@@ -201,7 +201,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <UserIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold">Lead Details</h2>
+                  <h2 className="text-xl font-semibold">{lead.name}</h2>
                   <p className="text-sm text-gray-500">
                     {lead.email} • {lead.phone}
                   </p>
