@@ -104,6 +104,7 @@ Changelog:
 - July 06, 2025. Made table rows clickable to open detail modals directly
 - July 06, 2025. Improved modals with status dropdowns and streamlined action buttons
 - July 06, 2025. Combined Profile and Activity tabs for activity-focused student management
+- July 06, 2025. Restructured student modal to two-column layout with activity sidebar for enhanced counselor workflow
 ```
 
 ## User Preferences

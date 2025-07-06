@@ -10,6 +10,7 @@ import { Student, Application, Admission } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { ActivityTracker } from './activity-tracker';
+import { format } from 'date-fns';
 import { 
   User, 
   Mail, 
@@ -32,53 +33,43 @@ interface StudentProfileModalProps {
 }
 
 export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {
-  const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [currentStatus, setCurrentStatus] = useState('');
+  const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
 
   const { data: student } = useQuery<Student>({
     queryKey: ['/api/students', studentId],
-    queryFn: async () => {
-      if (!studentId) return null;
-      const response = await fetch(`/api/students/${studentId}`);
-      return response.json();
-    },
     enabled: !!studentId,
   });
 
   const { data: applications } = useQuery<Application[]>({
-    queryKey: ['/api/applications', 'student', studentId],
-    queryFn: async () => {
-      if (!studentId) return [];
-      const response = await fetch(`/api/applications/student/${studentId}`);
-      return response.json();
-    },
+    queryKey: ['/api/applications/student', studentId],
     enabled: !!studentId,
   });
 
   const { data: admissions } = useQuery<Admission[]>({
-    queryKey: ['/api/admissions', 'student', studentId],
-    queryFn: async () => {
-      if (!studentId) return [];
-      const response = await fetch(`/api/admissions/student/${studentId}`);
-      return response.json();
-    },
+    queryKey: ['/api/admissions/student', studentId],
     enabled: !!studentId,
   });
 
+  React.useEffect(() => {
+    if (student) {
+      setCurrentStatus(student.status);
+    }
+  }, [student]);
+
   const updateStatusMutation = useMutation({
-    mutationFn: async (status: string) => {
-      if (!studentId) return;
-      const response = await apiRequest('PUT', `/api/students/${studentId}`, { status });
-      return response.json();
+    mutationFn: async (newStatus: string) => {
+      const response = await apiRequest(`/api/students/${studentId}`, 'PATCH', { status: newStatus });
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       queryClient.invalidateQueries({ queryKey: ['/api/students', studentId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({
-        title: "Success",
-        description: "Student status updated successfully.",
+        title: "Status Updated",
+        description: "Student status has been updated successfully.",
       });
     },
     onError: () => {
@@ -95,41 +86,27 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     updateStatusMutation.mutate(newStatus);
   };
 
-  // Update current status when student data changes
-  React.useEffect(() => {
-    if (student?.status) {
-      setCurrentStatus(student.status);
-    }
-  }, [student?.status]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'applied':
-        return 'bg-blue-100 text-blue-800';
-      case 'admitted':
-        return 'bg-purple-100 text-purple-800';
-      case 'enrolled':
-        return 'bg-emerald-100 text-emerald-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const formatDate = (dateString: string | Date | null) => {
+    if (!dateString) return 'Not specified';
+    return format(new Date(dateString), 'PPP');
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
-
-  if (!student) return null;
+  if (!student) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <div className="text-center py-8">
+            <p>Loading student profile...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl">{student.name} - Student Profile</DialogTitle>
@@ -159,131 +136,155 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   <Plus className="w-4 h-4 mr-2" />
                   Add Application
                 </Button>
-                <Button size="sm" variant="outline">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
               </div>
             </div>
           </DialogHeader>
 
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profile & Activity</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="applications">Applications ({applications?.length || 0})</TabsTrigger>
               <TabsTrigger value="admissions">Admissions ({admissions?.length || 0})</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <User className="w-4 h-4 mr-2" />
-                      Personal Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <Mail className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm">{student.email}</span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                {/* Left Column - Student Information */}
+                <div className="space-y-6">
+                  {/* Personal Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <User className="w-4 h-4 mr-2" />
+                        Personal Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center space-x-3">
+                        <Mail className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm">{student.email}</span>
+                      </div>
+                      {student.phone && (
+                        <div className="flex items-center space-x-3">
+                          <Phone className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{student.phone}</span>
+                        </div>
+                      )}
+                      {student.dateOfBirth && (
+                        <div className="flex items-center space-x-3">
+                          <Calendar className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">Born: {formatDate(student.dateOfBirth)}</span>
+                        </div>
+                      )}
+                      {student.nationality && (
+                        <div className="flex items-center space-x-3">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">Nationality: {student.nationality}</span>
+                        </div>
+                      )}
+                      {student.passportNumber && (
+                        <div className="flex items-center space-x-3">
+                          <GraduationCap className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">Passport: {student.passportNumber}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Academic Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <GraduationCap className="w-4 h-4 mr-2" />
+                        Academic Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {student.targetCountry && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500">Target Country</span>
+                          <p className="text-sm">{student.targetCountry}</p>
+                        </div>
+                      )}
+                      {student.targetProgram && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500">Target Program</span>
+                          <p className="text-sm">{student.targetProgram}</p>
+                        </div>
+                      )}
+                      {student.englishProficiency && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500">English Proficiency</span>
+                          <p className="text-sm">{student.englishProficiency}</p>
+                        </div>
+                      )}
+                      {student.budget && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500">Budget</span>
+                          <p className="text-sm font-medium text-green-600">{student.budget}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Academic Background */}
+                  {student.academicBackground && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Academic Background</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-700">{student.academicBackground}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Status & Actions */}
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <Badge className={`${
+                        student.status === 'active' ? 'bg-green-100 text-green-800' :
+                        student.status === 'applied' ? 'bg-blue-100 text-blue-800' :
+                        student.status === 'admitted' ? 'bg-purple-100 text-purple-800' :
+                        student.status === 'enrolled' ? 'bg-emerald-100 text-emerald-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {student.status}
+                      </Badge>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Created: {formatDate(student.createdAt)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Updated: {formatDate(student.updatedAt)}
+                      </p>
                     </div>
-                    {student.phone && (
-                      <div className="flex items-center space-x-3">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">{student.phone}</span>
-                      </div>
-                    )}
-                    {student.dateOfBirth && (
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">{student.dateOfBirth}</span>
-                      </div>
-                    )}
-                    {student.nationality && (
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">{student.nationality}</span>
-                      </div>
-                    )}
-                    {student.passportNumber && (
-                      <div className="flex items-center space-x-3">
-                        <GraduationCap className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">Passport: {student.passportNumber}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </div>
 
-                {/* Academic Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <GraduationCap className="w-4 h-4 mr-2" />
-                      Academic Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {student.targetCountry && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">Target Country</label>
-                        <p className="text-sm">{student.targetCountry}</p>
-                      </div>
-                    )}
-                    {student.targetProgram && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">Target Program</label>
-                        <p className="text-sm">{student.targetProgram}</p>
-                      </div>
-                    )}
-                    {student.englishProficiency && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">English Proficiency</label>
-                        <p className="text-sm">{student.englishProficiency}</p>
-                      </div>
-                    )}
-                    {student.budget && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">Budget</label>
-                        <p className="text-sm">{student.budget}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+                  {/* Notes */}
+                  {student.notes && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notes</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-700">{student.notes}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
 
-              {/* Academic Background */}
-              {student.academicBackground && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Academic Background</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-700">{student.academicBackground}</p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Notes */}
-              {student.notes && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-700">{student.notes}</p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Activity Section */}
-              <div className="mt-8">
-                <ActivityTracker 
-                  entityType="student" 
-                  entityId={student?.id || 0} 
-                  entityName={student?.name}
-                />
+                {/* Right Column - Activity */}
+                <div className="space-y-6">
+                  <ActivityTracker 
+                    entityType="student" 
+                    entityId={student?.id || 0} 
+                    entityName={student?.name}
+                  />
+                </div>
               </div>
             </TabsContent>
 
@@ -301,21 +302,22 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-4">
                   {applications?.map((application) => (
-                    <Card key={application.id}>
+                    <Card key={application.id} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{application.university}</h4>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{application.university}</h4>
                             <p className="text-sm text-gray-600">{application.program}</p>
-                            <p className="text-xs text-gray-500">
-                              {application.intakeSemester} {application.intakeYear}
-                            </p>
+                            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                              <span>Degree: {application.degree || 'Not specified'}</span>
+                              <span>Intake: {application.intakeSemester} {application.intakeYear}</span>
+                            </div>
                           </div>
                           <Badge className={`${
-                            application.status === 'accepted' ? 'bg-green-100 text-green-800' :
                             application.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                            application.status === 'accepted' ? 'bg-green-100 text-green-800' :
                             application.status === 'rejected' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
@@ -335,24 +337,26 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
             </TabsContent>
 
             <TabsContent value="admissions" className="space-y-4">
-              <h3 className="text-lg font-medium">Admissions</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Admissions</h3>
+              </div>
               
               {admissions?.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-8">
                     <Trophy className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No admissions yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">Admission records will appear here when universities make decisions.</p>
+                    <p className="mt-1 text-sm text-gray-500">Admissions will appear here when applications are processed.</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-4">
                   {admissions?.map((admission) => (
-                    <Card key={admission.id}>
+                    <Card key={admission.id} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{admission.university}</h4>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{admission.university}</h4>
                             <p className="text-sm text-gray-600">{admission.program}</p>
                             {admission.scholarshipAmount && (
                               <div className="flex items-center text-sm text-green-600 mt-1">
@@ -390,8 +394,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 </div>
               )}
             </TabsContent>
-
-
           </Tabs>
         </DialogContent>
       </Dialog>
