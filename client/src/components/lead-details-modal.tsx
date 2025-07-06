@@ -48,39 +48,44 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   }, [lead]);
 
   // Helper function to parse field values that might be arrays, JSON strings, or regular strings
-  const parseFieldValue = (value: any): string => {
-    if (!value) return '';
+  const parseFieldValue = (value: any): string[] => {
+    if (!value) return [];
     
-    // If it's already a simple string, return it
-    if (typeof value === 'string' && !value.startsWith('[')) {
+    // If it's already an array, return it
+    if (Array.isArray(value)) {
       return value;
     }
     
-    // If it's an array, return the first element
-    if (Array.isArray(value)) {
-      return value[0] || '';
+    // If it's a simple string that doesn't look like JSON, return as single item array
+    if (typeof value === 'string' && !value.startsWith('[')) {
+      return [value];
     }
     
-    // If it's a JSON string, try to parse it and return the first element
+    // If it's a JSON string, try to parse it
     if (typeof value === 'string' && value.startsWith('[')) {
       try {
         const parsed = JSON.parse(value);
         if (Array.isArray(parsed)) {
-          const firstElement = parsed[0];
           // Handle nested JSON strings
-          if (typeof firstElement === 'string' && firstElement.startsWith('[')) {
-            const nestedParsed = JSON.parse(firstElement);
-            return Array.isArray(nestedParsed) ? nestedParsed[0] || '' : firstElement;
-          }
-          return firstElement || '';
+          return parsed.map(item => {
+            if (typeof item === 'string' && item.startsWith('[')) {
+              try {
+                const nestedParsed = JSON.parse(item);
+                return Array.isArray(nestedParsed) ? nestedParsed[0] || '' : item;
+              } catch (e) {
+                return item;
+              }
+            }
+            return item;
+          }).filter(Boolean);
         }
-        return value;
+        return [value];
       } catch (e) {
-        return value;
+        return [value];
       }
     }
     
-    return String(value);
+    return [String(value)];
   };
 
   const updateLeadMutation = useMutation({
@@ -156,7 +161,14 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
       return;
     }
     
-    updateLeadMutation.mutate(editData);
+    // Convert arrays to JSON strings for backend storage
+    const dataToSave = {
+      ...editData,
+      country: Array.isArray(editData.country) ? JSON.stringify(editData.country) : editData.country,
+      program: Array.isArray(editData.program) ? JSON.stringify(editData.program) : editData.program
+    };
+    
+    updateLeadMutation.mutate(dataToSave);
   };
 
   const handleStatusChange = (newStatus: string) => {
@@ -268,7 +280,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <h2 className="text-xl font-semibold">{lead.name}</h2>
                 </div>
               </div>
-              <div className="flex items-center gap-2 pr-12">
+              <div className="flex items-center gap-3">
                 <div>
                   <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
                   <Select
@@ -304,26 +316,26 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     Mark as Lost
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="default"
+                  className="w-10 h-10 p-0 rounded-full hover:bg-gray-100 ml-2"
+                  onClick={() => onOpenChange(false)}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
             </div>
             
-            {/* Close Button - Top Right Corner */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-4 right-4 w-8 h-8 p-0 rounded-full hover:bg-gray-100"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
+
           </div>
 
           <div className="flex h-[90vh]">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-20">
+            <div className="flex-1 overflow-y-auto p-6 pt-24">
               <div className="space-y-6">
                 {/* Lead Information */}
-                <Card className="mt-6">
+                <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       Lead Information
@@ -365,43 +377,25 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                           disabled={!isEditing}
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="country">Country</Label>
-                        <Select
-                          value={editData.country || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, country: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countryOptions.map((country) => (
-                              <SelectItem key={country.value} value={country.value}>
-                                {country.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="country">Countries of Interest</Label>
+                        <MultiSelect
+                          options={countryOptions}
+                          value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                          onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
+                          placeholder="Select countries..."
+                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
+                        />
                       </div>
-                      <div>
-                        <Label htmlFor="program">Program</Label>
-                        <Select
-                          value={editData.program || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, program: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select program" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {programOptions.map((program) => (
-                              <SelectItem key={program.value} value={program.value}>
-                                {program.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="program">Programs of Interest</Label>
+                        <MultiSelect
+                          options={programOptions}
+                          value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
+                          onChange={(values) => setEditData(prev => ({ ...prev, program: values }))}
+                          placeholder="Select programs..."
+                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="source">Source</Label>
@@ -463,28 +457,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
-                        <Label htmlFor="status">Status</Label>
-                        <Select
-                          value={editData.status || ''}
-                          onValueChange={(value) => {
-                            setEditData(prev => ({ ...prev, status: value }));
-                            setCurrentStatus(value);
-                          }}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="new">New</SelectItem>
-                            <SelectItem value="contacted">Contacted</SelectItem>
-                            <SelectItem value="qualified">Qualified</SelectItem>
-                            <SelectItem value="converted">Converted</SelectItem>
-                            <SelectItem value="lost">Lost</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+
                       <div>
                         <Label htmlFor="counselor">Counselor</Label>
                         <Select
@@ -543,10 +516,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
             {/* Right Sidebar - Activity Timeline */}
             <div className="w-80 bg-gray-50 border-l overflow-hidden">
-              <div className="p-4 border-b bg-white">
+              <div className="px-4 py-5 border-b bg-white">
                 <h3 className="font-semibold text-gray-900">Activity Timeline</h3>
               </div>
-              <div className="overflow-y-auto h-full">
+              <div className="overflow-y-auto h-full pt-2">
                 <ActivityTracker
                   entityType="lead"
                   entityId={lead.id}

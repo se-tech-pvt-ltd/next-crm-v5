@@ -154,8 +154,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       console.log('Updating lead:', id, 'with data:', req.body);
       
-      // No need to process arrays since fields are now single text values
-      const validatedData = insertLeadSchema.partial().parse(req.body);
+      // Handle array to JSON string conversion for country and program fields
+      const processedData = { ...req.body };
+      if (Array.isArray(processedData.country)) {
+        processedData.country = JSON.stringify(processedData.country);
+      }
+      if (Array.isArray(processedData.program)) {
+        processedData.program = JSON.stringify(processedData.program);
+      }
+      
+      const validatedData = insertLeadSchema.partial().parse(processedData);
       const lead = await storage.updateLead(id, validatedData);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
