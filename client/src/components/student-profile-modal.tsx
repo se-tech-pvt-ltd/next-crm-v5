@@ -152,6 +152,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     </SelectContent>
                   </Select>
                 </div>
+                <Button 
+                  size="sm" 
+                  onClick={() => setIsAddApplicationOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Application
+                </Button>
                 <Button size="sm" variant="outline">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
@@ -271,31 +279,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 </Card>
               )}
 
-              {/* Quick Actions */}
-              <div className="flex space-x-2">
-                <Button onClick={() => updateStatusMutation.mutate('active')} disabled={updateStatusMutation.isPending}>
-                  Mark Active
-                </Button>
-                <Button onClick={() => updateStatusMutation.mutate('applied')} disabled={updateStatusMutation.isPending}>
-                  Mark Applied
-                </Button>
-                <Button onClick={() => updateStatusMutation.mutate('admitted')} disabled={updateStatusMutation.isPending}>
-                  Mark Admitted
-                </Button>
-                <Button onClick={() => setIsAddApplicationOpen(true)} variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Application
-                </Button>
-              </div>
+
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Applications</h3>
-                <Button onClick={() => setIsAddApplicationOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Application
-                </Button>
               </div>
               
               {applications?.length === 0 ? (

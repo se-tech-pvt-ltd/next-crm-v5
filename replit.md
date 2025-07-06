@@ -102,6 +102,7 @@ Changelog:
 - July 06, 2025. Added comprehensive modal detail views for all entities
 - July 06, 2025. Implemented activity tracking system with comments and change logging
 - July 06, 2025. Made table rows clickable to open detail modals directly
+- July 06, 2025. Improved modals with status dropdowns and streamlined action buttons
 ```
 
 ## User Preferences
