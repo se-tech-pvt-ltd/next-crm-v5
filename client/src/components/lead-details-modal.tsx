@@ -48,136 +48,76 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
     },
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-      // Update the editData state with the response from the server
-      setEditData(updatedLead);
-      // Update the parent component's selected lead
-      onLeadUpdate?.(updatedLead);
       setIsEditing(false);
+      onLeadUpdate?.(updatedLead);
       toast({
         title: "Success",
         description: "Lead updated successfully.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to update lead.",
+        description: "Failed to update lead. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Check if lead is already converted
-  const { data: students } = useQuery({
-    queryKey: ['/api/students'],
-    select: (data: any[]) => data.filter((student: any) => student.leadId === lead?.id),
-  });
-
-  // Get counselors for dropdown
-  const { data: counselors } = useQuery<User[]>({
-    queryKey: ['/api/users'],
-    select: (data: User[]) => data.filter(user => user.role === 'counselor')
-  });
-
-  const isAlreadyConverted = students && students.length > 0;
-
-  // Update status mutation
-  const updateStatusMutation = useMutation({
-    mutationFn: async (status: string) => {
-      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { status });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-      toast({
-        title: "Success",
-        description: "Lead status updated successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update status.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mark as Lost mutation
   const markAsLostMutation = useMutation({
     mutationFn: async ({ reason }: { reason: string }) => {
-      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { 
+      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, {
         status: 'lost',
-        lostReason: reason 
+        lostReason: reason
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       setShowMarkAsLostModal(false);
       setLostReason('');
+      onLeadUpdate?.(updatedLead);
       toast({
         title: "Success",
         description: "Lead marked as lost.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to mark lead as lost.",
+        description: "Failed to mark lead as lost. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  if (!lead) return null;
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/users');
+      return response.json();
+    },
+  });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new':
-        return 'bg-blue-100 text-blue-800';
-      case 'contacted':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'qualified':
-        return 'bg-green-100 text-green-800';
-      case 'converted':
-        return 'bg-purple-100 text-purple-800';
-      case 'lost':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const handleSaveChanges = () => {
+    if (!editData.name || !editData.email) {
+      toast({
+        title: "Error",
+        description: "Name and email are required.",
+        variant: "destructive",
+      });
+      return;
     }
-  };
-
-  const formatDate = (date: Date | string | null) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
-
-  const handleSave = () => {
     updateLeadMutation.mutate(editData);
   };
 
-  const handleCancel = () => {
-    setEditData(lead);
-    setIsEditing(false);
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateLeadMutation.mutate({ status: newStatus });
   };
 
-  const handleInputChange = (field: string, value: string | string[]) => {
-    // Convert arrays to comma-separated strings for storage
-    if (Array.isArray(value)) {
-      setEditData(prev => ({ ...prev, [field]: value.join(',') }));
-    } else {
-      setEditData(prev => ({ ...prev, [field]: value }));
-    }
-  };
+  if (!lead) return null;
 
-  const handleStatusChange = (status: string) => {
-    setCurrentStatus(status);
-    updateStatusMutation.mutate(status);
-  };
-
-  // Options for dropdowns
   const countryOptions = [
     { label: 'Canada', value: 'canada' },
     { label: 'United States', value: 'usa' },
@@ -187,8 +127,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
     { label: 'Germany', value: 'germany' },
     { label: 'France', value: 'france' },
     { label: 'Netherlands', value: 'netherlands' },
-    { label: 'Sweden', value: 'sweden' },
-    { label: 'Denmark', value: 'denmark' },
   ];
 
   const programOptions = [
@@ -238,370 +176,352 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
-        {/* Close Button - Top Right Corner */}
-        <div className="absolute top-4 right-4 z-20">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-8 h-8 p-0 rounded-full hover:bg-gray-100"
-            onClick={() => onOpenChange(false)}
-          >
-            <XCircle className="w-5 h-5 text-gray-500" />
-          </Button>
-        </div>
-
-        {/* Action Items in Top Right Corner */}
-        <div className="absolute top-4 right-14 z-10 flex items-center space-x-4"></div>
-          {/* Status dropdown - editable without edit mode */}
-          <div className="flex items-center space-x-2">
-            <Label className="text-sm font-medium">Status:</Label>
-            <Select value={currentStatus} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
-                <SelectItem value="converted">Converted</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+          <DialogTitle className="sr-only">Lead Details</DialogTitle>
           
-          {/* Convert to Student and Mark as Lost buttons */}
-          <div className="flex space-x-2">
-            {!isAlreadyConverted && (
-              <Button size="sm" onClick={() => setShowConvertModal(true)}>
-                <UserPlus className="w-4 h-4 mr-1" />
-                Convert to Student
-              </Button>
-            )}
-            {isAlreadyConverted && (
-              <Badge variant="secondary">Already Converted</Badge>
-            )}
-            
-            {/* Mark as Lost button */}
-            {lead.status !== 'lost' && (
-              <Button 
-                size="sm" 
-                variant="destructive" 
-                onClick={() => setShowMarkAsLostModal(true)}
-              >
-                Mark as Lost
-              </Button>
-            )}
+          {/* Close Button - Top Right Corner */}
+          <div className="absolute top-4 right-4 z-20">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-8 h-8 p-0 rounded-full hover:bg-gray-100"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
-        </div>
 
-        <div className="flex h-[90vh]">
-          {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6 pt-20">
-            {/* Lead Name at the top */}
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">{lead.name}</h1>
+          {/* Header with Fixed Position */}
+          <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold">Lead Details</h2>
+                  <p className="text-sm text-gray-500">
+                    {lead.email} • {lead.phone}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={lead.status === 'qualified' ? 'default' : 'secondary'}>
+                  {formatStatus(lead.status)}
+                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowConvertModal(true)}
+                  className="flex items-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Convert to Student
+                </Button>
+                {lead.status !== 'lost' && (
+                  <Button 
+                    size="sm" 
+                    variant="destructive" 
+                    onClick={() => setShowMarkAsLostModal(true)}
+                  >
+                    Mark as Lost
+                  </Button>
+                )}
+              </div>
             </div>
+          </div>
 
-            <div className="space-y-6">
-              {/* Lead Information */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center text-xl font-semibold">
-                      <UserIcon className="w-5 h-5 mr-2" />
+          <div className="flex h-[90vh]">
+            {/* Main Content - Left Side */}
+            <div className="flex-1 overflow-y-auto p-6 pt-20">
+              {/* Lead Name at the top */}
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">{lead.name}</h1>
+              </div>
+
+              <div className="space-y-6">
+                {/* Lead Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
                       Lead Information
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditing(!isEditing)}
+                      >
+                        {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+                      </Button>
                     </CardTitle>
-                    {/* Edit/Save buttons in header */}
-                    <div className="flex space-x-2">
-                      {isEditing ? (
-                        <>
-                          <Button size="sm" onClick={handleSave} disabled={updateLeadMutation.isPending}>
-                            <Save className="w-4 h-4 mr-1" />
-                            Save
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={handleCancel}>
-                            <X className="w-4 h-4 mr-1" />
-                            Cancel
-                          </Button>
-                        </>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit Lead
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Lead ID at the top of the card */}
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-blue-700">Lead ID</span>
-                      <span className="text-sm font-mono text-blue-900">#{lead.id}</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Name</Label>
-                      {isEditing ? (
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Name</Label>
                         <Input
                           id="name"
                           value={editData.name || ''}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                          disabled={!isEditing}
                         />
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.name}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      {isEditing ? (
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email</Label>
                         <Input
                           id="email"
-                          type="email"
                           value={editData.email || ''}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))}
+                          disabled={!isEditing}
                         />
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.email}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
-                      {isEditing ? (
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">Phone</Label>
                         <Input
                           id="phone"
                           value={editData.phone || ''}
-                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
+                          disabled={!isEditing}
                         />
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.phone}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label htmlFor="source">Source</Label>
-                      {isEditing ? (
-                        <Select value={editData.source || ''} onValueChange={(value) => handleInputChange('source', value)}>
+                      </div>
+                      <div>
+                        <Label htmlFor="country">Country</Label>
+                        <Select
+                          value={editData.country || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, country: value }))}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countryOptions.map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="program">Program</Label>
+                        <Select
+                          value={editData.program || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, program: value }))}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select program" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {programOptions.map((program) => (
+                              <SelectItem key={program.value} value={program.value}>
+                                {program.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="source">Source</Label>
+                        <Select
+                          value={editData.source || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, source: value }))}
+                          disabled={!isEditing}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select source" />
                           </SelectTrigger>
                           <SelectContent>
-                            {sourceOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
+                            {sourceOptions.map((source) => (
+                              <SelectItem key={source.value} value={source.value}>
+                                {source.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">
-                          {sourceOptions.find(opt => opt.value === lead.source)?.label || lead.source || 'N/A'}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Multi-select for Target Countries */}
-                    <div>
-                      <Label>Target Countries</Label>
-                      {isEditing ? (
-                        <MultiSelect
-                          options={countryOptions}
-                          value={editData.country ? (typeof editData.country === 'string' ? editData.country.split(',') : editData.country) : []}
-                          onChange={(value) => handleInputChange('country', value)}
-                          placeholder="Select countries..."
-                        />
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">
-                          {lead.country 
-                            ? (typeof lead.country === 'string' 
-                                ? lead.country.split(',').map(c => countryOptions.find(opt => opt.value === c.trim())?.label || c.trim()).join(', ')
-                                : Array.isArray(lead.country) 
-                                  ? lead.country.map(c => countryOptions.find(opt => opt.value === c)?.label || c).join(', ')
-                                  : countryOptions.find(opt => opt.value === lead.country)?.label || lead.country)
-                            : 'N/A'
-                          }
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Multi-select for Program Interests */}
-                    <div>
-                      <Label>Program Interests</Label>
-                      {isEditing ? (
-                        <MultiSelect
-                          options={programOptions}
-                          value={editData.program ? (typeof editData.program === 'string' ? editData.program.split(',') : editData.program) : []}
-                          onChange={(value) => handleInputChange('program', value)}
-                          placeholder="Select programs..."
-                        />
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">
-                          {lead.program 
-                            ? (typeof lead.program === 'string' 
-                                ? lead.program.split(',').map(p => programOptions.find(opt => opt.value === p.trim())?.label || p.trim()).join(', ')
-                                : Array.isArray(lead.program) 
-                                  ? lead.program.map(p => programOptions.find(opt => opt.value === p)?.label || p).join(', ')
-                                  : programOptions.find(opt => opt.value === lead.program)?.label || lead.program)
-                            : 'N/A'
-                          }
-                        </div>
-                      )}
-                    </div>
-
-                    {/* New Expectation field */}
-                    <div>
-                      <Label htmlFor="expectation">Expectation</Label>
-                      {isEditing ? (
-                        <Select value={editData.expectation || ''} onValueChange={(value) => handleInputChange('expectation', value)}>
+                      </div>
+                      <div>
+                        <Label htmlFor="expectation">
+                          Expectation
+                          <HelpTooltip content="How likely is this lead to convert to a student?" />
+                        </Label>
+                        <Select
+                          value={editData.expectation || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, expectation: value }))}
+                          disabled={!isEditing}
+                        >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select expectation..." />
+                            <SelectValue placeholder="Select expectation" />
                           </SelectTrigger>
                           <SelectContent>
-                            {expectationOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">
-                          {lead.expectation ? expectationOptions.find(opt => opt.value === lead.expectation)?.label || lead.expectation : 'N/A'}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* New Type field */}
-                    <div>
-                      <Label htmlFor="type">Type</Label>
-                      {isEditing ? (
-                        <Select value={editData.type || ''} onValueChange={(value) => handleInputChange('type', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {typeOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">
-                          {lead.type ? typeOptions.find(opt => opt.value === lead.type)?.label || lead.type : 'N/A'}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* New Counselor field */}
-                    <div>
-                      <Label htmlFor="counselor">Counselor</Label>
-                      {isEditing ? (
-                        <Select value={editData.counselorId || ''} onValueChange={(value) => handleInputChange('counselorId', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select counselor..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {counselors?.map(counselor => (
-                              <SelectItem key={counselor.id} value={counselor.id}>
-                                {counselor.firstName && counselor.lastName 
-                                  ? `${counselor.firstName} ${counselor.lastName}` 
-                                  : counselor.email}
+                            {expectationOptions.map((expectation) => (
+                              <SelectItem key={expectation.value} value={expectation.value}>
+                                {expectation.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                      ) : (
-                        <div className="p-2 bg-gray-50 rounded border">
-                          {lead.counselorId 
-                            ? counselors?.find(c => c.id === lead.counselorId)?.firstName && counselors?.find(c => c.id === lead.counselorId)?.lastName
-                              ? `${counselors.find(c => c.id === lead.counselorId)?.firstName} ${counselors.find(c => c.id === lead.counselorId)?.lastName}`
-                              : counselors?.find(c => c.id === lead.counselorId)?.email || 'Unknown'
-                            : 'N/A'
-                          }
+                      </div>
+                      <div>
+                        <Label htmlFor="type">Type</Label>
+                        <Select
+                          value={editData.type || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, type: value }))}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {typeOptions.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={editData.status || ''}
+                          onValueChange={(value) => {
+                            setEditData(prev => ({ ...prev, status: value }));
+                            setCurrentStatus(value);
+                          }}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="new">New</SelectItem>
+                            <SelectItem value="contacted">Contacted</SelectItem>
+                            <SelectItem value="qualified">Qualified</SelectItem>
+                            <SelectItem value="converted">Converted</SelectItem>
+                            <SelectItem value="lost">Lost</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="counselor">Counselor</Label>
+                        <Select
+                          value={editData.counselorId || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, counselorId: value }))}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select counselor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users.map((user: any) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.firstName} {user.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {currentStatus === 'lost' && (
+                        <div>
+                          <Label htmlFor="lostReason">Lost Reason</Label>
+                          <Select
+                            value={editData.lostReason || ''}
+                            onValueChange={(value) => setEditData(prev => ({ ...prev, lostReason: value }))}
+                            disabled={!isEditing}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select lost reason" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {lostReasonOptions.map((reason) => (
+                                <SelectItem key={reason.value} value={reason.value}>
+                                  {reason.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       )}
                     </div>
-                  </div>
-
-
-
-                  {/* Date fields at the bottom */}
-                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                      <Calendar className="w-4 h-4" />
-                      <span>Created: {formatDate(lead.createdAt)}</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                      <Calendar className="w-4 h-4" />
-                      <span>Last Updated: {formatDate(lead.updatedAt)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* No action buttons at the bottom - Close removed, Convert moved to top */}
-            </div>
-          </div>
-
-          {/* Activity Sidebar - Right Side - Increased width */}
-          <div className="w-96 border-l bg-gray-50 overflow-y-auto">
-            <div className="p-4 pt-6">
-              <ActivityTracker
-                entityType="lead"
-                entityId={lead.id}
-                entityName={lead.name}
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Convert to Student Modal */}
-        <ConvertToStudentModal
-          open={showConvertModal}
-          onOpenChange={setShowConvertModal}
-          lead={lead}
-        />
-
-        {/* Mark as Lost Modal */}
-        <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Mark Lead as Lost</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Please select a reason why this lead is being marked as lost:
-              </p>
-              <Select value={lostReason} onValueChange={setLostReason}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a reason" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lostReasonOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setShowMarkAsLostModal(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  onClick={() => markAsLostMutation.mutate({ reason: lostReason })}
-                  disabled={!lostReason || markAsLostMutation.isPending}
-                >
-                  Mark as Lost
-                </Button>
+                    {isEditing && (
+                      <div className="mt-4 flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleSaveChanges}>
+                          Save Changes
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </DialogContent>
-    </Dialog>
+
+            {/* Right Sidebar - Activity Timeline */}
+            <div className="w-80 bg-gray-50 border-l overflow-hidden">
+              <div className="p-4 border-b bg-white">
+                <h3 className="font-semibold text-gray-900">Activity Timeline</h3>
+              </div>
+              <div className="overflow-y-auto h-full">
+                <ActivityTracker
+                  entityType="lead"
+                  entityId={lead.id}
+                  entityName={lead.name}
+                />
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Convert to Student Modal */}
+      <ConvertToStudentModal
+        open={showConvertModal}
+        onOpenChange={setShowConvertModal}
+        lead={lead}
+      />
+
+      {/* Mark as Lost Modal */}
+      <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark Lead as Lost</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Please select a reason why this lead is being marked as lost:
+            </p>
+            <Select value={lostReason} onValueChange={setLostReason}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a reason" />
+              </SelectTrigger>
+              <SelectContent>
+                {lostReasonOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowMarkAsLostModal(false)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => markAsLostMutation.mutate({ reason: lostReason })}
+                disabled={!lostReason || markAsLostMutation.isPending}
+              >
+                Mark as Lost
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
