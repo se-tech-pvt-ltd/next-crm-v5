@@ -21,7 +21,9 @@ import {
   Edit, 
   Trophy,
   DollarSign,
-  Plus
+  Plus,
+  Save,
+  X
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { AddApplicationModal } from './add-application-modal';
@@ -38,6 +40,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentStatus, setCurrentStatus] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isApplicationDetailsOpen, setIsApplicationDetailsOpen] = useState(false);
@@ -62,13 +66,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   React.useEffect(() => {
     if (student) {
       setCurrentStatus(student.status);
+      setEditData(student);
     }
   }, [student]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
-      const response = await apiRequest(`/api/students/${studentId}`, 'PATCH', { status: newStatus });
-      return response;
+      const response = await apiRequest('PUT', `/api/students/${studentId}`, { status: newStatus });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/students', studentId] });
@@ -87,9 +92,45 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     },
   });
 
+  const updateStudentMutation = useMutation({
+    mutationFn: async (data: Partial<Student>) => {
+      const response = await apiRequest('PUT', `/api/students/${studentId}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/students', studentId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Student profile updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update student profile.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
     updateStatusMutation.mutate(newStatus);
+  };
+
+  const handleSaveProfile = () => {
+    updateStudentMutation.mutate(editData);
+  };
+
+  const handleCancelEdit = () => {
+    setEditData(student || {});
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
   };
 
   const formatDate = (dateString: string | Date | null) => {
@@ -142,20 +183,27 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   <Plus className="w-4 h-4 mr-2" />
                   Add Application
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    // TODO: Implement edit profile functionality
-                    toast({
-                      title: "Coming Soon",
-                      description: "Edit profile functionality will be implemented soon.",
-                    });
-                  }}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
+                {isEditing ? (
+                  <div className="flex space-x-2">
+                    <Button size="sm" onClick={handleSaveProfile} disabled={updateStudentMutation.isPending}>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                )}
               </div>
             </div>
           </DialogHeader>
@@ -278,10 +326,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         Updated: {formatDate(student.updatedAt)}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </Button>
+
                   </div>
 
 

@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3 } from 'lucide-react';
+import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3, Building } from 'lucide-react';
 
 interface DropdownOption {
   id: string;
@@ -266,7 +266,7 @@ export default function Settings() {
     >
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="fields" className="flex items-center space-x-2">
               <Edit3 className="w-4 h-4" />
               <span>Field Management</span>
@@ -274,6 +274,10 @@ export default function Settings() {
             <TabsTrigger value="users" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
               <span>User Management</span>
+            </TabsTrigger>
+            <TabsTrigger value="branches" className="flex items-center space-x-2">
+              <Building className="w-4 h-4" />
+              <span>Branch Management</span>
             </TabsTrigger>
           </TabsList>
 
@@ -390,13 +394,16 @@ export default function Settings() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="user-branch">Branch (Optional)</Label>
-                    <Input
-                      id="user-branch"
-                      placeholder="Branch ID or name"
-                      value={newUserBranch}
-                      onChange={(e) => setNewUserBranch(e.target.value)}
-                    />
+                    <Label htmlFor="user-branch">Branch *</Label>
+                    <Select value={newUserBranch} onValueChange={setNewUserBranch}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select branch" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="branch_alpha">Branch Alpha - New York, NY</SelectItem>
+                        <SelectItem value="branch_beta">Branch Beta - Los Angeles, CA</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <Button onClick={addUser} className="w-full md:w-auto">
@@ -457,6 +464,82 @@ export default function Settings() {
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary">Counselor</Badge>
                       <Badge variant="outline">Branch A</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="branches" className="space-y-6">
+            {/* Add New Branch */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Building className="w-4 h-4 mr-2" />
+                  Add New Branch
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="branch-name">Branch Name *</Label>
+                    <Input
+                      id="branch-name"
+                      placeholder="Branch Alpha"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="branch-location">Location *</Label>
+                    <Input
+                      id="branch-location"
+                      placeholder="New York, NY"
+                    />
+                  </div>
+                </div>
+                <Button className="w-full md:w-auto">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Branch
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Current Branches */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Branches</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Building size={16} className="text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Branch Alpha</p>
+                        <p className="text-sm text-gray-500">New York, NY</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline">5 Counselors</Badge>
+                      <Badge variant="outline">1 Manager</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <Building size={16} className="text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Branch Beta</p>
+                        <p className="text-sm text-gray-500">Los Angeles, CA</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline">3 Counselors</Badge>
+                      <Badge variant="outline">1 Manager</Badge>
                     </div>
                   </div>
                 </div>

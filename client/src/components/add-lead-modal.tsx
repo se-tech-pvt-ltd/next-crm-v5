@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertLeadSchema } from '@shared/schema';
@@ -32,7 +32,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
       program: '',
       source: '',
       status: 'new',
-      notes: '',
+
     },
   });
 
@@ -181,23 +181,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Additional notes about the lead..."
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <div className="flex justify-end space-x-3 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
