@@ -297,7 +297,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center text-xl font-semibold">
+                    <CardTitle className="flex items-center text-lg">
                       <UserIcon className="w-5 h-5 mr-2" />
                       Lead Information
                     </CardTitle>
@@ -535,7 +535,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
           {/* Activity Sidebar - Right Side - Increased width */}
           <div className="w-96 border-l bg-gray-50 overflow-y-auto">
-            <div className="p-4 pt-6">
+            <div className="p-4 pt-20">
               <ActivityTracker
                 entityType="lead"
                 entityId={lead.id}
