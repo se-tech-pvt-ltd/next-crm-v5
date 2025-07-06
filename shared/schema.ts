@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: text("role").notNull().default("counselor"), // counselor, branch_manager, admin_staff
   branchId: varchar("branch_id"), // for counselors and branch managers
+  passwordHash: varchar("password_hash"), // hashed password for authentication
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -24,6 +25,7 @@ export const leads = pgTable("leads", {
   program: text("program"),
   source: text("source"),
   status: text("status").notNull().default("new"),
+  notes: text("notes"),
   counselorId: text("counselor_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -44,6 +46,7 @@ export const students = pgTable("students", {
   targetProgram: text("target_program"),
   budget: text("budget"),
   status: text("status").notNull().default("active"),
+  notes: text("notes"),
   counselorId: text("counselor_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -59,6 +62,7 @@ export const applications = pgTable("applications", {
   intakeSemester: text("intake_semester"),
   applicationFee: text("application_fee"),
   status: text("status").notNull().default("draft"),
+  notes: text("notes"),
   submissionDate: timestamp("submission_date"),
   decisionDate: timestamp("decision_date"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -79,6 +83,7 @@ export const admissions = pgTable("admissions", {
   depositAmount: text("deposit_amount"),
   depositDeadline: timestamp("deposit_deadline"),
   visaStatus: text("visa_status").default("pending"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -86,6 +91,7 @@ export const admissions = pgTable("admissions", {
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
+  passwordHash: true, // Password is handled separately for security
 });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({

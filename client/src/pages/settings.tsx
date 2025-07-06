@@ -425,13 +425,12 @@ export default function Settings() {
                         <Users size={16} className="text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium">Sarah Johnson</p>
-                        <p className="text-sm text-gray-500">sarah@company.com</p>
+                        <p className="font-medium">Admin User</p>
+                        <p className="text-sm text-gray-500">admin@studybridge.com</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary">Admin Staff</Badge>
-                      <Badge variant="outline">Branch A</Badge>
                     </div>
                   </div>
                   
@@ -441,13 +440,13 @@ export default function Settings() {
                         <Users size={16} className="text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium">Mike Chen</p>
-                        <p className="text-sm text-gray-500">mike@company.com</p>
+                        <p className="font-medium">Branch Manager</p>
+                        <p className="text-sm text-gray-500">manager@studybridge.com</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary">Branch Manager</Badge>
-                      <Badge variant="outline">Branch B</Badge>
+                      <Badge variant="outline">Branch Alpha</Badge>
                     </div>
                   </div>
                   
@@ -457,13 +456,13 @@ export default function Settings() {
                         <Users size={16} className="text-purple-600" />
                       </div>
                       <div>
-                        <p className="font-medium">Alex Rodriguez</p>
-                        <p className="text-sm text-gray-500">alex@company.com</p>
+                        <p className="font-medium">John Counselor</p>
+                        <p className="text-sm text-gray-500">counselor@studybridge.com</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary">Counselor</Badge>
-                      <Badge variant="outline">Branch A</Badge>
+                      <Badge variant="outline">Branch Beta</Badge>
                     </div>
                   </div>
                 </div>
@@ -522,7 +521,7 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge variant="outline">5 Counselors</Badge>
+                      <Badge variant="outline">0 Counselors</Badge>
                       <Badge variant="outline">1 Manager</Badge>
                     </div>
                   </div>
@@ -538,8 +537,8 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge variant="outline">3 Counselors</Badge>
-                      <Badge variant="outline">1 Manager</Badge>
+                      <Badge variant="outline">1 Counselor</Badge>
+                      <Badge variant="outline">0 Managers</Badge>
                     </div>
                   </div>
                 </div>

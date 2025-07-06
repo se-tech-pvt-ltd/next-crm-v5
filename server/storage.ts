@@ -5,6 +5,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, or, and, desc } from "drizzle-orm";
+import * as bcrypt from "bcryptjs";
 
 export interface IStorage {
   // User operations
@@ -14,6 +15,10 @@ export interface IStorage {
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
   upsertUser(user: InsertUser): Promise<User>;
   getCounselors(): Promise<User[]>;
+  
+  // Authentication operations
+  authenticateUser(email: string, password: string): Promise<User | null>;
+  createUserWithPassword(user: InsertUser, password: string): Promise<User>;
   
   // Lead operations (with role-based access)
   getLeads(userId?: string, userRole?: string): Promise<Lead[]>;
@@ -119,6 +124,40 @@ export class DatabaseStorage implements IStorage {
 
   async getCounselors(): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, 'counselor'));
+  }
+
+  // Authentication operations
+  async authenticateUser(email: string, password: string): Promise<User | null> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    
+    if (!user || !user.passwordHash) {
+      return null;
+    }
+    
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!isValidPassword) {
+      return null;
+    }
+    
+    // Return user without password hash
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword as User;
+  }
+
+  async createUserWithPassword(userData: InsertUser, password: string): Promise<User> {
+    const passwordHash = await bcrypt.hash(password, 12);
+    
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...userData,
+        passwordHash,
+      })
+      .returning();
+
+    // Return user without password hash
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return userWithoutPassword as User;
   }
 
   // Lead operations

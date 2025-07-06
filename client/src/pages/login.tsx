@@ -38,27 +38,25 @@ export default function Login({ onLogin }: LoginProps) {
     setError(null);
 
     try {
-      // Simulate API call - in real app, this would call your backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-      // Mock authentication logic
-      const mockUsers = [
-        { id: '1', email: 'admin@studybridge.com', password: 'admin123', role: 'admin_staff' },
-        { id: '2', email: 'manager@studybridge.com', password: 'manager123', role: 'branch_manager', branch: 'branch_alpha' },
-        { id: '3', email: 'counselor@studybridge.com', password: 'counselor123', role: 'counselor', branch: 'branch_beta' },
-      ];
-
-      const user = mockUsers.find(u => u.email === data.email && u.password === data.password);
-
-      if (user) {
+      if (response.ok) {
+        const user = await response.json();
         onLogin({
           id: user.id,
           email: user.email,
           role: user.role,
-          branch: user.branch,
+          branch: user.branchId,
         });
       } else {
-        setError('Invalid email or password. Please check your credentials and try again.');
+        const errorData = await response.json();
+        setError(errorData.error || 'Invalid email or password. Please check your credentials and try again.');
       }
     } catch (err) {
       setError('An error occurred during login. Please try again.');
@@ -152,14 +150,7 @@ export default function Login({ onLogin }: LoginProps) {
             </form>
           </Form>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
-            <div className="space-y-1 text-xs text-blue-700">
-              <p><strong>Admin:</strong> admin@studybridge.com / admin123</p>
-              <p><strong>Manager:</strong> manager@studybridge.com / manager123</p>
-              <p><strong>Counselor:</strong> counselor@studybridge.com / counselor123</p>
-            </div>
-          </div>
+
         </CardContent>
       </Card>
     </div>
