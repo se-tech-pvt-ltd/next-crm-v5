@@ -59,6 +59,159 @@ export class MemStorage implements IStorage {
     this.currentStudentId = 1;
     this.currentApplicationId = 1;
     this.currentAdmissionId = 1;
+    
+    // Add sample data
+    this.initializeSampleData();
+  }
+
+  private initializeSampleData() {
+    // Sample leads
+    const sampleLeads = [
+      {
+        name: 'Emma Thompson',
+        email: 'emma.thompson@email.com',
+        phone: '+1-555-0123',
+        country: 'Canada',
+        program: 'Computer Science',
+        source: 'website',
+        status: 'new',
+        notes: 'Interested in AI and machine learning programs'
+      },
+      {
+        name: 'Michael Chen',
+        email: 'michael.chen@email.com',
+        phone: '+1-555-0124',
+        country: 'USA',
+        program: 'Business Administration',
+        source: 'referral',
+        status: 'contacted',
+        notes: 'Looking for MBA programs with tech focus'
+      },
+      {
+        name: 'Sarah Wilson',
+        email: 'sarah.wilson@email.com',
+        phone: '+1-555-0125',
+        country: 'UK',
+        program: 'Medicine',
+        source: 'social-media',
+        status: 'qualified',
+        notes: 'Pre-med student, excellent grades'
+      }
+    ];
+
+    sampleLeads.forEach(lead => {
+      this.createLead(lead);
+    });
+
+    // Sample students (converted from leads)
+    const sampleStudents = [
+      {
+        leadId: 1,
+        name: 'John Davis',
+        email: 'john.davis@email.com',
+        phone: '+1-555-0126',
+        dateOfBirth: '1998-05-15',
+        nationality: 'American',
+        passportNumber: 'US123456789',
+        academicBackground: 'Bachelor of Engineering, GPA: 3.8/4.0',
+        englishProficiency: 'IELTS 7.5',
+        targetCountry: 'Canada',
+        targetProgram: 'Master of Computer Science',
+        budget: '$50,000 - $70,000',
+        status: 'active',
+        notes: 'Strong programming background, interested in AI research'
+      },
+      {
+        leadId: null,
+        name: 'Lisa Rodriguez',
+        email: 'lisa.rodriguez@email.com',
+        phone: '+1-555-0127',
+        dateOfBirth: '1997-08-22',
+        nationality: 'Mexican',
+        passportNumber: 'MX987654321',
+        academicBackground: 'Bachelor of Business, GPA: 3.9/4.0',
+        englishProficiency: 'TOEFL 110+',
+        targetCountry: 'USA',
+        targetProgram: 'MBA',
+        budget: '$70,000+',
+        status: 'applied',
+        notes: 'Outstanding academic record, leadership experience'
+      }
+    ];
+
+    sampleStudents.forEach(student => {
+      this.createStudent(student);
+    });
+
+    // Sample applications
+    const sampleApplications = [
+      {
+        studentId: 1,
+        university: 'University of Toronto',
+        program: 'Master of Computer Science',
+        degree: 'Master\'s',
+        intakeYear: '2025',
+        intakeSemester: 'Fall',
+        applicationFee: '$125',
+        status: 'submitted',
+        submissionDate: new Date('2024-12-01'),
+        decisionDate: new Date('2025-03-15'),
+        notes: 'Focus on artificial intelligence track'
+      },
+      {
+        studentId: 2,
+        university: 'Stanford University',
+        program: 'MBA',
+        degree: 'Master\'s',
+        intakeYear: '2025',
+        intakeSemester: 'Fall',
+        applicationFee: '$275',
+        status: 'under-review',
+        submissionDate: new Date('2024-11-15'),
+        decisionDate: new Date('2025-04-01'),
+        notes: 'Applied for entrepreneurship concentration'
+      },
+      {
+        studentId: 1,
+        university: 'University of British Columbia',
+        program: 'Master of Computer Science',
+        degree: 'Master\'s',
+        intakeYear: '2025',
+        intakeSemester: 'Fall',
+        applicationFee: '$168',
+        status: 'accepted',
+        submissionDate: new Date('2024-11-20'),
+        decisionDate: new Date('2024-12-15'),
+        notes: 'Backup option, good program'
+      }
+    ];
+
+    sampleApplications.forEach(app => {
+      this.createApplication(app);
+    });
+
+    // Sample admissions
+    const sampleAdmissions = [
+      {
+        applicationId: 3,
+        studentId: 1,
+        university: 'University of British Columbia',
+        program: 'Master of Computer Science',
+        decision: 'accepted',
+        decisionDate: new Date('2024-12-15'),
+        scholarshipAmount: '$15,000',
+        conditions: 'Maintain minimum GPA of 3.5',
+        depositRequired: true,
+        depositAmount: '$2,000',
+        depositDeadline: new Date('2025-02-01'),
+        visaStatus: 'pending',
+        notes: 'Excellent academic performance, partial scholarship awarded'
+      }
+    ];
+
+    sampleAdmissions.forEach(admission => {
+      this.createAdmission(admission);
+    });
   }
 
   // Lead operations
@@ -78,6 +231,12 @@ export class MemStorage implements IStorage {
     const lead: Lead = {
       ...insertLead,
       id,
+      phone: insertLead.phone || null,
+      country: insertLead.country || null,
+      program: insertLead.program || null,
+      source: insertLead.source || null,
+      status: insertLead.status || 'new',
+      notes: insertLead.notes || null,
       createdAt: now,
       updatedAt: now,
     };
@@ -119,6 +278,18 @@ export class MemStorage implements IStorage {
     const student: Student = {
       ...insertStudent,
       id,
+      phone: insertStudent.phone || null,
+      notes: insertStudent.notes || null,
+      leadId: insertStudent.leadId || null,
+      dateOfBirth: insertStudent.dateOfBirth || null,
+      nationality: insertStudent.nationality || null,
+      passportNumber: insertStudent.passportNumber || null,
+      academicBackground: insertStudent.academicBackground || null,
+      englishProficiency: insertStudent.englishProficiency || null,
+      targetCountry: insertStudent.targetCountry || null,
+      targetProgram: insertStudent.targetProgram || null,
+      budget: insertStudent.budget || null,
+      status: insertStudent.status || 'active',
       createdAt: now,
       updatedAt: now,
     };
@@ -166,6 +337,14 @@ export class MemStorage implements IStorage {
     const application: Application = {
       ...insertApplication,
       id,
+      notes: insertApplication.notes || null,
+      degree: insertApplication.degree || null,
+      intakeYear: insertApplication.intakeYear || null,
+      intakeSemester: insertApplication.intakeSemester || null,
+      applicationFee: insertApplication.applicationFee || null,
+      submissionDate: insertApplication.submissionDate || null,
+      decisionDate: insertApplication.decisionDate || null,
+      status: insertApplication.status || 'draft',
       createdAt: now,
       updatedAt: now,
     };
@@ -213,6 +392,14 @@ export class MemStorage implements IStorage {
     const admission: Admission = {
       ...insertAdmission,
       id,
+      decisionDate: insertAdmission.decisionDate || null,
+      scholarshipAmount: insertAdmission.scholarshipAmount || null,
+      conditions: insertAdmission.conditions || null,
+      depositRequired: insertAdmission.depositRequired || null,
+      depositAmount: insertAdmission.depositAmount || null,
+      depositDeadline: insertAdmission.depositDeadline || null,
+      notes: insertAdmission.notes || null,
+      visaStatus: insertAdmission.visaStatus || 'pending',
       createdAt: now,
       updatedAt: now,
     };

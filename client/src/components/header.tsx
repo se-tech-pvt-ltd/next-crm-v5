@@ -7,6 +7,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { HelpTooltip } from './help-tooltip';
 import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
+import { AddStudentModal } from './add-student-modal';
+import { AddApplicationModal } from './add-application-modal';
 
 interface HeaderProps {
   title: string;
@@ -17,6 +19,8 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, showSearch = true, helpText }: HeaderProps) {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
+  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
+  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
 
   return (
@@ -100,11 +104,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                   <UserPlus size={16} className="mr-2" />
                   Add Lead
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsAddStudentModalOpen(true)}>
                   <GraduationCap size={16} className="mr-2" />
                   Add Student
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsAddApplicationModalOpen(true)}>
                   <FileText size={16} className="mr-2" />
                   New Application
                 </DropdownMenuItem>
@@ -117,6 +121,14 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
       <AddLeadModal 
         open={isAddLeadModalOpen}
         onOpenChange={setIsAddLeadModalOpen}
+      />
+      <AddStudentModal 
+        open={isAddStudentModalOpen}
+        onOpenChange={setIsAddStudentModalOpen}
+      />
+      <AddApplicationModal 
+        open={isAddApplicationModalOpen}
+        onOpenChange={setIsAddApplicationModalOpen}
       />
     </>
   );

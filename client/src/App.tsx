@@ -10,6 +10,7 @@ import Students from "@/pages/students";
 import Applications from "@/pages/applications";
 import Admissions from "@/pages/admissions";
 import Reports from "@/pages/reports";
+import Settings from "@/pages/settings";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/applications" component={Applications} />
       <Route path="/admissions" component={Admissions} />
       <Route path="/reports" component={Reports} />
+      <Route path="/settings" component={Settings} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

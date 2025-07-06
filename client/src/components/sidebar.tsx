@@ -76,6 +76,12 @@ export function Sidebar() {
       icon: BarChart3,
       count: undefined
     },
+    { 
+      path: '/settings', 
+      label: 'Settings', 
+      icon: Settings,
+      count: undefined
+    },
   ];
 
   return (

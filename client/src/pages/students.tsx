@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,15 +8,47 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
+import { AddStudentModal } from '@/components/add-student-modal';
+import { AddApplicationModal } from '@/components/add-application-modal';
+import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
+  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
+  });
+
+  const updateStudentMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Student> }) => {
+      const response = await apiRequest('PUT', `/api/students/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
+      toast({
+        title: "Success",
+        description: "Student updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update student.",
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredStudents = students?.filter(student => 
@@ -45,6 +77,16 @@ export default function Students() {
     return new Date(date).toLocaleDateString();
   };
 
+  const handleViewProfile = (studentId: number) => {
+    setSelectedStudentId(studentId);
+    setIsProfileModalOpen(true);
+  };
+
+  const handleCreateApplication = (studentId: number) => {
+    setSelectedStudentId(studentId);
+    setIsAddApplicationModalOpen(true);
+  };
+
   return (
     <Layout 
       title="Students" 
@@ -71,7 +113,7 @@ export default function Students() {
             <HelpTooltip content="Filter students by their current status. Active students are those currently working on applications." />
           </div>
           
-          <Button>
+          <Button onClick={() => setIsAddStudentModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Student
           </Button>
@@ -152,7 +194,7 @@ export default function Students() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button>
+                  <Button onClick={() => setIsAddStudentModalOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Student
                   </Button>
@@ -228,14 +270,20 @@ export default function Students() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewProfile(student.id)}>
                               View Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleCreateApplication(student.id)}>
                               Create Application
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              Update Status
+                            <DropdownMenuItem onClick={() => updateStudentMutation.mutate({ id: student.id, data: { status: 'applied' } })}>
+                              Mark as Applied
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateStudentMutation.mutate({ id: student.id, data: { status: 'admitted' } })}>
+                              Mark as Admitted
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateStudentMutation.mutate({ id: student.id, data: { status: 'inactive' } })}>
+                              Mark as Inactive
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -248,6 +296,21 @@ export default function Students() {
           </CardContent>
         </Card>
       </div>
+
+      <AddStudentModal 
+        open={isAddStudentModalOpen}
+        onOpenChange={setIsAddStudentModalOpen}
+      />
+      <AddApplicationModal 
+        open={isAddApplicationModalOpen}
+        onOpenChange={setIsAddApplicationModalOpen}
+        studentId={selectedStudentId || undefined}
+      />
+      <StudentProfileModal 
+        open={isProfileModalOpen}
+        onOpenChange={setIsProfileModalOpen}
+        studentId={selectedStudentId}
+      />
     </Layout>
   );
 }

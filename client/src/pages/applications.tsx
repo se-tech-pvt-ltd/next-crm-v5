@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,12 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
+import { AddApplicationModal } from '@/components/add-application-modal';
 import { Application, Student } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, FileText, Calendar, DollarSign, School } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
     queryKey: ['/api/applications'],
@@ -21,6 +27,27 @@ export default function Applications() {
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
+  });
+
+  const updateApplicationMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Application> }) => {
+      const response = await apiRequest('PUT', `/api/applications/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+      toast({
+        title: "Success",
+        description: "Application updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update application.",
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredApplications = applications?.filter(app => 
@@ -83,7 +110,7 @@ export default function Applications() {
             <HelpTooltip content="Filter applications by status. Track progress from draft to final decision." />
           </div>
           
-          <Button>
+          <Button onClick={() => setIsAddApplicationModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             New Application
           </Button>
@@ -164,7 +191,7 @@ export default function Applications() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button>
+                  <Button onClick={() => setIsAddApplicationModalOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     New Application
                   </Button>
@@ -237,11 +264,17 @@ export default function Applications() {
                             <DropdownMenuItem>
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              Update Status
+                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'submitted' } })}>
+                              Mark as Submitted
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              Create Admission Record
+                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'under-review' } })}>
+                              Mark Under Review
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'accepted' } })}>
+                              Mark as Accepted
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'rejected' } })}>
+                              Mark as Rejected
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -254,6 +287,11 @@ export default function Applications() {
           </CardContent>
         </Card>
       </div>
+
+      <AddApplicationModal 
+        open={isAddApplicationModalOpen}
+        onOpenChange={setIsAddApplicationModalOpen}
+      />
     </Layout>
   );
 }
