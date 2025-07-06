@@ -28,6 +28,8 @@ export const leads = pgTable("leads", {
   program: text("program"),
   source: text("source"),
   status: text("status").notNull().default("new"),
+  expectation: text("expectation"),
+  type: text("type"),
   notes: text("notes"),
   counselorId: text("counselor_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),

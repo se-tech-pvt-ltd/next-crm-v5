@@ -6,15 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
 import { HelpTooltip } from './help-tooltip';
 import { ConvertToStudentModal } from './convert-to-student-modal';
-import { type Lead } from '@shared/schema';
+import { MultiSelect } from './multi-select';
+import { type Lead, type User } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { User, Edit, Save, X, UserPlus } from 'lucide-react';
+import { User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2 } from 'lucide-react';
 
 interface LeadDetailsModalProps {
   open: boolean;
@@ -27,10 +29,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [showConvertModal, setShowConvertModal] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState('');
 
   useEffect(() => {
     if (lead) {
       setEditData(lead);
+      setCurrentStatus(lead.status);
     }
   }, [lead]);
 
@@ -62,7 +66,35 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
     select: (data: any[]) => data.filter((student: any) => student.leadId === lead?.id),
   });
 
+  // Get counselors for dropdown
+  const { data: counselors } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+    select: (data: User[]) => data.filter(user => user.role === 'counselor')
+  });
+
   const isAlreadyConverted = students && students.length > 0;
+
+  // Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async (status: string) => {
+      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      toast({
+        title: "Success",
+        description: "Lead status updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update status.",
+        variant: "destructive",
+      });
+    },
+  });
 
   if (!lead) return null;
 
@@ -97,9 +129,56 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
     setIsEditing(false);
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | string[]) => {
     setEditData(prev => ({ ...prev, [field]: value }));
   };
+
+  const handleStatusChange = (status: string) => {
+    setCurrentStatus(status);
+    updateStatusMutation.mutate(status);
+  };
+
+  // Options for dropdowns
+  const countryOptions = [
+    { label: 'Canada', value: 'canada' },
+    { label: 'United States', value: 'usa' },
+    { label: 'United Kingdom', value: 'uk' },
+    { label: 'Australia', value: 'australia' },
+    { label: 'New Zealand', value: 'new-zealand' },
+    { label: 'Germany', value: 'germany' },
+    { label: 'France', value: 'france' },
+    { label: 'Netherlands', value: 'netherlands' },
+    { label: 'Sweden', value: 'sweden' },
+    { label: 'Denmark', value: 'denmark' },
+  ];
+
+  const programOptions = [
+    { label: 'Business Administration', value: 'business-admin' },
+    { label: 'Computer Science', value: 'computer-science' },
+    { label: 'Engineering', value: 'engineering' },
+    { label: 'Medicine', value: 'medicine' },
+    { label: 'Law', value: 'law' },
+    { label: 'Arts & Humanities', value: 'arts-humanities' },
+    { label: 'Social Sciences', value: 'social-sciences' },
+    { label: 'Natural Sciences', value: 'natural-sciences' },
+    { label: 'Education', value: 'education' },
+    { label: 'Psychology', value: 'psychology' },
+  ];
+
+  const expectationOptions = [
+    { label: 'High', value: 'high' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Low', value: 'low' },
+  ];
+
+  const typeOptions = [
+    { label: 'Undergraduate', value: 'undergraduate' },
+    { label: 'Graduate', value: 'graduate' },
+    { label: 'Postgraduate', value: 'postgraduate' },
+    { label: 'PhD', value: 'phd' },
+    { label: 'Certificate', value: 'certificate' },
+    { label: 'Diploma', value: 'diploma' },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,17 +187,31 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
           {/* Main Content - Left Side */}
           <div className="flex-1 overflow-y-auto p-6">
             <DialogHeader className="pb-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <DialogTitle className="text-xl font-semibold">
                     {lead.name}
                   </DialogTitle>
-                  <Badge className={getStatusColor(lead.status)}>
-                    {formatStatus(lead.status)}
-                  </Badge>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {/* Convert to Student button in top right */}
+                <div className="flex items-center space-x-4">
+                  {/* Status dropdown - editable without edit mode */}
+                  <div className="flex items-center space-x-2">
+                    <Label className="text-sm font-medium">Status:</Label>
+                    <Select value={currentStatus} onValueChange={handleStatusChange}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="contacted">Contacted</SelectItem>
+                        <SelectItem value="qualified">Qualified</SelectItem>
+                        <SelectItem value="converted">Converted</SelectItem>
+                        <SelectItem value="lost">Lost</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Convert to Student button */}
                   {!isAlreadyConverted && (
                     <Button size="sm" onClick={() => setShowConvertModal(true)}>
                       <UserPlus className="w-4 h-4 mr-1" />
@@ -128,24 +221,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                   {isAlreadyConverted && (
                     <Badge variant="secondary">Already Converted</Badge>
                   )}
-                  {isEditing ? (
-                    <>
-                      <Button size="sm" onClick={handleSave} disabled={updateLeadMutation.isPending}>
-                        <Save className="w-4 h-4 mr-1" />
-                        Save
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleCancel}>
-                        <X className="w-4 h-4 mr-1" />
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit Lead
-                    </Button>
-                  )}
-                  <HelpTooltip content="Detailed view of lead information. Track progress and convert to students when qualified." />
                 </div>
               </div>
             </DialogHeader>
@@ -155,11 +230,32 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center text-lg">
-                    <User className="w-5 h-5 mr-2" />
+                    <UserIcon className="w-5 h-5 mr-2" />
                     Lead Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Edit/Save buttons */}
+                  <div className="flex justify-end space-x-2 mb-4">
+                    {isEditing ? (
+                      <>
+                        <Button size="sm" onClick={handleSave} disabled={updateLeadMutation.isPending}>
+                          <Save className="w-4 h-4 mr-1" />
+                          Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={handleCancel}>
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit Lead
+                      </Button>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name">Name</Label>
@@ -199,74 +295,158 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                       )}
                     </div>
                     <div>
-                      <Label htmlFor="country">Target Country</Label>
+                      <Label htmlFor="source">Source</Label>
                       {isEditing ? (
                         <Input
-                          id="country"
-                          value={editData.country || ''}
-                          onChange={(e) => handleInputChange('country', e.target.value)}
+                          id="source"
+                          value={editData.source || ''}
+                          onChange={(e) => handleInputChange('source', e.target.value)}
                         />
                       ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.country}</div>
+                        <div className="p-2 bg-gray-50 rounded border">{lead.source || 'N/A'}</div>
                       )}
                     </div>
+                    
+                    {/* Multi-select for Target Countries */}
                     <div>
-                      <Label htmlFor="program">Program Interest</Label>
+                      <Label>Target Countries</Label>
                       {isEditing ? (
-                        <Input
-                          id="program"
-                          value={editData.program || ''}
-                          onChange={(e) => handleInputChange('program', e.target.value)}
+                        <MultiSelect
+                          options={countryOptions}
+                          value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                          onChange={(value) => handleInputChange('country', value)}
+                          placeholder="Select countries..."
                         />
                       ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.program}</div>
+                        <div className="p-2 bg-gray-50 rounded border">
+                          {Array.isArray(lead.country) 
+                            ? lead.country.map(c => countryOptions.find(opt => opt.value === c)?.label || c).join(', ')
+                            : (lead.country ? countryOptions.find(opt => opt.value === lead.country)?.label || lead.country : 'N/A')
+                          }
+                        </div>
                       )}
                     </div>
+
+                    {/* Multi-select for Program Interests */}
                     <div>
-                      <Label htmlFor="source">Lead Source</Label>
+                      <Label>Program Interests</Label>
                       {isEditing ? (
-                        <Select value={editData.source || ''} onValueChange={(value) => handleInputChange('source', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select source" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="website">Website</SelectItem>
-                            <SelectItem value="referral">Referral</SelectItem>
-                            <SelectItem value="social_media">Social Media</SelectItem>
-                            <SelectItem value="education_fair">Education Fair</SelectItem>
-                            <SelectItem value="partner_agent">Partner Agent</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <MultiSelect
+                          options={programOptions}
+                          value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
+                          onChange={(value) => handleInputChange('program', value)}
+                          placeholder="Select programs..."
+                        />
                       ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.source}</div>
+                        <div className="p-2 bg-gray-50 rounded border">
+                          {Array.isArray(lead.program) 
+                            ? lead.program.map(p => programOptions.find(opt => opt.value === p)?.label || p).join(', ')
+                            : (lead.program ? programOptions.find(opt => opt.value === lead.program)?.label || lead.program : 'N/A')
+                          }
+                        </div>
                       )}
                     </div>
+
+                    {/* New Expectation field */}
                     <div>
-                      <Label htmlFor="status">Status</Label>
+                      <Label htmlFor="expectation">Expectation</Label>
                       {isEditing ? (
-                        <Select value={editData.status || ''} onValueChange={(value) => handleInputChange('status', value)}>
+                        <Select value={editData.expectation || ''} onValueChange={(value) => handleInputChange('expectation', value)}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder="Select expectation..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="new">New</SelectItem>
-                            <SelectItem value="contacted">Contacted</SelectItem>
-                            <SelectItem value="qualified">Qualified</SelectItem>
-                            <SelectItem value="converted">Converted</SelectItem>
-                            <SelectItem value="lost">Lost</SelectItem>
+                            {expectationOptions.map(option => (
+                              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ) : (
                         <div className="p-2 bg-gray-50 rounded border">
-                          <Badge className={getStatusColor(lead.status)}>
-                            {formatStatus(lead.status)}
-                          </Badge>
+                          {lead.expectation ? expectationOptions.find(opt => opt.value === lead.expectation)?.label || lead.expectation : 'N/A'}
                         </div>
                       )}
                     </div>
+
+                    {/* New Type field */}
                     <div>
-                      <Label>Created Date</Label>
-                      <div className="p-2 bg-gray-50 rounded border">{formatDate(lead.createdAt)}</div>
+                      <Label htmlFor="type">Type</Label>
+                      {isEditing ? (
+                        <Select value={editData.type || ''} onValueChange={(value) => handleInputChange('type', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {typeOptions.map(option => (
+                              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="p-2 bg-gray-50 rounded border">
+                          {lead.type ? typeOptions.find(opt => opt.value === lead.type)?.label || lead.type : 'N/A'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* New Counselor field */}
+                    <div>
+                      <Label htmlFor="counselor">Counselor</Label>
+                      {isEditing ? (
+                        <Select value={editData.counselorId || ''} onValueChange={(value) => handleInputChange('counselorId', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select counselor..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {counselors?.map(counselor => (
+                              <SelectItem key={counselor.id} value={counselor.id}>
+                                {counselor.firstName && counselor.lastName 
+                                  ? `${counselor.firstName} ${counselor.lastName}` 
+                                  : counselor.email}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="p-2 bg-gray-50 rounded border">
+                          {lead.counselorId 
+                            ? counselors?.find(c => c.id === lead.counselorId)?.firstName && counselors?.find(c => c.id === lead.counselorId)?.lastName
+                              ? `${counselors.find(c => c.id === lead.counselorId)?.firstName} ${counselors.find(c => c.id === lead.counselorId)?.lastName}`
+                              : counselors?.find(c => c.id === lead.counselorId)?.email || 'Unknown'
+                            : 'N/A'
+                          }
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Notes field - full width */}
+                  <div className="mt-4">
+                    <Label htmlFor="notes">Notes</Label>
+                    {isEditing ? (
+                      <Textarea
+                        id="notes"
+                        value={editData.notes || ''}
+                        onChange={(e) => handleInputChange('notes', e.target.value)}
+                        placeholder="Add notes about this lead..."
+                        rows={4}
+                      />
+                    ) : (
+                      <div className="p-2 bg-gray-50 rounded border min-h-[100px]">
+                        {lead.notes || 'No notes added'}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Date fields at the bottom */}
+                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t">
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Calendar className="w-4 h-4" />
+                      <span>Created: {formatDate(lead.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Calendar className="w-4 h-4" />
+                      <span>Last Updated: {formatDate(lead.updatedAt)}</span>
                     </div>
                   </div>
                 </CardContent>
