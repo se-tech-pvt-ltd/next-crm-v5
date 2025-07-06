@@ -103,6 +103,7 @@ Changelog:
 - July 06, 2025. Implemented activity tracking system with comments and change logging
 - July 06, 2025. Made table rows clickable to open detail modals directly
 - July 06, 2025. Improved modals with status dropdowns and streamlined action buttons
+- July 06, 2025. Combined Profile and Activity tabs for activity-focused student management
 ```
 
 ## User Preferences

@@ -168,11 +168,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           </DialogHeader>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="profile">Profile & Activity</TabsTrigger>
               <TabsTrigger value="applications">Applications ({applications?.length || 0})</TabsTrigger>
               <TabsTrigger value="admissions">Admissions ({admissions?.length || 0})</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -278,7 +277,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 </Card>
               )}
 
-
+              {/* Activity Section */}
+              <div className="mt-8">
+                <ActivityTracker 
+                  entityType="student" 
+                  entityId={student?.id || 0} 
+                  entityName={student?.name}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">
@@ -385,13 +391,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               )}
             </TabsContent>
 
-            <TabsContent value="activity">
-              <ActivityTracker 
-                entityType="student" 
-                entityId={student?.id || 0} 
-                entityName={student?.name}
-              />
-            </TabsContent>
+
           </Tabs>
         </DialogContent>
       </Dialog>
