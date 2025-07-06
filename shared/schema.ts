@@ -1,0 +1,107 @@
+import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  country: text("country"),
+  program: text("program"),
+  source: text("source"),
+  status: text("status").notNull().default("new"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const students = pgTable("students", {
+  id: serial("id").primaryKey(),
+  leadId: integer("lead_id").references(() => leads.id),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  dateOfBirth: text("date_of_birth"),
+  nationality: text("nationality"),
+  passportNumber: text("passport_number"),
+  academicBackground: text("academic_background"),
+  englishProficiency: text("english_proficiency"),
+  targetCountry: text("target_country"),
+  targetProgram: text("target_program"),
+  budget: text("budget"),
+  status: text("status").notNull().default("active"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const applications = pgTable("applications", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").references(() => students.id).notNull(),
+  university: text("university").notNull(),
+  program: text("program").notNull(),
+  degree: text("degree"),
+  intakeYear: text("intake_year"),
+  intakeSemester: text("intake_semester"),
+  applicationFee: text("application_fee"),
+  status: text("status").notNull().default("draft"),
+  submissionDate: timestamp("submission_date"),
+  decisionDate: timestamp("decision_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const admissions = pgTable("admissions", {
+  id: serial("id").primaryKey(),
+  applicationId: integer("application_id").references(() => applications.id).notNull(),
+  studentId: integer("student_id").references(() => students.id).notNull(),
+  university: text("university").notNull(),
+  program: text("program").notNull(),
+  decision: text("decision").notNull(),
+  decisionDate: timestamp("decision_date"),
+  scholarshipAmount: text("scholarship_amount"),
+  conditions: text("conditions"),
+  depositRequired: boolean("deposit_required").default(false),
+  depositAmount: text("deposit_amount"),
+  depositDeadline: timestamp("deposit_deadline"),
+  visaStatus: text("visa_status").default("pending"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertLeadSchema = createInsertSchema(leads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStudentSchema = createInsertSchema(students).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertApplicationSchema = createInsertSchema(applications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdmissionSchema = createInsertSchema(admissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type InsertStudent = z.infer<typeof insertStudentSchema>;
+export type InsertApplication = z.infer<typeof insertApplicationSchema>;
+export type InsertAdmission = z.infer<typeof insertAdmissionSchema>;
+
+export type Lead = typeof leads.$inferSelect;
+export type Student = typeof students.$inferSelect;
+export type Application = typeof applications.$inferSelect;
+export type Admission = typeof admissions.$inferSelect;
