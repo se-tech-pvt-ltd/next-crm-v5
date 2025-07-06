@@ -45,8 +45,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
       const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      // Update the editData state with the response from the server
+      setEditData(updatedLead);
       setIsEditing(false);
       toast({
         title: "Success",
