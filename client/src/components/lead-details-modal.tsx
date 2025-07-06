@@ -159,7 +159,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
   };
 
   const handleInputChange = (field: string, value: string | string[]) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
+    // Convert arrays to comma-separated strings for storage
+    if (Array.isArray(value)) {
+      setEditData(prev => ({ ...prev, [field]: value.join(',') }));
+    } else {
+      setEditData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleStatusChange = (status: string) => {
@@ -384,15 +389,19 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                       {isEditing ? (
                         <MultiSelect
                           options={countryOptions}
-                          value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                          value={editData.country ? (typeof editData.country === 'string' ? editData.country.split(',') : editData.country) : []}
                           onChange={(value) => handleInputChange('country', value)}
                           placeholder="Select countries..."
                         />
                       ) : (
                         <div className="p-2 bg-gray-50 rounded border">
-                          {Array.isArray(lead.country) 
-                            ? lead.country.map(c => countryOptions.find(opt => opt.value === c)?.label || c).join(', ')
-                            : (lead.country ? countryOptions.find(opt => opt.value === lead.country)?.label || lead.country : 'N/A')
+                          {lead.country 
+                            ? (typeof lead.country === 'string' 
+                                ? lead.country.split(',').map(c => countryOptions.find(opt => opt.value === c.trim())?.label || c.trim()).join(', ')
+                                : Array.isArray(lead.country) 
+                                  ? lead.country.map(c => countryOptions.find(opt => opt.value === c)?.label || c).join(', ')
+                                  : countryOptions.find(opt => opt.value === lead.country)?.label || lead.country)
+                            : 'N/A'
                           }
                         </div>
                       )}
@@ -404,15 +413,19 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                       {isEditing ? (
                         <MultiSelect
                           options={programOptions}
-                          value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
+                          value={editData.program ? (typeof editData.program === 'string' ? editData.program.split(',') : editData.program) : []}
                           onChange={(value) => handleInputChange('program', value)}
                           placeholder="Select programs..."
                         />
                       ) : (
                         <div className="p-2 bg-gray-50 rounded border">
-                          {Array.isArray(lead.program) 
-                            ? lead.program.map(p => programOptions.find(opt => opt.value === p)?.label || p).join(', ')
-                            : (lead.program ? programOptions.find(opt => opt.value === lead.program)?.label || lead.program : 'N/A')
+                          {lead.program 
+                            ? (typeof lead.program === 'string' 
+                                ? lead.program.split(',').map(p => programOptions.find(opt => opt.value === p.trim())?.label || p.trim()).join(', ')
+                                : Array.isArray(lead.program) 
+                                  ? lead.program.map(p => programOptions.find(opt => opt.value === p)?.label || p).join(', ')
+                                  : programOptions.find(opt => opt.value === lead.program)?.label || lead.program)
+                            : 'N/A'
                           }
                         </div>
                       )}
