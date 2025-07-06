@@ -213,11 +213,43 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateLead(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+    // Get the current lead to track changes
+    const currentLead = await this.getLead(id);
+    if (!currentLead) return undefined;
+
     const [lead] = await db
       .update(leads)
-      .set(updates)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(leads.id, id))
       .returning();
+
+    if (lead) {
+      // Log changes for each updated field
+      for (const [fieldName, newValue] of Object.entries(updates)) {
+        if (fieldName === 'updatedAt') continue; // Skip timestamp fields
+        
+        const oldValue = (currentLead as any)[fieldName];
+        if (oldValue !== newValue) {
+          const fieldDisplayName = fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase());
+          
+          await this.logActivity(
+            'lead', 
+            id, 
+            'updated', 
+            `${fieldDisplayName} updated`,
+            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+            fieldName,
+            String(oldValue || ''),
+            String(newValue || ''),
+            undefined,
+            "Next Bot"
+          );
+        }
+      }
+    }
+
     return lead || undefined;
   }
 
@@ -264,11 +296,43 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateStudent(id: number, updates: Partial<InsertStudent>): Promise<Student | undefined> {
+    // Get the current student to track changes
+    const currentStudent = await this.getStudent(id);
+    if (!currentStudent) return undefined;
+
     const [student] = await db
       .update(students)
-      .set(updates)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(students.id, id))
       .returning();
+
+    if (student) {
+      // Log changes for each updated field
+      for (const [fieldName, newValue] of Object.entries(updates)) {
+        if (fieldName === 'updatedAt') continue; // Skip timestamp fields
+        
+        const oldValue = (currentStudent as any)[fieldName];
+        if (oldValue !== newValue) {
+          const fieldDisplayName = fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase());
+          
+          await this.logActivity(
+            'student', 
+            id, 
+            'updated', 
+            `${fieldDisplayName} updated`,
+            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+            fieldName,
+            String(oldValue || ''),
+            String(newValue || ''),
+            undefined,
+            "Next Bot"
+          );
+        }
+      }
+    }
+
     return student || undefined;
   }
 
@@ -338,6 +402,35 @@ export class DatabaseStorage implements IStorage {
       .insert(applications)
       .values(insertApplication)
       .returning();
+    
+    // Log activity for the student
+    await this.logActivity(
+      'student', 
+      application.studentId, 
+      'application_created', 
+      'Application created',
+      `Application submitted to ${application.university} for ${application.program}`,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      "Next Bot"
+    );
+    
+    // Also log activity for the application itself
+    await this.logActivity(
+      'application', 
+      application.id, 
+      'created', 
+      'Application submitted',
+      `Application submitted to ${application.university} for ${application.program}`,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      "Next Bot"
+    );
+    
     return application;
   }
 
