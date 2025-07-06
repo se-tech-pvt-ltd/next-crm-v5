@@ -428,6 +428,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User profile routes
+  app.get("/api/users", async (req, res) => {
+    try {
+      const currentUser = getCurrentUser();
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
   app.put("/api/users/profile-image", async (req, res) => {
     try {
       const currentUser = getCurrentUser();

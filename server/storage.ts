@@ -15,6 +15,7 @@ export interface IStorage {
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
   upsertUser(user: InsertUser): Promise<User>;
   getCounselors(): Promise<User[]>;
+  getAllUsers(): Promise<User[]>;
   
   // Authentication operations
   authenticateUser(email: string, password: string): Promise<User | null>;
@@ -129,6 +130,10 @@ export class DatabaseStorage implements IStorage {
 
   async getCounselors(): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, 'counselor'));
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 
   // Authentication operations

@@ -8,8 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Activity as ActivityIcon, Plus, User, Calendar, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
-import { Activity } from "@shared/schema";
+import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
+import { Activity, User as UserType } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
 
@@ -25,7 +25,7 @@ const ACTIVITY_TYPES = [
   { value: 'status_change', label: 'Status Change', icon: AlertCircle },
   { value: 'note', label: 'Note', icon: FileText },
   { value: 'follow_up', label: 'Follow Up', icon: Calendar },
-  { value: 'call', label: 'Call', icon: User },
+  { value: 'call', label: 'Call', icon: UserIcon },
   { value: 'meeting', label: 'Meeting', icon: Users },
 ];
 
@@ -39,6 +39,17 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   const { data: activities = [], isLoading } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
   });
+
+  // Fetch users to get current profile images
+  const { data: users = [] } = useQuery<UserType[]>({
+    queryKey: ['/api/users'],
+  });
+
+  // Create a lookup function for user profile images
+  const getUserProfileImage = (userId: string) => {
+    const user = users.find((u: UserType) => u.id === userId);
+    return user?.profileImageUrl || null;
+  };
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
@@ -209,17 +220,21 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                 {/* User Avatar */}
                 <div className="flex-shrink-0">
                   <Avatar className="h-8 w-8">
-                    {activity.userProfileImage ? (
-                      <AvatarImage src={activity.userProfileImage} alt={activity.userName || "User"} />
-                    ) : (
-                      <AvatarFallback className="bg-gray-100">
-                        {activity.userName === "Next Bot" ? (
-                          <Bot className="h-4 w-4 text-blue-600" />
-                        ) : (
-                          <User className="h-4 w-4 text-gray-600" />
-                        )}
-                      </AvatarFallback>
-                    )}
+                    {(() => {
+                      // Use dynamic profile image lookup first, then fall back to stored image
+                      const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
+                      return profileImage ? (
+                        <AvatarImage src={profileImage} alt={activity.userName || "User"} />
+                      ) : (
+                        <AvatarFallback className="bg-gray-100">
+                          {activity.userName === "Next Bot" ? (
+                            <Bot className="h-4 w-4 text-blue-600" />
+                          ) : (
+                            <UserIcon className="h-4 w-4 text-gray-600" />
+                          )}
+                        </AvatarFallback>
+                      );
+                    })()}
                   </Avatar>
                 </div>
                 
