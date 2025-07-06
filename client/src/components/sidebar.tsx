@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
+import { UserMenu } from './user-menu';
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -124,20 +125,7 @@ export function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3 px-4 py-3">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <User className="text-gray-600" size={16} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">Sarah Johnson</p>
-            <p className="text-xs text-gray-500">Senior Consultant</p>
-          </div>
-          <Link href="/settings" className="text-gray-400 hover:text-gray-600">
-            <Settings size={16} />
-          </Link>
-        </div>
-      </div>
+      <UserMenu />
     </div>
   );
 }
