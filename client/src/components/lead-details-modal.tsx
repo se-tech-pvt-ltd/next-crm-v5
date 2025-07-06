@@ -181,18 +181,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
           
-          {/* Close Button - Top Right Corner */}
-          <div className="absolute top-4 right-4 z-20">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-8 h-8 p-0 rounded-full hover:bg-gray-100"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-
           {/* Header with Fixed Position */}
           <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
             <div className="flex items-center justify-between">
@@ -204,15 +192,29 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <h2 className="text-xl font-semibold">{lead.name}</h2>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={lead.status === 'qualified' ? 'default' : 'secondary'}>
-                  {formatStatus(lead.status)}
-                </Badge>
+              <div className="flex items-center gap-2 pr-12">
+                <div>
+                  <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
+                  <Select
+                    value={currentStatus}
+                    onValueChange={handleStatusChange}
+                  >
+                    <SelectTrigger className="w-32 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="contacted">Contacted</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="converted">Converted</SelectItem>
+                      <SelectItem value="lost">Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={() => setShowConvertModal(true)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
                 >
                   <UserPlus className="w-4 h-4" />
                   Convert to Student
@@ -228,6 +230,16 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                 )}
               </div>
             </div>
+            
+            {/* Close Button - Top Right Corner */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 w-8 h-8 p-0 rounded-full hover:bg-gray-100"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
 
           <div className="flex h-[90vh]">
