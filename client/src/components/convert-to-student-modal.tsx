@@ -61,11 +61,10 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {
-      const response = await apiRequest('POST', '/api/students', {
+      return apiRequest('POST', '/api/students/convert-from-lead', {
         ...studentData,
         leadId: lead?.id,
       });
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });

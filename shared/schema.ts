@@ -128,12 +128,15 @@ export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   entityType: text("entity_type").notNull(), // lead, student, application, admission
   entityId: integer("entity_id").notNull(),
-  activityType: text("activity_type").notNull(), // created, updated, status_changed, comment, deleted
+  activityType: text("activity_type").notNull(), // created, updated, status_changed, comment, deleted, converted, application_created, admission_created
   title: text("title").notNull(),
   description: text("description"),
   oldValue: text("old_value"),
   newValue: text("new_value"),
   fieldName: text("field_name"),
+  userId: text("user_id").references(() => users.id), // User who performed the action
+  userName: text("user_name"), // For system actions, this can be "Next Bot"
+  userProfileImage: text("user_profile_image"), // User's profile image URL
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -155,6 +155,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/students/convert-from-lead", async (req, res) => {
+    try {
+      const { leadId, ...studentData } = req.body;
+      const validatedData = insertStudentSchema.parse(studentData);
+      
+      // Create the student
+      const student = await storage.createStudent(validatedData);
+      
+      // Transfer activities from lead to student
+      await storage.transferActivities('lead', leadId, 'student', student.id);
+      
+      res.status(201).json(student);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create student" });
+    }
+  });
+
   app.put("/api/students/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -333,14 +353,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/activities", async (req, res) => {
     try {
+      const currentUser = getCurrentUser();
       const activityData = insertActivitySchema.parse(req.body);
-      const activity = await storage.createActivity(activityData);
+      const activity = await storage.createActivityWithUser(activityData, currentUser.id);
       res.json(activity);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid activity data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create activity" });
+    }
+  });
+
+  // User profile routes
+  app.put("/api/users/profile-image", async (req, res) => {
+    try {
+      const currentUser = getCurrentUser();
+      const { profileImageUrl } = req.body;
+      
+      const updatedUser = await storage.updateUser(currentUser.id, { profileImageUrl });
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update profile image" });
     }
   });
 

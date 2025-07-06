@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, KeyboardEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "./help-tooltip";
@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Activity as ActivityIcon, Plus, User, Calendar, Clock, Info } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageSquare, Activity as ActivityIcon, Plus, User, Calendar, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
 import { Activity } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
@@ -17,35 +19,55 @@ interface ActivityTrackerProps {
   entityName?: string;
 }
 
+const ACTIVITY_TYPES = [
+  { value: 'comment', label: 'Comment', icon: MessageSquare },
+  { value: 'update', label: 'Update', icon: Edit },
+  { value: 'status_change', label: 'Status Change', icon: AlertCircle },
+  { value: 'note', label: 'Note', icon: FileText },
+  { value: 'follow_up', label: 'Follow Up', icon: Calendar },
+  { value: 'call', label: 'Call', icon: User },
+  { value: 'meeting', label: 'Meeting', icon: Users },
+];
+
 export function ActivityTracker({ entityType, entityId, entityName }: ActivityTrackerProps) {
-  const [newComment, setNewComment] = useState("");
-  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [newActivity, setNewActivity] = useState("");
+  const [activityType, setActivityType] = useState("comment");
+  const [isAddingActivity, setIsAddingActivity] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
 
   const { data: activities = [], isLoading } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
   });
 
-  const addCommentMutation = useMutation({
-    mutationFn: async (comment: string) => {
+  const addActivityMutation = useMutation({
+    mutationFn: async (data: { type: string; content: string }) => {
       return apiRequest('POST', '/api/activities', {
         entityType,
         entityId,
-        activityType: 'comment',
-        title: 'Comment added',
-        description: comment,
+        activityType: data.type,
+        title: `${ACTIVITY_TYPES.find(t => t.value === data.type)?.label || 'Activity'} added`,
+        description: data.content,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
-      setNewComment("");
-      setIsAddingComment(false);
+      setNewActivity("");
+      setActivityType("comment");
+      setIsAddingActivity(false);
     },
   });
 
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      addCommentMutation.mutate(newComment.trim());
+  const handleAddActivity = () => {
+    if (newActivity.trim()) {
+      addActivityMutation.mutate({ type: activityType, content: newActivity.trim() });
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAddActivity();
     }
   };
 
@@ -101,45 +123,72 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Add Comment Section */}
-        <div className="space-y-3">
-          {!isAddingComment ? (
+        {/* Add Activity Section with Blue Gradient Background */}
+        <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
+          {!isAddingActivity ? (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsAddingComment(true)}
+              onClick={() => setIsAddingActivity(true)}
               className="w-full"
             >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Add Comment
+              <Plus className="h-4 w-4 mr-2" />
+              Add Activity
             </Button>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
+              <Select value={activityType} onValueChange={setActivityType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select activity type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACTIVITY_TYPES.map((type) => {
+                    const IconComponent = type.icon;
+                    return (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div className="flex items-center gap-2">
+                          <IconComponent className="h-4 w-4" />
+                          {type.label}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              
               <Textarea
-                placeholder="Add a comment about this record..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
+                ref={textareaRef}
+                placeholder="Enter activity details... (Press Enter to submit, Shift+Enter for new line)"
+                value={newActivity}
+                onChange={(e) => setNewActivity(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="min-h-[80px]"
               />
+              
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  onClick={handleAddComment}
-                  disabled={!newComment.trim() || addCommentMutation.isPending}
+                  onClick={handleAddActivity}
+                  disabled={!newActivity.trim() || addActivityMutation.isPending}
                 >
-                  {addCommentMutation.isPending ? "Adding..." : "Add Comment"}
+                  {addActivityMutation.isPending ? "Adding..." : "Add Activity"}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setIsAddingComment(false);
-                    setNewComment("");
+                    setIsAddingActivity(false);
+                    setNewActivity("");
+                    setActivityType("comment");
                   }}
                 >
                   Cancel
                 </Button>
               </div>
+              
+              <p className="text-xs text-gray-600">
+                Press Enter to submit, Shift+Enter for new line
+              </p>
             </div>
           )}
         </div>
@@ -148,32 +197,62 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
         {/* Activities List */}
         <div className="space-y-4">
-          {activities.length === 0 ? (
+          {(activities as Activity[]).length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>No activities yet</p>
               <p className="text-sm">Activities and comments will appear here</p>
             </div>
           ) : (
-            activities.map((activity: Activity) => (
-              <div key={activity.id} className="flex gap-3 p-3 border rounded-lg">
-                <div className="flex-shrink-0 mt-1">
-                  {getActivityIcon(activity.activityType)}
+            (activities as Activity[]).map((activity: Activity) => (
+              <div key={activity.id} className="flex gap-3 p-3 border rounded-lg bg-white shadow-sm">
+                {/* User Avatar */}
+                <div className="flex-shrink-0">
+                  <Avatar className="h-8 w-8">
+                    {activity.userProfileImage ? (
+                      <AvatarImage src={activity.userProfileImage} alt={activity.userName || "User"} />
+                    ) : (
+                      <AvatarFallback className="bg-gray-100">
+                        {activity.userName === "Next Bot" ? (
+                          <Bot className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <User className="h-4 w-4 text-gray-600" />
+                        )}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                 </div>
+                
                 <div className="flex-grow min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-sm">{activity.title}</h4>
+                    <div className="flex items-center gap-1">
+                      {getActivityIcon(activity.activityType)}
+                      <h4 className="font-medium text-sm">{activity.title}</h4>
+                    </div>
                     <Badge className={getActivityColor(activity.activityType)} variant="secondary">
                       {activity.activityType.replace('_', ' ')}
                     </Badge>
                   </div>
+                  
+                  <div className="flex items-center gap-2 mb-2 text-xs text-gray-500">
+                    <span className="font-medium">
+                      {activity.userName || "Unknown User"}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
+                    </span>
+                  </div>
+                  
                   {activity.description && (
                     <p className="text-gray-700 text-sm mb-2 whitespace-pre-wrap">
                       {activity.description}
                     </p>
                   )}
+                  
                   {(activity.oldValue || activity.newValue) && (
-                    <div className="text-xs text-gray-500 mb-2">
+                    <div className="text-xs text-gray-500 mb-2 bg-gray-50 p-2 rounded">
                       {activity.fieldName && (
                         <span className="font-medium">{activity.fieldName}: </span>
                       )}
@@ -186,10 +265,6 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                       )}
                     </div>
                   )}
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <Clock className="h-3 w-3" />
-                    {activity.createdAt && format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm')}
-                  </div>
                 </div>
               </div>
             ))

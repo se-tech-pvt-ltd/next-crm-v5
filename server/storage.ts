@@ -58,6 +58,8 @@ export interface IStorage {
   // Activity operations
   getActivities(entityType: string, entityId: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
+  createActivityWithUser(activity: InsertActivity, userId?: string): Promise<Activity>;
+  transferActivities(fromEntityType: string, fromEntityId: number, toEntityType: string, toEntityId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -65,7 +67,7 @@ export class DatabaseStorage implements IStorage {
     // Database storage doesn't need initialization
   }
 
-  private async logActivity(entityType: string, entityId: number, activityType: string, title: string, description?: string, fieldName?: string, oldValue?: string, newValue?: string) {
+  private async logActivity(entityType: string, entityId: number, activityType: string, title: string, description?: string, fieldName?: string, oldValue?: string, newValue?: string, userId?: string, userName?: string, userProfileImage?: string) {
     try {
       await this.createActivity({
         entityType,
@@ -76,6 +78,9 @@ export class DatabaseStorage implements IStorage {
         fieldName,
         oldValue,
         newValue,
+        userId,
+        userName: userName || "Next Bot",
+        userProfileImage,
       });
     } catch (error) {
       console.warn('Failed to log activity:', error);
@@ -253,7 +258,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     // Log activity
-    await this.logActivity('student', student.id, 'created', 'Student record created', `Student ${student.name} was added to the system`);
+    await this.logActivity('student', student.id, 'created', 'Student record created', `Student ${student.name} was added to the system`, undefined, undefined, undefined, undefined, "Next Bot");
     
     return student;
   }
@@ -493,6 +498,71 @@ export class DatabaseStorage implements IStorage {
       .values(insertActivity)
       .returning();
     return activity;
+  }
+
+  async createActivityWithUser(insertActivity: InsertActivity, userId?: string): Promise<Activity> {
+    let userName = "Next Bot";
+    let userProfileImage = null;
+    
+    if (userId) {
+      const user = await this.getUser(userId);
+      if (user) {
+        userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || "User";
+        userProfileImage = user.profileImageUrl;
+      }
+    }
+    
+    const activityWithUser = {
+      ...insertActivity,
+      userId,
+      userName,
+      userProfileImage,
+    };
+    
+    const [activity] = await db
+      .insert(activities)
+      .values(activityWithUser)
+      .returning();
+    return activity;
+  }
+
+  async transferActivities(fromEntityType: string, fromEntityId: number, toEntityType: string, toEntityId: number): Promise<void> {
+    // Get all activities from the source entity
+    const sourceActivities = await db.select().from(activities)
+      .where(
+        and(
+          eq(activities.entityType, fromEntityType),
+          eq(activities.entityId, fromEntityId)
+        )
+      );
+
+    // Create new activities for the target entity
+    for (const activity of sourceActivities) {
+      await db.insert(activities).values({
+        entityType: toEntityType,
+        entityId: toEntityId,
+        activityType: activity.activityType,
+        title: activity.title,
+        description: activity.description,
+        oldValue: activity.oldValue,
+        newValue: activity.newValue,
+        fieldName: activity.fieldName,
+        userId: activity.userId,
+        userName: activity.userName,
+        userProfileImage: activity.userProfileImage,
+        createdAt: activity.createdAt, // Preserve original timestamp
+      });
+    }
+
+    // Add a conversion activity
+    await db.insert(activities).values({
+      entityType: toEntityType,
+      entityId: toEntityId,
+      activityType: 'converted',
+      title: `Converted from ${fromEntityType}`,
+      description: `This record was converted from ${fromEntityType} ID ${fromEntityId}. All previous activities have been preserved.`,
+      userName: "Next Bot",
+    });
   }
 }
 
