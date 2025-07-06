@@ -152,15 +152,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/leads/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertLeadSchema.partial().parse(req.body);
+      console.log('Updating lead:', id, 'with data:', req.body);
+      
+      // Handle array fields - convert to JSON strings if they are arrays
+      const processedData = { ...req.body };
+      if (Array.isArray(processedData.country)) {
+        processedData.country = JSON.stringify(processedData.country);
+      }
+      if (Array.isArray(processedData.program)) {
+        processedData.program = JSON.stringify(processedData.program);
+      }
+      
+      const validatedData = insertLeadSchema.partial().parse(processedData);
       const lead = await storage.updateLead(id, validatedData);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
-      res.json(lead);
+      
+      // Convert JSON strings back to arrays for the response
+      const responseData = { ...lead };
+      if (responseData.country && typeof responseData.country === 'string' && responseData.country.startsWith('[')) {
+        try {
+          responseData.country = JSON.parse(responseData.country);
+        } catch (e) {
+          // Keep as string if not valid JSON
+        }
+      }
+      if (responseData.program && typeof responseData.program === 'string' && responseData.program.startsWith('[')) {
+        try {
+          responseData.program = JSON.parse(responseData.program);
+        } catch (e) {
+          // Keep as string if not valid JSON
+        }
+      }
+      
+      res.json(responseData);
     } catch (error) {
+      console.error('Lead update error:', error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        return res.status(400).json({ 
+          message: "Invalid data", 
+          errors: error.errors,
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
+        });
       }
       res.status(500).json({ message: "Failed to update lead" });
     }

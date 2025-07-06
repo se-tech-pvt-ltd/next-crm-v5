@@ -50,6 +50,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const updateLeadMutation = useMutation({
     mutationFn: async (data: Partial<Lead>) => {
       const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update lead');
+      }
       return response.json();
     },
     onSuccess: (updatedLead) => {
@@ -61,10 +65,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
         description: "Lead updated successfully.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Update lead error:', error);
       toast({
         title: "Error",
-        description: "Failed to update lead. Please try again.",
+        description: error.message || "Failed to update lead. Please try again.",
         variant: "destructive",
       });
     },
@@ -127,7 +132,35 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
-    updateLeadMutation.mutate({ status: newStatus });
+    const statusUpdateMutation = useMutation({
+      mutationFn: async (status: string) => {
+        const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { status });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update status');
+        }
+        return response.json();
+      },
+      onSuccess: (updatedLead) => {
+        queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+        onLeadUpdate?.(updatedLead);
+        toast({
+          title: "Success",
+          description: "Lead status updated successfully.",
+        });
+      },
+      onError: (error: any) => {
+        // Revert the status change on error
+        setCurrentStatus(lead?.status || '');
+        toast({
+          title: "Error",
+          description: error.message || "Failed to update lead status.",
+          variant: "destructive",
+        });
+      },
+    });
+    
+    statusUpdateMutation.mutate(newStatus);
   };
 
   if (!lead) return null;
