@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HelpTooltip } from "./help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Activity as ActivityIcon, Plus, User, FileText, Calendar, Clock } from "lucide-react";
+import { MessageSquare, Activity as ActivityIcon, Plus, User, FileText, Calendar, Clock, Info } from "lucide-react";
 import { Activity } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
@@ -22,25 +23,21 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   const queryClient = useQueryClient();
 
   const { data: activities = [], isLoading } = useQuery({
-    queryKey: ['/api/activities', entityType, entityId],
-    queryFn: () => apiRequest(`/api/activities/${entityType}/${entityId}`),
+    queryKey: [`/api/activities/${entityType}/${entityId}`],
   });
 
   const addCommentMutation = useMutation({
     mutationFn: async (comment: string) => {
-      return apiRequest('/api/activities', {
-        method: 'POST',
-        body: JSON.stringify({
-          entityType,
-          entityId,
-          activityType: 'comment',
-          title: 'Comment added',
-          description: comment,
-        }),
+      return apiRequest('POST', '/api/activities', {
+        entityType,
+        entityId,
+        activityType: 'comment',
+        title: 'Comment added',
+        description: comment,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/activities', entityType, entityId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
       setNewComment("");
       setIsAddingComment(false);
     },
@@ -97,6 +94,10 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
           <ActivityIcon className="h-4 w-4" />
           Activity Timeline
           {entityName && <span className="text-sm font-normal text-gray-500">for {entityName}</span>}
+          <HelpTooltip 
+            content="Track all changes and interactions for this record. Add comments to collaborate with your team and view automatic change logs."
+            className="ml-auto"
+          />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
