@@ -278,42 +278,24 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                         />
                       </div>
                       <div>
-                        <Label htmlFor="country">Country</Label>
-                        <Select
-                          value={editData.country || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, country: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countryOptions.map((country) => (
-                              <SelectItem key={country.value} value={country.value}>
-                                {country.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="country">Countries</Label>
+                        <MultiSelect
+                          options={countryOptions}
+                          value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                          onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
+                          placeholder="Select countries"
+                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
+                        />
                       </div>
                       <div>
-                        <Label htmlFor="program">Program</Label>
-                        <Select
-                          value={editData.program || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, program: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select program" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {programOptions.map((program) => (
-                              <SelectItem key={program.value} value={program.value}>
-                                {program.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="program">Programs</Label>
+                        <MultiSelect
+                          options={programOptions}
+                          value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
+                          onChange={(values) => setEditData(prev => ({ ...prev, program: values }))}
+                          placeholder="Select programs"
+                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="source">Source</Label>

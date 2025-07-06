@@ -12,6 +12,7 @@ import { insertLeadSchema } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
+import { MultiSelect } from './multi-select';
 
 interface AddLeadModalProps {
   open: boolean;
@@ -189,21 +190,24 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
               name="country"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Country of Interest</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select country" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="USA">United States</SelectItem>
-                      <SelectItem value="Canada">Canada</SelectItem>
-                      <SelectItem value="UK">United Kingdom</SelectItem>
-                      <SelectItem value="Australia">Australia</SelectItem>
-                      <SelectItem value="Germany">Germany</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Countries of Interest</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={[
+                        { label: 'United States', value: 'usa' },
+                        { label: 'Canada', value: 'canada' },
+                        { label: 'United Kingdom', value: 'uk' },
+                        { label: 'Australia', value: 'australia' },
+                        { label: 'Germany', value: 'germany' },
+                        { label: 'France', value: 'france' },
+                        { label: 'Netherlands', value: 'netherlands' },
+                        { label: 'New Zealand', value: 'new-zealand' },
+                      ]}
+                      value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
+                      onChange={field.onChange}
+                      placeholder="Select countries"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -214,9 +218,25 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
               name="program"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Program of Interest</FormLabel>
+                  <FormLabel>Programs of Interest</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Computer Science, Business, Medicine" {...field} />
+                    <MultiSelect
+                      options={[
+                        { label: 'Business Administration', value: 'business-admin' },
+                        { label: 'Computer Science', value: 'computer-science' },
+                        { label: 'Engineering', value: 'engineering' },
+                        { label: 'Medicine', value: 'medicine' },
+                        { label: 'Law', value: 'law' },
+                        { label: 'Arts & Humanities', value: 'arts-humanities' },
+                        { label: 'Social Sciences', value: 'social-sciences' },
+                        { label: 'Natural Sciences', value: 'natural-sciences' },
+                        { label: 'Education', value: 'education' },
+                        { label: 'Psychology', value: 'psychology' },
+                      ]}
+                      value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
+                      onChange={field.onChange}
+                      placeholder="Select programs"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

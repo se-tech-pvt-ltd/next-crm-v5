@@ -778,8 +778,8 @@ export default function Settings() {
                   <p className="text-sm text-gray-500">Manage dropdown options used across multiple entities</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {renderFieldRow("Countries", "countries", "Available destination countries")}
-                  {renderFieldRow("Programs", "programs", "Available study programs")}
+                  {renderFieldRow("Countries", "countries", "Available destination countries (supports multiple selection)")}
+                  {renderFieldRow("Programs", "programs", "Available study programs (supports multiple selection)")}
                 </CardContent>
               </Card>
 
