@@ -9,7 +9,6 @@ import { HelpTooltip } from '@/components/help-tooltip';
 import { 
   Users, 
   GraduationCap, 
-  FileText, 
   Trophy, 
   TrendingUp,
   UserPlus,
@@ -174,7 +173,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <FileText className="text-amber-500" size={24} />
+                  <GraduationCap className="text-amber-500" size={24} />
                 </div>
               </div>
             </CardContent>
@@ -219,7 +218,7 @@ export default function Dashboard() {
                   <div key={activity.id} className="flex items-start space-x-3">
                     <div className={`w-8 h-8 ${activity.color} rounded-full flex items-center justify-center flex-shrink-0`}>
                       {activity.icon === 'user-plus' && <UserPlus className="text-white" size={14} />}
-                      {activity.icon === 'file-text' && <FileText className="text-white" size={14} />}
+                      {activity.icon === 'file-text' && <GraduationCap className="text-white" size={14} />}
                       {activity.icon === 'clock' && <Clock className="text-white" size={14} />}
                       {activity.icon === 'trophy' && <Trophy className="text-white" size={14} />}
                     </div>
@@ -336,7 +335,7 @@ export default function Dashboard() {
 
                 <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2">
                   <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-                    <FileText className="text-white" size={16} />
+                    <GraduationCap className="text-white" size={16} />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">New Application</h4>

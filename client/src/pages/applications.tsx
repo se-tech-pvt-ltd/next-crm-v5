@@ -14,7 +14,7 @@ import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Application, Student } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, FileText, Calendar, DollarSign, School } from 'lucide-react';
+import { Plus, MoreHorizontal, Calendar, DollarSign, School } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Applications() {
@@ -188,7 +188,7 @@ export default function Applications() {
               </div>
             ) : filteredApplications.length === 0 ? (
               <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   {statusFilter === 'all' 

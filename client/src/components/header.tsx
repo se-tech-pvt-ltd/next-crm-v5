@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Plus, UserPlus, GraduationCap, FileText } from 'lucide-react';
+import { Search, Bell, Plus, UserPlus, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +63,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                             {result.type === 'lead' && <UserPlus size={14} />}
                             {result.type === 'student' && <GraduationCap size={14} />}
-                            {result.type === 'application' && <FileText size={14} />}
+                            {result.type === 'application' && <GraduationCap size={14} />}
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">{result.name}</p>
@@ -109,7 +109,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                   Add Student
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsAddApplicationModalOpen(true)}>
-                  <FileText size={16} className="mr-2" />
+                  <GraduationCap size={16} className="mr-2" />
                   New Application
                 </DropdownMenuItem>
               </DropdownMenuContent>

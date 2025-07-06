@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Activity as ActivityIcon, Plus, User, FileText, Calendar, Clock, Info } from "lucide-react";
+import { MessageSquare, Activity as ActivityIcon, Plus, User, Calendar, Clock, Info } from "lucide-react";
 import { Activity } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
@@ -52,10 +52,10 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   const getActivityIcon = (activityType: string) => {
     switch (activityType) {
       case 'created': return <Plus className="h-4 w-4 text-green-500" />;
-      case 'updated': return <FileText className="h-4 w-4 text-blue-500" />;
+      case 'updated': return <ActivityIcon className="h-4 w-4 text-blue-500" />;
       case 'status_changed': return <ActivityIcon className="h-4 w-4 text-orange-500" />;
       case 'comment': return <MessageSquare className="h-4 w-4 text-purple-500" />;
-      case 'deleted': return <FileText className="h-4 w-4 text-red-500" />;
+      case 'deleted': return <ActivityIcon className="h-4 w-4 text-red-500" />;
       default: return <ActivityIcon className="h-4 w-4 text-gray-500" />;
     }
   };

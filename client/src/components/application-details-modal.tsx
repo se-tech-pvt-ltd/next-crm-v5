@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { School, GraduationCap, Calendar, DollarSign, FileText, Clock, User, Edit, ExternalLink } from "lucide-react";
+import { School, GraduationCap, Calendar, DollarSign, Clock, User, Edit, ExternalLink } from "lucide-react";
 import { Application, Student } from "@shared/schema";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -219,53 +219,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
             </CardContent>
           </Card>
 
-          {/* Requirements & Documents */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Requirements & Documents
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {application.englishProficiencyRequirement && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">English Proficiency</span>
-                  <p className="mt-1">{application.englishProficiencyRequirement}</p>
-                </div>
-              )}
-              {application.academicRequirements && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Academic Requirements</span>
-                  <p className="mt-1">{application.academicRequirements}</p>
-                </div>
-              )}
-              {application.documentsSubmitted && application.documentsSubmitted.length > 0 && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Documents Submitted</span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {application.documentsSubmitted.map((doc, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {doc}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
-          {/* Notes */}
-          {application.notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 leading-relaxed">{application.notes}</p>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Created/Updated Timeline */}
           <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t">

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Phone, MapPin, GraduationCap, Users, FileText, Clock, Edit } from "lucide-react";
+import { User, Mail, Phone, MapPin, GraduationCap, Users, Clock, Edit } from "lucide-react";
 import { Lead } from "@shared/schema";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -183,7 +183,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
+                  <Users className="h-4 w-4" />
                   Notes
                 </CardTitle>
               </CardHeader>

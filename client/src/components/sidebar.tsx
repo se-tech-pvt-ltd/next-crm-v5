@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   Users, 
   GraduationCap, 
-  FileText, 
   Trophy, 
   BarChart3, 
   Settings,
@@ -59,7 +58,7 @@ export function Sidebar() {
     { 
       path: '/applications', 
       label: 'Applications', 
-      icon: FileText,
+      icon: GraduationCap,
       count: applications,
       countColor: 'bg-amber-500'
     },

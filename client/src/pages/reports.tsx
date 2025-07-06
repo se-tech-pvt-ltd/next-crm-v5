@@ -10,7 +10,6 @@ import {
   TrendingDown, 
   Users, 
   GraduationCap, 
-  FileText, 
   Trophy,
   DollarSign,
   Globe,
@@ -132,7 +131,7 @@ export default function Reports() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
-                <FileText className="w-4 h-4 mr-2" />
+                <GraduationCap className="w-4 h-4 mr-2" />
                 Application Rate
               </CardTitle>
             </CardHeader>
@@ -232,7 +231,7 @@ export default function Reports() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <FileText className="w-4 h-4 text-amber-500" />
+                      <GraduationCap className="w-4 h-4 text-amber-500" />
                       <span className="text-sm font-medium">Applications</span>
                     </div>
                     <div className="flex items-center space-x-2">

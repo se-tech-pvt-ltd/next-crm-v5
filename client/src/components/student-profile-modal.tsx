@@ -16,7 +16,6 @@ import {
   Phone, 
   Calendar, 
   MapPin, 
-  FileText, 
   GraduationCap, 
   Trophy,
   DollarSign,
@@ -211,7 +210,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     )}
                     {student.passportNumber && (
                       <div className="flex items-center space-x-3">
-                        <FileText className="w-4 h-4 text-gray-500" />
+                        <GraduationCap className="w-4 h-4 text-gray-500" />
                         <span className="text-sm">Passport: {student.passportNumber}</span>
                       </div>
                     )}
@@ -290,7 +289,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               {applications?.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-8">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                    <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No applications yet</h3>
                     <p className="mt-1 text-sm text-gray-500">Create the first application for this student.</p>
                   </CardContent>
