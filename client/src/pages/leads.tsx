@@ -23,6 +23,10 @@ export default function Leads() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  const handleLeadUpdate = (updatedLead: Lead) => {
+    setSelectedLead(updatedLead);
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -383,6 +387,7 @@ export default function Leads() {
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
         lead={selectedLead}
+        onLeadUpdate={handleLeadUpdate}
       />
     </Layout>
   );

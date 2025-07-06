@@ -22,9 +22,10 @@ interface LeadDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lead: Lead | null;
+  onLeadUpdate?: (updatedLead: Lead) => void;
 }
 
-export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalProps) {
+export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: LeadDetailsModalProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
@@ -49,6 +50,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       // Update the editData state with the response from the server
       setEditData(updatedLead);
+      // Update the parent component's selected lead
+      onLeadUpdate?.(updatedLead);
       setIsEditing(false);
       toast({
         title: "Success",
