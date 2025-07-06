@@ -36,7 +36,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
   useEffect(() => {
     if (lead) {
-      setEditData(lead);
+      // Ensure country and program are arrays for MultiSelect compatibility
+      const processedLead = {
+        ...lead,
+        country: Array.isArray(lead.country) ? lead.country : (lead.country ? [lead.country] : []),
+        program: Array.isArray(lead.program) ? lead.program : (lead.program ? [lead.program] : [])
+      };
+      setEditData(processedLead);
       setCurrentStatus(lead.status);
     }
   }, [lead]);
@@ -108,7 +114,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
       });
       return;
     }
-    updateLeadMutation.mutate(editData);
+    
+    // Prepare data for backend - ensure arrays are properly handled
+    const dataToSave = {
+      ...editData,
+      country: Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : []),
+      program: Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])
+    };
+    
+    updateLeadMutation.mutate(dataToSave);
   };
 
   const handleStatusChange = (newStatus: string) => {
