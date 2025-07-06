@@ -233,11 +233,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
           <div className="flex h-[90vh]">
             {/* Main Content - Left Side */}
             <div className="flex-1 overflow-y-auto p-6 pt-20">
-              {/* Lead Name at the top */}
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">{lead.name}</h1>
-              </div>
-
               <div className="space-y-6">
                 {/* Lead Information */}
                 <Card>
