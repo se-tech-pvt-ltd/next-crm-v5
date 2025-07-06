@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, boolean, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, varchar, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -11,6 +11,9 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: text("role").notNull().default("counselor"), // counselor, branch_manager, admin_staff
   branchId: varchar("branch_id"), // for counselors and branch managers
+  department: varchar("department"),
+  phoneNumber: varchar("phone_number"),
+  dateOfBirth: date("date_of_birth"),
   passwordHash: varchar("password_hash"), // hashed password for authentication
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

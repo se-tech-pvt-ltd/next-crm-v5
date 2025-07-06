@@ -36,6 +36,10 @@ export default function Settings() {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState('counselor');
   const [newUserBranch, setNewUserBranch] = useState('');
+  const [newUserPicture, setNewUserPicture] = useState('');
+  const [newUserDateOfBirth, setNewUserDateOfBirth] = useState('');
+  const [newUserDepartment, setNewUserDepartment] = useState('');
+  const [newUserPhone, setNewUserPhone] = useState('');
   
   const [config, setConfig] = useState<DropdownConfig>({
     leadStatuses: [
@@ -167,14 +171,28 @@ export default function Settings() {
       return;
     }
 
+    if (!newUserBranch) {
+      toast({
+        title: "Error",
+        description: "Please select a branch.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Success",
       description: `User ${newUserEmail} has been invited with ${newUserRole} role.`,
     });
     
+    // Clear all form fields
     setNewUserEmail('');
     setNewUserRole('counselor');
     setNewUserBranch('');
+    setNewUserPicture('');
+    setNewUserDateOfBirth('');
+    setNewUserDepartment('');
+    setNewUserPhone('');
   };
 
   const renderOptionCategory = (
@@ -404,6 +422,51 @@ export default function Settings() {
                         <SelectItem value="branch_beta">Branch Beta - Los Angeles, CA</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="user-phone">Phone Number</Label>
+                    <Input
+                      id="user-phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={newUserPhone}
+                      onChange={(e) => setNewUserPhone(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-dob">Date of Birth</Label>
+                    <Input
+                      id="user-dob"
+                      type="date"
+                      value={newUserDateOfBirth}
+                      onChange={(e) => setNewUserDateOfBirth(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-department">Department</Label>
+                    <Select value={newUserDepartment} onValueChange={setNewUserDepartment}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="counseling">Counseling</SelectItem>
+                        <SelectItem value="admissions">Admissions</SelectItem>
+                        <SelectItem value="finance">Finance</SelectItem>
+                        <SelectItem value="operations">Operations</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="administration">Administration</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-3">
+                    <Label htmlFor="user-picture">Profile Picture URL</Label>
+                    <Input
+                      id="user-picture"
+                      type="url"
+                      placeholder="https://example.com/profile.jpg"
+                      value={newUserPicture}
+                      onChange={(e) => setNewUserPicture(e.target.value)}
+                    />
                   </div>
                 </div>
                 <Button onClick={addUser} className="w-full md:w-auto">

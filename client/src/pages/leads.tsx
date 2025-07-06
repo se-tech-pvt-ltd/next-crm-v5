@@ -12,6 +12,7 @@ import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { formatStatus } from '@/lib/utils';
 import { Lead } from '@shared/schema';
 import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -281,7 +282,7 @@ export default function Leads() {
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(lead.status || 'new')}>
-                          {lead.status || 'new'}
+                          {formatStatus(lead.status || 'new')}
                         </Badge>
                       </TableCell>
                       <TableCell>

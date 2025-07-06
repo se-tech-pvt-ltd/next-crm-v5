@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatStatus } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
@@ -368,7 +369,7 @@ export default function Reports() {
               <div className="space-y-3">
                 {Object.entries(leadStatuses).map(([status, count]) => (
                   <div key={status} className="flex items-center justify-between">
-                    <span className="text-sm capitalize">{status}</span>
+                    <span className="text-sm">{formatStatus(status)}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-medium">{count}</span>
                       <span className="text-xs text-gray-500">
@@ -390,7 +391,7 @@ export default function Reports() {
               <div className="space-y-3">
                 {Object.entries(studentStatuses).map(([status, count]) => (
                   <div key={status} className="flex items-center justify-between">
-                    <span className="text-sm capitalize">{status}</span>
+                    <span className="text-sm">{formatStatus(status)}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-medium">{count}</span>
                       <span className="text-xs text-gray-500">
@@ -412,7 +413,7 @@ export default function Reports() {
               <div className="space-y-3">
                 {Object.entries(applicationStatuses).map(([status, count]) => (
                   <div key={status} className="flex items-center justify-between">
-                    <span className="text-sm capitalize">{status.replace('-', ' ')}</span>
+                    <span className="text-sm">{formatStatus(status)}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-medium">{count}</span>
                       <span className="text-xs text-gray-500">

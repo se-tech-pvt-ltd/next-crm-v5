@@ -4,7 +4,7 @@ import {
   type InsertLead, type InsertStudent, type InsertApplication, type InsertAdmission, type InsertActivity, type InsertUser
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, or, and, desc } from "drizzle-orm";
+import { eq, ilike, or, and, desc, isNull, not, exists } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 
 export interface IStorage {
@@ -168,13 +168,22 @@ export class DatabaseStorage implements IStorage {
   // Lead operations
   async getLeads(userId?: string, userRole?: string): Promise<Lead[]> {
     if (userRole === 'counselor' && userId) {
-      // Counselors can only see their assigned leads
+      // Counselors can only see their assigned leads that haven't been converted
       return await db.select().from(leads)
-        .where(eq(leads.counselorId, userId))
+        .where(and(
+          eq(leads.counselorId, userId),
+          not(exists(
+            db.select().from(students).where(eq(students.leadId, leads.id))
+          ))
+        ))
         .orderBy(desc(leads.createdAt));
     }
-    // Branch managers and admin staff can see all leads
-    return await db.select().from(leads).orderBy(desc(leads.createdAt));
+    // Branch managers and admin staff can see all leads that haven't been converted
+    return await db.select().from(leads)
+      .where(not(exists(
+        db.select().from(students).where(eq(students.leadId, leads.id))
+      )))
+      .orderBy(desc(leads.createdAt));
   }
 
   async getLead(id: number, userId?: string, userRole?: string): Promise<Lead | undefined> {
@@ -355,6 +364,7 @@ export class DatabaseStorage implements IStorage {
         intakeSemester: applications.intakeSemester,
         applicationFee: applications.applicationFee,
         status: applications.status,
+        notes: applications.notes,
         submissionDate: applications.submissionDate,
         decisionDate: applications.decisionDate,
         createdAt: applications.createdAt,
@@ -466,6 +476,7 @@ export class DatabaseStorage implements IStorage {
         depositAmount: admissions.depositAmount,
         depositDeadline: admissions.depositDeadline,
         visaStatus: admissions.visaStatus,
+        notes: admissions.notes,
         createdAt: admissions.createdAt,
         updatedAt: admissions.updatedAt
       })

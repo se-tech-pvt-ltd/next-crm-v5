@@ -12,6 +12,7 @@ import { ConvertToStudentModal } from './convert-to-student-modal';
 import { type Lead } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { User, Edit, Save, X, UserPlus } from 'lucide-react';
 
@@ -113,7 +114,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                     {lead.name}
                   </DialogTitle>
                   <Badge className={getStatusColor(lead.status)}>
-                    {lead.status}
+                    {formatStatus(lead.status)}
                   </Badge>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -258,7 +259,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                       ) : (
                         <div className="p-2 bg-gray-50 rounded border">
                           <Badge className={getStatusColor(lead.status)}>
-                            {lead.status}
+                            {formatStatus(lead.status)}
                           </Badge>
                         </div>
                       )}
