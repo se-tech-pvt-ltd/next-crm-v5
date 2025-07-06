@@ -44,6 +44,20 @@ export default function Settings() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Edit user state
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editUserData, setEditUserData] = useState({
+    email: '',
+    role: '',
+    branch: '',
+    phone: '',
+    dateOfBirth: '',
+    department: '',
+    picture: ''
+  });
+  const [isEditUploading, setIsEditUploading] = useState(false);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
+  
   const [config, setConfig] = useState<DropdownConfig>({
     leadStatuses: [
       { id: '1', value: 'new', label: 'New' },
@@ -220,6 +234,121 @@ export default function Settings() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleEditFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Image file must be less than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEditUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      
+      const response = await fetch('/api/upload/profile-picture', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setEditUserData(prev => ({ ...prev, picture: result.fileUrl }));
+        toast({
+          title: "Success",
+          description: "Profile picture uploaded successfully.",
+        });
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditUploading(false);
+    }
+  };
+
+  const startEditUser = (userId: string, userData: any) => {
+    setEditingUserId(userId);
+    setEditUserData({
+      email: userData.email || '',
+      role: userData.role || '',
+      branch: userData.branch || '',
+      phone: userData.phone || '',
+      dateOfBirth: userData.dateOfBirth || '',
+      department: userData.department || '',
+      picture: userData.picture || ''
+    });
+  };
+
+  const cancelEditUser = () => {
+    setEditingUserId(null);
+    setEditUserData({
+      email: '',
+      role: '',
+      branch: '',
+      phone: '',
+      dateOfBirth: '',
+      department: '',
+      picture: ''
+    });
+    if (editFileInputRef.current) {
+      editFileInputRef.current.value = '';
+    }
+  };
+
+  const saveEditUser = () => {
+    if (!editUserData.email) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!editUserData.branch) {
+      toast({
+        title: "Error",
+        description: "Please select a branch.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `User updated successfully.`,
+    });
+    
+    // Reset edit state
+    cancelEditUser();
   };
 
   const addUser = () => {
@@ -544,12 +673,12 @@ export default function Settings() {
                           ) : (
                             <>
                               <Upload className="h-4 w-4" />
-                              Upload Image
+                              Upload Profile Picture
                             </>
                           )}
                         </Button>
                         <span className="text-sm text-gray-500">
-                          or enter URL below (Max 5MB, JPG/PNG/GIF)
+                          Max 5MB, JPG/PNG/GIF
                         </span>
                       </div>
                       
@@ -562,22 +691,13 @@ export default function Settings() {
                         className="hidden"
                       />
                       
-                      {/* URL Input Option */}
-                      <Input
-                        id="user-picture"
-                        type="url"
-                        placeholder="https://example.com/profile.jpg"
-                        value={newUserPicture}
-                        onChange={(e) => setNewUserPicture(e.target.value)}
-                      />
-                      
                       {/* Preview */}
                       {newUserPicture && (
                         <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
                           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                             <img
                               src={newUserPicture}
-                              alt="Preview"
+                              alt="Profile preview"
                               className="w-full h-full object-cover"
                               onError={() => {
                                 toast({
@@ -589,8 +709,7 @@ export default function Settings() {
                             />
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium">Preview</p>
-                            <p className="text-xs text-gray-500 truncate">{newUserPicture}</p>
+                            <p className="text-sm font-medium">Profile picture uploaded</p>
                           </div>
                           <Button
                             type="button"
@@ -622,53 +741,235 @@ export default function Settings() {
                 <CardTitle>Current Users</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Users size={16} className="text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Admin User</p>
-                        <p className="text-sm text-gray-500">admin@studybridge.com</p>
-                      </div>
+                <div className="space-y-4">
+                  {[
+                    {
+                      id: 'admin1',
+                      name: 'Admin User',
+                      email: 'admin@studybridge.com',
+                      role: 'admin_staff',
+                      branch: 'branch_alpha',
+                      phone: '+1 (555) 123-4567',
+                      department: 'administration',
+                      dateOfBirth: '1985-03-15',
+                      picture: ''
+                    },
+                    {
+                      id: 'manager1',
+                      name: 'Sarah Johnson',
+                      email: 'manager@studybridge.com',
+                      role: 'branch_manager',
+                      branch: 'branch_alpha',
+                      phone: '+1 (555) 234-5678',
+                      department: 'operations',
+                      dateOfBirth: '1982-07-22',
+                      picture: ''
+                    },
+                    {
+                      id: 'counselor1',
+                      name: 'John Counselor',
+                      email: 'counselor@studybridge.com',
+                      role: 'counselor',
+                      branch: 'branch_beta',
+                      phone: '+1 (555) 345-6789',
+                      department: 'counseling',
+                      dateOfBirth: '1990-11-08',
+                      picture: ''
+                    }
+                  ].map((user) => (
+                    <div key={user.id} className="border rounded-lg p-4">
+                      {editingUserId === user.id ? (
+                        // Edit Mode
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-medium">Edit User Profile</h4>
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={saveEditUser}>
+                                <Save className="h-4 w-4 mr-1" />
+                                Save
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={cancelEditUser}>
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label>Email Address</Label>
+                              <Input
+                                value={editUserData.email}
+                                onChange={(e) => setEditUserData(prev => ({ ...prev, email: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label>Role</Label>
+                              <Select value={editUserData.role} onValueChange={(value) => setEditUserData(prev => ({ ...prev, role: value }))}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="counselor">Counselor</SelectItem>
+                                  <SelectItem value="branch_manager">Branch Manager</SelectItem>
+                                  <SelectItem value="admin_staff">Admin Staff</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Branch</Label>
+                              <Select value={editUserData.branch} onValueChange={(value) => setEditUserData(prev => ({ ...prev, branch: value }))}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="branch_alpha">Branch Alpha - New York, NY</SelectItem>
+                                  <SelectItem value="branch_beta">Branch Beta - Los Angeles, CA</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Phone Number</Label>
+                              <Input
+                                value={editUserData.phone}
+                                onChange={(e) => setEditUserData(prev => ({ ...prev, phone: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label>Date of Birth</Label>
+                              <Input
+                                type="date"
+                                value={editUserData.dateOfBirth}
+                                onChange={(e) => setEditUserData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label>Department</Label>
+                              <Select value={editUserData.department} onValueChange={(value) => setEditUserData(prev => ({ ...prev, department: value }))}>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="counseling">Counseling</SelectItem>
+                                  <SelectItem value="admissions">Admissions</SelectItem>
+                                  <SelectItem value="finance">Finance</SelectItem>
+                                  <SelectItem value="operations">Operations</SelectItem>
+                                  <SelectItem value="marketing">Marketing</SelectItem>
+                                  <SelectItem value="administration">Administration</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="md:col-span-2">
+                              <Label>Profile Picture</Label>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => editFileInputRef.current?.click()}
+                                    disabled={isEditUploading}
+                                    className="flex items-center gap-2"
+                                  >
+                                    {isEditUploading ? (
+                                      <>
+                                        <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                                        Uploading...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Upload className="h-4 w-4" />
+                                        Upload Profile Picture
+                                      </>
+                                    )}
+                                  </Button>
+                                  <span className="text-sm text-gray-500">
+                                    Max 5MB, JPG/PNG/GIF
+                                  </span>
+                                </div>
+                                
+                                <input
+                                  ref={editFileInputRef}
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleEditFileUpload}
+                                  className="hidden"
+                                />
+                                
+                                {editUserData.picture && (
+                                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                                      <img
+                                        src={editUserData.picture}
+                                        alt="Profile preview"
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium">Profile picture uploaded</p>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditUserData(prev => ({ ...prev, picture: '' }));
+                                        if (editFileInputRef.current) {
+                                          editFileInputRef.current.value = '';
+                                        }
+                                      }}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        // Display Mode
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                              {user.picture ? (
+                                <img
+                                  src={user.picture}
+                                  alt={user.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+                                  <Users size={20} className="text-blue-600" />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{user.name}</p>
+                              <p className="text-sm text-gray-500">{user.email}</p>
+                              {user.phone && (
+                                <p className="text-xs text-gray-400">{user.phone}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="secondary">
+                              {user.role === 'admin_staff' ? 'Admin Staff' : 
+                               user.role === 'branch_manager' ? 'Branch Manager' : 'Counselor'}
+                            </Badge>
+                            <Badge variant="outline">
+                              {user.branch === 'branch_alpha' ? 'Branch Alpha' : 'Branch Beta'}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditUser(user.id, user)}
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">Admin Staff</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <Users size={16} className="text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Branch Manager</p>
-                        <p className="text-sm text-gray-500">manager@studybridge.com</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">Branch Manager</Badge>
-                      <Badge variant="outline">Branch Alpha</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <Users size={16} className="text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">John Counselor</p>
-                        <p className="text-sm text-gray-500">counselor@studybridge.com</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">Counselor</Badge>
-                      <Badge variant="outline">Branch Beta</Badge>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
