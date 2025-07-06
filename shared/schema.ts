@@ -103,6 +103,9 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  country: z.union([z.string(), z.array(z.string())]).optional(),
+  program: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
 export const insertStudentSchema = createInsertSchema(students).omit({
