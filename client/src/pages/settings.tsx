@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3, Building } from 'lucide-react';
+import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3, Building, Upload, Image } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 
 interface DropdownOption {
   id: string;
@@ -40,6 +41,8 @@ export default function Settings() {
   const [newUserDateOfBirth, setNewUserDateOfBirth] = useState('');
   const [newUserDepartment, setNewUserDepartment] = useState('');
   const [newUserPhone, setNewUserPhone] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [config, setConfig] = useState<DropdownConfig>({
     leadStatuses: [
@@ -161,6 +164,64 @@ export default function Settings() {
     });
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Image file must be less than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      
+      const response = await fetch('/api/upload/profile-picture', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setNewUserPicture(result.fileUrl);
+        toast({
+          title: "Success",
+          description: "Profile picture uploaded successfully.",
+        });
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const addUser = () => {
     if (!newUserEmail) {
       toast({
@@ -193,6 +254,11 @@ export default function Settings() {
     setNewUserDateOfBirth('');
     setNewUserDepartment('');
     setNewUserPhone('');
+    
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const renderOptionCategory = (
@@ -459,14 +525,89 @@ export default function Settings() {
                     </Select>
                   </div>
                   <div className="md:col-span-3">
-                    <Label htmlFor="user-picture">Profile Picture URL</Label>
-                    <Input
-                      id="user-picture"
-                      type="url"
-                      placeholder="https://example.com/profile.jpg"
-                      value={newUserPicture}
-                      onChange={(e) => setNewUserPicture(e.target.value)}
-                    />
+                    <Label htmlFor="user-picture">Profile Picture</Label>
+                    <div className="space-y-3">
+                      {/* File Upload Option */}
+                      <div className="flex items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="flex items-center gap-2"
+                        >
+                          {isUploading ? (
+                            <>
+                              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="h-4 w-4" />
+                              Upload Image
+                            </>
+                          )}
+                        </Button>
+                        <span className="text-sm text-gray-500">
+                          or enter URL below (Max 5MB, JPG/PNG/GIF)
+                        </span>
+                      </div>
+                      
+                      {/* Hidden File Input */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      
+                      {/* URL Input Option */}
+                      <Input
+                        id="user-picture"
+                        type="url"
+                        placeholder="https://example.com/profile.jpg"
+                        value={newUserPicture}
+                        onChange={(e) => setNewUserPicture(e.target.value)}
+                      />
+                      
+                      {/* Preview */}
+                      {newUserPicture && (
+                        <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                            <img
+                              src={newUserPicture}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                              onError={() => {
+                                toast({
+                                  title: "Image Error",
+                                  description: "Failed to load image preview.",
+                                  variant: "destructive",
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">Preview</p>
+                            <p className="text-xs text-gray-500 truncate">{newUserPicture}</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setNewUserPicture('');
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = '';
+                              }
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <Button onClick={addUser} className="w-full md:w-auto">
