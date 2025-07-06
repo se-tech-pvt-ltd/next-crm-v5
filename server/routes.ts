@@ -7,8 +7,8 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Mock current user for demonstration (in production, this would come from authentication)
   const getCurrentUser = () => ({
-    id: 'counselor1',
-    role: 'counselor' // Change this to test different roles: 'counselor', 'branch_manager', 'admin_staff'
+    id: 'admin1',
+    role: 'admin_staff' // Change this to test different roles: 'counselor', 'branch_manager', 'admin_staff'
   });
 
   // Lead routes

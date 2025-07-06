@@ -105,6 +105,11 @@ Changelog:
 - July 06, 2025. Improved modals with status dropdowns and streamlined action buttons
 - July 06, 2025. Combined Profile and Activity tabs for activity-focused student management
 - July 06, 2025. Restructured student modal to two-column layout with activity sidebar for enhanced counselor workflow
+- July 06, 2025. Enhanced settings with three-tab interface: Field Management, User Management, and Branch Management
+- July 06, 2025. Fixed role-based access control issue causing leads to not display - changed mock user to admin_staff role
+- July 06, 2025. Implemented functional Edit Profile for students with save/cancel actions
+- July 06, 2025. Updated lead details modal to match student modal design with two-column layout and activity tracking
+- July 06, 2025. Made branch selection mandatory for user management with dropdown options
 ```
 
 ## User Preferences
