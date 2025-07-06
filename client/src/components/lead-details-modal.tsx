@@ -287,15 +287,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
           <div className="flex-1 overflow-y-auto p-6 pt-20">
-            <DialogHeader className="pb-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <DialogTitle className="text-xl font-semibold">
-                    {lead.name}
-                  </DialogTitle>
-                </div>
-              </div>
-            </DialogHeader>
+            {/* Lead Name at the top */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-gray-900">{lead.name}</h1>
+            </div>
 
             <div className="space-y-6">
               {/* Lead Information */}
@@ -329,6 +324,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Lead ID at the top of the card */}
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-blue-700">Lead ID</span>
+                      <span className="text-sm font-mono text-blue-900">#{lead.id}</span>
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
