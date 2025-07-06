@@ -14,11 +14,12 @@ import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User } from 'lucide-react';
+import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [countryFilter, setCountryFilter] = useState('all');
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
@@ -51,9 +52,20 @@ export default function Students() {
     },
   });
 
-  const filteredStudents = students?.filter(student => 
-    statusFilter === 'all' || student.status === statusFilter
-  ) || [];
+  const filteredStudents = students?.filter(student => {
+    const statusMatch = statusFilter === 'all' || student.status === statusFilter;
+    const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
+    return statusMatch && countryMatch;
+  }) || [];
+
+  // Get unique countries for filter dropdown
+  const uniqueCountries = students ? 
+    students.reduce((countries: string[], student) => {
+      if (student.targetCountry && !countries.includes(student.targetCountry)) {
+        countries.push(student.targetCountry);
+      }
+      return countries;
+    }, []) : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -97,12 +109,16 @@ export default function Students() {
         {/* Header Actions */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filters:</span>
+            </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Students</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="applied">Applied</SelectItem>
                 <SelectItem value="admitted">Admitted</SelectItem>
@@ -110,7 +126,20 @@ export default function Students() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <HelpTooltip content="Filter students by their current status. Active students are those currently working on applications." />
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {uniqueCountries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <HelpTooltip content="Filter students by status and target country. Active students are those currently working on applications." />
           </div>
           
           <Button onClick={() => setIsAddStudentModalOpen(true)}>
@@ -123,7 +152,10 @@ export default function Students() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="w-4 h-4 text-gray-500" />
+                Total Students
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -134,7 +166,10 @@ export default function Students() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Active</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-green-500" />
+                Active
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -145,7 +180,10 @@ export default function Students() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Applied</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Target className="w-4 h-4 text-blue-500" />
+                Applied
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
@@ -156,7 +194,10 @@ export default function Students() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Admitted</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-purple-500" />
+                Admitted
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">
@@ -286,15 +327,6 @@ export default function Students() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleCreateApplication(student.id)}>
                               Create Application
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateStudentMutation.mutate({ id: student.id, data: { status: 'applied' } })}>
-                              Mark as Applied
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateStudentMutation.mutate({ id: student.id, data: { status: 'admitted' } })}>
-                              Mark as Admitted
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateStudentMutation.mutate({ id: student.id, data: { status: 'inactive' } })}>
-                              Mark as Inactive
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

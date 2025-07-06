@@ -10,11 +10,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal';
 import { Admission, Student } from '@shared/schema';
-import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle } from 'lucide-react';
+import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
+  const [universityFilter, setUniversityFilter] = useState('all');
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -26,9 +27,20 @@ export default function Admissions() {
     queryKey: ['/api/students'],
   });
 
-  const filteredAdmissions = admissions?.filter(admission => 
-    decisionFilter === 'all' || admission.decision === decisionFilter
-  ) || [];
+  const filteredAdmissions = admissions?.filter(admission => {
+    const decisionMatch = decisionFilter === 'all' || admission.decision === decisionFilter;
+    const universityMatch = universityFilter === 'all' || admission.university === universityFilter;
+    return decisionMatch && universityMatch;
+  }) || [];
+
+  // Get unique universities for filter dropdown
+  const uniqueUniversities = admissions ? 
+    admissions.reduce((universities: string[], admission) => {
+      if (admission.university && !universities.includes(admission.university)) {
+        universities.push(admission.university);
+      }
+      return universities;
+    }, []) : [];
 
   const getStudentName = (studentId: number) => {
     const student = students?.find(s => s.id === studentId);
@@ -80,6 +92,10 @@ export default function Admissions() {
         {/* Header Actions */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filters:</span>
+            </div>
             <Select value={decisionFilter} onValueChange={setDecisionFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by decision" />
@@ -92,7 +108,17 @@ export default function Admissions() {
                 <SelectItem value="conditional">Conditional</SelectItem>
               </SelectContent>
             </Select>
-            <HelpTooltip content="Filter admissions by decision type. Track acceptance rates and manage next steps for students." />
+            <Select value={universityFilter} onValueChange={setUniversityFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by university" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Universities</SelectItem>
+                {uniqueUniversities.map((university) => (
+                  <SelectItem key={university} value={university}>{university}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <Button>
@@ -105,7 +131,10 @@ export default function Admissions() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Admissions</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <School className="w-4 h-4 mr-2 text-gray-500" />
+                Total Admissions
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -116,7 +145,10 @@ export default function Admissions() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                Accepted
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -127,7 +159,10 @@ export default function Admissions() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Waitlisted</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <Clock className="w-4 h-4 mr-2 text-yellow-500" />
+                Waitlisted
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
@@ -138,7 +173,10 @@ export default function Admissions() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <Trophy className="w-4 h-4 mr-2 text-purple-500" />
+                Success Rate
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">
@@ -269,12 +307,6 @@ export default function Admissions() {
                               }}
                             >
                               View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              Update Visa Status
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              Manage Deposit
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

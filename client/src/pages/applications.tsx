@@ -14,11 +14,12 @@ import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Application, Student } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, Calendar, DollarSign, School } from 'lucide-react';
+import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [universityFilter, setUniversityFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -56,9 +57,20 @@ export default function Applications() {
     },
   });
 
-  const filteredApplications = applications?.filter(app => 
-    statusFilter === 'all' || app.status === statusFilter
-  ) || [];
+  const filteredApplications = applications?.filter(app => {
+    const statusMatch = statusFilter === 'all' || app.status === statusFilter;
+    const universityMatch = universityFilter === 'all' || app.university === universityFilter;
+    return statusMatch && universityMatch;
+  }) || [];
+
+  // Get unique universities for filter dropdown
+  const uniqueUniversities = applications ? 
+    applications.reduce((universities: string[], app) => {
+      if (app.university && !universities.includes(app.university)) {
+        universities.push(app.university);
+      }
+      return universities;
+    }, []) : [];
 
   const getStudentName = (studentId: number) => {
     const student = students?.find(s => s.id === studentId);
@@ -99,12 +111,16 @@ export default function Applications() {
         {/* Header Actions */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filters:</span>
+            </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Applications</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="submitted">Submitted</SelectItem>
                 <SelectItem value="under-review">Under Review</SelectItem>
@@ -113,7 +129,17 @@ export default function Applications() {
                 <SelectItem value="waitlisted">Waitlisted</SelectItem>
               </SelectContent>
             </Select>
-            <HelpTooltip content="Filter applications by status. Track progress from draft to final decision." />
+            <Select value={universityFilter} onValueChange={setUniversityFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by university" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Universities</SelectItem>
+                {uniqueUniversities.map((university) => (
+                  <SelectItem key={university} value={university}>{university}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <Button onClick={() => setIsAddApplicationModalOpen(true)}>
@@ -126,7 +152,10 @@ export default function Applications() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <FileText className="w-4 h-4 mr-2 text-gray-500" />
+                Total Applications
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -137,7 +166,10 @@ export default function Applications() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Submitted</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
+                Submitted
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
@@ -148,7 +180,10 @@ export default function Applications() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Under Review</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <Clock className="w-4 h-4 mr-2 text-yellow-500" />
+                Under Review
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
@@ -159,7 +194,10 @@ export default function Applications() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <AlertCircle className="w-4 h-4 mr-2 text-green-500" />
+                Accepted
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -285,18 +323,6 @@ export default function Applications() {
                               }}
                             >
                               View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'submitted' } })}>
-                              Mark as Submitted
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'under-review' } })}>
-                              Mark Under Review
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'accepted' } })}>
-                              Mark as Accepted
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'rejected' } })}>
-                              Mark as Rejected
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

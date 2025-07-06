@@ -14,12 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
 import { Lead } from '@shared/schema';
-import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap } from 'lucide-react';
+import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Leads() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
@@ -87,9 +88,20 @@ export default function Leads() {
     },
   });
 
-  const filteredLeads = leads?.filter(lead => 
-    statusFilter === 'all' || lead.status === statusFilter
-  ) || [];
+  const filteredLeads = leads?.filter(lead => {
+    const statusMatch = statusFilter === 'all' || lead.status === statusFilter;
+    const sourceMatch = sourceFilter === 'all' || lead.source === sourceFilter;
+    return statusMatch && sourceMatch;
+  }) || [];
+
+  // Get unique sources for filter dropdown
+  const uniqueSources = leads ? 
+    leads.reduce((sources: string[], lead) => {
+      if (lead.source && !sources.includes(lead.source)) {
+        sources.push(lead.source);
+      }
+      return sources;
+    }, []) : [];;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -123,12 +135,16 @@ export default function Leads() {
         {/* Header Actions */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filters:</span>
+            </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Leads</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="new">New</SelectItem>
                 <SelectItem value="contacted">Contacted</SelectItem>
                 <SelectItem value="qualified">Qualified</SelectItem>
@@ -136,7 +152,20 @@ export default function Leads() {
                 <SelectItem value="lost">Lost</SelectItem>
               </SelectContent>
             </Select>
-            <HelpTooltip content="Use filters to view leads by status. Convert qualified leads to students when they're ready to proceed." />
+            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                {uniqueSources.map((source) => (
+                  <SelectItem key={source} value={source}>
+                    {source}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <HelpTooltip content="Use filters to view leads by status and source. Convert qualified leads to students when they're ready to proceed." />
           </div>
           
           <Button onClick={() => setIsAddModalOpen(true)}>
@@ -149,7 +178,10 @@ export default function Leads() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="w-4 h-4 text-gray-500" />
+                Total Leads
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -160,7 +192,10 @@ export default function Leads() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">New Leads</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <UserPlus className="w-4 h-4 text-blue-500" />
+                New Leads
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
@@ -171,7 +206,10 @@ export default function Leads() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Qualified</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Target className="w-4 h-4 text-green-500" />
+                Qualified
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -182,7 +220,10 @@ export default function Leads() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Converted</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-purple-500" />
+                Converted
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">
@@ -316,25 +357,10 @@ export default function Leads() {
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => updateLeadMutation.mutate({ id: lead.id, data: { status: 'contacted' } })}
-                            >
-                              Mark as Contacted
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateLeadMutation.mutate({ id: lead.id, data: { status: 'qualified' } })}
-                            >
-                              Mark as Qualified
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
                               onClick={() => convertToStudentMutation.mutate(lead)}
                               disabled={convertToStudentMutation.isPending}
                             >
                               Convert to Student
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateLeadMutation.mutate({ id: lead.id, data: { status: 'lost' } })}
-                            >
-                              Mark as Lost
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
