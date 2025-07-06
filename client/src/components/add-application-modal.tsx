@@ -43,7 +43,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       status: 'draft',
       submissionDate: null,
       decisionDate: null,
-      notes: '',
+
     },
   });
 
@@ -54,6 +54,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+      if (studentId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${studentId}`] });
+      }
       toast({
         title: "Success",
         description: "Application has been created successfully.",
@@ -288,24 +291,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Additional notes about the application..."
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="flex justify-end space-x-3 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

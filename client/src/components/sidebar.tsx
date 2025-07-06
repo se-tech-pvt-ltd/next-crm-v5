@@ -14,25 +14,26 @@ import { Badge } from '@/components/ui/badge';
 export function Sidebar() {
   const [location] = useLocation();
 
-  const { data: leads } = useQuery({
+  const { data: leadsData } = useQuery({
     queryKey: ['/api/leads'],
-    select: (data) => data?.filter((lead: any) => lead.status === 'new')?.length || 0,
   });
 
-  const { data: students } = useQuery({
+  const { data: studentsData } = useQuery({
     queryKey: ['/api/students'],
-    select: (data) => data?.length || 0,
   });
 
-  const { data: applications } = useQuery({
+  const { data: applicationsData } = useQuery({
     queryKey: ['/api/applications'],
-    select: (data) => data?.length || 0,
   });
 
-  const { data: admissions } = useQuery({
+  const { data: admissionsData } = useQuery({
     queryKey: ['/api/admissions'],
-    select: (data) => data?.filter((admission: any) => admission.decision === 'accepted')?.length || 0,
   });
+
+  const newLeadsCount = Array.isArray(leadsData) ? leadsData.filter((lead: any) => lead.status === 'new')?.length || 0 : 0;
+  const studentsCount = Array.isArray(studentsData) ? studentsData.length : 0;
+  const applicationsCount = Array.isArray(applicationsData) ? applicationsData.length : 0;
+  const acceptedAdmissionsCount = Array.isArray(admissionsData) ? admissionsData.filter((admission: any) => admission.decision === 'accepted')?.length || 0 : 0;
 
   const navItems = [
     { 
@@ -45,28 +46,28 @@ export function Sidebar() {
       path: '/leads', 
       label: 'Leads', 
       icon: Users,
-      count: leads,
+      count: newLeadsCount,
       countColor: 'bg-emerald-500'
     },
     { 
       path: '/students', 
       label: 'Students', 
       icon: GraduationCap,
-      count: students,
+      count: studentsCount,
       countColor: 'bg-purple'
     },
     { 
       path: '/applications', 
       label: 'Applications', 
       icon: GraduationCap,
-      count: applications,
+      count: applicationsCount,
       countColor: 'bg-amber-500'
     },
     { 
       path: '/admissions', 
       label: 'Admissions', 
       icon: Trophy,
-      count: admissions,
+      count: acceptedAdmissionsCount,
       countColor: 'bg-emerald-500'
     },
     { 
@@ -132,9 +133,9 @@ export function Sidebar() {
             <p className="text-sm font-medium text-gray-900">Sarah Johnson</p>
             <p className="text-xs text-gray-500">Senior Consultant</p>
           </div>
-          <button className="text-gray-400 hover:text-gray-600">
+          <Link href="/settings" className="text-gray-400 hover:text-gray-600">
             <Settings size={16} />
-          </button>
+          </Link>
         </div>
       </div>
     </div>

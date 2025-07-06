@@ -249,7 +249,6 @@ export class DatabaseStorage implements IStorage {
         status: applications.status,
         submissionDate: applications.submissionDate,
         decisionDate: applications.decisionDate,
-        notes: applications.notes,
         createdAt: applications.createdAt,
         updatedAt: applications.updatedAt
       })
@@ -330,7 +329,6 @@ export class DatabaseStorage implements IStorage {
         depositAmount: admissions.depositAmount,
         depositDeadline: admissions.depositDeadline,
         visaStatus: admissions.visaStatus,
-        notes: admissions.notes,
         createdAt: admissions.createdAt,
         updatedAt: admissions.updatedAt
       })

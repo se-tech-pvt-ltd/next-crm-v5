@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { Plus, X, Save, Settings as SettingsIcon } from 'lucide-react';
+import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3 } from 'lucide-react';
 
 interface DropdownOption {
   id: string;
@@ -30,6 +32,10 @@ interface DropdownConfig {
 
 export default function Settings() {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('fields');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState('counselor');
+  const [newUserBranch, setNewUserBranch] = useState('');
   
   const [config, setConfig] = useState<DropdownConfig>({
     leadStatuses: [
@@ -41,90 +47,79 @@ export default function Settings() {
     ],
     studentStatuses: [
       { id: '1', value: 'active', label: 'Active' },
-      { id: '2', value: 'applied', label: 'Applied' },
-      { id: '3', value: 'admitted', label: 'Admitted' },
-      { id: '4', value: 'enrolled', label: 'Enrolled' },
-      { id: '5', value: 'inactive', label: 'Inactive' },
+      { id: '2', value: 'application_prep', label: 'Application Prep' },
+      { id: '3', value: 'applied', label: 'Applied' },
+      { id: '4', value: 'admitted', label: 'Admitted' },
+      { id: '5', value: 'enrolled', label: 'Enrolled' },
     ],
     applicationStatuses: [
       { id: '1', value: 'draft', label: 'Draft' },
       { id: '2', value: 'submitted', label: 'Submitted' },
-      { id: '3', value: 'under-review', label: 'Under Review' },
-      { id: '4', value: 'accepted', label: 'Accepted' },
-      { id: '5', value: 'rejected', label: 'Rejected' },
-      { id: '6', value: 'waitlisted', label: 'Waitlisted' },
+      { id: '3', value: 'under_review', label: 'Under Review' },
+      { id: '4', value: 'decision_pending', label: 'Decision Pending' },
+      { id: '5', value: 'accepted', label: 'Accepted' },
+      { id: '6', value: 'rejected', label: 'Rejected' },
     ],
     countries: [
-      { id: '1', value: 'USA', label: 'United States' },
-      { id: '2', value: 'Canada', label: 'Canada' },
-      { id: '3', value: 'UK', label: 'United Kingdom' },
-      { id: '4', value: 'Australia', label: 'Australia' },
-      { id: '5', value: 'Germany', label: 'Germany' },
-      { id: '6', value: 'France', label: 'France' },
-      { id: '7', value: 'Netherlands', label: 'Netherlands' },
-      { id: '8', value: 'New Zealand', label: 'New Zealand' },
+      { id: '1', value: 'us', label: 'United States' },
+      { id: '2', value: 'uk', label: 'United Kingdom' },
+      { id: '3', value: 'canada', label: 'Canada' },
+      { id: '4', value: 'australia', label: 'Australia' },
+      { id: '5', value: 'germany', label: 'Germany' },
     ],
     leadSources: [
       { id: '1', value: 'website', label: 'Website' },
       { id: '2', value: 'referral', label: 'Referral' },
-      { id: '3', value: 'social-media', label: 'Social Media' },
-      { id: '4', value: 'advertisement', label: 'Advertisement' },
-      { id: '5', value: 'event', label: 'Event' },
+      { id: '3', value: 'social_media', label: 'Social Media' },
+      { id: '4', value: 'education_fair', label: 'Education Fair' },
+      { id: '5', value: 'partner_agent', label: 'Partner Agent' },
     ],
     degreeTypes: [
-      { id: '1', value: 'Bachelor\'s', label: 'Bachelor\'s' },
-      { id: '2', value: 'Master\'s', label: 'Master\'s' },
-      { id: '3', value: 'PhD', label: 'PhD' },
-      { id: '4', value: 'Diploma', label: 'Diploma' },
-      { id: '5', value: 'Certificate', label: 'Certificate' },
+      { id: '1', value: 'bachelors', label: 'Bachelor\'s' },
+      { id: '2', value: 'masters', label: 'Master\'s' },
+      { id: '3', value: 'phd', label: 'PhD' },
+      { id: '4', value: 'diploma', label: 'Diploma' },
+      { id: '5', value: 'certificate', label: 'Certificate' },
     ],
     intakeSemesters: [
-      { id: '1', value: 'Fall', label: 'Fall' },
-      { id: '2', value: 'Spring', label: 'Spring' },
-      { id: '3', value: 'Summer', label: 'Summer' },
-      { id: '4', value: 'Winter', label: 'Winter' },
+      { id: '1', value: 'fall', label: 'Fall' },
+      { id: '2', value: 'spring', label: 'Spring' },
+      { id: '3', value: 'summer', label: 'Summer' },
+      { id: '4', value: 'winter', label: 'Winter' },
     ],
     englishProficiency: [
-      { id: '1', value: 'IELTS 6.0', label: 'IELTS 6.0' },
-      { id: '2', value: 'IELTS 6.5', label: 'IELTS 6.5' },
-      { id: '3', value: 'IELTS 7.0', label: 'IELTS 7.0' },
-      { id: '4', value: 'IELTS 7.5', label: 'IELTS 7.5' },
-      { id: '5', value: 'IELTS 8.0+', label: 'IELTS 8.0+' },
-      { id: '6', value: 'TOEFL 80', label: 'TOEFL 80' },
-      { id: '7', value: 'TOEFL 90', label: 'TOEFL 90' },
-      { id: '8', value: 'TOEFL 100', label: 'TOEFL 100' },
-      { id: '9', value: 'TOEFL 110+', label: 'TOEFL 110+' },
-      { id: '10', value: 'Native', label: 'Native Speaker' },
-      { id: '11', value: 'Not tested', label: 'Not Yet Tested' },
+      { id: '1', value: 'ielts_6_5', label: 'IELTS 6.5+' },
+      { id: '2', value: 'toefl_90', label: 'TOEFL 90+' },
+      { id: '3', value: 'pte_65', label: 'PTE 65+' },
+      { id: '4', value: 'duolingo_115', label: 'Duolingo 115+' },
+      { id: '5', value: 'native', label: 'Native Speaker' },
     ],
     budgetRanges: [
-      { id: '1', value: '$10,000 - $20,000', label: '$10,000 - $20,000' },
-      { id: '2', value: '$20,000 - $30,000', label: '$20,000 - $30,000' },
-      { id: '3', value: '$30,000 - $50,000', label: '$30,000 - $50,000' },
-      { id: '4', value: '$50,000 - $70,000', label: '$50,000 - $70,000' },
-      { id: '5', value: '$70,000+', label: '$70,000+' },
-      { id: '6', value: 'Looking for scholarships', label: 'Looking for scholarships' },
+      { id: '1', value: 'under_20k', label: 'Under $20,000' },
+      { id: '2', value: '20k_40k', label: '$20,000 - $40,000' },
+      { id: '3', value: '40k_60k', label: '$40,000 - $60,000' },
+      { id: '4', value: '60k_80k', label: '$60,000 - $80,000' },
+      { id: '5', value: 'over_80k', label: 'Over $80,000' },
     ],
   });
 
   const [newOptionInputs, setNewOptionInputs] = useState<Record<string, { value: string; label: string }>>({});
 
   const addOption = (category: keyof DropdownConfig) => {
-    const input = newOptionInputs[category];
-    if (!input?.value || !input?.label) {
+    const newOption: DropdownOption = {
+      id: Date.now().toString(),
+      value: newOptionInputs[category]?.value || '',
+      label: newOptionInputs[category]?.label || '',
+    };
+
+    if (!newOption.value || !newOption.label) {
       toast({
         title: "Error",
-        description: "Please enter both value and label for the new option.",
+        description: "Both value and label are required.",
         variant: "destructive",
       });
       return;
     }
-
-    const newOption: DropdownOption = {
-      id: Date.now().toString(),
-      value: input.value,
-      label: input.label,
-    };
 
     setConfig(prev => ({
       ...prev,
@@ -155,12 +150,31 @@ export default function Settings() {
   };
 
   const saveConfiguration = () => {
-    // In a real application, this would save to a backend
     localStorage.setItem('crmDropdownConfig', JSON.stringify(config));
     toast({
       title: "Success",
       description: "Configuration saved successfully.",
     });
+  };
+
+  const addUser = () => {
+    if (!newUserEmail) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `User ${newUserEmail} has been invited with ${newUserRole} role.`,
+    });
+    
+    setNewUserEmail('');
+    setNewUserRole('counselor');
+    setNewUserBranch('');
   };
 
   const renderOptionCategory = (
@@ -182,7 +196,6 @@ export default function Settings() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Existing Options */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Current Options</Label>
           <div className="flex flex-wrap gap-2">
@@ -192,7 +205,7 @@ export default function Settings() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-4 w-4 p-0 hover:bg-red-100"
+                  className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
                   onClick={() => removeOption(category, option.id)}
                 >
                   <X className="h-3 w-3" />
@@ -204,15 +217,14 @@ export default function Settings() {
 
         <Separator />
 
-        {/* Add New Option */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Add New Option</Label>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor={`${category}-value`} className="text-xs">Value</Label>
+              <Label htmlFor={`${category}-value`} className="text-xs">System Value</Label>
               <Input
                 id={`${category}-value`}
-                placeholder="Enter value"
+                placeholder="Enter system value"
                 value={newOptionInputs[category]?.value || ''}
                 onChange={(e) =>
                   setNewOptionInputs(prev => ({
@@ -253,85 +265,205 @@ export default function Settings() {
       helpText="Configure dropdown options and system settings for your CRM. Changes are saved locally and will apply to all forms."
     >
       <div className="space-y-6">
-        {/* Save Configuration */}
-        <div className="flex justify-end">
-          <Button onClick={saveConfiguration}>
-            <Save className="w-4 h-4 mr-2" />
-            Save Configuration
-          </Button>
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="fields" className="flex items-center space-x-2">
+              <Edit3 className="w-4 h-4" />
+              <span>Field Management</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>User Management</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Configuration Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderOptionCategory(
-            "Lead Statuses",
-            "leadStatuses",
-            "Status options for lead management"
-          )}
-
-          {renderOptionCategory(
-            "Student Statuses",
-            "studentStatuses",
-            "Status options for student tracking"
-          )}
-
-          {renderOptionCategory(
-            "Application Statuses",
-            "applicationStatuses",
-            "Status options for application progress"
-          )}
-
-          {renderOptionCategory(
-            "Countries",
-            "countries",
-            "Available destination countries"
-          )}
-
-          {renderOptionCategory(
-            "Lead Sources",
-            "leadSources",
-            "Sources where leads can come from"
-          )}
-
-          {renderOptionCategory(
-            "Degree Types",
-            "degreeTypes",
-            "Available degree levels"
-          )}
-
-          {renderOptionCategory(
-            "Intake Semesters",
-            "intakeSemesters",
-            "University intake periods"
-          )}
-
-          {renderOptionCategory(
-            "English Proficiency",
-            "englishProficiency",
-            "English test scores and levels"
-          )}
-
-          {renderOptionCategory(
-            "Budget Ranges",
-            "budgetRanges",
-            "Student budget categories"
-          )}
-        </div>
-
-        {/* Information Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Configuration Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>• Changes to dropdown options will be reflected in all forms throughout the system.</p>
-              <p>• Configuration is saved locally in your browser's storage.</p>
-              <p>• For a multi-user environment, these settings would typically be managed by an administrator.</p>
-              <p>• Removing an option that's currently in use may affect existing records.</p>
+          <TabsContent value="fields" className="space-y-6">
+            <div className="flex justify-end">
+              <Button onClick={saveConfiguration}>
+                <Save className="w-4 h-4 mr-2" />
+                Save Configuration
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {renderOptionCategory(
+                "Lead Statuses",
+                "leadStatuses",
+                "Status options for lead management"
+              )}
+
+              {renderOptionCategory(
+                "Student Statuses",
+                "studentStatuses",
+                "Status options for student tracking"
+              )}
+
+              {renderOptionCategory(
+                "Application Statuses",
+                "applicationStatuses",
+                "Status options for application progress"
+              )}
+
+              {renderOptionCategory(
+                "Countries",
+                "countries",
+                "Available destination countries"
+              )}
+
+              {renderOptionCategory(
+                "Lead Sources",
+                "leadSources",
+                "Sources where leads can come from"
+              )}
+
+              {renderOptionCategory(
+                "Degree Types",
+                "degreeTypes",
+                "Available degree levels"
+              )}
+
+              {renderOptionCategory(
+                "Intake Semesters",
+                "intakeSemesters",
+                "University intake periods"
+              )}
+
+              {renderOptionCategory(
+                "English Proficiency",
+                "englishProficiency",
+                "English test scores and levels"
+              )}
+
+              {renderOptionCategory(
+                "Budget Ranges",
+                "budgetRanges",
+                "Student budget categories"
+              )}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuration Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm text-gray-600">
+                  <p>• Changes to dropdown options will be reflected in all forms throughout the system.</p>
+                  <p>• Configuration is saved locally in your browser's storage.</p>
+                  <p>• For a multi-user environment, these settings would typically be managed by an administrator.</p>
+                  <p>• Removing an option that's currently in use may affect existing records.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="w-4 h-4 mr-2" />
+                  Add New User
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="user-email">Email Address *</Label>
+                    <Input
+                      id="user-email"
+                      type="email"
+                      placeholder="user@example.com"
+                      value={newUserEmail}
+                      onChange={(e) => setNewUserEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-role">Role *</Label>
+                    <Select value={newUserRole} onValueChange={setNewUserRole}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="counselor">Counselor</SelectItem>
+                        <SelectItem value="branch_manager">Branch Manager</SelectItem>
+                        <SelectItem value="admin_staff">Admin Staff</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="user-branch">Branch (Optional)</Label>
+                    <Input
+                      id="user-branch"
+                      placeholder="Branch ID or name"
+                      value={newUserBranch}
+                      onChange={(e) => setNewUserBranch(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button onClick={addUser} className="w-full md:w-auto">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Invite User
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Users size={16} className="text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Sarah Johnson</p>
+                        <p className="text-sm text-gray-500">sarah@company.com</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary">Admin Staff</Badge>
+                      <Badge variant="outline">Branch A</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <Users size={16} className="text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Mike Chen</p>
+                        <p className="text-sm text-gray-500">mike@company.com</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary">Branch Manager</Badge>
+                      <Badge variant="outline">Branch B</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Users size={16} className="text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Alex Rodriguez</p>
+                        <p className="text-sm text-gray-500">alex@company.com</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary">Counselor</Badge>
+                      <Badge variant="outline">Branch A</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

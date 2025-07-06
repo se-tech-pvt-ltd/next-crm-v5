@@ -48,7 +48,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       depositRequired: false,
       depositAmount: '',
       visaStatus: 'pending',
-      notes: '',
+
       decisionDate: null,
       depositDeadline: null
     }
@@ -327,24 +327,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             />
 
             {/* Notes */}
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Additional notes..."
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel

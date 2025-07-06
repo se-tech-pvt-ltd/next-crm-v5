@@ -17,14 +17,16 @@ import {
   Phone, 
   Calendar, 
   MapPin, 
-  GraduationCap, 
+  GraduationCap,
+  Edit, 
   Trophy,
   DollarSign,
-  Edit,
   Plus
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { AddApplicationModal } from './add-application-modal';
+import { ApplicationDetailsModal } from './application-details-modal';
+import { AdmissionDetailsModal } from './admission-details-modal';
 
 interface StudentProfileModalProps {
   open: boolean;
@@ -37,6 +39,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const queryClient = useQueryClient();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isApplicationDetailsOpen, setIsApplicationDetailsOpen] = useState(false);
+  const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+  const [isAdmissionDetailsOpen, setIsAdmissionDetailsOpen] = useState(false);
 
   const { data: student } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
@@ -135,6 +141,20 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Application
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    // TODO: Implement edit profile functionality
+                    toast({
+                      title: "Coming Soon",
+                      description: "Edit profile functionality will be implemented soon.",
+                    });
+                  }}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
                 </Button>
               </div>
             </div>
@@ -264,17 +284,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     </Button>
                   </div>
 
-                  {/* Notes */}
-                  {student.notes && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Notes</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-700">{student.notes}</p>
-                      </CardContent>
-                    </Card>
-                  )}
+
                 </div>
 
                 {/* Right Column - Activity */}
@@ -304,7 +314,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               ) : (
                 <div className="grid gap-4">
                   {applications?.map((application) => (
-                    <Card key={application.id} className="hover:shadow-md transition-shadow">
+                    <Card 
+                      key={application.id} 
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => {
+                        setSelectedApplication(application);
+                        setIsApplicationDetailsOpen(true);
+                      }}
+                    >
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -352,7 +369,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               ) : (
                 <div className="grid gap-4">
                   {admissions?.map((admission) => (
-                    <Card key={admission.id} className="hover:shadow-md transition-shadow">
+                    <Card 
+                      key={admission.id} 
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => {
+                        setSelectedAdmission(admission);
+                        setIsAdmissionDetailsOpen(true);
+                      }}
+                    >
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -402,6 +426,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
         open={isAddApplicationOpen}
         onOpenChange={setIsAddApplicationOpen}
         studentId={studentId || undefined}
+      />
+
+      <ApplicationDetailsModal
+        open={isApplicationDetailsOpen}
+        onOpenChange={setIsApplicationDetailsOpen}
+        application={selectedApplication}
+      />
+
+      <AdmissionDetailsModal
+        open={isAdmissionDetailsOpen}
+        onOpenChange={setIsAdmissionDetailsOpen}
+        admission={selectedAdmission}
       />
     </>
   );
