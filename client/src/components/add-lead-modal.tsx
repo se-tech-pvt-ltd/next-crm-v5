@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,15 @@ interface AddLeadModalProps {
 export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get existing leads and students to prevent duplicates
+  const { data: existingLeads } = useQuery({
+    queryKey: ['/api/leads'],
+  });
+
+  const { data: existingStudents } = useQuery({
+    queryKey: ['/api/students'],
+  });
 
   const form = useForm({
     resolver: zodResolver(insertLeadSchema),
@@ -60,6 +69,64 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   });
 
   const onSubmit = (data: any) => {
+    // Check for duplicate email in existing leads
+    if (Array.isArray(existingLeads)) {
+      const duplicateLead = existingLeads.find(
+        (lead: any) => lead.email === data.email
+      );
+      if (duplicateLead) {
+        toast({
+          title: "Error",
+          description: "A lead with this email already exists.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Check for duplicate email in existing students
+    if (Array.isArray(existingStudents)) {
+      const duplicateStudent = existingStudents.find(
+        (student: any) => student.email === data.email
+      );
+      if (duplicateStudent) {
+        toast({
+          title: "Error",
+          description: "A student with this email already exists.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Check for duplicate phone if provided
+    if (data.phone) {
+      let duplicateFound = false;
+      
+      if (Array.isArray(existingLeads)) {
+        const duplicatePhoneLead = existingLeads.find(
+          (lead: any) => lead.phone === data.phone
+        );
+        if (duplicatePhoneLead) duplicateFound = true;
+      }
+      
+      if (Array.isArray(existingStudents)) {
+        const duplicatePhoneStudent = existingStudents.find(
+          (student: any) => student.phone === data.phone
+        );
+        if (duplicatePhoneStudent) duplicateFound = true;
+      }
+      
+      if (duplicateFound) {
+        toast({
+          title: "Error",
+          description: "A contact with this phone number already exists.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     createLeadMutation.mutate(data);
   };
 

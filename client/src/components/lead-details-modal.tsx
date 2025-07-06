@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
 import { HelpTooltip } from './help-tooltip';
+import { ConvertToStudentModal } from './convert-to-student-modal';
 import { type Lead } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { User, Edit, Save, X } from 'lucide-react';
+import { User, Edit, Save, X, UserPlus } from 'lucide-react';
 
 interface LeadDetailsModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
+  const [showConvertModal, setShowConvertModal] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -53,38 +55,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
     },
   });
 
-  const convertToStudentMutation = useMutation({
-    mutationFn: async () => {
-      if (!lead) throw new Error('No lead selected');
-      const studentData = {
-        leadId: lead.id,
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        targetCountry: lead.country,
-        targetProgram: lead.program,
-        status: 'active',
-      };
-      const response = await apiRequest('POST', '/api/students', studentData);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
-      toast({
-        title: "Success",
-        description: "Lead converted to student successfully.",
-      });
-      onOpenChange(false);
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to convert lead to student.",
-        variant: "destructive",
-      });
-    },
+  // Check if lead is already converted
+  const { data: students } = useQuery({
+    queryKey: ['/api/students'],
+    select: (data: any[]) => data.filter((student: any) => student.leadId === lead?.id),
   });
+
+  const isAlreadyConverted = students && students.length > 0;
 
   if (!lead) return null;
 
@@ -140,6 +117,16 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                   </Badge>
                 </div>
                 <div className="flex items-center space-x-2">
+                  {/* Convert to Student button in top right */}
+                  {!isAlreadyConverted && (
+                    <Button size="sm" onClick={() => setShowConvertModal(true)}>
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Convert to Student
+                    </Button>
+                  )}
+                  {isAlreadyConverted && (
+                    <Badge variant="secondary">Already Converted</Badge>
+                  )}
                   {isEditing ? (
                     <>
                       <Button size="sm" onClick={handleSave} disabled={updateLeadMutation.isPending}>
@@ -284,23 +271,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                 </CardContent>
               </Card>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-3 pt-4">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  Close
-                </Button>
-                <Button 
-                  onClick={() => convertToStudentMutation.mutate()}
-                  disabled={convertToStudentMutation.isPending || lead.status === 'converted'}
-                >
-                  {lead.status === 'converted' ? 'Already Converted' : 'Convert to Student'}
-                </Button>
-              </div>
+              {/* No action buttons at the bottom - Close removed, Convert moved to top */}
             </div>
           </div>
 
-          {/* Activity Sidebar - Right Side */}
-          <div className="w-80 border-l bg-gray-50 overflow-y-auto">
+          {/* Activity Sidebar - Right Side - Increased width */}
+          <div className="w-96 border-l bg-gray-50 overflow-y-auto">
             <div className="p-4">
               <ActivityTracker
                 entityType="lead"
@@ -310,6 +286,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
             </div>
           </div>
         </div>
+        
+        {/* Convert to Student Modal */}
+        <ConvertToStudentModal
+          open={showConvertModal}
+          onOpenChange={setShowConvertModal}
+          lead={lead}
+        />
       </DialogContent>
     </Dialog>
   );
