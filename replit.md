@@ -112,6 +112,7 @@ Changelog:
 - July 06, 2025. Made branch selection mandatory for user management with dropdown options
 - July 06, 2025. Integrated complete authentication system with proper password storage using bcrypt hashing
 - July 06, 2025. Removed all demo data across the app and connected login to real user database with secure authentication
+- July 06, 2025. Added comprehensive file upload system with multer for direct image uploads and fixed field name consistency issues
 ```
 
 ## User Preferences

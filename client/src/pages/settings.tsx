@@ -37,7 +37,7 @@ export default function Settings() {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState('counselor');
   const [newUserBranch, setNewUserBranch] = useState('');
-  const [newUserPicture, setNewUserPicture] = useState('');
+  const [newUserProfileImageUrl, setNewUserProfileImageUrl] = useState('');
   const [newUserDateOfBirth, setNewUserDateOfBirth] = useState('');
   const [newUserDepartment, setNewUserDepartment] = useState('');
   const [newUserPhone, setNewUserPhone] = useState('');
@@ -53,10 +53,47 @@ export default function Settings() {
     phone: '',
     dateOfBirth: '',
     department: '',
-    picture: ''
+    profileImageUrl: ''
   });
   const [isEditUploading, setIsEditUploading] = useState(false);
   const editFileInputRef = useRef<HTMLInputElement>(null);
+  
+  // User data state
+  const [users, setUsers] = useState([
+    {
+      id: 'admin1',
+      name: 'Admin User',
+      email: 'admin@studybridge.com',
+      role: 'admin_staff',
+      branch: 'branch_alpha',
+      phone: '+1 (555) 123-4567',
+      department: 'administration',
+      dateOfBirth: '1985-03-15',
+      profileImageUrl: ''
+    },
+    {
+      id: 'manager1',
+      name: 'Sarah Johnson',
+      email: 'manager@studybridge.com',
+      role: 'branch_manager',
+      branch: 'branch_alpha',
+      phone: '+1 (555) 234-5678',
+      department: 'operations',
+      dateOfBirth: '1982-07-22',
+      profileImageUrl: ''
+    },
+    {
+      id: 'counselor1',
+      name: 'John Counselor',
+      email: 'counselor@studybridge.com',
+      role: 'counselor',
+      branch: 'branch_beta',
+      phone: '+1 (555) 345-6789',
+      department: 'counseling',
+      dateOfBirth: '1990-11-08',
+      profileImageUrl: ''
+    }
+  ]);
   
   const [config, setConfig] = useState<DropdownConfig>({
     leadStatuses: [
@@ -216,7 +253,7 @@ export default function Settings() {
       const result = await response.json();
 
       if (result.success) {
-        setNewUserPicture(result.fileUrl);
+        setNewUserProfileImageUrl(result.fileUrl);
         toast({
           title: "Success",
           description: "Profile picture uploaded successfully.",
@@ -274,7 +311,7 @@ export default function Settings() {
       const result = await response.json();
 
       if (result.success) {
-        setEditUserData(prev => ({ ...prev, picture: result.fileUrl }));
+        setEditUserData(prev => ({ ...prev, profileImageUrl: result.fileUrl }));
         toast({
           title: "Success",
           description: "Profile picture uploaded successfully.",
@@ -303,7 +340,7 @@ export default function Settings() {
       phone: userData.phone || '',
       dateOfBirth: userData.dateOfBirth || '',
       department: userData.department || '',
-      picture: userData.picture || ''
+      profileImageUrl: userData.profileImageUrl || ''
     });
   };
 
@@ -316,7 +353,7 @@ export default function Settings() {
       phone: '',
       dateOfBirth: '',
       department: '',
-      picture: ''
+      profileImageUrl: ''
     });
     if (editFileInputRef.current) {
       editFileInputRef.current.value = '';
@@ -341,6 +378,24 @@ export default function Settings() {
       });
       return;
     }
+
+    // Update the user in the users array
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === editingUserId 
+          ? { 
+              ...user, 
+              email: editUserData.email,
+              role: editUserData.role,
+              branch: editUserData.branch,
+              phone: editUserData.phone,
+              dateOfBirth: editUserData.dateOfBirth,
+              department: editUserData.department,
+              profileImageUrl: editUserData.profileImageUrl
+            }
+          : user
+      )
+    );
 
     toast({
       title: "Success",
@@ -379,7 +434,7 @@ export default function Settings() {
     setNewUserEmail('');
     setNewUserRole('counselor');
     setNewUserBranch('');
-    setNewUserPicture('');
+    setNewUserProfileImageUrl('');
     setNewUserDateOfBirth('');
     setNewUserDepartment('');
     setNewUserPhone('');
@@ -692,11 +747,11 @@ export default function Settings() {
                       />
                       
                       {/* Preview */}
-                      {newUserPicture && (
+                      {newUserProfileImageUrl && (
                         <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
                           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                             <img
-                              src={newUserPicture}
+                              src={newUserProfileImageUrl}
                               alt="Profile preview"
                               className="w-full h-full object-cover"
                               onError={() => {
@@ -716,7 +771,7 @@ export default function Settings() {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              setNewUserPicture('');
+                              setNewUserProfileImageUrl('');
                               if (fileInputRef.current) {
                                 fileInputRef.current.value = '';
                               }
@@ -742,41 +797,7 @@ export default function Settings() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    {
-                      id: 'admin1',
-                      name: 'Admin User',
-                      email: 'admin@studybridge.com',
-                      role: 'admin_staff',
-                      branch: 'branch_alpha',
-                      phone: '+1 (555) 123-4567',
-                      department: 'administration',
-                      dateOfBirth: '1985-03-15',
-                      picture: ''
-                    },
-                    {
-                      id: 'manager1',
-                      name: 'Sarah Johnson',
-                      email: 'manager@studybridge.com',
-                      role: 'branch_manager',
-                      branch: 'branch_alpha',
-                      phone: '+1 (555) 234-5678',
-                      department: 'operations',
-                      dateOfBirth: '1982-07-22',
-                      picture: ''
-                    },
-                    {
-                      id: 'counselor1',
-                      name: 'John Counselor',
-                      email: 'counselor@studybridge.com',
-                      role: 'counselor',
-                      branch: 'branch_beta',
-                      phone: '+1 (555) 345-6789',
-                      department: 'counseling',
-                      dateOfBirth: '1990-11-08',
-                      picture: ''
-                    }
-                  ].map((user) => (
+                  {users.map((user) => (
                     <div key={user.id} className="border rounded-lg p-4">
                       {editingUserId === user.id ? (
                         // Edit Mode
@@ -894,11 +915,11 @@ export default function Settings() {
                                   className="hidden"
                                 />
                                 
-                                {editUserData.picture && (
+                                {editUserData.profileImageUrl && (
                                   <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
                                     <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                                       <img
-                                        src={editUserData.picture}
+                                        src={editUserData.profileImageUrl}
                                         alt="Profile preview"
                                         className="w-full h-full object-cover"
                                       />
@@ -911,7 +932,7 @@ export default function Settings() {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => {
-                                        setEditUserData(prev => ({ ...prev, picture: '' }));
+                                        setEditUserData(prev => ({ ...prev, profileImageUrl: '' }));
                                         if (editFileInputRef.current) {
                                           editFileInputRef.current.value = '';
                                         }
@@ -930,9 +951,9 @@ export default function Settings() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                              {user.picture ? (
+                              {user.profileImageUrl ? (
                                 <img
-                                  src={user.picture}
+                                  src={user.profileImageUrl}
                                   alt={user.name}
                                   className="w-full h-full object-cover"
                                 />
