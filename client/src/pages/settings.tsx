@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3, Building, Upload, Image } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface DropdownOption {
   id: string;
@@ -311,11 +311,44 @@ export default function Settings() {
       const result = await response.json();
 
       if (result.success) {
+        // Update local state
         setEditUserData(prev => ({ ...prev, profileImageUrl: result.fileUrl }));
-        toast({
-          title: "Success",
-          description: "Profile picture uploaded successfully.",
-        });
+        
+        // Also save to database immediately
+        try {
+          const updateResponse = await fetch(`/api/users/${editingUserId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              profileImageUrl: result.fileUrl,
+            }),
+          });
+
+          if (updateResponse.ok) {
+            // Invalidate users cache to refresh profile images everywhere
+            queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+            
+            toast({
+              title: "Success",
+              description: "Profile picture uploaded and saved successfully.",
+            });
+          } else {
+            toast({
+              title: "Warning",
+              description: "Image uploaded but failed to save to profile. Please click Save Changes.",
+              variant: "destructive",
+            });
+          }
+        } catch (saveError) {
+          console.error('Save error:', saveError);
+          toast({
+            title: "Warning",
+            description: "Image uploaded but failed to save to profile. Please click Save Changes.",
+            variant: "destructive",
+          });
+        }
       } else {
         throw new Error(result.error || 'Upload failed');
       }
@@ -397,6 +430,9 @@ export default function Settings() {
       )
     );
 
+    // Invalidate users cache to refresh profile images everywhere
+    queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+    
     toast({
       title: "Success",
       description: `User updated successfully.`,
