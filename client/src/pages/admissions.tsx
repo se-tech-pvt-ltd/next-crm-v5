@@ -8,12 +8,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
+import { AdmissionDetailsModal } from '@/components/admission-details-modal';
 import { Admission, Student } from '@shared/schema';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
+  const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -248,7 +251,12 @@ export default function Admissions() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedAdmission(admission);
+                                setIsDetailsModalOpen(true);
+                              }}
+                            >
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem>
@@ -268,6 +276,12 @@ export default function Admissions() {
           </CardContent>
         </Card>
       </div>
+      
+      <AdmissionDetailsModal 
+        open={isDetailsModalOpen}
+        onOpenChange={setIsDetailsModalOpen}
+        admission={selectedAdmission}
+      />
     </Layout>
   );
 }

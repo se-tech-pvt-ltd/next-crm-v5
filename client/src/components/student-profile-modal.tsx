@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Student, Application, Admission } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { ActivityTracker } from './activity-tracker';
 import { 
   User, 
   Mail, 
@@ -132,10 +133,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           </DialogHeader>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="applications">Applications ({applications?.length || 0})</TabsTrigger>
               <TabsTrigger value="admissions">Admissions ({admissions?.length || 0})</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -365,6 +367,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="activity">
+              <ActivityTracker 
+                entityType="student" 
+                entityId={student?.id || 0} 
+                entityName={student?.name}
+              />
             </TabsContent>
           </Tabs>
         </DialogContent>

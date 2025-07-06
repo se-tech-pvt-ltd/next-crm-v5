@@ -1,10 +1,10 @@
 import { 
-  leads, students, applications, admissions,
-  type Lead, type Student, type Application, type Admission,
-  type InsertLead, type InsertStudent, type InsertApplication, type InsertAdmission
+  leads, students, applications, admissions, activities,
+  type Lead, type Student, type Application, type Admission, type Activity,
+  type InsertLead, type InsertStudent, type InsertApplication, type InsertAdmission, type InsertActivity
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, or } from "drizzle-orm";
+import { eq, ilike, or, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Lead operations
@@ -40,11 +40,32 @@ export interface IStorage {
   // Search operations
   searchLeads(query: string): Promise<Lead[]>;
   searchStudents(query: string): Promise<Student[]>;
+  
+  // Activity operations
+  getActivities(entityType: string, entityId: number): Promise<Activity[]>;
+  createActivity(activity: InsertActivity): Promise<Activity>;
 }
 
 export class DatabaseStorage implements IStorage {
   constructor() {
     // Database storage doesn't need initialization
+  }
+
+  private async logActivity(entityType: string, entityId: number, activityType: string, title: string, description?: string, fieldName?: string, oldValue?: string, newValue?: string) {
+    try {
+      await this.createActivity({
+        entityType,
+        entityId,
+        activityType,
+        title,
+        description,
+        fieldName,
+        oldValue,
+        newValue,
+      });
+    } catch (error) {
+      console.warn('Failed to log activity:', error);
+    }
   }
 
   // Lead operations
@@ -94,6 +115,10 @@ export class DatabaseStorage implements IStorage {
       .insert(students)
       .values(insertStudent)
       .returning();
+    
+    // Log activity
+    await this.logActivity('student', student.id, 'created', 'Student record created', `Student ${student.name} was added to the system`);
+    
     return student;
   }
 
@@ -204,6 +229,26 @@ export class DatabaseStorage implements IStorage {
         ilike(students.targetCountry, `%${query}%`)
       )
     );
+  }
+
+  // Activity operations
+  async getActivities(entityType: string, entityId: number): Promise<Activity[]> {
+    return db.select().from(activities)
+      .where(
+        and(
+          eq(activities.entityType, entityType),
+          eq(activities.entityId, entityId)
+        )
+      )
+      .orderBy(desc(activities.createdAt));
+  }
+
+  async createActivity(insertActivity: InsertActivity): Promise<Activity> {
+    const [activity] = await db
+      .insert(activities)
+      .values(insertActivity)
+      .returning();
+    return activity;
   }
 }
 

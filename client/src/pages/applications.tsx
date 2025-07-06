@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { AddApplicationModal } from '@/components/add-application-modal';
+import { ApplicationDetailsModal } from '@/components/application-details-modal';
 import { Application, Student } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +19,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -261,7 +264,12 @@ export default function Applications() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedApplication(application);
+                                setIsDetailsModalOpen(true);
+                              }}
+                            >
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => updateApplicationMutation.mutate({ id: application.id, data: { status: 'submitted' } })}>
@@ -291,6 +299,12 @@ export default function Applications() {
       <AddApplicationModal 
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
+      />
+      
+      <ApplicationDetailsModal 
+        open={isDetailsModalOpen}
+        onOpenChange={setIsDetailsModalOpen}
+        application={selectedApplication}
       />
     </Layout>
   );

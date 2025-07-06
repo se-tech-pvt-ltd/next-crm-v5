@@ -101,6 +101,27 @@ export type InsertStudent = z.infer<typeof insertStudentSchema>;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type InsertAdmission = z.infer<typeof insertAdmissionSchema>;
 
+export const activities = pgTable("activities", {
+  id: serial("id").primaryKey(),
+  entityType: text("entity_type").notNull(), // lead, student, application, admission
+  entityId: integer("entity_id").notNull(),
+  activityType: text("activity_type").notNull(), // created, updated, status_changed, comment, deleted
+  title: text("title").notNull(),
+  description: text("description"),
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
+  fieldName: text("field_name"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertActivitySchema = createInsertSchema(activities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type Activity = typeof activities.$inferSelect;
+
 export type Lead = typeof leads.$inferSelect;
 export type Student = typeof students.$inferSelect;
 export type Application = typeof applications.$inferSelect;

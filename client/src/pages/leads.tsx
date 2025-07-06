@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddLeadModal } from '@/components/add-lead-modal';
+import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -18,6 +19,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export default function Leads() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -293,6 +296,14 @@ export default function Leads() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedLead(lead);
+                                setIsDetailsModalOpen(true);
+                              }}
+                            >
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => updateLeadMutation.mutate({ id: lead.id, data: { status: 'contacted' } })}
                             >
                               Mark as Contacted
@@ -328,6 +339,12 @@ export default function Leads() {
       <AddLeadModal 
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+      />
+      
+      <LeadDetailsModal 
+        open={isDetailsModalOpen}
+        onOpenChange={setIsDetailsModalOpen}
+        lead={selectedLead}
       />
     </Layout>
   );

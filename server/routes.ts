@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertLeadSchema, insertStudentSchema, insertApplicationSchema, insertAdmissionSchema } from "@shared/schema";
+import { insertLeadSchema, insertStudentSchema, insertApplicationSchema, insertAdmissionSchema, insertActivitySchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -261,6 +261,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(students);
     } catch (error) {
       res.status(500).json({ message: "Failed to search students" });
+    }
+  });
+
+  // Activity routes
+  app.get("/api/activities/:entityType/:entityId", async (req, res) => {
+    try {
+      const { entityType, entityId } = req.params;
+      const id = parseInt(entityId);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid entity ID" });
+      }
+      const activities = await storage.getActivities(entityType, id);
+      res.json(activities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch activities" });
+    }
+  });
+
+  app.post("/api/activities", async (req, res) => {
+    try {
+      const activityData = insertActivitySchema.parse(req.body);
+      const activity = await storage.createActivity(activityData);
+      res.json(activity);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid activity data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create activity" });
     }
   });
 
