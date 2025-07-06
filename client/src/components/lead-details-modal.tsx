@@ -36,16 +36,52 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
   useEffect(() => {
     if (lead) {
-      // Ensure country and program are arrays for MultiSelect compatibility
+      // Handle conversion from arrays/JSON strings to single strings for select compatibility
       const processedLead = {
         ...lead,
-        country: Array.isArray(lead.country) ? lead.country : (lead.country ? [lead.country] : []),
-        program: Array.isArray(lead.program) ? lead.program : (lead.program ? [lead.program] : [])
+        country: parseFieldValue(lead.country),
+        program: parseFieldValue(lead.program)
       };
       setEditData(processedLead);
       setCurrentStatus(lead.status);
     }
   }, [lead]);
+
+  // Helper function to parse field values that might be arrays, JSON strings, or regular strings
+  const parseFieldValue = (value: any): string => {
+    if (!value) return '';
+    
+    // If it's already a simple string, return it
+    if (typeof value === 'string' && !value.startsWith('[')) {
+      return value;
+    }
+    
+    // If it's an array, return the first element
+    if (Array.isArray(value)) {
+      return value[0] || '';
+    }
+    
+    // If it's a JSON string, try to parse it and return the first element
+    if (typeof value === 'string' && value.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          const firstElement = parsed[0];
+          // Handle nested JSON strings
+          if (typeof firstElement === 'string' && firstElement.startsWith('[')) {
+            const nestedParsed = JSON.parse(firstElement);
+            return Array.isArray(nestedParsed) ? nestedParsed[0] || '' : firstElement;
+          }
+          return firstElement || '';
+        }
+        return value;
+      } catch (e) {
+        return value;
+      }
+    }
+    
+    return String(value);
+  };
 
   const updateLeadMutation = useMutation({
     mutationFn: async (data: Partial<Lead>) => {
@@ -120,14 +156,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
       return;
     }
     
-    // Prepare data for backend - ensure arrays are properly handled
-    const dataToSave = {
-      ...editData,
-      country: Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : []),
-      program: Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])
-    };
-    
-    updateLeadMutation.mutate(dataToSave);
+    updateLeadMutation.mutate(editData);
   };
 
   const handleStatusChange = (newStatus: string) => {
@@ -337,24 +366,42 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                         />
                       </div>
                       <div>
-                        <Label htmlFor="country">Countries</Label>
-                        <MultiSelect
-                          options={countryOptions}
-                          value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
-                          onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
-                          placeholder="Select countries"
-                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
-                        />
+                        <Label htmlFor="country">Country</Label>
+                        <Select
+                          value={editData.country || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, country: value }))}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countryOptions.map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
-                        <Label htmlFor="program">Programs</Label>
-                        <MultiSelect
-                          options={programOptions}
-                          value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
-                          onChange={(values) => setEditData(prev => ({ ...prev, program: values }))}
-                          placeholder="Select programs"
-                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
-                        />
+                        <Label htmlFor="program">Program</Label>
+                        <Select
+                          value={editData.program || ''}
+                          onValueChange={(value) => setEditData(prev => ({ ...prev, program: value }))}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select program" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {programOptions.map((program) => (
+                              <SelectItem key={program.value} value={program.value}>
+                                {program.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="source">Source</Label>

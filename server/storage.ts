@@ -219,9 +219,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createLead(insertLead: InsertLead): Promise<Lead> {
+    // Normalize array fields to strings if they are arrays (backward compatibility)
+    const processedLead = { ...insertLead } as any;
+    if (Array.isArray((insertLead as any).country)) {
+      processedLead.country = (insertLead as any).country[0] || null;
+    }
+    if (Array.isArray((insertLead as any).program)) {
+      processedLead.program = (insertLead as any).program[0] || null;
+    }
+
     const [lead] = await db
       .insert(leads)
-      .values(insertLead)
+      .values(processedLead as InsertLead)
       .returning();
     return lead;
   }
@@ -231,9 +240,18 @@ export class DatabaseStorage implements IStorage {
     const currentLead = await this.getLead(id);
     if (!currentLead) return undefined;
 
+    // Normalize array fields to strings if they are arrays (backward compatibility)
+    const processedUpdates = { ...updates } as any;
+    if (Array.isArray((updates as any).country)) {
+      processedUpdates.country = (updates as any).country[0] || null;
+    }
+    if (Array.isArray((updates as any).program)) {
+      processedUpdates.program = (updates as any).program[0] || null;
+    }
+
     const [lead] = await db
       .update(leads)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...processedUpdates, updatedAt: new Date() } as any)
       .where(eq(leads.id, id))
       .returning();
 

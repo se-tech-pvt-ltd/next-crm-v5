@@ -154,39 +154,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       console.log('Updating lead:', id, 'with data:', req.body);
       
-      // Handle array fields - convert to JSON strings if they are arrays
-      const processedData = { ...req.body };
-      if (Array.isArray(processedData.country)) {
-        processedData.country = JSON.stringify(processedData.country);
-      }
-      if (Array.isArray(processedData.program)) {
-        processedData.program = JSON.stringify(processedData.program);
-      }
-      
-      const validatedData = insertLeadSchema.partial().parse(processedData);
+      // No need to process arrays since fields are now single text values
+      const validatedData = insertLeadSchema.partial().parse(req.body);
       const lead = await storage.updateLead(id, validatedData);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
       
-      // Convert JSON strings back to arrays for the response
-      const responseData = { ...lead };
-      if (responseData.country && typeof responseData.country === 'string' && responseData.country.startsWith('[')) {
-        try {
-          responseData.country = JSON.parse(responseData.country);
-        } catch (e) {
-          // Keep as string if not valid JSON
-        }
-      }
-      if (responseData.program && typeof responseData.program === 'string' && responseData.program.startsWith('[')) {
-        try {
-          responseData.program = JSON.parse(responseData.program);
-        } catch (e) {
-          // Keep as string if not valid JSON
-        }
-      }
-      
-      res.json(responseData);
+      res.json(lead);
     } catch (error) {
       console.error('Lead update error:', error);
       if (error instanceof z.ZodError) {
