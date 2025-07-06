@@ -25,6 +25,7 @@ interface DropdownConfig {
   leadSources: DropdownOption[];
   leadExpectations: DropdownOption[];
   leadTypes: DropdownOption[];
+  leadLostReasons: DropdownOption[];
   
   // Student fields
   studentStatuses: DropdownOption[];
@@ -139,6 +140,15 @@ export default function Settings() {
       { id: '5', value: 'certificate', label: 'Certificate' },
       { id: '6', value: 'diploma', label: 'Diploma' },
     ],
+    leadLostReasons: [
+      { id: '1', value: 'no_response', label: 'No Response' },
+      { id: '2', value: 'not_interested', label: 'Not Interested' },
+      { id: '3', value: 'budget_constraints', label: 'Budget Constraints' },
+      { id: '4', value: 'timing_issues', label: 'Timing Issues' },
+      { id: '5', value: 'chose_competitor', label: 'Chose Competitor' },
+      { id: '6', value: 'unqualified', label: 'Unqualified' },
+      { id: '7', value: 'other', label: 'Other' },
+    ],
     
     // Student fields
     studentStatuses: [
@@ -232,7 +242,7 @@ export default function Settings() {
   });
 
   const [newOptionInputs, setNewOptionInputs] = useState<Record<string, { value: string; label: string }>>({});
-  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<keyof DropdownConfig | null>(null);
 
   const addOption = (category: keyof DropdownConfig) => {
     const newOption: DropdownOption = {
@@ -706,6 +716,7 @@ export default function Settings() {
                   {renderFieldRow("Lead Source", "leadSources", "Sources where leads can come from")}
                   {renderFieldRow("Lead Expectation", "leadExpectations", "Expected quality level of leads")}
                   {renderFieldRow("Lead Type", "leadTypes", "Types of educational programs")}
+                  {renderFieldRow("Lead Lost Reasons", "leadLostReasons", "Reasons why leads are marked as lost")}
                 </CardContent>
               </Card>
 
@@ -773,7 +784,7 @@ export default function Settings() {
               </Card>
 
               {/* Field Editor */}
-              {editingField && renderFieldEditor(editingField)}
+              {editingField && renderFieldEditor(editingField as keyof DropdownConfig)}
 
               {/* Configuration Information */}
               <Card>

@@ -61,7 +61,7 @@ export default function Leads() {
         targetCountry: lead.country,
         targetProgram: lead.program,
         status: 'active',
-        notes: lead.notes,
+
       };
       
       const response = await apiRequest('POST', '/api/students', studentData);

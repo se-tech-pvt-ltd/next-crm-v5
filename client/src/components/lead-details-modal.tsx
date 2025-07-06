@@ -29,6 +29,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [showConvertModal, setShowConvertModal] = useState(false);
+  const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
+  const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
 
   useEffect(() => {
@@ -91,6 +93,33 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
       toast({
         title: "Error",
         description: "Failed to update status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mark as Lost mutation
+  const markAsLostMutation = useMutation({
+    mutationFn: async ({ reason }: { reason: string }) => {
+      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { 
+        status: 'lost',
+        lostReason: reason 
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      setShowMarkAsLostModal(false);
+      setLostReason('');
+      toast({
+        title: "Success",
+        description: "Lead marked as lost.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to mark lead as lost.",
         variant: "destructive",
       });
     },
@@ -180,6 +209,24 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
     { label: 'Diploma', value: 'diploma' },
   ];
 
+  const sourceOptions = [
+    { label: 'Website', value: 'website' },
+    { label: 'Referral', value: 'referral' },
+    { label: 'Social Media', value: 'social_media' },
+    { label: 'Education Fair', value: 'education_fair' },
+    { label: 'Partner Agent', value: 'partner_agent' },
+  ];
+
+  const lostReasonOptions = [
+    { label: 'No Response', value: 'no_response' },
+    { label: 'Not Interested', value: 'not_interested' },
+    { label: 'Budget Constraints', value: 'budget_constraints' },
+    { label: 'Timing Issues', value: 'timing_issues' },
+    { label: 'Chose Competitor', value: 'chose_competitor' },
+    { label: 'Unqualified', value: 'unqualified' },
+    { label: 'Other', value: 'other' },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
@@ -211,16 +258,29 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                     </Select>
                   </div>
                   
-                  {/* Convert to Student button */}
-                  {!isAlreadyConverted && (
-                    <Button size="sm" onClick={() => setShowConvertModal(true)}>
-                      <UserPlus className="w-4 h-4 mr-1" />
-                      Convert to Student
-                    </Button>
-                  )}
-                  {isAlreadyConverted && (
-                    <Badge variant="secondary">Already Converted</Badge>
-                  )}
+                  {/* Convert to Student and Mark as Lost buttons */}
+                  <div className="flex space-x-2">
+                    {!isAlreadyConverted && (
+                      <Button size="sm" onClick={() => setShowConvertModal(true)}>
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Convert to Student
+                      </Button>
+                    )}
+                    {isAlreadyConverted && (
+                      <Badge variant="secondary">Already Converted</Badge>
+                    )}
+                    
+                    {/* Mark as Lost button */}
+                    {lead.status !== 'lost' && (
+                      <Button 
+                        size="sm" 
+                        variant="destructive" 
+                        onClick={() => setShowMarkAsLostModal(true)}
+                      >
+                        Mark as Lost
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </DialogHeader>
@@ -229,32 +289,34 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
               {/* Lead Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center text-lg">
-                    <UserIcon className="w-5 h-5 mr-2" />
-                    Lead Information
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center text-lg">
+                      <UserIcon className="w-5 h-5 mr-2" />
+                      Lead Information
+                    </CardTitle>
+                    {/* Edit/Save buttons in header */}
+                    <div className="flex space-x-2">
+                      {isEditing ? (
+                        <>
+                          <Button size="sm" onClick={handleSave} disabled={updateLeadMutation.isPending}>
+                            <Save className="w-4 h-4 mr-1" />
+                            Save
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={handleCancel}>
+                            <X className="w-4 h-4 mr-1" />
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit Lead
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Edit/Save buttons */}
-                  <div className="flex justify-end space-x-2 mb-4">
-                    {isEditing ? (
-                      <>
-                        <Button size="sm" onClick={handleSave} disabled={updateLeadMutation.isPending}>
-                          <Save className="w-4 h-4 mr-1" />
-                          Save
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={handleCancel}>
-                          <X className="w-4 h-4 mr-1" />
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit Lead
-                      </Button>
-                    )}
-                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -297,13 +359,22 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                     <div>
                       <Label htmlFor="source">Source</Label>
                       {isEditing ? (
-                        <Input
-                          id="source"
-                          value={editData.source || ''}
-                          onChange={(e) => handleInputChange('source', e.target.value)}
-                        />
+                        <Select value={editData.source || ''} onValueChange={(value) => handleInputChange('source', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sourceOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       ) : (
-                        <div className="p-2 bg-gray-50 rounded border">{lead.source || 'N/A'}</div>
+                        <div className="p-2 bg-gray-50 rounded border">
+                          {sourceOptions.find(opt => opt.value === lead.source)?.label || lead.source || 'N/A'}
+                        </div>
                       )}
                     </div>
                     
@@ -420,23 +491,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
                     </div>
                   </div>
 
-                  {/* Notes field - full width */}
-                  <div className="mt-4">
-                    <Label htmlFor="notes">Notes</Label>
-                    {isEditing ? (
-                      <Textarea
-                        id="notes"
-                        value={editData.notes || ''}
-                        onChange={(e) => handleInputChange('notes', e.target.value)}
-                        placeholder="Add notes about this lead..."
-                        rows={4}
-                      />
-                    ) : (
-                      <div className="p-2 bg-gray-50 rounded border min-h-[100px]">
-                        {lead.notes || 'No notes added'}
-                      </div>
-                    )}
-                  </div>
+
 
                   {/* Date fields at the bottom */}
                   <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t">
@@ -474,6 +529,44 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
           onOpenChange={setShowConvertModal}
           lead={lead}
         />
+
+        {/* Mark as Lost Modal */}
+        <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Mark Lead as Lost</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Please select a reason why this lead is being marked as lost:
+              </p>
+              <Select value={lostReason} onValueChange={setLostReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  {lostReasonOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowMarkAsLostModal(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => markAsLostMutation.mutate({ reason: lostReason })}
+                  disabled={!lostReason || markAsLostMutation.isPending}
+                >
+                  Mark as Lost
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
