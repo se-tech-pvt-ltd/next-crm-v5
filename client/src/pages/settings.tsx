@@ -20,15 +20,30 @@ interface DropdownOption {
 }
 
 interface DropdownConfig {
+  // Lead fields
   leadStatuses: DropdownOption[];
-  studentStatuses: DropdownOption[];
-  applicationStatuses: DropdownOption[];
-  countries: DropdownOption[];
   leadSources: DropdownOption[];
-  degreeTypes: DropdownOption[];
-  intakeSemesters: DropdownOption[];
+  leadExpectations: DropdownOption[];
+  leadTypes: DropdownOption[];
+  
+  // Student fields
+  studentStatuses: DropdownOption[];
+  nationalities: DropdownOption[];
   englishProficiency: DropdownOption[];
   budgetRanges: DropdownOption[];
+  
+  // Application fields
+  applicationStatuses: DropdownOption[];
+  degreeTypes: DropdownOption[];
+  intakeSemesters: DropdownOption[];
+  
+  // Admission fields
+  admissionDecisions: DropdownOption[];
+  visaStatuses: DropdownOption[];
+  
+  // Shared fields
+  countries: DropdownOption[];
+  programs: DropdownOption[];
 }
 
 export default function Settings() {
@@ -96,34 +111,13 @@ export default function Settings() {
   ]);
   
   const [config, setConfig] = useState<DropdownConfig>({
+    // Lead fields
     leadStatuses: [
       { id: '1', value: 'new', label: 'New' },
       { id: '2', value: 'contacted', label: 'Contacted' },
       { id: '3', value: 'qualified', label: 'Qualified' },
       { id: '4', value: 'converted', label: 'Converted' },
       { id: '5', value: 'lost', label: 'Lost' },
-    ],
-    studentStatuses: [
-      { id: '1', value: 'active', label: 'Active' },
-      { id: '2', value: 'application_prep', label: 'Application Prep' },
-      { id: '3', value: 'applied', label: 'Applied' },
-      { id: '4', value: 'admitted', label: 'Admitted' },
-      { id: '5', value: 'enrolled', label: 'Enrolled' },
-    ],
-    applicationStatuses: [
-      { id: '1', value: 'draft', label: 'Draft' },
-      { id: '2', value: 'submitted', label: 'Submitted' },
-      { id: '3', value: 'under_review', label: 'Under Review' },
-      { id: '4', value: 'decision_pending', label: 'Decision Pending' },
-      { id: '5', value: 'accepted', label: 'Accepted' },
-      { id: '6', value: 'rejected', label: 'Rejected' },
-    ],
-    countries: [
-      { id: '1', value: 'us', label: 'United States' },
-      { id: '2', value: 'uk', label: 'United Kingdom' },
-      { id: '3', value: 'canada', label: 'Canada' },
-      { id: '4', value: 'australia', label: 'Australia' },
-      { id: '5', value: 'germany', label: 'Germany' },
     ],
     leadSources: [
       { id: '1', value: 'website', label: 'Website' },
@@ -132,18 +126,35 @@ export default function Settings() {
       { id: '4', value: 'education_fair', label: 'Education Fair' },
       { id: '5', value: 'partner_agent', label: 'Partner Agent' },
     ],
-    degreeTypes: [
-      { id: '1', value: 'bachelors', label: 'Bachelor\'s' },
-      { id: '2', value: 'masters', label: 'Master\'s' },
-      { id: '3', value: 'phd', label: 'PhD' },
-      { id: '4', value: 'diploma', label: 'Diploma' },
-      { id: '5', value: 'certificate', label: 'Certificate' },
+    leadExpectations: [
+      { id: '1', value: 'high', label: 'High' },
+      { id: '2', value: 'medium', label: 'Medium' },
+      { id: '3', value: 'low', label: 'Low' },
     ],
-    intakeSemesters: [
-      { id: '1', value: 'fall', label: 'Fall' },
-      { id: '2', value: 'spring', label: 'Spring' },
-      { id: '3', value: 'summer', label: 'Summer' },
-      { id: '4', value: 'winter', label: 'Winter' },
+    leadTypes: [
+      { id: '1', value: 'undergraduate', label: 'Undergraduate' },
+      { id: '2', value: 'graduate', label: 'Graduate' },
+      { id: '3', value: 'postgraduate', label: 'Postgraduate' },
+      { id: '4', value: 'phd', label: 'PhD' },
+      { id: '5', value: 'certificate', label: 'Certificate' },
+      { id: '6', value: 'diploma', label: 'Diploma' },
+    ],
+    
+    // Student fields
+    studentStatuses: [
+      { id: '1', value: 'active', label: 'Active' },
+      { id: '2', value: 'applied', label: 'Applied' },
+      { id: '3', value: 'admitted', label: 'Admitted' },
+      { id: '4', value: 'enrolled', label: 'Enrolled' },
+      { id: '5', value: 'inactive', label: 'Inactive' },
+    ],
+    nationalities: [
+      { id: '1', value: 'pakistani', label: 'Pakistani' },
+      { id: '2', value: 'indian', label: 'Indian' },
+      { id: '3', value: 'bangladeshi', label: 'Bangladeshi' },
+      { id: '4', value: 'nepali', label: 'Nepali' },
+      { id: '5', value: 'sri_lankan', label: 'Sri Lankan' },
+      { id: '6', value: 'other', label: 'Other' },
     ],
     englishProficiency: [
       { id: '1', value: 'ielts_6_5', label: 'IELTS 6.5+' },
@@ -159,9 +170,69 @@ export default function Settings() {
       { id: '4', value: '60k_80k', label: '$60,000 - $80,000' },
       { id: '5', value: 'over_80k', label: 'Over $80,000' },
     ],
+    
+    // Application fields
+    applicationStatuses: [
+      { id: '1', value: 'draft', label: 'Draft' },
+      { id: '2', value: 'submitted', label: 'Submitted' },
+      { id: '3', value: 'under-review', label: 'Under Review' },
+      { id: '4', value: 'accepted', label: 'Accepted' },
+      { id: '5', value: 'rejected', label: 'Rejected' },
+      { id: '6', value: 'waitlisted', label: 'Waitlisted' },
+    ],
+    degreeTypes: [
+      { id: '1', value: 'bachelors', label: 'Bachelor\'s' },
+      { id: '2', value: 'masters', label: 'Master\'s' },
+      { id: '3', value: 'phd', label: 'PhD' },
+      { id: '4', value: 'diploma', label: 'Diploma' },
+      { id: '5', value: 'certificate', label: 'Certificate' },
+    ],
+    intakeSemesters: [
+      { id: '1', value: 'fall', label: 'Fall' },
+      { id: '2', value: 'spring', label: 'Spring' },
+      { id: '3', value: 'summer', label: 'Summer' },
+      { id: '4', value: 'winter', label: 'Winter' },
+    ],
+    
+    // Admission fields
+    admissionDecisions: [
+      { id: '1', value: 'accepted', label: 'Accepted' },
+      { id: '2', value: 'rejected', label: 'Rejected' },
+      { id: '3', value: 'waitlisted', label: 'Waitlisted' },
+      { id: '4', value: 'conditional', label: 'Conditional' },
+    ],
+    visaStatuses: [
+      { id: '1', value: 'not-applied', label: 'Not Applied' },
+      { id: '2', value: 'pending', label: 'Pending' },
+      { id: '3', value: 'approved', label: 'Approved' },
+      { id: '4', value: 'rejected', label: 'Rejected' },
+    ],
+    
+    // Shared fields
+    countries: [
+      { id: '1', value: 'canada', label: 'Canada' },
+      { id: '2', value: 'usa', label: 'United States' },
+      { id: '3', value: 'uk', label: 'United Kingdom' },
+      { id: '4', value: 'australia', label: 'Australia' },
+      { id: '5', value: 'new-zealand', label: 'New Zealand' },
+      { id: '6', value: 'germany', label: 'Germany' },
+      { id: '7', value: 'france', label: 'France' },
+      { id: '8', value: 'netherlands', label: 'Netherlands' },
+    ],
+    programs: [
+      { id: '1', value: 'business-admin', label: 'Business Administration' },
+      { id: '2', value: 'computer-science', label: 'Computer Science' },
+      { id: '3', value: 'engineering', label: 'Engineering' },
+      { id: '4', value: 'medicine', label: 'Medicine' },
+      { id: '5', value: 'law', label: 'Law' },
+      { id: '6', value: 'arts-humanities', label: 'Arts & Humanities' },
+      { id: '7', value: 'social-sciences', label: 'Social Sciences' },
+      { id: '8', value: 'natural-sciences', label: 'Natural Sciences' },
+    ],
   });
 
   const [newOptionInputs, setNewOptionInputs] = useState<Record<string, { value: string; label: string }>>({});
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   const addOption = (category: keyof DropdownConfig) => {
     const newOption: DropdownOption = {
@@ -481,22 +552,56 @@ export default function Settings() {
     }
   };
 
-  const renderOptionCategory = (
+  const renderFieldRow = (
     title: string,
     category: keyof DropdownConfig,
     description: string
   ) => (
-    <Card>
+    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+      <div className="flex-1">
+        <div className="flex items-center space-x-2">
+          <h4 className="font-medium">{title}</h4>
+          <Badge variant="outline" className="text-xs">
+            {config[category].length} options
+          </Badge>
+        </div>
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      </div>
+      <Select
+        value={editingField === category ? "edit" : ""}
+        onValueChange={(value) => {
+          if (value === "edit") {
+            setEditingField(category);
+          } else if (value === "add") {
+            setNewOptionInputs(prev => ({
+              ...prev,
+              [category]: { value: '', label: '' }
+            }));
+          }
+        }}
+      >
+        <SelectTrigger className="w-32">
+          <SelectValue placeholder="Edit" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="edit">Edit Options</SelectItem>
+          <SelectItem value="add">Add Option</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  const renderFieldEditor = (category: keyof DropdownConfig) => (
+    <Card className="mt-4">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center">
-              <SettingsIcon className="w-4 h-4 mr-2" />
-              {title}
-            </CardTitle>
-            <p className="text-sm text-gray-500 mt-1">{description}</p>
-          </div>
-          <HelpTooltip content={`Manage the available options for ${title.toLowerCase()}. Add new options or remove existing ones.`} />
+          <CardTitle className="text-lg">
+            Edit {category.charAt(0).toUpperCase() + category.slice(1).replace(/([A-Z])/g, ' $1')} Options
+          </CardTitle>
+          <Button variant="outline" size="sm" onClick={() => setEditingField(null)}>
+            <X className="w-4 h-4 mr-2" />
+            Close
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -586,82 +691,105 @@ export default function Settings() {
           </TabsList>
 
           <TabsContent value="fields" className="space-y-6">
-            <div className="flex justify-end">
-              <Button onClick={saveConfiguration}>
-                <Save className="w-4 h-4 mr-2" />
-                Save Configuration
-              </Button>
+            <div className="space-y-6">
+              {/* Lead Fields */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <SettingsIcon className="w-4 h-4 mr-2 text-blue-600" />
+                    Lead Fields
+                  </CardTitle>
+                  <p className="text-sm text-gray-500">Manage dropdown options for lead management</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {renderFieldRow("Lead Status", "leadStatuses", "Status options for lead management")}
+                  {renderFieldRow("Lead Source", "leadSources", "Sources where leads can come from")}
+                  {renderFieldRow("Lead Expectation", "leadExpectations", "Expected quality level of leads")}
+                  {renderFieldRow("Lead Type", "leadTypes", "Types of educational programs")}
+                </CardContent>
+              </Card>
+
+              {/* Student Fields */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <SettingsIcon className="w-4 h-4 mr-2 text-green-600" />
+                    Student Fields
+                  </CardTitle>
+                  <p className="text-sm text-gray-500">Manage dropdown options for student management</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {renderFieldRow("Student Status", "studentStatuses", "Status options for student tracking")}
+                  {renderFieldRow("Nationality", "nationalities", "Available nationality options")}
+                  {renderFieldRow("English Proficiency", "englishProficiency", "English test scores and levels")}
+                  {renderFieldRow("Budget Range", "budgetRanges", "Student budget categories")}
+                </CardContent>
+              </Card>
+
+              {/* Application Fields */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <SettingsIcon className="w-4 h-4 mr-2 text-purple-600" />
+                    Application Fields
+                  </CardTitle>
+                  <p className="text-sm text-gray-500">Manage dropdown options for application tracking</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {renderFieldRow("Application Status", "applicationStatuses", "Status options for application progress")}
+                  {renderFieldRow("Degree Type", "degreeTypes", "Available degree levels")}
+                  {renderFieldRow("Intake Semester", "intakeSemesters", "University intake periods")}
+                </CardContent>
+              </Card>
+
+              {/* Admission Fields */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <SettingsIcon className="w-4 h-4 mr-2 text-orange-600" />
+                    Admission Fields
+                  </CardTitle>
+                  <p className="text-sm text-gray-500">Manage dropdown options for admission tracking</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {renderFieldRow("Admission Decision", "admissionDecisions", "University admission decisions")}
+                  {renderFieldRow("Visa Status", "visaStatuses", "Student visa application status")}
+                </CardContent>
+              </Card>
+
+              {/* Shared Fields */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <SettingsIcon className="w-4 h-4 mr-2 text-gray-600" />
+                    Shared Fields
+                  </CardTitle>
+                  <p className="text-sm text-gray-500">Manage dropdown options used across multiple entities</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {renderFieldRow("Countries", "countries", "Available destination countries")}
+                  {renderFieldRow("Programs", "programs", "Available study programs")}
+                </CardContent>
+              </Card>
+
+              {/* Field Editor */}
+              {editingField && renderFieldEditor(editingField)}
+
+              {/* Configuration Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Configuration Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p>• Changes to dropdown options will be reflected in all forms throughout the system.</p>
+                    <p>• Configuration is saved locally in your browser's storage.</p>
+                    <p>• For a multi-user environment, these settings would typically be managed by an administrator.</p>
+                    <p>• Removing an option that's currently in use may affect existing records.</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {renderOptionCategory(
-                "Lead Statuses",
-                "leadStatuses",
-                "Status options for lead management"
-              )}
-
-              {renderOptionCategory(
-                "Student Statuses",
-                "studentStatuses",
-                "Status options for student tracking"
-              )}
-
-              {renderOptionCategory(
-                "Application Statuses",
-                "applicationStatuses",
-                "Status options for application progress"
-              )}
-
-              {renderOptionCategory(
-                "Countries",
-                "countries",
-                "Available destination countries"
-              )}
-
-              {renderOptionCategory(
-                "Lead Sources",
-                "leadSources",
-                "Sources where leads can come from"
-              )}
-
-              {renderOptionCategory(
-                "Degree Types",
-                "degreeTypes",
-                "Available degree levels"
-              )}
-
-              {renderOptionCategory(
-                "Intake Semesters",
-                "intakeSemesters",
-                "University intake periods"
-              )}
-
-              {renderOptionCategory(
-                "English Proficiency",
-                "englishProficiency",
-                "English test scores and levels"
-              )}
-
-              {renderOptionCategory(
-                "Budget Ranges",
-                "budgetRanges",
-                "Student budget categories"
-              )}
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuration Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <p>• Changes to dropdown options will be reflected in all forms throughout the system.</p>
-                  <p>• Configuration is saved locally in your browser's storage.</p>
-                  <p>• For a multi-user environment, these settings would typically be managed by an administrator.</p>
-                  <p>• Removing an option that's currently in use may affect existing records.</p>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
