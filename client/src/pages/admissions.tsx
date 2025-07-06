@@ -202,7 +202,14 @@ export default function Admissions() {
                 </TableHeader>
                 <TableBody>
                   {filteredAdmissions.map((admission) => (
-                    <TableRow key={admission.id}>
+                    <TableRow 
+                      key={admission.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => {
+                        setSelectedAdmission(admission);
+                        setIsDetailsModalOpen(true);
+                      }}
+                    >
                       <TableCell className="font-medium">
                         {getStudentName(admission.studentId)}
                       </TableCell>
@@ -246,7 +253,11 @@ export default function Admissions() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button 
+                              variant="ghost" 
+                              className="h-8 w-8 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

@@ -216,7 +216,14 @@ export default function Applications() {
                 </TableHeader>
                 <TableBody>
                   {filteredApplications.map((application) => (
-                    <TableRow key={application.id}>
+                    <TableRow 
+                      key={application.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => {
+                        setSelectedApplication(application);
+                        setIsDetailsModalOpen(true);
+                      }}
+                    >
                       <TableCell className="font-medium">
                         {getStudentName(application.studentId)}
                       </TableCell>
@@ -259,7 +266,11 @@ export default function Applications() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button 
+                              variant="ghost" 
+                              className="h-8 w-8 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

@@ -215,7 +215,14 @@ export default function Students() {
                 </TableHeader>
                 <TableBody>
                   {filteredStudents.map((student) => (
-                    <TableRow key={student.id}>
+                    <TableRow 
+                      key={student.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => {
+                        setSelectedStudentId(student.id);
+                        setIsProfileModalOpen(true);
+                      }}
+                    >
                       <TableCell className="font-medium">{student.name}</TableCell>
                       <TableCell>
                         <div className="space-y-1">
@@ -265,7 +272,11 @@ export default function Students() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button 
+                              variant="ghost" 
+                              className="h-8 w-8 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
