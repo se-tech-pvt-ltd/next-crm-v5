@@ -202,9 +202,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">{lead.name}</h2>
-                  <p className="text-sm text-gray-500">
-                    {lead.email} • {lead.phone}
-                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
