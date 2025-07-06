@@ -277,7 +277,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <UserIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold">{lead.name}</h2>
+                  <h1 className="text-2xl font-bold">{lead.name}</h1>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -319,7 +319,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                 <Button
                   variant="ghost"
                   size="default"
-                  className="w-10 h-10 p-0 rounded-full hover:bg-gray-100 ml-2"
+                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
                   onClick={() => onOpenChange(false)}
                 >
                   <X className="w-5 h-5" />
@@ -332,13 +332,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
           <div className="flex h-[90vh]">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-24">
+            <div className="flex-1 overflow-y-auto p-6 pt-28">
               <div className="space-y-6">
                 {/* Lead Information */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                      Lead Information
+                      <h2 className="text-lg font-semibold">Lead Information</h2>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -515,9 +515,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
             </div>
 
             {/* Right Sidebar - Activity Timeline */}
-            <div className="w-80 bg-gray-50 border-l overflow-hidden">
-              <div className="px-4 py-5 border-b bg-white">
-                <h3 className="font-semibold text-gray-900">Activity Timeline</h3>
+            <div className="w-96 bg-gradient-to-br from-blue-50 to-blue-100 border-l overflow-hidden">
+              <div className="px-4 py-5 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                <h2 className="text-lg font-semibold">Activity Timeline</h2>
               </div>
               <div className="overflow-y-auto h-full pt-2">
                 <ActivityTracker

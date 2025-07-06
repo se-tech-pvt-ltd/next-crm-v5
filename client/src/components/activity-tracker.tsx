@@ -82,14 +82,14 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
     }
   };
 
-  const getActivityIcon = (activityType: string) => {
+  const getActivityIcon = (activityType: string, size: string = "h-4 w-4") => {
     switch (activityType) {
-      case 'created': return <Plus className="h-4 w-4 text-green-500" />;
-      case 'updated': return <ActivityIcon className="h-4 w-4 text-blue-500" />;
-      case 'status_changed': return <ActivityIcon className="h-4 w-4 text-orange-500" />;
-      case 'comment': return <MessageSquare className="h-4 w-4 text-purple-500" />;
-      case 'deleted': return <ActivityIcon className="h-4 w-4 text-red-500" />;
-      default: return <ActivityIcon className="h-4 w-4 text-gray-500" />;
+      case 'created': return <Plus className={`${size} text-green-500`} />;
+      case 'updated': return <ActivityIcon className={`${size} text-blue-500`} />;
+      case 'status_changed': return <ActivityIcon className={`${size} text-orange-500`} />;
+      case 'comment': return <MessageSquare className={`${size} text-purple-500`} />;
+      case 'deleted': return <ActivityIcon className={`${size} text-red-500`} />;
+      default: return <ActivityIcon className={`${size} text-gray-500`} />;
     }
   };
 
@@ -121,19 +121,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   }
 
   return (
-    <Card className="mt-12">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ActivityIcon className="h-4 w-4" />
-          Activity Timeline
-          {entityName && <span className="text-sm font-normal text-gray-500">for {entityName}</span>}
-          <HelpTooltip 
-            content="Track all changes and interactions for this record. Add comments to collaborate with your team and view automatic change logs."
-            className="ml-auto"
-          />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4 p-4">
         {/* Add Activity Section with Blue Gradient Background */}
         <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
           {!isAddingActivity ? (
@@ -216,21 +204,21 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
             </div>
           ) : (
             (activities as Activity[]).map((activity: Activity) => (
-              <div key={activity.id} className="flex gap-3 p-3 border rounded-lg bg-white shadow-sm">
-                {/* User Avatar */}
+              <div key={activity.id} className="flex gap-4 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                {/* User Avatar - Larger and more prominent */}
                 <div className="flex-shrink-0">
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-12 w-12 border-2 border-blue-100">
                     {(() => {
                       // Use dynamic profile image lookup first, then fall back to stored image
                       const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
                       return profileImage ? (
                         <AvatarImage src={profileImage} alt={activity.userName || "User"} />
                       ) : (
-                        <AvatarFallback className="bg-gray-100">
+                        <AvatarFallback className="bg-blue-50 text-blue-600">
                           {activity.userName === "Next Bot" ? (
-                            <Bot className="h-4 w-4 text-blue-600" />
+                            <Bot className="h-6 w-6" />
                           ) : (
-                            <UserIcon className="h-4 w-4 text-gray-600" />
+                            <UserIcon className="h-6 w-6" />
                           )}
                         </AvatarFallback>
                       );
@@ -239,44 +227,51 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                 </div>
                 
                 <div className="flex-grow min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="flex items-center gap-1">
-                      {getActivityIcon(activity.activityType)}
-                      <h4 className="font-medium text-sm">{activity.title}</h4>
-                    </div>
-                    <Badge className={getActivityColor(activity.activityType)} variant="secondary">
-                      {activity.activityType.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mb-2 text-xs text-gray-500">
-                    <span className="font-medium">
+                  {/* User Name - Most prominent */}
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-base text-gray-900">
                       {activity.userName || "Unknown User"}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
-                    </span>
+                    </h4>
+                    {/* Activity type and time - Less prominent */}
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        {getActivityIcon(activity.activityType, "h-3 w-3")}
+                        {activity.activityType.replace('_', ' ')}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
+                      </span>
+                    </div>
                   </div>
                   
+                  {/* Activity Title - Secondary prominence */}
+                  {activity.title && (
+                    <p className="text-sm text-gray-600 mb-2 font-medium">
+                      {activity.title}
+                    </p>
+                  )}
+                  
+                  {/* Comment/Description - Main focus */}
                   {activity.description && (
-                    <p className="text-gray-700 text-sm mb-2 whitespace-pre-wrap">
+                    <p className="text-gray-800 text-sm mb-3 whitespace-pre-wrap leading-relaxed">
                       {activity.description}
                     </p>
                   )}
                   
+                  {/* Field changes - Minimal styling */}
                   {(activity.oldValue || activity.newValue) && (
-                    <div className="text-xs text-gray-500 mb-2 bg-gray-50 p-2 rounded">
+                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border-l-2 border-blue-200">
                       {activity.fieldName && (
-                        <span className="font-medium">{activity.fieldName}: </span>
+                        <span className="font-medium text-gray-600">{activity.fieldName}: </span>
                       )}
                       {activity.oldValue && (
-                        <span className="line-through">{activity.oldValue}</span>
+                        <span className="line-through text-red-500">{activity.oldValue}</span>
                       )}
-                      {activity.oldValue && activity.newValue && <span> → </span>}
+                      {activity.oldValue && activity.newValue && <span className="mx-1">→</span>}
                       {activity.newValue && (
-                        <span className="text-green-600">{activity.newValue}</span>
+                        <span className="text-green-600 font-medium">{activity.newValue}</span>
                       )}
                     </div>
                   )}
@@ -285,7 +280,6 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
             ))
           )}
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
