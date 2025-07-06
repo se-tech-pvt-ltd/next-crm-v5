@@ -16,7 +16,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2 } from 'lucide-react';
+import { User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2, XCircle } from 'lucide-react';
 
 interface LeadDetailsModalProps {
   open: boolean;
@@ -240,8 +240,20 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        {/* Close Button - Top Right Corner */}
+        <div className="absolute top-4 right-4 z-20">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-8 h-8 p-0 rounded-full hover:bg-gray-100"
+            onClick={() => onOpenChange(false)}
+          >
+            <XCircle className="w-5 h-5 text-gray-500" />
+          </Button>
+        </div>
+
         {/* Action Items in Top Right Corner */}
-        <div className="absolute top-4 right-4 z-10 flex items-center space-x-4">
+        <div className="absolute top-4 right-14 z-10 flex items-center space-x-4"></div>
           {/* Status dropdown - editable without edit mode */}
           <div className="flex items-center space-x-2">
             <Label className="text-sm font-medium">Status:</Label>
@@ -297,7 +309,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center text-lg">
+                    <CardTitle className="flex items-center text-xl font-semibold">
                       <UserIcon className="w-5 h-5 mr-2" />
                       Lead Information
                     </CardTitle>
@@ -535,7 +547,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
           {/* Activity Sidebar - Right Side - Increased width */}
           <div className="w-96 border-l bg-gray-50 overflow-y-auto">
-            <div className="p-4 pt-20">
+            <div className="p-4 pt-6">
               <ActivityTracker
                 entityType="lead"
                 entityId={lead.id}
