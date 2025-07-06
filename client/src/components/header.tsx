@@ -9,6 +9,7 @@ import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddStudentModal } from './add-student-modal';
 import { AddApplicationModal } from './add-application-modal';
+import { AddAdmissionModal } from './add-admission-modal';
 
 interface HeaderProps {
   title: string;
@@ -21,6 +22,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
 
   return (
@@ -84,12 +86,35 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             )}
             
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell size={18} />
-              <Badge className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
-                3
-              </Badge>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell size={18} />
+                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
+                    3
+                  </Badge>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="p-3">
+                  <h4 className="font-medium text-sm mb-2">Notifications</h4>
+                  <div className="space-y-2">
+                    <div className="p-2 bg-blue-50 rounded-md">
+                      <p className="text-xs text-blue-800">New lead assigned: Emma Thompson</p>
+                      <p className="text-xs text-gray-500">2 minutes ago</p>
+                    </div>
+                    <div className="p-2 bg-green-50 rounded-md">
+                      <p className="text-xs text-green-800">Application approved: University of Toronto</p>
+                      <p className="text-xs text-gray-500">1 hour ago</p>
+                    </div>
+                    <div className="p-2 bg-orange-50 rounded-md">
+                      <p className="text-xs text-orange-800">Visa status update required</p>
+                      <p className="text-xs text-gray-500">3 hours ago</p>
+                    </div>
+                  </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {/* Quick Actions */}
             <DropdownMenu>
@@ -112,6 +137,10 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                   <GraduationCap size={16} className="mr-2" />
                   New Application
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsAddAdmissionModalOpen(true)}>
+                  <GraduationCap size={16} className="mr-2" />
+                  Add Admission
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -129,6 +158,10 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
       <AddApplicationModal 
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
+      />
+      <AddAdmissionModal 
+        open={isAddAdmissionModalOpen}
+        onOpenChange={setIsAddAdmissionModalOpen}
       />
     </>
   );

@@ -5,10 +5,17 @@ import { insertLeadSchema, insertStudentSchema, insertApplicationSchema, insertA
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Mock current user for demonstration (in production, this would come from authentication)
+  const getCurrentUser = () => ({
+    id: 'counselor1',
+    role: 'counselor' // Change this to test different roles: 'counselor', 'branch_manager', 'admin_staff'
+  });
+
   // Lead routes
   app.get("/api/leads", async (req, res) => {
     try {
-      const leads = await storage.getLeads();
+      const currentUser = getCurrentUser();
+      const leads = await storage.getLeads(currentUser.id, currentUser.role);
       res.json(leads);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch leads" });
@@ -18,7 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/leads/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const lead = await storage.getLead(id);
+      const currentUser = getCurrentUser();
+      const lead = await storage.getLead(id, currentUser.id, currentUser.role);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -74,7 +82,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Student routes
   app.get("/api/students", async (req, res) => {
     try {
-      const students = await storage.getStudents();
+      const currentUser = getCurrentUser();
+      const students = await storage.getStudents(currentUser.id, currentUser.role);
       res.json(students);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch students" });
@@ -84,7 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/students/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const student = await storage.getStudent(id);
+      const currentUser = getCurrentUser();
+      const student = await storage.getStudent(id, currentUser.id, currentUser.role);
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
@@ -140,7 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Application routes
   app.get("/api/applications", async (req, res) => {
     try {
-      const applications = await storage.getApplications();
+      const currentUser = getCurrentUser();
+      const applications = await storage.getApplications(currentUser.id, currentUser.role);
       res.json(applications);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch applications" });
@@ -150,7 +161,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/applications/student/:studentId", async (req, res) => {
     try {
       const studentId = parseInt(req.params.studentId);
-      const applications = await storage.getApplicationsByStudent(studentId);
+      const currentUser = getCurrentUser();
+      const applications = await storage.getApplicationsByStudent(studentId, currentUser.id, currentUser.role);
       res.json(applications);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch applications" });
@@ -190,7 +202,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admission routes
   app.get("/api/admissions", async (req, res) => {
     try {
-      const admissions = await storage.getAdmissions();
+      const currentUser = getCurrentUser();
+      const admissions = await storage.getAdmissions(currentUser.id, currentUser.role);
       res.json(admissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch admissions" });
@@ -200,7 +213,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admissions/student/:studentId", async (req, res) => {
     try {
       const studentId = parseInt(req.params.studentId);
-      const admissions = await storage.getAdmissionsByStudent(studentId);
+      const currentUser = getCurrentUser();
+      const admissions = await storage.getAdmissionsByStudent(studentId, currentUser.id, currentUser.role);
       res.json(admissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch admissions" });

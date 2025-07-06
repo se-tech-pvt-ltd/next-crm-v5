@@ -39,17 +39,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
 
   const { data: student } = useQuery<Student>({
-    queryKey: ['/api/students', studentId],
+    queryKey: [`/api/students/${studentId}`],
     enabled: !!studentId,
   });
 
   const { data: applications } = useQuery<Application[]>({
-    queryKey: ['/api/applications/student', studentId],
+    queryKey: [`/api/applications/student/${studentId}`],
     enabled: !!studentId,
   });
 
   const { data: admissions } = useQuery<Admission[]>({
-    queryKey: ['/api/admissions/student', studentId],
+    queryKey: [`/api/admissions/student/${studentId}`],
     enabled: !!studentId,
   });
 

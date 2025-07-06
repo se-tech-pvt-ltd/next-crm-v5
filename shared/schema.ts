@@ -1,6 +1,18 @@
-import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Users table for role-based access control
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  role: text("role").notNull().default("counselor"), // counselor, branch_manager, admin_staff
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
@@ -12,6 +24,7 @@ export const leads = pgTable("leads", {
   source: text("source"),
   status: text("status").notNull().default("new"),
   notes: text("notes"),
+  counselorId: text("counselor_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -32,6 +45,7 @@ export const students = pgTable("students", {
   budget: text("budget"),
   status: text("status").notNull().default("active"),
   notes: text("notes"),
+  counselorId: text("counselor_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -72,6 +86,11 @@ export const admissions = pgTable("admissions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertLeadSchema = createInsertSchema(leads).omit({
   id: true,
   createdAt: true,
@@ -96,6 +115,7 @@ export const insertAdmissionSchema = createInsertSchema(admissions).omit({
   updatedAt: true,
 });
 
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type InsertStudent = z.infer<typeof insertStudentSchema>;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
@@ -122,6 +142,7 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
 
+export type User = typeof users.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
 export type Student = typeof students.$inferSelect;
 export type Application = typeof applications.$inferSelect;
