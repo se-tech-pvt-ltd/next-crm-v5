@@ -121,7 +121,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   }
 
   return (
-    <Card className="mt-6">
+    <Card className="mt-12">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ActivityIcon className="h-4 w-4" />
