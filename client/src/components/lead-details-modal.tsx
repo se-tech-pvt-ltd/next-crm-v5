@@ -240,57 +240,59 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        {/* Action Items in Top Right Corner */}
+        <div className="absolute top-4 right-4 z-10 flex items-center space-x-4">
+          {/* Status dropdown - editable without edit mode */}
+          <div className="flex items-center space-x-2">
+            <Label className="text-sm font-medium">Status:</Label>
+            <Select value={currentStatus} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="contacted">Contacted</SelectItem>
+                <SelectItem value="qualified">Qualified</SelectItem>
+                <SelectItem value="converted">Converted</SelectItem>
+                <SelectItem value="lost">Lost</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Convert to Student and Mark as Lost buttons */}
+          <div className="flex space-x-2">
+            {!isAlreadyConverted && (
+              <Button size="sm" onClick={() => setShowConvertModal(true)}>
+                <UserPlus className="w-4 h-4 mr-1" />
+                Convert to Student
+              </Button>
+            )}
+            {isAlreadyConverted && (
+              <Badge variant="secondary">Already Converted</Badge>
+            )}
+            
+            {/* Mark as Lost button */}
+            {lead.status !== 'lost' && (
+              <Button 
+                size="sm" 
+                variant="destructive" 
+                onClick={() => setShowMarkAsLostModal(true)}
+              >
+                Mark as Lost
+              </Button>
+            )}
+          </div>
+        </div>
+
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 pt-20">
             <DialogHeader className="pb-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <DialogTitle className="text-xl font-semibold">
                     {lead.name}
                   </DialogTitle>
-                </div>
-                <div className="flex items-center space-x-4">
-                  {/* Status dropdown - editable without edit mode */}
-                  <div className="flex items-center space-x-2">
-                    <Label className="text-sm font-medium">Status:</Label>
-                    <Select value={currentStatus} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="contacted">Contacted</SelectItem>
-                        <SelectItem value="qualified">Qualified</SelectItem>
-                        <SelectItem value="converted">Converted</SelectItem>
-                        <SelectItem value="lost">Lost</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* Convert to Student and Mark as Lost buttons */}
-                  <div className="flex space-x-2">
-                    {!isAlreadyConverted && (
-                      <Button size="sm" onClick={() => setShowConvertModal(true)}>
-                        <UserPlus className="w-4 h-4 mr-1" />
-                        Convert to Student
-                      </Button>
-                    )}
-                    {isAlreadyConverted && (
-                      <Badge variant="secondary">Already Converted</Badge>
-                    )}
-                    
-                    {/* Mark as Lost button */}
-                    {lead.status !== 'lost' && (
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
-                        onClick={() => setShowMarkAsLostModal(true)}
-                      >
-                        Mark as Lost
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </div>
             </DialogHeader>
@@ -531,7 +533,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
           {/* Activity Sidebar - Right Side - Increased width */}
           <div className="w-96 border-l bg-gray-50 overflow-y-auto">
-            <div className="p-4">
+            <div className="p-4 pt-20">
               <ActivityTracker
                 entityType="lead"
                 entityId={lead.id}
