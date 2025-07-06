@@ -105,4 +105,17 @@ Changelog:
 
 ```
 Preferred communication style: Simple, everyday language.
+User interested in understanding high-level architecture and development processes.
 ```
+
+## Database Migration Steps
+
+When adding a database to a functional app:
+
+1. **Database Setup**: Create database connection and configure environment variables
+2. **Schema Design**: Define data models, relationships, and constraints
+3. **Migration Tools**: Use ORM migrations to version control schema changes
+4. **Storage Layer**: Implement database-specific storage that adheres to existing interface
+5. **API Integration**: Update routes to use new database storage
+6. **Testing**: Add sample data and test all CRUD operations
+7. **Deployment**: Configure database hosting and connection security
