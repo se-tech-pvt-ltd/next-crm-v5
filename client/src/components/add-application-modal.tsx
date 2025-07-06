@@ -7,11 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertApplicationSchema, type Student } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AddApplicationModalProps {
   open: boolean;
@@ -22,6 +26,7 @@ interface AddApplicationModalProps {
 export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplicationModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -92,22 +97,62 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 control={form.control}
                 name="studentId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Student *</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select student" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {students?.map((student) => (
-                          <SelectItem key={student.id} value={student.id.toString()}>
-                            {student.name} ({student.email})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={studentDropdownOpen} onOpenChange={setStudentDropdownOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? students?.find((student) => student.id === field.value)
+                                ? `${students.find((student) => student.id === field.value)?.name} (${students.find((student) => student.id === field.value)?.email})`
+                                : "Select student"
+                              : "Select student"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Search by name or email..." />
+                          <CommandList>
+                            <CommandEmpty>No students found.</CommandEmpty>
+                            <CommandGroup>
+                              {students?.map((student) => (
+                                <CommandItem
+                                  value={`${student.name} ${student.email}`}
+                                  key={student.id}
+                                  onSelect={() => {
+                                    field.onChange(student.id);
+                                    setStudentDropdownOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      student.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{student.name}</span>
+                                    <span className="text-sm text-gray-500">{student.email}</span>
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
