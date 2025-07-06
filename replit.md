@@ -97,7 +97,8 @@ RESTful API endpoints organized by entity:
 
 ```
 Changelog:
-- July 06, 2025. Initial setup
+- July 06, 2025. Initial setup and full feature implementation
+- July 06, 2025. Migrated from in-memory storage to PostgreSQL database
 ```
 
 ## User Preferences
