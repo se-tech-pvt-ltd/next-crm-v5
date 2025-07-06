@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { School, GraduationCap, Calendar, DollarSign, Clock, User, Edit, ExternalLink } from "lucide-react";
+import { School, GraduationCap, Calendar, DollarSign, Clock, User, Edit, ExternalLink, X } from "lucide-react";
 import { Application, Student } from "@shared/schema";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -47,21 +47,42 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              <School className="h-5 w-5" />
-              Application Details
-            </DialogTitle>
-            <Button variant="outline" size="sm">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Details
-            </Button>
-          </div>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+        <DialogTitle className="sr-only">Application Details</DialogTitle>
         
-        <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white border-b p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <School className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Application Details</h1>
+                <h2 className="text-sm text-gray-600">{application.university}</h2>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Details
+              </Button>
+              <Button
+                variant="ghost"
+                size="default"
+                className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="overflow-y-auto p-6 space-y-6">
           {/* Header with Status */}
           <div className="flex items-start justify-between">
             <div className="flex-1">

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trophy, School, GraduationCap, Calendar, DollarSign, Clock, User, CreditCard, Plane, Edit, ExternalLink } from "lucide-react";
+import { Trophy, School, GraduationCap, Calendar, DollarSign, Clock, User, CreditCard, Plane, Edit, ExternalLink, X } from "lucide-react";
 import { Admission, Student } from "@shared/schema";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

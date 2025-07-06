@@ -388,7 +388,6 @@ export class DatabaseStorage implements IStorage {
         applicationFee: applications.applicationFee,
         status: applications.status,
         notes: applications.notes,
-        submissionDate: applications.submissionDate,
         decisionDate: applications.decisionDate,
         createdAt: applications.createdAt,
         updatedAt: applications.updatedAt

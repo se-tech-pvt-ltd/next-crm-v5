@@ -41,8 +41,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       intakeSemester: '',
       applicationFee: '',
       status: 'draft',
-      submissionDate: null,
-      decisionDate: null,
 
     },
   });
@@ -255,41 +253,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="submissionDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Submission Date</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="date" 
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="decisionDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Expected Decision Date</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="date" 
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">

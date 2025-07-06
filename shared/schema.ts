@@ -68,7 +68,6 @@ export const applications = pgTable("applications", {
   applicationFee: text("application_fee"),
   status: text("status").notNull().default("draft"),
   notes: text("notes"),
-  submissionDate: timestamp("submission_date"),
   decisionDate: timestamp("decision_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

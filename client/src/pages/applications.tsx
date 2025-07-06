@@ -301,7 +301,7 @@ export default function Applications() {
                       <TableCell>
                         <div className="flex items-center text-sm text-gray-500">
                           <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(application.submissionDate)}
+                          {formatDate(application.createdAt)}
                         </div>
                       </TableCell>
                       <TableCell>
