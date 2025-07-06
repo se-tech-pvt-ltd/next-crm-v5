@@ -1,10 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Phone, MapPin, GraduationCap, Users, FileText, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, Mail, Phone, MapPin, GraduationCap, Users, FileText, Clock, Edit } from "lucide-react";
 import { Lead } from "@shared/schema";
 import { format } from "date-fns";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface LeadDetailsModalProps {
   open: boolean;
@@ -13,6 +18,24 @@ interface LeadDetailsModalProps {
 }
 
 export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalProps) {
+  const [currentStatus, setCurrentStatus] = useState<string>(lead?.status || 'new');
+  const queryClient = useQueryClient();
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      if (!lead) return;
+      return apiRequest('PUT', `/api/leads/${lead.id}`, { status: newStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+    },
+  });
+
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateStatusMutation.mutate(newStatus);
+  };
+
   if (!lead) return null;
 
   const getStatusColor = (status: string) => {
@@ -39,24 +62,54 @@ export function LeadDetailsModal({ open, onOpenChange, lead }: LeadDetailsModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Lead Details
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Lead Details
+            </DialogTitle>
+            <Button variant="outline" size="sm">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Details
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Header Info */}
+          {/* Header with Status */}
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold">{lead.name}</h2>
-              <p className="text-gray-600">{lead.email}</p>
+            <div className="flex-1">
+              <h2 className="text-2xl font-semibold text-gray-900">{lead.name}</h2>
+              <p className="text-lg text-gray-600 mt-1">{lead.email}</p>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-sm text-gray-500">
+                  <span className="font-medium">Lead ID:</span> #{lead.id}
+                </div>
+                {lead.phone && (
+                  <div className="text-sm text-gray-500">
+                    <span className="font-medium">Phone:</span> {lead.phone}
+                  </div>
+                )}
+              </div>
             </div>
-            <Badge className={getStatusColor(lead.status)}>
-              {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-            </Badge>
+            <div className="ml-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lead Status
+              </label>
+              <Select value={currentStatus} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="qualified">Qualified</SelectItem>
+                  <SelectItem value="converted">Converted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Separator />

@@ -1,133 +1,197 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { School, GraduationCap, Calendar, DollarSign, FileText, Clock, User } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { School, GraduationCap, Calendar, DollarSign, FileText, Clock, User, Edit, ExternalLink } from "lucide-react";
 import { Application, Student } from "@shared/schema";
 import { format } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 
 interface ApplicationDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   application: Application | null;
+  onOpenStudentProfile?: (studentId: number) => void;
 }
 
-export function ApplicationDetailsModal({ open, onOpenChange, application }: ApplicationDetailsModalProps) {
+export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
+  const [currentStatus, setCurrentStatus] = useState<string>(application?.status || 'draft');
+  const queryClient = useQueryClient();
+
   const { data: student } = useQuery({
-    queryKey: ['/api/students', application?.studentId],
+    queryKey: [`/api/students/${application?.studentId}`],
     enabled: !!application?.studentId,
   });
 
-  if (!application) return null;
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      if (!application) return;
+      return apiRequest('PUT', `/api/applications/${application.id}`, { status: newStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
+    },
+  });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'submitted': return 'bg-blue-100 text-blue-800';
-      case 'under-review': return 'bg-yellow-100 text-yellow-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'waitlisted': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateStatusMutation.mutate(newStatus);
   };
+
+  if (!application) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <School className="h-5 w-5" />
-            Application Details
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <School className="h-5 w-5" />
+              Application Details
+            </DialogTitle>
+            <Button variant="outline" size="sm">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Details
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Header Info */}
+          {/* Header with Status */}
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold">{application.university}</h2>
-              <p className="text-gray-600">{application.program}</p>
+            <div className="flex-1">
+              <h2 className="text-2xl font-semibold text-gray-900">{application.university}</h2>
+              <p className="text-lg text-gray-600 mt-1">{application.program}</p>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-sm text-gray-500">
+                  <span className="font-medium">Intake:</span> {application.intakeSemester} {application.intakeYear}
+                </div>
+                <div className="text-sm text-gray-500">
+                  <span className="font-medium">Application ID:</span> #{application.id}
+                </div>
+              </div>
             </div>
-            <Badge className={getStatusColor(application.status)}>
-              {application.status.charAt(0).toUpperCase() + application.status.slice(1).replace('-', ' ')}
-            </Badge>
+            <div className="ml-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Application Status
+              </label>
+              <Select value={currentStatus} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="under-review">Under Review</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Separator />
 
-          {/* Student Information */}
+          {/* Student Information with Link */}
           {student && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Student Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span>{student.name}</span>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Student Information
+                  </CardTitle>
+                  {onOpenStudentProfile && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onOpenStudentProfile(student.id)}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Profile
+                    </Button>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500">Email:</span>
-                  <span>{student.email}</span>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Name</span>
+                    <p className="font-medium">{student.name}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Email</span>
+                    <p className="text-sm">{student.email}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Phone</span>
+                    <p className="text-sm">{student.phone || 'Not provided'}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Program Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4" />
-                Program Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2">
-                <School className="h-4 w-4 text-gray-500" />
-                <span>{application.university}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-gray-500" />
-                <span>{application.program}</span>
-              </div>
-              {application.degree && (
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500">Degree:</span>
-                  <span>{application.degree}</span>
+          {/* Program & University Details */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4" />
+                  Program Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Program</span>
+                  <p className="mt-1">{application.program}</p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                {application.degree && (
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Degree Type</span>
+                    <p className="mt-1">{application.degree}</p>
+                  </div>
+                )}
+                {application.specialization && (
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Specialization</span>
+                    <p className="mt-1">{application.specialization}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* Intake Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Intake Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {application.intakeYear && (
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500">Year:</span>
-                  <span>{application.intakeYear}</span>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Important Dates
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Application Deadline</span>
+                  <p className="mt-1">{application.applicationDeadline ? format(new Date(application.applicationDeadline), 'PPP') : 'Not specified'}</p>
                 </div>
-              )}
-              {application.intakeSemester && (
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500">Semester:</span>
-                  <span>{application.intakeSemester}</span>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Submission Date</span>
+                  <p className="mt-1">{application.submissionDate ? format(new Date(application.submissionDate), 'PPP') : 'Not submitted'}</p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                {application.decisionDate && (
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Decision Date</span>
+                    <p className="mt-1">{format(new Date(application.decisionDate), 'PPP')}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Financial Information */}
           <Card>
@@ -138,34 +202,54 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {application.applicationFee && (
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-gray-500" />
-                  <span>Application Fee: {application.applicationFee}</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Application Fee</span>
+                  <p className="mt-1 font-medium">{application.applicationFee || 'Not specified'}</p>
                 </div>
-              )}
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Tuition Fee</span>
+                  <p className="mt-1 font-medium">{application.tuitionFee || 'Not specified'}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Living Costs</span>
+                  <p className="mt-1 font-medium">{application.estimatedLivingCosts || 'Not specified'}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Important Dates */}
+          {/* Requirements & Documents */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Important Dates
+                <FileText className="h-4 w-4" />
+                Requirements & Documents
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {application.submissionDate && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Submission Date:</span>
-                  <span>{format(new Date(application.submissionDate), 'MMM dd, yyyy')}</span>
+            <CardContent className="space-y-4">
+              {application.englishProficiencyRequirement && (
+                <div>
+                  <span className="text-sm font-medium text-gray-500">English Proficiency</span>
+                  <p className="mt-1">{application.englishProficiencyRequirement}</p>
                 </div>
               )}
-              {application.decisionDate && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Decision Date:</span>
-                  <span>{format(new Date(application.decisionDate), 'MMM dd, yyyy')}</span>
+              {application.academicRequirements && (
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Academic Requirements</span>
+                  <p className="mt-1">{application.academicRequirements}</p>
+                </div>
+              )}
+              {application.documentsSubmitted && application.documentsSubmitted.length > 0 && (
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Documents Submitted</span>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {application.documentsSubmitted.map((doc, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {doc}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -175,40 +259,19 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
           {application.notes && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Notes
-                </CardTitle>
+                <CardTitle>Additional Notes</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 whitespace-pre-wrap">{application.notes}</p>
+                <p className="text-gray-700 leading-relaxed">{application.notes}</p>
               </CardContent>
             </Card>
           )}
 
-          {/* Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {application.createdAt && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Created:</span>
-                  <span>{format(new Date(application.createdAt), 'MMM dd, yyyy HH:mm')}</span>
-                </div>
-              )}
-              {application.updatedAt && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Last Updated:</span>
-                  <span>{format(new Date(application.updatedAt), 'MMM dd, yyyy HH:mm')}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Created/Updated Timeline */}
+          <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t">
+            <span>Created: {format(new Date(application.createdAt), 'PPP p')}</span>
+            <span>Last Updated: {format(new Date(application.updatedAt), 'PPP p')}</span>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

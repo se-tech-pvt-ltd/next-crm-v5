@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Student, Application, Admission } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,7 @@ import {
   Edit,
   Plus
 } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { AddApplicationModal } from './add-application-modal';
 
 interface StudentProfileModalProps {
@@ -33,6 +34,7 @@ interface StudentProfileModalProps {
 
 export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -89,6 +91,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     },
   });
 
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateStatusMutation.mutate(newStatus);
+  };
+
+  // Update current status when student data changes
+  React.useEffect(() => {
+    if (student?.status) {
+      setCurrentStatus(student.status);
+    }
+  }, [student?.status]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -120,10 +134,24 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl">{student.name} - Student Profile</DialogTitle>
-              <div className="flex items-center space-x-2">
-                <Badge className={getStatusColor(student.status || 'active')}>
-                  {student.status || 'active'}
-                </Badge>
+              <div className="flex items-center space-x-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Student Status
+                  </label>
+                  <Select value={currentStatus} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="admitted">Admitted</SelectItem>
+                      <SelectItem value="enrolled">Enrolled</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button size="sm" variant="outline">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile

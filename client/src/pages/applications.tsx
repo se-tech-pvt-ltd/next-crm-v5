@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { ApplicationDetailsModal } from '@/components/application-details-modal';
+import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Application, Student } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +22,8 @@ export default function Applications() {
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [isStudentProfileModalOpen, setIsStudentProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -316,6 +319,17 @@ export default function Applications() {
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
         application={selectedApplication}
+        onOpenStudentProfile={(studentId) => {
+          setSelectedStudentId(studentId);
+          setIsStudentProfileModalOpen(true);
+          setIsDetailsModalOpen(false);
+        }}
+      />
+      
+      <StudentProfileModal 
+        open={isStudentProfileModalOpen}
+        onOpenChange={setIsStudentProfileModalOpen}
+        studentId={selectedStudentId}
       />
     </Layout>
   );

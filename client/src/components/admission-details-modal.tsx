@@ -1,23 +1,47 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, School, GraduationCap, Calendar, DollarSign, FileText, Clock, User, CreditCard, Plane } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trophy, School, GraduationCap, Calendar, DollarSign, FileText, Clock, User, CreditCard, Plane, Edit, ExternalLink } from "lucide-react";
 import { Admission, Student } from "@shared/schema";
 import { format } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 
 interface AdmissionDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   admission: Admission | null;
+  onOpenStudentProfile?: (studentId: number) => void;
 }
 
-export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
+export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
+  const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'pending');
+  const queryClient = useQueryClient();
+
   const { data: student } = useQuery({
-    queryKey: ['/api/students', admission?.studentId],
+    queryKey: [`/api/students/${admission?.studentId}`],
     enabled: !!admission?.studentId,
   });
+
+  const updateVisaStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      if (!admission) return;
+      return apiRequest('PUT', `/api/admissions/${admission.id}`, { visaStatus: newStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+    },
+  });
+
+  const handleVisaStatusChange = (newStatus: string) => {
+    setCurrentVisaStatus(newStatus);
+    updateVisaStatusMutation.mutate(newStatus);
+  };
 
   if (!admission) return null;
 
