@@ -7,12 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AddAdmissionModalProps {
   open: boolean;
@@ -24,6 +28,7 @@ interface AddAdmissionModalProps {
 export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId }: AddAdmissionModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [applicationDropdownOpen, setApplicationDropdownOpen] = useState(false);
   
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -42,14 +47,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       studentId: studentId || 0,
       university: '',
       program: '',
-      decision: 'pending',
       scholarshipAmount: '',
-      conditions: '',
-      depositRequired: false,
       depositAmount: '',
       visaStatus: 'pending',
-
-      decisionDate: null,
+      notes: '',
       depositDeadline: null
     }
   });
@@ -79,7 +80,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const onSubmit = (data: InsertAdmission) => {
     createAdmissionMutation.mutate({
       ...data,
-      decisionDate: data.decisionDate ? new Date(data.decisionDate) : null,
       depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : null
     });
   };
@@ -111,22 +111,70 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                   control={form.control}
                   name="applicationId"
                   render={({ field }) => (
-                    <FormItem className="col-span-2">
+                    <FormItem className="col-span-2 flex flex-col">
                       <FormLabel>Application</FormLabel>
-                      <Select onValueChange={handleApplicationChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select an application" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {applications?.map((app) => (
-                            <SelectItem key={app.id} value={app.id.toString()}>
-                              {app.university} - {app.program}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? (() => {
+                                    const selectedApp = applications?.find((app) => app.id === field.value);
+                                    const student = students?.find((s) => s.id === selectedApp?.studentId);
+                                    return selectedApp && student
+                                      ? `${student.name} - ${selectedApp.university} (${selectedApp.program})`
+                                      : "Select application";
+                                  })()
+                                : "Select application"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput placeholder="Search by student name, email, or university..." />
+                            <CommandList>
+                              <CommandEmpty>No applications found.</CommandEmpty>
+                              <CommandGroup>
+                                {applications?.map((app) => {
+                                  const student = students?.find((s) => s.id === app.studentId);
+                                  return (
+                                    <CommandItem
+                                      value={`${student?.name} ${student?.email} ${app.university} ${app.program}`}
+                                      key={app.id}
+                                      onSelect={() => {
+                                        handleApplicationChange(app.id.toString());
+                                        setApplicationDropdownOpen(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          app.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex flex-col">
+                                        <span className="font-medium">{student?.name}</span>
+                                        <span className="text-sm text-gray-500">{student?.email}</span>
+                                        <span className="text-sm text-blue-600">{app.university} - {app.program}</span>
+                                      </div>
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -163,50 +211,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                 )}
               />
 
-              {/* Decision */}
-              <FormField
-                control={form.control}
-                name="decision"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Decision</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select decision" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                        <SelectItem value="deferred">Deferred</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              {/* Decision Date */}
-              <FormField
-                control={form.control}
-                name="decisionDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Decision Date</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="date" 
-                        {...field}
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               {/* Scholarship Amount */}
               <FormField
@@ -249,74 +254,51 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                 )}
               />
 
-              {/* Deposit Required */}
+              {/* Deposit Amount */}
               <FormField
                 control={form.control}
-                name="depositRequired"
+                name="depositAmount"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem>
+                    <FormLabel>Deposit Amount</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value || false}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Input placeholder="e.g., $500" {...field} value={field.value || ''} />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Deposit Required</FormLabel>
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Deposit Amount */}
-              {form.watch('depositRequired') && (
-                <FormField
-                  control={form.control}
-                  name="depositAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Deposit Amount</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., $500" {...field} value={field.value || ''} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
               {/* Deposit Deadline */}
-              {form.watch('depositRequired') && (
-                <FormField
-                  control={form.control}
-                  name="depositDeadline"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Deposit Deadline</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="date" 
-                          {...field}
-                          value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="depositDeadline"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Deposit Deadline</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="date" 
+                        {...field}
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            {/* Conditions */}
+            {/* Notes */}
             <FormField
               control={form.control}
-              name="conditions"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Conditions</FormLabel>
+                  <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Enter any admission conditions..."
+                      placeholder="Enter any additional notes..."
                       {...field}
                       value={field.value || ''}
                     />
@@ -325,8 +307,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                 </FormItem>
               )}
             />
-
-            {/* Notes */}
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
