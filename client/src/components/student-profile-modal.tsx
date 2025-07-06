@@ -153,17 +153,28 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden p-0">
+          <DialogTitle className="sr-only">Student Profile</DialogTitle>
+          
+          {/* Header with Fixed Position */}
+          <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl">{student.name} - Student Profile</DialogTitle>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-green-600" />
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Student Status
-                  </label>
-                  <Select value={currentStatus} onValueChange={handleStatusChange}>
-                    <SelectTrigger className="w-32">
+                  <h1 className="text-2xl font-bold">{student.name}</h1>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div>
+                  <label htmlFor="header-status" className="text-xs text-gray-500">Status</label>
+                  <Select
+                    value={currentStatus}
+                    onValueChange={handleStatusChange}
+                  >
+                    <SelectTrigger className="w-32 h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -178,9 +189,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 <Button 
                   size="sm" 
                   onClick={() => setIsAddApplicationOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4" />
                   Add Application
                 </Button>
                 {isEditing ? (
@@ -204,27 +215,30 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     Edit Profile
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="default"
+                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                  onClick={() => onOpenChange(false)}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
             </div>
-          </DialogHeader>
+          </div>
 
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="applications">Applications ({applications?.length || 0})</TabsTrigger>
-              <TabsTrigger value="admissions">Admissions ({admissions?.length || 0})</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="profile" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-                {/* Left Column - Student Information */}
-                <div className="space-y-6">
+          <div className="flex h-[90vh]">
+            {/* Main Content - Left Side */}
+            <div className="flex-1 overflow-y-auto p-6 pt-28">
+              <div className="space-y-6">
                   {/* Personal Information */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center">
-                        <User className="w-4 h-4 mr-2" />
-                        Personal Information
+                        <h2 className="text-lg font-semibold flex items-center">
+                          <User className="w-4 h-4 mr-2" />
+                          Student Information
+                        </h2>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -461,9 +475,23 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     </Card>
                   ))}
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              </div>
+            </div>
+
+            {/* Right Sidebar - Activity Timeline */}
+            <div className="w-96 bg-gradient-to-br from-green-50 to-green-100 border-l overflow-hidden">
+              <div className="px-4 py-5 border-b bg-gradient-to-r from-green-600 to-green-700 text-white">
+                <h2 className="text-lg font-semibold">Activity Timeline</h2>
+              </div>
+              <div className="overflow-y-auto h-full pt-2">
+                <ActivityTracker
+                  entityType="student"
+                  entityId={student.id}
+                  entityName={student.name}
+                />
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
