@@ -14,37 +14,42 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
 import { Lead } from '@shared/schema';
-import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter } from 'lucide-react';
+import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format } from 'date-fns';
 
 export default function Leads() {
   // Helper functions for display names
   const getCountryDisplayName = (countryCode: string): string => {
     const countryMap: { [key: string]: string } = {
-      'usa': 'United States',
-      'canada': 'Canada',
-      'uk': 'United Kingdom',
-      'australia': 'Australia',
-      'germany': 'Germany',
-      'france': 'France',
-      'netherlands': 'Netherlands',
-      'new-zealand': 'New Zealand',
+      'USA': 'United States',
+      'Canada': 'Canada',
+      'UK': 'United Kingdom',
+      'Australia': 'Australia',
+      'Germany': 'Germany',
+      'France': 'France',
+      'Netherlands': 'Netherlands',
+      'New Zealand': 'New Zealand',
     };
     return countryMap[countryCode] || countryCode;
   };
 
   const getProgramDisplayName = (programCode: string): string => {
     const programMap: { [key: string]: string } = {
-      'business-admin': 'Business Administration',
-      'computer-science': 'Computer Science',
-      'engineering': 'Engineering',
-      'medicine': 'Medicine',
-      'law': 'Law',
-      'arts-humanities': 'Arts & Humanities',
-      'social-sciences': 'Social Sciences',
-      'natural-sciences': 'Natural Sciences',
-      'education': 'Education',
-      'psychology': 'Psychology',
+      'Business Administration': 'Business Administration',
+      'Computer Science': 'Computer Science',
+      'Computer': 'Computer Science',
+      'Engineering': 'Engineering',
+      'Medicine': 'Medicine',
+      'Law': 'Law',
+      'Arts & Humanities': 'Arts & Humanities',
+      'Social Sciences': 'Social Sciences',
+      'Natural Sciences': 'Natural Sciences',
+      'Education': 'Education',
+      'Psychology': 'Psychology',
     };
     return programMap[programCode] || programCode;
   };
@@ -62,6 +67,9 @@ export default function Leads() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
+  const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
+  // Removed no activity filter since we don't have activities API configured
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -74,6 +82,12 @@ export default function Leads() {
   const { data: leads, isLoading } = useQuery<Lead[]>({
     queryKey: ['/api/leads'],
   });
+
+  // For now, we'll simplify the no activity filter without requiring activities API
+  // const { data: activities } = useQuery({
+  //   queryKey: ['/api/activities'],
+  //   enabled: noActivityFilter,
+  // });
 
   const updateLeadMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<Lead> }) => {
@@ -136,7 +150,18 @@ export default function Leads() {
   const filteredLeads = leads?.filter(lead => {
     const statusMatch = statusFilter === 'all' || lead.status === statusFilter;
     const sourceMatch = sourceFilter === 'all' || lead.source === sourceFilter;
-    return statusMatch && sourceMatch;
+    
+    // Date range filter
+    let dateMatch = true;
+    if (dateFromFilter || dateToFilter) {
+      const leadDate = lead.createdAt ? new Date(lead.createdAt) : null;
+      if (leadDate) {
+        if (dateFromFilter && leadDate < dateFromFilter) dateMatch = false;
+        if (dateToFilter && leadDate > dateToFilter) dateMatch = false;
+      }
+    }
+    
+    return statusMatch && sourceMatch && dateMatch;
   }) || [];
 
   // Get unique sources for filter dropdown
@@ -210,7 +235,61 @@ export default function Leads() {
                 ))}
               </SelectContent>
             </Select>
-            <HelpTooltip content="Use filters to view leads by status and source. Convert qualified leads to students when they're ready to proceed." />
+            
+            {/* Date Range Filter */}
+            <div className="flex items-center space-x-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-40">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {dateFromFilter ? format(dateFromFilter, "PP") : "From Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateFromFilter}
+                    onSelect={setDateFromFilter}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-40">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {dateToFilter ? format(dateToFilter, "PP") : "To Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateToFilter}
+                    onSelect={setDateToFilter}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {/* Clear Filters */}
+            {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setStatusFilter('all');
+                  setSourceFilter('all');
+                  setDateFromFilter(undefined);
+                  setDateToFilter(undefined);
+                }}
+              >
+                Clear All
+              </Button>
+            )}
+            
+            <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
           </div>
           
           <Button onClick={() => setIsAddModalOpen(true)}>
@@ -355,19 +434,13 @@ export default function Leads() {
                           {lead.country && (
                             <div className="flex items-center text-sm">
                               <Globe className="w-3 h-3 mr-1" />
-                              {Array.isArray(lead.country) 
-                                ? lead.country.map(c => getCountryDisplayName(c)).join(', ')
-                                : getCountryDisplayName(lead.country)
-                              }
+                              {getCountryDisplayName(lead.country)}
                             </div>
                           )}
                           {lead.program && (
                             <div className="flex items-center text-sm">
                               <GraduationCap className="w-3 h-3 mr-1" />
-                              {Array.isArray(lead.program) 
-                                ? lead.program.map(p => getProgramDisplayName(p)).join(', ')
-                                : getProgramDisplayName(lead.program)
-                              }
+                              {getProgramDisplayName(lead.program)}
                             </div>
                           )}
                         </div>
