@@ -35,6 +35,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     enabled: !!studentId,
   });
 
+  const { data: lead } = useQuery({
+    queryKey: [`/api/leads/${student?.leadId}`],
+    enabled: !!student?.leadId,
+  });
+
   const { data: applications } = useQuery<Application[]>({
     queryKey: [`/api/applications/student/${studentId}`],
     enabled: !!studentId,
@@ -251,6 +256,84 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </Button>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
+
+                {/* Lead Information */}
+                {lead && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <User className="w-5 h-5 mr-2" />
+                        Lead Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Original Source</label>
+                          <p>{lead.source || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Lead Type</label>
+                          <p>{lead.type || 'General'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Interest Country</label>
+                          <p>{lead.country || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Interest Program</label>
+                          <p>{lead.program || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Expectation</label>
+                          <p>{lead.expectation || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Created Date</label>
+                          <p>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Academic Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Award className="w-5 h-5 mr-2" />
+                      Academic Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Academic Background</label>
+                        <p>{student.academicBackground || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">English Proficiency</label>
+                        <p>{student.englishProficiency || 'Not assessed'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Target Country</label>
+                        <p>{student.targetCountry || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Target Program</label>
+                        <p>{student.targetProgram || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Budget</label>
+                        <p>{student.budget || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Nationality</label>
+                        <p>{student.nationality || 'Not provided'}</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
