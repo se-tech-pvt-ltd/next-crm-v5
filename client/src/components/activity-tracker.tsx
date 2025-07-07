@@ -21,8 +21,11 @@ interface ActivityTrackerProps {
 
 const ACTIVITY_TYPES = [
   { value: 'comment', label: 'Comment', icon: MessageSquare },
-  { value: 'call', label: 'Call', icon: UserIcon },
+  { value: 'update', label: 'Update', icon: Edit },
+  { value: 'status_change', label: 'Status Change', icon: AlertCircle },
+  { value: 'note', label: 'Note', icon: FileText },
   { value: 'follow_up', label: 'Follow Up', icon: Calendar },
+  { value: 'call', label: 'Call', icon: UserIcon },
   { value: 'meeting', label: 'Meeting', icon: Users },
 ];
 
@@ -201,79 +204,77 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
             </div>
           ) : (
             (activities as Activity[]).map((activity: Activity) => (
-              <div key={activity.id} className="relative p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex gap-4">
-                  {/* User Avatar - Larger and more prominent */}
-                  <div className="flex-shrink-0">
-                    <Avatar className="h-12 w-12 border-2 border-blue-100">
-                      {(() => {
-                        // Use dynamic profile image lookup first, then fall back to stored image
-                        const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
-                        return profileImage ? (
-                          <AvatarImage src={profileImage} alt={activity.userName || "User"} />
-                        ) : (
-                          <AvatarFallback className="bg-blue-50 text-blue-600">
-                            {activity.userName === "Next Bot" ? (
-                              <Bot className="h-6 w-6" />
-                            ) : (
-                              <UserIcon className="h-6 w-6" />
-                            )}
-                          </AvatarFallback>
-                        );
-                      })()}
-                    </Avatar>
-                  </div>
-                  
-                  <div className="flex-grow min-w-0 pr-16">
-                    {/* User Name and Activity Type */}
-                    <div className="mb-2">
-                      <h4 className="font-semibold text-base text-gray-900">
-                        {activity.userName || "Unknown User"}
-                      </h4>
-                      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                        {getActivityIcon(activity.activityType, "h-3 w-3")}
-                        <span>{activity.activityType.replace('_', ' ')}</span>
-                      </div>
-                    </div>
-                    
-                    {/* Activity Title - Secondary prominence */}
-                    {activity.title && (
-                      <p className="text-sm text-gray-600 mb-2 font-medium">
-                        {activity.title}
-                      </p>
-                    )}
-                    
-                    {/* Comment/Description - Main focus */}
-                    {activity.description && (
-                      <p className="text-gray-800 text-sm mb-3 whitespace-pre-wrap leading-relaxed">
-                        {activity.description}
-                      </p>
-                    )}
-                    
-                    {/* Field changes - Minimal styling */}
-                    {(activity.oldValue || activity.newValue) && (
-                      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border-l-2 border-blue-200">
-                        {activity.fieldName && (
-                          <span className="font-medium text-gray-600">{activity.fieldName}: </span>
-                        )}
-                        {activity.oldValue && (
-                          <span className="line-through text-red-500">{activity.oldValue}</span>
-                        )}
-                        {activity.oldValue && activity.newValue && <span className="mx-1">→</span>}
-                        {activity.newValue && (
-                          <span className="text-green-600 font-medium">{activity.newValue}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
+              <div key={activity.id} className="flex gap-4 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                {/* User Avatar - Larger and more prominent */}
+                <div className="flex-shrink-0">
+                  <Avatar className="h-12 w-12 border-2 border-blue-100">
+                    {(() => {
+                      // Use dynamic profile image lookup first, then fall back to stored image
+                      const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
+                      return profileImage ? (
+                        <AvatarImage src={profileImage} alt={activity.userName || "User"} />
+                      ) : (
+                        <AvatarFallback className="bg-blue-50 text-blue-600">
+                          {activity.userName === "Next Bot" ? (
+                            <Bot className="h-6 w-6" />
+                          ) : (
+                            <UserIcon className="h-6 w-6" />
+                          )}
+                        </AvatarFallback>
+                      );
+                    })()}
+                  </Avatar>
                 </div>
                 
-                {/* Time - Bottom right corner */}
-                <div className="absolute bottom-3 right-3">
-                  <span className="text-xs text-gray-400 flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
-                  </span>
+                <div className="flex-grow min-w-0">
+                  {/* User Name - Most prominent */}
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-base text-gray-900">
+                      {activity.userName || "Unknown User"}
+                    </h4>
+                    {/* Activity type and time - Less prominent */}
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        {getActivityIcon(activity.activityType, "h-3 w-3")}
+                        {activity.activityType.replace('_', ' ')}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Activity Title - Secondary prominence */}
+                  {activity.title && (
+                    <p className="text-sm text-gray-600 mb-2 font-medium">
+                      {activity.title}
+                    </p>
+                  )}
+                  
+                  {/* Comment/Description - Main focus */}
+                  {activity.description && (
+                    <p className="text-gray-800 text-sm mb-3 whitespace-pre-wrap leading-relaxed">
+                      {activity.description}
+                    </p>
+                  )}
+                  
+                  {/* Field changes - Minimal styling */}
+                  {(activity.oldValue || activity.newValue) && (
+                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border-l-2 border-blue-200">
+                      {activity.fieldName && (
+                        <span className="font-medium text-gray-600">{activity.fieldName}: </span>
+                      )}
+                      {activity.oldValue && (
+                        <span className="line-through text-red-500">{activity.oldValue}</span>
+                      )}
+                      {activity.oldValue && activity.newValue && <span className="mx-1">→</span>}
+                      {activity.newValue && (
+                        <span className="text-green-600 font-medium">{activity.newValue}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))

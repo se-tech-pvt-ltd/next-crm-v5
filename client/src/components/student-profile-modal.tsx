@@ -119,68 +119,63 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           
           {/* Header with Fixed Position */}
           <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
-            {/* Close Button - Top Right */}
-            <div className="absolute top-4 right-4">
-              <Button
-                variant="ghost"
-                size="default"
-                className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            
-            {/* Header Content */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-green-600" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">{student.name}</h1>
+                  <p className="text-sm text-gray-600">{student.email}</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">{student.name}</h1>
-                <p className="text-sm text-gray-600">{student.email}</p>
+              <div className="flex items-center gap-3">
+                <div>
+                  <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
+                  <Select value={currentStatus} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="w-32 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="admitted">Admitted</SelectItem>
+                      <SelectItem value="enrolled">Enrolled</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  size="sm" 
+                  onClick={() => setIsAddApplicationOpen(true)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Application
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => setIsAddAdmissionOpen(true)}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Admission
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="default"
+                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                  onClick={() => onOpenChange(false)}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
-            </div>
-            
-            {/* Action Buttons Below Header */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <div>
-                <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
-                <Select value={currentStatus} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="applied">Applied</SelectItem>
-                    <SelectItem value="admitted">Admitted</SelectItem>
-                    <SelectItem value="enrolled">Enrolled</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                size="sm" 
-                onClick={() => setIsAddApplicationOpen(true)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4" />
-                Add Application
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => setIsAddAdmissionOpen(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                Add Admission
-              </Button>
             </div>
           </div>
 
           <div className="flex h-[90vh]">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-36">
+            <div className="flex-1 overflow-y-auto p-6 pt-28">
               <div className="space-y-6">
                 {/* Student Information */}
                 <Card>

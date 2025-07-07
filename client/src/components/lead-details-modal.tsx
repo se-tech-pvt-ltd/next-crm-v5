@@ -271,71 +271,68 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
           
           {/* Header with Fixed Position */}
           <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
-            {/* Close Button - Top Right */}
-            <div className="absolute top-4 right-4">
-              <Button
-                variant="ghost"
-                size="default"
-                className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            
-            {/* Header Content */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <UserIcon className="w-6 h-6 text-blue-600" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">{lead.name}</h1>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">{lead.name}</h1>
-              </div>
-            </div>
-            
-            {/* Action Buttons Below Header */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <div>
-                <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
-                <Select
-                  value={currentStatus}
-                  onValueChange={handleStatusChange}
+              <div className="flex items-center gap-3">
+                <div>
+                  <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
+                  <Select
+                    value={currentStatus}
+                    onValueChange={handleStatusChange}
+                  >
+                    <SelectTrigger className="w-32 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="contacted">Contacted</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="converted">Converted</SelectItem>
+                      <SelectItem value="lost">Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setShowConvertModal(true)}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
                 >
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="qualified">Qualified</SelectItem>
-                    <SelectItem value="converted">Converted</SelectItem>
-                    <SelectItem value="lost">Lost</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => setShowConvertModal(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-              >
-                <UserPlus className="w-4 h-4" />
-                Convert to Student
-              </Button>
-              {lead.status !== 'lost' && (
-                <Button 
-                  size="sm" 
-                  variant="destructive" 
-                  onClick={() => setShowMarkAsLostModal(true)}
-                >
-                  Mark as Lost
+                  <UserPlus className="w-4 h-4" />
+                  Convert to Student
                 </Button>
-              )}
+                {lead.status !== 'lost' && (
+                  <Button 
+                    size="sm" 
+                    variant="destructive" 
+                    onClick={() => setShowMarkAsLostModal(true)}
+                  >
+                    Mark as Lost
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="default"
+                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                  onClick={() => onOpenChange(false)}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
+            
+
           </div>
 
           <div className="flex h-[90vh]">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-36">
+            <div className="flex-1 overflow-y-auto p-6 pt-28">
               <div className="space-y-6">
                 {/* Lead Information */}
                 <Card>
@@ -518,9 +515,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
             </div>
 
             {/* Right Sidebar - Activity Timeline */}
-            <div className="w-96 bg-gray-50 border-l overflow-hidden">
-              <div className="px-4 py-5 border-b bg-gray-100">
-                <h2 className="text-lg font-semibold text-gray-900">Activity Timeline</h2>
+            <div className="w-96 bg-gradient-to-br from-blue-50 to-blue-100 border-l overflow-hidden">
+              <div className="px-4 py-5 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                <h2 className="text-lg font-semibold">Activity Timeline</h2>
               </div>
               <div className="overflow-y-auto h-full pt-2">
                 <ActivityTracker
