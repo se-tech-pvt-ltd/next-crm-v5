@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertLeadSchema, insertStudentSchema, insertApplicationSchema, insertAdmissionSchema, insertActivitySchema, insertUserSchema } from "@shared/schema";
@@ -483,62 +483,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedUser);
     } catch (error) {
       res.status(500).json({ message: "Failed to update profile image" });
-    }
-  });
-
-  // Achievement system routes
-  app.get("/api/achievements", async (req: Request, res: Response) => {
-    try {
-      console.log("Achievements route hit");
-      const achievements = await storage.getAchievements();
-      console.log("Found achievements:", achievements.length);
-      res.json(achievements);
-    } catch (error) {
-      console.error("Achievements route error:", error);
-      res.status(500).json({ message: "Failed to fetch achievements" });
-    }
-  });
-
-  app.get("/api/user-achievements/:userId", async (req: Request, res: Response) => {
-    try {
-      const { userId } = req.params;
-      const userAchievements = await storage.getUserAchievements(userId);
-      res.json(userAchievements);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user achievements" });
-    }
-  });
-
-  app.get("/api/user-stats/:userId", async (req: Request, res: Response) => {
-    try {
-      const { userId } = req.params;
-      const userStats = await storage.getUserStats(userId);
-      if (!userStats) {
-        return res.status(404).json({ message: "User stats not found" });
-      }
-      res.json(userStats);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user stats" });
-    }
-  });
-
-  app.get("/api/leaderboard", async (req: Request, res: Response) => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 10;
-      const leaderboard = await storage.getLeaderboard(limit);
-      res.json(leaderboard);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch leaderboard" });
-    }
-  });
-
-  app.post("/api/check-achievements/:userId", async (req: Request, res: Response) => {
-    try {
-      const { userId } = req.params;
-      const newAchievements = await storage.checkAndUnlockAchievements(userId);
-      res.json(newAchievements);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to check achievements" });
     }
   });
 
