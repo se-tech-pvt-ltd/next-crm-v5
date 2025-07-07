@@ -32,6 +32,11 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
     queryKey: ['/api/students'],
   });
 
+  // Get counselors for counselor field
+  const { data: counselors } = useQuery({
+    queryKey: ['/api/users'],
+  });
+
   const form = useForm({
     resolver: zodResolver(insertLeadSchema),
     defaultValues: {
@@ -42,7 +47,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
       program: '',
       source: '',
       status: 'new',
-
+      counselorId: '',
     },
   });
 
@@ -133,7 +138,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Add New Lead</DialogTitle>
@@ -143,130 +148,159 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter full name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address *</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Enter email address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="Enter phone number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Countries of Interest</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={[
-                        { label: 'United States', value: 'usa' },
-                        { label: 'Canada', value: 'canada' },
-                        { label: 'United Kingdom', value: 'uk' },
-                        { label: 'Australia', value: 'australia' },
-                        { label: 'Germany', value: 'germany' },
-                        { label: 'France', value: 'france' },
-                        { label: 'Netherlands', value: 'netherlands' },
-                        { label: 'New Zealand', value: 'new-zealand' },
-                      ]}
-                      value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
-                      onChange={field.onChange}
-                      placeholder="Select countries"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="program"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Programs of Interest</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={[
-                        { label: 'Business Administration', value: 'business-admin' },
-                        { label: 'Computer Science', value: 'computer-science' },
-                        { label: 'Engineering', value: 'engineering' },
-                        { label: 'Medicine', value: 'medicine' },
-                        { label: 'Law', value: 'law' },
-                        { label: 'Arts & Humanities', value: 'arts-humanities' },
-                        { label: 'Social Sciences', value: 'social-sciences' },
-                        { label: 'Natural Sciences', value: 'natural-sciences' },
-                        { label: 'Education', value: 'education' },
-                        { label: 'Psychology', value: 'psychology' },
-                      ]}
-                      value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
-                      onChange={field.onChange}
-                      placeholder="Select programs"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="source"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Lead Source</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name *</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select source" />
-                      </SelectTrigger>
+                      <Input placeholder="Enter full name" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="website">Website</SelectItem>
-                      <SelectItem value="referral">Referral</SelectItem>
-                      <SelectItem value="social-media">Social Media</SelectItem>
-                      <SelectItem value="advertisement">Advertisement</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address *</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Enter email address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="Enter phone number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="counselorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assigned Counselor</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select counselor" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.isArray(counselors) ? counselors.filter((user: any) => user.role === 'counselor' || user.role === 'admin_staff').map((counselor: any) => (
+                          <SelectItem key={counselor.id} value={counselor.id}>
+                            {counselor.email}
+                          </SelectItem>
+                        )) : null}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="source"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lead Source</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select source" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="website">Website</SelectItem>
+                        <SelectItem value="referral">Referral</SelectItem>
+                        <SelectItem value="social-media">Social Media</SelectItem>
+                        <SelectItem value="advertisement">Advertisement</SelectItem>
+                        <SelectItem value="event">Event</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Countries of Interest</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        options={[
+                          { label: 'United States', value: 'usa' },
+                          { label: 'Canada', value: 'canada' },
+                          { label: 'United Kingdom', value: 'uk' },
+                          { label: 'Australia', value: 'australia' },
+                          { label: 'Germany', value: 'germany' },
+                          { label: 'France', value: 'france' },
+                          { label: 'Netherlands', value: 'netherlands' },
+                          { label: 'New Zealand', value: 'new-zealand' },
+                        ]}
+                        value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
+                        onChange={field.onChange}
+                        placeholder="Select countries"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="program"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Programs of Interest</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        options={[
+                          { label: 'Business Administration', value: 'business-admin' },
+                          { label: 'Computer Science', value: 'computer-science' },
+                          { label: 'Engineering', value: 'engineering' },
+                          { label: 'Medicine', value: 'medicine' },
+                          { label: 'Law', value: 'law' },
+                          { label: 'Arts & Humanities', value: 'arts-humanities' },
+                          { label: 'Social Sciences', value: 'social-sciences' },
+                          { label: 'Natural Sciences', value: 'natural-sciences' },
+                          { label: 'Education', value: 'education' },
+                          { label: 'Psychology', value: 'psychology' },
+                        ]}
+                        value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
+                        onChange={field.onChange}
+                        placeholder="Select programs"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
 
 

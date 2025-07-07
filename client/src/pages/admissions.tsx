@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { Admission, Student } from '@shared/schema';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -18,6 +19,7 @@ export default function Admissions() {
   const [universityFilter, setUniversityFilter] = useState('all');
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -121,7 +123,7 @@ export default function Admissions() {
             </Select>
           </div>
           
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Admission Record
           </Button>
@@ -218,7 +220,7 @@ export default function Admissions() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button>
+                  <Button onClick={() => setIsAddModalOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Admission Record
                   </Button>
@@ -324,6 +326,11 @@ export default function Admissions() {
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
         admission={selectedAdmission}
+      />
+      
+      <AddAdmissionModal 
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
       />
     </Layout>
   );
