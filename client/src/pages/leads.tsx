@@ -18,6 +18,47 @@ import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap, User
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Leads() {
+  // Helper functions for display names
+  const getCountryDisplayName = (countryCode: string): string => {
+    const countryMap: { [key: string]: string } = {
+      'usa': 'United States',
+      'canada': 'Canada',
+      'uk': 'United Kingdom',
+      'australia': 'Australia',
+      'germany': 'Germany',
+      'france': 'France',
+      'netherlands': 'Netherlands',
+      'new-zealand': 'New Zealand',
+    };
+    return countryMap[countryCode] || countryCode;
+  };
+
+  const getProgramDisplayName = (programCode: string): string => {
+    const programMap: { [key: string]: string } = {
+      'business-admin': 'Business Administration',
+      'computer-science': 'Computer Science',
+      'engineering': 'Engineering',
+      'medicine': 'Medicine',
+      'law': 'Law',
+      'arts-humanities': 'Arts & Humanities',
+      'social-sciences': 'Social Sciences',
+      'natural-sciences': 'Natural Sciences',
+      'education': 'Education',
+      'psychology': 'Psychology',
+    };
+    return programMap[programCode] || programCode;
+  };
+
+  const getSourceDisplayName = (sourceCode: string): string => {
+    const sourceMap: { [key: string]: string } = {
+      'website': 'Website',
+      'referral': 'Referral',
+      'social-media': 'Social Media',
+      'advertisement': 'Advertisement',
+      'event': 'Event',
+    };
+    return sourceMap[sourceCode] || sourceCode.charAt(0).toUpperCase() + sourceCode.slice(1);
+  };
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -314,13 +355,19 @@ export default function Leads() {
                           {lead.country && (
                             <div className="flex items-center text-sm">
                               <Globe className="w-3 h-3 mr-1" />
-                              {lead.country}
+                              {Array.isArray(lead.country) 
+                                ? lead.country.map(c => getCountryDisplayName(c)).join(', ')
+                                : getCountryDisplayName(lead.country)
+                              }
                             </div>
                           )}
                           {lead.program && (
                             <div className="flex items-center text-sm">
                               <GraduationCap className="w-3 h-3 mr-1" />
-                              {lead.program}
+                              {Array.isArray(lead.program) 
+                                ? lead.program.map(p => getProgramDisplayName(p)).join(', ')
+                                : getProgramDisplayName(lead.program)
+                              }
                             </div>
                           )}
                         </div>
@@ -332,7 +379,7 @@ export default function Leads() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-gray-500">
-                          {lead.source || 'Unknown'}
+                          {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
                         </span>
                       </TableCell>
                       <TableCell>
