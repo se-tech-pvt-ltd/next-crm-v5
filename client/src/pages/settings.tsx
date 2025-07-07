@@ -243,6 +243,7 @@ export default function Settings() {
 
   const [newOptionInputs, setNewOptionInputs] = useState<Record<string, { value: string; label: string }>>({});
   const [editingField, setEditingField] = useState<keyof DropdownConfig | null>(null);
+  const [addingToField, setAddingToField] = useState<keyof DropdownConfig | null>(null);
 
   const addOption = (category: keyof DropdownConfig) => {
     const newOption: DropdownOption = {
@@ -269,6 +270,8 @@ export default function Settings() {
       ...prev,
       [category]: { value: '', label: '' },
     }));
+
+    setAddingToField(null);
 
     toast({
       title: "Success",
@@ -577,27 +580,95 @@ export default function Settings() {
         </div>
         <p className="text-sm text-gray-500 mt-1">{description}</p>
       </div>
-      <Select
-        value={editingField === category ? "edit" : ""}
-        onValueChange={(value) => {
-          if (value === "edit") {
-            setEditingField(category);
-          } else if (value === "add") {
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setAddingToField(category);
             setNewOptionInputs(prev => ({
               ...prev,
               [category]: { value: '', label: '' }
             }));
-          }
-        }}
-      >
-        <SelectTrigger className="w-32">
-          <SelectValue placeholder="Edit" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="edit">Edit Options</SelectItem>
-          <SelectItem value="add">Add Option</SelectItem>
-        </SelectContent>
-      </Select>
+          }}
+          className="h-8"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Add
+        </Button>
+        <Select
+          value={editingField === category ? "editing" : ""}
+          onValueChange={(value) => {
+            if (value === "edit") {
+              setEditingField(category);
+            }
+          }}
+        >
+          <SelectTrigger className="w-20 h-8">
+            <SelectValue placeholder={<Edit3 className="w-4 h-4" />} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="edit">Edit Options</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+
+  const renderAddOptionForm = (category: keyof DropdownConfig) => (
+    <div className="ml-8 mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
+      <div className="flex items-center justify-between mb-3">
+        <h5 className="font-medium text-sm">Add New Option</h5>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setAddingToField(null)}
+          className="h-6 w-6 p-0"
+        >
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <Label htmlFor={`${category}-value`} className="text-xs font-medium">System Value</Label>
+          <Input
+            id={`${category}-value`}
+            placeholder="Enter system value"
+            size="sm"
+            value={newOptionInputs[category]?.value || ''}
+            onChange={(e) =>
+              setNewOptionInputs(prev => ({
+                ...prev,
+                [category]: { ...prev[category], value: e.target.value, label: prev[category]?.label || '' },
+              }))
+            }
+          />
+        </div>
+        <div>
+          <Label htmlFor={`${category}-label`} className="text-xs font-medium">Display Label</Label>
+          <Input
+            id={`${category}-label`}
+            placeholder="Enter display label"
+            size="sm"
+            value={newOptionInputs[category]?.label || ''}
+            onChange={(e) =>
+              setNewOptionInputs(prev => ({
+                ...prev,
+                [category]: { ...prev[category], label: e.target.value, value: prev[category]?.value || '' },
+              }))
+            }
+          />
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={() => addOption(category)} className="flex-1">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Option
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setAddingToField(null)}>
+          Cancel
+        </Button>
+      </div>
     </div>
   );
 
@@ -713,10 +784,15 @@ export default function Settings() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {renderFieldRow("Lead Status", "leadStatuses", "Status options for lead management")}
+                  {addingToField === "leadStatuses" && renderAddOptionForm("leadStatuses")}
                   {renderFieldRow("Lead Source", "leadSources", "Sources where leads can come from")}
+                  {addingToField === "leadSources" && renderAddOptionForm("leadSources")}
                   {renderFieldRow("Lead Expectation", "leadExpectations", "Expected quality level of leads")}
+                  {addingToField === "leadExpectations" && renderAddOptionForm("leadExpectations")}
                   {renderFieldRow("Lead Type", "leadTypes", "Types of educational programs")}
+                  {addingToField === "leadTypes" && renderAddOptionForm("leadTypes")}
                   {renderFieldRow("Lead Lost Reasons", "leadLostReasons", "Reasons why leads are marked as lost")}
+                  {addingToField === "leadLostReasons" && renderAddOptionForm("leadLostReasons")}
                 </CardContent>
               </Card>
 

@@ -1,7 +1,9 @@
 import { 
-  leads, students, applications, admissions, activities, users,
+  leads, students, applications, admissions, activities, users, achievements, userAchievements, userStats,
   type Lead, type Student, type Application, type Admission, type Activity, type User,
-  type InsertLead, type InsertStudent, type InsertApplication, type InsertAdmission, type InsertActivity, type InsertUser
+  type Achievement, type UserAchievement, type UserStats,
+  type InsertLead, type InsertStudent, type InsertApplication, type InsertAdmission, type InsertActivity, type InsertUser,
+  type InsertAchievement, type InsertUserAchievement, type InsertUserStats
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, or, and, desc, isNull, not, exists } from "drizzle-orm";
@@ -61,6 +63,16 @@ export interface IStorage {
   createActivity(activity: InsertActivity): Promise<Activity>;
   createActivityWithUser(activity: InsertActivity, userId?: string): Promise<Activity>;
   transferActivities(fromEntityType: string, fromEntityId: number, toEntityType: string, toEntityId: number): Promise<void>;
+  
+  // Achievement system operations
+  getAchievements(): Promise<Achievement[]>;
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  getUserStats(userId: string): Promise<UserStats | undefined>;
+  createUserStats(userStats: InsertUserStats): Promise<UserStats>;
+  updateUserStats(userId: string, updates: Partial<InsertUserStats>): Promise<UserStats | undefined>;
+  checkAndUnlockAchievements(userId: string): Promise<UserAchievement[]>;
+  updateUserProgress(userId: string, category: string, increment?: number): Promise<void>;
+  getLeaderboard(limit?: number): Promise<Array<UserStats & { user: User }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -232,6 +244,12 @@ export class DatabaseStorage implements IStorage {
       .insert(leads)
       .values(processedLead as InsertLead)
       .returning();
+    
+    // Track achievement progress
+    if (lead.counselorId) {
+      await this.updateUserProgress(lead.counselorId, 'leads', 1);
+    }
+    
     return lead;
   }
 
@@ -323,6 +341,11 @@ export class DatabaseStorage implements IStorage {
     
     // Log activity
     await this.logActivity('student', student.id, 'created', 'Student record created', `Student ${student.name} was added to the system`, undefined, undefined, undefined, undefined, "Next Bot");
+    
+    // Track achievement progress
+    if (student.counselorId) {
+      await this.updateUserProgress(student.counselorId, 'students', 1);
+    }
     
     return student;
   }
@@ -463,6 +486,12 @@ export class DatabaseStorage implements IStorage {
       "Next Bot"
     );
     
+    // Track achievement progress - get student's counselor
+    const student = await this.getStudent(application.studentId);
+    if (student?.counselorId) {
+      await this.updateUserProgress(student.counselorId, 'applications', 1);
+    }
+    
     return application;
   }
 
@@ -544,6 +573,13 @@ export class DatabaseStorage implements IStorage {
       .insert(admissions)
       .values(insertAdmission)
       .returning();
+    
+    // Track achievement progress - get student's counselor
+    const student = await this.getStudent(admission.studentId);
+    if (student?.counselorId) {
+      await this.updateUserProgress(student.counselorId, 'admissions', 1);
+    }
+    
     return admission;
   }
 
@@ -689,6 +725,203 @@ export class DatabaseStorage implements IStorage {
       description: `This record was converted from ${fromEntityType} ID ${fromEntityId}. All previous activities have been preserved.`,
       userName: "Next Bot",
     });
+  }
+
+  // Achievement system implementation
+  async getAchievements(): Promise<Achievement[]> {
+    const result = await db.select().from(achievements).where(eq(achievements.isActive, true));
+    return result;
+  }
+
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    const result = await db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+    return result;
+  }
+
+  async getUserStats(userId: string): Promise<UserStats | undefined> {
+    const result = await db.select().from(userStats).where(eq(userStats.userId, userId));
+    return result[0];
+  }
+
+  async createUserStats(insertUserStats: InsertUserStats): Promise<UserStats> {
+    const result = await db.insert(userStats).values(insertUserStats).returning();
+    return result[0];
+  }
+
+  async updateUserStats(userId: string, updates: Partial<InsertUserStats>): Promise<UserStats | undefined> {
+    const result = await db.update(userStats)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userStats.userId, userId))
+      .returning();
+    return result[0];
+  }
+
+  async checkAndUnlockAchievements(userId: string): Promise<UserAchievement[]> {
+    const userStatsData = await this.getUserStats(userId);
+    if (!userStatsData) return [];
+
+    const allAchievements = await this.getAchievements();
+    const currentUserAchievements = await this.getUserAchievements(userId);
+    const unlockedAchievements: UserAchievement[] = [];
+
+    for (const achievement of allAchievements) {
+      const existingAchievement = currentUserAchievements.find(ua => ua.achievementId === achievement.id);
+      
+      if (!existingAchievement || !existingAchievement.isUnlocked) {
+        let currentProgress = 0;
+        let shouldUnlock = false;
+
+        // Calculate progress based on achievement category and requirement type
+        switch (achievement.category) {
+          case 'leads':
+            currentProgress = userStatsData.leadsCreated;
+            break;
+          case 'students':
+            currentProgress = userStatsData.studentsConverted;
+            break;
+          case 'applications':
+            currentProgress = userStatsData.applicationsSubmitted;
+            break;
+          case 'admissions':
+            currentProgress = userStatsData.admissionsReceived;
+            break;
+          case 'streak':
+            currentProgress = achievement.requirementType === 'streak' ? userStatsData.currentStreak : userStatsData.longestStreak;
+            break;
+          case 'points':
+            currentProgress = userStatsData.totalPoints;
+            break;
+          default:
+            currentProgress = 1; // For general achievements
+        }
+
+        shouldUnlock = currentProgress >= achievement.requirement;
+
+        if (existingAchievement) {
+          // Update existing achievement
+          const updatedAchievement = await db.update(userAchievements)
+            .set({
+              progress: currentProgress,
+              isUnlocked: shouldUnlock,
+              unlockedAt: shouldUnlock ? new Date() : null
+            })
+            .where(eq(userAchievements.id, existingAchievement.id))
+            .returning();
+          
+          if (shouldUnlock && !existingAchievement.isUnlocked) {
+            unlockedAchievements.push(updatedAchievement[0]);
+            // Award points for unlocking achievement
+            await this.updateUserStats(userId, {
+              totalPoints: userStatsData.totalPoints + achievement.points
+            });
+          }
+        } else {
+          // Create new achievement tracking
+          const newAchievement = await db.insert(userAchievements)
+            .values({
+              userId,
+              achievementId: achievement.id,
+              progress: currentProgress,
+              isUnlocked: shouldUnlock,
+              unlockedAt: shouldUnlock ? new Date() : null
+            })
+            .returning();
+          
+          if (shouldUnlock) {
+            unlockedAchievements.push(newAchievement[0]);
+            // Award points for unlocking achievement
+            await this.updateUserStats(userId, {
+              totalPoints: userStatsData.totalPoints + achievement.points
+            });
+          }
+        }
+      }
+    }
+
+    return unlockedAchievements;
+  }
+
+  async updateUserProgress(userId: string, category: string, increment: number = 1): Promise<void> {
+    let userStatsData = await this.getUserStats(userId);
+    
+    if (!userStatsData) {
+      // Create initial user stats
+      userStatsData = await this.createUserStats({
+        userId,
+        totalPoints: 0,
+        level: 1,
+        leadsCreated: 0,
+        studentsConverted: 0,
+        applicationsSubmitted: 0,
+        admissionsReceived: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+      });
+    }
+
+    const updates: Partial<InsertUserStats> = {};
+
+    // Update the relevant stat
+    switch (category) {
+      case 'leads':
+        updates.leadsCreated = userStatsData.leadsCreated + increment;
+        break;
+      case 'students':
+        updates.studentsConverted = userStatsData.studentsConverted + increment;
+        break;
+      case 'applications':
+        updates.applicationsSubmitted = userStatsData.applicationsSubmitted + increment;
+        break;
+      case 'admissions':
+        updates.admissionsReceived = userStatsData.admissionsReceived + increment;
+        break;
+    }
+
+    // Update daily streak
+    const today = new Date().toISOString().split('T')[0];
+    const lastActivityDate = userStatsData.lastActivityDate;
+    
+    if (lastActivityDate !== today) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      if (lastActivityDate === yesterdayStr) {
+        // Continue streak
+        updates.currentStreak = userStatsData.currentStreak + 1;
+        updates.longestStreak = Math.max(userStatsData.longestStreak, updates.currentStreak);
+      } else {
+        // Start new streak
+        updates.currentStreak = 1;
+      }
+      
+      updates.lastActivityDate = today;
+    }
+
+    // Calculate level based on total points
+    const totalPoints = userStatsData.totalPoints;
+    const newLevel = Math.floor(totalPoints / 100) + 1; // 100 points per level
+    if (newLevel > userStatsData.level) {
+      updates.level = newLevel;
+    }
+
+    await this.updateUserStats(userId, updates);
+    
+    // Check for new achievements
+    await this.checkAndUnlockAchievements(userId);
+  }
+
+  async getLeaderboard(limit: number = 10): Promise<Array<UserStats & { user: User }>> {
+    const result = await db.select()
+    .from(userStats)
+    .innerJoin(users, eq(userStats.userId, users.id))
+    .orderBy(desc(userStats.totalPoints))
+    .limit(limit);
+    
+    return result.map((row: any) => ({
+      ...row.user_stats,
+      user: row.users
+    }));
   }
 }
 
