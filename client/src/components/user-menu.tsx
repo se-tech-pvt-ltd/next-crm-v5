@@ -8,7 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from '@/contexts/AuthContext';
 import { Settings, LogOut, User, Building, Mail, Shield } from 'lucide-react';
 
-export function UserMenu() {
+interface UserMenuProps {
+  collapsed?: boolean;
+}
+
+export function UserMenu({ collapsed = false }: UserMenuProps) {
   const { user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -46,24 +50,36 @@ export function UserMenu() {
 
   return (
     <>
-      <div className="mt-auto border-t pt-4">
+      <div className="mt-auto pt-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start h-auto p-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+            <Button variant="ghost" className={`w-full h-auto p-2 ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
+              {collapsed ? (
+                <div className="relative group">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  {/* Tooltip for collapsed state */}
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    {user.email.split('@')[0]} - {getRoleDisplay(user.role)}
+                  </div>
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {user.email.split('@')[0]}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {getRoleDisplay(user.role)}
-                  </p>
+              ) : (
+                <div className="flex items-center space-x-3 w-full">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {user.email.split('@')[0]}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {getRoleDisplay(user.role)}
+                    </p>
+                  </div>
+                  <Settings className="w-4 h-4 text-gray-400" />
                 </div>
-                <Settings className="w-4 h-4 text-gray-400" />
-              </div>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

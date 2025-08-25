@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'wouter';
+import { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -6,14 +7,32 @@ import {
   Trophy, 
   BarChart3, 
   Settings,
-  User
+  Menu,
+  X
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 
 export function Sidebar() {
   const [location] = useLocation();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        setIsExpanded(false);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { data: leadsData } = useQuery({
     queryKey: ['/api/leads'],
@@ -85,38 +104,85 @@ export function Sidebar() {
     },
   ];
 
+  const sidebarWidth = isExpanded ? 'w-64' : 'w-16';
+
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <GraduationCap className="text-white" size={18} />
+    <div 
+      className={`${sidebarWidth} bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out relative`}
+      onMouseEnter={() => !isMobile && setIsExpanded(true)}
+      onMouseLeave={() => !isMobile && setIsExpanded(false)}
+    >
+      {/* Toggle Button */}
+      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+        {isExpanded ? (
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
+              <GraduationCap className="text-white" size={14} />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold text-gray-900">StudyBridge</h1>
+              <p className="text-xs text-gray-500">CRM</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">StudyBridge</h1>
-            <p className="text-xs text-gray-500">CRM System</p>
+        ) : (
+          <div className="w-6 h-6 bg-primary rounded flex items-center justify-center mx-auto">
+            <GraduationCap className="text-white" size={14} />
           </div>
-        </div>
+        )}
+        
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1 h-6 w-6"
+          >
+            {isExpanded ? <X size={14} /> : <Menu size={14} />}
+          </Button>
+        )}
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-2 space-y-1">
         {navItems.map((item) => {
           const isActive = location === item.path;
           return (
             <Link key={item.path} href={item.path}>
-              <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg group cursor-pointer transition-colors ${
+              <div className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
                 isActive 
                   ? 'bg-primary text-white' 
                   : 'text-gray-700 hover:bg-gray-100'
-              }`}>
-                <item.icon size={18} />
-                <span className="font-medium">{item.label}</span>
-                {item.count !== undefined && item.count > 0 && (
-                  <Badge className={`ml-auto ${item.countColor} text-white text-xs px-2 py-1`}>
-                    {item.count}
-                  </Badge>
+              } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}>
+                
+                <div className="relative">
+                  <item.icon size={16} />
+                  {/* Show count as dot when collapsed */}
+                  {!isExpanded && item.count !== undefined && item.count > 0 && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                  )}
+                </div>
+
+                {isExpanded && (
+                  <>
+                    <span className="font-medium text-sm">{item.label}</span>
+                    {item.count !== undefined && item.count > 0 && (
+                      <Badge className={`ml-auto ${item.countColor} text-white text-xs px-2 py-0.5`}>
+                        {item.count}
+                      </Badge>
+                    )}
+                  </>
+                )}
+
+                {/* Tooltip for collapsed state */}
+                {!isExpanded && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    {item.label}
+                    {item.count !== undefined && item.count > 0 && (
+                      <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded">
+                        {item.count}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </Link>
@@ -125,7 +191,9 @@ export function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <UserMenu />
+      <div className={`border-t border-gray-200 ${isExpanded ? '' : 'px-2'}`}>
+        <UserMenu collapsed={!isExpanded} />
+      </div>
     </div>
   );
 }
