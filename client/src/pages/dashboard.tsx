@@ -110,11 +110,11 @@ export default function Dashboard() {
       title="Dashboard" 
       helpText="Dashboard shows key metrics and recent activities. Use the cards to get quick insights into your business performance."
     >
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Total Leads</p>
@@ -136,7 +136,7 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Active Students</p>
@@ -158,7 +158,7 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Applications</p>
@@ -180,7 +180,7 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Admissions</p>
@@ -203,17 +203,17 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Activities & Pipeline */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Recent Activities */}
           <Card>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Activities</CardTitle>
                 <HelpTooltip content="Track all recent activities across leads, students, and applications. Click on any activity to view details." />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentActivities.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3">
                     <div className={`w-8 h-8 ${activity.color} rounded-full flex items-center justify-center flex-shrink-0`}>
@@ -239,14 +239,14 @@ export default function Dashboard() {
 
           {/* Pipeline Overview */}
           <Card>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle>Pipeline Overview</CardTitle>
                 <HelpTooltip content="Monitor the progression of leads through your sales funnel. Each stage shows conversion rates and opportunities." />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -314,7 +314,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions & Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Quick Actions */}
           <Card>
             <CardHeader>
@@ -323,7 +323,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2">
+                <Button variant="outline" className="h-auto p-3 flex flex-col items-start space-y-1">
                   <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                     <UserPlus className="text-white" size={16} />
                   </div>
@@ -333,7 +333,7 @@ export default function Dashboard() {
                   </div>
                 </Button>
 
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2">
+                <Button variant="outline" className="h-auto p-3 flex flex-col items-start space-y-1">
                   <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
                     <GraduationCap className="text-white" size={16} />
                   </div>
@@ -343,7 +343,7 @@ export default function Dashboard() {
                   </div>
                 </Button>
 
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2">
+                <Button variant="outline" className="h-auto p-3 flex flex-col items-start space-y-1">
                   <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                     <Calendar className="text-white" size={16} />
                   </div>
@@ -353,7 +353,7 @@ export default function Dashboard() {
                   </div>
                 </Button>
 
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2">
+                <Button variant="outline" className="h-auto p-3 flex flex-col items-start space-y-1">
                   <div className="w-8 h-8 bg-purple rounded-lg flex items-center justify-center">
                     <Edit className="text-white" size={16} />
                   </div>
@@ -373,7 +373,7 @@ export default function Dashboard() {
               <p className="text-sm text-gray-500">Performance summary</p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="text-center">
                   <div className="relative inline-flex items-center justify-center w-20 h-20 mb-4">
                     <svg className="w-20 h-20 transform -rotate-90">
@@ -395,7 +395,7 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600">Success Rate</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">New Leads</span>
                     <span className="text-sm font-medium text-gray-900">+{metrics.totalLeads}</span>
