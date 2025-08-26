@@ -13,7 +13,6 @@ import Admissions from "@/pages/admissions";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Login from "@/pages/login";
-import TestLogin from "@/pages/test-login";
 
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
