@@ -22,15 +22,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider: Checking localStorage for user...');
     // Check for existing session in localStorage
     const savedUser = localStorage.getItem('auth_user');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        console.log('AuthProvider: Found saved user:', parsedUser);
+        setUser(parsedUser);
       } catch (error) {
+        console.log('AuthProvider: Error parsing saved user, removing from localStorage');
         localStorage.removeItem('auth_user');
       }
+    } else {
+      console.log('AuthProvider: No saved user found in localStorage');
     }
+    console.log('AuthProvider: Setting loading to false');
     setIsLoading(false);
   }, []);
 
