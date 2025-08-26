@@ -34,12 +34,16 @@ export class StudentModel {
   }
 
   static async update(id: number, updates: Partial<InsertStudent>): Promise<Student | undefined> {
-    const [student] = await db
+    const result = await db
       .update(students)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(students.id, id))
-      .returning();
-    return student;
+      .where(eq(students.id, id));
+
+    if (result.rowsAffected === 0) {
+      return undefined;
+    }
+
+    return await StudentModel.findById(id);
   }
 
   static async delete(id: number): Promise<boolean> {
