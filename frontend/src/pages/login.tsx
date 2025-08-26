@@ -74,7 +74,7 @@ export default function Login({ onLogin }: LoginProps) {
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">StudyBridge CRM</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900">SetCrm</CardTitle>
           <CardDescription className="text-gray-600">
             Sign in to your account to access the system
           </CardDescription>
