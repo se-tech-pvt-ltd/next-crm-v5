@@ -34,12 +34,16 @@ export class AdmissionModel {
   }
 
   static async update(id: number, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
-    const [admission] = await db
+    const result = await db
       .update(admissions)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(admissions.id, id))
-      .returning();
-    return admission;
+      .where(eq(admissions.id, id));
+
+    if (result.rowsAffected === 0) {
+      return undefined;
+    }
+
+    return await AdmissionModel.findById(id);
   }
 
   static async delete(id: number): Promise<boolean> {
