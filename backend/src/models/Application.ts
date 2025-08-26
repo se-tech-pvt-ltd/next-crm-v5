@@ -19,11 +19,18 @@ export class ApplicationModel {
   }
 
   static async create(applicationData: InsertApplication): Promise<Application> {
-    const [application] = await db
+    const result = await db
       .insert(applications)
-      .values(applicationData)
-      .returning();
-    return application;
+      .values(applicationData);
+
+    const insertId = Number(result.insertId);
+    const createdApplication = await ApplicationModel.findById(insertId);
+
+    if (!createdApplication) {
+      throw new Error("Failed to create application - record not found after insert");
+    }
+
+    return createdApplication;
   }
 
   static async update(id: number, updates: Partial<InsertApplication>): Promise<Application | undefined> {
