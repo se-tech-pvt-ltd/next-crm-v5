@@ -175,13 +175,25 @@ export function Sidebar() {
       <nav className="flex-1 p-2 space-y-1">
         {navItems.map((item) => {
           const isActive = location === item.path;
+
+          const handleNavClick = () => {
+            // Keep sidebar open briefly during navigation
+            if (!isMobile && hoverTimeout) {
+              clearTimeout(hoverTimeout);
+              setHoverTimeout(null);
+            }
+          };
+
           return (
             <Link key={item.path} href={item.path}>
-              <div className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
-                isActive 
-                  ? 'bg-primary text-white' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}>
+              <div
+                className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
+                  isActive
+                    ? 'bg-primary text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
+                onClick={handleNavClick}
+              >
                 
                 <div className="relative">
                   <item.icon size={16} />
