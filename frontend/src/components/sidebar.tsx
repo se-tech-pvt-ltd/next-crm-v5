@@ -19,6 +19,7 @@ export function Sidebar() {
   const [location] = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Check if mobile screen
   useEffect(() => {
@@ -28,7 +29,7 @@ export function Sidebar() {
         setIsExpanded(false);
       }
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
