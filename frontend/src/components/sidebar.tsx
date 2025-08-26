@@ -163,7 +163,14 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              setIsExpanded(!isExpanded);
+              // Clear any pending hover timeout when manually toggling
+              if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                setHoverTimeout(null);
+              }
+            }}
             className="p-1 h-6 w-6"
           >
             {isExpanded ? <X size={14} /> : <Menu size={14} />}
