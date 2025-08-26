@@ -34,7 +34,7 @@ function Router() {
   if (!isAuthenticated) {
     console.log('Router: User not authenticated, showing Login component');
     try {
-      return <TestLogin onLogin={login} />;
+      return <Login onLogin={login} />;
     } catch (error) {
       console.error('Router: Error rendering Login component:', error);
       return (
