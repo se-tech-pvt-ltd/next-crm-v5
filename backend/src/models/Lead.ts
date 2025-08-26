@@ -37,11 +37,19 @@ export class LeadModel {
       processedLead.program = (leadData as any).program[0] || null;
     }
 
-    const [lead] = await db
+    const result = await db
       .insert(leads)
-      .values(processedLead as InsertLead)
-      .returning();
-    return lead;
+      .values(processedLead as InsertLead);
+
+    // MySQL doesn't support .returning(), so we fetch the created record
+    const insertId = Number(result.insertId);
+    const createdLead = await LeadModel.findById(insertId);
+
+    if (!createdLead) {
+      throw new Error("Failed to create lead - record not found after insert");
+    }
+
+    return createdLead;
   }
 
   static async update(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined> {
