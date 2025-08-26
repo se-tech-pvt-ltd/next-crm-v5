@@ -3,7 +3,10 @@ interface TestLoginProps {
 }
 
 export default function TestLogin({ onLogin }: TestLoginProps) {
+  console.log('TestLogin component rendering');
+
   const handleTestLogin = () => {
+    console.log('Test login button clicked');
     onLogin({
       id: "admin1",
       email: "admin@studybridge.com",
@@ -12,40 +15,42 @@ export default function TestLogin({ onLogin }: TestLoginProps) {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f3f4f6',
+      backgroundColor: '#ff0000',  // Red background so we can see it
+      color: 'white',
       fontFamily: 'sans-serif'
     }}>
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: '#000000',  // Black container for contrast
+        color: 'white',
         padding: '2rem',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        border: '2px solid yellow', // Yellow border for visibility
         textAlign: 'center'
       }}>
-        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#1f2937' }}>
-          StudyBridge CRM - Test Login
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+          🚀 TEST LOGIN PAGE IS WORKING! 🚀
         </h1>
-        <p style={{ marginBottom: '2rem', color: '#6b7280' }}>
-          Click the button below to login as admin
+        <p style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
+          If you can see this, the app is rendering correctly!
         </p>
-        <button 
+        <button
           onClick={handleTestLogin}
           style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '0.5rem 1rem',
-            border: 'none',
+            backgroundColor: '#00ff00',  // Bright green button
+            color: 'black',
+            padding: '1rem 2rem',
+            border: '2px solid white',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: '1rem'
+            fontSize: '1.2rem',
+            fontWeight: 'bold'
           }}
         >
-          Login as Admin
+          🎯 CLICK TO LOGIN AS ADMIN
         </button>
       </div>
     </div>
