@@ -5,7 +5,7 @@ import { formatStatus } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { Lead, Student, Application, Admission } from '@shared/schema';
+import { Lead, Student, Application, Admission } from '@/lib/types';
 import { 
   TrendingUp, 
   TrendingDown, 

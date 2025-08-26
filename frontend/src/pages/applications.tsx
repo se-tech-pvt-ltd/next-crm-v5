@@ -11,7 +11,7 @@ import { HelpTooltip } from '@/components/help-tooltip';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { ApplicationDetailsModal } from '@/components/application-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
-import { Application, Student } from '@shared/schema';
+import { Application, Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';

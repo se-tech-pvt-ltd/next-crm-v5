@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
-import { Admission, Student } from '@shared/schema';
+import { Admission, Student } from '@/lib/types';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
