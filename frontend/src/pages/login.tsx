@@ -70,7 +70,7 @@ export default function Login({ onLogin }: LoginProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
           </div>
