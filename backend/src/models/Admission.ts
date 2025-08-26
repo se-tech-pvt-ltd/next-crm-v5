@@ -19,11 +19,18 @@ export class AdmissionModel {
   }
 
   static async create(admissionData: InsertAdmission): Promise<Admission> {
-    const [admission] = await db
+    const result = await db
       .insert(admissions)
-      .values(admissionData)
-      .returning();
-    return admission;
+      .values(admissionData);
+
+    const insertId = Number(result.insertId);
+    const createdAdmission = await AdmissionModel.findById(insertId);
+
+    if (!createdAdmission) {
+      throw new Error("Failed to create admission - record not found after insert");
+    }
+
+    return createdAdmission;
   }
 
   static async update(id: number, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
