@@ -17,7 +17,10 @@ import Login from "@/pages/login";
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
 
+  console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
+
   if (isLoading) {
+    console.log('Router: Showing loading screen');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -29,8 +32,11 @@ function Router() {
   }
 
   if (!isAuthenticated) {
+    console.log('Router: User not authenticated, showing Login component');
     return <Login onLogin={login} />;
   }
+
+  console.log('Router: User authenticated, showing main app');
 
   return (
     <Switch>
