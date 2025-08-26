@@ -149,8 +149,7 @@ export function Sidebar() {
               <GraduationCap className="text-white" size={14} />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-gray-900">StudyBridge</h1>
-              <p className="text-xs text-gray-500">CRM</p>
+              <h1 className="text-sm font-bold text-gray-900">SetCrm</h1>
             </div>
           </div>
         ) : (

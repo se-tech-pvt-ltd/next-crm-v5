@@ -13,7 +13,6 @@ import Admissions from "@/pages/admissions";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Login from "@/pages/login";
-import TestLogin from "@/pages/test-login";
 
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
@@ -35,7 +34,7 @@ function Router() {
   if (!isAuthenticated) {
     console.log('Router: User not authenticated, showing Login component');
     try {
-      return <TestLogin onLogin={login} />;
+      return <Login onLogin={login} />;
     } catch (error) {
       console.error('Router: Error rendering Login component:', error);
       return (
