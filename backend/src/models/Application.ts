@@ -34,12 +34,16 @@ export class ApplicationModel {
   }
 
   static async update(id: number, updates: Partial<InsertApplication>): Promise<Application | undefined> {
-    const [application] = await db
+    const result = await db
       .update(applications)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(applications.id, id))
-      .returning();
-    return application;
+      .where(eq(applications.id, id));
+
+    if (result.rowsAffected === 0) {
+      return undefined;
+    }
+
+    return await ApplicationModel.findById(id);
   }
 
   static async delete(id: number): Promise<boolean> {
