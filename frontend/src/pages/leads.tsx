@@ -13,7 +13,7 @@ import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
-import { Lead } from '@shared/schema';
+import { Lead } from '@/lib/types';
 import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';

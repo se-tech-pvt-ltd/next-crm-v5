@@ -11,7 +11,7 @@ import { HelpTooltip } from '@/components/help-tooltip';
 import { AddStudentModal } from '@/components/add-student-modal';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
-import { Student } from '@shared/schema';
+import { Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter } from 'lucide-react';

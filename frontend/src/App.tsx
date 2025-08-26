@@ -13,11 +13,15 @@ import Admissions from "@/pages/admissions";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Login from "@/pages/login";
+import TestLogin from "@/pages/test-login";
 
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
 
+  console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
+
   if (isLoading) {
+    console.log('Router: Showing loading screen');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -29,8 +33,26 @@ function Router() {
   }
 
   if (!isAuthenticated) {
-    return <Login onLogin={login} />;
+    console.log('Router: User not authenticated, showing Login component');
+    try {
+      return <TestLogin onLogin={login} />;
+    } catch (error) {
+      console.error('Router: Error rendering Login component:', error);
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-red-50">
+          <div className="text-center p-8">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Login Error</h1>
+            <p className="text-gray-700">There was an error loading the login page.</p>
+            <pre className="mt-4 text-sm text-gray-600 bg-gray-100 p-4 rounded">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </pre>
+          </div>
+        </div>
+      );
+    }
   }
+
+  console.log('Router: User authenticated, showing main app');
 
   return (
     <Switch>
@@ -48,16 +70,43 @@ function Router() {
 }
 
 function App() {
-  return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </AuthProvider>
-  );
+  console.log('App component rendering');
+
+  try {
+    return (
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    );
+  } catch (error) {
+    console.error('Error in App component:', error);
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'red',
+        color: 'white',
+        fontSize: '2rem',
+        textAlign: 'center',
+        padding: '2rem'
+      }}>
+        <div>
+          <h1>⚠️ APP ERROR ⚠️</h1>
+          <p>Something went wrong loading the application.</p>
+          <pre style={{ fontSize: '1rem', backgroundColor: 'black', padding: '1rem', marginTop: '1rem' }}>
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </pre>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;

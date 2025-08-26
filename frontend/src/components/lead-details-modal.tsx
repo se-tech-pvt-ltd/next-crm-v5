@@ -11,7 +11,7 @@ import { ActivityTracker } from './activity-tracker';
 import { HelpTooltip } from './help-tooltip';
 import { ConvertToStudentModal } from './convert-to-student-modal';
 import { MultiSelect } from './multi-select';
-import { type Lead, type User } from '@shared/schema';
+import { type Lead, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';

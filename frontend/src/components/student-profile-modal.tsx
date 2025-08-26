@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
 import { AddAdmissionModal } from './add-admission-modal';
-import { type Student, type Application, type Admission } from '@shared/schema';
+import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';

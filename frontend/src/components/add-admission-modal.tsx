@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@shared/schema';
+import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Check, ChevronsUpDown } from 'lucide-react';
