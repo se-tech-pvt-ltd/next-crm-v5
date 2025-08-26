@@ -107,11 +107,30 @@ export function Sidebar() {
 
   const sidebarWidth = isExpanded ? 'w-64' : 'w-16';
 
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        setHoverTimeout(null);
+      }
+      setIsExpanded(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      const timeout = setTimeout(() => {
+        setIsExpanded(false);
+      }, 300); // 300ms delay before closing
+      setHoverTimeout(timeout);
+    }
+  };
+
   return (
-    <div 
+    <div
       className={`${sidebarWidth} bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out relative`}
-      onMouseEnter={() => !isMobile && setIsExpanded(true)}
-      onMouseLeave={() => !isMobile && setIsExpanded(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Toggle Button */}
       <div className="p-3 border-b border-gray-200 flex items-center justify-between">
