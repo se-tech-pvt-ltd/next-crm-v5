@@ -62,12 +62,18 @@ export class LeadModel {
       processedUpdates.program = (updates as any).program[0] || null;
     }
 
-    const [lead] = await db
+    const result = await db
       .update(leads)
       .set({ ...processedUpdates, updatedAt: new Date() } as any)
-      .where(eq(leads.id, id))
-      .returning();
-    return lead;
+      .where(eq(leads.id, id));
+
+    // Check if the update was successful
+    if (result.rowsAffected === 0) {
+      return undefined;
+    }
+
+    // Fetch the updated record
+    return await LeadModel.findById(id);
   }
 
   static async assignToCounselor(leadId: number, counselorId: string): Promise<boolean> {
