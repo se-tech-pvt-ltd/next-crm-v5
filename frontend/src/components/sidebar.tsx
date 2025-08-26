@@ -35,6 +35,15 @@ export function Sidebar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+    };
+  }, [hoverTimeout]);
+
   const { data: leadsData } = useQuery({
     queryKey: ['/api/leads'],
   });
