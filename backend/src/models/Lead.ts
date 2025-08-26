@@ -77,12 +77,11 @@ export class LeadModel {
   }
 
   static async assignToCounselor(leadId: number, counselorId: string): Promise<boolean> {
-    const [updated] = await db
+    const result = await db
       .update(leads)
       .set({ counselorId, updatedAt: new Date() })
-      .where(eq(leads.id, leadId))
-      .returning();
-    return !!updated;
+      .where(eq(leads.id, leadId));
+    return result.rowsAffected > 0;
   }
 
   static async delete(id: number): Promise<boolean> {
