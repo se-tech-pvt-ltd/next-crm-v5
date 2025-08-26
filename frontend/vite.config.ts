@@ -8,12 +8,12 @@ export default defineConfig({
     react(),
     runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+      process.env.REPL_ID !== undefined
       ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
+        await import("@replit/vite-plugin-cartographer").then((m) =>
+          m.cartographer(),
+        ),
+      ]
       : []),
   ],
   resolve: {
@@ -43,5 +43,10 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 4173,
+    allowedHosts: ["sales.crm-setech.cloud"],
   },
 });
