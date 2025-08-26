@@ -33,7 +33,22 @@ function Router() {
 
   if (!isAuthenticated) {
     console.log('Router: User not authenticated, showing Login component');
-    return <Login onLogin={login} />;
+    try {
+      return <Login onLogin={login} />;
+    } catch (error) {
+      console.error('Router: Error rendering Login component:', error);
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-red-50">
+          <div className="text-center p-8">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Login Error</h1>
+            <p className="text-gray-700">There was an error loading the login page.</p>
+            <pre className="mt-4 text-sm text-gray-600 bg-gray-100 p-4 rounded">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </pre>
+          </div>
+        </div>
+      );
+    }
   }
 
   console.log('Router: User authenticated, showing main app');
