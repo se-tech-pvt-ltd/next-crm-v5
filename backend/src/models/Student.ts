@@ -19,11 +19,18 @@ export class StudentModel {
   }
 
   static async create(studentData: InsertStudent): Promise<Student> {
-    const [student] = await db
+    const result = await db
       .insert(students)
-      .values(studentData)
-      .returning();
-    return student;
+      .values(studentData);
+
+    const insertId = Number(result.insertId);
+    const createdStudent = await StudentModel.findById(insertId);
+
+    if (!createdStudent) {
+      throw new Error("Failed to create student - record not found after insert");
+    }
+
+    return createdStudent;
   }
 
   static async update(id: number, updates: Partial<InsertStudent>): Promise<Student | undefined> {
