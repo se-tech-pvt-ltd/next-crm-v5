@@ -184,10 +184,14 @@ export function Sidebar() {
           const isActive = location === item.path;
 
           const handleNavClick = () => {
-            // Keep sidebar open briefly during navigation
+            // Keep sidebar open briefly during navigation on desktop
             if (!isMobile && hoverTimeout) {
               clearTimeout(hoverTimeout);
               setHoverTimeout(null);
+            }
+            // On mobile, close sidebar after navigation for better UX
+            if (isMobile && isExpanded) {
+              setTimeout(() => setIsExpanded(false), 150);
             }
           };
 
