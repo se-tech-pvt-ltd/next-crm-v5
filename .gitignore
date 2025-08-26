@@ -1,6 +1,27 @@
 node_modules
-dist
 .DS_Store
-server/public
-vite.config.ts.*
 *.tar.gz
+
+# Build outputs
+frontend/dist
+backend/dist
+uploads/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Config backup files
+vite.config.ts.*
