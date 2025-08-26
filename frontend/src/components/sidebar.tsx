@@ -19,6 +19,7 @@ export function Sidebar() {
   const [location] = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Check if mobile screen
   useEffect(() => {
@@ -28,11 +29,20 @@ export function Sidebar() {
         setIsExpanded(false);
       }
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+    };
+  }, [hoverTimeout]);
 
   const { data: leadsData } = useQuery({
     queryKey: ['/api/leads'],
@@ -106,11 +116,30 @@ export function Sidebar() {
 
   const sidebarWidth = isExpanded ? 'w-64' : 'w-16';
 
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        setHoverTimeout(null);
+      }
+      setIsExpanded(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      const timeout = setTimeout(() => {
+        setIsExpanded(false);
+      }, 300); // 300ms delay before closing
+      setHoverTimeout(timeout);
+    }
+  };
+
   return (
-    <div 
+    <div
       className={`${sidebarWidth} bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out relative`}
-      onMouseEnter={() => !isMobile && setIsExpanded(true)}
-      onMouseLeave={() => !isMobile && setIsExpanded(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Toggle Button */}
       <div className="p-3 border-b border-gray-200 flex items-center justify-between">
@@ -134,7 +163,14 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              setIsExpanded(!isExpanded);
+              // Clear any pending hover timeout when manually toggling
+              if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                setHoverTimeout(null);
+              }
+            }}
             className="p-1 h-6 w-6"
           >
             {isExpanded ? <X size={14} /> : <Menu size={14} />}
@@ -146,13 +182,29 @@ export function Sidebar() {
       <nav className="flex-1 p-2 space-y-1">
         {navItems.map((item) => {
           const isActive = location === item.path;
+
+          const handleNavClick = () => {
+            // Keep sidebar open briefly during navigation on desktop
+            if (!isMobile && hoverTimeout) {
+              clearTimeout(hoverTimeout);
+              setHoverTimeout(null);
+            }
+            // On mobile, close sidebar after navigation for better UX
+            if (isMobile && isExpanded) {
+              setTimeout(() => setIsExpanded(false), 150);
+            }
+          };
+
           return (
             <Link key={item.path} href={item.path}>
-              <div className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
-                isActive 
-                  ? 'bg-primary text-white' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}>
+              <div
+                className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
+                  isActive
+                    ? 'bg-primary text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
+                onClick={handleNavClick}
+              >
                 
                 <div className="relative">
                   <item.icon size={16} />

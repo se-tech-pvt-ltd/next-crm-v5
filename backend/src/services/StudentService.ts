@@ -1,0 +1,125 @@
+import { ilike, or, and, eq } from "drizzle-orm";
+import { db } from "../config/database.js";
+import { students, type Student, type InsertStudent } from "../shared/schema.js";
+import { StudentModel } from "../models/Student.js";
+import { ActivityService } from "./ActivityService.js";
+
+export class StudentService {
+  static async getStudents(userId?: string, userRole?: string): Promise<Student[]> {
+    if (userRole === 'counselor' && userId) {
+      return await StudentModel.findByCounselor(userId);
+    }
+    return await StudentModel.findAll();
+  }
+
+  static async getStudent(id: number, userId?: string, userRole?: string): Promise<Student | undefined> {
+    const student = await StudentModel.findById(id);
+    
+    if (!student) return undefined;
+    
+    // Check role-based access
+    if (userRole === 'counselor' && userId && student.counselorId !== userId) {
+      return undefined;
+    }
+    
+    return student;
+  }
+
+  static async createStudent(studentData: InsertStudent): Promise<Student> {
+    const student = await StudentModel.create(studentData);
+    
+    // Log activity
+    await ActivityService.logActivity(
+      'student', 
+      student.id, 
+      'created', 
+      'Student record created',
+      `Student ${student.name} was added to the system`
+    );
+    
+    return student;
+  }
+
+  static async updateStudent(id: number, updates: Partial<InsertStudent>): Promise<Student | undefined> {
+    // Get the current student to track changes
+    const currentStudent = await StudentModel.findById(id);
+    if (!currentStudent) return undefined;
+
+    const student = await StudentModel.update(id, updates);
+
+    if (student) {
+      // Log changes for each updated field
+      for (const [fieldName, newValue] of Object.entries(updates)) {
+        if (fieldName === 'updatedAt') continue;
+        
+        const oldValue = (currentStudent as any)[fieldName];
+        if (oldValue !== newValue) {
+          const fieldDisplayName = fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase());
+          
+          await ActivityService.logActivity(
+            'student', 
+            id, 
+            'updated', 
+            `${fieldDisplayName} updated`,
+            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+            fieldName,
+            String(oldValue || ''),
+            String(newValue || ''),
+            undefined,
+            "Next Bot"
+          );
+        }
+      }
+    }
+
+    return student;
+  }
+
+  static async deleteStudent(id: number): Promise<boolean> {
+    const student = await StudentModel.findById(id);
+    const success = await StudentModel.delete(id);
+    
+    if (success && student) {
+      await ActivityService.logActivity(
+        'student', 
+        id, 
+        'deleted', 
+        'Student deleted',
+        `Student ${student.name} was deleted from the system`
+      );
+    }
+    
+    return success;
+  }
+
+  static async searchStudents(query: string, userId?: string, userRole?: string): Promise<Student[]> {
+    const searchConditions = or(
+      ilike(students.name, `%${query}%`),
+      ilike(students.email, `%${query}%`),
+      ilike(students.targetProgram, `%${query}%`),
+      ilike(students.targetCountry, `%${query}%`)
+    );
+    
+    if (userRole === 'counselor' && userId) {
+      return await db.select().from(students).where(
+        and(
+          eq(students.counselorId, userId),
+          searchConditions
+        )
+      );
+    }
+    
+    return await db.select().from(students).where(searchConditions);
+  }
+
+  static async convertFromLead(leadId: number, studentData: InsertStudent): Promise<Student> {
+    const student = await StudentModel.create(studentData);
+    
+    // Transfer activities from lead to student
+    await ActivityService.transferActivities('lead', leadId, 'student', student.id);
+    
+    return student;
+  }
+}
