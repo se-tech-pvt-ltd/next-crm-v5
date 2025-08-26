@@ -14,8 +14,16 @@ export class UserModel {
   }
 
   static async create(userData: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(userData).returning();
-    return user;
+    const result = await db.insert(users).values(userData);
+
+    // For user, we use the provided ID since it's a string primary key
+    const createdUser = await UserModel.findById(userData.id);
+
+    if (!createdUser) {
+      throw new Error("Failed to create user - record not found after insert");
+    }
+
+    return createdUser;
   }
 
   static async update(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
