@@ -409,7 +409,7 @@ export default function AddLead() {
                           <Target className="w-4 h-4" />
                           <span>Lead Status *</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
