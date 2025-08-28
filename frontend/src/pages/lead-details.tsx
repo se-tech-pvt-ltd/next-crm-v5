@@ -216,6 +216,17 @@ export default function LeadDetails() {
     }
   };
 
+  const getStatusDisplayName = (status: string) => {
+    // First try to find the status in dropdown data
+    const statusOption = dropdownData?.Status?.find((option: any) => option.key === status);
+    if (statusOption) {
+      return statusOption.value;
+    }
+
+    // Fallback to formatStatus function
+    return formatStatus(status);
+  };
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
