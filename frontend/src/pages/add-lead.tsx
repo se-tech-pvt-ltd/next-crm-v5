@@ -296,62 +296,23 @@ export default function AddLead() {
   });
 
   const onSubmit = (data: AddLeadFormData) => {
-    // Check for duplicate email in existing leads
-    if (Array.isArray(existingLeads)) {
-      const duplicateLead = existingLeads.find(
-        (lead: any) => lead.email === data.email
-      );
-      if (duplicateLead) {
-        toast({
-          title: "Duplicate Found",
-          description: "A lead with this email already exists in your system.",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Check if there are any duplicate issues
+    if (emailDuplicateStatus.isDuplicate) {
+      toast({
+        title: "Duplicate Email",
+        description: emailDuplicateStatus.message || "This email already exists in the system.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Check for duplicate email in existing students
-    if (Array.isArray(existingStudents)) {
-      const duplicateStudent = existingStudents.find(
-        (student: any) => student.email === data.email
-      );
-      if (duplicateStudent) {
-        toast({
-          title: "Already a Student",
-          description: "This contact is already registered as a student.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    // Check for duplicate phone if provided
-    if (data.phone) {
-      let duplicateFound = false;
-      
-      if (Array.isArray(existingLeads)) {
-        const duplicatePhoneLead = existingLeads.find(
-          (lead: any) => lead.phone === data.phone
-        );
-        if (duplicatePhoneLead) duplicateFound = true;
-      }
-      
-      if (Array.isArray(existingStudents)) {
-        const duplicatePhoneStudent = existingStudents.find(
-          (student: any) => student.phone === data.phone
-        );
-        if (duplicatePhoneStudent) duplicateFound = true;
-      }
-      
-      if (duplicateFound) {
-        toast({
-          title: "Duplicate Phone",
-          description: "A contact with this phone number already exists.",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (phoneDuplicateStatus.isDuplicate) {
+      toast({
+        title: "Duplicate Phone",
+        description: phoneDuplicateStatus.message || "This phone number already exists in the system.",
+        variant: "destructive",
+      });
+      return;
     }
 
     createLeadMutation.mutate(data);
