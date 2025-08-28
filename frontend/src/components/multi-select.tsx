@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { useWheelScrolling } from '@/lib/scroll-utils';
 import { useResizeObserverErrorSuppression } from '@/lib/error-boundary';
 
 interface MultiSelectProps {
@@ -124,10 +123,6 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgb(203 213 225) transparent'
-            }}
-            onWheel={(e) => {
-              // Allow natural wheel scrolling, prevent event bubbling
-              e.stopPropagation();
             }}
           >
             {options.map((option) => (
