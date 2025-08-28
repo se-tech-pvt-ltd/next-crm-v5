@@ -247,6 +247,10 @@ export default function LeadDetails() {
   const StatusProgressBar = () => {
     const currentIndex = getCurrentStatusIndex();
 
+    // Temporary: if we can't find the status, assume it's "First Touch" (index 1)
+    const effectiveIndex = currentIndex === -1 ? 1 : currentIndex;
+    console.log('Using effective index:', effectiveIndex);
+
     return (
       <div className="w-full bg-gray-100 rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between relative">
