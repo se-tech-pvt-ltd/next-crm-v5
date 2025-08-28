@@ -7,54 +7,144 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Layout } from '@/components/layout';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { ResizeObserverErrorBoundary, LayoutSafeWrapper } from '@/lib/error-boundary';
-import { 
-  Users, 
-  GraduationCap, 
-  Trophy, 
+import {
+  Users,
+  GraduationCap,
+  Trophy,
   TrendingUp,
   UserPlus,
   Calendar,
   Edit,
   ArrowRight,
-  Clock
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
 import { DashboardMetrics, PipelineData, Activity } from '@/lib/types';
+import React from 'react';
 
-export default function Dashboard() {
-  const { data: leads, isLoading: leadsLoading } = useQuery({
+// Error boundary for the Dashboard component
+class DashboardErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Dashboard Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Layout title="Dashboard" helpText="Dashboard error occurred">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3 text-destructive">
+                <AlertTriangle className="w-5 h-5" />
+                <div>
+                  <h3 className="font-semibold">Error Loading Dashboard</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {this.state.error?.message || 'An unexpected error occurred'}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => window.location.reload()}
+                  >
+                    Reload Page
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Layout>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function DashboardContent() {
+  const { data: leads, isLoading: leadsLoading, error: leadsError } = useQuery({
     queryKey: ['/api/leads'],
   });
 
-  const { data: students, isLoading: studentsLoading } = useQuery({
+  const { data: students, isLoading: studentsLoading, error: studentsError } = useQuery({
     queryKey: ['/api/students'],
   });
 
-  const { data: applications, isLoading: applicationsLoading } = useQuery({
+  const { data: applications, isLoading: applicationsLoading, error: applicationsError } = useQuery({
     queryKey: ['/api/applications'],
   });
 
-  const { data: admissions, isLoading: admissionsLoading } = useQuery({
+  const { data: admissions, isLoading: admissionsLoading, error: admissionsError } = useQuery({
     queryKey: ['/api/admissions'],
   });
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
+  // Debug logging
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Dashboard data:', { leads, students, applications, admissions });
+      console.log('Dashboard errors:', { leadsError, studentsError, applicationsError, admissionsError });
+    }
+  }, [leads, students, applications, admissions, leadsError, studentsError, applicationsError, admissionsError]);
+
+  // Ensure data is always an array - handle different API response formats
+  const leadsArray = React.useMemo(() => {
+    if (Array.isArray(leads)) return leads;
+    if (leads && typeof leads === 'object' && Array.isArray(leads.data)) return leads.data;
+    if (leads && typeof leads === 'object' && Array.isArray(leads.results)) return leads.results;
+    return [];
+  }, [leads]);
+
+  const studentsArray = React.useMemo(() => {
+    if (Array.isArray(students)) return students;
+    if (students && typeof students === 'object' && Array.isArray(students.data)) return students.data;
+    if (students && typeof students === 'object' && Array.isArray(students.results)) return students.results;
+    return [];
+  }, [students]);
+
+  const applicationsArray = React.useMemo(() => {
+    if (Array.isArray(applications)) return applications;
+    if (applications && typeof applications === 'object' && Array.isArray(applications.data)) return applications.data;
+    if (applications && typeof applications === 'object' && Array.isArray(applications.results)) return applications.results;
+    return [];
+  }, [applications]);
+
+  const admissionsArray = React.useMemo(() => {
+    if (Array.isArray(admissions)) return admissions;
+    if (admissions && typeof admissions === 'object' && Array.isArray(admissions.data)) return admissions.data;
+    if (admissions && typeof admissions === 'object' && Array.isArray(admissions.results)) return admissions.results;
+    return [];
+  }, [admissions]);
+
   // Calculate metrics
   const metrics: DashboardMetrics = {
-    totalLeads: leads?.length || 0,
-    activeStudents: students?.length || 0,
-    applications: applications?.length || 0,
-    admissions: admissions?.filter((admission: any) => admission.decision === 'accepted')?.length || 0,
-    conversionRate: leads?.length ? ((students?.length || 0) / leads.length) * 100 : 0,
-    successRate: applications?.length ? ((admissions?.filter((admission: any) => admission.decision === 'accepted')?.length || 0) / applications.length) * 100 : 0,
+    totalLeads: leadsArray.length,
+    activeStudents: studentsArray.length,
+    applications: applicationsArray.length,
+    admissions: admissionsArray.filter((admission: any) => admission.decision === 'accepted').length,
+    conversionRate: leadsArray.length ? (studentsArray.length / leadsArray.length) * 100 : 0,
+    successRate: applicationsArray.length ? (admissionsArray.filter((admission: any) => admission.decision === 'accepted').length / applicationsArray.length) * 100 : 0,
   };
 
   // Calculate pipeline data
   const pipelineData: PipelineData = {
-    newLeads: leads?.filter((lead: any) => lead.status === 'new')?.length || 0,
-    qualifiedStudents: students?.filter((student: any) => student.status === 'active')?.length || 0,
-    applicationsSubmitted: applications?.filter((app: any) => app.status === 'submitted')?.length || 0,
-    admissions: admissions?.filter((admission: any) => admission.decision === 'accepted')?.length || 0,
+    newLeads: leadsArray.filter((lead: any) => lead.status === 'new').length,
+    qualifiedStudents: studentsArray.filter((student: any) => student.status === 'active').length,
+    applicationsSubmitted: applicationsArray.filter((app: any) => app.status === 'submitted').length,
+    admissions: admissionsArray.filter((admission: any) => admission.decision === 'accepted').length,
   };
 
   // Generate recent activities
@@ -170,7 +260,7 @@ export default function Dashboard() {
                   )}
                   <p className="text-xs text-amber-600 mt-1">
                     <Clock className="inline w-3 h-3 mr-1" />
-                    {applications?.filter((app: any) => app.status === 'pending')?.length || 0} pending
+                    {applicationsArray.filter((app: any) => app.status === 'pending').length} pending
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -434,5 +524,13 @@ export default function Dashboard() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <DashboardErrorBoundary>
+      <DashboardContent />
+    </DashboardErrorBoundary>
   );
 }

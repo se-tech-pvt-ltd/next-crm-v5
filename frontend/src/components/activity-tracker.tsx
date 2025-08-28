@@ -36,8 +36,9 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
 
-  const { data: activities = [], isLoading } = useQuery({
+  const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
+    enabled: !!entityId,
   });
 
   // Fetch users to get current profile images
@@ -53,19 +54,29 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
-      return apiRequest('POST', '/api/activities', {
+      console.log('Adding activity:', { entityType, entityId, data });
+      const response = await apiRequest('POST', '/api/activities', {
         entityType,
         entityId,
         activityType: data.type,
         title: `${ACTIVITY_TYPES.find(t => t.value === data.type)?.label || 'Activity'} added`,
         description: data.content,
       });
+      const result = await response.json();
+      console.log('Activity created:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Activity mutation success:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
+      // Trigger a refetch to immediately show the new activity
+      refetch();
       setNewActivity("");
       setActivityType("comment");
       setIsAddingActivity(false);
+    },
+    onError: (error) => {
+      console.error('Activity mutation error:', error);
     },
   });
 
@@ -106,22 +117,36 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ActivityIcon className="h-4 w-4" />
-            Activity Timeline
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-4 text-gray-500">Loading activities...</div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4 p-4">
+        <div className="text-center py-4 text-gray-500">Loading activities...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="text-center py-4">
+          <div className="text-red-600 mb-2">Error loading activities</div>
+          <div className="text-sm text-gray-500 mb-3">{error.message}</div>
+          <Button size="sm" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="space-y-4 p-4">
+        {/* Debug Info */}
+        <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+          Entity: {entityType}/{entityId} | Activities: {activities.length}
+          <Button size="sm" variant="ghost" onClick={() => refetch()} className="ml-2 h-5 px-2">
+            Refresh
+          </Button>
+        </div>
+
         {/* Add Activity Section with Blue Gradient Background */}
         <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
           {!isAddingActivity ? (
@@ -184,6 +209,12 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                   Cancel
                 </Button>
               </div>
+
+              {addActivityMutation.error && (
+                <div className="text-red-600 text-xs p-2 bg-red-50 rounded">
+                  Error: {addActivityMutation.error.message}
+                </div>
+              )}
               
               <p className="text-xs text-gray-600">
                 Press Enter to submit, Shift+Enter for new line
