@@ -180,6 +180,8 @@
     contain: layout style;
     /* Stabilize dimensions during positioning */
     will-change: auto;
+    /* Ensure scroll events are preserved */
+    pointer-events: auto;
   }
 
   /* Debounce resize events for chart containers */
