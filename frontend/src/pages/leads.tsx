@@ -386,7 +386,7 @@ export default function Leads() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Link href="/leads/add">
+                  <Link href="/leads/add" preload>
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Lead
