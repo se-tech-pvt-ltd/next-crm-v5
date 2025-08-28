@@ -37,6 +37,31 @@ export function SearchableCombobox({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure wheel events work properly in the scroll container
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation();
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isScrollingUp = e.deltaY < 0;
+      const isScrollingDown = e.deltaY > 0;
+
+      if (
+        (isScrollingUp && scrollTop > 0) ||
+        (isScrollingDown && scrollTop < scrollHeight - clientHeight)
+      ) {
+        return;
+      }
+    };
+
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: true });
+    return () => scrollContainer.removeEventListener('wheel', handleWheel);
+  }, [open]);
 
   const selectedOption = options.find(option => option.value === value);
 
@@ -127,12 +152,15 @@ export function SearchableCombobox({
           />
         </div>
         <div
+          ref={scrollContainerRef}
           className="max-h-60 overflow-y-auto overflow-x-hidden p-1"
           style={{
             touchAction: 'pan-y',
             WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'thin'
+            scrollbarWidth: 'thin',
+            overscrollBehavior: 'contain'
           }}
+          tabIndex={-1}
         >
           {loading ? (
             <div className="flex items-center justify-center py-6">
