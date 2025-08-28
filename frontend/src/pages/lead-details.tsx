@@ -203,26 +203,85 @@ export default function LeadDetails() {
   };
 
 
-  const getStatusDisplayName = (status: string) => {
-    // First try to find the status in dropdown data
-    const statusOption = dropdownData?.Status?.find((option: any) => option.key === status);
+  // Define the status sequence using provided IDs
+  const statusSequence = [
+    'b6ba479e-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b6d98a94-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b6f80223-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b71e2fb9-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b73cb47a-840f-11f0-a5b5-92e8d4b3e6a5'
+  ];
+
+  const getStatusDisplayName = (statusId: string) => {
+    // Find the status in dropdown data using ID
+    const statusOption = dropdownData?.Status?.find((option: any) => option.id === statusId);
     if (statusOption) {
       return statusOption.value;
     }
 
-    // Fallback to formatStatus function
-    return formatStatus(status);
+    // Fallback - try with key field
+    const statusByKey = dropdownData?.Status?.find((option: any) => option.key === statusId);
+    if (statusByKey) {
+      return statusByKey.value;
+    }
+
+    // Final fallback
+    return formatStatus(statusId);
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'contacted': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
-      case 'qualified': return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'converted': return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
-      case 'lost': return 'bg-red-100 text-red-800 hover:bg-red-200';
-      default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-    }
+  const getCurrentStatusIndex = () => {
+    return statusSequence.findIndex(id => {
+      // Check if current status matches by ID
+      const statusOption = dropdownData?.Status?.find((option: any) => option.id === id);
+      return statusOption?.key === currentStatus || statusOption?.id === currentStatus;
+    });
+  };
+
+  const StatusProgressBar = () => {
+    const currentIndex = getCurrentStatusIndex();
+
+    return (
+      <div className="w-full bg-gray-100 rounded-lg p-4 mb-6">
+        <div className="flex items-center justify-between relative">
+          {statusSequence.map((statusId, index) => {
+            const isActive = index === currentIndex;
+            const isPassed = index < currentIndex;
+            const statusName = getStatusDisplayName(statusId);
+
+            return (
+              <div key={statusId} className="flex flex-col items-center relative flex-1">
+                {/* Status Circle */}
+                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-green-500 border-green-500 text-white'
+                    : isPassed
+                    ? 'bg-green-100 border-green-300 text-green-700'
+                    : 'bg-white border-gray-300 text-gray-500'
+                }`}>
+                  {isActive && <div className="w-3 h-3 bg-white rounded-full" />}
+                  {isPassed && <div className="w-3 h-3 bg-green-500 rounded-full" />}
+                  {!isActive && !isPassed && <div className="w-3 h-3 bg-gray-300 rounded-full" />}
+                </div>
+
+                {/* Status Label */}
+                <span className={`mt-2 text-xs font-medium text-center ${
+                  isActive ? 'text-green-600' : isPassed ? 'text-green-500' : 'text-gray-500'
+                }`}>
+                  {statusName}
+                </span>
+
+                {/* Connector Line */}
+                {index < statusSequence.length - 1 && (
+                  <div className={`absolute top-4 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                    index < currentIndex ? 'bg-green-300' : 'bg-gray-300'
+                  }`} style={{ marginLeft: '1rem', width: 'calc(100% - 2rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   if (!match) {
