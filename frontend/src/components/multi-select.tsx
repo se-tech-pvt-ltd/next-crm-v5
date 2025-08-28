@@ -69,9 +69,14 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-2" style={{ width: 'var(--radix-popover-trigger-width)' }}>
+      <PopoverContent className="w-full p-0" style={{ width: 'var(--radix-popover-trigger-width)' }}>
+        <div className="p-2 border-b border-border">
+          <span className="text-xs text-muted-foreground">
+            Select preferred study destinations ({options.length} available)
+          </span>
+        </div>
         <div
-          className="max-h-48 overflow-auto space-y-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+          className="max-h-48 overflow-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
           style={{ touchAction: 'pan-y' }}
         >
           {options.map((option) => (
@@ -93,6 +98,13 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
             </div>
           ))}
         </div>
+        {options.length > 8 && (
+          <div className="px-2 py-1 border-t border-border bg-muted/30">
+            <span className="text-xs text-muted-foreground">
+              💡 Scroll to see more options
+            </span>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
