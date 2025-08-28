@@ -1,6 +1,17 @@
-import { eq, desc, and, not, exists } from "drizzle-orm";
+import { eq, desc, and, not, exists, count, sql } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
+
+interface PaginationOptions {
+  page: number;
+  limit: number;
+  offset: number;
+}
+
+interface PaginatedLeadsResult {
+  leads: Lead[];
+  total: number;
+}
 
 export class LeadModel {
   static async findById(id: number): Promise<Lead | undefined> {
@@ -8,23 +19,78 @@ export class LeadModel {
     return lead;
   }
 
-  static async findAll(): Promise<Lead[]> {
-    return await db.select().from(leads)
+  static async findAll(pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+    const baseQuery = db.select().from(leads)
       .where(not(exists(
         db.select().from(students).where(eq(students.leadId, leads.id))
-      )))
-      .orderBy(desc(leads.createdAt));
+      )));
+
+    if (pagination) {
+      // Get total count
+      const [totalResult] = await db.select({ count: count() })
+        .from(leads)
+        .where(not(exists(
+          db.select().from(students).where(eq(students.leadId, leads.id))
+        )));
+
+      // Get paginated results
+      const paginatedLeads = await baseQuery
+        .orderBy(desc(leads.createdAt))
+        .limit(pagination.limit)
+        .offset(pagination.offset);
+
+      return {
+        leads: paginatedLeads,
+        total: totalResult.count
+      };
+    }
+
+    // Return all leads if no pagination
+    const allLeads = await baseQuery.orderBy(desc(leads.createdAt));
+    return {
+      leads: allLeads,
+      total: allLeads.length
+    };
   }
 
-  static async findByCounselor(counselorId: string): Promise<Lead[]> {
-    return await db.select().from(leads)
+  static async findByCounselor(counselorId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+    const baseQuery = db.select().from(leads)
       .where(and(
         eq(leads.counselorId, counselorId),
         not(exists(
           db.select().from(students).where(eq(students.leadId, leads.id))
         ))
-      ))
-      .orderBy(desc(leads.createdAt));
+      ));
+
+    if (pagination) {
+      // Get total count
+      const [totalResult] = await db.select({ count: count() })
+        .from(leads)
+        .where(and(
+          eq(leads.counselorId, counselorId),
+          not(exists(
+            db.select().from(students).where(eq(students.leadId, leads.id))
+          ))
+        ));
+
+      // Get paginated results
+      const paginatedLeads = await baseQuery
+        .orderBy(desc(leads.createdAt))
+        .limit(pagination.limit)
+        .offset(pagination.offset);
+
+      return {
+        leads: paginatedLeads,
+        total: totalResult.count
+      };
+    }
+
+    // Return all leads if no pagination
+    const allLeads = await baseQuery.orderBy(desc(leads.createdAt));
+    return {
+      leads: allLeads,
+      total: allLeads.length
+    };
   }
 
   static async create(leadData: InsertLead): Promise<Lead> {
