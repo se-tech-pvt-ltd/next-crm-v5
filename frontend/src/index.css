@@ -140,8 +140,6 @@
   [data-radix-popover-content] {
     /* Ensure scroll events work properly */
     overscroll-behavior: contain;
-    /* Prevent scroll chaining to parent elements */
-    overflow: hidden;
   }
 
   [data-radix-popover-content] .overflow-y-auto {
