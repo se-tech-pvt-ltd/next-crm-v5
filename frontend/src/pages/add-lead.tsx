@@ -835,13 +835,29 @@ export default function AddLead() {
               
               <Button
                 type="submit"
-                disabled={createLeadMutation.isPending}
+                disabled={
+                  createLeadMutation.isPending ||
+                  emailDuplicateStatus.isDuplicate ||
+                  phoneDuplicateStatus.isDuplicate ||
+                  checkingEmail ||
+                  checkingPhone
+                }
                 className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto"
               >
                 {createLeadMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     <span>Creating...</span>
+                  </>
+                ) : (checkingEmail || checkingPhone) ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                    <span>Checking...</span>
+                  </>
+                ) : (emailDuplicateStatus.isDuplicate || phoneDuplicateStatus.isDuplicate) ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Duplicates Found</span>
                   </>
                 ) : (
                   <>
