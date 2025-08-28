@@ -47,8 +47,9 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
                   <Badge
                     key={item}
                     variant="secondary"
-                    className="text-xs"
+                    className="text-xs cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleRemove(item);
                     }}
