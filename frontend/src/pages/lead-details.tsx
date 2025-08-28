@@ -336,6 +336,9 @@ export default function LeadDetails() {
       subtitle={lead ? `Managing lead: ${lead.email}` : undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
+      {/* Status Progress Bar */}
+      {!isLoading && <StatusProgressBar />}
+
       <div className="flex gap-6 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
         <div className="flex-1 flex flex-col space-y-6 min-w-0 w-full">
