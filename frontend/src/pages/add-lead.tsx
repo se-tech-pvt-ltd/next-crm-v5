@@ -189,12 +189,16 @@ export default function AddLead() {
           setCheckingPhone(true);
           timeoutId = setTimeout(async () => {
             try {
-              // Check in existing leads
-              if (Array.isArray(existingLeads)) {
-                const duplicateLead = existingLeads.find(
+              console.log('Checking phone duplicate for:', phone);
+
+              // Check in existing leads - handle both array and paginated response
+              const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
+              if (Array.isArray(leadsData)) {
+                const duplicateLead = leadsData.find(
                   (lead: any) => lead.phone === phone
                 );
                 if (duplicateLead) {
+                  console.log('Found duplicate lead phone:', duplicateLead);
                   setPhoneDuplicateStatus({
                     isDuplicate: true,
                     type: 'lead',
@@ -205,12 +209,14 @@ export default function AddLead() {
                 }
               }
 
-              // Check in existing students
-              if (Array.isArray(existingStudents)) {
-                const duplicateStudent = existingStudents.find(
+              // Check in existing students - handle both array and paginated response
+              const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
+              if (Array.isArray(studentsData)) {
+                const duplicateStudent = studentsData.find(
                   (student: any) => student.phone === phone
                 );
                 if (duplicateStudent) {
+                  console.log('Found duplicate student phone:', duplicateStudent);
                   setPhoneDuplicateStatus({
                     isDuplicate: true,
                     type: 'student',
@@ -222,6 +228,7 @@ export default function AddLead() {
               }
 
               // No duplicates found
+              console.log('No phone duplicates found');
               setPhoneDuplicateStatus({ isDuplicate: false });
               setCheckingPhone(false);
             } catch (error) {
