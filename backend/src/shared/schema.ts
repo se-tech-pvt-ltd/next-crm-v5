@@ -150,6 +150,15 @@ export const activities = mysqlTable("activities", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const dropdowns = mysqlTable("dropdowns", {
+  id: int("id").primaryKey().autoincrement(),
+  moduleName: varchar("module_name", { length: 100 }).notNull(),
+  fieldName: varchar("field_name", { length: 100 }).notNull(),
+  key: varchar("key", { length: 255 }).notNull(),
+  value: text("value").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertActivitySchema = createInsertSchema(activities).omit({
   id: true,
   createdAt: true,
