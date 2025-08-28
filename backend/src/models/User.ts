@@ -59,10 +59,7 @@ export class UserModel {
   }
 
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
-    console.log('UserModel.searchUsers called with:', { searchQuery, roles, limit });
-
     const searchPattern = `%${searchQuery}%`;
-    console.log('Search pattern:', searchPattern);
 
     // Build the search condition
     const searchCondition = or(
@@ -89,9 +86,7 @@ export class UserModel {
       query = query.limit(limit);
     }
 
-    const results = await query;
-    console.log('Search results:', results.length, 'users found');
-    return results;
+    return await query;
   }
 
   static async delete(id: string): Promise<boolean> {
