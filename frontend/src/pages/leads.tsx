@@ -74,12 +74,6 @@ export default function Leads() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10); // 10 records per page
   // Removed no activity filter since we don't have activities API configured
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-
-  const handleLeadUpdate = (updatedLead: Lead) => {
-    setSelectedLead(updatedLead);
-  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
