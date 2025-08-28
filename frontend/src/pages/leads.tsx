@@ -500,12 +500,11 @@ export default function Leads() {
                 </TableHeader>
                 <TableBody>
                   {filteredLeads.map((lead) => (
-                    <TableRow 
-                      key={lead.id} 
+                    <TableRow
+                      key={lead.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => {
-                        setSelectedLead(lead);
-                        setIsDetailsModalOpen(true);
+                        setLocation(`/leads/${lead.id}`);
                       }}
                     >
                       <TableCell className="font-medium">{lead.name}</TableCell>
