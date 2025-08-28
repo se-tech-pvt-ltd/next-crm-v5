@@ -328,7 +328,109 @@ export default function Leads() {
         {/* Leads Table */}
         <Card>
           <CardHeader className="p-4 pb-3">
-            <CardTitle className="text-lg">Leads List</CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">Filters:</span>
+                </div>
+                <Select value={statusFilter} onValueChange={(value) => {
+                  setStatusFilter(value);
+                  setCurrentPage(1); // Reset to first page when filter changes
+                }}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="contacted">Contacted</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="converted">Converted</SelectItem>
+                    <SelectItem value="lost">Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={sourceFilter} onValueChange={(value) => {
+                  setSourceFilter(value);
+                  setCurrentPage(1); // Reset to first page when filter changes
+                }}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue placeholder="Filter by source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    {uniqueSources.map((source) => (
+                      <SelectItem key={source} value={source}>
+                        {source}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Date Range Filter */}
+                <div className="flex items-center space-x-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32 h-8 text-xs">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        selected={dateFromFilter}
+                        onSelect={(date) => {
+                          setDateFromFilter(date);
+                          setCurrentPage(1); // Reset to first page when filter changes
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32 h-8 text-xs">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        selected={dateToFilter}
+                        onSelect={(date) => {
+                          setDateToFilter(date);
+                          setCurrentPage(1); // Reset to first page when filter changes
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Clear Filters */}
+                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setSourceFilter('all');
+                      setDateFromFilter(undefined);
+                      setDateToFilter(undefined);
+                      setCurrentPage(1); // Reset to first page when clearing filters
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
             {isLoading ? (
