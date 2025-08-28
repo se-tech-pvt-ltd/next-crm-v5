@@ -16,7 +16,7 @@ import { insertLeadSchema } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
-import { MultiSelect } from './multi-select';
+import { CommandMultiSelect } from './command-multi-select';
 import {
   User,
   Mail,
