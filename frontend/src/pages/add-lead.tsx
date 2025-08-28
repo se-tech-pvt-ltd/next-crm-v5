@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -34,7 +34,8 @@ import {
   BookOpen,
   ArrowLeft,
   Save,
-  UserPlus
+  UserPlus,
+  AlertTriangle
 } from 'lucide-react';
 import { z } from 'zod';
 
@@ -139,7 +140,7 @@ export default function AddLead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
-        title: "Success! 🎉",
+        title: "Success! ��",
         description: "Lead has been created successfully and added to your pipeline.",
       });
       setLocation('/leads');
