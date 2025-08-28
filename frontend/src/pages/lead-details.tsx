@@ -270,6 +270,10 @@ export default function LeadDetails() {
   const StatusProgressBar = () => {
     const currentIndex = getCurrentStatusIndex();
 
+    // Temporary: force show colors for testing
+    const testIndex = currentIndex === -1 ? 1 : currentIndex;
+    console.log('Using index:', testIndex, 'for status:', currentStatus);
+
     return (
       <div className="w-full bg-gray-100 rounded-md p-2 mb-4">
         <div className="flex items-center justify-between relative">
