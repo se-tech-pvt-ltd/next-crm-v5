@@ -117,51 +117,49 @@ export function SearchableCombobox({
             className="border-0 bg-transparent p-2 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
-        <ScrollArea className="max-h-60">
-          <div className="p-1">
-            {loading ? (
-              <div className="flex items-center justify-center py-6">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
-              </div>
-            ) : options.length === 0 ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                {emptyMessage}
-              </div>
-            ) : (
-              options.map((option) => (
-                <div
-                  key={option.value}
-                  className={cn(
-                    "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                    value === option.value && "bg-accent text-accent-foreground"
-                  )}
-                  onClick={() => handleSelect(option.value)}
-                >
-                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate font-medium">{option.label}</div>
-                      {option.email && (
-                        <div className="truncate text-xs text-muted-foreground">{option.email}</div>
-                      )}
-                      {option.role && (
-                        <Badge variant="secondary" className="mt-1 text-xs">
-                          {option.role}
-                        </Badge>
-                      )}
-                    </div>
+        <div className="max-h-60 overflow-auto p-1" style={{ touchAction: 'pan-y' }}>
+          {loading ? (
+            <div className="flex items-center justify-center py-6">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+            </div>
+          ) : options.length === 0 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              {emptyMessage}
+            </div>
+          ) : (
+            options.map((option) => (
+              <div
+                key={option.value}
+                className={cn(
+                  "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
+                  value === option.value && "bg-accent text-accent-foreground"
+                )}
+                onClick={() => handleSelect(option.value)}
+              >
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-primary" />
                   </div>
-                  {value === option.value && (
-                    <Check className="ml-2 h-4 w-4 text-primary flex-shrink-0" />
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="truncate font-medium">{option.label}</div>
+                    {option.email && (
+                      <div className="truncate text-xs text-muted-foreground">{option.email}</div>
+                    )}
+                    {option.role && (
+                      <Badge variant="secondary" className="mt-1 text-xs">
+                        {option.role}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-              ))
-            )}
-          </div>
-        </ScrollArea>
+                {value === option.value && (
+                  <Check className="ml-2 h-4 w-4 text-primary flex-shrink-0" />
+                )}
+              </div>
+            ))
+          )}
+        </div>
         {searchQuery && !loading && options.length > 0 && (
           <div className="border-t px-3 py-2 text-xs text-muted-foreground">
             Showing {options.length} results
