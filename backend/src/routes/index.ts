@@ -26,6 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/activities', activityRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/upload', uploadRoutes);
+  app.use('/api/dropdowns', dropdownRoutes);
 
   // Search routes
   app.use('/api/search', leadRoutes); // This includes search functionality
