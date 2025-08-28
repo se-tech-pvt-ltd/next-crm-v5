@@ -13,8 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { SearchableComboboxV2 as SearchableCombobox } from '@/components/ui/searchable-combobox-v2';
-import { MultiSelectV2 as MultiSelect } from '@/components/ui/multi-select-v2';
+import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
+import { MultiSelectV3 as MultiSelect } from '@/components/ui/multi-select-v3';
 import { Layout } from '@/components/layout';
 import { insertLeadSchema } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
