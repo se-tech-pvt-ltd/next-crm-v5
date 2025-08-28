@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { HelpTooltip } from './help-tooltip';
+import { HelpTooltipSimple as HelpTooltip } from './help-tooltip-simple';
 import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddStudentModal } from './add-student-modal';
