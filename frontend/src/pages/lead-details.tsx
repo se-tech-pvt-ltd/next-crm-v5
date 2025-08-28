@@ -735,7 +735,7 @@ export default function LeadDetails() {
             Activity Timeline
           </h3>
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -744,7 +744,9 @@ export default function LeadDetails() {
               ))}
             </div>
           ) : (
-            <ActivityTracker entityType="lead" entityId={parseInt(params?.id || '0', 10)} />
+            <div className="flex-1 overflow-y-auto">
+              <ActivityTracker entityType="lead" entityId={parseInt(params?.id || '0', 10)} />
+            </div>
           )}
         </div>
       </div>
