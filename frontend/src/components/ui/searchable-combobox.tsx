@@ -42,7 +42,10 @@ export function SearchableCombobox({
 
   useEffect(() => {
     if (open && searchInputRef.current) {
-      searchInputRef.current.focus();
+      // Delay focus to prevent layout thrashing
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
     }
   }, [open]);
 
@@ -105,7 +108,14 @@ export function SearchableCombobox({
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" style={{ width: 'var(--radix-popover-trigger-width)' }}>
+      <PopoverContent
+        className="w-full p-0"
+        style={{
+          minWidth: 'var(--radix-popover-trigger-width)',
+          maxWidth: '32rem'
+        }}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex items-center border-b px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
@@ -117,8 +127,12 @@ export function SearchableCombobox({
           />
         </div>
         <div
-          className="max-h-60 overflow-auto p-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
-          style={{ touchAction: 'pan-y' }}
+          className="max-h-60 overflow-y-auto overflow-x-hidden p-1"
+          style={{
+            touchAction: 'pan-y',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin'
+          }}
         >
           {loading ? (
             <div className="flex items-center justify-center py-6">
