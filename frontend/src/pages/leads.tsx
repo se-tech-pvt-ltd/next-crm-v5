@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,6 +65,8 @@ export default function Leads() {
     };
     return sourceMap[sourceCode] || sourceCode.charAt(0).toUpperCase() + sourceCode.slice(1);
   };
+  const [, setLocation] = useLocation();
+  const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
@@ -77,6 +80,14 @@ export default function Leads() {
   };
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleAddLeadClick = () => {
+    setIsNavigating(true);
+    // Small delay for animation effect
+    setTimeout(() => {
+      setLocation('/leads/add');
+    }, 200);
+  };
 
   const { data: leads, isLoading } = useQuery<Lead[]>({
     queryKey: ['/api/leads'],
@@ -386,14 +397,45 @@ export default function Leads() {
                     : `No leads with status "${statusFilter}".`
                   }
                 </p>
-                <div className="mt-4">
-                  <Link href="/leads/add" preload>
-                    <Button className="h-8">
-                      <Plus className="w-3 h-3 mr-1" />
-                      <span className="text-sm">Add Lead</span>
+                <motion.div
+                  className="mt-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      className="h-8"
+                      onClick={handleAddLeadClick}
+                      disabled={isNavigating}
+                    >
+                      {isNavigating ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                          className="w-3 h-3 mr-1"
+                        >
+                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ rotate: 0 }}
+                          animate={{ rotate: 0 }}
+                          whileHover={{ rotate: 90 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                        </motion.div>
+                      )}
+                      <span className="text-sm">
+                        {isNavigating ? 'Opening...' : 'Add Lead'}
+                      </span>
                     </Button>
-                  </Link>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
             ) : (
               <Table>

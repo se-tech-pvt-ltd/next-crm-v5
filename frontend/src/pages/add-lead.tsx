@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -192,14 +193,19 @@ export default function AddLead() {
         {/* Header with Back Button */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setLocation('/leads')}
-              className="flex items-center space-x-2"
+            <motion.div
+              whileHover={{ x: -2 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Leads</span>
-            </Button>
+              <Button
+                variant="outline"
+                onClick={() => setLocation('/leads')}
+                className="flex items-center space-x-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Leads</span>
+              </Button>
+            </motion.div>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                 <UserPlus className="w-5 h-5 text-primary" />
@@ -587,15 +593,20 @@ export default function AddLead() {
 
             {/* Form Actions */}
             <div className="flex items-center justify-between pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setLocation('/leads')}
-                className="flex items-center space-x-2"
+              <motion.div
+                whileHover={{ x: -2 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Cancel</span>
-              </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocation('/leads')}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Cancel</span>
+                </Button>
+              </motion.div>
               
               <Button 
                 type="submit" 
