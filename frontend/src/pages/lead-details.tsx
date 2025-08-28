@@ -244,27 +244,24 @@ export default function LeadDetails() {
         <div className="flex items-center justify-between relative">
           {statusSequence.map((statusId, index) => {
             const isActive = index === currentIndex;
-            const isPassed = index < currentIndex;
+            const isCompleted = index <= currentIndex; // Current and all previous should be green
             const statusName = getStatusDisplayName(statusId);
 
             return (
               <div key={statusId} className="flex flex-col items-center relative flex-1">
                 {/* Status Circle */}
                 <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium transition-all ${
-                  isActive
+                  isCompleted
                     ? 'bg-green-500 border-green-500 text-white'
-                    : isPassed
-                    ? 'bg-green-100 border-green-300 text-green-700'
                     : 'bg-white border-gray-300 text-gray-500'
                 }`}>
-                  {isActive && <div className="w-3 h-3 bg-white rounded-full" />}
-                  {isPassed && <div className="w-3 h-3 bg-green-500 rounded-full" />}
-                  {!isActive && !isPassed && <div className="w-3 h-3 bg-gray-300 rounded-full" />}
+                  {isCompleted && <div className="w-3 h-3 bg-white rounded-full" />}
+                  {!isCompleted && <div className="w-3 h-3 bg-gray-300 rounded-full" />}
                 </div>
 
                 {/* Status Label */}
                 <span className={`mt-2 text-xs font-medium text-center ${
-                  isActive ? 'text-green-600' : isPassed ? 'text-green-500' : 'text-gray-500'
+                  isCompleted ? 'text-green-600' : 'text-gray-500'
                 }`}>
                   {statusName}
                 </span>
@@ -272,7 +269,7 @@ export default function LeadDetails() {
                 {/* Connector Line */}
                 {index < statusSequence.length - 1 && (
                   <div className={`absolute top-4 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
-                    index < currentIndex ? 'bg-green-300' : 'bg-gray-300'
+                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
                   }`} style={{ marginLeft: '1rem', width: 'calc(100% - 2rem)' }} />
                 )}
               </div>
