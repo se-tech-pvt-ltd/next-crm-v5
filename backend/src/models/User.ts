@@ -58,6 +58,42 @@ export class UserModel {
     return await db.select().from(users);
   }
 
+  static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
+    const searchPattern = `%${searchQuery}%`;
+
+    let query = db
+      .select()
+      .from(users)
+      .where(
+        or(
+          like(users.firstName, searchPattern),
+          like(users.lastName, searchPattern),
+          like(users.email, searchPattern)
+        )
+      );
+
+    // Filter by roles if provided
+    if (roles && roles.length > 0) {
+      query = query.where(
+        and(
+          or(
+            like(users.firstName, searchPattern),
+            like(users.lastName, searchPattern),
+            like(users.email, searchPattern)
+          ),
+          inArray(users.role, roles)
+        )
+      );
+    }
+
+    // Apply limit if provided
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    return await query;
+  }
+
   static async delete(id: string): Promise<boolean> {
     const result = await db.delete(users).where(eq(users.id, id));
     return (result.rowCount || 0) > 0;
