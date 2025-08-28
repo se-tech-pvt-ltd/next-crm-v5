@@ -2,6 +2,8 @@
  * Utilities for handling scroll events in components
  */
 
+import * as React from 'react';
+
 /**
  * Enable wheel scrolling for an element by preventing event bubbling
  * when the element can scroll in the wheel direction
