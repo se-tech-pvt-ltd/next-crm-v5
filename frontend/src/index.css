@@ -175,21 +175,35 @@
   [data-radix-select-content],
   [data-radix-dropdown-menu-content] {
     /* Prevent content size changes from affecting trigger measurements */
-    contain: layout style;
-    /* Stabilize dimensions during positioning */
-    will-change: auto;
+    contain: size layout style;
     /* Ensure scroll events are preserved */
     pointer-events: auto;
+    /* Prevent layout thrashing */
+    transform: translateZ(0);
   }
 
   /* Debounce resize events for chart containers */
   [data-chart] {
-    contain: layout;
+    contain: size layout;
+    transform: translateZ(0);
   }
 
   /* Prevent focus outline from causing layout shifts */
   [data-radix-popover-content] input:focus,
   [data-radix-select-content] input:focus {
     outline-offset: -2px;
+  }
+
+  /* Prevent scroll containers from triggering resize loops */
+  .overflow-y-auto,
+  .overflow-auto {
+    contain: layout;
+    overscroll-behavior: contain;
+  }
+
+  /* Stable positioning for popover elements */
+  [data-radix-popper-content-wrapper] {
+    contain: layout;
+    transform: translateZ(0);
   }
 }
