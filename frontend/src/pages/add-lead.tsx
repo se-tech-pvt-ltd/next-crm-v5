@@ -508,7 +508,7 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <Globe className="w-4 h-4" />
-                          <span>Preferred Countries</span>
+                          <span>Interested Countries</span>
                         </FormLabel>
                         <FormControl>
                           <MultiSelect
