@@ -569,15 +569,22 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <BookOpen className="w-4 h-4" />
-                          <span>Field of Study</span>
+                          <span>Study Plan</span>
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Computer Science, Medicine"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select study plan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.["Study Plan"]?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
