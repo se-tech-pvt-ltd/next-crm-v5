@@ -303,12 +303,38 @@ export default function Leads() {
             <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
           </div>
 
-          <Link href="/leads/add" preload>
-            <Button className="h-8">
-              <Plus className="w-3 h-3 mr-1" />
-              <span className="text-sm">Add Lead</span>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              className="h-8"
+              onClick={handleAddLeadClick}
+              disabled={isNavigating}
+            >
+              {isNavigating ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                  className="w-3 h-3 mr-1"
+                >
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: 0 }}
+                  whileHover={{ rotate: 90 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                </motion.div>
+              )}
+              <span className="text-sm">
+                {isNavigating ? 'Opening...' : 'Add Lead'}
+              </span>
             </Button>
-          </Link>
+          </motion.div>
         </div>
 
         {/* Leads Overview Cards */}
