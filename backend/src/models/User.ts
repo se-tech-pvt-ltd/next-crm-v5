@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, or, like, and, inArray } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { users, type User, type InsertUser } from "../shared/schema.js";
 
