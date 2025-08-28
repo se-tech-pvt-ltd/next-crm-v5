@@ -13,7 +13,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { formatStatus, getCountryDisplayName, getSourceDisplayName, getStatusColor } from '@/lib/utils';
+import { getStatusColor } from '@/lib/utils';
 import { Lead } from '@/lib/types';
 import { Plus, UserPlus, Phone, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -22,47 +22,23 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 
 export default function Leads() {
-  // Helper functions for display names
-  const getCountryDisplayName = (countryCode: string): string => {
-    const countryMap: { [key: string]: string } = {
-      'USA': 'United States',
-      'Canada': 'Canada',
-      'UK': 'United Kingdom',
-      'Australia': 'Australia',
-      'Germany': 'Germany',
-      'France': 'France',
-      'Netherlands': 'Netherlands',
-      'New Zealand': 'New Zealand',
-    };
-    return countryMap[countryCode] || countryCode;
+  // Helper functions for display names using dropdown data
+  const getCountryDisplayName = (countryId: string): string => {
+    if (!dropdownData?.["Interested Country"]) return countryId;
+    const country = dropdownData["Interested Country"].find((item: any) => item.key === countryId);
+    return country?.value || countryId;
   };
 
-  const getProgramDisplayName = (programCode: string): string => {
-    const programMap: { [key: string]: string } = {
-      'Business Administration': 'Business Administration',
-      'Computer Science': 'Computer Science',
-      'Computer': 'Computer Science',
-      'Engineering': 'Engineering',
-      'Medicine': 'Medicine',
-      'Law': 'Law',
-      'Arts & Humanities': 'Arts & Humanities',
-      'Social Sciences': 'Social Sciences',
-      'Natural Sciences': 'Natural Sciences',
-      'Education': 'Education',
-      'Psychology': 'Psychology',
-    };
-    return programMap[programCode] || programCode;
+  const getSourceDisplayName = (sourceId: string): string => {
+    if (!dropdownData?.Source) return sourceId;
+    const source = dropdownData.Source.find((item: any) => item.key === sourceId);
+    return source?.value || sourceId;
   };
 
-  const getSourceDisplayName = (sourceCode: string): string => {
-    const sourceMap: { [key: string]: string } = {
-      'website': 'Website',
-      'referral': 'Referral',
-      'social-media': 'Social Media',
-      'advertisement': 'Advertisement',
-      'event': 'Event',
-    };
-    return sourceMap[sourceCode] || sourceCode.charAt(0).toUpperCase() + sourceCode.slice(1);
+  const getStatusDisplayName = (statusId: string): string => {
+    if (!dropdownData?.Status) return statusId;
+    const status = dropdownData.Status.find((item: any) => item.key === statusId);
+    return status?.value || statusId;
   };
   const [, setLocation] = useLocation();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -83,6 +59,15 @@ export default function Leads() {
       setLocation('/leads/add');
     }, 200);
   };
+
+  // Get dropdown data for mapping IDs to display values
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
+  });
 
   const { data: leadsResponse, isLoading } = useQuery({
     queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
@@ -532,7 +517,7 @@ export default function Leads() {
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(lead.status || 'new')}>
-                          {formatStatus(lead.status || 'new')}
+                          {getStatusDisplayName(lead.status || 'new')}
                         </Badge>
                       </TableCell>
                     </TableRow>
