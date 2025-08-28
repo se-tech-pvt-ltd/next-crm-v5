@@ -61,30 +61,25 @@ export class UserModel {
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
     const searchPattern = `%${searchQuery}%`;
 
+    // Build the search condition
+    const searchCondition = or(
+      like(users.firstName, searchPattern),
+      like(users.lastName, searchPattern),
+      like(users.email, searchPattern)
+    );
+
+    // Build the role condition if provided
+    const roleCondition = roles && roles.length > 0 ? inArray(users.role, roles) : undefined;
+
+    // Combine conditions
+    const whereCondition = roleCondition
+      ? and(searchCondition, roleCondition)
+      : searchCondition;
+
     let query = db
       .select()
       .from(users)
-      .where(
-        or(
-          like(users.firstName, searchPattern),
-          like(users.lastName, searchPattern),
-          like(users.email, searchPattern)
-        )
-      );
-
-    // Filter by roles if provided
-    if (roles && roles.length > 0) {
-      query = query.where(
-        and(
-          or(
-            like(users.firstName, searchPattern),
-            like(users.lastName, searchPattern),
-            like(users.email, searchPattern)
-          ),
-          inArray(users.role, roles)
-        )
-      );
-    }
+      .where(whereCondition);
 
     // Apply limit if provided
     if (limit) {
