@@ -44,7 +44,7 @@ const addLeadFormSchema = z.object({
   email: z.string().email("Valid email is required"),
   city: z.string().optional(),
   source: z.string().optional(),
-  country: z.string().optional(),
+  country: z.array(z.string()).optional(),
   studyLevel: z.string().optional(),
   studyPlan: z.string().optional(),
   elt: z.string().optional(),
