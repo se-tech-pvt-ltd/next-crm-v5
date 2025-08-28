@@ -449,13 +449,7 @@ export default function AddLead() {
                               <SelectItem key={option.key} value={option.key}>
                                 {option.value}
                               </SelectItem>
-                            )) || (
-                              <>
-                                <SelectItem value="website">Website</SelectItem>
-                                <SelectItem value="referral">Referral</SelectItem>
-                                <SelectItem value="social-media">Social Media</SelectItem>
-                              </>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
