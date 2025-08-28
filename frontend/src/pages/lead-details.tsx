@@ -284,7 +284,7 @@ export default function LeadDetails() {
         {/* Main Content */}
         <div className="flex-1 space-y-6 overflow-y-auto min-w-0 w-full">
           {/* Header Card */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -388,7 +388,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Personal Information Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <UserIcon className="w-5 h-5 text-primary" />
@@ -474,7 +474,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Lead Management Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -561,7 +561,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Academic Interests Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
@@ -676,7 +676,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Additional Information Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-primary" />
