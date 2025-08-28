@@ -98,13 +98,13 @@ export class LeadModel {
     // Generate UUID for the lead
     const leadId = uuidv4();
 
-    // Normalize array fields to strings if they are arrays (backward compatibility)
+    // Serialize array fields to JSON strings for database storage
     const processedLead = { ...leadData, id: leadId } as any;
     if (Array.isArray((leadData as any).country)) {
-      processedLead.country = (leadData as any).country[0] || null;
+      processedLead.country = JSON.stringify((leadData as any).country);
     }
     if (Array.isArray((leadData as any).program)) {
-      processedLead.program = (leadData as any).program[0] || null;
+      processedLead.program = JSON.stringify((leadData as any).program);
     }
 
     await db
@@ -121,13 +121,13 @@ export class LeadModel {
   }
 
   static async update(id: string, updates: Partial<InsertLead>): Promise<Lead | undefined> {
-    // Normalize array fields to strings if they are arrays (backward compatibility)
+    // Serialize array fields to JSON strings for database storage
     const processedUpdates = { ...updates } as any;
     if (Array.isArray((updates as any).country)) {
-      processedUpdates.country = (updates as any).country[0] || null;
+      processedUpdates.country = JSON.stringify((updates as any).country);
     }
     if (Array.isArray((updates as any).program)) {
-      processedUpdates.program = (updates as any).program[0] || null;
+      processedUpdates.program = JSON.stringify((updates as any).program);
     }
 
     const result = await db
