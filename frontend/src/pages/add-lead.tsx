@@ -184,41 +184,44 @@ export default function AddLead() {
   };
 
   return (
-    <Layout 
-      title="Add New Lead" 
+    <Layout
+      title="Add New Lead"
       subtitle="Capture lead information to start the student journey"
       helpText="Fill out the lead information to add them to your pipeline. Required fields are marked with an asterisk."
     >
-      <div className="max-w-4xl">
+      <div className="w-full max-w-none sm:max-w-4xl mx-auto px-2 sm:px-0">
         {/* Header with Back Button */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-4">
             <motion.div
               whileHover={{ x: -2 }}
               whileTap={{ scale: 0.98 }}
+              className="sm:order-first"
             >
               <Button
                 variant="outline"
                 onClick={() => setLocation('/leads')}
-                className="flex items-center space-x-2"
+                className="flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Leads</span>
               </Button>
             </motion.div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                 <UserPlus className="w-5 h-5 text-primary" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">Add New Lead</h1>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold truncate">Add New Lead</h1>
+                <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1">
                   Capture lead information to start the student journey
                 </p>
               </div>
             </div>
           </div>
-          <HelpTooltip content="Fill out the lead information to add them to your pipeline. Required fields are marked with an asterisk." />
+          <div className="hidden sm:block sm:order-last">
+            <HelpTooltip content="Fill out the lead information to add them to your pipeline. Required fields are marked with an asterisk." />
+          </div>
         </div>
 
         <Form {...form}>
@@ -233,7 +236,7 @@ export default function AddLead() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -447,7 +450,7 @@ export default function AddLead() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="source"
@@ -592,26 +595,27 @@ export default function AddLead() {
             </Card>
 
             {/* Form Actions */}
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3 pt-4">
               <motion.div
                 whileHover={{ x: -2 }}
                 whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto"
               >
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setLocation('/leads')}
-                  className="flex items-center space-x-2"
+                  className="flex items-center justify-center space-x-2 w-full"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Cancel</span>
                 </Button>
               </motion.div>
               
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createLeadMutation.isPending}
-                className="flex items-center space-x-2 min-w-32"
+                className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto"
               >
                 {createLeadMutation.isPending ? (
                   <>

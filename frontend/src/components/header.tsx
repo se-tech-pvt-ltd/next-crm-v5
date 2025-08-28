@@ -27,30 +27,32 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-2">
+        <div className="flex items-center justify-between min-w-0 gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{title}</h2>
               {subtitle && (
-                <p className="text-xs text-gray-500">{subtitle}</p>
+                <p className="text-xs text-gray-500 line-clamp-1">{subtitle}</p>
               )}
             </div>
             {helpText && (
-              <HelpTooltip content={helpText} />
+              <div className="hidden sm:block">
+                <HelpTooltip content={helpText} />
+              </div>
             )}
           </div>
-          
-          <div className="flex items-center space-x-3">
+
+          <div className="flex items-center space-x-1 sm:space-x-3 flex-shrink-0">
             {/* Search */}
             {showSearch && (
-              <div className="relative">
+              <div className="relative hidden sm:block">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                  <Input 
-                    type="text" 
-                    placeholder="Search students, leads..." 
-                    className="w-64 pl-10"
+                  <Input
+                    type="text"
+                    placeholder="Search students, leads..."
+                    className="w-48 lg:w-64 pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -88,9 +90,9 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
-                  <Bell size={18} />
-                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
+                <Button variant="ghost" size="sm" className="relative p-2">
+                  <Bell size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs">
                     3
                   </Badge>
                 </Button>
@@ -119,9 +121,9 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Quick Actions */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus size={16} className="mr-2" />
-                  Quick Add
+                <Button className="bg-primary hover:bg-primary/90" size="sm">
+                  <Plus size={16} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Quick Add</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

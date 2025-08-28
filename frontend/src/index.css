@@ -78,25 +78,89 @@
   .font-inter {
     font-family: 'Inter', sans-serif;
   }
-  
+
   .bg-purple {
     background-color: hsl(var(--purple));
   }
-  
+
   .text-purple {
     color: hsl(var(--purple));
   }
-  
+
   .border-purple {
     border-color: hsl(var(--purple));
   }
-  
+
   .bg-purple-100 {
     background-color: hsl(var(--purple) / 0.1);
   }
-  
+
   .text-purple-foreground {
     color: hsl(var(--purple-foreground));
+  }
+
+  /* Line clamping utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Better responsive containers */
+  .container-responsive {
+    width: 100%;
+    max-width: none;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-responsive {
+      max-width: 64rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  /* Prevent layout shifts */
+  .no-layout-shift {
+    contain: layout;
+    transform: translateZ(0);
+  }
+
+  /* Safe area utilities for mobile */
+  .safe-area-padding {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 

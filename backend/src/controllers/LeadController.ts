@@ -15,8 +15,33 @@ export class LeadController {
   static async getLeads(req: Request, res: Response) {
     try {
       const currentUser = LeadController.getCurrentUser();
-      const leads = await LeadService.getLeads(currentUser.id, currentUser.role);
-      res.json(leads);
+
+      // Parse pagination parameters
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = (page - 1) * limit;
+
+      console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}, user=${currentUser.id}, role=${currentUser.role}`);
+
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset });
+
+      console.log(`Lead results: total=${result.total}, leads count=${result.leads.length}`);
+
+      const response = {
+        data: result.leads,
+        pagination: {
+          page,
+          limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit),
+          hasNextPage: page < Math.ceil(result.total / limit),
+          hasPrevPage: page > 1
+        }
+      };
+
+      console.log(`Pagination response:`, JSON.stringify(response.pagination, null, 2));
+
+      res.json(response);
     } catch (error) {
       console.error("Get leads error:", error);
       res.status(500).json({ message: "Failed to fetch leads" });
@@ -40,12 +65,16 @@ export class LeadController {
 
   static async createLead(req: Request, res: Response) {
     try {
+      console.log("Received lead data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertLeadSchema.parse(req.body);
+      console.log("Validated data:", JSON.stringify(validatedData, null, 2));
       const lead = await LeadService.createLead(validatedData);
+      console.log("Created lead:", JSON.stringify(lead, null, 2));
       res.status(201).json(lead);
     } catch (error) {
       console.error("Create lead error:", error);
       if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create lead" });

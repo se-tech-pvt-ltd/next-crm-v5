@@ -4,12 +4,23 @@ import { leads, type Lead, type InsertLead } from "../shared/schema.js";
 import { LeadModel } from "../models/Lead.js";
 import { ActivityService } from "./ActivityService.js";
 
+interface PaginationOptions {
+  page: number;
+  limit: number;
+  offset: number;
+}
+
+interface PaginatedLeadsResult {
+  leads: Lead[];
+  total: number;
+}
+
 export class LeadService {
-  static async getLeads(userId?: string, userRole?: string): Promise<Lead[]> {
+  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
     if (userRole === 'counselor' && userId) {
-      return await LeadModel.findByCounselor(userId);
+      return await LeadModel.findByCounselor(userId, pagination);
     }
-    return await LeadModel.findAll();
+    return await LeadModel.findAll(pagination);
   }
 
   static async getLead(id: number, userId?: string, userRole?: string): Promise<Lead | undefined> {

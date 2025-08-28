@@ -28,6 +28,9 @@ export interface Lead {
   expectation: string | null;
   type: string | null;
   lostReason: string | null;
+  budget: string | null;
+  timeline: string | null;
+  notes: string | null;
   counselorId: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -130,6 +133,9 @@ export const insertLeadSchema = z.object({
   expectation: z.string().optional(),
   type: z.string().optional(),
   lostReason: z.string().optional(),
+  budget: z.string().optional(),
+  timeline: z.string().optional(),
+  notes: z.string().optional(),
   counselorId: z.string().optional(),
 });
 

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Pagination } from '@/components/ui/pagination';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -71,6 +72,8 @@ export default function Leads() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10); // 10 records per page
   // Removed no activity filter since we don't have activities API configured
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -89,9 +92,24 @@ export default function Leads() {
     }, 200);
   };
 
-  const { data: leads, isLoading } = useQuery<Lead[]>({
-    queryKey: ['/api/leads'],
+  const { data: leadsResponse, isLoading } = useQuery({
+    queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/leads?page=${currentPage}&limit=${pageSize}`);
+      return response.json();
+    },
   });
+
+  // Extract leads and pagination info from response
+  const leads = leadsResponse?.data || [];
+  const pagination = leadsResponse?.pagination || {
+    page: 1,
+    limit: pageSize,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  };
 
   // For now, we'll simplify the no activity filter without requiring activities API
   // const { data: activities } = useQuery({
@@ -213,96 +231,7 @@ export default function Leads() {
     >
       <div className="space-y-3">
         {/* Header Actions */}
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32 h-8">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
-                <SelectItem value="converted">Converted</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sourceFilter} onValueChange={setSourceFilter}>
-              <SelectTrigger className="w-32 h-8">
-                <SelectValue placeholder="Filter by source" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
-                {uniqueSources.map((source) => (
-                  <SelectItem key={source} value={source}>
-                    {source}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {/* Date Range Filter */}
-            <div className="flex items-center space-x-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-32 h-8 text-xs">
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateFromFilter}
-                    onSelect={setDateFromFilter}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-32 h-8 text-xs">
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateToFilter}
-                    onSelect={setDateToFilter}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Clear Filters */}
-            {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  setStatusFilter('all');
-                  setSourceFilter('all');
-                  setDateFromFilter(undefined);
-                  setDateToFilter(undefined);
-                }}
-              >
-                Clear All
-              </Button>
-            )}
-            
-            <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
-          </div>
-
+        <div className="flex justify-end items-center gap-2">
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -348,11 +277,11 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-3 pt-0">
               <div className="text-xl font-bold">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : pagination.total || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -366,7 +295,7 @@ export default function Leads() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -380,7 +309,7 @@ export default function Leads() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -399,7 +328,109 @@ export default function Leads() {
         {/* Leads Table */}
         <Card>
           <CardHeader className="p-4 pb-3">
-            <CardTitle className="text-lg">Leads List</CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">Filters:</span>
+                </div>
+                <Select value={statusFilter} onValueChange={(value) => {
+                  setStatusFilter(value);
+                  setCurrentPage(1); // Reset to first page when filter changes
+                }}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="contacted">Contacted</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="converted">Converted</SelectItem>
+                    <SelectItem value="lost">Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={sourceFilter} onValueChange={(value) => {
+                  setSourceFilter(value);
+                  setCurrentPage(1); // Reset to first page when filter changes
+                }}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue placeholder="Filter by source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    {uniqueSources.map((source) => (
+                      <SelectItem key={source} value={source}>
+                        {source}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Date Range Filter */}
+                <div className="flex items-center space-x-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32 h-8 text-xs">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        selected={dateFromFilter}
+                        onSelect={(date) => {
+                          setDateFromFilter(date);
+                          setCurrentPage(1); // Reset to first page when filter changes
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32 h-8 text-xs">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        selected={dateToFilter}
+                        onSelect={(date) => {
+                          setDateToFilter(date);
+                          setCurrentPage(1); // Reset to first page when filter changes
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Clear Filters */}
+                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setSourceFilter('all');
+                      setDateFromFilter(undefined);
+                      setDateToFilter(undefined);
+                      setCurrentPage(1); // Reset to first page when clearing filters
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
             {isLoading ? (
@@ -565,6 +596,19 @@ export default function Leads() {
                   ))}
                 </TableBody>
               </Table>
+            )}
+
+            {/* Pagination */}
+            {!isLoading && filteredLeads.length > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                  hasNextPage={pagination.hasNextPage}
+                  hasPrevPage={pagination.hasPrevPage}
+                />
+              </div>
             )}
           </CardContent>
         </Card>
