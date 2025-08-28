@@ -92,18 +92,20 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           </span>
         </div>
         <div
-          ref={scrollContainerRef}
-          className="max-h-48 overflow-y-auto overflow-x-hidden p-2 space-y-1"
-          style={{
-            touchAction: 'pan-y',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgb(203 213 225) transparent',
-            // Ensure scrolling works
-            overscrollBehavior: 'contain'
-          }}
-          tabIndex={-1}
+          className="relative max-h-48 overflow-hidden"
         >
+          <div
+            ref={scrollContainerRef}
+            className="max-h-48 overflow-y-auto overflow-x-hidden p-1"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgb(203 213 225) transparent'
+            }}
+            onWheel={(e) => {
+              // Allow natural wheel scrolling, prevent event bubbling
+              e.stopPropagation();
+            }}
+          >
           {options.map((option) => (
             <div
               key={option.value}
@@ -122,9 +124,10 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
                   value.includes(option.value) ? "opacity-100" : "opacity-0"
                 )}
               />
-              <span className="text-sm flex-1">{option.label}</span>
-            </div>
-          ))}
+                <span className="text-sm">{option.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
         {options.length > 8 && (
           <div className="px-2 py-1 border-t border-border bg-muted/30">
