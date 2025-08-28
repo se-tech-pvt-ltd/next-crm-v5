@@ -309,23 +309,9 @@ export default function LeadDetails() {
                   {isLoading ? (
                     <Skeleton className="h-8 w-20" />
                   ) : (
-                    <>
-                      <Select value={currentStatus} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="new">New</SelectItem>
-                          <SelectItem value="contacted">Contacted</SelectItem>
-                          <SelectItem value="qualified">Qualified</SelectItem>
-                          <SelectItem value="converted">Converted</SelectItem>
-                          <SelectItem value="lost">Lost</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Badge className={getStatusBadgeColor(currentStatus)}>
-                        {formatStatus(currentStatus)}
-                      </Badge>
-                    </>
+                    <Badge className={getStatusBadgeColor(currentStatus)}>
+                      {getStatusDisplayName(currentStatus)}
+                    </Badge>
                   )}
                 </div>
               </div>
