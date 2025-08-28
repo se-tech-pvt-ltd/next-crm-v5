@@ -597,6 +597,19 @@ export default function Leads() {
                 </TableBody>
               </Table>
             )}
+
+            {/* Pagination */}
+            {!isLoading && filteredLeads.length > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                  hasNextPage={pagination.hasNextPage}
+                  hasPrevPage={pagination.hasPrevPage}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
