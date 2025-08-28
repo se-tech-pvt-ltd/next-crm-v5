@@ -41,12 +41,36 @@ export class LeadModel {
       .insert(leads)
       .values(processedLead as InsertLead);
 
-    // MySQL doesn't support .returning(), so we fetch the created record
-    const insertId = Number(result.insertId);
+    // Handle different MySQL result formats
+    let insertId: number;
+    if (typeof result.insertId === 'bigint') {
+      insertId = Number(result.insertId);
+    } else if (typeof result.insertId === 'number') {
+      insertId = result.insertId;
+    } else if (typeof result.insertId === 'string') {
+      insertId = parseInt(result.insertId, 10);
+    } else {
+      // Fallback: find the most recent lead by email
+      console.warn("InsertId not available, falling back to query by email");
+      const [fallbackLead] = await db.select().from(leads)
+        .where(eq(leads.email, processedLead.email))
+        .orderBy(desc(leads.createdAt))
+        .limit(1);
+
+      if (fallbackLead) {
+        return fallbackLead;
+      }
+      throw new Error("Failed to create lead - unable to retrieve inserted record");
+    }
+
+    if (isNaN(insertId)) {
+      throw new Error(`Failed to create lead - invalid insertId: ${result.insertId}`);
+    }
+
     const createdLead = await LeadModel.findById(insertId);
 
     if (!createdLead) {
-      throw new Error("Failed to create lead - record not found after insert");
+      throw new Error(`Failed to create lead - record not found after insert with ID: ${insertId}`);
     }
 
     return createdLead;
