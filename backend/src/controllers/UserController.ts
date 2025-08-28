@@ -11,7 +11,39 @@ export class UserController {
 
   static async getUsers(req: Request, res: Response) {
     try {
-      const users = await UserService.getAllUsers();
+      const { search, role, limit } = req.query;
+
+      let users;
+
+      if (search && typeof search === 'string' && search.trim()) {
+        // Parse roles if provided
+        const roles = role ?
+          (typeof role === 'string' ? role.split(',') : Array.isArray(role) ? role : [])
+          : undefined;
+
+        // Parse limit if provided
+        const limitNum = limit && typeof limit === 'string' ? parseInt(limit) : undefined;
+
+        users = await UserService.searchUsers(search.trim(), roles, limitNum);
+      } else {
+        // If no search query, return filtered by roles or all users
+        users = await UserService.getAllUsers();
+
+        // Filter by roles if provided but no search
+        if (role && typeof role === 'string') {
+          const roles = role.split(',');
+          users = users.filter(user => roles.includes(user.role));
+        }
+
+        // Apply limit if provided
+        if (limit && typeof limit === 'string') {
+          const limitNum = parseInt(limit);
+          if (!isNaN(limitNum)) {
+            users = users.slice(0, limitNum);
+          }
+        }
+      }
+
       res.json(users);
     } catch (error) {
       console.error("Get users error:", error);
