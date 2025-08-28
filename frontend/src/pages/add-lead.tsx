@@ -125,10 +125,6 @@ export default function AddLead() {
           setCheckingEmail(true);
           timeoutId = setTimeout(async () => {
             try {
-              console.log('Checking email duplicate for:', email);
-              console.log('Existing leads:', existingLeads);
-              console.log('Existing students:', existingStudents);
-
               // Check in existing leads - handle both array and paginated response
               const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
               if (Array.isArray(leadsData)) {
@@ -136,7 +132,6 @@ export default function AddLead() {
                   (lead: any) => lead.email?.toLowerCase() === email.toLowerCase()
                 );
                 if (duplicateLead) {
-                  console.log('Found duplicate lead:', duplicateLead);
                   setEmailDuplicateStatus({
                     isDuplicate: true,
                     type: 'lead',
@@ -154,7 +149,6 @@ export default function AddLead() {
                   (student: any) => student.email?.toLowerCase() === email.toLowerCase()
                 );
                 if (duplicateStudent) {
-                  console.log('Found duplicate student:', duplicateStudent);
                   setEmailDuplicateStatus({
                     isDuplicate: true,
                     type: 'student',
@@ -166,7 +160,6 @@ export default function AddLead() {
               }
 
               // No duplicates found
-              console.log('No email duplicates found');
               setEmailDuplicateStatus({ isDuplicate: false });
               setCheckingEmail(false);
             } catch (error) {
@@ -174,7 +167,7 @@ export default function AddLead() {
               setEmailDuplicateStatus({ isDuplicate: false });
               setCheckingEmail(false);
             }
-          }, 500); // 500ms debounce
+          }, 300); // Reduced to 300ms for faster response
         };
       },
       [existingLeads, existingStudents]
