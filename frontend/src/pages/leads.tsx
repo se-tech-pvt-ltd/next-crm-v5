@@ -602,13 +602,6 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
-
-      <LeadDetailsModal 
-        open={isDetailsModalOpen}
-        onOpenChange={setIsDetailsModalOpen}
-        lead={selectedLead}
-        onLeadUpdate={handleLeadUpdate}
-      />
     </Layout>
   );
 }
