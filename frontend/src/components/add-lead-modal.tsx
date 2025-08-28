@@ -65,6 +65,30 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
     enabled: true,
   });
 
+  // Handle counselor search
+  const handleCounselorSearch = useCallback((query: string) => {
+    setCounselorSearchQuery(query);
+    if (query) {
+      setSearchingCounselors(true);
+      // The query will be refetched automatically due to the queryKey dependency
+      setTimeout(() => setSearchingCounselors(false), 500);
+    }
+  }, []);
+
+  // Prepare counselor options for the searchable combobox
+  const counselorOptions = Array.isArray(counselors)
+    ? counselors
+        .filter((user: any) => user.role === 'counselor' || user.role === 'admin_staff')
+        .map((counselor: any) => ({
+          value: counselor.id,
+          label: counselor.firstName && counselor.lastName
+            ? `${counselor.firstName} ${counselor.lastName}`
+            : counselor.email.split('@')[0],
+          email: counselor.email,
+          role: counselor.role === 'admin_staff' ? 'Admin' : 'Counselor'
+        }))
+    : [];
+
   const form = useForm({
     resolver: zodResolver(insertLeadSchema),
     defaultValues: {
