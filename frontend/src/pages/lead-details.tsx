@@ -513,15 +513,15 @@ export default function LeadDetails() {
                   <div className="space-y-2">
                     <Label htmlFor="counselor">Assigned Counselor</Label>
                     <Select
-                      value={isEditing ? (editData.counselorId || '') : (lead?.counselorId || '')}
-                      onValueChange={(value) => setEditData({ ...editData, counselorId: value })}
+                      value={isEditing ? (editData.counselorId || 'unassigned') : (lead?.counselorId || 'unassigned')}
+                      onValueChange={(value) => setEditData({ ...editData, counselorId: value === 'unassigned' ? null : value })}
                       disabled={!isEditing}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select counselor" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No counselor assigned</SelectItem>
+                        <SelectItem value="unassigned">No counselor assigned</SelectItem>
                         {users?.map((user: User) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name}
