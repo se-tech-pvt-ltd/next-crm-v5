@@ -19,6 +19,9 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
   const [open, setOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Suppress ResizeObserver errors from this component
+  useResizeObserverErrorSuppression();
+
   // Enable wheel scrolling for the scroll container
   useWheelScrolling(scrollContainerRef, open);
 
