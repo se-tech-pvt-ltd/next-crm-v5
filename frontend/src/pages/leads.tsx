@@ -237,7 +237,10 @@ export default function Leads() {
               <Filter className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">Filters:</span>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value) => {
+              setStatusFilter(value);
+              setCurrentPage(1); // Reset to first page when filter changes
+            }}>
               <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -250,7 +253,10 @@ export default function Leads() {
                 <SelectItem value="lost">Lost</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+            <Select value={sourceFilter} onValueChange={(value) => {
+              setSourceFilter(value);
+              setCurrentPage(1); // Reset to first page when filter changes
+            }}>
               <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Filter by source" />
               </SelectTrigger>
