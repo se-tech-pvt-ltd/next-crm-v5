@@ -39,22 +39,28 @@ export default function Dashboard() {
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
+  // Ensure data is always an array
+  const leadsArray = Array.isArray(leads) ? leads : [];
+  const studentsArray = Array.isArray(students) ? students : [];
+  const applicationsArray = Array.isArray(applications) ? applications : [];
+  const admissionsArray = Array.isArray(admissions) ? admissions : [];
+
   // Calculate metrics
   const metrics: DashboardMetrics = {
-    totalLeads: leads?.length || 0,
-    activeStudents: students?.length || 0,
-    applications: applications?.length || 0,
-    admissions: admissions?.filter((admission: any) => admission.decision === 'accepted')?.length || 0,
-    conversionRate: leads?.length ? ((students?.length || 0) / leads.length) * 100 : 0,
-    successRate: applications?.length ? ((admissions?.filter((admission: any) => admission.decision === 'accepted')?.length || 0) / applications.length) * 100 : 0,
+    totalLeads: leadsArray.length,
+    activeStudents: studentsArray.length,
+    applications: applicationsArray.length,
+    admissions: admissionsArray.filter((admission: any) => admission.decision === 'accepted').length,
+    conversionRate: leadsArray.length ? (studentsArray.length / leadsArray.length) * 100 : 0,
+    successRate: applicationsArray.length ? (admissionsArray.filter((admission: any) => admission.decision === 'accepted').length / applicationsArray.length) * 100 : 0,
   };
 
   // Calculate pipeline data
   const pipelineData: PipelineData = {
-    newLeads: leads?.filter((lead: any) => lead.status === 'new')?.length || 0,
-    qualifiedStudents: students?.filter((student: any) => student.status === 'active')?.length || 0,
-    applicationsSubmitted: applications?.filter((app: any) => app.status === 'submitted')?.length || 0,
-    admissions: admissions?.filter((admission: any) => admission.decision === 'accepted')?.length || 0,
+    newLeads: leadsArray.filter((lead: any) => lead.status === 'new').length,
+    qualifiedStudents: studentsArray.filter((student: any) => student.status === 'active').length,
+    applicationsSubmitted: applicationsArray.filter((app: any) => app.status === 'submitted').length,
+    admissions: admissionsArray.filter((admission: any) => admission.decision === 'accepted').length,
   };
 
   // Generate recent activities
