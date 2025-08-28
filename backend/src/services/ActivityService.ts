@@ -25,6 +25,7 @@ export class ActivityService {
     
     const activityWithUser = {
       ...activityData,
+      entityId: String(activityData.entityId), // Convert to string for consistency
       userId,
       userName,
       userProfileImage,
