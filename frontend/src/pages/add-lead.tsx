@@ -91,10 +91,18 @@ export default function AddLead() {
   // Get existing leads and students to prevent duplicates
   const { data: existingLeads } = useQuery({
     queryKey: ['/api/leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/leads');
+      return response.json();
+    }
   });
 
   const { data: existingStudents } = useQuery({
     queryKey: ['/api/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/students');
+      return response.json();
+    }
   });
 
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
