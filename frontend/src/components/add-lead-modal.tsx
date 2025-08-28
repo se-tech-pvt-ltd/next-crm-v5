@@ -40,6 +40,8 @@ interface AddLeadModalProps {
 export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
+  const [searchingCounselors, setSearchingCounselors] = useState(false);
 
   // Get existing leads and students to prevent duplicates
   const { data: existingLeads } = useQuery({
@@ -50,9 +52,17 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
     queryKey: ['/api/students'],
   });
 
-  // Get counselors for counselor field
-  const { data: counselors } = useQuery({
-    queryKey: ['/api/users'],
+  // Get counselors with search functionality
+  const { data: counselors, isLoading: counselorsLoading } = useQuery({
+    queryKey: ['/api/users', { search: counselorSearchQuery }],
+    queryFn: async () => {
+      const url = counselorSearchQuery
+        ? `/api/users?search=${encodeURIComponent(counselorSearchQuery)}&role=counselor,admin_staff`
+        : '/api/users?role=counselor,admin_staff&limit=20';
+      const response = await apiRequest('GET', url);
+      return response.json();
+    },
+    enabled: true,
   });
 
   const form = useForm({
