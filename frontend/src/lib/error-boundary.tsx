@@ -113,8 +113,13 @@ export class ResizeObserverErrorBoundary extends React.Component<
       
       // For layout errors, render invisibly and auto-recover
       return (
-        <div style={{ display: 'contents' }} key={`recovery-${this.state.lastErrorTime}`}>
-          {/* Invisible placeholder that forces re-render */}
+        <div
+          style={{ display: 'contents', contain: 'layout' }}
+          key={`recovery-${this.state.lastErrorTime}`}
+        >
+          <div style={{ width: 0, height: 0, overflow: 'hidden' }}>
+            Recovery in progress...
+          </div>
         </div>
       );
     }
