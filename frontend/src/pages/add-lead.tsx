@@ -190,8 +190,6 @@ export default function AddLead() {
           setCheckingPhone(true);
           timeoutId = setTimeout(async () => {
             try {
-              console.log('Checking phone duplicate for:', phone);
-
               // Check in existing leads - handle both array and paginated response
               const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
               if (Array.isArray(leadsData)) {
@@ -199,7 +197,6 @@ export default function AddLead() {
                   (lead: any) => lead.phone === phone
                 );
                 if (duplicateLead) {
-                  console.log('Found duplicate lead phone:', duplicateLead);
                   setPhoneDuplicateStatus({
                     isDuplicate: true,
                     type: 'lead',
@@ -217,7 +214,6 @@ export default function AddLead() {
                   (student: any) => student.phone === phone
                 );
                 if (duplicateStudent) {
-                  console.log('Found duplicate student phone:', duplicateStudent);
                   setPhoneDuplicateStatus({
                     isDuplicate: true,
                     type: 'student',
@@ -229,7 +225,6 @@ export default function AddLead() {
               }
 
               // No duplicates found
-              console.log('No phone duplicates found');
               setPhoneDuplicateStatus({ isDuplicate: false });
               setCheckingPhone(false);
             } catch (error) {
@@ -237,7 +232,7 @@ export default function AddLead() {
               setPhoneDuplicateStatus({ isDuplicate: false });
               setCheckingPhone(false);
             }
-          }, 500); // 500ms debounce
+          }, 300); // Reduced to 300ms for faster response
         };
       },
       [existingLeads, existingStudents]
