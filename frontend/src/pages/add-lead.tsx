@@ -391,7 +391,7 @@ export default function AddLead() {
                               <SelectItem key={option.key} value={option.key}>
                                 {option.value}
                               </SelectItem>
-                            )) || <SelectItem value="individual">Individual</SelectItem>}
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
