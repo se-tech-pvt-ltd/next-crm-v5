@@ -49,9 +49,12 @@ const ChartContainer = React.forwardRef<
 
   // Delay mounting to prevent initial ResizeObserver loops
   React.useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 100)
+    const timer = setTimeout(() => setMounted(true), 150)
     return () => clearTimeout(timer)
   }, [])
+
+  // Prevent frequent re-renders that could cause ResizeObserver loops
+  const stableConfig = React.useMemo(() => config, [JSON.stringify(config)])
 
   return (
     <ChartContext.Provider value={{ config }}>
