@@ -86,3 +86,23 @@
     color: hsl(var(--purple-foreground));
   }
 }
+
+/* Touch scrolling improvements for nested scroll containers */
+@layer base {
+  /* Improve touch scrolling for popover content */
+  [data-radix-popper-content-wrapper] {
+    touch-action: pan-y;
+  }
+
+  /* Better scrolling for modal content */
+  [role="dialog"] {
+    touch-action: pan-y;
+  }
+
+  /* Ensure proper touch behavior for overflow containers */
+  .overflow-auto,
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+}
