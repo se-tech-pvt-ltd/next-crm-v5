@@ -507,77 +507,34 @@ export default function Leads() {
                     >
                       <TableCell className="font-medium">{lead.name}</TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {lead.email}
+                        {lead.phone ? (
+                          <div className="flex items-center text-sm">
+                            <Phone className="w-3 h-3 mr-1" />
+                            {lead.phone}
                           </div>
-                          {lead.phone && (
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Phone className="w-3 h-3 mr-1" />
-                              {lead.phone}
-                            </div>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">No phone</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          {lead.country && (
-                            <div className="flex items-center text-sm">
-                              <Globe className="w-3 h-3 mr-1" />
-                              {getCountryDisplayName(lead.country)}
-                            </div>
-                          )}
-                          {lead.program && (
-                            <div className="flex items-center text-sm">
-                              <GraduationCap className="w-3 h-3 mr-1" />
-                              {getProgramDisplayName(lead.program)}
-                            </div>
-                          )}
-                        </div>
+                        <span className="text-sm">
+                          {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {lead.country ? (
+                          <div className="flex items-center text-sm">
+                            <Globe className="w-3 h-3 mr-1" />
+                            {getCountryDisplayName(lead.country)}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">Not specified</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(lead.status || 'new')}>
                           {formatStatus(lead.status || 'new')}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">
-                          {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(lead.createdAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setLocation(`/leads/${lead.id}`);
-                              }}
-                            >
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => convertToStudentMutation.mutate(lead)}
-                              disabled={convertToStudentMutation.isPending}
-                            >
-                              Convert to Student
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
