@@ -18,7 +18,7 @@ export class DropdownService {
     return await DropdownModel.create(dropdownData);
   }
 
-  static async deleteDropdown(id: number): Promise<boolean> {
+  static async deleteDropdown(id: string): Promise<boolean> {
     return await DropdownModel.delete(id);
   }
 
