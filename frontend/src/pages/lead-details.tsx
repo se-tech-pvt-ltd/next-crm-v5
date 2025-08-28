@@ -426,9 +426,6 @@ export default function LeadDetails() {
             </CardHeader>
           </Card>
 
-          {/* Status Progress Bar */}
-          {!isLoading && <StatusProgressBar />}
-
           {/* Personal Information Section */}
           <Card className="w-full">
             <CardHeader className="pb-3">
