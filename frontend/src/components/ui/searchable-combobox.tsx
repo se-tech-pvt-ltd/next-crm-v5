@@ -116,7 +116,10 @@ export function SearchableCombobox({
             className="border-0 bg-transparent p-2 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
-        <div className="max-h-60 overflow-auto p-1" style={{ touchAction: 'pan-y' }}>
+        <div
+          className="max-h-60 overflow-auto p-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+          style={{ touchAction: 'pan-y' }}
+        >
           {loading ? (
             <div className="flex items-center justify-center py-6">
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
