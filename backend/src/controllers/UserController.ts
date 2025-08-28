@@ -13,6 +13,8 @@ export class UserController {
     try {
       const { search, role, limit } = req.query;
 
+      console.log('UserController.getUsers - Query params:', { search, role, limit });
+
       let users;
 
       if (search && typeof search === 'string' && search.trim()) {
@@ -24,7 +26,9 @@ export class UserController {
         // Parse limit if provided
         const limitNum = limit && typeof limit === 'string' ? parseInt(limit) : undefined;
 
+        console.log('Calling searchUsers with:', { search: search.trim(), roles, limitNum });
         users = await UserService.searchUsers(search.trim(), roles, limitNum);
+        console.log('Search results count:', users.length);
       } else {
         // If no search query, return filtered by roles or all users
         users = await UserService.getAllUsers();
