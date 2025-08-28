@@ -133,6 +133,9 @@ export const insertLeadSchema = z.object({
   expectation: z.string().optional(),
   type: z.string().optional(),
   lostReason: z.string().optional(),
+  budget: z.string().optional(),
+  timeline: z.string().optional(),
+  notes: z.string().optional(),
   counselorId: z.string().optional(),
 });
 
