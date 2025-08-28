@@ -114,7 +114,7 @@ export class StudentService {
     return await db.select().from(students).where(searchConditions);
   }
 
-  static async convertFromLead(leadId: number, studentData: InsertStudent): Promise<Student> {
+  static async convertFromLead(leadId: string, studentData: InsertStudent): Promise<Student> {
     const student = await StudentModel.create(studentData);
     
     // Transfer activities from lead to student

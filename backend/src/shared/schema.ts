@@ -20,7 +20,7 @@ export const users = mysqlTable("users", {
 });
 
 export const leads = mysqlTable("leads", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -45,7 +45,7 @@ export const leads = mysqlTable("leads", {
 
 export const students = mysqlTable("students", {
   id: int("id").primaryKey().autoincrement(),
-  leadId: int("lead_id"),
+  leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -106,13 +106,12 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
-  id: true,
   createdAt: true,
   updatedAt: true,
 }).extend({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
-});
+}).partial({ id: true }); // id is optional since it will be generated
 
 export const insertStudentSchema = createInsertSchema(students).omit({
   id: true,
@@ -141,7 +140,7 @@ export type InsertAdmission = z.infer<typeof insertAdmissionSchema>;
 export const activities = mysqlTable("activities", {
   id: int("id").primaryKey().autoincrement(),
   entityType: text("entity_type").notNull(), // lead, student, application, admission
-  entityId: int("entity_id").notNull(),
+  entityId: varchar("entity_id", { length: 255 }).notNull(), // supports both string UUIDs and number IDs
   activityType: text("activity_type").notNull(), // created, updated, status_changed, comment, deleted, converted, application_created, admission_created
   title: text("title").notNull(),
   description: text("description"),
@@ -165,6 +164,8 @@ export const dropdowns = mysqlTable("dropdown", {
 export const insertActivitySchema = createInsertSchema(activities).omit({
   id: true,
   createdAt: true,
+}).extend({
+  entityId: z.union([z.string(), z.number()]).transform(String), // Accept both but convert to string
 });
 
 export const insertDropdownSchema = createInsertSchema(dropdowns);

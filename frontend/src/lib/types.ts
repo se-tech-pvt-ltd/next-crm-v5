@@ -17,7 +17,7 @@ export interface User {
 }
 
 export interface Lead {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string | null;
@@ -38,7 +38,7 @@ export interface Lead {
 
 export interface Student {
   id: number;
-  leadId: number | null;
+  leadId: string | null;
   name: string;
   email: string;
   phone: string | null;
@@ -95,7 +95,7 @@ export interface Admission {
 export interface Activity {
   id: number;
   entityType: string;
-  entityId: number;
+  entityId: string | number;
   activityType: string;
   title: string;
   description: string | null;
@@ -140,7 +140,7 @@ export const insertLeadSchema = z.object({
 });
 
 export const insertStudentSchema = z.object({
-  leadId: z.number().optional(),
+  leadId: z.string().optional(),
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().optional(),
@@ -188,7 +188,7 @@ export const insertAdmissionSchema = z.object({
 
 export const insertActivitySchema = z.object({
   entityType: z.string(),
-  entityId: z.number(),
+  entityId: z.union([z.string(), z.number()]),
   activityType: z.string(),
   title: z.string(),
   description: z.string().optional(),

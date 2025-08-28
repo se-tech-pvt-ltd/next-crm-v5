@@ -3,7 +3,7 @@ import { UserModel } from "../models/User.js";
 import { type Activity, type InsertActivity } from "../shared/schema.js";
 
 export class ActivityService {
-  static async getActivities(entityType: string, entityId: number): Promise<Activity[]> {
+  static async getActivities(entityType: string, entityId: string | number): Promise<Activity[]> {
     return await ActivityModel.findByEntity(entityType, entityId);
   }
 
@@ -25,6 +25,7 @@ export class ActivityService {
     
     const activityWithUser = {
       ...activityData,
+      entityId: String(activityData.entityId), // Convert to string for consistency
       userId,
       userName,
       userProfileImage,
@@ -34,22 +35,22 @@ export class ActivityService {
   }
 
   static async logActivity(
-    entityType: string, 
-    entityId: number, 
-    activityType: string, 
-    title: string, 
-    description?: string, 
-    fieldName?: string, 
-    oldValue?: string, 
-    newValue?: string, 
-    userId?: string, 
-    userName?: string, 
+    entityType: string,
+    entityId: string | number,
+    activityType: string,
+    title: string,
+    description?: string,
+    fieldName?: string,
+    oldValue?: string,
+    newValue?: string,
+    userId?: string,
+    userName?: string,
     userProfileImage?: string
   ): Promise<void> {
     try {
       await ActivityModel.create({
         entityType,
-        entityId,
+        entityId: String(entityId), // Convert to string for consistency
         activityType,
         title,
         description,
@@ -66,10 +67,10 @@ export class ActivityService {
   }
 
   static async transferActivities(
-    fromEntityType: string, 
-    fromEntityId: number, 
-    toEntityType: string, 
-    toEntityId: number
+    fromEntityType: string,
+    fromEntityId: string | number,
+    toEntityType: string,
+    toEntityId: string | number
   ): Promise<void> {
     return await ActivityModel.transferActivities(fromEntityType, fromEntityId, toEntityType, toEntityId);
   }

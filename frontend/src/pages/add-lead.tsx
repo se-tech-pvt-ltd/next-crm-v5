@@ -10,7 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Layout } from '@/components/layout';
 import { insertLeadSchema } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
@@ -43,7 +46,7 @@ const addLeadFormSchema = z.object({
   email: z.string().email("Valid email is required"),
   city: z.string().optional(),
   source: z.string().optional(),
-  country: z.string().optional(),
+  country: z.array(z.string()).optional(),
   studyLevel: z.string().optional(),
   studyPlan: z.string().optional(),
   elt: z.string().optional(),
@@ -112,13 +115,13 @@ export default function AddLead() {
     resolver: zodResolver(addLeadFormSchema),
     defaultValues: {
       type: '',
-      status: 'new',
+      status: '',
       name: '',
       phone: '',
       email: '',
       city: '',
       source: '',
-      country: '',
+      country: [],
       studyLevel: '',
       studyPlan: '',
       elt: '',
@@ -255,80 +258,16 @@ export default function AddLead() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
-            {/* Lead Information Section */}
+            {/* Personal Information Section */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center space-x-2">
                   <User className="w-5 h-5 text-primary" />
-                  <span>Lead Information</span>
+                  <span>Personal Information</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  
-                  {/* Type - Dropdown */}
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
-                          <span>Type</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.Type?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            )) || <SelectItem value="individual">Individual</SelectItem>}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Status - Dropdown */}
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Users className="w-4 h-4" />
-                          <span>Status *</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.Status?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            )) || (
-                              <>
-                                <SelectItem value="new">New</SelectItem>
-                                <SelectItem value="contacted">Contacted</SelectItem>
-                                <SelectItem value="qualified">Qualified</SelectItem>
-                              </>
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   {/* Name */}
                   <FormField
@@ -338,36 +277,13 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <User className="w-4 h-4" />
-                          <span>Name *</span>
+                          <span>Full Name *</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter full name" 
+                          <Input
+                            placeholder="Enter full name"
                             className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Number (Phone) */}
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4" />
-                          <span>Number</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="tel" 
-                            placeholder="+1 (555) 123-4567" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -383,14 +299,37 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <Mail className="w-4 h-4" />
-                          <span>Email *</span>
+                          <span>Email Address *</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="name@example.com" 
+                          <Input
+                            type="email"
+                            placeholder="name@example.com"
                             className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Number (Phone) */}
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4" />
+                          <span>Phone Number</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="+1 (555) 123-4567"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -409,12 +348,84 @@ export default function AddLead() {
                           <span>City</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter city" 
+                          <Input
+                            placeholder="Enter city"
                             className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lead Management Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  <span>Lead Management</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                  {/* Type - Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Users className="w-4 h-4" />
+                          <span>Lead Type</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.Type?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Status - Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Target className="w-4 h-4" />
+                          <span>Lead Status *</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select lead status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.Status?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -427,10 +438,10 @@ export default function AddLead() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
-                          <span>Source</span>
+                          <Globe className="w-4 h-4" />
+                          <span>Lead Source</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select source" />
@@ -441,117 +452,9 @@ export default function AddLead() {
                               <SelectItem key={option.key} value={option.key}>
                                 {option.value}
                               </SelectItem>
-                            )) || (
-                              <>
-                                <SelectItem value="website">Website</SelectItem>
-                                <SelectItem value="referral">Referral</SelectItem>
-                                <SelectItem value="social-media">Social Media</SelectItem>
-                              </>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Interested Country - Dropdown */}
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Globe className="w-4 h-4" />
-                          <span>Interested Country</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select country" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.["Interested Country"]?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            )) || (
-                              <>
-                                <SelectItem value="usa">United States</SelectItem>
-                                <SelectItem value="canada">Canada</SelectItem>
-                                <SelectItem value="uk">United Kingdom</SelectItem>
-                                <SelectItem value="australia">Australia</SelectItem>
-                              </>
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Study Level */}
-                  <FormField
-                    control={form.control}
-                    name="studyLevel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <GraduationCap className="w-4 h-4" />
-                          <span>Study Level</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g., Bachelor's, Master's" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Study Plan */}
-                  <FormField
-                    control={form.control}
-                    name="studyPlan"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <BookOpen className="w-4 h-4" />
-                          <span>Study Plan</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter study plan" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* ELT */}
-                  <FormField
-                    control={form.control}
-                    name="elt"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <FileText className="w-4 h-4" />
-                          <span>ELT</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter ELT information" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -564,7 +467,7 @@ export default function AddLead() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
+                          <User className="w-4 h-4" />
                           <span>Admission Officer</span>
                         </FormLabel>
                         <FormControl>
@@ -585,7 +488,155 @@ export default function AddLead() {
                     )}
                   />
                 </div>
+              </CardContent>
+            </Card>
 
+            {/* Academic Interests Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <GraduationCap className="w-5 h-5 text-primary" />
+                  <span>Academic Interests</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                  {/* Interested Country - Multi-Select */}
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Globe className="w-4 h-4" />
+                          <span>Interested Countries</span>
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            value={field.value || []}
+                            onValueChange={field.onChange}
+                            placeholder="Select countries"
+                            searchPlaceholder="Search countries..."
+                            options={dropdownData?.["Interested Country"]?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No countries found"
+                            maxDisplayItems={2}
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Study Level */}
+                  <FormField
+                    control={form.control}
+                    name="studyLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <GraduationCap className="w-4 h-4" />
+                          <span>Study Level</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select study level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.["Study Level"]?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Study Plan */}
+                  <FormField
+                    control={form.control}
+                    name="studyPlan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <BookOpen className="w-4 h-4" />
+                          <span>Study Plan</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select study plan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.["Study Plan"]?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* ELT */}
+                  <FormField
+                    control={form.control}
+                    name="elt"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="flex items-center space-x-2">
+                          <FileText className="w-4 h-4" />
+                          <span>English Language Test Completed</span>
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-row space-x-6"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="elt-yes" />
+                              <Label htmlFor="elt-yes" className="text-sm font-normal cursor-pointer">
+                                Yes
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="elt-no" />
+                              <Label htmlFor="elt-no" className="text-sm font-normal cursor-pointer">
+                                No
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Additional Information Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <span>Additional Information</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {/* Notes */}
                 <FormField
                   control={form.control}
@@ -594,13 +645,13 @@ export default function AddLead() {
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
-                        <span>Notes</span>
+                        <span>Notes & Comments</span>
                       </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Add any additional information about this lead..." 
+                        <Textarea
+                          placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
                           className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />

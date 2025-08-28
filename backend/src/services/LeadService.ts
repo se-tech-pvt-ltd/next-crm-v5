@@ -23,7 +23,7 @@ export class LeadService {
     return await LeadModel.findAll(pagination);
   }
 
-  static async getLead(id: number, userId?: string, userRole?: string): Promise<Lead | undefined> {
+  static async getLead(id: string, userId?: string, userRole?: string): Promise<Lead | undefined> {
     const lead = await LeadModel.findById(id);
     
     if (!lead) return undefined;
@@ -51,7 +51,7 @@ export class LeadService {
     return lead;
   }
 
-  static async updateLead(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+  static async updateLead(id: string, updates: Partial<InsertLead>): Promise<Lead | undefined> {
     // Get the current lead to track changes
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
@@ -88,7 +88,7 @@ export class LeadService {
     return lead;
   }
 
-  static async assignLeadToCounselor(leadId: number, counselorId: string): Promise<boolean> {
+  static async assignLeadToCounselor(leadId: string, counselorId: string): Promise<boolean> {
     const success = await LeadModel.assignToCounselor(leadId, counselorId);
     
     if (success) {
@@ -104,7 +104,7 @@ export class LeadService {
     return success;
   }
 
-  static async deleteLead(id: number): Promise<boolean> {
+  static async deleteLead(id: string): Promise<boolean> {
     const lead = await LeadModel.findById(id);
     const success = await LeadModel.delete(id);
     
