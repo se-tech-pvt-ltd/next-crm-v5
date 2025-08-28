@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -203,28 +201,115 @@ export default function LeadDetails() {
     updateLeadMutation.mutate(updateData);
   };
 
-  const handleStatusChange = async (newStatus: string) => {
-    try {
-      const prevStatus = currentStatus;
-      // Optimistic update
-      setCurrentStatus(newStatus);
-      
-      await updateLeadMutation.mutateAsync({ status: newStatus });
-    } catch (error) {
-      // Revert on error
-      setCurrentStatus(currentStatus);
+
+  // Define the status sequence using provided IDs
+  const statusSequence = [
+    'b6ba479e-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b6d98a94-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b6f80223-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b71e2fb9-840f-11f0-a5b5-92e8d4b3e6a5',
+    'b73cb47a-840f-11f0-a5b5-92e8d4b3e6a5'
+  ];
+
+  const getStatusDisplayName = (statusId: string) => {
+    // Find the status in dropdown data using ID
+    const statusOption = dropdownData?.Status?.find((option: any) => option.id === statusId);
+    if (statusOption) {
+      return statusOption.value;
     }
+
+    // Fallback - try with key field
+    const statusByKey = dropdownData?.Status?.find((option: any) => option.key === statusId);
+    if (statusByKey) {
+      return statusByKey.value;
+    }
+
+    // Final fallback
+    return formatStatus(statusId);
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'contacted': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
-      case 'qualified': return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'converted': return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
-      case 'lost': return 'bg-red-100 text-red-800 hover:bg-red-200';
-      default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+  const getCurrentStatusIndex = () => {
+    if (!dropdownData?.Status || !currentStatus) {
+      console.log('Missing data:', { dropdownData: !!dropdownData?.Status, currentStatus });
+      return -1;
     }
+
+    console.log('Current status:', currentStatus);
+    console.log('Available statuses:', dropdownData.Status);
+    console.log('Status sequence:', statusSequence);
+
+    // Find the current status in dropdown data first
+    const currentStatusOption = dropdownData.Status.find((option: any) =>
+      option.key === currentStatus || option.id === currentStatus
+    );
+
+    console.log('Found status option:', currentStatusOption);
+
+    if (!currentStatusOption) {
+      // If we can't find by key/id, try finding by value (display name)
+      const statusByValue = dropdownData.Status.find((option: any) =>
+        option.value?.toLowerCase() === currentStatus?.toLowerCase()
+      );
+      console.log('Status by value:', statusByValue);
+
+      if (statusByValue) {
+        const index = statusSequence.findIndex(id => id === statusByValue.key);
+        console.log('Index by value:', index);
+        return index;
+      }
+
+      return -1;
+    }
+
+    // Find which position this status is in our sequence using the key, not id
+    const index = statusSequence.findIndex(id => id === currentStatusOption.key);
+    console.log('Final index:', index);
+    return index;
+  };
+
+  const StatusProgressBar = () => {
+    const currentIndex = getCurrentStatusIndex();
+    console.log('Using index:', currentIndex, 'for status:', currentStatus);
+
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-2 mb-4">
+        <div className="flex items-center justify-between relative">
+          {statusSequence.map((statusId, index) => {
+            const isActive = index === currentIndex;
+            const isCompleted = index <= currentIndex; // Current and all previous should be green
+            const statusName = getStatusDisplayName(statusId);
+
+            return (
+              <div key={statusId} className="flex flex-col items-center relative flex-1">
+                {/* Status Circle */}
+                <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                  isCompleted
+                    ? 'bg-green-500 border-green-500 text-white'
+                    : 'bg-white border-gray-300 text-gray-500'
+                }`}>
+                  {isCompleted && <div className="w-2 h-2 bg-white rounded-full" />}
+                  {!isCompleted && <div className="w-2 h-2 bg-gray-300 rounded-full" />}
+                </div>
+
+                {/* Status Label */}
+                <span className={`mt-1 text-xs font-medium text-center ${
+                  isCompleted ? 'text-green-600' : 'text-gray-500'
+                }`}>
+                  {statusName}
+                </span>
+
+                {/* Connector Line */}
+                {index < statusSequence.length - 1 && (
+                  <div className={`absolute top-3 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                  }`} style={{ marginLeft: '0.75rem', width: 'calc(100% - 1.5rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   if (!match) {
@@ -280,11 +365,14 @@ export default function LeadDetails() {
       subtitle={lead ? `Managing lead: ${lead.email}` : undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
-      <div className="flex gap-6 h-[calc(100vh-12rem)] w-full">
+      {/* Status Progress Bar */}
+      {!isLoading && <StatusProgressBar />}
+
+      <div className="flex gap-6 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
-        <div className="flex-1 space-y-6 overflow-y-auto min-w-0">
+        <div className="flex-1 flex flex-col space-y-6 min-w-0 w-full">
           {/* Header Card */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -306,27 +394,7 @@ export default function LeadDetails() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-20" />
-                  ) : (
-                    <>
-                      <Select value={currentStatus} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="new">New</SelectItem>
-                          <SelectItem value="contacted">Contacted</SelectItem>
-                          <SelectItem value="qualified">Qualified</SelectItem>
-                          <SelectItem value="converted">Converted</SelectItem>
-                          <SelectItem value="lost">Lost</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Badge className={getStatusBadgeColor(currentStatus)}>
-                        {formatStatus(currentStatus)}
-                      </Badge>
-                    </>
-                  )}
+                  {/* Status actions can be added here if needed */}
                 </div>
               </div>
               <div className="flex items-center space-x-2 mt-4">
@@ -388,7 +456,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Personal Information Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <UserIcon className="w-5 h-5 text-primary" />
@@ -474,7 +542,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Lead Management Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -561,7 +629,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Academic Interests Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
@@ -676,7 +744,7 @@ export default function LeadDetails() {
           </Card>
 
           {/* Additional Information Section */}
-          <Card>
+          <Card className="w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-primary" />
@@ -729,13 +797,13 @@ export default function LeadDetails() {
         </div>
 
         {/* Activity Sidebar */}
-        <div className="w-96 bg-gray-50 rounded-lg p-4 overflow-y-auto">
+        <div className="w-80 flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Activity Timeline
           </h3>
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -744,7 +812,9 @@ export default function LeadDetails() {
               ))}
             </div>
           ) : (
-            <ActivityTracker entityType="lead" entityId={parseInt(params?.id || '0', 10)} />
+            <div className="flex-1 overflow-y-auto">
+              <ActivityTracker entityType="lead" entityId={parseInt(params?.id || '0', 10)} />
+            </div>
           )}
         </div>
       </div>
