@@ -261,8 +261,8 @@ export default function LeadDetails() {
       return -1;
     }
 
-    // Find which position this status is in our sequence
-    const index = statusSequence.findIndex(id => id === currentStatusOption.id);
+    // Find which position this status is in our sequence using the key, not id
+    const index = statusSequence.findIndex(id => id === currentStatusOption.key);
     console.log('Final index:', index);
     return index;
   };
