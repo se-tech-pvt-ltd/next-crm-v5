@@ -65,6 +65,20 @@ export default function AddLead() {
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
 
+  // Duplicate checking state
+  const [emailDuplicateStatus, setEmailDuplicateStatus] = useState<{
+    isDuplicate: boolean;
+    type?: 'lead' | 'student';
+    message?: string;
+  }>({ isDuplicate: false });
+  const [phoneDuplicateStatus, setPhoneDuplicateStatus] = useState<{
+    isDuplicate: boolean;
+    type?: 'lead' | 'student';
+    message?: string;
+  }>({ isDuplicate: false });
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [checkingPhone, setCheckingPhone] = useState(false);
+
   // Get dropdown data for Leads module
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
@@ -140,7 +154,7 @@ export default function AddLead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
-        title: "Success! ��",
+        title: "Success! 🎉",
         description: "Lead has been created successfully and added to your pipeline.",
       });
       setLocation('/leads');
