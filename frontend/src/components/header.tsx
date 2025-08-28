@@ -46,13 +46,13 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
           <div className="flex items-center space-x-1 sm:space-x-3 flex-shrink-0">
             {/* Search */}
             {showSearch && (
-              <div className="relative">
+              <div className="relative hidden sm:block">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                  <Input 
-                    type="text" 
-                    placeholder="Search students, leads..." 
-                    className="w-64 pl-10"
+                  <Input
+                    type="text"
+                    placeholder="Search students, leads..."
+                    className="w-48 lg:w-64 pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
