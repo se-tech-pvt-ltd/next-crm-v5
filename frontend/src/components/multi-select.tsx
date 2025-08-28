@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { useWheelScrolling } from '@/lib/scroll-utils';
 
 interface MultiSelectProps {
   options: { label: string; value: string }[];
