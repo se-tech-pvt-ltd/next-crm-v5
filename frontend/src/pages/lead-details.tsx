@@ -203,18 +203,6 @@ export default function LeadDetails() {
     updateLeadMutation.mutate(updateData);
   };
 
-  const handleStatusChange = async (newStatus: string) => {
-    try {
-      const prevStatus = currentStatus;
-      // Optimistic update
-      setCurrentStatus(newStatus);
-      
-      await updateLeadMutation.mutateAsync({ status: newStatus });
-    } catch (error) {
-      // Revert on error
-      setCurrentStatus(currentStatus);
-    }
-  };
 
   const getStatusDisplayName = (status: string) => {
     // First try to find the status in dropdown data
