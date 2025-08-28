@@ -13,7 +13,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { formatStatus } from '@/lib/utils';
+import { formatStatus, getCountryDisplayName, getSourceDisplayName, getStatusColor } from '@/lib/utils';
 import { Lead } from '@/lib/types';
 import { Plus, UserPlus, Phone, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
