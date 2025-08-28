@@ -115,17 +115,23 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ActivityIcon className="h-4 w-4" />
-            Activity Timeline
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-4 text-gray-500">Loading activities...</div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4 p-4">
+        <div className="text-center py-4 text-gray-500">Loading activities...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="text-center py-4">
+          <div className="text-red-600 mb-2">Error loading activities</div>
+          <div className="text-sm text-gray-500 mb-3">{error.message}</div>
+          <Button size="sm" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
+      </div>
     );
   }
 
