@@ -119,7 +119,7 @@ export default function AddLead() {
       email: '',
       city: '',
       source: '',
-      country: '',
+      country: [],
       studyLevel: '',
       studyPlan: '',
       elt: '',
