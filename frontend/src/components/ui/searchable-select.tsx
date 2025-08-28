@@ -43,9 +43,11 @@ export function SearchableSelect({
 
   useEffect(() => {
     if (open && searchInputRef.current) {
-      requestAnimationFrame(() => {
+      // Use a small delay to ensure the popover is fully mounted
+      const timer = setTimeout(() => {
         searchInputRef.current?.focus();
-      });
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [open]);
 
@@ -87,7 +89,10 @@ export function SearchableSelect({
         style={{
           minWidth: 'var(--radix-popover-trigger-width)',
         }}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          // Let our useEffect handle the focus
+        }}
       >
         <div className="flex items-center border-b px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
