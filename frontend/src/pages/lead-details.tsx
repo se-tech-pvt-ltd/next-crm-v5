@@ -165,7 +165,9 @@ export default function LeadDetails() {
     const updateData = {
       ...editData,
       country: Array.isArray(editData.country) ? editData.country : [editData.country].filter(Boolean),
-      program: Array.isArray(editData.program) ? editData.program : [editData.program].filter(Boolean)
+      program: Array.isArray(editData.program) ? editData.program : [editData.program].filter(Boolean),
+      counselorId: editData.counselorId === 'unassigned' ? null : editData.counselorId,
+      type: editData.type === 'not_specified' ? null : editData.type
     };
     updateLeadMutation.mutate(updateData);
   };
