@@ -500,7 +500,7 @@ export default function AddLead() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                  {/* Interested Country - Dropdown */}
+                  {/* Interested Country - Multi-Select */}
                   <FormField
                     control={form.control}
                     name="country"
@@ -508,22 +508,23 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <Globe className="w-4 h-4" />
-                          <span>Preferred Country</span>
+                          <span>Preferred Countries</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select country" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.["Interested Country"]?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <MultiSelect
+                            value={field.value || []}
+                            onValueChange={field.onChange}
+                            placeholder="Select countries"
+                            searchPlaceholder="Search countries..."
+                            options={dropdownData?.["Interested Country"]?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No countries found"
+                            maxDisplayItems={2}
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
