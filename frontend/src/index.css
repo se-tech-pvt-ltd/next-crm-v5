@@ -171,4 +171,25 @@
   [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:active {
     background-color: rgb(100 116 139);
   }
+
+  /* Prevent ResizeObserver loops by stabilizing layout */
+  [data-radix-popover-content],
+  [data-radix-select-content],
+  [data-radix-dropdown-menu-content] {
+    /* Prevent content size changes from affecting trigger measurements */
+    contain: layout style;
+    /* Stabilize dimensions during positioning */
+    will-change: auto;
+  }
+
+  /* Debounce resize events for chart containers */
+  [data-chart] {
+    contain: layout;
+  }
+
+  /* Prevent focus outline from causing layout shifts */
+  [data-radix-popover-content] input:focus,
+  [data-radix-select-content] input:focus {
+    outline-offset: -2px;
+  }
 }
