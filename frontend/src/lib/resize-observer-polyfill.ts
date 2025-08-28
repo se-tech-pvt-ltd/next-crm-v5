@@ -1,11 +1,13 @@
 /**
  * Utility to handle ResizeObserver loop errors gracefully
- * 
+ *
  * ResizeObserver loop errors are common and usually benign when using libraries
  * like Radix UI, Recharts, and other components that measure DOM elements.
- * 
+ *
  * This utility helps suppress the console errors while maintaining functionality.
  */
+
+import * as React from 'react';
 
 // Store the original console.error
 const originalConsoleError = console.error;
