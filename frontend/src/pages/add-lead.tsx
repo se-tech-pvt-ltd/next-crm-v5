@@ -409,7 +409,7 @@ export default function AddLead() {
                           <Target className="w-4 h-4" />
                           <span>Lead Status *</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} defaultValue="new">
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select lead status" />
@@ -420,13 +420,7 @@ export default function AddLead() {
                               <SelectItem key={option.key} value={option.key}>
                                 {option.value}
                               </SelectItem>
-                            )) || (
-                              <>
-                                <SelectItem value="new">New</SelectItem>
-                                <SelectItem value="contacted">Contacted</SelectItem>
-                                <SelectItem value="qualified">Qualified</SelectItem>
-                              </>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
