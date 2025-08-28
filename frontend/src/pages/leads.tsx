@@ -490,12 +490,10 @@ export default function Leads() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Interest</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Source</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Interested Country</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
