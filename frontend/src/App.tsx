@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Leads from "@/pages/leads";
 import AddLead from "@/pages/add-lead";
+import LeadDetails from "@/pages/lead-details";
 import Students from "@/pages/students";
 import Applications from "@/pages/applications";
 import Admissions from "@/pages/admissions";
