@@ -176,7 +176,7 @@ export default function Dashboard() {
                   )}
                   <p className="text-xs text-amber-600 mt-1">
                     <Clock className="inline w-3 h-3 mr-1" />
-                    {applications?.filter((app: any) => app.status === 'pending')?.length || 0} pending
+                    {applicationsArray.filter((app: any) => app.status === 'pending').length} pending
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
