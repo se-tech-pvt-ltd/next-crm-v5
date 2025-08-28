@@ -193,6 +193,12 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                   Cancel
                 </Button>
               </div>
+
+              {addActivityMutation.error && (
+                <div className="text-red-600 text-xs p-2 bg-red-50 rounded">
+                  Error: {addActivityMutation.error.message}
+                </div>
+              )}
               
               <p className="text-xs text-gray-600">
                 Press Enter to submit, Shift+Enter for new line
