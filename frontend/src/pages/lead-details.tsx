@@ -253,7 +253,7 @@ export default function LeadDetails() {
       console.log('Status by value:', statusByValue);
 
       if (statusByValue) {
-        const index = statusSequence.findIndex(id => id === statusByValue.id);
+        const index = statusSequence.findIndex(id => id === statusByValue.key);
         console.log('Index by value:', index);
         return index;
       }
