@@ -230,41 +230,6 @@ export default function Leads() {
       helpText="Leads are potential students interested in study abroad programs. Track their progress and convert them to active students."
     >
       <div className="space-y-3">
-        {/* Header Actions */}
-        <div className="flex justify-end items-center gap-2">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              className="h-8"
-              onClick={handleAddLeadClick}
-              disabled={isNavigating}
-            >
-              {isNavigating ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                  className="w-3 h-3 mr-1"
-                >
-                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ rotate: 0 }}
-                  animate={{ rotate: 0 }}
-                  whileHover={{ rotate: 90 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Plus className="w-3 h-3 mr-1" />
-                </motion.div>
-              )}
-              <span className="text-sm">
-                {isNavigating ? 'Opening...' : 'Add Lead'}
-              </span>
-            </Button>
-          </motion.div>
-        </div>
 
         {/* Leads Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -429,7 +394,40 @@ export default function Leads() {
                 )}
               </div>
 
-              <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
+              <div className="flex items-center gap-2">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="ml-2"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={handleAddLeadClick}
+                    disabled={isNavigating}
+                    title="Add New Lead"
+                  >
+                    {isNavigating ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                      >
+                        <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ rotate: 0 }}
+                        whileHover={{ rotate: 90 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </motion.div>
+                    )}
+                  </Button>
+                </motion.div>
+                <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
