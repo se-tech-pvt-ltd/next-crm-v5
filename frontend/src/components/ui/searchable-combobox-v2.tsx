@@ -128,13 +128,12 @@ export function SearchableComboboxV2({
                   </div>
                 )}
               </div>
-              <button
-                type="button"
+              <div
                 className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground rounded cursor-pointer flex items-center justify-center transition-colors"
                 onClick={handleClear}
               >
                 <X className="h-3 w-3" />
-              </button>
+              </div>
             </>
           ) : (
             <span>{placeholder}</span>

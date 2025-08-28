@@ -128,9 +128,8 @@ export function MultiSelectV2({
                   className="text-xs"
                 >
                   {option.label}
-                  <button
-                    type="button"
-                    className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  <span
+                    className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleRemove(option.value);
@@ -143,7 +142,7 @@ export function MultiSelectV2({
                     onClick={(e) => handleRemove(option.value, e)}
                   >
                     <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                  </button>
+                  </span>
                 </Badge>
               ))}
               {selectedOptions.length > maxDisplayItems && (
@@ -154,13 +153,12 @@ export function MultiSelectV2({
             </div>
           )}
           {selectedOptions.length > 0 && (
-            <button
-              type="button"
-              className="ml-2 h-4 w-4 shrink-0 hover:text-destructive"
+            <div
+              className="ml-2 h-4 w-4 shrink-0 hover:text-destructive cursor-pointer"
               onClick={handleClearAll}
             >
               <X className="h-4 w-4" />
-            </button>
+            </div>
           )}
         </div>
         <ChevronDown className={cn(
@@ -207,13 +205,12 @@ export function MultiSelectV2({
           {selectedOptions.length > 0 && (
             <div className="border-t px-3 py-2 text-xs text-muted-foreground flex justify-between">
               <span>{selectedOptions.length} selected</span>
-              <button
-                type="button"
+              <span
                 onClick={handleClearAll}
-                className="text-destructive hover:text-destructive/80"
+                className="text-destructive hover:text-destructive/80 cursor-pointer"
               >
                 Clear all
-              </button>
+              </span>
             </div>
           )}
         </div>
