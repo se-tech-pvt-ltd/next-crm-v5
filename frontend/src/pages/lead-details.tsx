@@ -280,9 +280,9 @@ export default function LeadDetails() {
       subtitle={lead ? `Managing lead: ${lead.email}` : undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
-      <div className="flex gap-6 h-[calc(100vh-12rem)]">
+      <div className="flex gap-6 h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
-        <div className="flex-1 space-y-6 overflow-y-auto">
+        <div className="flex-1 space-y-6 overflow-y-auto min-w-0">
           {/* Header Card */}
           <Card>
             <CardHeader className="pb-4">
