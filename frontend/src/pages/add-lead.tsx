@@ -101,6 +101,133 @@ export default function AddLead() {
     queryKey: ['/api/users'],
   });
 
+  // Debounced duplicate checking functions
+  const checkEmailDuplicate = useCallback(
+    useMemo(
+      () => {
+        let timeoutId: NodeJS.Timeout;
+        return (email: string) => {
+          clearTimeout(timeoutId);
+          if (!email || !email.includes('@')) {
+            setEmailDuplicateStatus({ isDuplicate: false });
+            setCheckingEmail(false);
+            return;
+          }
+
+          setCheckingEmail(true);
+          timeoutId = setTimeout(async () => {
+            try {
+              // Check in existing leads
+              if (Array.isArray(existingLeads)) {
+                const duplicateLead = existingLeads.find(
+                  (lead: any) => lead.email?.toLowerCase() === email.toLowerCase()
+                );
+                if (duplicateLead) {
+                  setEmailDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'lead',
+                    message: 'This email already exists as a lead'
+                  });
+                  setCheckingEmail(false);
+                  return;
+                }
+              }
+
+              // Check in existing students
+              if (Array.isArray(existingStudents)) {
+                const duplicateStudent = existingStudents.find(
+                  (student: any) => student.email?.toLowerCase() === email.toLowerCase()
+                );
+                if (duplicateStudent) {
+                  setEmailDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'student',
+                    message: 'This contact is already registered as a student'
+                  });
+                  setCheckingEmail(false);
+                  return;
+                }
+              }
+
+              // No duplicates found
+              setEmailDuplicateStatus({ isDuplicate: false });
+              setCheckingEmail(false);
+            } catch (error) {
+              console.error('Error checking email duplicate:', error);
+              setEmailDuplicateStatus({ isDuplicate: false });
+              setCheckingEmail(false);
+            }
+          }, 500); // 500ms debounce
+        };
+      },
+      [existingLeads, existingStudents]
+    ),
+    [existingLeads, existingStudents]
+  );
+
+  const checkPhoneDuplicate = useCallback(
+    useMemo(
+      () => {
+        let timeoutId: NodeJS.Timeout;
+        return (phone: string) => {
+          clearTimeout(timeoutId);
+          if (!phone || phone.length < 3) {
+            setPhoneDuplicateStatus({ isDuplicate: false });
+            setCheckingPhone(false);
+            return;
+          }
+
+          setCheckingPhone(true);
+          timeoutId = setTimeout(async () => {
+            try {
+              // Check in existing leads
+              if (Array.isArray(existingLeads)) {
+                const duplicateLead = existingLeads.find(
+                  (lead: any) => lead.phone === phone
+                );
+                if (duplicateLead) {
+                  setPhoneDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'lead',
+                    message: 'This phone number already exists as a lead'
+                  });
+                  setCheckingPhone(false);
+                  return;
+                }
+              }
+
+              // Check in existing students
+              if (Array.isArray(existingStudents)) {
+                const duplicateStudent = existingStudents.find(
+                  (student: any) => student.phone === phone
+                );
+                if (duplicateStudent) {
+                  setPhoneDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'student',
+                    message: 'This phone number is already registered to a student'
+                  });
+                  setCheckingPhone(false);
+                  return;
+                }
+              }
+
+              // No duplicates found
+              setPhoneDuplicateStatus({ isDuplicate: false });
+              setCheckingPhone(false);
+            } catch (error) {
+              console.error('Error checking phone duplicate:', error);
+              setPhoneDuplicateStatus({ isDuplicate: false });
+              setCheckingPhone(false);
+            }
+          }, 500); // 500ms debounce
+        };
+      },
+      [existingLeads, existingStudents]
+    ),
+    [existingLeads, existingStudents]
+  );
+
   // Filter counselors based on search
   const counselorOptions = counselors 
     ? counselors
