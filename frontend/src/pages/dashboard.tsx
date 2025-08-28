@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Layout } from '@/components/layout';
 import { HelpTooltip } from '@/components/help-tooltip';
+import { ResizeObserverErrorBoundary, LayoutSafeWrapper } from '@/lib/error-boundary';
 import { 
   Users, 
   GraduationCap, 
@@ -258,7 +259,9 @@ export default function Dashboard() {
                       <span className="text-xs text-gray-500">100%</span>
                     </div>
                   </div>
-                  <Progress value={100} className="h-2" />
+                  <ResizeObserverErrorBoundary>
+                    <Progress value={100} className="h-2" />
+                  </ResizeObserverErrorBoundary>
                 </div>
 
                 <div className="space-y-2">
@@ -274,7 +277,9 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <Progress value={pipelineData.newLeads ? (pipelineData.qualifiedStudents / pipelineData.newLeads) * 100 : 0} className="h-2" />
+                  <ResizeObserverErrorBoundary>
+                    <Progress value={pipelineData.newLeads ? (pipelineData.qualifiedStudents / pipelineData.newLeads) * 100 : 0} className="h-2" />
+                  </ResizeObserverErrorBoundary>
                 </div>
 
                 <div className="space-y-2">
@@ -290,7 +295,9 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <Progress value={pipelineData.newLeads ? (pipelineData.applicationsSubmitted / pipelineData.newLeads) * 100 : 0} className="h-2" />
+                  <ResizeObserverErrorBoundary>
+                    <Progress value={pipelineData.newLeads ? (pipelineData.applicationsSubmitted / pipelineData.newLeads) * 100 : 0} className="h-2" />
+                  </ResizeObserverErrorBoundary>
                 </div>
 
                 <div className="space-y-2">
@@ -306,7 +313,9 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <Progress value={pipelineData.newLeads ? (pipelineData.admissions / pipelineData.newLeads) * 100 : 0} className="h-2" />
+                  <ResizeObserverErrorBoundary>
+                    <Progress value={pipelineData.newLeads ? (pipelineData.admissions / pipelineData.newLeads) * 100 : 0} className="h-2" />
+                  </ResizeObserverErrorBoundary>
                 </div>
               </div>
             </CardContent>

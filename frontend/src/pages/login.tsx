@@ -66,37 +66,37 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50 flex items-center justify-center p-2">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center pb-4">
+          <div className="flex items-center justify-center mb-2">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+              <GraduationCap className="w-5 h-5 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">SetCrm</CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle className="text-xl font-bold text-gray-900">SetCrm</CardTitle>
+          <CardDescription className="text-sm text-gray-600">
             Sign in to your account to access the system
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4" />
+                  <FormItem className="space-y-1">
+                    <FormLabel className="flex items-center space-x-1.5 text-sm">
+                      <Mail className="w-3.5 h-3.5" />
                       <span>Email Address</span>
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
+                      <Input
+                        {...field}
                         type="email"
                         placeholder="Enter your email"
-                        className="pl-4"
+                        className="h-9"
                       />
                     </FormControl>
                     <FormMessage />
@@ -108,17 +108,17 @@ export default function Login({ onLogin }: LoginProps) {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Lock className="w-4 h-4" />
+                  <FormItem className="space-y-1">
+                    <FormLabel className="flex items-center space-x-1.5 text-sm">
+                      <Lock className="w-3.5 h-3.5" />
                       <span>Password</span>
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
+                      <Input
+                        {...field}
                         type="password"
                         placeholder="Enter your password"
-                        className="pl-4"
+                        className="h-9"
                       />
                     </FormControl>
                     <FormMessage />
@@ -135,12 +135,12 @@ export default function Login({ onLogin }: LoginProps) {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-9 mt-4"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></div>
                     <span>Signing in...</span>
                   </div>
                 ) : (

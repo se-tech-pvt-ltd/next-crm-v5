@@ -47,14 +47,24 @@ const ChartContainer = React.forwardRef<
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
   const [mounted, setMounted] = React.useState(false)
 
-  // Delay mounting to prevent initial ResizeObserver loops
+  // Enhanced mounting delay to prevent ResizeObserver loops
   React.useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 150)
+    const timer = setTimeout(() => setMounted(true), 200)
     return () => clearTimeout(timer)
   }, [])
 
-  // Prevent frequent re-renders that could cause ResizeObserver loops
+  // Stabilized config to prevent ResizeObserver loops
   const stableConfig = React.useMemo(() => config, [JSON.stringify(config)])
+
+  // Error boundary for chart rendering
+  const [renderError, setRenderError] = React.useState(false)
+
+  React.useEffect(() => {
+    if (renderError) {
+      const timer = setTimeout(() => setRenderError(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [renderError])
 
   return (
     <ChartContext.Provider value={{ config: stableConfig }}>
@@ -77,10 +87,23 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={stableConfig} />
-        {mounted && (
-          <RechartsPrimitive.ResponsiveContainer debounceMs={200}>
-            {children}
-          </RechartsPrimitive.ResponsiveContainer>
+        {mounted && !renderError && (
+          <div
+            style={{ contain: 'layout size style' }}
+            onError={() => setRenderError(true)}
+          >
+            <RechartsPrimitive.ResponsiveContainer
+              debounceMs={300}
+              minHeight={200}
+            >
+              {children}
+            </RechartsPrimitive.ResponsiveContainer>
+          </div>
+        )}
+        {renderError && (
+          <div className="flex items-center justify-center h-48 text-muted-foreground">
+            Chart loading...
+          </div>
         )}
       </div>
     </ChartContext.Provider>

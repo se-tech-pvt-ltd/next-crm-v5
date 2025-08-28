@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link, useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -64,7 +65,8 @@ export default function Leads() {
     };
     return sourceMap[sourceCode] || sourceCode.charAt(0).toUpperCase() + sourceCode.slice(1);
   };
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
+  const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
@@ -78,6 +80,14 @@ export default function Leads() {
   };
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleAddLeadClick = () => {
+    setIsNavigating(true);
+    // Small delay for animation effect
+    setTimeout(() => {
+      setLocation('/leads/add');
+    }, 200);
+  };
 
   const { data: leads, isLoading } = useQuery<Lead[]>({
     queryKey: ['/api/leads'],
@@ -201,16 +211,16 @@ export default function Leads() {
       subtitle="Manage and track your prospects"
       helpText="Leads are potential students interested in study abroad programs. Track their progress and convert them to active students."
     >
-      <div className="space-y-6">
+      <div className="space-y-3">
         {/* Header Actions */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">Filters:</span>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -223,7 +233,7 @@ export default function Leads() {
               </SelectContent>
             </Select>
             <Select value={sourceFilter} onValueChange={setSourceFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Filter by source" />
               </SelectTrigger>
               <SelectContent>
@@ -240,9 +250,9 @@ export default function Leads() {
             <div className="flex items-center space-x-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-40">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {dateFromFilter ? format(dateFromFilter, "PP") : "From Date"}
+                  <Button variant="outline" className="w-32 h-8 text-xs">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -257,9 +267,9 @@ export default function Leads() {
               
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-40">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {dateToFilter ? format(dateToFilter, "PP") : "To Date"}
+                  <Button variant="outline" className="w-32 h-8 text-xs">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -275,9 +285,10 @@ export default function Leads() {
             
             {/* Clear Filters */}
             {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
+                className="h-8 text-xs"
                 onClick={() => {
                   setStatusFilter('all');
                   setSourceFilter('all');
@@ -291,67 +302,95 @@ export default function Leads() {
             
             <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
           </div>
-          
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Lead
-          </Button>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              className="h-8"
+              onClick={handleAddLeadClick}
+              disabled={isNavigating}
+            >
+              {isNavigating ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                  className="w-3 h-3 mr-1"
+                >
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: 0 }}
+                  whileHover={{ rotate: 90 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                </motion.div>
+              )}
+              <span className="text-sm">
+                {isNavigating ? 'Opening...' : 'Add Lead'}
+              </span>
+            </Button>
+          </motion.div>
         </div>
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Users className="w-4 h-4 text-gray-500" />
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.length || 0}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-blue-500" />
                 New Leads
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.filter(l => l.status === 'new').length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-blue-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'new').length || 0}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Target className="w-4 h-4 text-green-500" />
                 Qualified
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.filter(l => l.status === 'qualified').length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-green-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'qualified').length || 0}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-purple-500" />
                 Converted
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.filter(l => l.status === 'converted').length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-purple-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'converted').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -359,37 +398,70 @@ export default function Leads() {
 
         {/* Leads Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Leads List</CardTitle>
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="text-lg">Leads List</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
                   </div>
                 ))}
               </div>
             ) : filteredLeads.length === 0 ? (
-              <div className="text-center py-8">
-                <UserPlus className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="text-center py-4">
+                <UserPlus className="mx-auto h-10 w-10 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No leads found</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all' 
+                  {statusFilter === 'all'
                     ? "Get started by adding your first lead."
                     : `No leads with status "${statusFilter}".`
                   }
                 </p>
-                <div className="mt-6">
-                  <Button onClick={() => setIsAddModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Lead
-                  </Button>
-                </div>
+                <motion.div
+                  className="mt-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      className="h-8"
+                      onClick={handleAddLeadClick}
+                      disabled={isNavigating}
+                    >
+                      {isNavigating ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                          className="w-3 h-3 mr-1"
+                        >
+                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ rotate: 0 }}
+                          animate={{ rotate: 0 }}
+                          whileHover={{ rotate: 90 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                        </motion.div>
+                      )}
+                      <span className="text-sm">
+                        {isNavigating ? 'Opening...' : 'Add Lead'}
+                      </span>
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </div>
             ) : (
               <Table>
@@ -498,11 +570,6 @@ export default function Leads() {
         </Card>
       </div>
 
-      <AddLeadModal 
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-      />
-      
       <LeadDetailsModal 
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
