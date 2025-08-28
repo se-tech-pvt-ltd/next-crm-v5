@@ -236,7 +236,7 @@ export default function AddLead() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -375,7 +375,7 @@ export default function AddLead() {
                             { label: 'Austria 🇦🇹', value: 'austria' },
                             { label: 'Italy 🇮🇹', value: 'italy' },
                             { label: 'Spain 🇪🇸', value: 'spain' },
-                            { label: 'Japan ����🇵', value: 'japan' },
+                            { label: 'Japan 🇯🇵', value: 'japan' },
                             { label: 'South Korea 🇰🇷', value: 'south-korea' },
                             { label: 'Hong Kong 🇭🇰', value: 'hong-kong' },
                             { label: 'UAE 🇦🇪', value: 'uae' },
@@ -450,7 +450,7 @@ export default function AddLead() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="source"
@@ -595,26 +595,27 @@ export default function AddLead() {
             </Card>
 
             {/* Form Actions */}
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3 pt-4">
               <motion.div
                 whileHover={{ x: -2 }}
                 whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto"
               >
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setLocation('/leads')}
-                  className="flex items-center space-x-2"
+                  className="flex items-center justify-center space-x-2 w-full"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Cancel</span>
                 </Button>
               </motion.div>
               
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createLeadMutation.isPending}
-                className="flex items-center space-x-2 min-w-32"
+                className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto"
               >
                 {createLeadMutation.isPending ? (
                   <>
