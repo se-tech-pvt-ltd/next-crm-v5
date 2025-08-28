@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'wouter';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -64,7 +64,6 @@ export default function Leads() {
     };
     return sourceMap[sourceCode] || sourceCode.charAt(0).toUpperCase() + sourceCode.slice(1);
   };
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
@@ -385,10 +384,12 @@ export default function Leads() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button onClick={() => setIsAddModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Lead
-                  </Button>
+                  <Link href="/leads/add">
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Lead
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ) : (
@@ -498,11 +499,6 @@ export default function Leads() {
         </Card>
       </div>
 
-      <AddLeadModal 
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-      />
-      
       <LeadDetailsModal 
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
