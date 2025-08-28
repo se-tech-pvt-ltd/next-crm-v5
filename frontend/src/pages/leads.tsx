@@ -379,11 +379,11 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-3 pt-0">
               <div className="text-xl font-bold">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : pagination.total || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -397,7 +397,7 @@ export default function Leads() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -411,7 +411,7 @@ export default function Leads() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
