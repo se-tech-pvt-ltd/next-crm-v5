@@ -71,7 +71,10 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
       </PopoverTrigger>
       <PopoverContent
         className="w-full p-0"
-        style={{ width: 'var(--radix-popover-trigger-width)' }}
+        style={{
+          minWidth: 'var(--radix-popover-trigger-width)',
+          maxWidth: '32rem'
+        }}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="p-2 border-b border-border">
