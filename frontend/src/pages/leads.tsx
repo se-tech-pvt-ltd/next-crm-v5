@@ -92,9 +92,24 @@ export default function Leads() {
     }, 200);
   };
 
-  const { data: leads, isLoading } = useQuery<Lead[]>({
-    queryKey: ['/api/leads'],
+  const { data: leadsResponse, isLoading } = useQuery({
+    queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/leads?page=${currentPage}&limit=${pageSize}`);
+      return response.json();
+    },
   });
+
+  // Extract leads and pagination info from response
+  const leads = leadsResponse?.data || [];
+  const pagination = leadsResponse?.pagination || {
+    page: 1,
+    limit: pageSize,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  };
 
   // For now, we'll simplify the no activity filter without requiring activities API
   // const { data: activities } = useQuery({
