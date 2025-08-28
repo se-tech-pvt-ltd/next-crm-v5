@@ -341,7 +341,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                         <span>Countries of Interest</span>
                       </FormLabel>
                       <FormControl>
-                        <MultiSelect
+                        <CommandMultiSelect
                           options={[
                             { label: 'United States 🇺🇸', value: 'usa' },
                             { label: 'Canada 🇨🇦', value: 'canada' },
@@ -372,6 +372,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                           value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
                           onChange={field.onChange}
                           placeholder="Select preferred study destinations"
+                          searchPlaceholder="Search countries..."
                           className="transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </FormControl>
@@ -390,7 +391,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                         <span>Programs of Interest</span>
                       </FormLabel>
                       <FormControl>
-                        <MultiSelect
+                        <CommandMultiSelect
                           options={[
                             { label: 'Business & Management', value: 'business-admin' },
                             { label: 'Computer Science & IT', value: 'computer-science' },
@@ -410,6 +411,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                           value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
                           onChange={field.onChange}
                           placeholder="Select areas of study interest"
+                          searchPlaceholder="Search programs..."
                           className="transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </FormControl>
