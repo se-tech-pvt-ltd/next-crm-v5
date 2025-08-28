@@ -22,8 +22,32 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
   // Suppress ResizeObserver errors from this component
   useResizeObserverErrorSuppression();
 
-  // Enable wheel scrolling for the scroll container
-  useWheelScrolling(scrollContainerRef, open);
+  // Enhanced wheel event handling for better scrolling
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || !open) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const { deltaY } = e;
+
+      // Check if scrolling is possible
+      const canScrollUp = scrollTop > 0;
+      const canScrollDown = scrollTop < scrollHeight - clientHeight;
+      const isScrollingUp = deltaY < 0;
+      const isScrollingDown = deltaY > 0;
+
+      // Only handle wheel if we can scroll in that direction
+      if ((isScrollingUp && canScrollUp) || (isScrollingDown && canScrollDown)) {
+        e.stopPropagation();
+        scrollContainer.scrollTop += deltaY;
+        e.preventDefault();
+      }
+    };
+
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    return () => scrollContainer.removeEventListener('wheel', handleWheel);
+  }, [open]);
 
   const handleSelect = (selectedValue: string) => {
     if (value.includes(selectedValue)) {
