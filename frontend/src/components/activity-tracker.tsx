@@ -69,6 +69,8 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
     onSuccess: (data) => {
       console.log('Activity mutation success:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
+      // Trigger a refetch to immediately show the new activity
+      refetch();
       setNewActivity("");
       setActivityType("comment");
       setIsAddingActivity(false);
