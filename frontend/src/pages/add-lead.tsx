@@ -581,17 +581,30 @@ export default function AddLead() {
                     control={form.control}
                     name="elt"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="space-y-3">
                         <FormLabel className="flex items-center space-x-2">
                           <FileText className="w-4 h-4" />
-                          <span>English Language Test</span>
+                          <span>English Language Test Completed</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="e.g., IELTS 7.0, TOEFL 100"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field}
-                          />
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-row space-x-6"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="elt-yes" />
+                              <Label htmlFor="elt-yes" className="text-sm font-normal cursor-pointer">
+                                Yes
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="elt-no" />
+                              <Label htmlFor="elt-no" className="text-sm font-normal cursor-pointer">
+                                No
+                              </Label>
+                            </div>
+                          </RadioGroup>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
