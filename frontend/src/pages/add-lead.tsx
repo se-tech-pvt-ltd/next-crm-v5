@@ -520,14 +520,7 @@ export default function AddLead() {
                               <SelectItem key={option.key} value={option.key}>
                                 {option.value}
                               </SelectItem>
-                            )) || (
-                              <>
-                                <SelectItem value="usa">United States</SelectItem>
-                                <SelectItem value="canada">Canada</SelectItem>
-                                <SelectItem value="uk">United Kingdom</SelectItem>
-                                <SelectItem value="australia">Australia</SelectItem>
-                              </>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
