@@ -68,7 +68,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-2">
+      <PopoverContent className="w-full p-2" style={{ width: 'var(--radix-popover-trigger-width)' }}>
         <div className="max-h-64 overflow-auto space-y-1">
           {options.map((option) => (
             <div
