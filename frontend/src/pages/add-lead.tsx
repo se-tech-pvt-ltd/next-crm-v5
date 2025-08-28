@@ -19,7 +19,7 @@ import { Layout } from '@/components/layout';
 import { insertLeadSchema } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { HelpTooltip } from '@/components/help-tooltip';
+import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import {
   User,
   Mail,
