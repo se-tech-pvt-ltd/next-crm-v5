@@ -255,17 +255,121 @@ export default function AddLead() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
-            {/* Lead Information Section */}
+            {/* Personal Information Section */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center space-x-2">
                   <User className="w-5 h-5 text-primary" />
-                  <span>Lead Information</span>
+                  <span>Personal Information</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  
+
+                  {/* Name */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <User className="w-4 h-4" />
+                          <span>Full Name *</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter full name"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Email */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email Address *</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="name@example.com"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Number (Phone) */}
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4" />
+                          <span>Phone Number</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="+1 (555) 123-4567"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* City */}
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>City</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter city"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lead Management Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  <span>Lead Management</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                   {/* Type - Dropdown */}
                   <FormField
                     control={form.control}
@@ -273,8 +377,8 @@ export default function AddLead() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
-                          <span>Type</span>
+                          <Users className="w-4 h-4" />
+                          <span>Lead Type</span>
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -302,8 +406,8 @@ export default function AddLead() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
-                          <Users className="w-4 h-4" />
-                          <span>Status *</span>
+                          <Target className="w-4 h-4" />
+                          <span>Lead Status *</span>
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -330,96 +434,6 @@ export default function AddLead() {
                     )}
                   />
 
-                  {/* Name */}
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <User className="w-4 h-4" />
-                          <span>Name *</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter full name" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Number (Phone) */}
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4" />
-                          <span>Number</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="tel" 
-                            placeholder="+1 (555) 123-4567" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Email */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email *</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="name@example.com" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* City */}
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4" />
-                          <span>City</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter city" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   {/* Source - Dropdown */}
                   <FormField
                     control={form.control}
@@ -427,8 +441,8 @@ export default function AddLead() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
-                          <span>Source</span>
+                          <Globe className="w-4 h-4" />
+                          <span>Lead Source</span>
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -455,6 +469,48 @@ export default function AddLead() {
                     )}
                   />
 
+                  {/* Admission Officer (Counselor) */}
+                  <FormField
+                    control={form.control}
+                    name="counselorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <User className="w-4 h-4" />
+                          <span>Admission Officer</span>
+                        </FormLabel>
+                        <FormControl>
+                          <SearchableCombobox
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            onSearch={handleCounselorSearch}
+                            options={counselorOptions}
+                            loading={searchingCounselors || counselorsLoading}
+                            placeholder="Search and select officer..."
+                            searchPlaceholder="Type to search officers..."
+                            emptyMessage={counselorSearchQuery ? "No officers found matching your search." : "Start typing to search officers..."}
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Academic Interests Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <GraduationCap className="w-5 h-5 text-primary" />
+                  <span>Academic Interests</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                   {/* Interested Country - Dropdown */}
                   <FormField
                     control={form.control}
@@ -463,7 +519,7 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <Globe className="w-4 h-4" />
-                          <span>Interested Country</span>
+                          <span>Preferred Country</span>
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -502,10 +558,10 @@ export default function AddLead() {
                           <span>Study Level</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="e.g., Bachelor's, Master's" 
+                          <Input
+                            placeholder="e.g., Bachelor's, Master's, PhD"
                             className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -521,13 +577,13 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <BookOpen className="w-4 h-4" />
-                          <span>Study Plan</span>
+                          <span>Field of Study</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter study plan" 
+                          <Input
+                            placeholder="e.g., Computer Science, Medicine"
                             className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -543,41 +599,13 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <FileText className="w-4 h-4" />
-                          <span>ELT</span>
+                          <span>English Language Test</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter ELT information" 
+                          <Input
+                            placeholder="e.g., IELTS 7.0, TOEFL 100"
                             className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Admission Officer (Counselor) */}
-                  <FormField
-                    control={form.control}
-                    name="counselorId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
-                          <span>Admission Officer</span>
-                        </FormLabel>
-                        <FormControl>
-                          <SearchableCombobox
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            onSearch={handleCounselorSearch}
-                            options={counselorOptions}
-                            loading={searchingCounselors || counselorsLoading}
-                            placeholder="Search and select officer..."
-                            searchPlaceholder="Type to search officers..."
-                            emptyMessage={counselorSearchQuery ? "No officers found matching your search." : "Start typing to search officers..."}
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -585,7 +613,18 @@ export default function AddLead() {
                     )}
                   />
                 </div>
+              </CardContent>
+            </Card>
 
+            {/* Additional Information Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <span>Additional Information</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {/* Notes */}
                 <FormField
                   control={form.control}
@@ -594,13 +633,13 @@ export default function AddLead() {
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
-                        <span>Notes</span>
+                        <span>Notes & Comments</span>
                       </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Add any additional information about this lead..." 
+                        <Textarea
+                          placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
                           className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
