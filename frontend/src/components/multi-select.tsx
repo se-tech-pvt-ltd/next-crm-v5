@@ -69,32 +69,48 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" style={{ width: 'var(--radix-popover-trigger-width)' }}>
+      <PopoverContent
+        className="w-full p-0"
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="p-2 border-b border-border">
           <span className="text-xs text-muted-foreground">
             Select preferred study destinations ({options.length} available)
           </span>
         </div>
         <div
-          className="max-h-48 overflow-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
-          style={{ touchAction: 'pan-y' }}
+          className="max-h-48 overflow-y-auto overflow-x-hidden p-2 space-y-1"
+          style={{
+            touchAction: 'pan-y',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgb(203 213 225) transparent'
+          }}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           {options.map((option) => (
             <div
               key={option.value}
               className={cn(
-                "flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors",
+                "flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors select-none",
                 value.includes(option.value) && "bg-accent text-accent-foreground"
               )}
-              onClick={() => handleSelect(option.value)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSelect(option.value);
+              }}
+              onMouseDown={(e) => e.preventDefault()}
             >
               <Check
                 className={cn(
-                  "h-4 w-4 text-primary",
+                  "h-4 w-4 text-primary flex-shrink-0",
                   value.includes(option.value) ? "opacity-100" : "opacity-0"
                 )}
               />
-              <span className="text-sm">{option.label}</span>
+              <span className="text-sm flex-1">{option.label}</span>
             </div>
           ))}
         </div>
