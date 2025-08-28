@@ -90,9 +90,9 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
-                  <Bell size={18} />
-                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
+                <Button variant="ghost" size="sm" className="relative p-2">
+                  <Bell size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs">
                     3
                   </Badge>
                 </Button>
