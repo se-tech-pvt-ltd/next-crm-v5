@@ -112,7 +112,7 @@ export default function AddLead() {
     resolver: zodResolver(addLeadFormSchema),
     defaultValues: {
       type: '',
-      status: 'new',
+      status: '',
       name: '',
       phone: '',
       email: '',
