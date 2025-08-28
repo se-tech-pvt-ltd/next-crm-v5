@@ -15,9 +15,40 @@ interface PaginatedLeadsResult {
 }
 
 export class LeadModel {
+  // Helper function to parse JSON fields back to arrays for frontend consumption
+  private static parseLeadFields(lead: Lead): Lead {
+    const parsedLead = { ...lead };
+
+    // Parse country field if it's a JSON string
+    if (parsedLead.country && typeof parsedLead.country === 'string') {
+      try {
+        const parsed = JSON.parse(parsedLead.country);
+        if (Array.isArray(parsed)) {
+          (parsedLead as any).country = parsed;
+        }
+      } catch {
+        // If parsing fails, keep as string (backward compatibility)
+      }
+    }
+
+    // Parse program field if it's a JSON string
+    if (parsedLead.program && typeof parsedLead.program === 'string') {
+      try {
+        const parsed = JSON.parse(parsedLead.program);
+        if (Array.isArray(parsed)) {
+          (parsedLead as any).program = parsed;
+        }
+      } catch {
+        // If parsing fails, keep as string (backward compatibility)
+      }
+    }
+
+    return parsedLead;
+  }
+
   static async findById(id: string): Promise<Lead | undefined> {
     const [lead] = await db.select().from(leads).where(eq(leads.id, id));
-    return lead;
+    return lead ? LeadModel.parseLeadFields(lead) : undefined;
   }
 
   static async findAll(pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
@@ -41,7 +72,7 @@ export class LeadModel {
         .offset(pagination.offset);
 
       return {
-        leads: paginatedLeads,
+        leads: paginatedLeads.map(LeadModel.parseLeadFields),
         total: totalResult.count
       };
     }
@@ -49,7 +80,7 @@ export class LeadModel {
     // Return all leads if no pagination
     const allLeads = await baseQuery.orderBy(desc(leads.createdAt));
     return {
-      leads: allLeads,
+      leads: allLeads.map(LeadModel.parseLeadFields),
       total: allLeads.length
     };
   }
@@ -81,7 +112,7 @@ export class LeadModel {
         .offset(pagination.offset);
 
       return {
-        leads: paginatedLeads,
+        leads: paginatedLeads.map(LeadModel.parseLeadFields),
         total: totalResult.count
       };
     }
@@ -89,7 +120,7 @@ export class LeadModel {
     // Return all leads if no pagination
     const allLeads = await baseQuery.orderBy(desc(leads.createdAt));
     return {
-      leads: allLeads,
+      leads: allLeads.map(LeadModel.parseLeadFields),
       total: allLeads.length
     };
   }
