@@ -1,4 +1,5 @@
 import { eq, desc, and, not, exists, count, sql } from "drizzle-orm";
+import { v4 as uuidv4 } from 'uuid';
 import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
 
@@ -14,7 +15,7 @@ interface PaginatedLeadsResult {
 }
 
 export class LeadModel {
-  static async findById(id: number): Promise<Lead | undefined> {
+  static async findById(id: string): Promise<Lead | undefined> {
     const [lead] = await db.select().from(leads).where(eq(leads.id, id));
     return lead;
   }
@@ -94,8 +95,11 @@ export class LeadModel {
   }
 
   static async create(leadData: InsertLead): Promise<Lead> {
+    // Generate UUID for the lead
+    const leadId = uuidv4();
+
     // Normalize array fields to strings if they are arrays (backward compatibility)
-    const processedLead = { ...leadData } as any;
+    const processedLead = { ...leadData, id: leadId } as any;
     if (Array.isArray((leadData as any).country)) {
       processedLead.country = (leadData as any).country[0] || null;
     }
@@ -103,46 +107,20 @@ export class LeadModel {
       processedLead.program = (leadData as any).program[0] || null;
     }
 
-    const result = await db
+    await db
       .insert(leads)
-      .values(processedLead as InsertLead);
+      .values(processedLead as InsertLead & { id: string });
 
-    // Handle different MySQL result formats
-    let insertId: number;
-    if (typeof result.insertId === 'bigint') {
-      insertId = Number(result.insertId);
-    } else if (typeof result.insertId === 'number') {
-      insertId = result.insertId;
-    } else if (typeof result.insertId === 'string') {
-      insertId = parseInt(result.insertId, 10);
-    } else {
-      // Fallback: find the most recent lead by email
-      console.warn("InsertId not available, falling back to query by email");
-      const [fallbackLead] = await db.select().from(leads)
-        .where(eq(leads.email, processedLead.email))
-        .orderBy(desc(leads.createdAt))
-        .limit(1);
-
-      if (fallbackLead) {
-        return fallbackLead;
-      }
-      throw new Error("Failed to create lead - unable to retrieve inserted record");
-    }
-
-    if (isNaN(insertId)) {
-      throw new Error(`Failed to create lead - invalid insertId: ${result.insertId}`);
-    }
-
-    const createdLead = await LeadModel.findById(insertId);
+    const createdLead = await LeadModel.findById(leadId);
 
     if (!createdLead) {
-      throw new Error(`Failed to create lead - record not found after insert with ID: ${insertId}`);
+      throw new Error(`Failed to create lead - record not found after insert with ID: ${leadId}`);
     }
 
     return createdLead;
   }
 
-  static async update(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+  static async update(id: string, updates: Partial<InsertLead>): Promise<Lead | undefined> {
     // Normalize array fields to strings if they are arrays (backward compatibility)
     const processedUpdates = { ...updates } as any;
     if (Array.isArray((updates as any).country)) {
@@ -166,7 +144,7 @@ export class LeadModel {
     return await LeadModel.findById(id);
   }
 
-  static async assignToCounselor(leadId: number, counselorId: string): Promise<boolean> {
+  static async assignToCounselor(leadId: string, counselorId: string): Promise<boolean> {
     const result = await db
       .update(leads)
       .set({ counselorId, updatedAt: new Date() })
@@ -174,7 +152,7 @@ export class LeadModel {
     return result.rowsAffected > 0;
   }
 
-  static async delete(id: number): Promise<boolean> {
+  static async delete(id: string): Promise<boolean> {
     const result = await db.delete(leads).where(eq(leads.id, id));
     return (result.rowCount || 0) > 0;
   }
