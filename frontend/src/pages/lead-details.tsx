@@ -567,7 +567,7 @@ export default function LeadDetails() {
               ))}
             </div>
           ) : (
-            <ActivityTracker entityType="lead" entityId={params?.id || ''} />
+            <ActivityTracker entityType="lead" entityId={parseInt(params?.id || '0', 10)} />
           )}
         </div>
       </div>
