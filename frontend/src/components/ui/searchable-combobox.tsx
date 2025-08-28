@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { useWheelScrolling } from '@/lib/scroll-utils';
 
 interface SearchableComboboxProps {
   value?: string;
@@ -39,29 +40,8 @@ export function SearchableCombobox({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Ensure wheel events work properly in the scroll container
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.stopPropagation();
-
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const isScrollingUp = e.deltaY < 0;
-      const isScrollingDown = e.deltaY > 0;
-
-      if (
-        (isScrollingUp && scrollTop > 0) ||
-        (isScrollingDown && scrollTop < scrollHeight - clientHeight)
-      ) {
-        return;
-      }
-    };
-
-    scrollContainer.addEventListener('wheel', handleWheel, { passive: true });
-    return () => scrollContainer.removeEventListener('wheel', handleWheel);
-  }, [open]);
+  // Enable wheel scrolling for the scroll container
+  useWheelScrolling(scrollContainerRef, open);
 
   const selectedOption = options.find(option => option.value === value);
 
