@@ -164,6 +164,8 @@ export const dropdowns = mysqlTable("dropdown", {
 export const insertActivitySchema = createInsertSchema(activities).omit({
   id: true,
   createdAt: true,
+}).extend({
+  entityId: z.union([z.string(), z.number()]).transform(String), // Accept both but convert to string
 });
 
 export const insertDropdownSchema = createInsertSchema(dropdowns);
