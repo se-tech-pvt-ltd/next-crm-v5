@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { useWheelScrolling } from '@/lib/scroll-utils';
 import { useResizeObserverErrorSuppression } from '@/lib/error-boundary';
 
 interface SearchableComboboxProps {
@@ -44,8 +43,32 @@ export function SearchableCombobox({
   // Suppress ResizeObserver errors from this component
   useResizeObserverErrorSuppression();
 
-  // Enable wheel scrolling for the scroll container
-  useWheelScrolling(scrollContainerRef, open);
+  // Enhanced wheel event handling for better scrolling
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || !open) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const { deltaY } = e;
+
+      // Check if scrolling is possible
+      const canScrollUp = scrollTop > 0;
+      const canScrollDown = scrollTop < scrollHeight - clientHeight;
+      const isScrollingUp = deltaY < 0;
+      const isScrollingDown = deltaY > 0;
+
+      // Only handle wheel if we can scroll in that direction
+      if ((isScrollingUp && canScrollUp) || (isScrollingDown && canScrollDown)) {
+        e.stopPropagation();
+        scrollContainer.scrollTop += deltaY;
+        e.preventDefault();
+      }
+    };
+
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    return () => scrollContainer.removeEventListener('wheel', handleWheel);
+  }, [open]);
 
   const selectedOption = options.find(option => option.value === value);
 
@@ -139,12 +162,9 @@ export function SearchableCombobox({
           ref={scrollContainerRef}
           className="max-h-60 overflow-y-auto overflow-x-hidden p-1"
           style={{
-            touchAction: 'pan-y',
-            WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'thin',
-            overscrollBehavior: 'contain'
+            scrollbarColor: 'rgb(203 213 225) transparent'
           }}
-          tabIndex={-1}
         >
           {loading ? (
             <div className="flex items-center justify-center py-6">
