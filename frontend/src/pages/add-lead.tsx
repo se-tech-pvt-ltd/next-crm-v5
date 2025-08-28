@@ -117,12 +117,18 @@ export default function AddLead() {
           setCheckingEmail(true);
           timeoutId = setTimeout(async () => {
             try {
-              // Check in existing leads
-              if (Array.isArray(existingLeads)) {
-                const duplicateLead = existingLeads.find(
+              console.log('Checking email duplicate for:', email);
+              console.log('Existing leads:', existingLeads);
+              console.log('Existing students:', existingStudents);
+
+              // Check in existing leads - handle both array and paginated response
+              const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
+              if (Array.isArray(leadsData)) {
+                const duplicateLead = leadsData.find(
                   (lead: any) => lead.email?.toLowerCase() === email.toLowerCase()
                 );
                 if (duplicateLead) {
+                  console.log('Found duplicate lead:', duplicateLead);
                   setEmailDuplicateStatus({
                     isDuplicate: true,
                     type: 'lead',
@@ -133,12 +139,14 @@ export default function AddLead() {
                 }
               }
 
-              // Check in existing students
-              if (Array.isArray(existingStudents)) {
-                const duplicateStudent = existingStudents.find(
+              // Check in existing students - handle both array and paginated response
+              const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
+              if (Array.isArray(studentsData)) {
+                const duplicateStudent = studentsData.find(
                   (student: any) => student.email?.toLowerCase() === email.toLowerCase()
                 );
                 if (duplicateStudent) {
+                  console.log('Found duplicate student:', duplicateStudent);
                   setEmailDuplicateStatus({
                     isDuplicate: true,
                     type: 'student',
@@ -150,6 +158,7 @@ export default function AddLead() {
               }
 
               // No duplicates found
+              console.log('No email duplicates found');
               setEmailDuplicateStatus({ isDuplicate: false });
               setCheckingEmail(false);
             } catch (error) {
