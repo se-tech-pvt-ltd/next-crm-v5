@@ -363,15 +363,15 @@ export default function Leads() {
           <CardHeader className="p-4 pb-3">
             <CardTitle className="text-lg">Leads List</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
                   </div>
                 ))}
               </div>
