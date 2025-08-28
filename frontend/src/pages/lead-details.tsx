@@ -304,7 +304,7 @@ export default function LeadDetails() {
                 {/* Connector Line */}
                 {index < statusSequence.length - 1 && (
                   <div className={`absolute top-3 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
-                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                    index < testIndex ? 'bg-green-500' : 'bg-gray-300'
                   }`} style={{ marginLeft: '0.75rem', width: 'calc(100% - 1.5rem)' }} />
                 )}
               </div>
