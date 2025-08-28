@@ -106,24 +106,26 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
               e.stopPropagation();
             }}
           >
-          {options.map((option) => (
-            <div
-              key={option.value}
-              className={cn(
-                "flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors select-none",
-                value.includes(option.value) && "bg-accent text-accent-foreground"
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelect(option.value);
-              }}
-            >
-              <Check
+            {options.map((option) => (
+              <div
+                key={option.value}
                 className={cn(
-                  "h-4 w-4 text-primary flex-shrink-0",
-                  value.includes(option.value) ? "opacity-100" : "opacity-0"
+                  "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground transition-colors",
+                  value.includes(option.value) && "bg-accent text-accent-foreground"
                 )}
-              />
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelect(option.value);
+                }}
+              >
+                <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                  <Check
+                    className={cn(
+                      "h-4 w-4",
+                      value.includes(option.value) ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </span>
                 <span className="text-sm">{option.label}</span>
               </div>
             ))}
