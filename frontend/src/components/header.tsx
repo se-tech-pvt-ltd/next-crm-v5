@@ -121,9 +121,9 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Quick Actions */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus size={16} className="mr-2" />
-                  Quick Add
+                <Button className="bg-primary hover:bg-primary/90" size="sm">
+                  <Plus size={16} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Quick Add</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
