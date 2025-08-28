@@ -7,7 +7,7 @@ interface HelpTooltipProps {
   className?: string;
 }
 
-export function HelpTooltip({ content, className = '' }: HelpTooltipProps) {
+export function HelpTooltipSimple({ content, className = '' }: HelpTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
@@ -22,7 +22,7 @@ export function HelpTooltip({ content, className = '' }: HelpTooltipProps) {
       >
         <HelpCircle size={16} />
       </button>
-
+      
       {isVisible && (
         <div className="absolute z-50 w-64 p-2 text-sm text-white bg-gray-900 rounded-md shadow-lg -top-1 left-6 transform -translate-y-full">
           <div className="relative">

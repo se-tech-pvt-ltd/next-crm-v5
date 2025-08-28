@@ -13,57 +13,32 @@ import { Pagination } from '@/components/ui/pagination';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { formatStatus } from '@/lib/utils';
+import { getStatusColor } from '@/lib/utils';
 import { Lead } from '@/lib/types';
-import { Plus, MoreHorizontal, UserPlus, Phone, Mail, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, UserPlus, Phone, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 
 export default function Leads() {
-  // Helper functions for display names
-  const getCountryDisplayName = (countryCode: string): string => {
-    const countryMap: { [key: string]: string } = {
-      'USA': 'United States',
-      'Canada': 'Canada',
-      'UK': 'United Kingdom',
-      'Australia': 'Australia',
-      'Germany': 'Germany',
-      'France': 'France',
-      'Netherlands': 'Netherlands',
-      'New Zealand': 'New Zealand',
-    };
-    return countryMap[countryCode] || countryCode;
+  // Helper functions for display names using dropdown data
+  const getCountryDisplayName = (countryId: string): string => {
+    if (!dropdownData?.["Interested Country"]) return countryId;
+    const country = dropdownData["Interested Country"].find((item: any) => item.key === countryId);
+    return country?.value || countryId;
   };
 
-  const getProgramDisplayName = (programCode: string): string => {
-    const programMap: { [key: string]: string } = {
-      'Business Administration': 'Business Administration',
-      'Computer Science': 'Computer Science',
-      'Computer': 'Computer Science',
-      'Engineering': 'Engineering',
-      'Medicine': 'Medicine',
-      'Law': 'Law',
-      'Arts & Humanities': 'Arts & Humanities',
-      'Social Sciences': 'Social Sciences',
-      'Natural Sciences': 'Natural Sciences',
-      'Education': 'Education',
-      'Psychology': 'Psychology',
-    };
-    return programMap[programCode] || programCode;
+  const getSourceDisplayName = (sourceId: string): string => {
+    if (!dropdownData?.Source) return sourceId;
+    const source = dropdownData.Source.find((item: any) => item.key === sourceId);
+    return source?.value || sourceId;
   };
 
-  const getSourceDisplayName = (sourceCode: string): string => {
-    const sourceMap: { [key: string]: string } = {
-      'website': 'Website',
-      'referral': 'Referral',
-      'social-media': 'Social Media',
-      'advertisement': 'Advertisement',
-      'event': 'Event',
-    };
-    return sourceMap[sourceCode] || sourceCode.charAt(0).toUpperCase() + sourceCode.slice(1);
+  const getStatusDisplayName = (statusId: string): string => {
+    if (!dropdownData?.Status) return statusId;
+    const status = dropdownData.Status.find((item: any) => item.key === statusId);
+    return status?.value || statusId;
   };
   const [, setLocation] = useLocation();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -84,6 +59,15 @@ export default function Leads() {
       setLocation('/leads/add');
     }, 200);
   };
+
+  // Get dropdown data for mapping IDs to display values
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
+  });
 
   const { data: leadsResponse, isLoading } = useQuery({
     queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
@@ -490,12 +474,10 @@ export default function Leads() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Interest</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Source</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Interested Country</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -509,77 +491,34 @@ export default function Leads() {
                     >
                       <TableCell className="font-medium">{lead.name}</TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {lead.email}
+                        {lead.phone ? (
+                          <div className="flex items-center text-sm">
+                            <Phone className="w-3 h-3 mr-1" />
+                            {lead.phone}
                           </div>
-                          {lead.phone && (
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Phone className="w-3 h-3 mr-1" />
-                              {lead.phone}
-                            </div>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">No phone</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          {lead.country && (
-                            <div className="flex items-center text-sm">
-                              <Globe className="w-3 h-3 mr-1" />
-                              {getCountryDisplayName(lead.country)}
-                            </div>
-                          )}
-                          {lead.program && (
-                            <div className="flex items-center text-sm">
-                              <GraduationCap className="w-3 h-3 mr-1" />
-                              {getProgramDisplayName(lead.program)}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(lead.status || 'new')}>
-                          {formatStatus(lead.status || 'new')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm">
                           {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(lead.createdAt)}
-                        </span>
+                        {lead.country ? (
+                          <div className="flex items-center text-sm">
+                            <Globe className="w-3 h-3 mr-1" />
+                            {getCountryDisplayName(lead.country)}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">Not specified</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setLocation(`/leads/${lead.id}`);
-                              }}
-                            >
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => convertToStudentMutation.mutate(lead)}
-                              disabled={convertToStudentMutation.isPending}
-                            >
-                              Convert to Student
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Badge className={getStatusColor(lead.status || 'new')}>
+                          {getStatusDisplayName(lead.status || 'new')}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
