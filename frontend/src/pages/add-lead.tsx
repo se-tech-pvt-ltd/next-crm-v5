@@ -445,14 +445,33 @@ export default function AddLead() {
                           <span>Email Address *</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="name@example.com"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input
+                              type="email"
+                              placeholder="name@example.com"
+                              className={`transition-all focus:ring-2 focus:ring-primary/20 ${
+                                emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''
+                              }`}
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                checkEmailDuplicate(e.target.value);
+                              }}
+                            />
+                            {checkingEmail && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
                         <FormMessage />
+                        {emailDuplicateStatus.isDuplicate && (
+                          <div className="flex items-center space-x-2 text-amber-600 text-sm mt-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>{emailDuplicateStatus.message}</span>
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
