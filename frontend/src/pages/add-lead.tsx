@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -34,7 +34,8 @@ import {
   BookOpen,
   ArrowLeft,
   Save,
-  UserPlus
+  UserPlus,
+  AlertTriangle
 } from 'lucide-react';
 import { z } from 'zod';
 
@@ -64,6 +65,20 @@ export default function AddLead() {
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
 
+  // Duplicate checking state
+  const [emailDuplicateStatus, setEmailDuplicateStatus] = useState<{
+    isDuplicate: boolean;
+    type?: 'lead' | 'student';
+    message?: string;
+  }>({ isDuplicate: false });
+  const [phoneDuplicateStatus, setPhoneDuplicateStatus] = useState<{
+    isDuplicate: boolean;
+    type?: 'lead' | 'student';
+    message?: string;
+  }>({ isDuplicate: false });
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [checkingPhone, setCheckingPhone] = useState(false);
+
   // Get dropdown data for Leads module
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
@@ -76,15 +91,154 @@ export default function AddLead() {
   // Get existing leads and students to prevent duplicates
   const { data: existingLeads } = useQuery({
     queryKey: ['/api/leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/leads');
+      return response.json();
+    }
   });
 
   const { data: existingStudents } = useQuery({
     queryKey: ['/api/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/students');
+      return response.json();
+    }
   });
 
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
     queryKey: ['/api/users'],
   });
+
+  // Debounced duplicate checking functions
+  const checkEmailDuplicate = useCallback(
+    useMemo(
+      () => {
+        let timeoutId: NodeJS.Timeout;
+        return (email: string) => {
+          clearTimeout(timeoutId);
+          if (!email || !email.includes('@')) {
+            setEmailDuplicateStatus({ isDuplicate: false });
+            setCheckingEmail(false);
+            return;
+          }
+
+          setCheckingEmail(true);
+          timeoutId = setTimeout(async () => {
+            try {
+              // Check in existing leads - handle both array and paginated response
+              const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
+              if (Array.isArray(leadsData)) {
+                const duplicateLead = leadsData.find(
+                  (lead: any) => lead.email?.toLowerCase() === email.toLowerCase()
+                );
+                if (duplicateLead) {
+                  setEmailDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'lead',
+                    message: 'This email already exists as a lead'
+                  });
+                  setCheckingEmail(false);
+                  return;
+                }
+              }
+
+              // Check in existing students - handle both array and paginated response
+              const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
+              if (Array.isArray(studentsData)) {
+                const duplicateStudent = studentsData.find(
+                  (student: any) => student.email?.toLowerCase() === email.toLowerCase()
+                );
+                if (duplicateStudent) {
+                  setEmailDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'student',
+                    message: 'This contact is already registered as a student'
+                  });
+                  setCheckingEmail(false);
+                  return;
+                }
+              }
+
+              // No duplicates found
+              setEmailDuplicateStatus({ isDuplicate: false });
+              setCheckingEmail(false);
+            } catch (error) {
+              console.error('Error checking email duplicate:', error);
+              setEmailDuplicateStatus({ isDuplicate: false });
+              setCheckingEmail(false);
+            }
+          }, 300); // Reduced to 300ms for faster response
+        };
+      },
+      [existingLeads, existingStudents]
+    ),
+    [existingLeads, existingStudents]
+  );
+
+  const checkPhoneDuplicate = useCallback(
+    useMemo(
+      () => {
+        let timeoutId: NodeJS.Timeout;
+        return (phone: string) => {
+          clearTimeout(timeoutId);
+          if (!phone || phone.length < 3) {
+            setPhoneDuplicateStatus({ isDuplicate: false });
+            setCheckingPhone(false);
+            return;
+          }
+
+          setCheckingPhone(true);
+          timeoutId = setTimeout(async () => {
+            try {
+              // Check in existing leads - handle both array and paginated response
+              const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
+              if (Array.isArray(leadsData)) {
+                const duplicateLead = leadsData.find(
+                  (lead: any) => lead.phone === phone
+                );
+                if (duplicateLead) {
+                  setPhoneDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'lead',
+                    message: 'This phone number already exists as a lead'
+                  });
+                  setCheckingPhone(false);
+                  return;
+                }
+              }
+
+              // Check in existing students - handle both array and paginated response
+              const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
+              if (Array.isArray(studentsData)) {
+                const duplicateStudent = studentsData.find(
+                  (student: any) => student.phone === phone
+                );
+                if (duplicateStudent) {
+                  setPhoneDuplicateStatus({
+                    isDuplicate: true,
+                    type: 'student',
+                    message: 'This phone number is already registered to a student'
+                  });
+                  setCheckingPhone(false);
+                  return;
+                }
+              }
+
+              // No duplicates found
+              setPhoneDuplicateStatus({ isDuplicate: false });
+              setCheckingPhone(false);
+            } catch (error) {
+              console.error('Error checking phone duplicate:', error);
+              setPhoneDuplicateStatus({ isDuplicate: false });
+              setCheckingPhone(false);
+            }
+          }, 300); // Reduced to 300ms for faster response
+        };
+      },
+      [existingLeads, existingStudents]
+    ),
+    [existingLeads, existingStudents]
+  );
 
   // Filter counselors based on search
   const counselorOptions = counselors 
@@ -154,62 +308,23 @@ export default function AddLead() {
   });
 
   const onSubmit = (data: AddLeadFormData) => {
-    // Check for duplicate email in existing leads
-    if (Array.isArray(existingLeads)) {
-      const duplicateLead = existingLeads.find(
-        (lead: any) => lead.email === data.email
-      );
-      if (duplicateLead) {
-        toast({
-          title: "Duplicate Found",
-          description: "A lead with this email already exists in your system.",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Check if there are any duplicate issues
+    if (emailDuplicateStatus.isDuplicate) {
+      toast({
+        title: "Duplicate Email",
+        description: emailDuplicateStatus.message || "This email already exists in the system.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Check for duplicate email in existing students
-    if (Array.isArray(existingStudents)) {
-      const duplicateStudent = existingStudents.find(
-        (student: any) => student.email === data.email
-      );
-      if (duplicateStudent) {
-        toast({
-          title: "Already a Student",
-          description: "This contact is already registered as a student.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    // Check for duplicate phone if provided
-    if (data.phone) {
-      let duplicateFound = false;
-      
-      if (Array.isArray(existingLeads)) {
-        const duplicatePhoneLead = existingLeads.find(
-          (lead: any) => lead.phone === data.phone
-        );
-        if (duplicatePhoneLead) duplicateFound = true;
-      }
-      
-      if (Array.isArray(existingStudents)) {
-        const duplicatePhoneStudent = existingStudents.find(
-          (student: any) => student.phone === data.phone
-        );
-        if (duplicatePhoneStudent) duplicateFound = true;
-      }
-      
-      if (duplicateFound) {
-        toast({
-          title: "Duplicate Phone",
-          description: "A contact with this phone number already exists.",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (phoneDuplicateStatus.isDuplicate) {
+      toast({
+        title: "Duplicate Phone",
+        description: phoneDuplicateStatus.message || "This phone number already exists in the system.",
+        variant: "destructive",
+      });
+      return;
     }
 
     createLeadMutation.mutate(data);
@@ -303,14 +418,33 @@ export default function AddLead() {
                           <span>Email Address *</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="name@example.com"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input
+                              type="email"
+                              placeholder="name@example.com"
+                              className={`transition-all focus:ring-2 focus:ring-primary/20 ${
+                                emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''
+                              }`}
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                checkEmailDuplicate(e.target.value);
+                              }}
+                            />
+                            {checkingEmail && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
                         <FormMessage />
+                        {emailDuplicateStatus.isDuplicate && (
+                          <div className="flex items-center space-x-2 text-amber-600 text-sm mt-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>{emailDuplicateStatus.message}</span>
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -326,14 +460,33 @@ export default function AddLead() {
                           <span>Phone Number</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="+1 (555) 123-4567"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input
+                              type="tel"
+                              placeholder="+1 (555) 123-4567"
+                              className={`transition-all focus:ring-2 focus:ring-primary/20 ${
+                                phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''
+                              }`}
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                checkPhoneDuplicate(e.target.value);
+                              }}
+                            />
+                            {checkingPhone && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
                         <FormMessage />
+                        {phoneDuplicateStatus.isDuplicate && (
+                          <div className="flex items-center space-x-2 text-amber-600 text-sm mt-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>{phoneDuplicateStatus.message}</span>
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -682,13 +835,29 @@ export default function AddLead() {
               
               <Button
                 type="submit"
-                disabled={createLeadMutation.isPending}
+                disabled={
+                  createLeadMutation.isPending ||
+                  emailDuplicateStatus.isDuplicate ||
+                  phoneDuplicateStatus.isDuplicate ||
+                  checkingEmail ||
+                  checkingPhone
+                }
                 className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto"
               >
                 {createLeadMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     <span>Creating...</span>
+                  </>
+                ) : (checkingEmail || checkingPhone) ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                    <span>Checking...</span>
+                  </>
+                ) : (emailDuplicateStatus.isDuplicate || phoneDuplicateStatus.isDuplicate) ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Duplicates Found</span>
                   </>
                 ) : (
                   <>

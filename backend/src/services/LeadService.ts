@@ -128,16 +128,49 @@ export class LeadService {
       ilike(leads.program, `%${query}%`),
       ilike(leads.country, `%${query}%`)
     );
-    
+
+    let results: Lead[];
+
     if (userRole === 'counselor' && userId) {
-      return await db.select().from(leads).where(
+      results = await db.select().from(leads).where(
         and(
           eq(leads.counselorId, userId),
           searchConditions
         )
       );
+    } else {
+      results = await db.select().from(leads).where(searchConditions);
     }
-    
-    return await db.select().from(leads).where(searchConditions);
+
+    // Parse JSON fields for frontend consumption
+    return results.map(lead => {
+      const parsedLead = { ...lead };
+
+      // Parse country field if it's a JSON string
+      if (parsedLead.country && typeof parsedLead.country === 'string') {
+        try {
+          const parsed = JSON.parse(parsedLead.country);
+          if (Array.isArray(parsed)) {
+            (parsedLead as any).country = parsed;
+          }
+        } catch {
+          // If parsing fails, keep as string (backward compatibility)
+        }
+      }
+
+      // Parse program field if it's a JSON string
+      if (parsedLead.program && typeof parsedLead.program === 'string') {
+        try {
+          const parsed = JSON.parse(parsedLead.program);
+          if (Array.isArray(parsed)) {
+            (parsedLead as any).program = parsed;
+          }
+        } catch {
+          // If parsing fails, keep as string (backward compatibility)
+        }
+      }
+
+      return parsedLead;
+    });
   }
 }
