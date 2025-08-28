@@ -380,7 +380,7 @@ export default function AddLead() {
                           <Users className="w-4 h-4" />
                           <span>Lead Type</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select type" />
