@@ -23,10 +23,39 @@ import { format } from 'date-fns';
 
 export default function Leads() {
   // Helper functions for display names using dropdown data
-  const getCountryDisplayName = (countryId: string): string => {
-    if (!dropdownData?.["Interested Country"]) return countryId;
-    const country = dropdownData["Interested Country"].find((item: any) => item.key === countryId);
-    return country?.value || countryId;
+  const getCountryDisplayName = (countryData: string | string[]): string => {
+    if (!dropdownData?.["Interested Country"]) return String(countryData);
+
+    // Handle array of country IDs (either as array or JSON string)
+    let countryIds: string[] = [];
+
+    if (Array.isArray(countryData)) {
+      countryIds = countryData;
+    } else if (typeof countryData === 'string') {
+      // Try to parse as JSON array first
+      try {
+        const parsed = JSON.parse(countryData);
+        if (Array.isArray(parsed)) {
+          countryIds = parsed;
+        } else {
+          // Single country ID
+          countryIds = [countryData];
+        }
+      } catch {
+        // Not JSON, treat as single country ID
+        countryIds = [countryData];
+      }
+    }
+
+    // Map IDs to country names
+    const countryNames = countryIds
+      .map(id => {
+        const country = dropdownData["Interested Country"].find((item: any) => item.key === id);
+        return country?.value || id;
+      })
+      .filter(Boolean);
+
+    return countryNames.length > 0 ? countryNames.join(', ') : 'Not specified';
   };
 
   const getSourceDisplayName = (sourceId: string): string => {
