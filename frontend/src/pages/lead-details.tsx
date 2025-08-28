@@ -493,14 +493,15 @@ export default function LeadDetails() {
                   <div className="space-y-2">
                     <Label htmlFor="type">Type</Label>
                     <Select
-                      value={isEditing ? (editData.type || '') : (lead?.type || '')}
-                      onValueChange={(value) => setEditData({ ...editData, type: value })}
+                      value={isEditing ? (editData.type || 'not_specified') : (lead?.type || 'not_specified')}
+                      onValueChange={(value) => setEditData({ ...editData, type: value === 'not_specified' ? null : value })}
                       disabled={!isEditing}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="not_specified">Not specified</SelectItem>
                         <SelectItem value="undergraduate">Undergraduate</SelectItem>
                         <SelectItem value="postgraduate">Postgraduate</SelectItem>
                         <SelectItem value="phd">PhD</SelectItem>
