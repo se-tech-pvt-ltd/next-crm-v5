@@ -487,14 +487,33 @@ export default function AddLead() {
                           <span>Phone Number</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="+1 (555) 123-4567"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input
+                              type="tel"
+                              placeholder="+1 (555) 123-4567"
+                              className={`transition-all focus:ring-2 focus:ring-primary/20 ${
+                                phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''
+                              }`}
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                checkPhoneDuplicate(e.target.value);
+                              }}
+                            />
+                            {checkingPhone && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
                         <FormMessage />
+                        {phoneDuplicateStatus.isDuplicate && (
+                          <div className="flex items-center space-x-2 text-amber-600 text-sm mt-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>{phoneDuplicateStatus.message}</span>
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
