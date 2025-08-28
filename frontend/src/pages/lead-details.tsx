@@ -255,8 +255,8 @@ export default function LeadDetails() {
       <div className="w-full bg-gray-100 rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between relative">
           {statusSequence.map((statusId, index) => {
-            const isActive = index === currentIndex;
-            const isCompleted = index <= currentIndex; // Current and all previous should be green
+            const isActive = index === effectiveIndex;
+            const isCompleted = index <= effectiveIndex; // Current and all previous should be green
             const statusName = getStatusDisplayName(statusId);
 
             return (
