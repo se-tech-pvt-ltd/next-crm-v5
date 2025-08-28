@@ -239,9 +239,9 @@ export default function Leads() {
             <div className="flex items-center space-x-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-40">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {dateFromFilter ? format(dateFromFilter, "PP") : "From Date"}
+                  <Button variant="outline" className="w-32 h-8 text-xs">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -256,9 +256,9 @@ export default function Leads() {
               
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-40">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {dateToFilter ? format(dateToFilter, "PP") : "To Date"}
+                  <Button variant="outline" className="w-32 h-8 text-xs">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -274,9 +274,10 @@ export default function Leads() {
             
             {/* Clear Filters */}
             {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
+                className="h-8 text-xs"
                 onClick={() => {
                   setStatusFilter('all');
                   setSourceFilter('all');
