@@ -353,6 +353,21 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                             { label: 'New Zealand 🇳🇿', value: 'new-zealand' },
                             { label: 'Switzerland 🇨🇭', value: 'switzerland' },
                             { label: 'Singapore 🇸🇬', value: 'singapore' },
+                            { label: 'Ireland 🇮🇪', value: 'ireland' },
+                            { label: 'Denmark 🇩🇰', value: 'denmark' },
+                            { label: 'Norway 🇳🇴', value: 'norway' },
+                            { label: 'Sweden 🇸🇪', value: 'sweden' },
+                            { label: 'Finland 🇫🇮', value: 'finland' },
+                            { label: 'Belgium 🇧🇪', value: 'belgium' },
+                            { label: 'Austria 🇦🇹', value: 'austria' },
+                            { label: 'Italy 🇮🇹', value: 'italy' },
+                            { label: 'Spain 🇪🇸', value: 'spain' },
+                            { label: 'Japan 🇯🇵', value: 'japan' },
+                            { label: 'South Korea 🇰🇷', value: 'south-korea' },
+                            { label: 'Hong Kong 🇭🇰', value: 'hong-kong' },
+                            { label: 'UAE 🇦🇪', value: 'uae' },
+                            { label: 'Malta 🇲🇹', value: 'malta' },
+                            { label: 'Cyprus 🇨🇾', value: 'cyprus' },
                           ]}
                           value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
                           onChange={field.onChange}
