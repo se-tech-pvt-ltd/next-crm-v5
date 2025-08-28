@@ -29,7 +29,7 @@ export class DropdownModel {
     return await db.select().from(dropdowns);
   }
 
-  static async delete(id: number): Promise<boolean> {
+  static async delete(id: string): Promise<boolean> {
     const result = await db.delete(dropdowns).where(eq(dropdowns.id, id));
     return (result.rowCount || 0) > 0;
   }
