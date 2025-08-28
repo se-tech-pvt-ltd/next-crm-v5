@@ -164,8 +164,15 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
   createdAt: true,
 });
 
+export const insertDropdownSchema = createInsertSchema(dropdowns).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
+export type InsertDropdown = z.infer<typeof insertDropdownSchema>;
+export type Dropdown = typeof dropdowns.$inferSelect;
 
 export type User = typeof users.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
