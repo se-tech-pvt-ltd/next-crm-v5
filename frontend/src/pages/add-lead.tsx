@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Layout } from '@/components/layout';
 import { insertLeadSchema } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
