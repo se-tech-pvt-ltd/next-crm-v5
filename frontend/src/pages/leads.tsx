@@ -200,7 +200,7 @@ export default function Leads() {
       subtitle="Manage and track your prospects"
       helpText="Leads are potential students interested in study abroad programs. Track their progress and convert them to active students."
     >
-      <div className="space-y-6">
+      <div className="space-y-3">
         {/* Header Actions */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
@@ -300,7 +300,7 @@ export default function Leads() {
         </div>
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -308,8 +308,8 @@ export default function Leads() {
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold">
                 {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.length || 0}
               </div>
             </CardContent>
@@ -376,16 +376,16 @@ export default function Leads() {
                 ))}
               </div>
             ) : filteredLeads.length === 0 ? (
-              <div className="text-center py-8">
-                <UserPlus className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="text-center py-4">
+                <UserPlus className="mx-auto h-10 w-10 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No leads found</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all' 
+                  {statusFilter === 'all'
                     ? "Get started by adding your first lead."
                     : `No leads with status "${statusFilter}".`
                   }
                 </p>
-                <div className="mt-6">
+                <div className="mt-4">
                   <Link href="/leads/add" preload>
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />

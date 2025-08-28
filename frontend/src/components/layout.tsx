@@ -23,7 +23,7 @@ export function Layout({ children, title, subtitle, showSearch = true, helpText 
           helpText={helpText}
         />
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-4 scrollbar-thin">
           {children}
         </main>
       </div>
