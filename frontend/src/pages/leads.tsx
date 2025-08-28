@@ -360,8 +360,8 @@ export default function Leads() {
 
         {/* Leads Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Leads List</CardTitle>
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="text-lg">Leads List</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
