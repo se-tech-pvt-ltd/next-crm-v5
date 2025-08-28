@@ -106,13 +106,12 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
-  id: true,
   createdAt: true,
   updatedAt: true,
 }).extend({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
-});
+}).partial({ id: true }); // id is optional since it will be generated
 
 export const insertStudentSchema = createInsertSchema(students).omit({
   id: true,
