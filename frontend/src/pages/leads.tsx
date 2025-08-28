@@ -303,7 +303,10 @@ export default function Leads() {
                   <CalendarComponent
                     mode="single"
                     selected={dateToFilter}
-                    onSelect={setDateToFilter}
+                    onSelect={(date) => {
+                      setDateToFilter(date);
+                      setCurrentPage(1); // Reset to first page when filter changes
+                    }}
                     initialFocus
                   />
                 </PopoverContent>
