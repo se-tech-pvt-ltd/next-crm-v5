@@ -58,6 +58,19 @@
 
   body {
     @apply font-inter antialiased bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  html {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  #root {
+    height: 100vh;
+    overflow: hidden;
   }
 }
 
