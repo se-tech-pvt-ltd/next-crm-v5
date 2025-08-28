@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
 import { HelpTooltip } from './help-tooltip';
 import { ConvertToStudentModal } from './convert-to-student-modal';
-import { MultiSelect } from './multi-select';
+import { CommandMultiSelect } from './command-multi-select';
 import { type Lead, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -379,21 +379,23 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                       </div>
                       <div className="md:col-span-2">
                         <Label htmlFor="country">Countries of Interest</Label>
-                        <MultiSelect
+                        <CommandMultiSelect
                           options={countryOptions}
                           value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
                           onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
                           placeholder="Select countries..."
+                          searchPlaceholder="Search countries..."
                           className={!isEditing ? "pointer-events-none opacity-50" : ""}
                         />
                       </div>
                       <div className="md:col-span-2">
                         <Label htmlFor="program">Programs of Interest</Label>
-                        <MultiSelect
+                        <CommandMultiSelect
                           options={programOptions}
                           value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
                           onChange={(values) => setEditData(prev => ({ ...prev, program: values }))}
                           placeholder="Select programs..."
+                          searchPlaceholder="Search programs..."
                           className={!isEditing ? "pointer-events-none opacity-50" : ""}
                         />
                       </div>

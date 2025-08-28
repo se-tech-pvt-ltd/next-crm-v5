@@ -45,22 +45,43 @@ const ChartContainer = React.forwardRef<
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const [mounted, setMounted] = React.useState(false)
+
+  // Delay mounting to prevent initial ResizeObserver loops
+  React.useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 150)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Prevent frequent re-renders that could cause ResizeObserver loops
+  const stableConfig = React.useMemo(() => config, [JSON.stringify(config)])
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config: stableConfig }}>
       <div
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          // Remove aspect-video to prevent size conflicts in overlays
+          !props.style?.height && !className?.includes('h-') ? 'aspect-video' : '',
           className
         )}
+        style={{
+          // Provide stable dimensions for charts in overlays
+          minHeight: '200px',
+          // Prevent layout thrashing
+          contain: 'layout size',
+          ...props.style
+        }}
         {...props}
       >
-        <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>
-          {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        <ChartStyle id={chartId} config={stableConfig} />
+        {mounted && (
+          <RechartsPrimitive.ResponsiveContainer debounceMs={200}>
+            {children}
+          </RechartsPrimitive.ResponsiveContainer>
+        )}
       </div>
     </ChartContext.Provider>
   )

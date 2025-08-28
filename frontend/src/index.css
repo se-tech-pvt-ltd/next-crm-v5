@@ -135,4 +135,75 @@
   .scrollbar-track-transparent::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  /* Enhanced scrolling for popover content */
+  [data-radix-popover-content] {
+    /* Ensure scroll events work properly */
+    overscroll-behavior: contain;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto {
+    /* Custom scrollbar for popover content */
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(148 163 184);
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:active {
+    background-color: rgb(100 116 139);
+  }
+
+  /* Prevent ResizeObserver loops by stabilizing layout */
+  [data-radix-popover-content],
+  [data-radix-select-content],
+  [data-radix-dropdown-menu-content] {
+    /* Prevent content size changes from affecting trigger measurements */
+    contain: size layout style;
+    /* Ensure scroll events are preserved */
+    pointer-events: auto;
+    /* Prevent layout thrashing */
+    transform: translateZ(0);
+  }
+
+  /* Debounce resize events for chart containers */
+  [data-chart] {
+    contain: size layout;
+    transform: translateZ(0);
+  }
+
+  /* Prevent focus outline from causing layout shifts */
+  [data-radix-popover-content] input:focus,
+  [data-radix-select-content] input:focus {
+    outline-offset: -2px;
+  }
+
+  /* Prevent scroll containers from triggering resize loops */
+  .overflow-y-auto,
+  .overflow-auto {
+    contain: layout;
+    overscroll-behavior: contain;
+  }
+
+  /* Stable positioning for popover elements */
+  [data-radix-popper-content-wrapper] {
+    contain: layout;
+    transform: translateZ(0);
+  }
 }
