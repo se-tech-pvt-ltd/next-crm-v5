@@ -302,7 +302,7 @@ export default function Leads() {
         {/* Leads Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Users className="w-4 h-4 text-gray-500" />
                 Total Leads
@@ -310,49 +310,49 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-3 pt-0">
               <div className="text-xl font-bold">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.length || 0}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-blue-500" />
                 New Leads
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.filter(l => l.status === 'new').length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-blue-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'new').length || 0}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Target className="w-4 h-4 text-green-500" />
                 Qualified
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.filter(l => l.status === 'qualified').length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-green-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'qualified').length || 0}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-purple-500" />
                 Converted
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : leads?.filter(l => l.status === 'converted').length || 0}
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-purple-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'converted').length || 0}
               </div>
             </CardContent>
           </Card>
