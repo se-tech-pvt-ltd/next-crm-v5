@@ -229,19 +229,17 @@ export default function LeadDetails() {
   };
 
   const getCurrentStatusIndex = () => {
-    // Debug: log current status and dropdown data
-    console.log('Current Status:', currentStatus);
-    console.log('Dropdown Status Data:', dropdownData?.Status);
+    if (!dropdownData?.Status || !currentStatus) return -1;
 
-    const index = statusSequence.findIndex(id => {
-      // Find status option by the sequence ID
-      const statusOption = dropdownData?.Status?.find((option: any) => option.id === id);
-      console.log(`Checking ID ${id}:`, statusOption, 'matches current:', statusOption?.key === currentStatus);
-      return statusOption?.key === currentStatus || statusOption?.id === currentStatus;
-    });
+    // Find the current status in dropdown data first
+    const currentStatusOption = dropdownData.Status.find((option: any) =>
+      option.key === currentStatus || option.id === currentStatus
+    );
 
-    console.log('Found index:', index);
-    return index;
+    if (!currentStatusOption) return -1;
+
+    // Find which position this status is in our sequence
+    return statusSequence.findIndex(id => id === currentStatusOption.id);
   };
 
   const StatusProgressBar = () => {
