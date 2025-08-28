@@ -135,4 +135,40 @@
   .scrollbar-track-transparent::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  /* Enhanced scrolling for popover content */
+  [data-radix-popover-content] {
+    /* Ensure scroll events work properly */
+    overscroll-behavior: contain;
+    /* Prevent scroll chaining to parent elements */
+    overflow: hidden;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto {
+    /* Custom scrollbar for popover content */
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(148 163 184);
+  }
+
+  [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:active {
+    background-color: rgb(100 116 139);
+  }
 }
