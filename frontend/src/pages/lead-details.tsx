@@ -8,9 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchable-select-v2';
+import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
+import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
-import { CommandMultiSelect } from '@/components/command-multi-select';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Lead, type User } from '@/lib/types';
@@ -18,7 +21,26 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2, XCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  User as UserIcon,
+  Edit,
+  Save,
+  X,
+  UserPlus,
+  Calendar,
+  Users2,
+  XCircle,
+  Mail,
+  Phone,
+  MapPin,
+  GraduationCap,
+  Globe,
+  FileText,
+  Users,
+  Target,
+  BookOpen
+} from 'lucide-react';
 
 export default function LeadDetails() {
   const [match, params] = useRoute('/leads/:id');
@@ -41,6 +63,15 @@ export default function LeadDetails() {
     enabled: !!params?.id,
     staleTime: 0, // Always fetch fresh data
     refetchOnMount: true,
+  });
+
+  // Get dropdown data for Leads module
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
   });
 
   const { data: users } = useQuery({
@@ -195,52 +226,6 @@ export default function LeadDetails() {
       default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
     }
   };
-
-  const countryOptions = [
-    { value: 'USA', label: 'United States' },
-    { value: 'Canada', label: 'Canada' },
-    { value: 'UK', label: 'United Kingdom' },
-    { value: 'Australia', label: 'Australia' },
-    { value: 'Germany', label: 'Germany' },
-    { value: 'France', label: 'France' },
-    { value: 'Netherlands', label: 'Netherlands' },
-    { value: 'Sweden', label: 'Sweden' },
-    { value: 'Norway', label: 'Norway' },
-    { value: 'Denmark', label: 'Denmark' },
-    { value: 'Finland', label: 'Finland' },
-    { value: 'Switzerland', label: 'Switzerland' },
-    { value: 'Austria', label: 'Austria' },
-    { value: 'Belgium', label: 'Belgium' },
-    { value: 'Ireland', label: 'Ireland' },
-    { value: 'New Zealand', label: 'New Zealand' },
-    { value: 'Japan', label: 'Japan' },
-    { value: 'South Korea', label: 'South Korea' },
-    { value: 'Singapore', label: 'Singapore' },
-    { value: 'Hong Kong', label: 'Hong Kong' },
-  ];
-
-  const programOptions = [
-    { value: 'Computer Science', label: 'Computer Science' },
-    { value: 'Business Administration', label: 'Business Administration' },
-    { value: 'Engineering', label: 'Engineering' },
-    { value: 'Medicine', label: 'Medicine' },
-    { value: 'Law', label: 'Law' },
-    { value: 'Psychology', label: 'Psychology' },
-    { value: 'Economics', label: 'Economics' },
-    { value: 'Mathematics', label: 'Mathematics' },
-    { value: 'Physics', label: 'Physics' },
-    { value: 'Chemistry', label: 'Chemistry' },
-    { value: 'Biology', label: 'Biology' },
-    { value: 'Arts', label: 'Arts' },
-    { value: 'Design', label: 'Design' },
-    { value: 'Architecture', label: 'Architecture' },
-    { value: 'Data Science', label: 'Data Science' },
-    { value: 'Artificial Intelligence', label: 'Artificial Intelligence' },
-    { value: 'Cybersecurity', label: 'Cybersecurity' },
-    { value: 'International Relations', label: 'International Relations' },
-    { value: 'Environmental Science', label: 'Environmental Science' },
-    { value: 'Journalism', label: 'Journalism' },
-  ];
 
   if (!match) {
     return <div>Lead not found</div>;
@@ -402,15 +387,18 @@ export default function LeadDetails() {
             </CardHeader>
           </Card>
 
-          {/* Lead Information */}
+          {/* Personal Information Section */}
           <Card>
-            <CardHeader>
-              <CardTitle>Lead Information</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <UserIcon className="w-5 h-5 text-primary" />
+                <span>Personal Information</span>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[...Array(8)].map((_, i) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[...Array(4)].map((_, i) => (
                     <div key={i} className="space-y-2">
                       <Skeleton className="h-4 w-20" />
                       <Skeleton className="h-9 w-full" />
@@ -418,130 +406,319 @@ export default function LeadDetails() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name" className="flex items-center space-x-2">
+                      <UserIcon className="w-4 h-4" />
+                      <span>Full Name</span>
+                    </Label>
                     <Input
                       id="name"
                       value={isEditing ? (editData.name || '') : (lead?.name || '')}
                       onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
+                  {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4" />
+                      <span>Email Address</span>
+                    </Label>
                     <Input
                       id="email"
                       type="email"
                       value={isEditing ? (editData.email || '') : (lead?.email || '')}
                       onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
+                  {/* Phone */}
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone" className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4" />
+                      <span>Phone Number</span>
+                    </Label>
                     <Input
                       id="phone"
+                      type="tel"
                       value={isEditing ? (editData.phone || '') : (lead?.phone || '')}
                       onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
+                  {/* City */}
                   <div className="space-y-2">
-                    <Label htmlFor="source">Source</Label>
+                    <Label htmlFor="city" className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>City</span>
+                    </Label>
                     <Input
-                      id="source"
+                      id="city"
+                      value={isEditing ? (editData.city || '') : (lead?.city || '')}
+                      onChange={(e) => setEditData({ ...editData, city: e.target.value })}
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Lead Management Section */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Target className="w-5 h-5 text-primary" />
+                <span>Lead Management</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-9 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Type */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Lead Type</span>
+                    </Label>
+                    <SearchableSelect
+                      value={isEditing ? (editData.type || '') : (lead?.type || '')}
+                      onValueChange={(value) => setEditData({ ...editData, type: value })}
+                      placeholder="Select type"
+                      searchPlaceholder="Search types..."
+                      options={dropdownData?.Type?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No types found"
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+
+                  {/* Source */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center space-x-2">
+                      <Globe className="w-4 h-4" />
+                      <span>Lead Source</span>
+                    </Label>
+                    <SearchableSelect
                       value={isEditing ? (editData.source || '') : (lead?.source || '')}
-                      onChange={(e) => setEditData({ ...editData, source: e.target.value })}
+                      onValueChange={(value) => setEditData({ ...editData, source: value })}
+                      placeholder="Select source"
+                      searchPlaceholder="Search sources..."
+                      options={dropdownData?.Source?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No sources found"
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
+                  {/* Counselor */}
                   <div className="space-y-2">
-                    <Label>Countries of Interest</Label>
-                    <CommandMultiSelect
-                      options={countryOptions}
+                    <Label className="flex items-center space-x-2">
+                      <UserIcon className="w-4 h-4" />
+                      <span>Admission Officer</span>
+                    </Label>
+                    <SearchableSelect
+                      value={isEditing ? (editData.counselorId || '') : (lead?.counselorId || '')}
+                      onValueChange={(value) => setEditData({ ...editData, counselorId: value })}
+                      placeholder="Select officer"
+                      searchPlaceholder="Search officers..."
+                      options={users?.map((user: any) => ({
+                        value: user.id,
+                        label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+                      })) || []}
+                      emptyMessage="No officers found"
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Academic Interests Section */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <GraduationCap className="w-5 h-5 text-primary" />
+                <span>Academic Interests</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-9 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Interested Country - Multi-Select */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center space-x-2">
+                      <Globe className="w-4 h-4" />
+                      <span>Interested Countries</span>
+                    </Label>
+                    <MultiSelect
                       value={isEditing ? (editData.country || []) : parseFieldValue(lead?.country)}
-                      onChange={(values) => setEditData({ ...editData, country: values })}
-                      placeholder="Select countries..."
+                      onValueChange={(values) => setEditData({ ...editData, country: values })}
+                      placeholder="Select countries"
+                      searchPlaceholder="Search countries..."
+                      options={dropdownData?.["Interested Country"]?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No countries found"
+                      maxDisplayItems={2}
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
+                  {/* Study Level */}
                   <div className="space-y-2">
-                    <Label>Programs of Interest</Label>
-                    <CommandMultiSelect
-                      options={programOptions}
-                      value={isEditing ? (editData.program || []) : parseFieldValue(lead?.program)}
-                      onChange={(values) => setEditData({ ...editData, program: values })}
-                      placeholder="Select programs..."
+                    <Label className="flex items-center space-x-2">
+                      <GraduationCap className="w-4 h-4" />
+                      <span>Study Level</span>
+                    </Label>
+                    <SearchableSelect
+                      value={isEditing ? (editData.studyLevel || '') : (lead?.studyLevel || '')}
+                      onValueChange={(value) => setEditData({ ...editData, studyLevel: value })}
+                      placeholder="Select study level"
+                      searchPlaceholder="Search study levels..."
+                      options={dropdownData?.["Study Level"]?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No study levels found"
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
+                  {/* Study Plan */}
                   <div className="space-y-2">
-                    <Label htmlFor="expectation">Expectation</Label>
-                    <Input
-                      id="expectation"
-                      value={isEditing ? (editData.expectation || '') : (lead?.expectation || '')}
-                      onChange={(e) => setEditData({ ...editData, expectation: e.target.value })}
+                    <Label className="flex items-center space-x-2">
+                      <BookOpen className="w-4 h-4" />
+                      <span>Study Plan</span>
+                    </Label>
+                    <SearchableSelect
+                      value={isEditing ? (editData.studyPlan || '') : (lead?.studyPlan || '')}
+                      onValueChange={(value) => setEditData({ ...editData, studyPlan: value })}
+                      placeholder="Select study plan"
+                      searchPlaceholder="Search study plans..."
+                      options={dropdownData?.["Study Plan"]?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No study plans found"
                       disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Type</Label>
-                    <Select
-                      value={isEditing ? (editData.type || 'not_specified') : (lead?.type || 'not_specified')}
-                      onValueChange={(value) => setEditData({ ...editData, type: value === 'not_specified' ? null : value })}
+                  {/* ELT */}
+                  <div className="space-y-3">
+                    <Label className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4" />
+                      <span>English Language Test Completed</span>
+                    </Label>
+                    <RadioGroup
+                      value={isEditing ? (editData.elt || '') : (lead?.elt || '')}
+                      onValueChange={(value) => setEditData({ ...editData, elt: value })}
                       disabled={!isEditing}
+                      className="flex flex-row space-x-6"
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not_specified">Not specified</SelectItem>
-                        <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                        <SelectItem value="postgraduate">Postgraduate</SelectItem>
-                        <SelectItem value="phd">PhD</SelectItem>
-                        <SelectItem value="diploma">Diploma</SelectItem>
-                        <SelectItem value="certificate">Certificate</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="elt-yes" disabled={!isEditing} />
+                        <Label htmlFor="elt-yes" className="text-sm font-normal cursor-pointer">
+                          Yes
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="elt-no" disabled={!isEditing} />
+                        <Label htmlFor="elt-no" className="text-sm font-normal cursor-pointer">
+                          No
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
+          {/* Additional Information Section */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <FileText className="w-5 h-5 text-primary" />
+                <span>Additional Information</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Notes */}
                   <div className="space-y-2">
-                    <Label htmlFor="counselor">Assigned Counselor</Label>
-                    <Select
-                      value={isEditing ? (editData.counselorId || 'unassigned') : (lead?.counselorId || 'unassigned')}
-                      onValueChange={(value) => setEditData({ ...editData, counselorId: value === 'unassigned' ? null : value })}
+                    <Label htmlFor="notes" className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Notes & Comments</span>
+                    </Label>
+                    <Textarea
+                      id="notes"
+                      placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
+                      value={isEditing ? (editData.notes || '') : (lead?.notes || '')}
+                      onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
                       disabled={!isEditing}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select counselor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">No counselor assigned</SelectItem>
-                        {users?.map((user: User) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
+                    />
                   </div>
 
+                  {/* Lost Reason (only show if lead is lost) */}
                   {lead?.lostReason && (
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="lostReason">Lost Reason</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="lostReason" className="flex items-center space-x-2">
+                        <XCircle className="w-4 h-4" />
+                        <span>Lost Reason</span>
+                      </Label>
                       <Textarea
                         id="lostReason"
                         value={lead.lostReason}
                         disabled
-                        className="bg-red-50"
+                        className="bg-red-50 min-h-16"
                       />
                     </div>
                   )}
