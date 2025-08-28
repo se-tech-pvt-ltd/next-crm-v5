@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Check, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,34 @@ interface MultiSelectProps {
 
 export function MultiSelect({ options, value, onChange, placeholder = "Select items...", className }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure wheel events work properly in the scroll container
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Allow natural scrolling
+      e.stopPropagation();
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isScrollingUp = e.deltaY < 0;
+      const isScrollingDown = e.deltaY > 0;
+
+      // Prevent event from bubbling if we can scroll
+      if (
+        (isScrollingUp && scrollTop > 0) ||
+        (isScrollingDown && scrollTop < scrollHeight - clientHeight)
+      ) {
+        // We can scroll, so don't let parent elements handle this
+        return;
+      }
+    };
+
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: true });
+    return () => scrollContainer.removeEventListener('wheel', handleWheel);
+  }, [open]);
 
   const handleSelect = (selectedValue: string) => {
     if (value.includes(selectedValue)) {
@@ -83,13 +111,17 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           </span>
         </div>
         <div
+          ref={scrollContainerRef}
           className="max-h-48 overflow-y-auto overflow-x-hidden p-2 space-y-1"
           style={{
             touchAction: 'pan-y',
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'thin',
-            scrollbarColor: 'rgb(203 213 225) transparent'
+            scrollbarColor: 'rgb(203 213 225) transparent',
+            // Ensure scrolling works
+            overscrollBehavior: 'contain'
           }}
+          tabIndex={-1}
         >
           {options.map((option) => (
             <div
