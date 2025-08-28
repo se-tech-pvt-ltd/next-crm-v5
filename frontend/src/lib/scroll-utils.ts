@@ -9,16 +9,28 @@ import * as React from 'react';
  * when the element can scroll in the wheel direction
  */
 export function enableWheelScrolling(element: HTMLElement): () => void {
+  let lastScrollCheck = 0;
+  let cachedScrollInfo: { scrollTop: number; scrollHeight: number; clientHeight: number } | null = null;
+
   const handleWheel = (e: WheelEvent) => {
-    const { scrollTop, scrollHeight, clientHeight } = element;
+    const now = performance.now();
+
+    // Cache scroll info for 16ms (one frame) to avoid excessive layout reads
+    if (!cachedScrollInfo || now - lastScrollCheck > 16) {
+      const { scrollTop, scrollHeight, clientHeight } = element;
+      cachedScrollInfo = { scrollTop, scrollHeight, clientHeight };
+      lastScrollCheck = now;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = cachedScrollInfo;
     const { deltaY } = e;
-    
+
     // Check if we can scroll in the direction of the wheel
     const canScrollUp = scrollTop > 0;
     const canScrollDown = scrollTop < scrollHeight - clientHeight;
     const isScrollingUp = deltaY < 0;
     const isScrollingDown = deltaY > 0;
-    
+
     // If we can scroll in the direction the user is wheeling,
     // prevent the event from bubbling to parent elements
     if ((isScrollingUp && canScrollUp) || (isScrollingDown && canScrollDown)) {
@@ -27,9 +39,10 @@ export function enableWheelScrolling(element: HTMLElement): () => void {
   };
 
   element.addEventListener('wheel', handleWheel, { passive: true });
-  
+
   return () => {
     element.removeEventListener('wheel', handleWheel);
+    cachedScrollInfo = null;
   };
 }
 
