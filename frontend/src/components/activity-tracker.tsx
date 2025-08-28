@@ -36,8 +36,9 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
 
-  const { data: activities = [], isLoading } = useQuery({
+  const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
+    enabled: !!entityId,
   });
 
   // Fetch users to get current profile images
