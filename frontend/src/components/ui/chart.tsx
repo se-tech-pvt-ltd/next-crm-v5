@@ -57,7 +57,7 @@ const ChartContainer = React.forwardRef<
   const stableConfig = React.useMemo(() => config, [JSON.stringify(config)])
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config: stableConfig }}>
       <div
         data-chart={chartId}
         ref={ref}
@@ -70,13 +70,15 @@ const ChartContainer = React.forwardRef<
         style={{
           // Provide stable dimensions for charts in overlays
           minHeight: '200px',
+          // Prevent layout thrashing
+          contain: 'layout size',
           ...props.style
         }}
         {...props}
       >
-        <ChartStyle id={chartId} config={config} />
+        <ChartStyle id={chartId} config={stableConfig} />
         {mounted && (
-          <RechartsPrimitive.ResponsiveContainer debounceMs={150}>
+          <RechartsPrimitive.ResponsiveContainer debounceMs={200}>
             {children}
           </RechartsPrimitive.ResponsiveContainer>
         )}
