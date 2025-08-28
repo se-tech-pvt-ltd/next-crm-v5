@@ -167,10 +167,7 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
   createdAt: true,
 });
 
-export const insertDropdownSchema = createInsertSchema(dropdowns).omit({
-  id: true,
-  createdAt: true,
-});
+export const insertDropdownSchema = createInsertSchema(dropdowns);
 
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
