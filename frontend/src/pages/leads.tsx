@@ -202,14 +202,14 @@ export default function Leads() {
     >
       <div className="space-y-3">
         {/* Header Actions */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">Filters:</span>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -222,7 +222,7 @@ export default function Leads() {
               </SelectContent>
             </Select>
             <Select value={sourceFilter} onValueChange={setSourceFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Filter by source" />
               </SelectTrigger>
               <SelectContent>
