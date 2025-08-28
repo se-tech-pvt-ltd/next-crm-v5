@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { useWheelScrolling } from '@/lib/scroll-utils';
+import { useResizeObserverErrorSuppression } from '@/lib/error-boundary';
 
 interface SearchableComboboxProps {
   value?: string;
@@ -39,6 +40,9 @@ export function SearchableCombobox({
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Suppress ResizeObserver errors from this component
+  useResizeObserverErrorSuppression();
 
   // Enable wheel scrolling for the scroll container
   useWheelScrolling(scrollContainerRef, open);
