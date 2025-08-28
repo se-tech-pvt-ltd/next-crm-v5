@@ -312,6 +312,7 @@ export default function Leads() {
                   setSourceFilter('all');
                   setDateFromFilter(undefined);
                   setDateToFilter(undefined);
+                  setCurrentPage(1); // Reset to first page when clearing filters
                 }}
               >
                 Clear All
