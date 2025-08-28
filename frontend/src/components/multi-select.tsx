@@ -18,32 +18,8 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
   const [open, setOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Ensure wheel events work properly in the scroll container
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      // Allow natural scrolling
-      e.stopPropagation();
-
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const isScrollingUp = e.deltaY < 0;
-      const isScrollingDown = e.deltaY > 0;
-
-      // Prevent event from bubbling if we can scroll
-      if (
-        (isScrollingUp && scrollTop > 0) ||
-        (isScrollingDown && scrollTop < scrollHeight - clientHeight)
-      ) {
-        // We can scroll, so don't let parent elements handle this
-        return;
-      }
-    };
-
-    scrollContainer.addEventListener('wheel', handleWheel, { passive: true });
-    return () => scrollContainer.removeEventListener('wheel', handleWheel);
-  }, [open]);
+  // Enable wheel scrolling for the scroll container
+  useWheelScrolling(scrollContainerRef, open);
 
   const handleSelect = (selectedValue: string) => {
     if (value.includes(selectedValue)) {
