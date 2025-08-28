@@ -15,8 +15,27 @@ export class LeadController {
   static async getLeads(req: Request, res: Response) {
     try {
       const currentUser = LeadController.getCurrentUser();
-      const leads = await LeadService.getLeads(currentUser.id, currentUser.role);
-      res.json(leads);
+
+      // Parse pagination parameters
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = (page - 1) * limit;
+
+      console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}`);
+
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset });
+
+      res.json({
+        data: result.leads,
+        pagination: {
+          page,
+          limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit),
+          hasNextPage: page < Math.ceil(result.total / limit),
+          hasPrevPage: page > 1
+        }
+      });
     } catch (error) {
       console.error("Get leads error:", error);
       res.status(500).json({ message: "Failed to fetch leads" });
