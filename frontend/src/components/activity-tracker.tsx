@@ -53,19 +53,27 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
-      return apiRequest('POST', '/api/activities', {
+      console.log('Adding activity:', { entityType, entityId, data });
+      const response = await apiRequest('POST', '/api/activities', {
         entityType,
         entityId,
         activityType: data.type,
         title: `${ACTIVITY_TYPES.find(t => t.value === data.type)?.label || 'Activity'} added`,
         description: data.content,
       });
+      const result = await response.json();
+      console.log('Activity created:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Activity mutation success:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
       setNewActivity("");
       setActivityType("comment");
       setIsAddingActivity(false);
+    },
+    onError: (error) => {
+      console.error('Activity mutation error:', error);
     },
   });
 
