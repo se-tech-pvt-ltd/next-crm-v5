@@ -73,12 +73,15 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           {options.map((option) => (
             <div
               key={option.value}
-              className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+              className={cn(
+                "flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors",
+                value.includes(option.value) && "bg-accent text-accent-foreground"
+              )}
               onClick={() => handleSelect(option.value)}
             >
               <Check
                 className={cn(
-                  "h-4 w-4",
+                  "h-4 w-4 text-primary",
                   value.includes(option.value) ? "opacity-100" : "opacity-0"
                 )}
               />
