@@ -10,21 +10,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { Layout } from '@/components/layout';
 import { insertLeadSchema } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { CommandMultiSelect } from '@/components/command-multi-select';
 import {
   User,
   Mail,
   Phone,
   MapPin,
   GraduationCap,
-  DollarSign,
   Calendar,
   Globe,
   FileText,
@@ -35,6 +32,26 @@ import {
   Save,
   UserPlus
 } from 'lucide-react';
+import { z } from 'zod';
+
+// Create form schema based on required fields
+const addLeadFormSchema = z.object({
+  type: z.string().optional(),
+  status: z.string().min(1, "Status is required"),
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().optional(),
+  email: z.string().email("Valid email is required"),
+  city: z.string().optional(),
+  source: z.string().optional(),
+  country: z.string().optional(),
+  studyLevel: z.string().optional(),
+  studyPlan: z.string().optional(),
+  elt: z.string().optional(),
+  counselorId: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type AddLeadFormData = z.infer<typeof addLeadFormSchema>;
 
 export default function AddLead() {
   const [, setLocation] = useLocation();
@@ -42,6 +59,15 @@ export default function AddLead() {
   const queryClient = useQueryClient();
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
+
+  // Get dropdown data for Leads module
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
+  });
 
   // Get existing leads and students to prevent duplicates
   const { data: existingLeads } = useQuery({
@@ -65,7 +91,7 @@ export default function AddLead() {
           user.email?.toLowerCase().includes(counselorSearchQuery.toLowerCase())
         )
         .map((user: any) => ({
-          label: `${user.name || user.email}`,
+          label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
           value: user.id,
           subtitle: user.email !== user.name ? user.email : undefined
         }))
@@ -82,25 +108,27 @@ export default function AddLead() {
     }
   }, []);
 
-  const form = useForm({
-    resolver: zodResolver(insertLeadSchema),
+  const form = useForm<AddLeadFormData>({
+    resolver: zodResolver(addLeadFormSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      country: '',
-      program: '',
-      source: 'website',
-      notes: '',
-      budget: '',
-      timeline: '',
+      type: '',
       status: 'new',
+      name: '',
+      phone: '',
+      email: '',
+      city: '',
+      source: '',
+      country: '',
+      studyLevel: '',
+      studyPlan: '',
+      elt: '',
       counselorId: '',
+      notes: '',
     },
   });
 
   const createLeadMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: AddLeadFormData) => {
       const response = await apiRequest('POST', '/api/leads', data);
       return response.json();
     },
@@ -121,7 +149,7 @@ export default function AddLead() {
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: AddLeadFormData) => {
     // Check for duplicate email in existing leads
     if (Array.isArray(existingLeads)) {
       const duplicateLead = existingLeads.find(
@@ -227,16 +255,82 @@ export default function AddLead() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
-            {/* Personal Information Section */}
+            {/* Lead Information Section */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center space-x-2">
                   <User className="w-5 h-5 text-primary" />
-                  <span>Personal Information</span>
+                  <span>Lead Information</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  
+                  {/* Type - Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Target className="w-4 h-4" />
+                          <span>Type</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.Type?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            )) || <SelectItem value="individual">Individual</SelectItem>}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Status - Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Users className="w-4 h-4" />
+                          <span>Status *</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.Status?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            )) || (
+                              <>
+                                <SelectItem value="new">New</SelectItem>
+                                <SelectItem value="contacted">Contacted</SelectItem>
+                                <SelectItem value="qualified">Qualified</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Name */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -244,7 +338,7 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <User className="w-4 h-4" />
-                          <span>Full Name *</span>
+                          <span>Name *</span>
                         </FormLabel>
                         <FormControl>
                           <Input 
@@ -258,28 +352,7 @@ export default function AddLead() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email Address *</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="name@example.com" 
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
+                  {/* Number (Phone) */}
                   <FormField
                     control={form.control}
                     name="phone"
@@ -287,7 +360,7 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <Phone className="w-4 h-4" />
-                          <span>Phone Number</span>
+                          <span>Number</span>
                         </FormLabel>
                         <FormControl>
                           <Input 
@@ -302,6 +375,189 @@ export default function AddLead() {
                     )}
                   />
 
+                  {/* Email */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email *</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="email" 
+                            placeholder="name@example.com" 
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* City */}
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>City</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter city" 
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Source - Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="source"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Target className="w-4 h-4" />
+                          <span>Source</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select source" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.Source?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            )) || (
+                              <>
+                                <SelectItem value="website">Website</SelectItem>
+                                <SelectItem value="referral">Referral</SelectItem>
+                                <SelectItem value="social-media">Social Media</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Interested Country - Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <Globe className="w-4 h-4" />
+                          <span>Interested Country</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dropdownData?.["Interested Country"]?.map((option: any) => (
+                              <SelectItem key={option.key} value={option.key}>
+                                {option.value}
+                              </SelectItem>
+                            )) || (
+                              <>
+                                <SelectItem value="usa">United States</SelectItem>
+                                <SelectItem value="canada">Canada</SelectItem>
+                                <SelectItem value="uk">United Kingdom</SelectItem>
+                                <SelectItem value="australia">Australia</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Study Level */}
+                  <FormField
+                    control={form.control}
+                    name="studyLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <GraduationCap className="w-4 h-4" />
+                          <span>Study Level</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., Bachelor's, Master's" 
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Study Plan */}
+                  <FormField
+                    control={form.control}
+                    name="studyPlan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <BookOpen className="w-4 h-4" />
+                          <span>Study Plan</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter study plan" 
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* ELT */}
+                  <FormField
+                    control={form.control}
+                    name="elt"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <FileText className="w-4 h-4" />
+                          <span>ELT</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter ELT information" 
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Admission Officer (Counselor) */}
                   <FormField
                     control={form.control}
                     name="counselorId"
@@ -309,7 +565,7 @@ export default function AddLead() {
                       <FormItem>
                         <FormLabel className="flex items-center space-x-2">
                           <Target className="w-4 h-4" />
-                          <span>Assigned Counselor</span>
+                          <span>Admission Officer</span>
                         </FormLabel>
                         <FormControl>
                           <SearchableCombobox
@@ -318,259 +574,19 @@ export default function AddLead() {
                             onSearch={handleCounselorSearch}
                             options={counselorOptions}
                             loading={searchingCounselors || counselorsLoading}
-                            placeholder="Search and select counselor..."
-                            searchPlaceholder="Type to search counselors..."
-                            emptyMessage={counselorSearchQuery ? "No counselors found matching your search." : "Start typing to search counselors..."}
+                            placeholder="Search and select officer..."
+                            searchPlaceholder="Type to search officers..."
+                            emptyMessage={counselorSearchQuery ? "No officers found matching your search." : "Start typing to search officers..."}
                             className="transition-all focus:ring-2 focus:ring-primary/20"
                           />
                         </FormControl>
                         <FormMessage />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          💡 Type to search through all counselors by name or email
-                        </p>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Academic Interests Section */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center space-x-2">
-                  <GraduationCap className="w-5 h-5 text-primary" />
-                  <span>Academic Interests</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <Globe className="w-4 h-4" />
-                        <span>Countries of Interest</span>
-                      </FormLabel>
-                      <FormControl>
-                        <CommandMultiSelect
-                          options={[
-                            { label: 'United States 🇺🇸', value: 'usa' },
-                            { label: 'Canada 🇨🇦', value: 'canada' },
-                            { label: 'United Kingdom 🇬🇧', value: 'uk' },
-                            { label: 'Australia 🇦🇺', value: 'australia' },
-                            { label: 'Germany 🇩🇪', value: 'germany' },
-                            { label: 'France 🇫🇷', value: 'france' },
-                            { label: 'Netherlands 🇳🇱', value: 'netherlands' },
-                            { label: 'New Zealand 🇳🇿', value: 'new-zealand' },
-                            { label: 'Switzerland 🇨🇭', value: 'switzerland' },
-                            { label: 'Singapore 🇸🇬', value: 'singapore' },
-                            { label: 'Ireland 🇮🇪', value: 'ireland' },
-                            { label: 'Denmark 🇩🇰', value: 'denmark' },
-                            { label: 'Norway 🇳🇴', value: 'norway' },
-                            { label: 'Sweden 🇸🇪', value: 'sweden' },
-                            { label: 'Finland 🇫🇮', value: 'finland' },
-                            { label: 'Belgium 🇧🇪', value: 'belgium' },
-                            { label: 'Austria 🇦🇹', value: 'austria' },
-                            { label: 'Italy 🇮🇹', value: 'italy' },
-                            { label: 'Spain 🇪🇸', value: 'spain' },
-                            { label: 'Japan 🇯🇵', value: 'japan' },
-                            { label: 'South Korea 🇰🇷', value: 'south-korea' },
-                            { label: 'Hong Kong 🇭🇰', value: 'hong-kong' },
-                            { label: 'UAE 🇦🇪', value: 'uae' },
-                            { label: 'Malta 🇲🇹', value: 'malta' },
-                            { label: 'Cyprus 🇨🇾', value: 'cyprus' },
-                          ]}
-                          value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
-                          onChange={field.onChange}
-                          placeholder="Select preferred study destinations"
-                          searchPlaceholder="Search countries..."
-                          className="transition-all focus:ring-2 focus:ring-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="program"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <BookOpen className="w-4 h-4" />
-                        <span>Programs of Interest</span>
-                      </FormLabel>
-                      <FormControl>
-                        <CommandMultiSelect
-                          options={[
-                            { label: 'Business & Management', value: 'business-admin' },
-                            { label: 'Computer Science & IT', value: 'computer-science' },
-                            { label: 'Engineering', value: 'engineering' },
-                            { label: 'Medicine & Healthcare', value: 'medicine' },
-                            { label: 'Law & Legal Studies', value: 'law' },
-                            { label: 'Arts & Humanities', value: 'arts-humanities' },
-                            { label: 'Social Sciences', value: 'social-sciences' },
-                            { label: 'Natural Sciences', value: 'natural-sciences' },
-                            { label: 'Education & Teaching', value: 'education' },
-                            { label: 'Psychology', value: 'psychology' },
-                            { label: 'Architecture & Design', value: 'architecture' },
-                            { label: 'Media & Communications', value: 'media' },
-                            { label: 'Environmental Studies', value: 'environmental' },
-                            { label: 'Mathematics & Statistics', value: 'mathematics' },
-                            { label: 'Agriculture & Forestry', value: 'agriculture' },
-                            { label: 'Hospitality & Tourism', value: 'hospitality' },
-                            { label: 'Sports & Recreation', value: 'sports' },
-                            { label: 'Public Administration', value: 'public-admin' },
-                            { label: 'International Relations', value: 'international-relations' },
-                            { label: 'Data Science & Analytics', value: 'data-science' },
-                          ]}
-                          value={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
-                          onChange={field.onChange}
-                          placeholder="Select areas of academic interest"
-                          searchPlaceholder="Search programs..."
-                          className="transition-all focus:ring-2 focus:ring-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Additional Details Section */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center space-x-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <span>Additional Details</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="source"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Target className="w-4 h-4" />
-                          <span>Lead Source</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select how they found us" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="website">Website</SelectItem>
-                            <SelectItem value="referral">Referral</SelectItem>
-                            <SelectItem value="social-media">Social Media</SelectItem>
-                            <SelectItem value="advertisement">Advertisement</SelectItem>
-                            <SelectItem value="event">Event</SelectItem>
-                            <SelectItem value="phone-call">Phone Call</SelectItem>
-                            <SelectItem value="email">Email Campaign</SelectItem>
-                            <SelectItem value="partner">Partner Organization</SelectItem>
-                            <SelectItem value="walk-in">Walk-in</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="budget"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <DollarSign className="w-4 h-4" />
-                          <span>Budget Range</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select budget range" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="under-20k">Under $20,000</SelectItem>
-                            <SelectItem value="20k-40k">$20,000 - $40,000</SelectItem>
-                            <SelectItem value="40k-60k">$40,000 - $60,000</SelectItem>
-                            <SelectItem value="60k-80k">$60,000 - $80,000</SelectItem>
-                            <SelectItem value="80k-100k">$80,000 - $100,000</SelectItem>
-                            <SelectItem value="over-100k">Over $100,000</SelectItem>
-                            <SelectItem value="flexible">Flexible</SelectItem>
-                            <SelectItem value="not-specified">Not Specified</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="timeline"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>Timeline</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="When do they plan to start?" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="immediate">Immediate (Next 3 months)</SelectItem>
-                            <SelectItem value="short-term">Short-term (3-6 months)</SelectItem>
-                            <SelectItem value="medium-term">Medium-term (6-12 months)</SelectItem>
-                            <SelectItem value="long-term">Long-term (1-2 years)</SelectItem>
-                            <SelectItem value="flexible">Flexible</SelectItem>
-                            <SelectItem value="not-sure">Not Sure</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center space-x-2">
-                          <Users className="w-4 h-4" />
-                          <span>Initial Status</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Set initial status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="new">🆕 New</SelectItem>
-                            <SelectItem value="contacted">📞 Contacted</SelectItem>
-                            <SelectItem value="qualified">✅ Qualified</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
 
+                {/* Notes */}
                 <FormField
                   control={form.control}
                   name="notes"
@@ -583,7 +599,7 @@ export default function AddLead() {
                       <FormControl>
                         <Textarea 
                           placeholder="Add any additional information about this lead..." 
-                          className="min-h-24 transition-all focus:ring-2 focus:ring-primary/20"
+                          className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
                           {...field} 
                         />
                       </FormControl>
