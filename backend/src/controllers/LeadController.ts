@@ -50,7 +50,7 @@ export class LeadController {
 
   static async getLead(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const currentUser = LeadController.getCurrentUser();
       const lead = await LeadService.getLead(id, currentUser.id, currentUser.role);
       if (!lead) {
@@ -83,7 +83,7 @@ export class LeadController {
 
   static async updateLead(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       console.log('Updating lead:', id, 'with data:', req.body);
       
       // Handle array to JSON string conversion for country and program fields
@@ -117,7 +117,7 @@ export class LeadController {
 
   static async deleteLead(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const success = await LeadService.deleteLead(id);
       if (!success) {
         return res.status(404).json({ message: "Lead not found" });
