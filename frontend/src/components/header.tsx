@@ -41,7 +41,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             )}
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {/* Search */}
             {showSearch && (
               <div className="relative">
