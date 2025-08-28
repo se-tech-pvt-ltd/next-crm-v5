@@ -43,7 +43,7 @@ export class ActivityController {
 
   static async createActivity(req: Request, res: Response) {
     try {
-      const currentUser = ActivityController.getCurrentUser();
+      const currentUser = await ActivityController.getCurrentUser();
       const activityData = insertActivitySchema.parse(req.body);
       const activity = await ActivityService.createActivityWithUser(activityData, currentUser.id);
       res.json(activity);
