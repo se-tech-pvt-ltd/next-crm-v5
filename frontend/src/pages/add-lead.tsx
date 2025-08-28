@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -383,20 +384,20 @@ export default function AddLead() {
                           <Users className="w-4 h-4" />
                           <span>Lead Type</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.Type?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select type"
+                            searchPlaceholder="Search types..."
+                            options={dropdownData?.Type?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No types found"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -412,20 +413,20 @@ export default function AddLead() {
                           <Target className="w-4 h-4" />
                           <span>Lead Status *</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select lead status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.Status?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select lead status"
+                            searchPlaceholder="Search statuses..."
+                            options={dropdownData?.Status?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No statuses found"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -441,20 +442,20 @@ export default function AddLead() {
                           <Globe className="w-4 h-4" />
                           <span>Lead Source</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select source" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.Source?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select source"
+                            searchPlaceholder="Search sources..."
+                            options={dropdownData?.Source?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No sources found"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -542,20 +543,20 @@ export default function AddLead() {
                           <GraduationCap className="w-4 h-4" />
                           <span>Study Level</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select study level" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.["Study Level"]?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select study level"
+                            searchPlaceholder="Search study levels..."
+                            options={dropdownData?.["Study Level"]?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No study levels found"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -571,20 +572,20 @@ export default function AddLead() {
                           <BookOpen className="w-4 h-4" />
                           <span>Study Plan</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select study plan" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dropdownData?.["Study Plan"]?.map((option: any) => (
-                              <SelectItem key={option.key} value={option.key}>
-                                {option.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select study plan"
+                            searchPlaceholder="Search study plans..."
+                            options={dropdownData?.["Study Plan"]?.map((option: any) => ({
+                              value: option.key,
+                              label: option.value
+                            })) || []}
+                            emptyMessage="No study plans found"
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
