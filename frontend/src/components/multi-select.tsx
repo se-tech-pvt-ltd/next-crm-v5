@@ -47,8 +47,9 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
                   <Badge
                     key={item}
                     variant="secondary"
-                    className="text-xs"
+                    className="text-xs cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleRemove(item);
                     }}
@@ -68,17 +69,28 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-2">
-        <div className="max-h-64 overflow-auto space-y-1">
+      <PopoverContent className="w-full p-0" style={{ width: 'var(--radix-popover-trigger-width)' }}>
+        <div className="p-2 border-b border-border">
+          <span className="text-xs text-muted-foreground">
+            Select preferred study destinations ({options.length} available)
+          </span>
+        </div>
+        <div
+          className="max-h-48 overflow-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+          style={{ touchAction: 'pan-y' }}
+        >
           {options.map((option) => (
             <div
               key={option.value}
-              className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+              className={cn(
+                "flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors",
+                value.includes(option.value) && "bg-accent text-accent-foreground"
+              )}
               onClick={() => handleSelect(option.value)}
             >
               <Check
                 className={cn(
-                  "h-4 w-4",
+                  "h-4 w-4 text-primary",
                   value.includes(option.value) ? "opacity-100" : "opacity-0"
                 )}
               />
@@ -86,6 +98,13 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
             </div>
           ))}
         </div>
+        {options.length > 8 && (
+          <div className="px-2 py-1 border-t border-border bg-muted/30">
+            <span className="text-xs text-muted-foreground">
+              💡 Scroll to see more options
+            </span>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

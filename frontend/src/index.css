@@ -86,3 +86,53 @@
     color: hsl(var(--purple-foreground));
   }
 }
+
+/* Touch scrolling improvements for nested scroll containers */
+@layer base {
+  /* Improve touch scrolling for popover content */
+  [data-radix-popper-content-wrapper] {
+    touch-action: pan-y;
+  }
+
+  /* Better scrolling for modal content */
+  [role="dialog"] {
+    touch-action: pan-y;
+  }
+
+  /* Ensure proper touch behavior for overflow containers */
+  .overflow-auto,
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  /* Custom scrollbar styles for better visibility */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+    background-color: rgb(209 213 219);
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

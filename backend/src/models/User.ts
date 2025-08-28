@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, or, like, and, inArray } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { users, type User, type InsertUser } from "../shared/schema.js";
 
@@ -56,6 +56,37 @@ export class UserModel {
 
   static async findAll(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
+    const searchPattern = `%${searchQuery}%`;
+
+    // Build the search condition
+    const searchCondition = or(
+      like(users.firstName, searchPattern),
+      like(users.lastName, searchPattern),
+      like(users.email, searchPattern)
+    );
+
+    // Build the role condition if provided
+    const roleCondition = roles && roles.length > 0 ? inArray(users.role, roles) : undefined;
+
+    // Combine conditions
+    const whereCondition = roleCondition
+      ? and(searchCondition, roleCondition)
+      : searchCondition;
+
+    let query = db
+      .select()
+      .from(users)
+      .where(whereCondition);
+
+    // Apply limit if provided
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    return await query;
   }
 
   static async delete(id: string): Promise<boolean> {

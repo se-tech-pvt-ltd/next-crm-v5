@@ -14,6 +14,10 @@ export class UserService {
     return await UserModel.findAll();
   }
 
+  static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
+    return await UserModel.searchUsers(searchQuery, roles, limit);
+  }
+
   static async getCounselors(): Promise<User[]> {
     return await UserModel.findCounselors();
   }
