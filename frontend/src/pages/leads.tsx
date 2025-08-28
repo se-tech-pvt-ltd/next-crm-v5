@@ -567,8 +567,7 @@ export default function Leads() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedLead(lead);
-                                setIsDetailsModalOpen(true);
+                                setLocation(`/leads/${lead.id}`);
                               }}
                             >
                               View Details
