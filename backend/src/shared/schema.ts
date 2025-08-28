@@ -20,7 +20,7 @@ export const users = mysqlTable("users", {
 });
 
 export const leads = mysqlTable("leads", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -45,7 +45,7 @@ export const leads = mysqlTable("leads", {
 
 export const students = mysqlTable("students", {
   id: int("id").primaryKey().autoincrement(),
-  leadId: int("lead_id"),
+  leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
