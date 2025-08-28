@@ -295,28 +295,23 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                           <Target className="w-4 h-4" />
                           <span>Assigned Counselor</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select counselor" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.isArray(counselors) ? counselors
-                              .filter((user: any) => user.role === 'counselor' || user.role === 'admin_staff')
-                              .map((counselor: any) => (
-                              <SelectItem key={counselor.id} value={counselor.id}>
-                                <div className="flex items-center space-x-2">
-                                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                                    <User className="w-3 h-3" />
-                                  </div>
-                                  <span>{counselor.email}</span>
-                                </div>
-                              </SelectItem>
-                            )) : null}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableCombobox
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            onSearch={handleCounselorSearch}
+                            options={counselorOptions}
+                            loading={searchingCounselors || counselorsLoading}
+                            placeholder="Search and select counselor..."
+                            searchPlaceholder="Type to search counselors..."
+                            emptyMessage={counselorSearchQuery ? "No counselors found matching your search." : "Start typing to search counselors..."}
+                            className="transition-all focus:ring-2 focus:ring-primary/20"
+                          />
+                        </FormControl>
                         <FormMessage />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          💡 Type to search through all counselors by name or email
+                        </p>
                       </FormItem>
                     )}
                   />
