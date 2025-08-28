@@ -409,10 +409,15 @@ export default function AddLead() {
                           <Target className="w-4 h-4" />
                           <span>Lead Status *</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ''}>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue="new">
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Select status">
+                                {field.value === 'new' && 'New'}
+                                {field.value === 'contacted' && 'Contacted'}
+                                {field.value === 'qualified' && 'Qualified'}
+                                {dropdownData?.Status?.find((option: any) => option.key === field.value)?.value}
+                              </SelectValue>
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
