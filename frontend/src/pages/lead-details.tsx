@@ -363,13 +363,7 @@ export default function LeadDetails() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-20" />
-                  ) : (
-                    <Badge className={getStatusBadgeColor(currentStatus)}>
-                      {getStatusDisplayName(currentStatus)}
-                    </Badge>
-                  )}
+                  {/* Status actions can be added here if needed */}
                 </div>
               </div>
               <div className="flex items-center space-x-2 mt-4">
