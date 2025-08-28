@@ -509,7 +509,7 @@ export default function AddLead() {
                           <Globe className="w-4 h-4" />
                           <span>Preferred Country</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select country" />
