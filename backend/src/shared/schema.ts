@@ -140,7 +140,7 @@ export type InsertAdmission = z.infer<typeof insertAdmissionSchema>;
 export const activities = mysqlTable("activities", {
   id: int("id").primaryKey().autoincrement(),
   entityType: text("entity_type").notNull(), // lead, student, application, admission
-  entityId: int("entity_id").notNull(),
+  entityId: varchar("entity_id", { length: 255 }).notNull(), // supports both string UUIDs and number IDs
   activityType: text("activity_type").notNull(), // created, updated, status_changed, comment, deleted, converted, application_created, admission_created
   title: text("title").notNull(),
   description: text("description"),
