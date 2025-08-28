@@ -49,7 +49,7 @@ export class ActivityService {
     try {
       await ActivityModel.create({
         entityType,
-        entityId,
+        entityId: String(entityId), // Convert to string for consistency
         activityType,
         title,
         description,
