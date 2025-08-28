@@ -20,17 +20,24 @@ export const users = mysqlTable("users", {
 });
 
 export const leads = mysqlTable("leads", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
+  city: text("city"),
   country: text("country"),
   program: text("program"),
   source: text("source"),
   status: text("status").notNull().default("new"),
   expectation: text("expectation"),
   type: text("type"),
+  studyLevel: text("study_level"),
+  studyPlan: text("study_plan"),
+  elt: text("elt"),
   lostReason: text("lost_reason"),
+  budget: text("budget"),
+  timeline: text("timeline"),
+  notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -38,7 +45,7 @@ export const leads = mysqlTable("leads", {
 
 export const students = mysqlTable("students", {
   id: int("id").primaryKey().autoincrement(),
-  leadId: int("lead_id"),
+  leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
