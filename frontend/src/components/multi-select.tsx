@@ -70,7 +70,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-2" style={{ width: 'var(--radix-popover-trigger-width)' }}>
-        <div className="max-h-64 overflow-auto space-y-1">
+        <div className="max-h-64 overflow-auto space-y-1" style={{ touchAction: 'pan-y' }}>
           {options.map((option) => (
             <div
               key={option.value}
