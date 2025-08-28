@@ -290,11 +290,13 @@ export default function Leads() {
             
             <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
           </div>
-          
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Lead
-          </Button>
+
+          <Link href="/leads/add">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Lead
+            </Button>
+          </Link>
         </div>
 
         {/* Leads Overview Cards */}
