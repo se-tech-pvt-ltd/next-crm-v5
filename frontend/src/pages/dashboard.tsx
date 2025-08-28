@@ -526,3 +526,11 @@ function DashboardContent() {
     </Layout>
   );
 }
+
+export default function Dashboard() {
+  return (
+    <DashboardErrorBoundary>
+      <DashboardContent />
+    </DashboardErrorBoundary>
+  );
+}
