@@ -7,18 +7,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Layout } from '@/components/layout';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { ResizeObserverErrorBoundary, LayoutSafeWrapper } from '@/lib/error-boundary';
-import { 
-  Users, 
-  GraduationCap, 
-  Trophy, 
+import {
+  Users,
+  GraduationCap,
+  Trophy,
   TrendingUp,
   UserPlus,
   Calendar,
   Edit,
   ArrowRight,
-  Clock
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
 import { DashboardMetrics, PipelineData, Activity } from '@/lib/types';
+import React from 'react';
 
 export default function Dashboard() {
   const { data: leads, isLoading: leadsLoading } = useQuery({
