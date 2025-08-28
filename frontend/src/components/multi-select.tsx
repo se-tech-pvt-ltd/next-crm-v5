@@ -90,8 +90,6 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
             scrollbarWidth: 'thin',
             scrollbarColor: 'rgb(203 213 225) transparent'
           }}
-          onTouchStart={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
         >
           {options.map((option) => (
             <div
@@ -101,11 +99,9 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select it
                 value.includes(option.value) && "bg-accent text-accent-foreground"
               )}
               onClick={(e) => {
-                e.preventDefault();
                 e.stopPropagation();
                 handleSelect(option.value);
               }}
-              onMouseDown={(e) => e.preventDefault()}
             >
               <Check
                 className={cn(
