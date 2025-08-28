@@ -8,12 +8,13 @@ export class ActivityModel {
     return activity;
   }
 
-  static async findByEntity(entityType: string, entityId: number): Promise<Activity[]> {
+  static async findByEntity(entityType: string, entityId: string | number): Promise<Activity[]> {
+    const entityIdStr = String(entityId); // Convert to string for consistency
     return db.select().from(activities)
       .where(
         and(
           eq(activities.entityType, entityType),
-          eq(activities.entityId, entityId)
+          eq(activities.entityId, entityIdStr)
         )
       )
       .orderBy(desc(activities.createdAt));
@@ -35,17 +36,20 @@ export class ActivityModel {
   }
 
   static async transferActivities(
-    fromEntityType: string, 
-    fromEntityId: number, 
-    toEntityType: string, 
-    toEntityId: number
+    fromEntityType: string,
+    fromEntityId: string | number,
+    toEntityType: string,
+    toEntityId: string | number
   ): Promise<void> {
+    const fromEntityIdStr = String(fromEntityId);
+    const toEntityIdStr = String(toEntityId);
+
     // Get all activities from the source entity
     const sourceActivities = await db.select().from(activities)
       .where(
         and(
           eq(activities.entityType, fromEntityType),
-          eq(activities.entityId, fromEntityId)
+          eq(activities.entityId, fromEntityIdStr)
         )
       );
 
@@ -53,7 +57,7 @@ export class ActivityModel {
     for (const activity of sourceActivities) {
       await db.insert(activities).values({
         entityType: toEntityType,
-        entityId: toEntityId,
+        entityId: toEntityIdStr,
         activityType: activity.activityType,
         title: activity.title,
         description: activity.description,
@@ -70,10 +74,10 @@ export class ActivityModel {
     // Add a conversion activity
     await db.insert(activities).values({
       entityType: toEntityType,
-      entityId: toEntityId,
+      entityId: toEntityIdStr,
       activityType: 'converted',
       title: `Converted from ${fromEntityType}`,
-      description: `This record was converted from ${fromEntityType} ID ${fromEntityId}. All previous activities have been preserved.`,
+      description: `This record was converted from ${fromEntityType} ID ${fromEntityIdStr}. All previous activities have been preserved.`,
       userName: "Next Bot",
     });
   }
