@@ -17,6 +17,7 @@ import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Lead, type User } from '@/lib/types';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
@@ -43,6 +44,7 @@ import {
 } from 'lucide-react';
 
 export default function LeadDetails() {
+  const { user: authUser } = useAuth();
   const [match, params] = useRoute('/leads/:id');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -544,7 +546,7 @@ export default function LeadDetails() {
 
           {/* Lead Management Section */}
           <CollapsibleCard
-            persistKey={`lead-details:${params?.id}:lead-information`}
+            persistKey={`lead-details:${authUser?.id || 'anon'}:lead-information`}
             header={
               <CardTitle className="text-sm flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -631,7 +633,7 @@ export default function LeadDetails() {
 
           {/* Academic Interests Section */}
           <CollapsibleCard
-            persistKey={`lead-details:${params?.id}:academic-interests`}
+            persistKey={`lead-details:${authUser?.id || 'anon'}:academic-interests`}
             header={
               <CardTitle className="text-sm flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
