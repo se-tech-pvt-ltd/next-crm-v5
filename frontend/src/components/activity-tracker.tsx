@@ -106,12 +106,23 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   const getActivityColor = (activityType: string) => {
     switch (activityType) {
-      case 'created': return 'bg-green-100 text-green-800';
-      case 'updated': return 'bg-blue-100 text-blue-800';
-      case 'status_changed': return 'bg-orange-100 text-orange-800';
-      case 'comment': return 'bg-purple-100 text-purple-800';
-      case 'deleted': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'created': return 'bg-green-100 text-green-700';
+      case 'updated': return 'bg-blue-100 text-blue-700';
+      case 'status_changed': return 'bg-orange-100 text-orange-700';
+      case 'comment': return 'bg-purple-100 text-purple-700';
+      case 'deleted': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getDotColor = (activityType: string) => {
+    switch (activityType) {
+      case 'created': return 'bg-green-500';
+      case 'updated': return 'bg-blue-500';
+      case 'status_changed': return 'bg-orange-500';
+      case 'comment': return 'bg-purple-500';
+      case 'deleted': return 'bg-red-500';
+      default: return 'bg-gray-400';
     }
   };
 
@@ -226,7 +237,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
         <Separator />
 
         {/* Activities List */}
-        <div className="space-y-4">
+        <div className="space-y-5 pl-1">
           {(activities as Activity[]).length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -238,18 +249,18 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
               const isLast = idx === arr.length - 1;
               const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
               return (
-                <div key={activity.id} className="relative flex gap-4">
+                <div key={activity.id} className="relative flex gap-3">
                   {/* Timeline rail */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white shadow" />
+                  <div className="relative w-5 flex flex-col items-center">
+                    <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(activity.activityType)} ring-2 ring-white shadow mt-2`} />
                     {!isLast && <div className="w-px flex-1 bg-gray-200 mt-1" />}
                   </div>
 
                   {/* Card */}
-                  <div className="flex-1 rounded-lg border bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex-1 rounded-md border border-gray-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
                     {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="h-9 w-9 border">
                           {profileImage ? (
                             <AvatarImage src={profileImage} alt={activity.userName || "User"} />
@@ -259,20 +270,20 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                             </AvatarFallback>
                           )}
                         </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900">{activity.userName || "Unknown User"}</span>
-                            <Badge variant="outline" className={`text-[10px] ${getActivityColor(activity.activityType)} px-2 py-0.5 capitalize`}>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-gray-900 truncate max-w-[14rem] sm:max-w-none">{activity.userName || "Unknown User"}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${getActivityColor(activity.activityType)} capitalize`}>
                               {activity.activityType.replace('_', ' ')}
-                            </Badge>
+                            </span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                             <Clock className="h-3 w-3" />
                             {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
                           </div>
                         </div>
                       </div>
-                      <div className="hidden sm:flex items-center text-gray-400 text-xs gap-1">
+                      <div className="hidden sm:flex items-center text-gray-400 text-xs gap-1 shrink-0">
                         {getActivityIcon(activity.activityType, "h-4 w-4")}
                         <span className="capitalize">{activity.activityType.replace('_', ' ')}</span>
                       </div>
@@ -280,7 +291,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
                     {/* Title */}
                     {activity.title && (
-                      <p className="mt-3 text-sm text-gray-700 font-medium">{activity.title}</p>
+                      <p className="mt-3 text-sm text-gray-800 font-medium">{activity.title}</p>
                     )}
 
                     {/* Description */}
