@@ -150,15 +150,15 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     if (lead) {
       setFormData(prev => ({
         ...prev,
-        // From Lead fields
-        type: lead.type || '',
+        // From Lead fields - map IDs to display values
+        type: mapDropdownToLabels(lead.type, 'Type') || normalizeToText(lead.type),
         name: lead.name || '',
         phone: lead.phone || '',
         email: lead.email || '',
-        source: lead.source || '',
+        source: mapDropdownToLabels(lead.source, 'Source') || normalizeToText(lead.source),
         interestedCountry: mapDropdownToLabels((lead as any).country, 'Interested Country') || normalizeToText((lead as any).country),
-        studyLevel: lead.type || '',
-        studyPlan: normalizeToText((lead as any).program),
+        studyLevel: mapDropdownToLabels(lead.type, 'Type') || normalizeToText(lead.type),
+        studyPlan: mapDropdownToLabels((lead as any).program, 'Program') || normalizeToText((lead as any).program),
         admissionOfficer: lead.createdBy || '',
 
         // Set default expectation from lead
