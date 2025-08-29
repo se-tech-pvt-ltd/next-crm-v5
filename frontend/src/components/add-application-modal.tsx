@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 interface AddApplicationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studentId?: number;
+  studentId?: string;
 }
 
 export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplicationModalProps) {
