@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,14 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpTooltip } from '@/components/help-tooltip';
 import { AddStudentModal } from '@/components/add-student-modal';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter } from 'lucide-react';
+import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Students() {
