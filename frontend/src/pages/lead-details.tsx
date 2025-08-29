@@ -280,6 +280,9 @@ export default function LeadDetails() {
     onSuccess: (updatedLead) => {
       setCurrentStatus(updatedLead.status);
       queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
+      // Refresh only the activity timeline for this lead
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
     onError: (error: any) => {
