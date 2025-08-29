@@ -42,19 +42,32 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
   });
 
   const [formData, setFormData] = useState({
+    // Student status and expectation
+    status: 'Open',
+    expectation: 'High',
+
+    // From Lead (inherited fields)
+    type: '',
     name: '',
-    email: '',
     phone: '',
+    email: '',
+    city: '',
+    source: '',
+    interestedCountry: '',
+    studyLevel: '',
+    studyPlan: '',
+    admissionOfficer: '',
+
+    // Student specific fields
+    counsellor: '',
+    passport: '',
     dateOfBirth: '',
-    nationality: '',
-    passportNumber: '',
-    targetCountry: '',
-    targetProgram: '',
-    targetLevel: '',
-    englishProficiency: '',
-    previousEducation: '',
-    notes: '',
-    status: 'active',
+    address: '',
+    eltTest: '',
+    consultancyFee: 'No',
+    consultancyFeeAttachment: '',
+    scholarship: 'No',
+    scholarshipAttachment: '',
   });
 
   // Helper to normalize lead fields (arrays/JSON strings) into text
