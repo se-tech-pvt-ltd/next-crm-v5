@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
-import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +12,10 @@ import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
+import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Students() {
-  const [, setLocation] = useLocation();
   const [statusFilter, setStatusFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
