@@ -247,7 +247,33 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       }
     }
 
-    convertToStudentMutation.mutate(formData);
+    // Normalize dateOfBirth if provided in MM/DD/YYYY
+    const normalizeDate = (value: string): string => {
+      if (!value) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      const m = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (m) {
+        const mm = m[1].padStart(2, '0');
+        const dd = m[2].padStart(2, '0');
+        const yyyy = m[3];
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      return value;
+    };
+
+    const payload = {
+      ...formData,
+      dateOfBirth: normalizeDate(formData.dateOfBirth),
+    };
+
+    convertToStudentMutation.mutate(payload);
   };
 
   if (!lead) return null;
