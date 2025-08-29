@@ -395,63 +395,60 @@ export default function LeadDetails() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  {/* Status actions can be added here if needed */}
+                  {!isEditing ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditing(true)}
+                        disabled={isLoading}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowConvertModal(true)}
+                        disabled={isLoading || currentStatus === 'converted'}
+                      >
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Convert to Student
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowMarkAsLostModal(true)}
+                        disabled={isLoading || currentStatus === 'lost'}
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Mark as Lost
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={handleSave}
+                        disabled={updateLeadMutation.isPending}
+                      >
+                        <Save className="w-4 h-4 mr-1" />
+                        Save Changes
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditData(lead);
+                        }}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Cancel
+                      </Button>
+                    </>
+                  )}
                 </div>
-              </div>
-              <div className="flex items-center space-x-2 mt-4">
-                {!isEditing ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsEditing(true)}
-                      disabled={isLoading}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowConvertModal(true)}
-                      disabled={isLoading || currentStatus === 'converted'}
-                    >
-                      <UserPlus className="w-4 h-4 mr-1" />
-                      Convert to Student
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowMarkAsLostModal(true)}
-                      disabled={isLoading || currentStatus === 'lost'}
-                    >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Mark as Lost
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={handleSave}
-                      disabled={updateLeadMutation.isPending}
-                    >
-                      <Save className="w-4 h-4 mr-1" />
-                      Save Changes
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditData(lead);
-                      }}
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Cancel
-                    </Button>
-                  </>
-                )}
               </div>
             </CardHeader>
           </Card>
