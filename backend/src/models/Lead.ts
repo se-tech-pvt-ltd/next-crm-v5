@@ -219,6 +219,8 @@ export class LeadModel {
       processedLead.updatedBy = processedLead.createdBy ?? processedLead.counselorId ?? null;
     }
 
+    console.log("[LeadModel.create] Inserting lead:", JSON.stringify({ id: processedLead.id, createdBy: processedLead.createdBy, updatedBy: processedLead.updatedBy, counselorId: processedLead.counselorId }, null, 2));
+
     await db
       .insert(leads)
       .values(processedLead as InsertLead & { id: string });
