@@ -109,11 +109,14 @@ export class LeadController {
     } catch (error) {
       console.error('Lead update error:', error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Invalid data", 
+        return res.status(400).json({
+          message: "Invalid data",
           errors: error.errors,
           details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
         });
+      }
+      if (error instanceof Error && (error as any).code === 'LEAD_CONVERTED') {
+        return res.status(400).json({ message: "Lead has been converted to a student and cannot be edited" });
       }
       res.status(500).json({ message: "Failed to update lead" });
     }
