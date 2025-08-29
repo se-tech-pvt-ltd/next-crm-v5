@@ -93,6 +93,25 @@ export default function StudentDetails() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async (uiStatus: string) => {
+      const response = await apiRequest('PUT', `/api/students/${student?.id}`, { status: mapStatusUiToDb(uiStatus) });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update status');
+      }
+      return response.json();
+    },
+    onSuccess: (updated) => {
+      setCurrentStatus(updated.status);
+      queryClient.setQueryData(['/api/students', params?.id], updated);
+      toast({ title: 'Status updated', description: `Student status set to ${mapStatusDbToUi(updated.status)}` });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
+  });
+
   const handleSaveChanges = () => {
     const payload: any = { ...editData };
     if (payload.status) payload.status = mapStatusUiToDb(payload.status as any);
