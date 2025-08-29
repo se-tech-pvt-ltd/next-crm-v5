@@ -163,6 +163,30 @@ export default function StudentDetails() {
       helpText="View and manage student details."
     >
       <div className="text-xs md:text-[12px]">
+        {!isLoading && (
+          <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
+            <div className="flex items-center justify-between">
+              {(['Open','Closed','Enrolled'] as const).map((label) => {
+                const active = mapStatusDbToUi(currentStatus || student?.status) === label;
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => {
+                      if (!active && !updateStatusMutation.isPending) updateStatusMutation.mutate(label);
+                    }}
+                    className={`text-[11px] font-medium px-3 py-1.5 rounded-md border transition-colors ${
+                      active ? 'bg-green-100 border-green-400 text-green-700' : 'bg-white border-gray-300 text-gray-600 hover:border-green-400 hover:text-green-700'
+                    }`}
+                    aria-pressed={active}
+                  >
+                    {label.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
           {/* Main Content */}
           <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
