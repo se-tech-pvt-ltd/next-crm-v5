@@ -310,14 +310,6 @@ export default function StudentDetails() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
-                        <span>Academic Background</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.academicBackground || 'Not provided'}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
                         <span>English Proficiency</span>
                       </Label>
                       <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
@@ -330,14 +322,6 @@ export default function StudentDetails() {
                       </Label>
                       <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
                         {student?.targetCountry || 'Not specified'}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Target Program</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.targetProgram || 'Not specified'}
                       </div>
                     </div>
                   </div>
