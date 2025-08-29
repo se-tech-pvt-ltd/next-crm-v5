@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,17 +9,18 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpTooltip } from '@/components/help-tooltip';
 import { AddStudentModal } from '@/components/add-student-modal';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter } from 'lucide-react';
+import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Students() {
+  const [, setLocation] = useLocation();
+  const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
@@ -26,6 +29,13 @@ export default function Students() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleAddStudentClick = () => {
+    setIsNavigating(true);
+    setIsAddStudentModalOpen(true);
+    // Reset navigation state after opening modal
+    setTimeout(() => setIsNavigating(false), 200);
+  };
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -59,7 +69,7 @@ export default function Students() {
   }) || [];
 
   // Get unique countries for filter dropdown
-  const uniqueCountries = students ? 
+  const uniqueCountries = students ?
     students.reduce((countries: string[], student) => {
       if (student.targetCountry && !countries.includes(student.targetCountry)) {
         countries.push(student.targetCountry);
@@ -100,108 +110,65 @@ export default function Students() {
   };
 
   return (
-    <Layout 
-      title="Students" 
-      subtitle="Manage your active students"
-      helpText="Students are converted leads who are actively pursuing study abroad programs. Track their applications and admissions progress."
+    <Layout
+      title="Students"
+      subtitle="Manage and track your active students"
     >
-      <div className="space-y-6">
-        {/* Header Actions */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="applied">Applied</SelectItem>
-                <SelectItem value="admitted">Admitted</SelectItem>
-                <SelectItem value="enrolled">Enrolled</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {uniqueCountries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <HelpTooltip content="Filter students by status and target country. Active students are those currently working on applications." />
-          </div>
-          
-          <Button onClick={() => setIsAddStudentModalOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Student
-          </Button>
-        </div>
-
+      <div className="space-y-3">
         {/* Students Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="w-4 h-4 text-gray-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Users className="w-3 h-3 text-gray-500" />
                 Total Students
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : students?.length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-green-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <UserCheck className="w-3 h-3 text-green-500" />
                 Active
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : students?.filter(s => s.status === 'active').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-green-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'active').length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Target className="w-4 h-4 text-blue-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Target className="w-3 h-3 text-blue-500" />
                 Applied
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : students?.filter(s => s.status === 'applied').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-blue-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'applied').length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <TrendingUp className="w-3 h-3 text-purple-500" />
                 Admitted
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : students?.filter(s => s.status === 'admitted').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-purple-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'admitted').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -209,116 +176,224 @@ export default function Students() {
 
         {/* Students Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Students List</CardTitle>
+          <CardHeader className="p-3 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-3 h-3 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="applied">Applied</SelectItem>
+                    <SelectItem value="admitted">Admitted</SelectItem>
+                    <SelectItem value="enrolled">Enrolled</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={countryFilter} onValueChange={setCountryFilter}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Filter by country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {uniqueCountries.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Clear Filters */}
+                {(statusFilter !== 'all' || countryFilter !== 'all') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setCountryFilter('all');
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                  className="ml-2"
+                >
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
+                    onClick={handleAddStudentClick}
+                    disabled={isNavigating}
+                    title="Add New Student"
+                  >
+                    {isNavigating ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                      >
+                        <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ rotate: 0 }}
+                        whileHover={{ rotate: 90 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </motion.div>
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
                   </div>
                 ))}
               </div>
             ) : filteredStudents.length === 0 ? (
-              <div className="text-center py-8">
-                <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="text-center py-4">
+                <GraduationCap className="mx-auto h-10 w-10 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No students found</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all' 
+                  {statusFilter === 'all'
                     ? "Students will appear here when leads are converted."
                     : `No students with status "${statusFilter}".`
                   }
                 </p>
-                <div className="mt-6">
-                  <Button onClick={() => setIsAddStudentModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Student
-                  </Button>
-                </div>
+                <motion.div
+                  className="mt-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      className="h-8"
+                      onClick={handleAddStudentClick}
+                      disabled={isNavigating}
+                    >
+                      {isNavigating ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                          className="w-3 h-3 mr-1"
+                        >
+                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ rotate: 0 }}
+                          animate={{ rotate: 0 }}
+                          whileHover={{ rotate: 90 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                        </motion.div>
+                      )}
+                      <span className="text-sm">
+                        {isNavigating ? 'Opening...' : 'Add Student'}
+                      </span>
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </div>
             ) : (
-              <Table>
+              <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Target Program</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Academic Background</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Target Program</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Academic Background</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredStudents.map((student) => (
-                    <TableRow 
+                    <TableRow
                       key={student.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => {
-                        setSelectedStudentId(student.id);
-                        setIsProfileModalOpen(true);
-                      }}
+                      onClick={() => handleViewProfile(student.id)}
                     >
-                      <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium p-2 text-xs">{student.name}</TableCell>
+                      <TableCell className="p-2 text-xs">
                         <div className="space-y-1">
-                          <div className="flex items-center text-sm text-gray-500">
+                          <div className="flex items-center text-xs">
                             <Mail className="w-3 h-3 mr-1" />
                             {student.email}
                           </div>
                           {student.phone && (
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-xs text-gray-500">
                               <Phone className="w-3 h-3 mr-1" />
                               {student.phone}
                             </div>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         <div className="space-y-1">
                           {student.targetCountry && (
-                            <div className="flex items-center text-sm">
+                            <div className="flex items-center text-xs">
                               <Globe className="w-3 h-3 mr-1" />
                               {student.targetCountry}
                             </div>
                           )}
                           {student.targetProgram && (
-                            <div className="flex items-center text-sm">
-                              <GraduationCap className="w-3 h-3 mr-1" />
+                            <div className="flex items-center text-xs text-gray-500">
+                              <BookOpen className="w-3 h-3 mr-1" />
                               {student.targetProgram}
                             </div>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(student.status || 'active')}>
                           {student.status || 'active'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">
+                      <TableCell className="p-2 text-xs">
+                        <span className="text-xs text-gray-500">
                           {student.academicBackground || 'Not specified'}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(student.createdAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
+                            <Button
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

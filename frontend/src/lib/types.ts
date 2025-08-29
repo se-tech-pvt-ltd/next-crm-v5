@@ -21,12 +21,16 @@ export interface Lead {
   name: string;
   email: string;
   phone: string | null;
+  city: string | null;
   country: string | null;
   program: string | null;
   source: string | null;
   status: string;
   expectation: string | null;
   type: string | null;
+  studyLevel: string | null;
+  studyPlan: string | null;
+  elt: string | null;
   lostReason: string | null;
   budget: string | null;
   timeline: string | null;
@@ -128,12 +132,16 @@ export const insertLeadSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().optional(),
+  city: z.string().optional(),
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
   source: z.string().optional(),
   status: z.string().default("new"),
   expectation: z.string().optional(),
   type: z.string().optional(),
+  studyLevel: z.string().optional(),
+  studyPlan: z.string().optional(),
+  elt: z.string().optional(),
   lostReason: z.string().optional(),
   budget: z.string().optional(),
   timeline: z.string().optional(),
