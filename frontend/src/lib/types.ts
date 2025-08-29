@@ -43,7 +43,7 @@ export interface Lead {
 }
 
 export interface Student {
-  id: number;
+  id: string;
   leadId: string | null;
   name: string;
   email: string;
@@ -65,7 +65,7 @@ export interface Student {
 
 export interface Application {
   id: number;
-  studentId: number;
+  studentId: string;
   university: string;
   program: string;
   degree: string | null;
@@ -82,7 +82,7 @@ export interface Application {
 export interface Admission {
   id: number;
   applicationId: number;
-  studentId: number;
+  studentId: string;
   university: string;
   program: string;
   decision: string;
@@ -168,7 +168,7 @@ export const insertStudentSchema = z.object({
 });
 
 export const insertApplicationSchema = z.object({
-  studentId: z.number(),
+  studentId: z.string(),
   university: z.string().min(1, "University is required"),
   program: z.string().min(1, "Program is required"),
   degree: z.string().optional(),
@@ -182,7 +182,7 @@ export const insertApplicationSchema = z.object({
 
 export const insertAdmissionSchema = z.object({
   applicationId: z.number(),
-  studentId: z.number(),
+  studentId: z.string(),
   university: z.string().min(1, "University is required"),
   program: z.string().min(1, "Program is required"),
   decision: z.string().min(1, "Decision is required"),
