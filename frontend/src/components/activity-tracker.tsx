@@ -17,6 +17,7 @@ interface ActivityTrackerProps {
   entityType: string;
   entityId: string | number;
   entityName?: string;
+  initialInfo?: string;
 }
 
 const ACTIVITY_TYPES = [
@@ -29,7 +30,7 @@ const ACTIVITY_TYPES = [
   { value: 'meeting', label: 'Meeting', icon: Users },
 ];
 
-export function ActivityTracker({ entityType, entityId, entityName }: ActivityTrackerProps) {
+export function ActivityTracker({ entityType, entityId, entityName, initialInfo }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
   const [isAddingActivity, setIsAddingActivity] = useState(false);
@@ -263,7 +264,23 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
         {/* Activities List */}
         <div className="space-y-5 pl-1">
-          {(activities as Activity[]).length === 0 ? (
+          {/* Initial Info from Additional Information panel */}
+          {initialInfo && initialInfo.trim().length > 0 && (
+            <div className="relative flex gap-3">
+              <div className="relative w-5 flex flex-col items-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white shadow mt-2" />
+                {(activities as Activity[]).length > 0 && <div className="w-px flex-1 bg-gray-200 mt-1" />}
+              </div>
+              <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm">
+                <div className="space-y-1.5">
+                  <div className="text-xs font-semibold text-gray-900">Initial info</div>
+                  <div className="pt-0.5 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">{initialInfo}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(!activities || (activities as Activity[]).length === 0) && !(initialInfo && initialInfo.trim().length > 0) ? (
             <div className="text-center py-8 text-gray-500">
               <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>No activities yet</p>
