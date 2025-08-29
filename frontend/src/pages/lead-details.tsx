@@ -676,7 +676,7 @@ export default function LeadDetails() {
                           .map((opt: any) => opt.value);
                         return labels.length ? (
                           labels.map((label: string) => (
-                            <span key={label} className="text-primary text-xs">
+                            <span key={label} className="px-2 py-0.5 rounded-full border border-red-500 text-red-600 text-xs">
                               {label}
                             </span>
                           ))
