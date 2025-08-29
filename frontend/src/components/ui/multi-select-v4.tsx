@@ -69,6 +69,7 @@ export function MultiSelectV4({
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     setIsOpen(prev => !prev);
   };
 
