@@ -68,7 +68,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     }
   });
 
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     // Student status and expectation
     status: 'Open',
     expectation: 'High',
@@ -95,7 +95,9 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     consultancyFeeAttachment: '',
     scholarship: 'No',
     scholarshipAttachment: '',
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   // Helper to normalize lead fields (arrays/JSON strings) into text
   const normalizeToText = (value: unknown): string => {
