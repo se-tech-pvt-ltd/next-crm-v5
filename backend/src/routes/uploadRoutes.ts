@@ -34,7 +34,7 @@ router.post('/file', upload.single('file'), (req, res) => {
 });
 
 // Upload profile picture (existing)
-router.post('/profile-picture', upload.single('profilePicture'), (req, res) => {
+router.post('/profile-picture', uploadProfilePicture.single('profilePicture'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 
