@@ -22,7 +22,7 @@ interface AddAdmissionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   applicationId?: number;
-  studentId?: number;
+  studentId?: string;
 }
 
 export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId }: AddAdmissionModalProps) {
