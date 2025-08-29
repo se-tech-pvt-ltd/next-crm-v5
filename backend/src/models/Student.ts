@@ -20,11 +20,19 @@ export class StudentModel {
   }
 
   static async create(studentData: InsertStudent): Promise<Student> {
-    const result = await db
-      .insert(students)
-      .values(studentData);
+    const result: any = await db.insert(students).values(studentData);
+    const insertIdRaw = (result && (result.insertId ?? result[0]?.insertId));
+    const insertId = typeof insertIdRaw === 'number' ? insertIdRaw : Number(insertIdRaw);
 
-    const insertId = Number(result.insertId);
+    if (!Number.isFinite(insertId)) {
+      // Fallback: fetch the most recent matching record
+      const rows = await db.select().from(students)
+        .where(eq(students.email, studentData.email))
+        .orderBy(desc(students.createdAt));
+      if (rows.length > 0) return rows[0];
+      throw new Error("Failed to create student - insertId not available");
+    }
+
     const createdStudent = await StudentModel.findById(insertId);
 
     if (!createdStudent) {
@@ -48,7 +56,8 @@ export class StudentModel {
   }
 
   static async delete(id: number): Promise<boolean> {
-    const result = await db.delete(students).where(eq(students.id, id));
-    return (result.rowCount || 0) > 0;
+    const result: any = await db.delete(students).where(eq(students.id, id));
+    const affected = result?.affectedRows ?? result?.rowCount ?? 0;
+    return affected > 0;
   }
 }
