@@ -258,64 +258,26 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
                   {/* Card */}
                   <div className="flex-1 rounded-md border border-gray-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-9 w-9 border">
-                          {profileImage ? (
-                            <AvatarImage src={profileImage} alt={activity.userName || "User"} />
-                          ) : (
-                            <AvatarFallback className="bg-blue-50 text-blue-600">
-                              {activity.userName === "Next Bot" ? <Bot className="h-5 w-5" /> : <UserIcon className="h-5 w-5" />}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-gray-900 truncate max-w-[14rem] sm:max-w-none">{activity.userName || "Unknown User"}</span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${getActivityColor(activity.activityType)} capitalize`}>
-                              {activity.activityType.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
-                            <Clock className="h-3 w-3" />
-                            {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
-                          </div>
+                    <div className="space-y-1.5">
+                      {/* Line 1: User */}
+                      <div className="text-sm font-semibold text-gray-900">
+                        {activity.userName || "Unknown User"}
+                      </div>
+                      {/* Line 2: Type */}
+                      <div className="text-xs text-gray-700 capitalize">
+                        {activity.activityType.replace('_', ' ')}
+                      </div>
+                      {/* Line 3: Date */}
+                      <div className="text-xs text-gray-500">
+                        {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
+                      </div>
+                      {/* Line 4: Message */}
+                      {(activity.description || activity.title) && (
+                        <div className="pt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                          {activity.description || activity.title}
                         </div>
-                      </div>
-                      <div className="hidden sm:flex items-center text-gray-400 text-xs gap-1 shrink-0">
-                        {getActivityIcon(activity.activityType, "h-4 w-4")}
-                        <span className="capitalize">{activity.activityType.replace('_', ' ')}</span>
-                      </div>
+                      )}
                     </div>
-
-                    {/* Title */}
-                    {activity.title && (
-                      <p className="mt-3 text-sm text-gray-800 font-medium">{activity.title}</p>
-                    )}
-
-                    {/* Description */}
-                    {activity.description && (
-                      <p className="mt-2 text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">{activity.description}</p>
-                    )}
-
-                    {/* Field changes */}
-                    {(activity.oldValue || activity.newValue) && (
-                      <div className="mt-3">
-                        {activity.fieldName && (
-                          <div className="text-xs text-gray-500 mb-1">{activity.fieldName}</div>
-                        )}
-                        <div className="flex items-center gap-2 text-xs">
-                          {activity.oldValue && (
-                            <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 line-through">{activity.oldValue}</span>
-                          )}
-                          {activity.oldValue && activity.newValue && <span className="text-gray-400">→</span>}
-                          {activity.newValue && (
-                            <span className="px-2 py-0.5 rounded bg-green-50 text-green-700">{activity.newValue}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               );
