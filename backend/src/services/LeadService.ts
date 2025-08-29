@@ -58,6 +58,15 @@ export class LeadService {
   }
 
   static async updateLead(id: string, updates: Partial<InsertLead>, currentUserId?: string): Promise<Lead | undefined> {
+    // Block edits if lead already converted to student
+    const converted = await db.select().from(students).where(eq(students.leadId, id));
+    if (converted.length > 0) {
+      const err = new Error('LEAD_CONVERTED');
+      // @ts-expect-error attach code
+      (err as any).code = 'LEAD_CONVERTED';
+      throw err;
+    }
+
     // Get the current lead to track changes
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
