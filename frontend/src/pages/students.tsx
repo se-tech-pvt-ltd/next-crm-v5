@@ -87,8 +87,10 @@ export default function Students() {
   };
 
   const handleViewProfile = (studentId: string) => {
-    setSelectedStudentId(studentId);
-    setIsProfileModalOpen(true);
+    // Navigate to full-page student details (mirror of lead details)
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // @ts-ignore
+    import('wouter').then(mod => mod.setLocation(`/students/${studentId}`));
   };
 
   const handleCreateApplication = (studentId: string) => {
