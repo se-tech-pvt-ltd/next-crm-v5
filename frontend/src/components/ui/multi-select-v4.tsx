@@ -30,7 +30,8 @@ export function MultiSelectV4({
   options,
   className,
   emptyMessage = "No options found.",
-  maxDisplayItems = 3
+  maxDisplayItems = 3,
+  disabled = false
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
