@@ -394,7 +394,7 @@ export default function LeadDetails() {
       {/* Status Progress Bar */}
       {!isLoading && <StatusProgressBar />}
 
-      <div className="flex gap-6 min-h-[calc(100vh-12rem)] w-full">
+      <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
         <div className="flex-1 flex flex-col space-y-6 min-w-0 w-full">
           {/* Personal Information Section */}
@@ -790,7 +790,7 @@ export default function LeadDetails() {
         </div>
 
         {/* Activity Sidebar */}
-        <div className="w-80 flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
+        <div className="w-96 flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Activity Timeline
