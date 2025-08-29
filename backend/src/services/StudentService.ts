@@ -116,8 +116,11 @@ export class StudentService {
   }
 
   static async convertFromLead(leadId: string, studentData: InsertStudent): Promise<Student> {
-    // Ensure the new student is linked to the lead
-    const student = await StudentModel.create({ ...(studentData as any), leadId } as any);
+    console.log('[StudentService.convertFromLead] leadId:', leadId);
+    const payload = { ...(studentData as any), leadId } as any;
+    console.log('[StudentService.convertFromLead] payload:', JSON.stringify(payload));
+
+    const student = await StudentModel.create(payload);
 
     // Transfer activities from lead to student
     await ActivityService.transferActivities('lead', leadId, 'student', student.id);
