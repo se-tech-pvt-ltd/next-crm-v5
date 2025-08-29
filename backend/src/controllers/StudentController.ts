@@ -37,6 +37,21 @@ export class StudentController {
     }
   }
 
+  static async getStudentByLeadId(req: Request, res: Response) {
+    try {
+      const leadId = req.params.leadId;
+      const currentUser = StudentController.getCurrentUser();
+      const student = await StudentService.getStudentByLeadId(leadId, currentUser.id, currentUser.role);
+      if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      res.json(student);
+    } catch (error) {
+      console.error("Get student by leadId error:", error);
+      res.status(500).json({ message: "Failed to fetch student" });
+    }
+  }
+
   static async createStudent(req: Request, res: Response) {
     try {
       const validatedData = insertStudentSchema.parse(req.body);
