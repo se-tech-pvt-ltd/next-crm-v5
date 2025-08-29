@@ -114,7 +114,7 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 export const insertStudentSchema = createInsertSchema(students).omit({
   createdAt: true,
   updatedAt: true,
-});
+}).partial({ id: true });
 
 export const insertApplicationSchema = createInsertSchema(applications).omit({
   id: true,
