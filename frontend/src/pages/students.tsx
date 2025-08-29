@@ -241,45 +241,6 @@ export default function Students() {
                     : `No students with status "${statusFilter}".`
                   }
                 </p>
-                <motion.div
-                  className="mt-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      className="h-8"
-                      onClick={handleAddStudentClick}
-                      disabled={isNavigating}
-                    >
-                      {isNavigating ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                          className="w-3 h-3 mr-1"
-                        >
-                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ rotate: 0 }}
-                          animate={{ rotate: 0 }}
-                          whileHover={{ rotate: 90 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                        </motion.div>
-                      )}
-                      <span className="text-sm">
-                        {isNavigating ? 'Opening...' : 'Add Student'}
-                      </span>
-                    </Button>
-                  </motion.div>
-                </motion.div>
               </div>
             ) : (
               <Table className="text-xs">
