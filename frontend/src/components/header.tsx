@@ -27,11 +27,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-2">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-1">
         <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{title}</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{title}</h2>
               {subtitle && (
                 <p className="text-xs text-gray-500 line-clamp-1">{subtitle}</p>
               )}
