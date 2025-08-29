@@ -69,7 +69,9 @@ export class LeadController {
       const currentUser = LeadController.getCurrentUser();
       const validatedData = insertLeadSchema.parse(req.body);
       console.log("Validated data:", JSON.stringify(validatedData, null, 2));
-      const lead = await LeadService.createLead({ ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any, currentUser.id);
+      const payload = { ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any;
+      console.log("Create payload (with audit fields):", JSON.stringify(payload, null, 2));
+      const lead = await LeadService.createLead(payload, currentUser.id);
       console.log("Created lead:", JSON.stringify(lead, null, 2));
       res.status(201).json(lead);
     } catch (error) {
