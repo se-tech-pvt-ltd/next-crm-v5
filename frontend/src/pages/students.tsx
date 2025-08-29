@@ -14,9 +14,11 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useLocation } from 'wouter';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [, setLocation] = useLocation();
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -87,10 +89,7 @@ export default function Students() {
   };
 
   const handleViewProfile = (studentId: string) => {
-    // Navigate to full-page student details (mirror of lead details)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    // @ts-ignore
-    import('wouter').then(mod => mod.setLocation(`/students/${studentId}`));
+    setLocation(`/students/${studentId}`);
   };
 
   const handleCreateApplication = (studentId: string) => {
