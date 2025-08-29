@@ -15,6 +15,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Award, Mail, Phone, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function StudentDetails() {
   const [match, params] = useRoute('/students/:id');
@@ -50,6 +51,28 @@ export default function StudentDetails() {
     }
   }, [student]);
 
+  const mapStatusDbToUi = (s?: string | null) => {
+    if (!s) return 'Open';
+    if (s.toLowerCase() === 'active') return 'Open';
+    if (s.toLowerCase() === 'inactive' || s.toLowerCase() === 'closed') return 'Closed';
+    if (s.toLowerCase() === 'enrolled') return 'Enrolled';
+    return s;
+  };
+  const mapStatusUiToDb = (s?: string | null) => {
+    if (!s) return undefined;
+    if (s === 'Open') return 'active';
+    if (s === 'Closed') return 'inactive';
+    if (s === 'Enrolled') return 'enrolled';
+    return String(s).toLowerCase();
+  };
+  const boolToUi = (b?: boolean | null) => (b ? 'Yes' : 'No');
+  const uiToBool = (s: string) => ['yes', 'true', '1', 'on'].includes(String(s).toLowerCase());
+  const getCounselorName = (id?: string | null) => {
+    const list = (users as any[]) || [];
+    const u = list.find((u: User) => u.id === id);
+    return u ? `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email : 'Unassigned';
+  };
+
   const updateStudentMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => {
       const response = await apiRequest('PUT', `/api/students/${student?.id}`, data);
@@ -71,7 +94,9 @@ export default function StudentDetails() {
   });
 
   const handleSaveChanges = () => {
-    updateStudentMutation.mutate(editData);
+    const payload: any = { ...editData };
+    if (payload.status) payload.status = mapStatusUiToDb(payload.status as any);
+    updateStudentMutation.mutate(payload);
   };
 
   if (!match) {
@@ -157,15 +182,6 @@ export default function StudentDetails() {
                         >
                           <Plus className="w-4 h-4 mr-1" />
                           Add Application
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsAddAdmissionOpen(true)}
-                          disabled={isLoading}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Add Admission
                         </Button>
                       </>
                     ) : (
@@ -267,6 +283,178 @@ export default function StudentDetails() {
                         disabled={!isEditing}
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
+                    </div>
+
+                    {/* Status */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Status</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={mapStatusDbToUi((editData.status as any) || student?.status)}
+                          onValueChange={(v) => setEditData({ ...editData, status: v as any })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Open">Open</SelectItem>
+                            <SelectItem value="Closed">Closed</SelectItem>
+                            <SelectItem value="Enrolled">Enrolled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={mapStatusDbToUi(student?.status)} />
+                      )}
+                    </div>
+
+                    {/* Expectation */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Expectation</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.expectation as any) || student?.expectation || 'High'}
+                          onValueChange={(v) => setEditData({ ...editData, expectation: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select expectation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Average">Average</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
+                      )}
+                    </div>
+
+                    {/* Counsellor */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Counsellor</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={editData.counselorId || (student?.counselorId || '')}
+                          onValueChange={(v) => setEditData({ ...editData, counselorId: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select counsellor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.isArray(users) && (users as any[]).map((u: User) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {(u.firstName || '') + ' ' + (u.lastName || '')} ({u.email})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={getCounselorName(student?.counselorId)} />
+                      )}
+                    </div>
+
+                    {/* Passport */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Passport</span>
+                      </Label>
+                      <Input
+                        value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
+                        onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* Address */}
+                    <div className="space-y-2 lg:col-span-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Address</span>
+                      </Label>
+                      <Input
+                        value={isEditing ? (editData.address || '') : (student?.address || '')}
+                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* ELT Test */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>ELT Test</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.eltTest as any) || student?.eltTest || ''}
+                          onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select test" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="IELTS">IELTS</SelectItem>
+                            <SelectItem value="PTE">PTE</SelectItem>
+                            <SelectItem value="OIDI">OIDI</SelectItem>
+                            <SelectItem value="Toefl">Toefl</SelectItem>
+                            <SelectItem value="Passwords">Passwords</SelectItem>
+                            <SelectItem value="No Test">No Test</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
+                      )}
+                    </div>
+
+                    {/* Consultancy Fee */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Consultancy Fee</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={boolToUi(editData.consultancyFree ?? student?.consultancyFree ?? false)}
+                          onValueChange={(v) => setEditData({ ...editData, consultancyFree: uiToBool(v) })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
+                      )}
+                    </div>
+
+                    {/* Scholarship */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Scholarship</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={boolToUi(editData.scholarship ?? student?.scholarship ?? false)}
+                          onValueChange={(v) => setEditData({ ...editData, scholarship: uiToBool(v) })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
+                      )}
                     </div>
 
                     {/* Notes */}
