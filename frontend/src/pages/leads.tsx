@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
-import { HelpTooltip } from '@/components/help-tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { getStatusColor } from '@/lib/utils';
@@ -404,12 +403,14 @@ export default function Leads() {
                 <motion.div
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
                   className="ml-2"
                 >
                   <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
                     onClick={handleAddLeadClick}
                     disabled={isNavigating}
                     title="Add New Lead"
@@ -432,7 +433,6 @@ export default function Leads() {
                     )}
                   </Button>
                 </motion.div>
-                <HelpTooltip content="Use filters to view leads by status, source, creation date range, and activity. Convert qualified leads to students when they're ready to proceed." />
               </div>
             </div>
           </CardHeader>
