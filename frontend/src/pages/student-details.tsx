@@ -138,6 +138,16 @@ export default function StudentDetails() {
                   <div className="flex items-center space-x-2">
                     {!isEditing ? (
                       <>
+                        {student?.leadId && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLocation(`/leads/${student.leadId}`)}
+                            disabled={isLoading}
+                          >
+                            View Lead
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
