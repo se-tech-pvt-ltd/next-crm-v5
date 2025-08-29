@@ -21,12 +21,16 @@ export interface Lead {
   name: string;
   email: string;
   phone: string | null;
+  city: string | null;
   country: string | null;
   program: string | null;
   source: string | null;
   status: string;
   expectation: string | null;
   type: string | null;
+  studyLevel: string | null;
+  studyPlan: string | null;
+  elt: string | null;
   lostReason: string | null;
   budget: string | null;
   timeline: string | null;
