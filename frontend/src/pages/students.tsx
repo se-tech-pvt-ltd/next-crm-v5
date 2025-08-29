@@ -335,11 +335,6 @@ export default function Students() {
         onOpenChange={setIsAddApplicationModalOpen}
         studentId={selectedStudentId || undefined}
       />
-      <StudentProfileModal 
-        open={isProfileModalOpen}
-        onOpenChange={setIsProfileModalOpen}
-        studentId={selectedStudentId}
-      />
     </Layout>
   );
 }
