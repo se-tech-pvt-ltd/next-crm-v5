@@ -12,7 +12,7 @@ export class AdmissionModel {
     return await db.select().from(admissions).orderBy(desc(admissions.createdAt));
   }
 
-  static async findByStudent(studentId: number): Promise<Admission[]> {
+  static async findByStudent(studentId: string): Promise<Admission[]> {
     return await db.select().from(admissions)
       .where(eq(admissions.studentId, studentId))
       .orderBy(desc(admissions.createdAt));
