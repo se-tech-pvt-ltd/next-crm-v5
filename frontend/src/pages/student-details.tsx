@@ -86,6 +86,7 @@ export default function StudentDetails() {
       toast({ title: 'Success', description: 'Student updated successfully.' });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       queryClient.setQueryData(['/api/students', params?.id], updated);
+      setCurrentStatus(updated.status);
       setIsEditing(false);
     },
     onError: (error: Error) => {
