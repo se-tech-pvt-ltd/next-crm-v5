@@ -1,5 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../config/database.js";
+import { eq, desc } from "drizzle-orm";
 import { students, type Student, type InsertStudent } from "../shared/schema.js";
 
 export class StudentModel {

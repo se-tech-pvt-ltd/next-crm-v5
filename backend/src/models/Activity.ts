@@ -1,5 +1,6 @@
 import { eq, desc, and } from "drizzle-orm";
 import { db } from "../config/database.js";
+import { eq, and, desc } from "drizzle-orm";
 import { activities, type Activity, type InsertActivity } from "../shared/schema.js";
 
 export class ActivityModel {
