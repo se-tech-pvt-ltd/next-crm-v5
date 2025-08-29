@@ -150,13 +150,6 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   return (
     <div className="space-y-4 p-4">
-        {/* Debug Info */}
-        <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-          Entity: {entityType}/{entityId} | Activities: {activities.length}
-          <Button size="sm" variant="ghost" onClick={() => refetch()} className="ml-2 h-5 px-2">
-            Refresh
-          </Button>
-        </div>
 
         {/* Add Activity Section with Blue Gradient Background */}
         <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
