@@ -7,7 +7,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { HelpTooltipSimple as HelpTooltip } from './help-tooltip-simple';
 import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
-import { AddStudentModal } from './add-student-modal';
 import { AddApplicationModal } from './add-application-modal';
 import { AddAdmissionModal } from './add-admission-modal';
 
@@ -20,7 +19,6 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, showSearch = true, helpText }: HeaderProps) {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
-  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
@@ -125,10 +123,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
       <AddLeadModal 
         open={isAddLeadModalOpen}
         onOpenChange={setIsAddLeadModalOpen}
-      />
-      <AddStudentModal 
-        open={isAddStudentModalOpen}
-        onOpenChange={setIsAddStudentModalOpen}
       />
       <AddApplicationModal 
         open={isAddApplicationModalOpen}
