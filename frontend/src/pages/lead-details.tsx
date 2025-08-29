@@ -545,7 +545,7 @@ export default function LeadDetails() {
             header={
               <CardTitle className="text-lg flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
-                <span>Lead Management</span>
+                <span>Lead Information</span>
               </CardTitle>
             }
           >
