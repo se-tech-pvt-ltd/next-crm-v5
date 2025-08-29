@@ -36,27 +36,33 @@ export class LeadService {
     return lead;
   }
 
-  static async createLead(leadData: InsertLead): Promise<Lead> {
-    const lead = await LeadModel.create(leadData);
-    
+  static async createLead(leadData: InsertLead, currentUserId?: string): Promise<Lead> {
+    const enriched: InsertLead = {
+      ...leadData,
+      createdBy: (leadData as any).createdBy ?? currentUserId ?? (leadData as any).counselorId ?? null,
+      updatedBy: (leadData as any).updatedBy ?? (leadData as any).createdBy ?? currentUserId ?? (leadData as any).counselorId ?? null,
+    } as any;
+
+    const lead = await LeadModel.create(enriched);
+
     // Log activity
     await ActivityService.logActivity(
-      'lead', 
-      lead.id, 
-      'created', 
+      'lead',
+      lead.id,
+      'created',
       'Lead created',
       `Lead ${lead.name} was added to the system`
     );
-    
+
     return lead;
   }
 
-  static async updateLead(id: string, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+  static async updateLead(id: string, updates: Partial<InsertLead>, currentUserId?: string): Promise<Lead | undefined> {
     // Get the current lead to track changes
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
 
-    const lead = await LeadModel.update(id, updates);
+    const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
     
     if (lead) {
       // Log changes for each updated field
