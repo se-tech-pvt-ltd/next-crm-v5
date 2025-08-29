@@ -37,12 +37,14 @@ export const leads = mysqlTable("leads", {
   lostReason: text("lost_reason"),
   notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
+  createdBy: varchar("created_by", { length: 255 }),
+  updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const students = mysqlTable("students", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
   leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
@@ -60,11 +62,16 @@ export const students = mysqlTable("students", {
   counselorId: varchar("counselor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  address: varchar("address", { length: 255 }),
+  consultancyFree: boolean("consultancy_free").notNull(),
+  scholarship: boolean("scholarship").notNull(),
+  expectation: varchar("expectation", { length: 255 }).notNull(),
+  eltTest: varchar("elt_test", { length: 255 }).notNull(),
 });
 
 export const applications = mysqlTable("applications", {
   id: int("id").primaryKey().autoincrement(),
-  studentId: int("student_id").notNull(),
+  studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),
   degree: text("degree"),
@@ -81,7 +88,7 @@ export const applications = mysqlTable("applications", {
 export const admissions = mysqlTable("admissions", {
   id: int("id").primaryKey().autoincrement(),
   applicationId: int("application_id").notNull(),
-  studentId: int("student_id").notNull(),
+  studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),
   decision: text("decision").notNull(),
@@ -109,13 +116,20 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 }).extend({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
+  createdBy: z.string().optional().nullable(),
+  updatedBy: z.string().optional().nullable(),
 }).partial({ id: true }); // id is optional since it will be generated
 
 export const insertStudentSchema = createInsertSchema(students).omit({
-  id: true,
   createdAt: true,
   updatedAt: true,
-});
+}).extend({
+  address: z.string().optional(),
+  consultancyFree: z.boolean().optional(),
+  scholarship: z.boolean().optional(),
+  expectation: z.string().optional(),
+  eltTest: z.string().optional(),
+}).partial({ id: true });
 
 export const insertApplicationSchema = createInsertSchema(applications).omit({
   id: true,

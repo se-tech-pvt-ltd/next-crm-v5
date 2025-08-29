@@ -33,7 +33,7 @@ import { AdmissionDetailsModal } from './admission-details-modal';
 interface StudentProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studentId: number | null;
+  studentId: string | null;
 }
 
 export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {

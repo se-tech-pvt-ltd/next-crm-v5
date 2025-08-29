@@ -44,7 +44,7 @@ export default function Admissions() {
       return universities;
     }, []) : [];
 
-  const getStudentName = (studentId: number) => {
+  const getStudentName = (studentId: string) => {
     const student = students?.find(s => s.id === studentId);
     return student?.name || 'Unknown';
   };

@@ -792,7 +792,18 @@ export default function LeadDetails() {
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
-              <ActivityTracker entityType="lead" entityId={params?.id || ''} initialInfo={lead?.notes} initialInfoDate={lead?.createdAt as any} />
+              <ActivityTracker
+                entityType="lead"
+                entityId={params?.id || ''}
+                initialInfo={lead?.notes}
+                initialInfoDate={lead?.createdAt as any}
+                initialInfoUserName={(function() {
+                  const creatorId = (lead as any)?.createdBy || lead?.counselorId || null;
+                  const user = (users as any[])?.find?.((u: any) => u.id === creatorId);
+                  const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : null;
+                  return name || undefined;
+                })()}
+              />
             </div>
           )}
         </div>

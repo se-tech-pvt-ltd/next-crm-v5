@@ -1,6 +1,6 @@
 import { ilike, or, and, eq } from "drizzle-orm";
 import { db } from "../config/database.js";
-import { leads, type Lead, type InsertLead } from "../shared/schema.js";
+import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
 import { LeadModel } from "../models/Lead.js";
 import { ActivityService } from "./ActivityService.js";
 
@@ -36,27 +36,42 @@ export class LeadService {
     return lead;
   }
 
-  static async createLead(leadData: InsertLead): Promise<Lead> {
-    const lead = await LeadModel.create(leadData);
-    
+  static async createLead(leadData: InsertLead, currentUserId?: string): Promise<Lead> {
+    const enriched: InsertLead = {
+      ...leadData,
+      createdBy: (leadData as any).createdBy ?? currentUserId ?? (leadData as any).counselorId ?? null,
+      updatedBy: (leadData as any).updatedBy ?? (leadData as any).createdBy ?? currentUserId ?? (leadData as any).counselorId ?? null,
+    } as any;
+
+    const lead = await LeadModel.create(enriched);
+
     // Log activity
     await ActivityService.logActivity(
-      'lead', 
-      lead.id, 
-      'created', 
+      'lead',
+      lead.id,
+      'created',
       'Lead created',
       `Lead ${lead.name} was added to the system`
     );
-    
+
     return lead;
   }
 
-  static async updateLead(id: string, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+  static async updateLead(id: string, updates: Partial<InsertLead>, currentUserId?: string): Promise<Lead | undefined> {
+    // Block edits if lead already converted to student
+    const converted = await db.select().from(students).where(eq(students.leadId, id));
+    if (converted.length > 0) {
+      const err = new Error('LEAD_CONVERTED');
+      // @ts-expect-error attach code
+      (err as any).code = 'LEAD_CONVERTED';
+      throw err;
+    }
+
     // Get the current lead to track changes
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
 
-    const lead = await LeadModel.update(id, updates);
+    const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
     
     if (lead) {
       // Log changes for each updated field

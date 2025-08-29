@@ -66,9 +66,12 @@ export class LeadController {
   static async createLead(req: Request, res: Response) {
     try {
       console.log("Received lead data:", JSON.stringify(req.body, null, 2));
+      const currentUser = LeadController.getCurrentUser();
       const validatedData = insertLeadSchema.parse(req.body);
       console.log("Validated data:", JSON.stringify(validatedData, null, 2));
-      const lead = await LeadService.createLead(validatedData);
+      const payload = { ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any;
+      console.log("Create payload (with audit fields):", JSON.stringify(payload, null, 2));
+      const lead = await LeadService.createLead(payload, currentUser.id);
       console.log("Created lead:", JSON.stringify(lead, null, 2));
       res.status(201).json(lead);
     } catch (error) {
@@ -95,8 +98,9 @@ export class LeadController {
         processedData.program = JSON.stringify(processedData.program);
       }
       
+      const currentUser = LeadController.getCurrentUser();
       const validatedData = insertLeadSchema.partial().parse(processedData);
-      const lead = await LeadService.updateLead(id, validatedData);
+      const lead = await LeadService.updateLead(id, { ...validatedData, updatedBy: currentUser.id } as any, currentUser.id);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -105,11 +109,14 @@ export class LeadController {
     } catch (error) {
       console.error('Lead update error:', error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Invalid data", 
+        return res.status(400).json({
+          message: "Invalid data",
           errors: error.errors,
           details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
         });
+      }
+      if (error instanceof Error && (error as any).code === 'LEAD_CONVERTED') {
+        return res.status(400).json({ message: "Lead has been converted to a student and cannot be edited" });
       }
       res.status(500).json({ message: "Failed to update lead" });
     }

@@ -1,6 +1,5 @@
 import { ilike, or, and, eq } from "drizzle-orm";
 import { db } from "../config/database.js";
-import { or, ilike, and, eq } from "drizzle-orm";
 import { students, type Student, type InsertStudent } from "../shared/schema.js";
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
@@ -13,7 +12,7 @@ export class StudentService {
     return await StudentModel.findAll();
   }
 
-  static async getStudent(id: number, userId?: string, userRole?: string): Promise<Student | undefined> {
+  static async getStudent(id: string, userId?: string, userRole?: string): Promise<Student | undefined> {
     const student = await StudentModel.findById(id);
     
     if (!student) return undefined;
@@ -41,7 +40,7 @@ export class StudentService {
     return student;
   }
 
-  static async updateStudent(id: number, updates: Partial<InsertStudent>): Promise<Student | undefined> {
+  static async updateStudent(id: string, updates: Partial<InsertStudent>): Promise<Student | undefined> {
     // Get the current student to track changes
     const currentStudent = await StudentModel.findById(id);
     if (!currentStudent) return undefined;
@@ -78,7 +77,7 @@ export class StudentService {
     return student;
   }
 
-  static async deleteStudent(id: number): Promise<boolean> {
+  static async deleteStudent(id: string): Promise<boolean> {
     const student = await StudentModel.findById(id);
     const success = await StudentModel.delete(id);
     
@@ -116,11 +115,15 @@ export class StudentService {
   }
 
   static async convertFromLead(leadId: string, studentData: InsertStudent): Promise<Student> {
-    const student = await StudentModel.create(studentData);
-    
+    console.log('[StudentService.convertFromLead] leadId:', leadId);
+    const payload = { ...(studentData as any), leadId } as any;
+    console.log('[StudentService.convertFromLead] payload:', JSON.stringify(payload));
+
+    const student = await StudentModel.create(payload);
+
     // Transfer activities from lead to student
     await ActivityService.transferActivities('lead', leadId, 'student', student.id);
-    
+
     return student;
   }
 }

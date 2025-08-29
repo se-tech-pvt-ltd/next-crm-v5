@@ -24,7 +24,7 @@ export class ApplicationController {
 
   static async getApplicationsByStudent(req: Request, res: Response) {
     try {
-      const studentId = parseInt(req.params.studentId);
+      const studentId = req.params.studentId;
       const currentUser = ApplicationController.getCurrentUser();
       const applications = await ApplicationService.getApplicationsByStudent(studentId, currentUser.id, currentUser.role);
       res.json(applications);

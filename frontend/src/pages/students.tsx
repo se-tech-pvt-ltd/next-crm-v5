@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
-import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,40 +7,31 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddStudentModal } from '@/components/add-student-modal';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
+import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useLocation } from 'wouter';
 
 export default function Students() {
-  const [, setLocation] = useLocation();
-  const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [, setLocation] = useLocation();
   const [countryFilter, setCountryFilter] = useState('all');
-  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const handleAddStudentClick = () => {
-    setIsNavigating(true);
-    setIsAddStudentModalOpen(true);
-    // Reset navigation state after opening modal
-    setTimeout(() => setIsNavigating(false), 200);
-  };
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
   });
 
   const updateStudentMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<Student> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => {
       const response = await apiRequest('PUT', `/api/students/${id}`, data);
       return response.json();
     },
@@ -99,12 +88,11 @@ export default function Students() {
     return new Date(date).toLocaleDateString();
   };
 
-  const handleViewProfile = (studentId: number) => {
-    setSelectedStudentId(studentId);
-    setIsProfileModalOpen(true);
+  const handleViewProfile = (studentId: string) => {
+    setLocation(`/students/${studentId}`);
   };
 
-  const handleCreateApplication = (studentId: number) => {
+  const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
     setIsAddApplicationModalOpen(true);
   };
@@ -226,41 +214,6 @@ export default function Students() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
-                  className="ml-2"
-                >
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
-                    onClick={handleAddStudentClick}
-                    disabled={isNavigating}
-                    title="Add New Student"
-                  >
-                    {isNavigating ? (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                      >
-                        <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ rotate: 0 }}
-                        whileHover={{ rotate: 90 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </motion.div>
-                    )}
-                  </Button>
-                </motion.div>
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-3 pt-0">
@@ -285,45 +238,6 @@ export default function Students() {
                     : `No students with status "${statusFilter}".`
                   }
                 </p>
-                <motion.div
-                  className="mt-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      className="h-8"
-                      onClick={handleAddStudentClick}
-                      disabled={isNavigating}
-                    >
-                      {isNavigating ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                          className="w-3 h-3 mr-1"
-                        >
-                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ rotate: 0 }}
-                          animate={{ rotate: 0 }}
-                          whileHover={{ rotate: 90 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                        </motion.div>
-                      )}
-                      <span className="text-sm">
-                        {isNavigating ? 'Opening...' : 'Add Student'}
-                      </span>
-                    </Button>
-                  </motion.div>
-                </motion.div>
               </div>
             ) : (
               <Table className="text-xs">
@@ -415,19 +329,10 @@ export default function Students() {
         </Card>
       </div>
 
-      <AddStudentModal 
-        open={isAddStudentModalOpen}
-        onOpenChange={setIsAddStudentModalOpen}
-      />
       <AddApplicationModal 
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
         studentId={selectedStudentId || undefined}
-      />
-      <StudentProfileModal 
-        open={isProfileModalOpen}
-        onOpenChange={setIsProfileModalOpen}
-        studentId={selectedStudentId}
       />
     </Layout>
   );

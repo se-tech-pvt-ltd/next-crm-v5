@@ -66,6 +66,8 @@ export class LeadModel {
         lostReason: leads.lostReason,
         notes: leads.notes,
         counselorId: leads.counselorId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
@@ -94,6 +96,8 @@ export class LeadModel {
         lostReason: leads.lostReason,
         notes: leads.notes,
         counselorId: leads.counselorId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
@@ -150,6 +154,8 @@ export class LeadModel {
         lostReason: leads.lostReason,
         notes: leads.notes,
         counselorId: leads.counselorId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
@@ -204,6 +210,16 @@ export class LeadModel {
     if (Array.isArray((leadData as any).program)) {
       processedLead.program = JSON.stringify((leadData as any).program);
     }
+
+    // Ensure audit fields are set
+    if (!processedLead.createdBy) {
+      processedLead.createdBy = processedLead.counselorId ?? null;
+    }
+    if (!processedLead.updatedBy) {
+      processedLead.updatedBy = processedLead.createdBy ?? processedLead.counselorId ?? null;
+    }
+
+    console.log("[LeadModel.create] Inserting lead:", JSON.stringify({ id: processedLead.id, createdBy: processedLead.createdBy, updatedBy: processedLead.updatedBy, counselorId: processedLead.counselorId }, null, 2));
 
     await db
       .insert(leads)

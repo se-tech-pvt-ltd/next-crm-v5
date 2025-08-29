@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 interface AddApplicationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studentId?: number;
+  studentId?: string;
 }
 
 export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplicationModalProps) {
@@ -38,7 +38,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
-      studentId: studentId || 0,
+      studentId: studentId || '',
       university: '',
       program: selectedStudent?.targetProgram || '',
       degree: '',
