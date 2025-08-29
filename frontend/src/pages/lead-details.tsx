@@ -411,11 +411,7 @@ export default function LeadDetails() {
     >
       <div className="text-xs md:text-[12px]">
         {/* Status Progress Bar */}
-        {!isLoading && (convertedStudent ? (
-          <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3 text-xs text-gray-700">Lead is already converted</div>
-        ) : (
-          <StatusProgressBar />
-        ))}
+        {!isLoading && (!convertedStudent && <StatusProgressBar />)}
 
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
@@ -831,6 +827,7 @@ export default function LeadDetails() {
                   const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : null;
                   return name || undefined;
                 })()}
+                canAdd={!convertedStudent}
               />
             </div>
           )}
@@ -847,6 +844,8 @@ export default function LeadDetails() {
           setShowConvertModal(false);
           setCurrentStatus('converted');
           queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+          queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
+          queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
         }}
       />
 
