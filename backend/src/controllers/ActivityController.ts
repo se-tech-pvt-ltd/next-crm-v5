@@ -29,11 +29,8 @@ export class ActivityController {
   static async getActivities(req: Request, res: Response) {
     try {
       const { entityType, entityId } = req.params;
-      const id = parseInt(entityId);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid entity ID" });
-      }
-      const activities = await ActivityService.getActivities(entityType, id);
+      // Accept both string UUIDs and numeric IDs
+      const activities = await ActivityService.getActivities(entityType, entityId);
       res.json(activities);
     } catch (error) {
       console.error("Get activities error:", error);

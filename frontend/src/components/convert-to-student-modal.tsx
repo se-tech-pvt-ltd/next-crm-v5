@@ -29,6 +29,15 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     queryKey: ['/api/leads'],
   });
 
+  // Dropdowns for mapping keys -> labels
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -45,6 +54,54 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     status: 'active',
   });
 
+  // Helper to normalize lead fields (arrays/JSON strings) into text
+  const normalizeToText = (value: unknown): string => {
+    if (!value) return '';
+    if (Array.isArray(value)) return value.filter(Boolean).join(', ');
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed.filter(Boolean).join(', ');
+        } catch {}
+      }
+      return trimmed;
+    }
+    return String(value);
+  };
+
+  // Map dropdown keys/ids to labels using dropdownData
+  const mapDropdownToLabels = (raw: unknown, fieldName: string): string => {
+    try {
+      const options: any[] = dropdownData?.[fieldName] || [];
+      const byKey = new Map(options.map(o => [o.key, o.value]));
+      const byId = new Map(options.map(o => [o.id, o.value]));
+
+      const toArray = (v: unknown): string[] => {
+        if (!v) return [];
+        if (Array.isArray(v)) return v.map(String);
+        if (typeof v === 'string') {
+          const t = v.trim();
+          if (t.startsWith('[')) {
+            try {
+              const parsed = JSON.parse(t);
+              if (Array.isArray(parsed)) return parsed.map(String);
+            } catch {}
+          }
+          return t.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        return [String(v)];
+      };
+
+      const items = toArray(raw);
+      const labels = items.map(i => byKey.get(i) || byId.get(i) || i);
+      return labels.filter(Boolean).join(', ');
+    } catch {
+      return normalizeToText(raw);
+    }
+  };
+
   // Pre-populate form when lead changes
   useEffect(() => {
     if (lead) {
@@ -53,11 +110,11 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        targetCountry: lead.country || '',
-        targetProgram: lead.program || '',
+        targetCountry: mapDropdownToLabels((lead as any).country, 'Interested Country') || normalizeToText((lead as any).country),
+        targetProgram: normalizeToText((lead as any).program),
       }));
     }
-  }, [lead]);
+  }, [lead, dropdownData]);
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {

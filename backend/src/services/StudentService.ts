@@ -1,5 +1,6 @@
 import { ilike, or, and, eq } from "drizzle-orm";
 import { db } from "../config/database.js";
+import { or, ilike, and, eq } from "drizzle-orm";
 import { students, type Student, type InsertStudent } from "../shared/schema.js";
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
