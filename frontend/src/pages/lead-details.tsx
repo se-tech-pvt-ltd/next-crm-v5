@@ -367,9 +367,8 @@ export default function LeadDetails() {
           <CollapsibleCard
             defaultOpen
             header={
-              <CardTitle className="text-lg flex items-center space-x-2">
-                <UserIcon className="w-5 h-5 text-primary" />
-                <span>Personal Information</span>
+              <CardTitle className="text-lg font-semibold">
+                {lead?.name || 'Personal Information'}
               </CardTitle>
             }
           >
@@ -391,14 +390,10 @@ export default function LeadDetails() {
                     </div>
                     <div>
                       {isLoading ? (
-                        <div className="space-y-2">
-                          <Skeleton className="h-5 w-32" />
-                          <Skeleton className="h-4 w-24" />
-                        </div>
+                        <Skeleton className="h-5 w-32" />
                       ) : (
                         <div>
                           <h2 className="text-xl font-semibold text-gray-900">{lead?.name}</h2>
-                          <p className="text-sm text-gray-500">{lead?.email}</p>
                         </div>
                       )}
                     </div>
