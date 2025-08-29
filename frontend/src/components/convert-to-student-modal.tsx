@@ -259,9 +259,25 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[85vw] max-w-6xl h-[85vh] max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="shrink-0 pb-2">
-          <DialogTitle className="text-lg font-semibold">Convert Lead to Student</DialogTitle>
+      <DialogContent
+        className="max-w-6xl max-h-[90vh] overflow-y-auto"
+        style={{ touchAction: 'pan-y' }}
+      >
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl">Convert Lead to Student</DialogTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Transform your lead into an active student with complete profile information
+                </p>
+              </div>
+            </div>
+            <HelpTooltip content="Complete all necessary fields to convert this lead into a student profile. Required fields are marked with an asterisk." />
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-2">
