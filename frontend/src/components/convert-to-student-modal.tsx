@@ -33,6 +33,11 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     queryKey: ['/api/leads'],
   });
 
+  // Fetch users for counsellor dropdown
+  const { data: users } = useQuery({
+    queryKey: ['/api/users'],
+  });
+
   // Dropdowns for mapping keys -> labels
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
