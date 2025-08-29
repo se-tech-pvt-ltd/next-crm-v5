@@ -25,6 +25,15 @@ export class StudentService {
     return student;
   }
 
+  static async getStudentByLeadId(leadId: string, userId?: string, userRole?: string): Promise<Student | undefined> {
+    const student = await StudentModel.findByLeadId(leadId);
+    if (!student) return undefined;
+    if (userRole === 'counselor' && userId && student.counselorId !== userId) {
+      return undefined;
+    }
+    return student;
+  }
+
   static async createStudent(studentData: InsertStudent): Promise<Student> {
     const student = await StudentModel.create(studentData);
     
@@ -123,6 +132,15 @@ export class StudentService {
 
     // Transfer activities from lead to student
     await ActivityService.transferActivities('lead', leadId, 'student', student.id);
+
+    // Log conversion on the lead timeline
+    await ActivityService.logActivity(
+      'lead',
+      leadId,
+      'converted',
+      'Lead converted',
+      `Lead ${student.name} was converted to student ${student.id}`
+    );
 
     return student;
   }

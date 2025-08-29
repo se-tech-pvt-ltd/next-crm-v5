@@ -11,10 +11,11 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
 import { HelpTooltip } from './help-tooltip';
-import { type Lead } from '@/lib/types';
+import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 import {
   ChevronDown,
   ChevronRight,
@@ -38,10 +39,12 @@ interface ConvertToStudentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lead: Lead | null;
+  onSuccess?: (student: Student) => void;
 }
 
-export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStudentModalProps) {
+export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: ConvertToStudentModalProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isLeadDetailsOpen, setIsLeadDetailsOpen] = useState(false);
 
   // Check for existing students to prevent duplicates
@@ -172,12 +175,14 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {
-      return apiRequest('POST', '/api/students/convert-from-lead', {
+      const res = await apiRequest('POST', '/api/students/convert-from-lead', {
         ...studentData,
         leadId: lead?.id,
       });
+      const data = await res.json();
+      return data as Student;
     },
-    onSuccess: () => {
+    onSuccess: (student: Student) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({
@@ -185,8 +190,9 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
         description: "Lead converted to student successfully.",
       });
       onOpenChange(false);
-      // Reset form to consistent initial shape
       setFormData(initialFormData);
+      if (onSuccess) onSuccess(student);
+      setLocation(`/students/${student.id}`);
     },
     onError: (error: Error) => {
       toast({
@@ -241,7 +247,33 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
       }
     }
 
-    convertToStudentMutation.mutate(formData);
+    // Normalize dateOfBirth if provided in MM/DD/YYYY
+    const normalizeDate = (value: string): string => {
+      if (!value) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      const m = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (m) {
+        const mm = m[1].padStart(2, '0');
+        const dd = m[2].padStart(2, '0');
+        const yyyy = m[3];
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      return value;
+    };
+
+    const payload = {
+      ...formData,
+      dateOfBirth: normalizeDate(formData.dateOfBirth),
+    };
+
+    convertToStudentMutation.mutate(payload);
   };
 
   if (!lead) return null;

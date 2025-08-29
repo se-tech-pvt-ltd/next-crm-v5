@@ -37,6 +37,21 @@ export class StudentController {
     }
   }
 
+  static async getStudentByLeadId(req: Request, res: Response) {
+    try {
+      const leadId = req.params.leadId;
+      const currentUser = StudentController.getCurrentUser();
+      const student = await StudentService.getStudentByLeadId(leadId, currentUser.id, currentUser.role);
+      if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      res.json(student);
+    } catch (error) {
+      console.error("Get student by leadId error:", error);
+      res.status(500).json({ message: "Failed to fetch student" });
+    }
+  }
+
   static async createStudent(req: Request, res: Response) {
     try {
       const validatedData = insertStudentSchema.parse(req.body);
@@ -55,20 +70,45 @@ export class StudentController {
     try {
       const { leadId, ...studentData } = req.body as any;
 
+      // Normalize date formats (accept mm/dd/yyyy or yyyy-mm-dd)
+      const normalizeDate = (value: unknown): string | undefined => {
+        if (!value) return undefined;
+        const s = String(value).trim();
+        // Already ISO-like
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        // mm/dd/yyyy or m/d/yyyy
+        const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (m) {
+          const mm = m[1].padStart(2, '0');
+          const dd = m[2].padStart(2, '0');
+          const yyyy = m[3];
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        // Fallback parse
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        return undefined;
+      };
+
       // Map UI fields to ORM fields
       const transformed: any = {
         name: studentData.name,
         email: studentData.email,
         phone: studentData.phone,
-        dateOfBirth: studentData.dateOfBirth || undefined,
+        dateOfBirth: normalizeDate(studentData.dateOfBirth),
         englishProficiency: studentData.englishProficiency || studentData.eltTest || undefined,
         passportNumber: studentData.passport || studentData.passportNumber || undefined,
         targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
         status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
         counselorId: studentData.counsellor || studentData.counselorId || undefined,
         address: studentData.address || studentData.city || undefined,
-        consultancyFree: Boolean(studentData.consultancyFee ?? studentData.consultancy_free ?? studentData.consultancyFree ?? false),
-        scholarship: Boolean(studentData.scholarship ?? false),
+        consultancyFree: ['yes','true','1','on'].includes(String(studentData.consultancyFee ?? studentData.consultancy_free ?? studentData.consultancyFree ?? '').toLowerCase()),
+        scholarship: ['yes','true','1','on'].includes(String(studentData.scholarship ?? '').toLowerCase()),
         expectation: studentData.expectation || '',
         eltTest: studentData.eltTest || '',
         notes: studentData.notes || undefined,

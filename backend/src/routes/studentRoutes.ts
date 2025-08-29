@@ -4,6 +4,7 @@ import { StudentController } from "../controllers/StudentController.js";
 export const studentRoutes = Router();
 
 studentRoutes.get("/", StudentController.getStudents);
+studentRoutes.get("/by-lead/:leadId", StudentController.getStudentByLeadId);
 studentRoutes.get("/:id", StudentController.getStudent);
 studentRoutes.post("/", StudentController.createStudent);
 studentRoutes.post("/convert-from-lead", StudentController.convertFromLead);

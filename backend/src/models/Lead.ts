@@ -102,17 +102,11 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
-      .where(not(exists(
-        db.select().from(students).where(eq(students.leadId, leads.id))
-      )));
 
     if (pagination) {
       // Get total count
       const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(not(exists(
-          db.select().from(students).where(eq(students.leadId, leads.id))
-        )));
+        .from(leads);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
@@ -160,23 +154,13 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
-      .where(and(
-        eq(leads.counselorId, counselorId),
-        not(exists(
-          db.select().from(students).where(eq(students.leadId, leads.id))
-        ))
-      ));
+      .where(eq(leads.counselorId, counselorId));
 
     if (pagination) {
       // Get total count
       const [totalResult] = await db.select({ count: count() })
         .from(leads)
-        .where(and(
-          eq(leads.counselorId, counselorId),
-          not(exists(
-            db.select().from(students).where(eq(students.leadId, leads.id))
-          ))
-        ));
+        .where(eq(leads.counselorId, counselorId));
 
       // Get paginated results
       const paginatedLeads = await baseQuery

@@ -15,6 +15,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Award, Mail, Phone, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function StudentDetails() {
   const [match, params] = useRoute('/students/:id');
@@ -37,14 +38,6 @@ export default function StudentDetails() {
     refetchOnMount: true,
   });
 
-  const { data: lead } = useQuery({
-    queryKey: ['/api/leads', student?.leadId],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/leads/${student?.leadId}`);
-      return res.json();
-    },
-    enabled: !!student?.leadId,
-  });
 
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
@@ -57,6 +50,28 @@ export default function StudentDetails() {
       setCurrentStatus(student.status || 'active');
     }
   }, [student]);
+
+  const mapStatusDbToUi = (s?: string | null) => {
+    if (!s) return 'Open';
+    if (s.toLowerCase() === 'active') return 'Open';
+    if (s.toLowerCase() === 'inactive' || s.toLowerCase() === 'closed') return 'Closed';
+    if (s.toLowerCase() === 'enrolled') return 'Enrolled';
+    return s;
+  };
+  const mapStatusUiToDb = (s?: string | null) => {
+    if (!s) return undefined;
+    if (s === 'Open') return 'active';
+    if (s === 'Closed') return 'inactive';
+    if (s === 'Enrolled') return 'enrolled';
+    return String(s).toLowerCase();
+  };
+  const boolToUi = (b?: boolean | null) => (b ? 'Yes' : 'No');
+  const uiToBool = (s: string) => ['yes', 'true', '1', 'on'].includes(String(s).toLowerCase());
+  const getCounselorName = (id?: string | null) => {
+    const list = (users as any[]) || [];
+    const u = list.find((u: User) => u.id === id);
+    return u ? `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email : 'Unassigned';
+  };
 
   const updateStudentMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => {
@@ -71,6 +86,7 @@ export default function StudentDetails() {
       toast({ title: 'Success', description: 'Student updated successfully.' });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       queryClient.setQueryData(['/api/students', params?.id], updated);
+      setCurrentStatus(updated.status);
       setIsEditing(false);
     },
     onError: (error: Error) => {
@@ -78,8 +94,29 @@ export default function StudentDetails() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async (uiStatus: string) => {
+      const response = await apiRequest('PUT', `/api/students/${student?.id}`, { status: mapStatusUiToDb(uiStatus) });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update status');
+      }
+      return response.json();
+    },
+    onSuccess: (updated) => {
+      setCurrentStatus(updated.status);
+      queryClient.setQueryData(['/api/students', params?.id], updated);
+      toast({ title: 'Status updated', description: `Student status set to ${mapStatusDbToUi(updated.status)}` });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
+  });
+
   const handleSaveChanges = () => {
-    updateStudentMutation.mutate(editData);
+    const payload: any = { ...editData };
+    if (payload.status) payload.status = mapStatusUiToDb(payload.status as any);
+    updateStudentMutation.mutate(payload);
   };
 
   if (!match) {
@@ -127,6 +164,57 @@ export default function StudentDetails() {
       helpText="View and manage student details."
     >
       <div className="text-xs md:text-[12px]">
+        {!isLoading && (
+          <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
+            <div className="flex items-center justify-between relative">
+              {(['Open','Closed','Enrolled'] as const).map((label, index, arr) => {
+                const currentLabel = mapStatusDbToUi(currentStatus || student?.status);
+                const currentIndex = arr.indexOf(currentLabel as any);
+                const isActive = label === currentLabel;
+                const isCompleted = currentIndex >= 0 && index <= currentIndex;
+
+                const handleClick = () => {
+                  if (updateStatusMutation.isPending) return;
+                  if (isActive) return;
+                  updateStatusMutation.mutate(label);
+                };
+
+                return (
+                  <div
+                    key={label}
+                    className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                    onClick={handleClick}
+                    role="button"
+                    aria-label={`Set status to ${label}`}
+                  >
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                      isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                    }`}>
+                      {isCompleted ? (
+                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+                      )}
+                    </div>
+                    <span className={`mt-1 text-xs font-medium text-center ${
+                      isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                    }`}>
+                      {label.toUpperCase()}
+                    </span>
+                    {index < arr.length - 1 && (
+                      <div
+                        className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                          index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
+                        style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
           {/* Main Content */}
           <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
@@ -138,6 +226,16 @@ export default function StudentDetails() {
                   <div className="flex items-center space-x-2">
                     {!isEditing ? (
                       <>
+                        {student?.leadId && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLocation(`/leads/${student.leadId}`)}
+                            disabled={isLoading}
+                          >
+                            View Lead
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
@@ -155,15 +253,6 @@ export default function StudentDetails() {
                         >
                           <Plus className="w-4 h-4 mr-1" />
                           Add Application
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsAddAdmissionOpen(true)}
-                          disabled={isLoading}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Add Admission
                         </Button>
                       </>
                     ) : (
@@ -267,6 +356,178 @@ export default function StudentDetails() {
                       />
                     </div>
 
+                    {/* Status */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Status</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={mapStatusDbToUi((editData.status as any) || student?.status)}
+                          onValueChange={(v) => setEditData({ ...editData, status: v as any })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Open">Open</SelectItem>
+                            <SelectItem value="Closed">Closed</SelectItem>
+                            <SelectItem value="Enrolled">Enrolled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={mapStatusDbToUi(student?.status)} />
+                      )}
+                    </div>
+
+                    {/* Expectation */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Expectation</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.expectation as any) || student?.expectation || 'High'}
+                          onValueChange={(v) => setEditData({ ...editData, expectation: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select expectation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Average">Average</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
+                      )}
+                    </div>
+
+                    {/* Counsellor */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Counsellor</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={editData.counselorId || (student?.counselorId || '')}
+                          onValueChange={(v) => setEditData({ ...editData, counselorId: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select counsellor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.isArray(users) && (users as any[]).map((u: User) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {(u.firstName || '') + ' ' + (u.lastName || '')} ({u.email})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={getCounselorName(student?.counselorId)} />
+                      )}
+                    </div>
+
+                    {/* Passport */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Passport</span>
+                      </Label>
+                      <Input
+                        value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
+                        onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* Address */}
+                    <div className="space-y-2 lg:col-span-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Address</span>
+                      </Label>
+                      <Input
+                        value={isEditing ? (editData.address || '') : (student?.address || '')}
+                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* ELT Test */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>ELT Test</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.eltTest as any) || student?.eltTest || ''}
+                          onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select test" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="IELTS">IELTS</SelectItem>
+                            <SelectItem value="PTE">PTE</SelectItem>
+                            <SelectItem value="OIDI">OIDI</SelectItem>
+                            <SelectItem value="Toefl">Toefl</SelectItem>
+                            <SelectItem value="Passwords">Passwords</SelectItem>
+                            <SelectItem value="No Test">No Test</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
+                      )}
+                    </div>
+
+                    {/* Consultancy Fee */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Consultancy Fee</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={boolToUi(editData.consultancyFree ?? student?.consultancyFree ?? false)}
+                          onValueChange={(v) => setEditData({ ...editData, consultancyFree: uiToBool(v) })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
+                      )}
+                    </div>
+
+                    {/* Scholarship */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Scholarship</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={boolToUi(editData.scholarship ?? student?.scholarship ?? false)}
+                          onValueChange={(v) => setEditData({ ...editData, scholarship: uiToBool(v) })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
+                      )}
+                    </div>
+
                     {/* Notes */}
                     <div className="space-y-2 lg:col-span-3">
                       <Label htmlFor="notes" className="flex items-center space-x-2">
@@ -308,14 +569,6 @@ export default function StudentDetails() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
-                        <span>Academic Background</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.academicBackground || 'Not provided'}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
                         <span>English Proficiency</span>
                       </Label>
                       <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
@@ -330,74 +583,11 @@ export default function StudentDetails() {
                         {student?.targetCountry || 'Not specified'}
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Target Program</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.targetProgram || 'Not specified'}
-                      </div>
-                    </div>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Lead Info (if converted from lead) */}
-            {lead && (
-              <Card className="w-full">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Lead Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {[...Array(4)].map((_, i) => (
-                        <div key={i} className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-6 w-3/4" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Original Source</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.source || 'Not specified'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Lead Type</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.type || 'General'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Interest Country</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.country || 'Not specified'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Interest Program</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.program || 'Not specified'}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Activity Sidebar */}

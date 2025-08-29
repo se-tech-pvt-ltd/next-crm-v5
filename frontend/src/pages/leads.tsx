@@ -101,10 +101,21 @@ export default function Leads() {
       const response = await apiRequest('GET', `/api/leads?page=${currentPage}&limit=${pageSize}`);
       return response.json();
     },
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
+  const { data: students } = useQuery({
+    queryKey: ['/api/students'],
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Extract leads and pagination info from response
   const leads = leadsResponse?.data || [];
+  const convertedLeadIds = new Set((Array.isArray(students) ? students : []).map((s: any) => s.leadId).filter(Boolean));
+  const convertedCount = leads.filter((l: any) => convertedLeadIds.has(l.id)).length;
   const pagination = leadsResponse?.pagination || {
     page: 1,
     limit: pageSize,
@@ -179,7 +190,11 @@ export default function Leads() {
   });
 
   const filteredLeads = leads?.filter(lead => {
-    const statusMatch = statusFilter === 'all' || lead.status === statusFilter;
+    const statusMatch = statusFilter === 'all'
+      ? true
+      : statusFilter === 'converted'
+        ? convertedLeadIds.has(lead.id)
+        : lead.status === statusFilter;
     const sourceMatch = sourceFilter === 'all' || lead.source === sourceFilter;
     
     // Date range filter
@@ -265,7 +280,7 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
@@ -274,7 +289,7 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-purple-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'converted').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
               </div>
             </CardContent>
           </Card>
@@ -303,6 +318,7 @@ export default function Leads() {
                         {status.value}
                       </SelectItem>
                     ))}
+                    <SelectItem value="converted">Converted</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={sourceFilter} onValueChange={(value) => {
