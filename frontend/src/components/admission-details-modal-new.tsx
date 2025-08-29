@@ -14,7 +14,7 @@ interface AdmissionDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   admission: Admission | null;
-  onOpenStudentProfile?: (studentId: number) => void;
+  onOpenStudentProfile?: (studentId: string) => void;
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
