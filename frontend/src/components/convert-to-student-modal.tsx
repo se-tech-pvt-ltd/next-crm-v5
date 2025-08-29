@@ -45,6 +45,23 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     status: 'active',
   });
 
+  // Helper to normalize lead fields (arrays/JSON strings) into text
+  const normalizeToText = (value: unknown): string => {
+    if (!value) return '';
+    if (Array.isArray(value)) return value.filter(Boolean).join(', ');
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed.filter(Boolean).join(', ');
+        } catch {}
+      }
+      return trimmed;
+    }
+    return String(value);
+  };
+
   // Pre-populate form when lead changes
   useEffect(() => {
     if (lead) {
@@ -53,8 +70,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        targetCountry: lead.country || '',
-        targetProgram: lead.program || '',
+        targetCountry: normalizeToText((lead as any).country),
+        targetProgram: normalizeToText((lead as any).program),
       }));
     }
   }, [lead]);
