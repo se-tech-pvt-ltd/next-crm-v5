@@ -62,6 +62,11 @@ export const students = mysqlTable("students", {
   counselorId: varchar("counselor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  address: varchar("address", { length: 255 }),
+  consultancyFree: boolean("consultancy_free").notNull(),
+  scholarship: boolean("scholarship").notNull(),
+  expectation: varchar("expectation", { length: 255 }).notNull(),
+  eltTest: varchar("elt_test", { length: 255 }).notNull(),
 });
 
 export const applications = mysqlTable("applications", {

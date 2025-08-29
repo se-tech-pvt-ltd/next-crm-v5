@@ -1,7 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { v4 as uuidv4 } from 'uuid';
-import { eq, desc } from "drizzle-orm";
 import { students, type Student, type InsertStudent } from "../shared/schema.js";
 
 export class StudentModel {
@@ -22,7 +21,15 @@ export class StudentModel {
 
   static async create(studentData: InsertStudent): Promise<Student> {
     const studentId = uuidv4();
-    const insertPayload = { ...(studentData as any), id: studentId } as any;
+    const insertPayload = {
+      ...(studentData as any),
+      id: studentId,
+      consultancyFree: (studentData as any).consultancyFree ?? false,
+      scholarship: (studentData as any).scholarship ?? false,
+      expectation: (studentData as any).expectation ?? '',
+      eltTest: (studentData as any).eltTest ?? '',
+      address: (studentData as any).address ?? (studentData as any).city ?? null,
+    } as any;
     console.log('[StudentModel.create] inserting:', JSON.stringify(insertPayload));
     await db.insert(students).values(insertPayload);
     const createdStudent = await StudentModel.findById(studentId);

@@ -59,6 +59,11 @@ export interface Student {
   status: string;
   notes: string | null;
   counselorId: string | null;
+  address: string | null;
+  consultancyFree: boolean | null;
+  scholarship: boolean | null;
+  expectation: string | null;
+  eltTest: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -165,6 +170,11 @@ export const insertStudentSchema = z.object({
   status: z.string().default("active"),
   notes: z.string().optional(),
   counselorId: z.string().optional(),
+  address: z.string().optional(),
+  consultancyFree: z.boolean().optional(),
+  scholarship: z.boolean().optional(),
+  expectation: z.string().optional(),
+  eltTest: z.string().optional(),
 });
 
 export const insertApplicationSchema = z.object({
