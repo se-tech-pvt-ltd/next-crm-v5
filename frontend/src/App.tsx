@@ -61,6 +61,7 @@ function Router() {
       <Route path="/leads/add" component={AddLead} />
       <Route path="/leads/:id" component={LeadDetails} />
       <Route path="/students" component={Students} />
+      <Route path="/students/:id" component={require('@/pages/student-details').default} />
       <Route path="/applications" component={Applications} />
       <Route path="/admissions" component={Admissions} />
       <Route path="/reports" component={Reports} />
