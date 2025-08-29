@@ -790,7 +790,7 @@ export default function LeadDetails() {
         </div>
 
         {/* Activity Sidebar */}
-        <div className="w-96 flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
+        <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Activity Timeline
