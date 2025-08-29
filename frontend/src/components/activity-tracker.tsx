@@ -286,7 +286,16 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
               } as Activity;
               list = [...list, synthetic];
             }
-            list.sort((a: any, b: any) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime());
+            // Custom ordering: note first, created second, then others by createdAt desc
+            const priority = (t: string) => (t === 'note' ? 0 : t === 'created' ? 1 : 2);
+            list.sort((a: any, b: any) => {
+              const pa = priority(a.activityType);
+              const pb = priority(b.activityType);
+              if (pa !== pb) return pa - pb;
+              const da = new Date(a.createdAt as any).getTime();
+              const db = new Date(b.createdAt as any).getTime();
+              return db - da;
+            });
 
             if (list.length === 0) {
               return (
