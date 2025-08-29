@@ -400,7 +400,7 @@ export default function LeadDetails() {
 
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col space-y-6 min-w-0 w-full">
+        <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
           {/* Personal Information Section */}
           <Card className="w-full">
             <CardHeader className="pb-3">
