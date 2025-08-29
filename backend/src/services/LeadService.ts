@@ -1,6 +1,6 @@
 import { ilike, or, and, eq } from "drizzle-orm";
 import { db } from "../config/database.js";
-import { leads, type Lead, type InsertLead } from "../shared/schema.js";
+import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
 import { LeadModel } from "../models/Lead.js";
 import { ActivityService } from "./ActivityService.js";
 
