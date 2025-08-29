@@ -6,12 +6,33 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
+import { HelpTooltip } from './help-tooltip';
 import { type Lead } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  UserPlus,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  GraduationCap,
+  Calendar,
+  FileText,
+  Target,
+  Globe,
+  Users,
+  Award,
+  DollarSign,
+  Upload
+} from 'lucide-react';
 
 interface ConvertToStudentModalProps {
   open: boolean;
