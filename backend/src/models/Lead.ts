@@ -66,6 +66,8 @@ export class LeadModel {
         lostReason: leads.lostReason,
         notes: leads.notes,
         counselorId: leads.counselorId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
@@ -94,6 +96,8 @@ export class LeadModel {
         lostReason: leads.lostReason,
         notes: leads.notes,
         counselorId: leads.counselorId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
@@ -150,6 +154,8 @@ export class LeadModel {
         lostReason: leads.lostReason,
         notes: leads.notes,
         counselorId: leads.counselorId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
