@@ -325,8 +325,8 @@ export default function LeadDetails() {
                     ? 'bg-green-500 border-green-500 text-white'
                     : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
                 }`}>
-                  {isCompleted && <div className="w-2 h-2 bg-white rounded-full" />}
-                  {!isCompleted && <div className="w-2 h-2 bg-gray-300 rounded-full" />}
+                  {isCompleted && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  {!isCompleted && <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
                 </div>
 
                 {/* Status Label */}
@@ -338,9 +338,9 @@ export default function LeadDetails() {
 
                 {/* Connector Line */}
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-3 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
                     index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
-                  }`} style={{ marginLeft: '0.75rem', width: 'calc(100% - 1.5rem)' }} />
+                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
             );
