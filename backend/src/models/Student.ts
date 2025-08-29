@@ -57,4 +57,9 @@ export class StudentModel {
     const affected = result?.affectedRows ?? result?.rowCount ?? 0;
     return affected > 0;
   }
+
+  static async findByLeadId(leadId: string): Promise<Student | undefined> {
+    const [student] = await db.select().from(students).where(eq(students.leadId, leadId)).limit(1);
+    return student;
+  }
 }
