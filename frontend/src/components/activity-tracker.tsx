@@ -285,7 +285,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                   <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-2">
                       {/* Line 1: User (bold) */}
-                      <div className="text-sm font-semibold text-gray-900">
+                      <div className="text-xs font-semibold text-gray-900">
                         {activity.userName || "Unknown User"}
                       </div>
                       {/* Line 2: Type (left)  Date (right) */}
@@ -295,7 +295,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                       </div>
                       {/* Line 3: Message */}
                       {(activity.description || activity.title) && (
-                        <div className="pt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                        <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
                           {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || activity.title) : (activity.description || activity.title)}
                         </div>
                       )}
