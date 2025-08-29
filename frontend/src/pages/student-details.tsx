@@ -37,14 +37,6 @@ export default function StudentDetails() {
     refetchOnMount: true,
   });
 
-  const { data: lead } = useQuery({
-    queryKey: ['/api/leads', student?.leadId],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/leads/${student?.leadId}`);
-      return res.json();
-    },
-    enabled: !!student?.leadId,
-  });
 
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
@@ -353,61 +345,6 @@ export default function StudentDetails() {
               </CardContent>
             </Card>
 
-            {/* Lead Info (if converted from lead) */}
-            {lead && (
-              <Card className="w-full">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Lead Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {[...Array(4)].map((_, i) => (
-                        <div key={i} className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-6 w-3/4" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Original Source</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.source || 'Not specified'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Lead Type</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.type || 'General'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Interest Country</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.country || 'Not specified'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Interest Program</span>
-                        </Label>
-                        <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                          {lead?.program || 'Not specified'}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Activity Sidebar */}
