@@ -330,6 +330,13 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <MapPin className="w-3 h-3" />
+                        <span>City</span>
+                      </Label>
+                      <Input value={formData.city} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <MapPin className="w-3 h-3" />
                         <span>Source</span>
                       </Label>
                       <Input value={formData.source} disabled className="bg-background" />
