@@ -405,7 +405,7 @@ export default function LeadDetails() {
           <Card className="w-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Personal Information</CardTitle>
+                <CardTitle className="text-base">Personal Information</CardTitle>
                 <div className="flex items-center space-x-2">
                   {!isEditing ? (
                     <>
@@ -544,7 +544,7 @@ export default function LeadDetails() {
           {/* Lead Management Section */}
           <CollapsibleCard
             header={
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-base flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
                 <span>Lead Information</span>
               </CardTitle>
@@ -630,7 +630,7 @@ export default function LeadDetails() {
           {/* Academic Interests Section */}
           <CollapsibleCard
             header={
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-base flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic Interests</span>
               </CardTitle>
@@ -744,7 +744,7 @@ export default function LeadDetails() {
           {/* Additional Information Section */}
           <CollapsibleCard
             header={
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-base flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <span>Additional Information</span>
               </CardTitle>
