@@ -157,8 +157,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
         email: lead.email || '',
         source: mapDropdownToLabels(lead.source, 'Source') || normalizeToText(lead.source),
         interestedCountry: mapDropdownToLabels((lead as any).country, 'Interested Country') || normalizeToText((lead as any).country),
-        studyLevel: mapDropdownToLabels(lead.type, 'Type') || normalizeToText(lead.type),
-        studyPlan: mapDropdownToLabels((lead as any).program, 'Program') || normalizeToText((lead as any).program),
+        studyLevel: mapDropdownToLabels((lead as any).studyLevel, 'Study Level') || normalizeToText((lead as any).studyLevel),
+        studyPlan: mapDropdownToLabels((lead as any).studyPlan, 'Study Plan') || normalizeToText((lead as any).studyPlan),
         admissionOfficer: lead.createdBy || '',
 
         // Set default expectation from lead
