@@ -22,18 +22,33 @@ export class ActivityModel {
   }
 
   static async create(activityData: InsertActivity): Promise<Activity> {
-    const [activity] = await db
-      .insert(activities)
-      .values(activityData)
-      .returning();
-    return activity;
+    const result: any = await db.insert(activities).values(activityData);
+    const insertId: number | undefined = result?.insertId ?? result?.[0]?.insertId;
+    if (typeof insertId !== 'number') {
+      // Fallback: fetch the most recent matching record as a last resort
+      const rows = await db.select().from(activities)
+        .where(
+          and(
+            eq(activities.entityType, activityData.entityType),
+            eq(activities.entityId, String(activityData.entityId)),
+            eq(activities.title, activityData.title)
+          )
+        )
+        .orderBy(desc(activities.createdAt));
+      if (rows.length > 0) return rows[0];
+      throw new Error('Failed to retrieve inserted activity');
+    }
+    const created = await db.select().from(activities).where(eq(activities.id, insertId));
+    return created[0]!;
   }
 
   static async bulkCreate(activitiesData: InsertActivity[]): Promise<Activity[]> {
-    return await db
-      .insert(activities)
-      .values(activitiesData)
-      .returning();
+    const created: Activity[] = [];
+    for (const data of activitiesData) {
+      const row = await this.create(data);
+      created.push(row);
+    }
+    return created;
   }
 
   static async transferActivities(
@@ -84,7 +99,8 @@ export class ActivityModel {
   }
 
   static async delete(id: number): Promise<boolean> {
-    const result = await db.delete(activities).where(eq(activities.id, id));
-    return (result.rowCount || 0) > 0;
+    const result: any = await db.delete(activities).where(eq(activities.id, id));
+    const affected = result?.affectedRows ?? result?.rowCount ?? 0;
+    return affected > 0;
   }
 }
