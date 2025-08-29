@@ -792,7 +792,7 @@ export default function LeadDetails() {
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
-              <ActivityTracker entityType="lead" entityId={params?.id || ''} initialInfo={lead?.notes} />
+              <ActivityTracker entityType="lead" entityId={params?.id || ''} initialInfo={lead?.notes} initialInfoDate={lead?.createdAt as any} />
             </div>
           )}
         </div>
