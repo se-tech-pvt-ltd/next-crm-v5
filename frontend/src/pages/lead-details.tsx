@@ -653,20 +653,39 @@ export default function LeadDetails() {
                     <Globe className="w-4 h-4" />
                     <span>Interested Countries</span>
                   </Label>
-                  <MultiSelect
-                    value={isEditing ? (editData.country || []) : parseFieldValue(lead?.country)}
-                    onValueChange={(values) => setEditData({ ...editData, country: values })}
-                    placeholder="Select countries"
-                    searchPlaceholder="Search countries..."
-                    options={dropdownData?.["Interested Country"]?.map((option: any) => ({
-                      value: option.key,
-                      label: option.value
-                    })) || []}
-                    emptyMessage="No countries found"
-                    maxDisplayItems={2}
-                    disabled={!isEditing}
-                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                  />
+                  {isEditing ? (
+                    <MultiSelect
+                      value={Array.isArray(editData.country) ? editData.country : parseFieldValue(editData.country)}
+                      onValueChange={(values) => setEditData({ ...editData, country: values })}
+                      placeholder="Select countries"
+                      searchPlaceholder="Search countries..."
+                      options={dropdownData?.["Interested Country"]?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No countries found"
+                      maxDisplayItems={3}
+                      className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {(function() {
+                        const values = parseFieldValue(lead?.country);
+                        const labels = (dropdownData?.["Interested Country"] || [])
+                          .filter((opt: any) => values.includes(opt.key) || values.includes(opt.id) || values.includes(opt.value))
+                          .map((opt: any) => opt.value);
+                        return labels.length ? (
+                          labels.map((label: string) => (
+                            <span key={label} className="text-primary text-xs">
+                              {label}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground text-xs">Not specified</span>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 {/* Study Level */}
