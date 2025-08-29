@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchable-select-v2';
 import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
