@@ -22,19 +22,11 @@ export default function Students() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
-  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const handleAddStudentClick = () => {
-    setIsNavigating(true);
-    setIsAddStudentModalOpen(true);
-    // Reset navigation state after opening modal
-    setTimeout(() => setIsNavigating(false), 200);
-  };
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
