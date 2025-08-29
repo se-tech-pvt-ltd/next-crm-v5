@@ -309,11 +309,11 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                   </div>
                   <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-2">
-                      <div className="text-xs font-semibold text-gray-900">
-                        {activity.userName || 'Unknown User'}
-                      </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">{activity.userName || 'Unknown User'}</span>
+                          <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                        </div>
                         <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
                       </div>
                       {(activity.description || (activity as any).title) && (
