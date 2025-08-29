@@ -37,8 +37,6 @@ export const leads = mysqlTable("leads", {
   lostReason: text("lost_reason"),
   notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
-  createdBy: varchar("created_by", { length: 255 }),
-  updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
