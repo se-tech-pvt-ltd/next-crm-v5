@@ -282,9 +282,9 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
 
         <div className="space-y-6">
           {/* Collapsible Lead Details */}
-          <Card>
-            <CardHeader className="pb-3">
-              <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
+          <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
+            <Card>
+              <CardHeader className="pb-3">
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" className="w-full justify-between hover:bg-muted/50 transition-all">
                     <div className="flex items-center space-x-2">
@@ -294,78 +294,78 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
                     {isLeadDetailsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </Button>
                 </CollapsibleTrigger>
-              </Collapsible>
-            </CardHeader>
-            <CollapsibleContent>
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <User className="w-3 h-3" />
-                      <span>Type</span>
-                    </Label>
-                    <Input value={formData.type} disabled className="bg-background" />
+              </CardHeader>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <User className="w-3 h-3" />
+                        <span>Type</span>
+                      </Label>
+                      <Input value={formData.type} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <User className="w-3 h-3" />
+                        <span>Name</span>
+                      </Label>
+                      <Input value={formData.name} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <Mail className="w-3 h-3" />
+                        <span>Email</span>
+                      </Label>
+                      <Input value={formData.email} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <Phone className="w-3 h-3" />
+                        <span>Phone</span>
+                      </Label>
+                      <Input value={formData.phone} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <MapPin className="w-3 h-3" />
+                        <span>Source</span>
+                      </Label>
+                      <Input value={formData.source} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <Globe className="w-3 h-3" />
+                        <span>Interested Country</span>
+                      </Label>
+                      <Input value={formData.interestedCountry} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <GraduationCap className="w-3 h-3" />
+                        <span>Study Level</span>
+                      </Label>
+                      <Input value={formData.studyLevel} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <GraduationCap className="w-3 h-3" />
+                        <span>Study Plan</span>
+                      </Label>
+                      <Input value={formData.studyPlan} disabled className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                        <Users className="w-3 h-3" />
+                        <span>Admission Officer</span>
+                      </Label>
+                      <Input value={formData.admissionOfficer} disabled className="bg-background" />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <User className="w-3 h-3" />
-                      <span>Name</span>
-                    </Label>
-                    <Input value={formData.name} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <Mail className="w-3 h-3" />
-                      <span>Email</span>
-                    </Label>
-                    <Input value={formData.email} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <Phone className="w-3 h-3" />
-                      <span>Phone</span>
-                    </Label>
-                    <Input value={formData.phone} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <MapPin className="w-3 h-3" />
-                      <span>Source</span>
-                    </Label>
-                    <Input value={formData.source} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <Globe className="w-3 h-3" />
-                      <span>Interested Country</span>
-                    </Label>
-                    <Input value={formData.interestedCountry} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <GraduationCap className="w-3 h-3" />
-                      <span>Study Level</span>
-                    </Label>
-                    <Input value={formData.studyLevel} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <GraduationCap className="w-3 h-3" />
-                      <span>Study Plan</span>
-                    </Label>
-                    <Input value={formData.studyPlan} disabled className="bg-background" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                      <Users className="w-3 h-3" />
-                      <span>Admission Officer</span>
-                    </Label>
-                    <Input value={formData.admissionOfficer} disabled className="bg-background" />
-                  </div>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           {/* Student Status & Basic Info */}
           <Card>
