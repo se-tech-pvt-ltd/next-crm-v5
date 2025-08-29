@@ -51,7 +51,7 @@ export class AdmissionService {
     return admission;
   }
 
-  static async getAdmissionsByStudent(studentId: number, userId?: string, userRole?: string): Promise<Admission[]> {
+  static async getAdmissionsByStudent(studentId: string, userId?: string, userRole?: string): Promise<Admission[]> {
     // Check role-based access for counselors
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
