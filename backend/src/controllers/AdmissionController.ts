@@ -24,7 +24,7 @@ export class AdmissionController {
 
   static async getAdmissionsByStudent(req: Request, res: Response) {
     try {
-      const studentId = parseInt(req.params.studentId);
+      const studentId = req.params.studentId;
       const currentUser = AdmissionController.getCurrentUser();
       const admissions = await AdmissionService.getAdmissionsByStudent(studentId, currentUser.id, currentUser.role);
       res.json(admissions);
