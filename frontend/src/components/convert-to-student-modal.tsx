@@ -185,22 +185,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
         description: "Lead converted to student successfully.",
       });
       onOpenChange(false);
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        dateOfBirth: '',
-        nationality: '',
-        passportNumber: '',
-        targetCountry: '',
-        targetProgram: '',
-        targetLevel: '',
-        englishProficiency: '',
-        previousEducation: '',
-        notes: '',
-        status: 'active',
-      });
+      // Reset form to consistent initial shape
+      setFormData(initialFormData);
     },
     onError: (error: Error) => {
       toast({
