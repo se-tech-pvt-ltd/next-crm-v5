@@ -166,23 +166,50 @@ export default function StudentDetails() {
       <div className="text-xs md:text-[12px]">
         {!isLoading && (
           <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
-            <div className="flex items-center justify-between">
-              {(['Open','Closed','Enrolled'] as const).map((label) => {
-                const active = mapStatusDbToUi(currentStatus || student?.status) === label;
+            <div className="flex items-center justify-between relative">
+              {(['Open','Closed','Enrolled'] as const).map((label, index, arr) => {
+                const currentLabel = mapStatusDbToUi(currentStatus || student?.status);
+                const currentIndex = arr.indexOf(currentLabel as any);
+                const isActive = label === currentLabel;
+                const isCompleted = currentIndex >= 0 && index <= currentIndex;
+
+                const handleClick = () => {
+                  if (updateStatusMutation.isPending) return;
+                  if (isActive) return;
+                  updateStatusMutation.mutate(label);
+                };
+
                 return (
-                  <button
+                  <div
                     key={label}
-                    type="button"
-                    onClick={() => {
-                      if (!active && !updateStatusMutation.isPending) updateStatusMutation.mutate(label);
-                    }}
-                    className={`text-[11px] font-medium px-3 py-1.5 rounded-md border transition-colors ${
-                      active ? 'bg-green-100 border-green-400 text-green-700' : 'bg-white border-gray-300 text-gray-600 hover:border-green-400 hover:text-green-700'
-                    }`}
-                    aria-pressed={active}
+                    className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                    onClick={handleClick}
+                    role="button"
+                    aria-label={`Set status to ${label}`}
                   >
-                    {label.toUpperCase()}
-                  </button>
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                      isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                    }`}>
+                      {isCompleted ? (
+                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+                      )}
+                    </div>
+                    <span className={`mt-1 text-xs font-medium text-center ${
+                      isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                    }`}>
+                      {label.toUpperCase()}
+                    </span>
+                    {index < arr.length - 1 && (
+                      <div
+                        className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                          index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
+                        style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }}
+                      />
+                    )}
+                  </div>
                 );
               })}
             </div>
