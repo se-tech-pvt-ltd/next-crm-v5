@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { upload } from '../middlewares/upload.js';
+import { upload, uploadProfilePicture } from '../middlewares/upload.js';
 import path from 'path';
 
 const router = Router();
