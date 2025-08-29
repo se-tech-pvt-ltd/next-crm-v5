@@ -211,6 +211,14 @@ export class LeadModel {
       processedLead.program = JSON.stringify((leadData as any).program);
     }
 
+    // Ensure audit fields are set
+    if (!processedLead.createdBy) {
+      processedLead.createdBy = processedLead.counselorId ?? null;
+    }
+    if (!processedLead.updatedBy) {
+      processedLead.updatedBy = processedLead.createdBy ?? processedLead.counselorId ?? null;
+    }
+
     await db
       .insert(leads)
       .values(processedLead as InsertLead & { id: string });
