@@ -736,25 +736,33 @@ export default function LeadDetails() {
                     <FileText className="w-4 h-4" />
                     <span>English Language Test Completed</span>
                   </Label>
-                  <RadioGroup
+                  <ToggleGroup
+                    type="single"
                     value={isEditing ? (editData.elt || '') : (lead?.elt || '')}
-                    onValueChange={(value) => setEditData({ ...editData, elt: value })}
-                    disabled={!isEditing}
-                    className="flex flex-row space-x-4"
+                    onValueChange={(value) => value && setEditData({ ...editData, elt: value })}
+                    className="gap-2"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="elt-yes" disabled={!isEditing} />
-                      <Label htmlFor="elt-yes" className="text-xs font-normal cursor-pointer">
-                        Yes
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="elt-no" disabled={!isEditing} />
-                      <Label htmlFor="elt-no" className="text-xs font-normal cursor-pointer">
-                        No
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                    <ToggleGroupItem
+                      value="yes"
+                      disabled={!isEditing}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full px-3 data-[state=on]:bg-green-100 data-[state=on]:text-green-700 data-[state=on]:border-green-400"
+                      aria-label="Yes"
+                    >
+                      Yes
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="no"
+                      disabled={!isEditing}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full px-3 data-[state=on]:bg-red-100 data-[state=on]:text-red-700 data-[state=on]:border-red-400"
+                      aria-label="No"
+                    >
+                      No
+                    </ToggleGroupItem>
+                  </ToggleGroup>
                 </div>
               </div>
             )}
