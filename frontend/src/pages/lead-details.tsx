@@ -806,7 +806,7 @@ export default function LeadDetails() {
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
-              <ActivityTracker entityType="lead" entityId={parseInt(params?.id || '0', 10)} />
+              <ActivityTracker entityType="lead" entityId={params?.id || ''} />
             </div>
           )}
         </div>
