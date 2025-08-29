@@ -238,45 +238,108 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[85vw] max-w-5xl h-[85vh] max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-[85vw] max-w-6xl h-[85vh] max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader className="shrink-0 pb-2">
           <DialogTitle className="text-lg font-semibold">Convert Lead to Student</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-2">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* Collapsible Lead Details */}
+            <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  Lead Details (Auto-filled)
+                  {isLeadDetailsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 mt-3 p-3 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Type</Label>
+                    <Input value={formData.type} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Name</Label>
+                    <Input value={formData.name} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Email</Label>
+                    <Input value={formData.email} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Phone</Label>
+                    <Input value={formData.phone} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Source</Label>
+                    <Input value={formData.source} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Interested Country</Label>
+                    <Input value={formData.interestedCountry} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Study Level</Label>
+                    <Input value={formData.studyLevel} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Study Plan</Label>
+                    <Input value={formData.studyPlan} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Admission Officer</Label>
+                    <Input value={formData.admissionOfficer} disabled className="h-8 text-sm bg-white" />
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Student Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="name" className="text-xs">Full Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Enter full name"
-                  className="h-8 text-sm"
-                />
+                <Label htmlFor="status" className="text-xs">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Open">Open</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                    <SelectItem value="Enrolled">Enrolled</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
               <div className="space-y-1">
-                <Label htmlFor="email" className="text-xs">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Enter email address"
-                  className="h-8 text-sm"
-                />
+                <Label htmlFor="expectation" className="text-xs">Expectation *</Label>
+                <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Select expectation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Average">Average</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
               <div className="space-y-1">
-                <Label htmlFor="phone" className="text-xs">Phone Number</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder="Enter phone number"
-                  className="h-8 text-sm"
-                />
+                <Label htmlFor="counsellor" className="text-xs">Counsellor</Label>
+                <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Select counsellor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(users) && users.map((user: any) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
               <div className="space-y-1">
                 <Label htmlFor="dateOfBirth" className="text-xs">Date of Birth</Label>
                 <Input
@@ -287,99 +350,113 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
                   className="h-8 text-sm"
                 />
               </div>
+
               <div className="space-y-1">
-                <Label htmlFor="nationality" className="text-xs">Nationality</Label>
+                <Label htmlFor="city" className="text-xs">City</Label>
                 <Input
-                  id="nationality"
-                  value={formData.nationality}
-                  onChange={(e) => handleInputChange('nationality', e.target.value)}
-                  placeholder="Enter nationality"
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  placeholder="Enter city"
                   className="h-8 text-sm"
                 />
               </div>
+
               <div className="space-y-1">
-                <Label htmlFor="passportNumber" className="text-xs">Passport Number</Label>
-                <Input
-                  id="passportNumber"
-                  value={formData.passportNumber}
-                  onChange={(e) => handleInputChange('passportNumber', e.target.value)}
-                  placeholder="Enter passport number"
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="targetCountry" className="text-xs">Target Country</Label>
-                <Input
-                  id="targetCountry"
-                  value={formData.targetCountry}
-                  onChange={(e) => handleInputChange('targetCountry', e.target.value)}
-                  placeholder="Enter target country"
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="targetProgram" className="text-xs">Target Program</Label>
-                <Input
-                  id="targetProgram"
-                  value={formData.targetProgram}
-                  onChange={(e) => handleInputChange('targetProgram', e.target.value)}
-                  placeholder="Enter target program"
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="targetLevel" className="text-xs">Target Level</Label>
-                <Select value={formData.targetLevel} onValueChange={(value) => handleInputChange('targetLevel', value)}>
+                <Label htmlFor="eltTest" className="text-xs">ELT Test</Label>
+                <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
                   <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder="Select test" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                    <SelectItem value="graduate">Graduate</SelectItem>
-                    <SelectItem value="postgraduate">Postgraduate</SelectItem>
-                    <SelectItem value="phd">PhD</SelectItem>
+                    <SelectItem value="IELTS">IELTS</SelectItem>
+                    <SelectItem value="PTE">PTE</SelectItem>
+                    <SelectItem value="OIDI">OIDI</SelectItem>
+                    <SelectItem value="TOEFL">TOEFL</SelectItem>
+                    <SelectItem value="Passwords">Passwords</SelectItem>
+                    <SelectItem value="No Test">No Test</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-1">
-                <Label htmlFor="englishProficiency" className="text-xs">English Proficiency</Label>
-                <Select value={formData.englishProficiency} onValueChange={(value) => handleInputChange('englishProficiency', value)}>
+                <Label htmlFor="consultancyFee" className="text-xs">Consultancy Fee</Label>
+                <Select value={formData.consultancyFee} onValueChange={(value) => handleInputChange('consultancyFee', value)}>
                   <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select proficiency" />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                    <SelectItem value="native">Native</SelectItem>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="scholarship" className="text-xs">Scholarship</Label>
+                <Select value={formData.scholarship} onValueChange={(value) => handleInputChange('scholarship', value)}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {/* File Upload Fields */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="previousEducation" className="text-xs">Previous Education</Label>
-                <Textarea
-                  id="previousEducation"
-                  value={formData.previousEducation}
-                  onChange={(e) => handleInputChange('previousEducation', e.target.value)}
-                  placeholder="Enter previous education details"
-                  rows={2}
-                  className="text-sm"
+                <FileUpload
+                  label="Passport"
+                  value={formData.passport}
+                  onChange={(value) => handleInputChange('passport', value)}
+                  accept="image/*,.pdf"
+                  allowTextInput={true}
+                  placeholder="Enter passport number or upload file"
                 />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="notes" className="text-xs">Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  placeholder="Enter any additional notes"
-                  rows={2}
-                  className="text-sm"
-                />
-              </div>
+
+              {formData.consultancyFee === 'Yes' && (
+                <div className="space-y-1">
+                  <FileUpload
+                    label="Consultancy Fee Attachment"
+                    value={formData.consultancyFeeAttachment}
+                    onChange={(value) => handleInputChange('consultancyFeeAttachment', value)}
+                    accept=".pdf,.doc,.docx,image/*"
+                    allowTextInput={false}
+                    placeholder="Upload consultancy fee document"
+                  />
+                </div>
+              )}
+
+              {formData.scholarship === 'Yes' && (
+                <div className="space-y-1">
+                  <FileUpload
+                    label="Scholarship Attachment"
+                    value={formData.scholarshipAttachment}
+                    onChange={(value) => handleInputChange('scholarshipAttachment', value)}
+                    accept=".pdf,.doc,.docx,image/*"
+                    allowTextInput={false}
+                    placeholder="Upload scholarship document"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Address Field */}
+            <div className="space-y-1">
+              <Label htmlFor="address" className="text-xs">Address</Label>
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                placeholder="Enter full address"
+                rows={2}
+                className="text-sm"
+              />
             </div>
           </div>
         </div>
