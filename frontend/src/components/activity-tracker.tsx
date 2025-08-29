@@ -46,6 +46,15 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
     queryKey: ['/api/users'],
   });
 
+  // Fetch Leads dropdowns (for mapping status IDs/keys to display names)
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
+  });
+
   // Create a lookup function for user profile images
   const getUserProfileImage = (userId: string) => {
     const user = users.find((u: UserType) => u.id === userId);
@@ -124,6 +133,29 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
       case 'deleted': return 'bg-red-500';
       default: return 'bg-gray-400';
     }
+  };
+
+  // Map status id/key/value to display label from dropdowns
+  const getStatusLabel = (idOrKey?: string) => {
+    if (!idOrKey || !leadsDropdowns?.Status) return idOrKey || '';
+    const status = leadsDropdowns.Status.find((opt: any) =>
+      opt.id === idOrKey || opt.key === idOrKey || opt.value?.toLowerCase() === idOrKey.toLowerCase()
+    );
+    return status?.value || idOrKey;
+  };
+
+  // Replace raw status IDs in activity text with human-readable labels
+  const mapStatusIdsInText = (text: string) => {
+    if (!text) return '';
+    const statusChangeRegex = /status changed from\s+"([^"]+)"\s+to\s+"([^"]+)"/i;
+    if (statusChangeRegex.test(text)) {
+      return text.replace(statusChangeRegex, (_m, fromId, toId) => {
+        const fromLabel = getStatusLabel(fromId);
+        const toLabel = getStatusLabel(toId);
+        return `Status changed from "${fromLabel}" to "${toLabel}"`;
+      });
+    }
+    return text.replace(/[0-9a-fA-F-]{36}/g, (token) => getStatusLabel(token));
   };
 
   if (isLoading) {
@@ -264,7 +296,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                       {/* Line 3: Message */}
                       {(activity.description || activity.title) && (
                         <div className="pt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                          {activity.description || activity.title}
+                          {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || activity.title) : (activity.description || activity.title)}
                         </div>
                       )}
                     </div>
