@@ -29,7 +29,7 @@ export default function Students() {
   });
 
   const updateStudentMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<Student> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => {
       const response = await apiRequest('PUT', `/api/students/${id}`, data);
       return response.json();
     },
