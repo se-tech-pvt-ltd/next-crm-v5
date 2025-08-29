@@ -22,8 +22,20 @@ export function CollapsibleCard({
   cardClassName,
   persistKey,
 }: CollapsibleCardProps) {
-  const [open, setOpen] = useState<boolean>(defaultOpen);
+  const [open, setOpen] = useState<boolean>(() => {
+    if (!persistKey) return defaultOpen;
+    if (typeof window === "undefined") return defaultOpen;
+    try {
+      const stored = localStorage.getItem(persistKey);
+      if (stored === "1") return true;
+      if (stored === "0") return false;
+      return defaultOpen;
+    } catch {
+      return defaultOpen;
+    }
+  });
 
+  // When the key changes (navigating to another lead), re-read persisted state
   useEffect(() => {
     if (!persistKey) return;
     try {
