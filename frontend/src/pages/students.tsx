@@ -332,10 +332,6 @@ export default function Students() {
         </Card>
       </div>
 
-      <AddStudentModal 
-        open={isAddStudentModalOpen}
-        onOpenChange={setIsAddStudentModalOpen}
-      />
       <AddApplicationModal 
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
