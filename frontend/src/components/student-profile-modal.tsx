@@ -19,7 +19,7 @@ import { User, Edit, Save, X, Plus, FileText, Award, Calendar, Phone, Mail } fro
 interface StudentProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studentId: number | null;
+  studentId: string | null;
 }
 
 export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {
