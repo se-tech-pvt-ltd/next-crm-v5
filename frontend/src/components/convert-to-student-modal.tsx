@@ -280,222 +280,353 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto py-2">
-          <div className="space-y-4">
-            {/* Collapsible Lead Details */}
-            <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  Lead Details (Auto-filled)
-                  {isLeadDetailsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-3 mt-3 p-3 bg-gray-50 rounded-lg">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Type</Label>
-                    <Input value={formData.type} disabled className="h-8 text-sm bg-white" />
+        <div className="space-y-6">
+          {/* Collapsible Lead Details */}
+          <Card>
+            <CardHeader className="pb-3">
+              <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between hover:bg-muted/50 transition-all">
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      <span>Lead Details (Auto-filled from Lead Profile)</span>
+                    </div>
+                    {isLeadDetailsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+              </Collapsible>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <User className="w-3 h-3" />
+                      <span>Type</span>
+                    </Label>
+                    <Input value={formData.type} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Name</Label>
-                    <Input value={formData.name} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <User className="w-3 h-3" />
+                      <span>Name</span>
+                    </Label>
+                    <Input value={formData.name} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Email</Label>
-                    <Input value={formData.email} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <Mail className="w-3 h-3" />
+                      <span>Email</span>
+                    </Label>
+                    <Input value={formData.email} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Phone</Label>
-                    <Input value={formData.phone} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <Phone className="w-3 h-3" />
+                      <span>Phone</span>
+                    </Label>
+                    <Input value={formData.phone} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Source</Label>
-                    <Input value={formData.source} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <MapPin className="w-3 h-3" />
+                      <span>Source</span>
+                    </Label>
+                    <Input value={formData.source} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Interested Country</Label>
-                    <Input value={formData.interestedCountry} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <Globe className="w-3 h-3" />
+                      <span>Interested Country</span>
+                    </Label>
+                    <Input value={formData.interestedCountry} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Study Level</Label>
-                    <Input value={formData.studyLevel} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <GraduationCap className="w-3 h-3" />
+                      <span>Study Level</span>
+                    </Label>
+                    <Input value={formData.studyLevel} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Study Plan</Label>
-                    <Input value={formData.studyPlan} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <GraduationCap className="w-3 h-3" />
+                      <span>Study Plan</span>
+                    </Label>
+                    <Input value={formData.studyPlan} disabled className="bg-background" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-gray-600">Admission Officer</Label>
-                    <Input value={formData.admissionOfficer} disabled className="h-8 text-sm bg-white" />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
+                      <Users className="w-3 h-3" />
+                      <span>Admission Officer</span>
+                    </Label>
+                    <Input value={formData.admissionOfficer} disabled className="bg-background" />
                   </div>
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
 
-            {/* Student Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="status" className="text-xs">Status *</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Open">Open</SelectItem>
-                    <SelectItem value="Closed">Closed</SelectItem>
-                    <SelectItem value="Enrolled">Enrolled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="expectation" className="text-xs">Expectation *</Label>
-                <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select expectation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Average">Average</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="counsellor" className="text-xs">Counsellor</Label>
-                <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select counsellor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(users) && users.map((user: any) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName} ({user.email})
+          {/* Student Status & Basic Info */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Target className="w-5 h-5 text-primary" />
+                <span>Student Status & Priority</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-sm font-medium flex items-center space-x-2">
+                    <Target className="w-4 h-4" />
+                    <span>Status *</span>
+                  </Label>
+                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Open">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="w-2 h-2 rounded-full p-0 bg-green-500"></Badge>
+                          <span>Open</span>
+                        </div>
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      <SelectItem value="Closed">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="w-2 h-2 rounded-full p-0 bg-red-500"></Badge>
+                          <span>Closed</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Enrolled">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="w-2 h-2 rounded-full p-0 bg-blue-500"></Badge>
+                          <span>Enrolled</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="dateOfBirth" className="text-xs">Date of Birth</Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                  className="h-8 text-sm"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expectation" className="text-sm font-medium flex items-center space-x-2">
+                    <Award className="w-4 h-4" />
+                    <span>Expectation *</span>
+                  </Label>
+                  <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
+                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Select expectation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="High">
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="destructive" className="w-2 h-2 rounded-full p-0"></Badge>
+                          <span>High</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Average">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="w-2 h-2 rounded-full p-0 bg-yellow-500"></Badge>
+                          <span>Average</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="city" className="text-xs">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  placeholder="Enter city"
-                  className="h-8 text-sm"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="counsellor" className="text-sm font-medium flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>Counsellor</span>
+                  </Label>
+                  <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
+                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Select counsellor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(users) && users.map((user: any) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.firstName} {user.lastName} ({user.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="eltTest" className="text-xs">ELT Test</Label>
-                <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select test" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IELTS">IELTS</SelectItem>
-                    <SelectItem value="PTE">PTE</SelectItem>
-                    <SelectItem value="OIDI">OIDI</SelectItem>
-                    <SelectItem value="TOEFL">TOEFL</SelectItem>
-                    <SelectItem value="Passwords">Passwords</SelectItem>
-                    <SelectItem value="No Test">No Test</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="consultancyFee" className="text-xs">Consultancy Fee</Label>
-                <Select value={formData.consultancyFee} onValueChange={(value) => handleInputChange('consultancyFee', value)}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                    <SelectItem value="No">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="scholarship" className="text-xs">Scholarship</Label>
-                <Select value={formData.scholarship} onValueChange={(value) => handleInputChange('scholarship', value)}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                    <SelectItem value="No">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* File Upload Fields */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <FileUpload
-                  label="Passport"
-                  value={formData.passport}
-                  onChange={(value) => handleInputChange('passport', value)}
-                  accept="image/*,.pdf"
-                  allowTextInput={true}
-                  placeholder="Enter passport number or upload file"
-                />
-              </div>
-
-              {formData.consultancyFee === 'Yes' && (
-                <div className="space-y-1">
-                  <FileUpload
-                    label="Consultancy Fee Attachment"
-                    value={formData.consultancyFeeAttachment}
-                    onChange={(value) => handleInputChange('consultancyFeeAttachment', value)}
-                    accept=".pdf,.doc,.docx,image/*"
-                    allowTextInput={false}
-                    placeholder="Upload consultancy fee document"
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth" className="text-sm font-medium flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Date of Birth</span>
+                  </Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                    className="transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
-              )}
+              </div>
+            </CardContent>
+          </Card>
 
-              {formData.scholarship === 'Yes' && (
-                <div className="space-y-1">
-                  <FileUpload
-                    label="Scholarship Attachment"
-                    value={formData.scholarshipAttachment}
-                    onChange={(value) => handleInputChange('scholarshipAttachment', value)}
-                    accept=".pdf,.doc,.docx,image/*"
-                    allowTextInput={false}
-                    placeholder="Upload scholarship document"
+          {/* Academic & Location Details */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <GraduationCap className="w-5 h-5 text-primary" />
+                <span>Academic & Location Details</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city" className="text-sm font-medium flex items-center space-x-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>City</span>
+                  </Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
+                    placeholder="Enter city"
+                    className="transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
-              )}
-            </div>
 
-            {/* Address Field */}
-            <div className="space-y-1">
-              <Label htmlFor="address" className="text-xs">Address</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                placeholder="Enter full address"
-                rows={2}
-                className="text-sm"
-              />
-            </div>
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eltTest" className="text-sm font-medium flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>ELT Test</span>
+                  </Label>
+                  <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
+                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Select test" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="IELTS">📝 IELTS</SelectItem>
+                      <SelectItem value="PTE">📝 PTE</SelectItem>
+                      <SelectItem value="OIDI">📝 OIDI</SelectItem>
+                      <SelectItem value="TOEFL">📝 TOEFL</SelectItem>
+                      <SelectItem value="Passwords">🔑 Passwords</SelectItem>
+                      <SelectItem value="No Test">❌ No Test</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-sm font-medium flex items-center space-x-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>Full Address</span>
+                </Label>
+                <Textarea
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="Enter complete address with street, city, postal code..."
+                  rows={3}
+                  className="transition-all focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Financial & Documentation */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <DollarSign className="w-5 h-5 text-primary" />
+                <span>Financial & Documentation</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="consultancyFee" className="text-sm font-medium flex items-center space-x-2">
+                    <DollarSign className="w-4 h-4" />
+                    <span>Consultancy Fee</span>
+                  </Label>
+                  <Select value={formData.consultancyFee} onValueChange={(value) => handleInputChange('consultancyFee', value)}>
+                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Select option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">✅ Yes</SelectItem>
+                      <SelectItem value="No">❌ No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="scholarship" className="text-sm font-medium flex items-center space-x-2">
+                    <Award className="w-4 h-4" />
+                    <span>Scholarship</span>
+                  </Label>
+                  <Select value={formData.scholarship} onValueChange={(value) => handleInputChange('scholarship', value)}>
+                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Select option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">🎓 Yes</SelectItem>
+                      <SelectItem value="No">❌ No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium flex items-center space-x-2">
+                    <Upload className="w-4 h-4" />
+                    <span>Passport</span>
+                  </Label>
+                  <FileUpload
+                    value={formData.passport}
+                    onChange={(value) => handleInputChange('passport', value)}
+                    accept="image/*,.pdf"
+                    allowTextInput={true}
+                    placeholder="Enter passport number or upload file"
+                  />
+                </div>
+
+                {formData.consultancyFee === 'Yes' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4" />
+                      <span>Consultancy Fee Attachment</span>
+                    </Label>
+                    <FileUpload
+                      value={formData.consultancyFeeAttachment}
+                      onChange={(value) => handleInputChange('consultancyFeeAttachment', value)}
+                      accept=".pdf,.doc,.docx,image/*"
+                      allowTextInput={false}
+                      placeholder="Upload consultancy fee document"
+                    />
+                  </div>
+                )}
+
+                {formData.scholarship === 'Yes' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center space-x-2">
+                      <Award className="w-4 h-4" />
+                      <span>Scholarship Attachment</span>
+                    </Label>
+                    <FileUpload
+                      value={formData.scholarshipAttachment}
+                      onChange={(value) => handleInputChange('scholarshipAttachment', value)}
+                      accept=".pdf,.doc,.docx,image/*"
+                      allowTextInput={false}
+                      placeholder="Upload scholarship document"
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Separator />
         </div>
 
         <div className="shrink-0 border-t pt-2 pb-2">
