@@ -25,3 +25,5 @@ yarn-error.log*
 
 # Config backup files
 vite.config.ts.*
+
+dist/
