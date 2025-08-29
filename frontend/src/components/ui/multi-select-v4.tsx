@@ -113,9 +113,10 @@ export function MultiSelectV4({
         variant="outline"
         role="combobox"
         aria-expanded={isOpen}
+        disabled={disabled}
         onClick={handleToggle}
         className={cn(
-          "w-full justify-between h-auto min-h-10 text-left font-normal",
+          "w-full justify-between h-auto min-h-10 text-left font-normal disabled:border-transparent disabled:bg-transparent",
           selectedOptions.length === 0 && "text-muted-foreground",
           className
         )}
