@@ -19,6 +19,7 @@ interface MultiSelectProps {
   className?: string;
   emptyMessage?: string;
   maxDisplayItems?: number;
+  disabled?: boolean;
 }
 
 export function MultiSelectV4({
