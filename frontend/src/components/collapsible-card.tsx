@@ -16,7 +16,7 @@ interface CollapsibleCardProps {
 export function CollapsibleCard({
   header,
   children,
-  defaultOpen = true,
+  defaultOpen = false,
   headerClassName,
   contentClassName,
   cardClassName,
