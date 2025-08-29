@@ -16,7 +16,7 @@ import { ActivityTracker } from '@/components/activity-tracker';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type Lead, type User } from '@/lib/types';
+import { type Lead, type User, type Student } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -79,6 +79,18 @@ export default function LeadDetails() {
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  const { data: convertedStudent } = useQuery<Student | undefined>({
+    queryKey: ['/api/students/by-lead', params?.id],
+    queryFn: async () => {
+      const res = await apiRequest('GET', `/api/students/by-lead/${params?.id}`);
+      if (res.status === 404) return undefined as any;
+      return res.json();
+    },
+    enabled: !!params?.id,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   useEffect(() => {
@@ -399,7 +411,11 @@ export default function LeadDetails() {
     >
       <div className="text-xs md:text-[12px]">
         {/* Status Progress Bar */}
-        {!isLoading && <StatusProgressBar />}
+        {!isLoading && (convertedStudent ? (
+          <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3 text-xs text-gray-700">Lead is already converted</div>
+        ) : (
+          <StatusProgressBar />
+        ))}
 
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
@@ -411,35 +427,47 @@ export default function LeadDetails() {
                 <CardTitle className="text-sm">Personal Information</CardTitle>
                 <div className="flex items-center space-x-2">
                   {!isEditing ? (
-                    <>
+                    convertedStudent ? (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setIsEditing(true)}
+                        onClick={() => setLocation(`/students/${convertedStudent.id}`)}
                         disabled={isLoading}
                       >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
+                        <UserIcon className="w-4 h-4 mr-1" />
+                        View Student
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowConvertModal(true)}
-                        disabled={isLoading || currentStatus === 'converted'}
-                      >
-                        <UserPlus className="w-4 h-4 mr-1" />
-                        Convert to Student
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowMarkAsLostModal(true)}
-                        disabled={isLoading || currentStatus === 'lost'}
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Mark as Lost
-                      </Button>
-                    </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditing(true)}
+                          disabled={isLoading}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowConvertModal(true)}
+                          disabled={isLoading || currentStatus === 'converted'}
+                        >
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Convert to Student
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowMarkAsLostModal(true)}
+                          disabled={isLoading || currentStatus === 'lost'}
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          Mark as Lost
+                        </Button>
+                      </>
+                    )
                   ) : (
                     <>
                       <Button
