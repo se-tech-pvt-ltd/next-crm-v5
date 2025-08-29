@@ -18,6 +18,8 @@ interface ActivityTrackerProps {
   entityId: string | number;
   entityName?: string;
   initialInfo?: string;
+  initialInfoDate?: string | Date;
+  initialInfoUserName?: string;
 }
 
 const ACTIVITY_TYPES = [
@@ -30,7 +32,7 @@ const ACTIVITY_TYPES = [
   { value: 'meeting', label: 'Meeting', icon: Users },
 ];
 
-export function ActivityTracker({ entityType, entityId, entityName, initialInfo }: ActivityTrackerProps) {
+export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
   const [isAddingActivity, setIsAddingActivity] = useState(false);
@@ -264,64 +266,67 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo 
 
         {/* Activities List */}
         <div className="space-y-5 pl-1">
-          {/* Initial Info from Additional Information panel */}
-          {initialInfo && initialInfo.trim().length > 0 && (
-            <div className="relative flex gap-3">
-              <div className="relative w-5 flex flex-col items-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white shadow mt-2" />
-                {(activities as Activity[]).length > 0 && <div className="w-px flex-1 bg-gray-200 mt-1" />}
-              </div>
-              <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm">
-                <div className="space-y-1.5">
-                  <div className="text-xs font-semibold text-gray-900">Initial info</div>
-                  <div className="pt-0.5 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">{initialInfo}</div>
-                </div>
-              </div>
-            </div>
-          )}
+          {(() => {
+            let list: Activity[] = Array.isArray(activities) ? [...(activities as Activity[])] : [];
+            if (initialInfo && initialInfo.trim().length > 0) {
+              const createdActivity = list.find(a => a.activityType === 'created');
+              const userName = initialInfoUserName || createdActivity?.userName || 'Admin User';
+              const when = initialInfoDate || createdActivity?.createdAt || new Date(0).toISOString();
+              const synthetic: any = {
+                id: -1,
+                entityType: String(entityType),
+                entityId: String(entityId),
+                activityType: 'note',
+                title: 'Initial note',
+                description: initialInfo,
+                userName,
+                userId: createdActivity?.userId,
+                userProfileImage: createdActivity?.userProfileImage,
+                createdAt: when,
+              } as Activity;
+              list = [...list, synthetic];
+            }
+            list.sort((a: any, b: any) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime());
 
-          {(!activities || (activities as Activity[]).length === 0) && !(initialInfo && initialInfo.trim().length > 0) ? (
-            <div className="text-center py-8 text-gray-500">
-              <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No activities yet</p>
-              <p className="text-sm">Activities and comments will appear here</p>
-            </div>
-          ) : (
-            (activities as Activity[]).map((activity: Activity, idx: number, arr: Activity[]) => {
-              const isLast = idx === arr.length - 1;
-              const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
+            if (list.length === 0) {
               return (
-                <div key={activity.id} className="relative flex gap-3">
-                  {/* Timeline rail */}
+                <div className="text-center py-8 text-gray-500">
+                  <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No activities yet</p>
+                  <p className="text-sm">Activities and comments will appear here</p>
+                </div>
+              );
+            }
+
+            return list.map((activity: Activity, idx: number) => {
+              const isLast = idx === list.length - 1;
+              const profileImage = (activity as any).userId ? getUserProfileImage((activity as any).userId as any) : (activity as any).userProfileImage;
+              return (
+                <div key={`${activity.id}-${activity.createdAt}`} className="relative flex gap-3">
                   <div className="relative w-5 flex flex-col items-center">
                     <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(activity.activityType)} ring-2 ring-white shadow mt-2`} />
                     {!isLast && <div className="w-px flex-1 bg-gray-200 mt-1" />}
                   </div>
-
-                  {/* Card */}
                   <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-2">
-                      {/* Line 1: User (bold) */}
                       <div className="text-xs font-semibold text-gray-900">
-                        {activity.userName || "Unknown User"}
+                        {activity.userName || 'Unknown User'}
                       </div>
-                      {/* Line 2: Type (left)  Date (right) */}
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
-                        <span className="text-gray-500">{format(new Date(activity.createdAt!), 'MMM d, h:mm a')}</span>
+                        <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
                       </div>
-                      {/* Line 3: Message */}
-                      {(activity.description || activity.title) && (
+                      {(activity.description || (activity as any).title) && (
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
-                          {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || activity.title) : (activity.description || activity.title)}
+                          {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || (activity as any).title) : (activity.description || (activity as any).title)}
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
               );
-            })
-          )}
+            });
+          })()}
         </div>
     </div>
   );
