@@ -32,6 +32,8 @@ export interface Lead {
   timeline: string | null;
   notes: string | null;
   counselorId: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
