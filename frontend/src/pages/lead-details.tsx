@@ -833,7 +833,7 @@ export default function LeadDetails() {
           <DialogHeader>
             <DialogTitle>Mark Lead as Lost</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="reason">Reason for marking as lost</Label>
               <Textarea
