@@ -268,6 +268,25 @@ export default function LeadDetails() {
     return index;
   };
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatusKey: string) => {
+      const response = await apiRequest('PUT', `/api/leads/${params?.id}`, { status: newStatusKey });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update status');
+      }
+      return response.json();
+    },
+    onSuccess: (updatedLead) => {
+      setCurrentStatus(updatedLead.status);
+      queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
+      toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
+  });
+
   const StatusProgressBar = () => {
     const currentIndex = getCurrentStatusIndex();
     console.log('Using index:', currentIndex, 'for status:', currentStatus);
@@ -280,13 +299,28 @@ export default function LeadDetails() {
             const isCompleted = index <= currentIndex; // Current and all previous should be green
             const statusName = getStatusDisplayName(statusId);
 
+            const handleClick = () => {
+              if (updateStatusMutation.isPending) return;
+              if (!lead) return;
+              // If already at this status, do nothing (no toggle back)
+              const targetKey = statusId; // statusSequence holds keys
+              if (currentStatus === targetKey) return;
+              updateStatusMutation.mutate(targetKey);
+            };
+
             return (
-              <div key={statusId} className="flex flex-col items-center relative flex-1">
+              <div
+                key={statusId}
+                className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                onClick={handleClick}
+                role="button"
+                aria-label={`Set status to ${statusName}`}
+              >
                 {/* Status Circle */}
                 <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
                   isCompleted
                     ? 'bg-green-500 border-green-500 text-white'
-                    : 'bg-white border-gray-300 text-gray-500'
+                    : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
                 }`}>
                   {isCompleted && <div className="w-2 h-2 bg-white rounded-full" />}
                   {!isCompleted && <div className="w-2 h-2 bg-gray-300 rounded-full" />}
@@ -294,7 +328,7 @@ export default function LeadDetails() {
 
                 {/* Status Label */}
                 <span className={`mt-1 text-xs font-medium text-center ${
-                  isCompleted ? 'text-green-600' : 'text-gray-500'
+                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
                 }`}>
                   {statusName}
                 </span>
