@@ -21,7 +21,8 @@ const storage = multer.diskStorage({
   }
 });
 
-export const upload = multer({ 
+// Profile picture upload (images only)
+export const uploadProfilePicture = multer({
   storage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
@@ -32,6 +33,32 @@ export const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
+
+// General file upload (documents, images, etc.)
+export const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit for documents
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow images and documents
+    const allowedTypes = [
+      'image/',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/'
+    ];
+
+    const isAllowed = allowedTypes.some(type => file.mimetype.startsWith(type));
+
+    if (isAllowed) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only images, PDFs, Word documents, and text files are allowed!'));
     }
   }
 });
