@@ -547,6 +547,12 @@ export default function Leads() {
                         )}
                       </TableCell>
                       <TableCell>
+                        <span className="text-sm text-gray-700">{lead.createdBy || '—'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-700">{lead.updatedBy || '—'}</span>
+                      </TableCell>
+                      <TableCell>
                         <Badge className={getStatusColor(lead.status || 'new')}>
                           {getStatusDisplayName(lead.status || 'new')}
                         </Badge>
