@@ -755,7 +755,7 @@ export default function LeadDetails() {
                 <Skeleton className="h-20 w-full" />
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="notes" className="flex items-center space-x-2">
