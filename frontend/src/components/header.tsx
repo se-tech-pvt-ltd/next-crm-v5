@@ -118,33 +118,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Quick Actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90" size="sm">
-                  <Plus size={16} className="sm:mr-2" />
-                  <span className="hidden sm:inline">Quick Add</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsAddLeadModalOpen(true)}>
-                  <UserPlus size={16} className="mr-2" />
-                  Add Lead
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddStudentModalOpen(true)}>
-                  <GraduationCap size={16} className="mr-2" />
-                  Add Student
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddApplicationModalOpen(true)}>
-                  <GraduationCap size={16} className="mr-2" />
-                  New Application
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddAdmissionModalOpen(true)}>
-                  <GraduationCap size={16} className="mr-2" />
-                  Add Admission
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </header>
