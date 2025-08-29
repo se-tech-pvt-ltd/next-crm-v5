@@ -769,7 +769,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.notes || '') : (lead?.notes || '')}
                     onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
                     disabled={!isEditing}
-                    className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
+                    className="min-h-20 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -784,7 +784,7 @@ export default function LeadDetails() {
                       id="lostReason"
                       value={lead.lostReason}
                       disabled
-                      className="bg-red-50 min-h-16"
+                      className="bg-red-50 min-h-16 text-sm"
                     />
                   </div>
                 )}
@@ -794,8 +794,8 @@ export default function LeadDetails() {
         </div>
 
         {/* Activity Sidebar */}
-        <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
+        <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
+          <h3 className="text-base font-semibold mb-3 flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Activity Timeline
           </h3>
