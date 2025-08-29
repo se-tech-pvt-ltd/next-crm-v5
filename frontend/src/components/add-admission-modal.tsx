@@ -44,7 +44,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     resolver: zodResolver(insertAdmissionSchema),
     defaultValues: {
       applicationId: applicationId || 0,
-      studentId: studentId || 0,
+      studentId: studentId || '',
       university: '',
       program: '',
       scholarshipAmount: '',
