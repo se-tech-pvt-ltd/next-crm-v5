@@ -155,6 +155,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
         name: lead.name || '',
         phone: lead.phone || '',
         email: lead.email || '',
+        city: lead.city || '',
         source: mapDropdownToLabels(lead.source, 'Source') || normalizeToText(lead.source),
         interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
