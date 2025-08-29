@@ -741,7 +741,7 @@ export default function LeadDetails() {
                     type="single"
                     value={isEditing ? (editData.elt || '') : (lead?.elt || '')}
                     onValueChange={(value) => value && setEditData({ ...editData, elt: value })}
-                    className="gap-2"
+                    className="justify-start gap-2"
                   >
                     <ToggleGroupItem
                       value="yes"
