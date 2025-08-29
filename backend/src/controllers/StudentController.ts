@@ -53,9 +53,37 @@ export class StudentController {
 
   static async convertFromLead(req: Request, res: Response) {
     try {
-      const { leadId, ...studentData } = req.body;
-      const validatedData = insertStudentSchema.parse(studentData);
-      
+      const { leadId, ...studentData } = req.body as any;
+
+      // Map UI fields to ORM fields
+      const transformed: any = {
+        name: studentData.name,
+        email: studentData.email,
+        phone: studentData.phone,
+        dateOfBirth: studentData.dateOfBirth || undefined,
+        englishProficiency: studentData.eltTest || studentData.englishProficiency || undefined,
+        passportNumber: studentData.passport || studentData.passportNumber || undefined,
+        targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
+        status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
+        counselorId: studentData.counsellor || studentData.counselorId || undefined,
+        // Preserve extra UI-only fields in notes
+        notes: [
+          studentData.address ? `Address: ${studentData.address}` : '',
+          studentData.consultancyFee ? `Consultancy Fee: ${studentData.consultancyFee}` : '',
+          studentData.scholarship ? `Scholarship: ${studentData.scholarship}` : '',
+          studentData.studyLevel ? `Study Level: ${studentData.studyLevel}` : '',
+          studentData.studyPlan ? `Study Plan: ${studentData.studyPlan}` : '',
+          studentData.source ? `Source: ${studentData.source}` : '',
+          studentData.city ? `City: ${studentData.city}` : '',
+          studentData.expectation ? `Expectation: ${studentData.expectation}` : '',
+          studentData.type ? `Type: ${studentData.type}` : '',
+        ].filter(Boolean).join(' | ') || undefined,
+      };
+
+      console.log('[ConvertFromLead] Incoming:', JSON.stringify(studentData));
+      console.log('[ConvertFromLead] Transformed:', JSON.stringify(transformed));
+
+      const validatedData = insertStudentSchema.parse(transformed);
       const student = await StudentService.convertFromLead(leadId, validatedData);
       res.status(201).json(student);
     } catch (error) {
