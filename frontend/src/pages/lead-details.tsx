@@ -394,7 +394,7 @@ export default function LeadDetails() {
       subtitle={undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
-      <div className="text-sm md:text-[13px]">
+      <div className="text-xs md:text-[12px]">
         {/* Status Progress Bar */}
         {!isLoading && <StatusProgressBar />}
 
@@ -405,7 +405,7 @@ export default function LeadDetails() {
           <Card className="w-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Personal Information</CardTitle>
+                <CardTitle className="text-sm">Personal Information</CardTitle>
                 <div className="flex items-center space-x-2">
                   {!isEditing ? (
                     <>
@@ -463,9 +463,9 @@ export default function LeadDetails() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
@@ -474,7 +474,7 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {/* Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="flex items-center space-x-2">
@@ -486,7 +486,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.name || '') : (lead?.name || '')}
                     onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -502,7 +502,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.email || '') : (lead?.email || '')}
                     onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -518,7 +518,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.phone || '') : (lead?.phone || '')}
                     onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -533,7 +533,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.city || '') : (lead?.city || '')}
                     onChange={(e) => setEditData({ ...editData, city: e.target.value })}
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -544,14 +544,14 @@ export default function LeadDetails() {
           {/* Lead Management Section */}
           <CollapsibleCard
             header={
-              <CardTitle className="text-base flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
                 <span>Lead Information</span>
               </CardTitle>
             }
           >
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
@@ -560,7 +560,7 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {/* Type */}
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
@@ -578,7 +578,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No types found"
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -599,7 +599,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No sources found"
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -620,7 +620,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No officers found"
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -630,14 +630,14 @@ export default function LeadDetails() {
           {/* Academic Interests Section */}
           <CollapsibleCard
             header={
-              <CardTitle className="text-base flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic Interests</span>
               </CardTitle>
             }
           >
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
@@ -646,7 +646,7 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 {/* Interested Country - Multi-Select */}
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
@@ -665,7 +665,7 @@ export default function LeadDetails() {
                     emptyMessage="No countries found"
                     maxDisplayItems={2}
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -686,7 +686,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No study levels found"
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -707,12 +707,12 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No study plans found"
                     disabled={!isEditing}
-                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
                 {/* ELT */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
                     <FileText className="w-4 h-4" />
                     <span>English Language Test Completed</span>
@@ -725,13 +725,13 @@ export default function LeadDetails() {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="yes" id="elt-yes" disabled={!isEditing} />
-                      <Label htmlFor="elt-yes" className="text-sm font-normal cursor-pointer">
+                      <Label htmlFor="elt-yes" className="text-xs font-normal cursor-pointer">
                         Yes
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="no" id="elt-no" disabled={!isEditing} />
-                      <Label htmlFor="elt-no" className="text-sm font-normal cursor-pointer">
+                      <Label htmlFor="elt-no" className="text-xs font-normal cursor-pointer">
                         No
                       </Label>
                     </div>
@@ -744,7 +744,7 @@ export default function LeadDetails() {
           {/* Additional Information Section */}
           <CollapsibleCard
             header={
-              <CardTitle className="text-base flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <span>Additional Information</span>
               </CardTitle>
@@ -756,7 +756,7 @@ export default function LeadDetails() {
                 <Skeleton className="h-20 w-full" />
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="notes" className="flex items-center space-x-2">
@@ -769,7 +769,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.notes || '') : (lead?.notes || '')}
                     onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
                     disabled={!isEditing}
-                    className="min-h-20 text-sm transition-all focus:ring-2 focus:ring-primary/20"
+                    className="min-h-16 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -784,7 +784,7 @@ export default function LeadDetails() {
                       id="lostReason"
                       value={lead.lostReason}
                       disabled
-                      className="bg-red-50 min-h-16 text-sm"
+                      className="bg-red-50 min-h-16 text-xs"
                     />
                   </div>
                 )}
@@ -795,7 +795,7 @@ export default function LeadDetails() {
 
         {/* Activity Sidebar */}
         <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
-          <h3 className="text-base font-semibold mb-3 flex items-center">
+          <h3 className="text-sm font-semibold mb-2 flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Activity Timeline
           </h3>
@@ -835,7 +835,7 @@ export default function LeadDetails() {
           <DialogHeader>
             <DialogTitle>Mark Lead as Lost</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="space-y-2">
               <Label htmlFor="reason">Reason for marking as lost</Label>
               <Textarea
