@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddStudentModal } from '@/components/add-student-modal';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@/lib/types';
