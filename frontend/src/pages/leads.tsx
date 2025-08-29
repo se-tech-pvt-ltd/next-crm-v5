@@ -12,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { getStatusColor } from '@/lib/utils';
 import { Lead } from '@/lib/types';
 import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -215,29 +214,24 @@ export default function Leads() {
     }
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
 
   return (
-    <Layout 
-      title="Leads" 
+    <Layout
+      title="Leads"
       subtitle="Manage and track your prospects"
-      helpText="Leads are potential students interested in study abroad programs. Track their progress and convert them to active students."
     >
       <div className="space-y-3">
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           <Card>
-            <CardHeader className="pb-2 p-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="w-4 h-4 text-gray-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Users className="w-3 h-3 text-gray-500" />
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 pt-0">
+            <CardContent className="p-2 pt-0">
               <div className="text-xl font-bold">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : pagination.total || 0}
               </div>
@@ -245,13 +239,13 @@ export default function Leads() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-2 p-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <UserPlus className="w-4 h-4 text-blue-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <UserPlus className="w-3 h-3 text-blue-500" />
                 New Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 pt-0">
+            <CardContent className="p-2 pt-0">
               <div className="text-xl font-bold text-blue-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'new').length || 0}
               </div>
@@ -259,13 +253,13 @@ export default function Leads() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-2 p-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Target className="w-4 h-4 text-green-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Target className="w-3 h-3 text-green-500" />
                 Qualified
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 pt-0">
+            <CardContent className="p-2 pt-0">
               <div className="text-xl font-bold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'qualified').length || 0}
               </div>
@@ -273,13 +267,13 @@ export default function Leads() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-2 p-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <TrendingUp className="w-3 h-3 text-purple-500" />
                 Converted
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 pt-0">
+            <CardContent className="p-2 pt-0">
               <div className="text-xl font-bold text-purple-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'converted').length || 0}
               </div>
@@ -289,18 +283,18 @@ export default function Leads() {
 
         {/* Leads Table */}
         <Card>
-          <CardHeader className="p-4 pb-3">
+          <CardHeader className="p-3 pb-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center space-x-2">
                 <div className="flex items-center space-x-2">
-                  <Filter className="w-4 h-4 text-gray-500" />
+                  <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-sm font-medium text-gray-700">Filters:</span>
                 </div>
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
                   setCurrentPage(1); // Reset to first page when filter changes
                 }}>
-                  <SelectTrigger className="w-32 h-8">
+                  <SelectTrigger className="w-28 h-7 text-xs">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -316,7 +310,7 @@ export default function Leads() {
                   setSourceFilter(value);
                   setCurrentPage(1); // Reset to first page when filter changes
                 }}>
-                  <SelectTrigger className="w-32 h-8">
+                  <SelectTrigger className="w-28 h-7 text-xs">
                     <SelectValue placeholder="Filter by source" />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,7 +327,7 @@ export default function Leads() {
                 <div className="flex items-center space-x-2">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-32 h-8 text-xs">
+                      <Button variant="outline" className="w-28 h-7 text-xs">
                         <Calendar className="w-3 h-3 mr-1" />
                         {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
                       </Button>
@@ -353,7 +347,7 @@ export default function Leads() {
 
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-32 h-8 text-xs">
+                      <Button variant="outline" className="w-28 h-7 text-xs">
                         <Calendar className="w-3 h-3 mr-1" />
                         {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
                       </Button>
@@ -377,7 +371,7 @@ export default function Leads() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 text-xs"
+                    className="h-7 text-xs"
                     onClick={() => {
                       setStatusFilter('all');
                       setSourceFilter('all');
@@ -491,14 +485,14 @@ export default function Leads() {
                 </motion.div>
               </div>
             ) : (
-              <Table>
+              <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Interested Country</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -510,33 +504,33 @@ export default function Leads() {
                         setLocation(`/leads/${lead.id}`);
                       }}
                     >
-                      <TableCell className="font-medium">{lead.name}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium p-2 text-xs">{lead.name}</TableCell>
+                      <TableCell className="p-2 text-xs">
                         {lead.phone ? (
-                          <div className="flex items-center text-sm">
+                          <div className="flex items-center text-xs">
                             <Phone className="w-3 h-3 mr-1" />
                             {lead.phone}
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">No phone</span>
+                          <span className="text-xs text-gray-400">No phone</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <span className="text-sm">
+                      <TableCell className="p-2 text-xs">
+                        <span className="text-xs">
                           {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         {lead.country ? (
-                          <div className="flex items-center text-sm">
+                          <div className="flex items-center text-xs">
                             <Globe className="w-3 h-3 mr-1" />
                             {getCountryDisplayName(lead.country)}
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">Not specified</span>
+                          <span className="text-xs text-gray-400">Not specified</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(lead.status || 'new')}>
                           {getStatusDisplayName(lead.status || 'new')}
                         </Badge>
