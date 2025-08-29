@@ -320,7 +320,7 @@ export default function LeadDetails() {
                 aria-label={`Set status to ${statusName}`}
               >
                 {/* Status Circle */}
-                <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
                   isCompleted
                     ? 'bg-green-500 border-green-500 text-white'
                     : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
