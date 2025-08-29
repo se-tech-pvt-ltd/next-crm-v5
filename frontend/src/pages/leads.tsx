@@ -101,6 +101,9 @@ export default function Leads() {
       const response = await apiRequest('GET', `/api/leads?page=${currentPage}&limit=${pageSize}`);
       return response.json();
     },
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Extract leads and pagination info from response
