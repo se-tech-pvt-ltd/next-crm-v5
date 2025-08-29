@@ -42,7 +42,7 @@ export const leads = mysqlTable("leads", {
 });
 
 export const students = mysqlTable("students", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
   leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
@@ -64,7 +64,7 @@ export const students = mysqlTable("students", {
 
 export const applications = mysqlTable("applications", {
   id: int("id").primaryKey().autoincrement(),
-  studentId: int("student_id").notNull(),
+  studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),
   degree: text("degree"),
@@ -81,7 +81,7 @@ export const applications = mysqlTable("applications", {
 export const admissions = mysqlTable("admissions", {
   id: int("id").primaryKey().autoincrement(),
   applicationId: int("application_id").notNull(),
-  studentId: int("student_id").notNull(),
+  studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),
   decision: text("decision").notNull(),
@@ -112,7 +112,6 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 }).partial({ id: true }); // id is optional since it will be generated
 
 export const insertStudentSchema = createInsertSchema(students).omit({
-  id: true,
   createdAt: true,
   updatedAt: true,
 });
