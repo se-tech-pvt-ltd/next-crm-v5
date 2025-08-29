@@ -38,7 +38,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
-      studentId: studentId || 0,
+      studentId: studentId || '',
       university: '',
       program: selectedStudent?.targetProgram || '',
       degree: '',
