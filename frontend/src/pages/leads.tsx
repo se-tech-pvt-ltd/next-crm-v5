@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { getStatusColor } from '@/lib/utils';
 import { Lead } from '@/lib/types';
-import { Plus, UserPlus, Phone, Globe, GraduationCap, Users, UserCheck, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
+import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -197,14 +197,6 @@ export default function Leads() {
     return statusMatch && sourceMatch && dateMatch;
   }) || [];
 
-  // Get unique sources for filter dropdown
-  const uniqueSources = leads ? 
-    leads.reduce((sources: string[], lead) => {
-      if (lead.source && !sources.includes(lead.source)) {
-        sources.push(lead.source);
-      }
-      return sources;
-    }, []) : [];;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -312,12 +304,12 @@ export default function Leads() {
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="qualified">Qualified</SelectItem>
-                    <SelectItem value="converted">Converted</SelectItem>
-                    <SelectItem value="lost">Lost</SelectItem>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {dropdownData?.Status?.map((status: any) => (
+                      <SelectItem key={status.key} value={status.key}>
+                        {status.value}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={sourceFilter} onValueChange={(value) => {
@@ -329,9 +321,9 @@ export default function Leads() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Sources</SelectItem>
-                    {uniqueSources.map((source) => (
-                      <SelectItem key={source} value={source}>
-                        {source}
+                    {dropdownData?.Source?.map((source: any) => (
+                      <SelectItem key={source.key} value={source.key}>
+                        {source.value}
                       </SelectItem>
                     ))}
                   </SelectContent>
