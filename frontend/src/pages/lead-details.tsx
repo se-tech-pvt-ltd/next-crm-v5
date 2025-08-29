@@ -455,6 +455,7 @@ export default function LeadDetails() {
 
           {/* Personal Information Section */}
           <CollapsibleCard
+            defaultOpen
             header={
               <CardTitle className="text-lg flex items-center space-x-2">
                 <UserIcon className="w-5 h-5 text-primary" />
