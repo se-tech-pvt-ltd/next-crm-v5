@@ -19,7 +19,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export default function Students() {
   const [, setLocation] = useLocation();
-  const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
