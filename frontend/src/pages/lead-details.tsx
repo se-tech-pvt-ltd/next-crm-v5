@@ -544,6 +544,7 @@ export default function LeadDetails() {
 
           {/* Lead Management Section */}
           <CollapsibleCard
+            persistKey={`lead-details:${params?.id}:lead-information`}
             header={
               <CardTitle className="text-sm flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -630,6 +631,7 @@ export default function LeadDetails() {
 
           {/* Academic Interests Section */}
           <CollapsibleCard
+            persistKey={`lead-details:${params?.id}:academic-interests`}
             header={
               <CardTitle className="text-sm flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
