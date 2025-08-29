@@ -383,69 +383,146 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="flex items-center space-x-2">
-                    <UserIcon className="w-4 h-4" />
-                    <span>Full Name</span>
-                  </Label>
-                  <Input
-                    id="name"
-                    value={isEditing ? (editData.name || '') : (lead?.name || '')}
-                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                    disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
-                  />
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <UserIcon className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      {isLoading ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-5 w-32" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      ) : (
+                        <div>
+                          <h2 className="text-xl font-semibold text-gray-900">{lead?.name}</h2>
+                          <p className="text-sm text-gray-500">{lead?.email}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {!isEditing ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditing(true)}
+                          disabled={isLoading}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowConvertModal(true)}
+                          disabled={isLoading || currentStatus === 'converted'}
+                        >
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Convert to Student
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowMarkAsLostModal(true)}
+                          disabled={isLoading || currentStatus === 'lost'}
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          Mark as Lost
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={handleSave}
+                          disabled={updateLeadMutation.isPending}
+                        >
+                          <Save className="w-4 h-4 mr-1" />
+                          Save Changes
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setIsEditing(false);
+                            setEditData(lead);
+                          }}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="flex items-center space-x-2">
+                      <UserIcon className="w-4 h-4" />
+                      <span>Full Name</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      value={isEditing ? (editData.name || '') : (lead?.name || '')}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
 
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center space-x-2">
-                    <Mail className="w-4 h-4" />
-                    <span>Email Address</span>
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={isEditing ? (editData.email || '') : (lead?.email || '')}
-                    onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                    disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4" />
+                      <span>Email Address</span>
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={isEditing ? (editData.email || '') : (lead?.email || '')}
+                      onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
 
-                {/* Phone */}
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4" />
-                    <span>Phone Number</span>
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={isEditing ? (editData.phone || '') : (lead?.phone || '')}
-                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                    disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
+                  {/* Phone */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4" />
+                      <span>Phone Number</span>
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={isEditing ? (editData.phone || '') : (lead?.phone || '')}
+                      onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
 
-                {/* City */}
-                <div className="space-y-2">
-                  <Label htmlFor="city" className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>City</span>
-                  </Label>
-                  <Input
-                    id="city"
-                    value={isEditing ? (editData.city || '') : (lead?.city || '')}
-                    onChange={(e) => setEditData({ ...editData, city: e.target.value })}
-                    disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
-                  />
+                  {/* City */}
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>City</span>
+                    </Label>
+                    <Input
+                      id="city"
+                      value={isEditing ? (editData.city || '') : (lead?.city || '')}
+                      onChange={(e) => setEditData({ ...editData, city: e.target.value })}
+                      disabled={!isEditing}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </CollapsibleCard>
 
