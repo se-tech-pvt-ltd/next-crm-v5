@@ -486,7 +486,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.name || '') : (lead?.name || '')}
                     onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -502,7 +502,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.email || '') : (lead?.email || '')}
                     onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -518,7 +518,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.phone || '') : (lead?.phone || '')}
                     onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -533,7 +533,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.city || '') : (lead?.city || '')}
                     onChange={(e) => setEditData({ ...editData, city: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -578,7 +578,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No types found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -599,7 +599,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No sources found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -620,7 +620,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No officers found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -665,7 +665,7 @@ export default function LeadDetails() {
                     emptyMessage="No countries found"
                     maxDisplayItems={2}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -686,7 +686,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No study levels found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -707,7 +707,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No study plans found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-9 text-sm transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
