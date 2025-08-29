@@ -133,6 +133,15 @@ export class StudentService {
     // Transfer activities from lead to student
     await ActivityService.transferActivities('lead', leadId, 'student', student.id);
 
+    // Log conversion on the lead timeline
+    await ActivityService.logActivity(
+      'lead',
+      leadId,
+      'converted',
+      'Lead converted',
+      `Lead ${student.name} was converted to student ${student.id}`
+    );
+
     return student;
   }
 }
