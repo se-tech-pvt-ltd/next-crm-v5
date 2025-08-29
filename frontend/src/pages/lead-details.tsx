@@ -721,7 +721,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.elt || '') : (lead?.elt || '')}
                     onValueChange={(value) => setEditData({ ...editData, elt: value })}
                     disabled={!isEditing}
-                    className="flex flex-row space-x-6"
+                    className="flex flex-row space-x-4"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="yes" id="elt-yes" disabled={!isEditing} />
