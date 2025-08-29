@@ -629,15 +629,33 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
           <Separator />
         </div>
 
-        <div className="shrink-0 border-t pt-2 pb-2">
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} size="sm">
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} disabled={convertToStudentMutation.isPending} size="sm">
-              {convertToStudentMutation.isPending ? 'Converting...' : 'Convert to Student'}
-            </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-3 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="px-6"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={convertToStudentMutation.isPending}
+            className="px-6 bg-primary hover:bg-primary/90"
+          >
+            {convertToStudentMutation.isPending ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Converting...</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <UserPlus className="w-4 h-4" />
+                <span>Convert to Student</span>
+              </div>
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
