@@ -13,7 +13,7 @@ export class StudentService {
     return await StudentModel.findAll();
   }
 
-  static async getStudent(id: number, userId?: string, userRole?: string): Promise<Student | undefined> {
+  static async getStudent(id: string, userId?: string, userRole?: string): Promise<Student | undefined> {
     const student = await StudentModel.findById(id);
     
     if (!student) return undefined;
@@ -41,7 +41,7 @@ export class StudentService {
     return student;
   }
 
-  static async updateStudent(id: number, updates: Partial<InsertStudent>): Promise<Student | undefined> {
+  static async updateStudent(id: string, updates: Partial<InsertStudent>): Promise<Student | undefined> {
     // Get the current student to track changes
     const currentStudent = await StudentModel.findById(id);
     if (!currentStudent) return undefined;
@@ -78,7 +78,7 @@ export class StudentService {
     return student;
   }
 
-  static async deleteStudent(id: number): Promise<boolean> {
+  static async deleteStudent(id: string): Promise<boolean> {
     const student = await StudentModel.findById(id);
     const success = await StudentModel.delete(id);
     
