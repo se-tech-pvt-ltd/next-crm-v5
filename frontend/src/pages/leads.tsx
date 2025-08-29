@@ -506,6 +506,8 @@ export default function Leads() {
                     <TableHead>Phone</TableHead>
                     <TableHead>Source</TableHead>
                     <TableHead>Interested Country</TableHead>
+                    <TableHead>Created By</TableHead>
+                    <TableHead>Updated By</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
