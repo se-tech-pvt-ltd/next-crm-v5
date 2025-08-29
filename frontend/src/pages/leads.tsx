@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,6 @@ import { Lead } from '@/lib/types';
 import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 
 export default function Leads() {
@@ -232,7 +231,7 @@ export default function Leads() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
-              <div className="text-xl font-bold">
+              <div className="text-base font-semibold">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : pagination.total || 0}
               </div>
             </CardContent>
@@ -246,7 +245,7 @@ export default function Leads() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
-              <div className="text-xl font-bold text-blue-600">
+              <div className="text-base font-semibold text-blue-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'new').length || 0}
               </div>
             </CardContent>
@@ -260,7 +259,7 @@ export default function Leads() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
-              <div className="text-xl font-bold text-green-600">
+              <div className="text-base font-semibold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'qualified').length || 0}
               </div>
             </CardContent>
@@ -274,7 +273,7 @@ export default function Leads() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
-              <div className="text-xl font-bold text-purple-600">
+              <div className="text-base font-semibold text-purple-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'converted').length || 0}
               </div>
             </CardContent>
@@ -288,7 +287,7 @@ export default function Leads() {
               <div className="flex items-center space-x-2">
                 <div className="flex items-center space-x-2">
                   <Filter className="w-3 h-3 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700">Filters:</span>
+                  <span className="text-xs font-medium text-gray-700">Filters:</span>
                 </div>
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
@@ -396,7 +395,7 @@ export default function Leads() {
                   <Button
                     variant="default"
                     size="sm"
-                    className="h-8 w-8 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
+                    className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
                     onClick={handleAddLeadClick}
                     disabled={isNavigating}
                     title="Add New Lead"
@@ -422,7 +421,7 @@ export default function Leads() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4 pt-0">
+          <CardContent className="p-3 pt-0">
             {isLoading ? (
               <div className="space-y-2">
                 {[...Array(3)].map((_, i) => (
