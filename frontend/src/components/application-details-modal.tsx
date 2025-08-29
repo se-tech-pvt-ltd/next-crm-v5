@@ -14,7 +14,7 @@ interface ApplicationDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   application: Application | null;
-  onOpenStudentProfile?: (studentId: number) => void;
+  onOpenStudentProfile?: (studentId: string) => void;
 }
 
 export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
