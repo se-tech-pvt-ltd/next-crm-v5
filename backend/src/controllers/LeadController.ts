@@ -69,7 +69,7 @@ export class LeadController {
       const currentUser = LeadController.getCurrentUser();
       const validatedData = insertLeadSchema.parse(req.body);
       console.log("Validated data:", JSON.stringify(validatedData, null, 2));
-      const lead = await LeadService.createLead({ ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any);
+      const lead = await LeadService.createLead({ ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any, currentUser.id);
       console.log("Created lead:", JSON.stringify(lead, null, 2));
       res.status(201).json(lead);
     } catch (error) {
@@ -98,7 +98,7 @@ export class LeadController {
       
       const currentUser = LeadController.getCurrentUser();
       const validatedData = insertLeadSchema.partial().parse(processedData);
-      const lead = await LeadService.updateLead(id, { ...validatedData, updatedBy: currentUser.id } as any);
+      const lead = await LeadService.updateLead(id, { ...validatedData, updatedBy: currentUser.id } as any, currentUser.id);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
