@@ -343,27 +343,18 @@ export default function LeadDetails() {
   }
 
   return (
-    <Layout 
+    <Layout
       title={
-        <div className="flex items-center space-x-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation('/leads')}
-            className="p-1 h-8 w-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div>
-            {isLoading ? (
-              <Skeleton className="h-6 w-32" />
-            ) : (
-              <span>Lead Details - {lead?.name}</span>
-            )}
-          </div>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setLocation('/leads')}
+          className="p-1 h-8 w-8"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
       }
-      subtitle={lead ? `Managing lead: ${lead.email}` : undefined}
+      subtitle={undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
       {/* Status Progress Bar */}
