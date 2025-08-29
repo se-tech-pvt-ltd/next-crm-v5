@@ -19,6 +19,7 @@ interface MultiSelectProps {
   className?: string;
   emptyMessage?: string;
   maxDisplayItems?: number;
+  disabled?: boolean;
 }
 
 export function MultiSelectV4({
@@ -29,7 +30,8 @@ export function MultiSelectV4({
   options,
   className,
   emptyMessage = "No options found.",
-  maxDisplayItems = 3
+  maxDisplayItems = 3,
+  disabled = false
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +69,7 @@ export function MultiSelectV4({
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     setIsOpen(prev => !prev);
   };
 
@@ -110,9 +113,10 @@ export function MultiSelectV4({
         variant="outline"
         role="combobox"
         aria-expanded={isOpen}
+        disabled={disabled}
         onClick={handleToggle}
         className={cn(
-          "w-full justify-between h-auto min-h-10 text-left font-normal",
+          "w-full justify-between h-auto min-h-10 text-left font-normal disabled:border-transparent disabled:bg-transparent",
           selectedOptions.length === 0 && "text-muted-foreground",
           className
         )}

@@ -17,6 +17,9 @@ interface ActivityTrackerProps {
   entityType: string;
   entityId: string | number;
   entityName?: string;
+  initialInfo?: string;
+  initialInfoDate?: string | Date;
+  initialInfoUserName?: string;
 }
 
 const ACTIVITY_TYPES = [
@@ -29,7 +32,7 @@ const ACTIVITY_TYPES = [
   { value: 'meeting', label: 'Meeting', icon: Users },
 ];
 
-export function ActivityTracker({ entityType, entityId, entityName }: ActivityTrackerProps) {
+export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
   const [isAddingActivity, setIsAddingActivity] = useState(false);
@@ -44,6 +47,15 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   // Fetch users to get current profile images
   const { data: users = [] } = useQuery<UserType[]>({
     queryKey: ['/api/users'],
+  });
+
+  // Fetch Leads dropdowns (for mapping status IDs/keys to display names)
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    }
   });
 
   // Create a lookup function for user profile images
@@ -126,9 +138,32 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
     }
   };
 
+  // Map status id/key/value to display label from dropdowns
+  const getStatusLabel = (idOrKey?: string) => {
+    if (!idOrKey || !leadsDropdowns?.Status) return idOrKey || '';
+    const status = leadsDropdowns.Status.find((opt: any) =>
+      opt.id === idOrKey || opt.key === idOrKey || opt.value?.toLowerCase() === idOrKey.toLowerCase()
+    );
+    return status?.value || idOrKey;
+  };
+
+  // Replace raw status IDs in activity text with human-readable labels
+  const mapStatusIdsInText = (text: string) => {
+    if (!text) return '';
+    const statusChangeRegex = /status changed from\s+"([^"]+)"\s+to\s+"([^"]+)"/i;
+    if (statusChangeRegex.test(text)) {
+      return text.replace(statusChangeRegex, (_m, fromId, toId) => {
+        const fromLabel = getStatusLabel(fromId);
+        const toLabel = getStatusLabel(toId);
+        return `Status changed from "${fromLabel}" to "${toLabel}"`;
+      });
+    }
+    return text.replace(/[0-9a-fA-F-]{36}/g, (token) => getStatusLabel(token));
+  };
+
   if (isLoading) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 p-3">
         <div className="text-center py-4 text-gray-500">Loading activities...</div>
       </div>
     );
@@ -136,7 +171,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   if (error) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 p-3">
         <div className="text-center py-4">
           <div className="text-red-600 mb-2">Error loading activities</div>
           <div className="text-sm text-gray-500 mb-3">{error.message}</div>
@@ -149,17 +184,10 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   }
 
   return (
-    <div className="space-y-4 p-4">
-        {/* Debug Info */}
-        <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-          Entity: {entityType}/{entityId} | Activities: {activities.length}
-          <Button size="sm" variant="ghost" onClick={() => refetch()} className="ml-2 h-5 px-2">
-            Refresh
-          </Button>
-        </div>
+    <div className="space-y-3 p-3">
 
         {/* Add Activity Section with Blue Gradient Background */}
-        <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
+        <div className="space-y-2.5 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
           {!isAddingActivity ? (
             <Button
               variant="outline"
@@ -238,48 +266,67 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
         {/* Activities List */}
         <div className="space-y-5 pl-1">
-          {(activities as Activity[]).length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No activities yet</p>
-              <p className="text-sm">Activities and comments will appear here</p>
-            </div>
-          ) : (
-            (activities as Activity[]).map((activity: Activity, idx: number, arr: Activity[]) => {
-              const isLast = idx === arr.length - 1;
-              const profileImage = activity.userId ? getUserProfileImage(activity.userId) : activity.userProfileImage;
+          {(() => {
+            let list: Activity[] = Array.isArray(activities) ? [...(activities as Activity[])] : [];
+            if (initialInfo && initialInfo.trim().length > 0) {
+              const createdActivity = list.find(a => a.activityType === 'created');
+              const userName = initialInfoUserName || createdActivity?.userName || 'Admin User';
+              const when = initialInfoDate || createdActivity?.createdAt || new Date(0).toISOString();
+              const synthetic: any = {
+                id: -1,
+                entityType: String(entityType),
+                entityId: String(entityId),
+                activityType: 'note',
+                title: 'Initial note',
+                description: initialInfo,
+                userName,
+                userId: createdActivity?.userId,
+                userProfileImage: createdActivity?.userProfileImage,
+                createdAt: when,
+              } as Activity;
+              list = [...list, synthetic];
+            }
+            list.sort((a: any, b: any) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime());
+
+            if (list.length === 0) {
               return (
-                <div key={activity.id} className="relative flex gap-3">
-                  {/* Timeline rail */}
+                <div className="text-center py-8 text-gray-500">
+                  <ActivityIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No activities yet</p>
+                  <p className="text-sm">Activities and comments will appear here</p>
+                </div>
+              );
+            }
+
+            return list.map((activity: Activity, idx: number) => {
+              const isLast = idx === list.length - 1;
+              const profileImage = (activity as any).userId ? getUserProfileImage((activity as any).userId as any) : (activity as any).userProfileImage;
+              return (
+                <div key={`${activity.id}-${activity.createdAt}`} className="relative flex gap-3">
                   <div className="relative w-5 flex flex-col items-center">
                     <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(activity.activityType)} ring-2 ring-white shadow mt-2`} />
                     {!isLast && <div className="w-px flex-1 bg-gray-200 mt-1" />}
                   </div>
-
-                  {/* Card */}
-                  <div className="flex-1 rounded-md border border-gray-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-2">
-                      {/* Line 1: User (bold) */}
-                      <div className="text-sm font-semibold text-gray-900">
-                        {activity.userName || "Unknown User"}
+                      <div className="text-xs font-semibold text-gray-900">
+                        {activity.userName || 'Unknown User'}
                       </div>
-                      {/* Line 2: Type (left)  Date (right) */}
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
-                        <span className="text-gray-500">{format(new Date(activity.createdAt!), 'MMM d, h:mm a')}</span>
+                        <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
                       </div>
-                      {/* Line 3: Message */}
-                      {(activity.description || activity.title) && (
-                        <div className="pt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                          {activity.description || activity.title}
+                      {(activity.description || (activity as any).title) && (
+                        <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
+                          {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || (activity as any).title) : (activity.description || (activity as any).title)}
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
               );
-            })
-          )}
+            });
+          })()}
         </div>
     </div>
   );

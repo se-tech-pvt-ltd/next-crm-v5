@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchable-select-v2';
 import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
@@ -16,6 +17,7 @@ import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Lead, type User } from '@/lib/types';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatStatus } from '@/lib/utils';
@@ -42,6 +44,7 @@ import {
 } from 'lucide-react';
 
 export default function LeadDetails() {
+  const { user: authUser } = useAuth();
   const [match, params] = useRoute('/leads/:id');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -280,6 +283,9 @@ export default function LeadDetails() {
     onSuccess: (updatedLead) => {
       setCurrentStatus(updatedLead.status);
       queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
+      // Refresh only the activity timeline for this lead
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
     onError: (error: any) => {
@@ -292,7 +298,7 @@ export default function LeadDetails() {
     console.log('Using index:', currentIndex, 'for status:', currentStatus);
 
     return (
-      <div className="w-full bg-gray-100 rounded-md p-2 mb-4">
+      <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
         <div className="flex items-center justify-between relative">
           {statusSequence.map((statusId, index) => {
             const isActive = index === currentIndex;
@@ -317,13 +323,13 @@ export default function LeadDetails() {
                 aria-label={`Set status to ${statusName}`}
               >
                 {/* Status Circle */}
-                <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
                   isCompleted
                     ? 'bg-green-500 border-green-500 text-white'
                     : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
                 }`}>
-                  {isCompleted && <div className="w-2 h-2 bg-white rounded-full" />}
-                  {!isCompleted && <div className="w-2 h-2 bg-gray-300 rounded-full" />}
+                  {isCompleted && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  {!isCompleted && <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
                 </div>
 
                 {/* Status Label */}
@@ -335,9 +341,9 @@ export default function LeadDetails() {
 
                 {/* Connector Line */}
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-3 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
                     index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
-                  }`} style={{ marginLeft: '0.75rem', width: 'calc(100% - 1.5rem)' }} />
+                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
             );
@@ -391,17 +397,18 @@ export default function LeadDetails() {
       subtitle={undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
-      {/* Status Progress Bar */}
-      {!isLoading && <StatusProgressBar />}
+      <div className="text-xs md:text-[12px]">
+        {/* Status Progress Bar */}
+        {!isLoading && <StatusProgressBar />}
 
-      <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
+        <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col space-y-6 min-w-0 w-full">
+        <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
           {/* Personal Information Section */}
           <Card className="w-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Personal Information</CardTitle>
+                <CardTitle className="text-sm">Personal Information</CardTitle>
                 <div className="flex items-center space-x-2">
                   {!isEditing ? (
                     <>
@@ -459,9 +466,9 @@ export default function LeadDetails() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-2">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
@@ -470,7 +477,7 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {/* Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="flex items-center space-x-2">
@@ -482,7 +489,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.name || '') : (lead?.name || '')}
                     onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -498,7 +505,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.email || '') : (lead?.email || '')}
                     onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -514,7 +521,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.phone || '') : (lead?.phone || '')}
                     onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -529,7 +536,7 @@ export default function LeadDetails() {
                     value={isEditing ? (editData.city || '') : (lead?.city || '')}
                     onChange={(e) => setEditData({ ...editData, city: e.target.value })}
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -539,15 +546,16 @@ export default function LeadDetails() {
 
           {/* Lead Management Section */}
           <CollapsibleCard
+            persistKey={`lead-details:${authUser?.id || 'anon'}:lead-information`}
             header={
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
-                <span>Lead Management</span>
+                <span>Lead Information</span>
               </CardTitle>
             }
           >
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
@@ -556,7 +564,7 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {/* Type */}
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
@@ -574,7 +582,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No types found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -595,7 +603,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No sources found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -616,7 +624,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No officers found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -625,15 +633,16 @@ export default function LeadDetails() {
 
           {/* Academic Interests Section */}
           <CollapsibleCard
+            persistKey={`lead-details:${authUser?.id || 'anon'}:academic-interests`}
             header={
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic Interests</span>
               </CardTitle>
             }
           >
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
@@ -642,27 +651,46 @@ export default function LeadDetails() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 {/* Interested Country - Multi-Select */}
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
                     <Globe className="w-4 h-4" />
                     <span>Interested Countries</span>
                   </Label>
-                  <MultiSelect
-                    value={isEditing ? (editData.country || []) : parseFieldValue(lead?.country)}
-                    onValueChange={(values) => setEditData({ ...editData, country: values })}
-                    placeholder="Select countries"
-                    searchPlaceholder="Search countries..."
-                    options={dropdownData?.["Interested Country"]?.map((option: any) => ({
-                      value: option.key,
-                      label: option.value
-                    })) || []}
-                    emptyMessage="No countries found"
-                    maxDisplayItems={2}
-                    disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
-                  />
+                  {isEditing ? (
+                    <MultiSelect
+                      value={Array.isArray(editData.country) ? editData.country : parseFieldValue(editData.country)}
+                      onValueChange={(values) => setEditData({ ...editData, country: values })}
+                      placeholder="Select countries"
+                      searchPlaceholder="Search countries..."
+                      options={dropdownData?.["Interested Country"]?.map((option: any) => ({
+                        value: option.key,
+                        label: option.value
+                      })) || []}
+                      emptyMessage="No countries found"
+                      maxDisplayItems={3}
+                      className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {(function() {
+                        const values = parseFieldValue(lead?.country);
+                        const labels = (dropdownData?.["Interested Country"] || [])
+                          .filter((opt: any) => values.includes(opt.key) || values.includes(opt.id) || values.includes(opt.value))
+                          .map((opt: any) => opt.value);
+                        return labels.length ? (
+                          labels.map((label: string) => (
+                            <span key={label} className="px-2 py-0.5 rounded-full border border-red-500 text-red-600 text-xs">
+                              {label}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground text-xs">Not specified</span>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 {/* Study Level */}
@@ -682,7 +710,7 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No study levels found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -703,95 +731,53 @@ export default function LeadDetails() {
                     })) || []}
                     emptyMessage="No study plans found"
                     disabled={!isEditing}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
                 {/* ELT */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
                     <FileText className="w-4 h-4" />
                     <span>English Language Test Completed</span>
                   </Label>
-                  <RadioGroup
+                  <ToggleGroup
+                    type="single"
                     value={isEditing ? (editData.elt || '') : (lead?.elt || '')}
-                    onValueChange={(value) => setEditData({ ...editData, elt: value })}
-                    disabled={!isEditing}
-                    className="flex flex-row space-x-6"
+                    onValueChange={(value) => value && setEditData({ ...editData, elt: value })}
+                    className="justify-start gap-2"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="elt-yes" disabled={!isEditing} />
-                      <Label htmlFor="elt-yes" className="text-sm font-normal cursor-pointer">
-                        Yes
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="elt-no" disabled={!isEditing} />
-                      <Label htmlFor="elt-no" className="text-sm font-normal cursor-pointer">
-                        No
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                    <ToggleGroupItem
+                      value="yes"
+                      disabled={!isEditing}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full px-3 data-[state=on]:bg-green-100 data-[state=on]:text-green-700 data-[state=on]:border-green-400"
+                      aria-label="Yes"
+                    >
+                      Yes
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="no"
+                      disabled={!isEditing}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full px-3 data-[state=on]:bg-red-100 data-[state=on]:text-red-700 data-[state=on]:border-red-400"
+                      aria-label="No"
+                    >
+                      No
+                    </ToggleGroupItem>
+                  </ToggleGroup>
                 </div>
               </div>
             )}
           </CollapsibleCard>
 
-          {/* Additional Information Section */}
-          <CollapsibleCard
-            header={
-              <CardTitle className="text-lg flex items-center space-x-2">
-                <FileText className="w-5 h-5 text-primary" />
-                <span>Additional Information</span>
-              </CardTitle>
-            }
-          >
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Notes */}
-                <div className="space-y-2">
-                  <Label htmlFor="notes" className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4" />
-                    <span>Notes & Comments</span>
-                  </Label>
-                  <Textarea
-                    id="notes"
-                    placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
-                    value={isEditing ? (editData.notes || '') : (lead?.notes || '')}
-                    onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                    disabled={!isEditing}
-                    className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                {/* Lost Reason (only show if lead is lost) */}
-                {lead?.lostReason && (
-                  <div className="space-y-2">
-                    <Label htmlFor="lostReason" className="flex items-center space-x-2">
-                      <XCircle className="w-4 h-4" />
-                      <span>Lost Reason</span>
-                    </Label>
-                    <Textarea
-                      id="lostReason"
-                      value={lead.lostReason}
-                      disabled
-                      className="bg-red-50 min-h-16"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </CollapsibleCard>
         </div>
 
         {/* Activity Sidebar */}
-        <div className="w-96 flex-shrink-0 bg-gray-50 rounded-lg p-4 flex flex-col min-h-full">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
+        <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
+          <h3 className="text-sm font-semibold mb-2 flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Activity Timeline
           </h3>
@@ -806,10 +792,11 @@ export default function LeadDetails() {
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
-              <ActivityTracker entityType="lead" entityId={params?.id || ''} />
+              <ActivityTracker entityType="lead" entityId={params?.id || ''} initialInfo={lead?.notes} initialInfoDate={lead?.createdAt as any} />
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Convert to Student Modal */}
@@ -830,7 +817,7 @@ export default function LeadDetails() {
           <DialogHeader>
             <DialogTitle>Mark Lead as Lost</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="space-y-2">
               <Label htmlFor="reason">Reason for marking as lost</Label>
               <Textarea

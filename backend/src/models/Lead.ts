@@ -47,12 +47,57 @@ export class LeadModel {
   }
 
   static async findById(id: string): Promise<Lead | undefined> {
-    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
-    return lead ? LeadModel.parseLeadFields(lead) : undefined;
+    const [lead] = await db
+      .select({
+        id: leads.id,
+        name: leads.name,
+        email: leads.email,
+        phone: leads.phone,
+        city: leads.city,
+        country: leads.country,
+        program: leads.program,
+        source: leads.source,
+        status: leads.status,
+        expectation: leads.expectation,
+        type: leads.type,
+        studyLevel: leads.studyLevel,
+        studyPlan: leads.studyPlan,
+        elt: leads.elt,
+        lostReason: leads.lostReason,
+        notes: leads.notes,
+        counselorId: leads.counselorId,
+        createdAt: leads.createdAt,
+        updatedAt: leads.updatedAt,
+      })
+      .from(leads)
+      .where(eq(leads.id, id));
+    return lead ? (LeadModel.parseLeadFields(lead as unknown as Lead)) : undefined;
   }
 
   static async findAll(pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db.select().from(leads)
+    const baseQuery = db
+      .select({
+        id: leads.id,
+        name: leads.name,
+        email: leads.email,
+        phone: leads.phone,
+        city: leads.city,
+        country: leads.country,
+        program: leads.program,
+        source: leads.source,
+        status: leads.status,
+        expectation: leads.expectation,
+        type: leads.type,
+        studyLevel: leads.studyLevel,
+        studyPlan: leads.studyPlan,
+        elt: leads.elt,
+        lostReason: leads.lostReason,
+        notes: leads.notes,
+        counselorId: leads.counselorId,
+        createdAt: leads.createdAt,
+        updatedAt: leads.updatedAt,
+      })
+      .from(leads)
       .where(not(exists(
         db.select().from(students).where(eq(students.leadId, leads.id))
       )));
@@ -86,7 +131,29 @@ export class LeadModel {
   }
 
   static async findByCounselor(counselorId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db.select().from(leads)
+    const baseQuery = db
+      .select({
+        id: leads.id,
+        name: leads.name,
+        email: leads.email,
+        phone: leads.phone,
+        city: leads.city,
+        country: leads.country,
+        program: leads.program,
+        source: leads.source,
+        status: leads.status,
+        expectation: leads.expectation,
+        type: leads.type,
+        studyLevel: leads.studyLevel,
+        studyPlan: leads.studyPlan,
+        elt: leads.elt,
+        lostReason: leads.lostReason,
+        notes: leads.notes,
+        counselorId: leads.counselorId,
+        createdAt: leads.createdAt,
+        updatedAt: leads.updatedAt,
+      })
+      .from(leads)
       .where(and(
         eq(leads.counselorId, counselorId),
         not(exists(

@@ -98,7 +98,7 @@ export function SearchableSelectV2({
         disabled={disabled}
         onClick={handleToggle}
         className={cn(
-          "w-full justify-between h-10 text-left font-normal",
+          "w-full justify-between h-10 text-left font-normal disabled:border-transparent disabled:bg-transparent",
           !selectedOption && "text-muted-foreground",
           className
         )}

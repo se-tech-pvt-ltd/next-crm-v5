@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Plus, UserPlus, GraduationCap } from 'lucide-react';
+import { Search, Bell, UserPlus, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -27,11 +27,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-2">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-1">
         <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{title}</h2>
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{title}</h2>
               {subtitle && (
                 <p className="text-xs text-gray-500 line-clamp-1">{subtitle}</p>
               )}
@@ -118,33 +118,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Quick Actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90" size="sm">
-                  <Plus size={16} className="sm:mr-2" />
-                  <span className="hidden sm:inline">Quick Add</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsAddLeadModalOpen(true)}>
-                  <UserPlus size={16} className="mr-2" />
-                  Add Lead
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddStudentModalOpen(true)}>
-                  <GraduationCap size={16} className="mr-2" />
-                  Add Student
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddApplicationModalOpen(true)}>
-                  <GraduationCap size={16} className="mr-2" />
-                  New Application
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddAdmissionModalOpen(true)}>
-                  <GraduationCap size={16} className="mr-2" />
-                  Add Admission
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </header>

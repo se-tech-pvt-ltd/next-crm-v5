@@ -35,8 +35,6 @@ export const leads = mysqlTable("leads", {
   studyPlan: text("study_plan"),
   elt: text("elt"),
   lostReason: text("lost_reason"),
-  budget: text("budget"),
-  timeline: text("timeline"),
   notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
