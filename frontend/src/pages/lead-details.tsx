@@ -769,56 +769,6 @@ export default function LeadDetails() {
             )}
           </CollapsibleCard>
 
-          {/* Additional Information Section */}
-          <CollapsibleCard
-            header={
-              <CardTitle className="text-sm flex items-center space-x-2">
-                <FileText className="w-5 h-5 text-primary" />
-                <span>Additional Information</span>
-              </CardTitle>
-            }
-          >
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {/* Notes */}
-                <div className="space-y-2">
-                  <Label htmlFor="notes" className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4" />
-                    <span>Notes & Comments</span>
-                  </Label>
-                  <Textarea
-                    id="notes"
-                    placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
-                    value={isEditing ? (editData.notes || '') : (lead?.notes || '')}
-                    onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                    disabled={!isEditing}
-                    className="min-h-16 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                {/* Lost Reason (only show if lead is lost) */}
-                {lead?.lostReason && (
-                  <div className="space-y-2">
-                    <Label htmlFor="lostReason" className="flex items-center space-x-2">
-                      <XCircle className="w-4 h-4" />
-                      <span>Lost Reason</span>
-                    </Label>
-                    <Textarea
-                      id="lostReason"
-                      value={lead.lostReason}
-                      disabled
-                      className="bg-red-50 min-h-16 text-xs"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </CollapsibleCard>
         </div>
 
         {/* Activity Sidebar */}
