@@ -24,7 +24,7 @@ export class StudentController {
 
   static async getStudent(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const currentUser = StudentController.getCurrentUser();
       const student = await StudentService.getStudent(id, currentUser.id, currentUser.role);
       if (!student) {
@@ -69,7 +69,7 @@ export class StudentController {
 
   static async updateStudent(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const validatedData = insertStudentSchema.partial().parse(req.body);
       const student = await StudentService.updateStudent(id, validatedData);
       if (!student) {
@@ -87,7 +87,7 @@ export class StudentController {
 
   static async deleteStudent(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const success = await StudentService.deleteStudent(id);
       if (!success) {
         return res.status(404).json({ message: "Student not found" });
