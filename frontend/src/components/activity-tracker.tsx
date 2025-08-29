@@ -258,20 +258,17 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
                   {/* Card */}
                   <div className="flex-1 rounded-md border border-gray-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="space-y-1.5">
-                      {/* Line 1: User */}
+                    <div className="space-y-2">
+                      {/* Line 1: User (bold) */}
                       <div className="text-sm font-semibold text-gray-900">
                         {activity.userName || "Unknown User"}
                       </div>
-                      {/* Line 2: Type */}
-                      <div className="text-xs text-gray-700 capitalize">
-                        {activity.activityType.replace('_', ' ')}
+                      {/* Line 2: Type (left)  Date (right) */}
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                        <span className="text-gray-500">{format(new Date(activity.createdAt!), 'MMM d, h:mm a')}</span>
                       </div>
-                      {/* Line 3: Date */}
-                      <div className="text-xs text-gray-500">
-                        {format(new Date(activity.createdAt!), 'MMM d, h:mm a')}
-                      </div>
-                      {/* Line 4: Message */}
+                      {/* Line 3: Message */}
                       {(activity.description || activity.title) && (
                         <div className="pt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
                           {activity.description || activity.title}
