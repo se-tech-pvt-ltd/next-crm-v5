@@ -129,11 +129,19 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
     if (lead) {
       setFormData(prev => ({
         ...prev,
+        // From Lead fields
+        type: lead.type || '',
         name: lead.name || '',
-        email: lead.email || '',
         phone: lead.phone || '',
-        targetCountry: mapDropdownToLabels((lead as any).country, 'Interested Country') || normalizeToText((lead as any).country),
-        targetProgram: normalizeToText((lead as any).program),
+        email: lead.email || '',
+        source: lead.source || '',
+        interestedCountry: mapDropdownToLabels((lead as any).country, 'Interested Country') || normalizeToText((lead as any).country),
+        studyLevel: lead.type || '',
+        studyPlan: normalizeToText((lead as any).program),
+        admissionOfficer: lead.createdBy || '',
+
+        // Set default expectation from lead
+        expectation: lead.expectation || 'High',
       }));
     }
   }, [lead, dropdownData]);
