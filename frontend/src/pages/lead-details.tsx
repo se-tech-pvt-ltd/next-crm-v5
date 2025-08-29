@@ -394,10 +394,11 @@ export default function LeadDetails() {
       subtitle={undefined}
       helpText="View and edit lead information, track activities, and convert qualified leads to students."
     >
-      {/* Status Progress Bar */}
-      {!isLoading && <StatusProgressBar />}
+      <div className="text-sm md:text-[13px]">
+        {/* Status Progress Bar */}
+        {!isLoading && <StatusProgressBar />}
 
-      <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
+        <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
         <div className="flex-1 flex flex-col space-y-6 min-w-0 w-full">
           {/* Personal Information Section */}
@@ -813,6 +814,7 @@ export default function LeadDetails() {
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Convert to Student Modal */}
