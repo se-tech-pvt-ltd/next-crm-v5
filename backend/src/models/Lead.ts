@@ -102,9 +102,6 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
-      .where(not(exists(
-        db.select().from(students).where(eq(students.leadId, leads.id))
-      )));
 
     if (pagination) {
       // Get total count
