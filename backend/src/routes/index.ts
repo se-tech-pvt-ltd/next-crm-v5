@@ -9,7 +9,7 @@ import { applicationRoutes } from "./applicationRoutes.js";
 import { admissionRoutes } from "./admissionRoutes.js";
 import { activityRoutes } from "./activityRoutes.js";
 import { userRoutes } from "./userRoutes.js";
-import { uploadRoutes } from "./uploadRoutes.js";
+import uploadRoutes from "./uploadRoutes.js";
 import { dropdownRoutes } from "./dropdownRoutes.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
