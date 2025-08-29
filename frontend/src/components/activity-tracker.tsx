@@ -160,7 +160,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   if (isLoading) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 p-3">
         <div className="text-center py-4 text-gray-500">Loading activities...</div>
       </div>
     );
@@ -168,7 +168,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
 
   if (error) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 p-3">
         <div className="text-center py-4">
           <div className="text-red-600 mb-2">Error loading activities</div>
           <div className="text-sm text-gray-500 mb-3">{error.message}</div>
@@ -181,10 +181,10 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-3 p-3">
 
         {/* Add Activity Section with Blue Gradient Background */}
-        <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
+        <div className="space-y-2.5 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
           {!isAddingActivity ? (
             <Button
               variant="outline"
@@ -282,7 +282,7 @@ export function ActivityTracker({ entityType, entityId, entityName }: ActivityTr
                   </div>
 
                   {/* Card */}
-                  <div className="flex-1 rounded-md border border-gray-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-2">
                       {/* Line 1: User (bold) */}
                       <div className="text-sm font-semibold text-gray-900">
