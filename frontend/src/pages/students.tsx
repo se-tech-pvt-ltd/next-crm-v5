@@ -19,7 +19,7 @@ export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -86,12 +86,12 @@ export default function Students() {
     return new Date(date).toLocaleDateString();
   };
 
-  const handleViewProfile = (studentId: number) => {
+  const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
     setIsProfileModalOpen(true);
   };
 
-  const handleCreateApplication = (studentId: number) => {
+  const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
     setIsAddApplicationModalOpen(true);
   };
