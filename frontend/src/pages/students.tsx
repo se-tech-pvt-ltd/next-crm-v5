@@ -19,6 +19,8 @@ import { Plus, MoreHorizontal, GraduationCap, Phone, Mail, Globe, User, Users, U
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Students() {
+  const [, setLocation] = useLocation();
+  const [isNavigating, setIsNavigating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
@@ -27,6 +29,13 @@ export default function Students() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleAddStudentClick = () => {
+    setIsNavigating(true);
+    setIsAddStudentModalOpen(true);
+    // Reset navigation state after opening modal
+    setTimeout(() => setIsNavigating(false), 200);
+  };
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -60,7 +69,7 @@ export default function Students() {
   }) || [];
 
   // Get unique countries for filter dropdown
-  const uniqueCountries = students ? 
+  const uniqueCountries = students ?
     students.reduce((countries: string[], student) => {
       if (student.targetCountry && !countries.includes(student.targetCountry)) {
         countries.push(student.targetCountry);
