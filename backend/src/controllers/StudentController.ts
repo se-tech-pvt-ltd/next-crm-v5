@@ -61,23 +61,17 @@ export class StudentController {
         email: studentData.email,
         phone: studentData.phone,
         dateOfBirth: studentData.dateOfBirth || undefined,
-        englishProficiency: studentData.eltTest || studentData.englishProficiency || undefined,
+        englishProficiency: studentData.englishProficiency || studentData.eltTest || undefined,
         passportNumber: studentData.passport || studentData.passportNumber || undefined,
         targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
         status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
         counselorId: studentData.counsellor || studentData.counselorId || undefined,
-        // Preserve extra UI-only fields in notes
-        notes: [
-          studentData.address ? `Address: ${studentData.address}` : '',
-          studentData.consultancyFee ? `Consultancy Fee: ${studentData.consultancyFee}` : '',
-          studentData.scholarship ? `Scholarship: ${studentData.scholarship}` : '',
-          studentData.studyLevel ? `Study Level: ${studentData.studyLevel}` : '',
-          studentData.studyPlan ? `Study Plan: ${studentData.studyPlan}` : '',
-          studentData.source ? `Source: ${studentData.source}` : '',
-          studentData.city ? `City: ${studentData.city}` : '',
-          studentData.expectation ? `Expectation: ${studentData.expectation}` : '',
-          studentData.type ? `Type: ${studentData.type}` : '',
-        ].filter(Boolean).join(' | ') || undefined,
+        address: studentData.address || studentData.city || undefined,
+        consultancyFree: Boolean(studentData.consultancyFee ?? studentData.consultancy_free ?? studentData.consultancyFree ?? false),
+        scholarship: Boolean(studentData.scholarship ?? false),
+        expectation: studentData.expectation || '',
+        eltTest: studentData.eltTest || '',
+        notes: studentData.notes || undefined,
       };
 
       console.log('[ConvertFromLead] Incoming:', JSON.stringify(studentData));
