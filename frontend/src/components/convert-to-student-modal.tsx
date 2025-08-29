@@ -208,146 +208,185 @@ export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Convert Lead to Student</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-7xl h-[95vh] max-h-[95vh] overflow-hidden flex flex-col">
+        <DialogHeader className="shrink-0 border-b pb-4">
+          <DialogTitle className="text-2xl font-bold text-center">Convert Lead to Student</DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Full Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter full name"
-              />
+
+        <div className="flex-1 overflow-y-auto py-6">
+          <div className="max-w-6xl mx-auto space-y-8">
+            {/* Personal Information Section */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                Personal Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <Label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Enter full name"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="Enter email address"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="Enter phone number"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-700">Date of Birth</Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="nationality" className="text-sm font-medium text-gray-700">Nationality</Label>
+                  <Input
+                    id="nationality"
+                    value={formData.nationality}
+                    onChange={(e) => handleInputChange('nationality', e.target.value)}
+                    placeholder="Enter nationality"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="passportNumber" className="text-sm font-medium text-gray-700">Passport Number</Label>
+                  <Input
+                    id="passportNumber"
+                    value={formData.passportNumber}
+                    onChange={(e) => handleInputChange('passportNumber', e.target.value)}
+                    placeholder="Enter passport number"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="Enter email address"
-              />
+
+            {/* Academic Information Section */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                Academic Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <Label htmlFor="targetCountry" className="text-sm font-medium text-gray-700">Target Country</Label>
+                  <Input
+                    id="targetCountry"
+                    value={formData.targetCountry}
+                    onChange={(e) => handleInputChange('targetCountry', e.target.value)}
+                    placeholder="Enter target country"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="targetProgram" className="text-sm font-medium text-gray-700">Target Program</Label>
+                  <Input
+                    id="targetProgram"
+                    value={formData.targetProgram}
+                    onChange={(e) => handleInputChange('targetProgram', e.target.value)}
+                    placeholder="Enter target program"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="targetLevel" className="text-sm font-medium text-gray-700">Target Level</Label>
+                  <Select value={formData.targetLevel} onValueChange={(value) => handleInputChange('targetLevel', value)}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="undergraduate">Undergraduate</SelectItem>
+                      <SelectItem value="graduate">Graduate</SelectItem>
+                      <SelectItem value="postgraduate">Postgraduate</SelectItem>
+                      <SelectItem value="phd">PhD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="englishProficiency" className="text-sm font-medium text-gray-700">English Proficiency</Label>
+                  <Select value={formData.englishProficiency} onValueChange={(value) => handleInputChange('englishProficiency', value)}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select proficiency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                      <SelectItem value="native">Native</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="Enter phone number"
-              />
+
+            {/* Additional Information Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6 border border-purple-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                Additional Information
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="previousEducation" className="text-sm font-medium text-gray-700">Previous Education</Label>
+                  <Textarea
+                    id="previousEducation"
+                    value={formData.previousEducation}
+                    onChange={(e) => handleInputChange('previousEducation', e.target.value)}
+                    placeholder="Enter previous education details"
+                    rows={4}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="notes" className="text-sm font-medium text-gray-700">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Enter any additional notes"
+                    rows={4}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="nationality">Nationality</Label>
-              <Input
-                id="nationality"
-                value={formData.nationality}
-                onChange={(e) => handleInputChange('nationality', e.target.value)}
-                placeholder="Enter nationality"
-              />
-            </div>
-            <div>
-              <Label htmlFor="passportNumber">Passport Number</Label>
-              <Input
-                id="passportNumber"
-                value={formData.passportNumber}
-                onChange={(e) => handleInputChange('passportNumber', e.target.value)}
-                placeholder="Enter passport number"
-              />
-            </div>
-            <div>
-              <Label htmlFor="targetCountry">Target Country</Label>
-              <Input
-                id="targetCountry"
-                value={formData.targetCountry}
-                onChange={(e) => handleInputChange('targetCountry', e.target.value)}
-                placeholder="Enter target country"
-              />
-            </div>
-            <div>
-              <Label htmlFor="targetProgram">Target Program</Label>
-              <Input
-                id="targetProgram"
-                value={formData.targetProgram}
-                onChange={(e) => handleInputChange('targetProgram', e.target.value)}
-                placeholder="Enter target program"
-              />
-            </div>
-            <div>
-              <Label htmlFor="targetLevel">Target Level</Label>
-              <Select value={formData.targetLevel} onValueChange={(value) => handleInputChange('targetLevel', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                  <SelectItem value="graduate">Graduate</SelectItem>
-                  <SelectItem value="postgraduate">Postgraduate</SelectItem>
-                  <SelectItem value="phd">PhD</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="englishProficiency">English Proficiency</Label>
-              <Select value={formData.englishProficiency} onValueChange={(value) => handleInputChange('englishProficiency', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select proficiency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                  <SelectItem value="native">Native</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="previousEducation">Previous Education</Label>
-            <Textarea
-              id="previousEducation"
-              value={formData.previousEducation}
-              onChange={(e) => handleInputChange('previousEducation', e.target.value)}
-              placeholder="Enter previous education details"
-              rows={3}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              placeholder="Enter any additional notes"
-              rows={3}
-            />
           </div>
         </div>
-        
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={convertToStudentMutation.isPending}>
-            {convertToStudentMutation.isPending ? 'Converting...' : 'Convert to Student'}
-          </Button>
+
+        <div className="shrink-0 border-t pt-4 bg-gray-50 px-6 py-4">
+          <div className="flex justify-end space-x-3">
+            <Button variant="outline" onClick={() => onOpenChange(false)} size="lg">
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={convertToStudentMutation.isPending} size="lg" className="min-w-[140px]">
+              {convertToStudentMutation.isPending ? 'Converting...' : 'Convert to Student'}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
