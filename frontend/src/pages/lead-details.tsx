@@ -295,7 +295,7 @@ export default function LeadDetails() {
     console.log('Using index:', currentIndex, 'for status:', currentStatus);
 
     return (
-      <div className="w-full bg-gray-100 rounded-md p-2 mb-4">
+      <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
         <div className="flex items-center justify-between relative">
           {statusSequence.map((statusId, index) => {
             const isActive = index === currentIndex;
