@@ -506,8 +506,6 @@ export default function Leads() {
                     <TableHead>Phone</TableHead>
                     <TableHead>Source</TableHead>
                     <TableHead>Interested Country</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead>Updated By</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -545,12 +543,6 @@ export default function Leads() {
                         ) : (
                           <span className="text-sm text-gray-400">Not specified</span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-700">{lead.createdBy || '—'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-700">{lead.updatedBy || '—'}</span>
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(lead.status || 'new')}>
