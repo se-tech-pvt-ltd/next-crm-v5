@@ -15,7 +15,7 @@ import { format } from "date-fns";
 
 interface ActivityTrackerProps {
   entityType: string;
-  entityId: number;
+  entityId: string | number;
   entityName?: string;
 }
 
