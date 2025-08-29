@@ -21,6 +21,7 @@ interface ConvertToStudentModalProps {
 
 export function ConvertToStudentModal({ open, onOpenChange, lead }: ConvertToStudentModalProps) {
   const { toast } = useToast();
+  const [isLeadDetailsOpen, setIsLeadDetailsOpen] = useState(false);
 
   // Check for existing students to prevent duplicates
   const { data: existingStudents } = useQuery({
