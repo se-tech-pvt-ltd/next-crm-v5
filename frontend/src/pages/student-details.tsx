@@ -226,29 +226,36 @@ export default function StudentDetails() {
                           <Button
                             variant="outline"
                             size="sm"
+                            className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                             onClick={() => setLocation(`/leads/${student.leadId}`)}
                             disabled={isLoading}
+                            title="View Lead"
                           >
-                            View Lead
+                            <UserIcon />
+                            <span className="hidden lg:inline">View Lead</span>
                           </Button>
                         )}
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setIsEditing(true)}
                           disabled={isLoading}
+                          title="Edit"
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setIsAddApplicationOpen(true)}
                           disabled={isLoading}
+                          title="Add Application"
                         >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Add Application
+                          <Plus />
+                          <span className="hidden lg:inline">Application</span>
                         </Button>
                       </>
                     ) : (
