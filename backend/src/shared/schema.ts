@@ -70,17 +70,19 @@ export const students = mysqlTable("students", {
 });
 
 export const applications = mysqlTable("applications", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  applicationCode: varchar("application_code", { length: 255 }),
   studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),
-  degree: text("degree"),
-  intakeYear: text("intake_year"),
-  intakeSemester: text("intake_semester"),
-  applicationFee: text("application_fee"),
-  status: text("status").notNull().default("draft"),
+  courseType: text("course_type"),
+  appStatus: text("app_status").notNull().default("Open"),
+  caseStatus: text("case_status").default("Raw"),
+  country: text("country"),
+  channelPartner: text("channel_partner"),
+  intake: text("intake"),
+  googleDriveLink: text("google_drive_link"),
   notes: text("notes"),
-  decisionDate: timestamp("decision_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
