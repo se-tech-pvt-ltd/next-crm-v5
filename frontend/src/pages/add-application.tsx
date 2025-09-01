@@ -316,6 +316,56 @@ export default function AddApplication() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Additional Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="intake"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Intake</FormLabel>
+                        <Select value={field.value || ''} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select intake" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="October 2025">October 2025</SelectItem>
+                            <SelectItem value="November 2025">November 2025</SelectItem>
+                            <SelectItem value="December 2025">December 2025</SelectItem>
+                            <SelectItem value="January 2026">January 2026</SelectItem>
+                            <SelectItem value="February 2026">February 2026</SelectItem>
+                            <SelectItem value="March 2026">March 2026</SelectItem>
+                            <SelectItem value="April 2026">April 2026</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="googleDriveLink"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Google Drive Link</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://drive.google.com/..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={goBack}>Cancel</Button>
               <Button type="submit" disabled={createMutation.isPending}>
