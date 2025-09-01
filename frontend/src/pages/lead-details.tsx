@@ -13,7 +13,6 @@ import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchab
 import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { ActivityTracker } from '@/components/activity-tracker';
-import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Lead, type User, type Student } from '@/lib/types';
@@ -50,7 +49,6 @@ export default function LeadDetails() {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
-  const [showConvertModal, setShowConvertModal] = useState(false);
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
@@ -447,7 +445,7 @@ export default function LeadDetails() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowConvertModal(true)}
+                          onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
                         >
                           <UserPlus className="w-4 h-4 mr-1" />
@@ -835,19 +833,6 @@ export default function LeadDetails() {
       </div>
       </div>
 
-      {/* Convert to Student Modal */}
-      <ConvertToStudentModal
-        open={showConvertModal}
-        onOpenChange={setShowConvertModal}
-        lead={lead}
-        onSuccess={() => {
-          setShowConvertModal(false);
-          setCurrentStatus('converted');
-          queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-          queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
-          queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
-        }}
-      />
 
       {/* Mark as Lost Modal */}
       <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
