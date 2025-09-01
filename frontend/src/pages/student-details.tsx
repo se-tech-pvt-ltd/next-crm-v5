@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
@@ -14,7 +13,7 @@ import { type Student, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Award, Mail, Phone, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Award, Mail, Phone, Calendar as CalendarIcon } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function StudentDetails() {
@@ -570,32 +569,6 @@ export default function StudentDetails() {
                 </CardContent>
               </Card>
 
-              <Card className="w-full lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Notes</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-24 w-full" />
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Label htmlFor="notes" className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 opacity-0" />
-                        <span>Notes</span>
-                      </Label>
-                      <Textarea
-                        id="notes"
-                        rows={3}
-                        value={isEditing ? (editData.notes || '') : (student?.notes || '')}
-                        onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                        disabled={!isEditing}
-                      />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
             </div>
 
             <Card className="w-full">
@@ -659,7 +632,6 @@ export default function StudentDetails() {
                 <ActivityTracker
                   entityType="student"
                   entityId={params?.id || ''}
-                  initialInfo={student?.notes}
                   initialInfoDate={student?.createdAt as any}
                   initialInfoUserName={(function() {
                     const creatorId = (student as any)?.counselorId || null;
