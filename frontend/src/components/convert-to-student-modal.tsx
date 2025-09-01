@@ -281,7 +281,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-6xl max-h-[90vh] overflow-y-auto"
+        className="max-w-4xl max-h-[90vh] overflow-y-auto"
         style={{ touchAction: 'pan-y' }}
       >
         <DialogHeader>
@@ -291,7 +291,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                 <UserPlus className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <DialogTitle className="text-xl">Convert Lead to Student</DialogTitle>
+                <DialogTitle className="text-base">Convert Lead to Student</DialogTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Transform your lead into an active student with complete profile information
                 </p>
@@ -301,7 +301,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-3">
           {/* Collapsible Lead Details */}
           <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
             <Card>
@@ -318,76 +318,76 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardHeader>
               <CollapsibleContent>
                 <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-2 bg-muted/30 rounded-lg">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <User className="w-3 h-3" />
                         <span>Type</span>
                       </Label>
-                      <Input value={formData.type} disabled className="bg-background" />
+                      <Input value={formData.type} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <User className="w-3 h-3" />
                         <span>Name</span>
                       </Label>
-                      <Input value={formData.name} disabled className="bg-background" />
+                      <Input value={formData.name} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <Mail className="w-3 h-3" />
                         <span>Email</span>
                       </Label>
-                      <Input value={formData.email} disabled className="bg-background" />
+                      <Input value={formData.email} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <Phone className="w-3 h-3" />
                         <span>Phone</span>
                       </Label>
-                      <Input value={formData.phone} disabled className="bg-background" />
+                      <Input value={formData.phone} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <MapPin className="w-3 h-3" />
                         <span>City</span>
                       </Label>
-                      <Input value={formData.city} disabled className="bg-background" />
+                      <Input value={formData.city} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <MapPin className="w-3 h-3" />
                         <span>Source</span>
                       </Label>
-                      <Input value={formData.source} disabled className="bg-background" />
+                      <Input value={formData.source} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <Globe className="w-3 h-3" />
                         <span>Interested Country</span>
                       </Label>
-                      <Input value={formData.interestedCountry} disabled className="bg-background" />
+                      <Input value={formData.interestedCountry} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <GraduationCap className="w-3 h-3" />
                         <span>Study Level</span>
                       </Label>
-                      <Input value={formData.studyLevel} disabled className="bg-background" />
+                      <Input value={formData.studyLevel} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <GraduationCap className="w-3 h-3" />
                         <span>Study Plan</span>
                       </Label>
-                      <Input value={formData.studyPlan} disabled className="bg-background" />
+                      <Input value={formData.studyPlan} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <Users className="w-3 h-3" />
                         <span>Admission Officer</span>
                       </Label>
-                      <Input value={formData.admissionOfficer} disabled className="bg-background" />
+                      <Input value={formData.admissionOfficer} disabled className="bg-background h-8 text-xs" />
                     </div>
                   </div>
                 </CardContent>
@@ -398,20 +398,20 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           {/* Student Status & Basic Info */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
                 <span>Student Status & Priority</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardContent className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="status" className="text-sm font-medium flex items-center space-x-2">
                     <Target className="w-4 h-4" />
                     <span>Status *</span>
                   </Label>
                   <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -443,7 +443,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <span>Expectation *</span>
                   </Label>
                   <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
-                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder="Select expectation" />
                     </SelectTrigger>
                     <SelectContent>
@@ -469,7 +469,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <span>Counsellor</span>
                   </Label>
                   <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
-                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder="Select counsellor" />
                     </SelectTrigger>
                     <SelectContent>
@@ -502,13 +502,13 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           {/* Academic & Location Details */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic & Location Details</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardContent className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="city" className="text-sm font-medium flex items-center space-x-2">
                     <MapPin className="w-4 h-4" />
@@ -529,7 +529,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <span>ELT Test</span>
                   </Label>
                   <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
-                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder="Select test" />
                     </SelectTrigger>
                     <SelectContent>
@@ -564,20 +564,20 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           {/* Financial & Documentation */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center space-x-2">
+              <CardTitle className="text-sm flex items-center space-x-2">
                 <DollarSign className="w-5 h-5 text-primary" />
                 <span>Financial & Documentation</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="consultancyFee" className="text-sm font-medium flex items-center space-x-2">
                     <DollarSign className="w-4 h-4" />
                     <span>Consultancy Fee</span>
                   </Label>
                   <Select value={formData.consultancyFee} onValueChange={(value) => handleInputChange('consultancyFee', value)}>
-                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder="Select option" />
                     </SelectTrigger>
                     <SelectContent>
@@ -593,7 +593,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <span>Scholarship</span>
                   </Label>
                   <Select value={formData.scholarship} onValueChange={(value) => handleInputChange('scholarship', value)}>
-                    <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder="Select option" />
                     </SelectTrigger>
                     <SelectContent>
@@ -604,7 +604,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center space-x-2">
                     <Upload className="w-4 h-4" />
@@ -663,14 +663,14 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="px-6"
+            className="px-4 h-8 text-xs"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={convertToStudentMutation.isPending}
-            className="px-6 bg-primary hover:bg-primary/90"
+            className="px-4 h-8 text-xs bg-primary hover:bg-primary/90"
           >
             {convertToStudentMutation.isPending ? (
               <div className="flex items-center space-x-2">
