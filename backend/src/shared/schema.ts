@@ -171,7 +171,6 @@ export const dropdowns = mysqlTable("dropdown", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
   moduleName: varchar("module_name", { length: 255 }).notNull(),
   fieldName: varchar("field_name", { length: 255 }).notNull(),
-  key: varchar("key", { length: 255 }).notNull(),
   value: varchar("value", { length: 255 }).notNull(),
 });
 
@@ -187,7 +186,7 @@ export const insertDropdownSchema = createInsertSchema(dropdowns);
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
 export type InsertDropdown = z.infer<typeof insertDropdownSchema>;
-export type Dropdown = typeof dropdowns.$inferSelect;
+export type Dropdown = typeof dropdowns.$inferSelect & { key?: string };
 
 export type User = typeof users.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
