@@ -229,21 +229,25 @@ export default function AddApplication() {
 
                   <FormField
                     control={form.control}
-                    name="intakeSemester"
+                    name="courseType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Intake Semester</FormLabel>
+                        <FormLabel>Course Type</FormLabel>
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select semester" />
+                              <SelectValue placeholder="Select course type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Fall">Fall</SelectItem>
-                            <SelectItem value="Spring">Spring</SelectItem>
-                            <SelectItem value="Summer">Summer</SelectItem>
-                            <SelectItem value="Winter">Winter</SelectItem>
+                            <SelectItem value="ELT">ELT</SelectItem>
+                            <SelectItem value="Foundation">Foundation</SelectItem>
+                            <SelectItem value="Bachelors">Bachelors</SelectItem>
+                            <SelectItem value="Masters">Masters</SelectItem>
+                            <SelectItem value="Top Up">Top Up</SelectItem>
+                            <SelectItem value="Pre Masters">Pre Masters</SelectItem>
+                            <SelectItem value="MRes/PHD">MRes/PHD</SelectItem>
+                            <SelectItem value="Diploma">Diploma</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
