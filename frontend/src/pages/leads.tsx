@@ -547,7 +547,11 @@ export default function Leads() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        {convertedLeadIds.has(lead.id) ? 'Yes' : 'No'}
+                        {convertedLeadIds.has(lead.id) ? (
+                          <Badge className="bg-green-100 text-green-800">Yes</Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-800">No</Badge>
+                        )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(lead.status || 'new')}>
