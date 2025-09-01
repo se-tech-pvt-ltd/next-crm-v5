@@ -13,7 +13,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { type Lead, type Student } from '@/lib/types';
-import { ArrowLeft, Award, Calendar, DollarSign, FileText, Globe, GraduationCap, MapPin, Target, Users } from 'lucide-react';
+import { ArrowLeft, Award, Calendar, DollarSign, FileText, GraduationCap, MapPin, Target, Users } from 'lucide-react';
 
 export default function ConvertLeadToStudent() {
   const [, params] = useRoute('/leads/:id/convert');
