@@ -13,7 +13,7 @@ import { insertApplicationSchema, type Student, type InsertApplication } from '@
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
-import { School, FileText, GraduationCap, Calendar, DollarSign, ArrowLeft, PlusCircle } from 'lucide-react';
+import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap } from 'lucide-react';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
