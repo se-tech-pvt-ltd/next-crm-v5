@@ -443,8 +443,9 @@ export default function LeadDetails() {
                           Edit
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="default"
                           size="sm"
+                          className="shadow-sm"
                           onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
                         >
