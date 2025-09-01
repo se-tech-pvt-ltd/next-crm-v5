@@ -554,8 +554,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   placeholder="Enter complete address with street, city, postal code..."
-                  rows={3}
-                  className="transition-all focus:ring-2 focus:ring-primary/20"
+                  rows={2}
+                  className="text-xs transition-all focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </CardContent>
