@@ -317,12 +317,9 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select test" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="IELTS">📝 IELTS</SelectItem>
-                    <SelectItem value="PTE">📝 PTE</SelectItem>
-                    <SelectItem value="OIDI">📝 OIDI</SelectItem>
-                    <SelectItem value="TOEFL">📝 TOEFL</SelectItem>
-                    <SelectItem value="Passwords">🔑 Passwords</SelectItem>
-                    <SelectItem value="No Test">❌ No Test</SelectItem>
+                    {Array.isArray(studentDropdowns?.['ELT Test']) && studentDropdowns['ELT Test'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
