@@ -18,7 +18,7 @@ interface ApplicationDetailsModalProps {
 }
 
 export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
-  const [currentStatus, setCurrentStatus] = useState<string>(application?.status || 'draft');
+  const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
   const queryClient = useQueryClient();
 
   const { data: student } = useQuery({
@@ -29,7 +29,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!application) return;
-      return apiRequest('PUT', `/api/applications/${application.id}`, { status: newStatus });
+      return apiRequest('PUT', `/api/applications/${application.id}`, { appStatus: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
@@ -63,18 +63,15 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
             </div>
             <div className="flex items-center gap-3">
               <div>
-                <label className="text-xs text-gray-500">Status</label>
+                <label className="text-xs text-gray-500">Application Status</label>
                 <Select value={currentStatus} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-32 h-8">
+                  <SelectTrigger className="w-40 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="submitted">Submitted</SelectItem>
-                    <SelectItem value="under_review">Under Review</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                    <SelectItem value="Open">Open</SelectItem>
+                    <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -113,20 +110,24 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <p className="text-lg font-semibold">{application.program}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Degree</label>
-                      <p>{application.degree || 'Not specified'}</p>
+                      <label className="text-sm font-medium text-gray-600">Course Type</label>
+                      <p>{application.courseType || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Country</label>
+                      <p>{application.country || 'Not specified'}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Intake</label>
-                      <p>{application.intakeSemester} {application.intakeYear}</p>
+                      <p>{application.intake || 'Not specified'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Application Fee</label>
-                      <p>{application.applicationFee || 'Not specified'}</p>
+                      <label className="text-sm font-medium text-gray-600">Channel Partner</label>
+                      <p>{application.channelPartner || 'Not specified'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Decision Date</label>
-                      <p>{application.decisionDate ? new Date(application.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                      <label className="text-sm font-medium text-gray-600">Google Drive Link</label>
+                      <p>{application.googleDriveLink ? <a className="text-blue-600 underline" href={application.googleDriveLink} target="_blank" rel="noreferrer">Open Link</a> : 'Not provided'}</p>
                     </div>
                   </div>
                   {application.notes && (
