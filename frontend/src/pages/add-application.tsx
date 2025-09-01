@@ -120,7 +120,7 @@ export default function AddApplication() {
                         <FormLabel>Student *</FormLabel>
                         <FormControl>
                           {presetStudentId ? (
-                            <Input value={presetStudentId} disabled />
+                            <Input value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'} disabled />
                           ) : (
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
