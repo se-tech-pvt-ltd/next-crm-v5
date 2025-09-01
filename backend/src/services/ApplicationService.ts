@@ -122,7 +122,7 @@ export class ApplicationService {
     return application;
   }
 
-  static async deleteApplication(id: number): Promise<boolean> {
+  static async deleteApplication(id: string): Promise<boolean> {
     const application = await ApplicationModel.findById(id);
     const success = await ApplicationModel.delete(id);
     
