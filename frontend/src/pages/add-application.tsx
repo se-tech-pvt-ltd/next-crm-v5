@@ -257,13 +257,29 @@ export default function AddApplication() {
 
                   <FormField
                     control={form.control}
-                    name="applicationFee"
+                    name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><DollarSign className="w-4 h-4" /> Application Fee</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., $50" {...field} />
-                        </FormControl>
+                        <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country</FormLabel>
+                        <Select value={field.value || ''} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="UK">UK</SelectItem>
+                            <SelectItem value="USA">USA</SelectItem>
+                            <SelectItem value="Canada">Canada</SelectItem>
+                            <SelectItem value="Australia">Australia</SelectItem>
+                            <SelectItem value="Germany">Germany</SelectItem>
+                            <SelectItem value="France">France</SelectItem>
+                            <SelectItem value="Spain">Spain</SelectItem>
+                            <SelectItem value="Georgia">Georgia</SelectItem>
+                            <SelectItem value="Cyprus">Cyprus</SelectItem>
+                            <SelectItem value="Ireland">Ireland</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
