@@ -250,10 +250,7 @@ Closed
                     <TableRow 
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => {
-                        setSelectedApplication(application);
-                        setIsDetailsModalOpen(true);
-                      }}
+                      onClick={() => setLocation(`/applications/${application.id}`)}
                     >
                       <TableCell className="font-medium">
                         {getStudentName(application.studentId)}
@@ -310,10 +307,7 @@ Closed
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedApplication(application);
-                                setIsDetailsModalOpen(true);
-                              }}
+                              onClick={() => setLocation(`/applications/${application.id}`)}
                             >
                               View Details
                             </DropdownMenuItem>
