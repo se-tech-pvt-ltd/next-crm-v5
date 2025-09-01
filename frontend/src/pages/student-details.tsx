@@ -543,7 +543,12 @@ export default function StudentDetails() {
                     <div key={application.id} className="border rounded-md p-3 bg-white">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium">{application.university}</div>
+                          <div className="font-medium">
+                            {application.university}
+                            {application.applicationCode && (
+                              <span className="ml-1 text-xs text-gray-500">({application.applicationCode})</span>
+                            )}
+                          </div>
                           <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` • ${application.courseType}` : ''}</div>
                         </div>
                         <Badge className="capitalize">{application.appStatus || 'Open'}</Badge>
