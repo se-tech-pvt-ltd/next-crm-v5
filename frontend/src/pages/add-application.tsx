@@ -28,6 +28,11 @@ export default function AddApplication() {
     enabled: !presetStudentId,
   });
 
+  const { data: presetStudent } = useQuery<Student>({
+    queryKey: [`/api/students/${presetStudentId}`],
+    enabled: !!presetStudentId,
+  });
+
   const form = useForm<InsertApplication>({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
