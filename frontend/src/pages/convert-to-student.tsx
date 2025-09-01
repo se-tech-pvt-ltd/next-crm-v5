@@ -256,7 +256,7 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(studentDropdowns?.['status']) && studentDropdowns['status'].map((opt: any) => (
+                    {Array.isArray(studentDropdowns?.['Status']) && studentDropdowns['Status'].map((opt: any) => (
                       <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
                     ))}
                   </SelectContent>
