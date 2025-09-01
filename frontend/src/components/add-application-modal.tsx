@@ -41,12 +41,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       studentId: studentId || '',
       university: '',
       program: selectedStudent?.targetProgram || '',
-      degree: '',
-      intakeYear: new Date().getFullYear().toString(),
-      intakeSemester: '',
-      applicationFee: '',
-      status: 'draft',
-
+      courseType: '',
+      appStatus: 'Open',
+      caseStatus: 'Raw',
+      country: '',
+      channelPartner: '',
+      intake: '',
+      googleDriveLink: '',
+      notes: '',
     },
   });
 
@@ -188,109 +190,139 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
               <FormField
                 control={form.control}
-                name="degree"
+                name="appStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Degree Level</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select degree level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Bachelor's">Bachelor's</SelectItem>
-                        <SelectItem value="Master's">Master's</SelectItem>
-                        <SelectItem value="PhD">PhD</SelectItem>
-                        <SelectItem value="Diploma">Diploma</SelectItem>
-                        <SelectItem value="Certificate">Certificate</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="intakeYear"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Intake Year</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select year" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="2024">2024</SelectItem>
-                        <SelectItem value="2025">2025</SelectItem>
-                        <SelectItem value="2026">2026</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="intakeSemester"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Intake Semester</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select semester" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Fall">Fall</SelectItem>
-                        <SelectItem value="Spring">Spring</SelectItem>
-                        <SelectItem value="Summer">Summer</SelectItem>
-                        <SelectItem value="Winter">Winter</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="applicationFee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Application Fee</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., $50, $100" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <FormLabel>Application Status</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || 'Open'}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="submitted">Submitted</SelectItem>
-                        <SelectItem value="under-review">Under Review</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                        <SelectItem value="Open">Open</SelectItem>
+                        <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+                        <SelectItem value="Closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="caseStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Case Status</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || 'Raw'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select case status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Raw">Raw</SelectItem>
+                        <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                        <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                        <SelectItem value="Supervisor">Supervisor</SelectItem>
+                        <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                        <SelectItem value="Submitted">Submitted</SelectItem>
+                        <SelectItem value="Rejected">Rejected</SelectItem>
+                        <SelectItem value="COL Received">COL Received</SelectItem>
+                        <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                        <SelectItem value="UOL Received">UOL Received</SelectItem>
+                        <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                        <SelectItem value="Deposit">Deposit</SelectItem>
+                        <SelectItem value="Deferred">Deferred</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="courseType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select course type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ELT">ELT</SelectItem>
+                        <SelectItem value="Foundation">Foundation</SelectItem>
+                        <SelectItem value="Bachelors">Bachelors</SelectItem>
+                        <SelectItem value="Masters">Masters</SelectItem>
+                        <SelectItem value="Top Up">Top Up</SelectItem>
+                        <SelectItem value="Pre Masters">Pre Masters</SelectItem>
+                        <SelectItem value="MRes/PHD">MRes/PHD</SelectItem>
+                        <SelectItem value="Diploma">Diploma</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="UK">UK</SelectItem>
+                        <SelectItem value="USA">USA</SelectItem>
+                        <SelectItem value="Canada">Canada</SelectItem>
+                        <SelectItem value="Australia">Australia</SelectItem>
+                        <SelectItem value="Germany">Germany</SelectItem>
+                        <SelectItem value="France">France</SelectItem>
+                        <SelectItem value="Spain">Spain</SelectItem>
+                        <SelectItem value="Georgia">Georgia</SelectItem>
+                        <SelectItem value="Cyprus">Cyprus</SelectItem>
+                        <SelectItem value="Ireland">Ireland</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="channelPartner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Channel Partner</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select channel partner" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Scorp">Scorp</SelectItem>
+                        <SelectItem value="UKEC">UKEC</SelectItem>
+                        <SelectItem value="Crizac">Crizac</SelectItem>
+                        <SelectItem value="Direct">Direct</SelectItem>
+                        <SelectItem value="MSM Unify">MSM Unify</SelectItem>
+                        <SelectItem value="Adventus">Adventus</SelectItem>
+                        <SelectItem value="ABN">ABN</SelectItem>
+                        <SelectItem value="NSA">NSA</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -299,6 +331,49 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               />
 
 
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <FormField
+                control={form.control}
+                name="intake"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Intake</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select intake" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="October 2025">October 2025</SelectItem>
+                        <SelectItem value="November 2025">November 2025</SelectItem>
+                        <SelectItem value="December 2025">December 2025</SelectItem>
+                        <SelectItem value="January 2026">January 2026</SelectItem>
+                        <SelectItem value="February 2026">February 2026</SelectItem>
+                        <SelectItem value="March 2026">March 2026</SelectItem>
+                        <SelectItem value="April 2026">April 2026</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="googleDriveLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Google Drive Link</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://drive.google.com/..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">
