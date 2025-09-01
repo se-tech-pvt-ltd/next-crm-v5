@@ -9,18 +9,20 @@ export class ApplicationService {
   static async getApplications(userId?: string, userRole?: string): Promise<Application[]> {
     if (userRole === 'counselor' && userId) {
       // Counselors can only see applications for their assigned students
-      return await db.select({ 
+      return await db.select({
         id: applications.id,
+        applicationCode: applications.applicationCode,
         studentId: applications.studentId,
         university: applications.university,
         program: applications.program,
-        degree: applications.degree,
-        intakeYear: applications.intakeYear,
-        intakeSemester: applications.intakeSemester,
-        applicationFee: applications.applicationFee,
-        status: applications.status,
+        courseType: applications.courseType,
+        appStatus: applications.appStatus,
+        caseStatus: applications.caseStatus,
+        country: applications.country,
+        channelPartner: applications.channelPartner,
+        intake: applications.intake,
+        googleDriveLink: applications.googleDriveLink,
         notes: applications.notes,
-        decisionDate: applications.decisionDate,
         createdAt: applications.createdAt,
         updatedAt: applications.updatedAt
       })
@@ -32,7 +34,7 @@ export class ApplicationService {
     return await ApplicationModel.findAll();
   }
 
-  static async getApplication(id: number, userId?: string, userRole?: string): Promise<Application | undefined> {
+  static async getApplication(id: string, userId?: string, userRole?: string): Promise<Application | undefined> {
     const application = await ApplicationModel.findById(id);
     
     if (!application) return undefined;
