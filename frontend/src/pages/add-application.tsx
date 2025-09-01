@@ -196,20 +196,30 @@ export default function AddApplication() {
 
                   <FormField
                     control={form.control}
-                    name="intakeYear"
+                    name="caseStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><Calendar className="w-4 h-4" /> Intake Year</FormLabel>
-                        <Select value={field.value || ''} onValueChange={field.onChange}>
+                        <FormLabel>Case Status</FormLabel>
+                        <Select value={field.value || 'Raw'} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select year" />
+                              <SelectValue placeholder="Select case status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="2024">2024</SelectItem>
-                            <SelectItem value="2025">2025</SelectItem>
-                            <SelectItem value="2026">2026</SelectItem>
+                            <SelectItem value="Raw">Raw</SelectItem>
+                            <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                            <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                            <SelectItem value="Supervisor">Supervisor</SelectItem>
+                            <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                            <SelectItem value="Submitted">Submitted</SelectItem>
+                            <SelectItem value="Rejected">Rejected</SelectItem>
+                            <SelectItem value="COL Received">COL Received</SelectItem>
+                            <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                            <SelectItem value="UOL Received">UOL Received</SelectItem>
+                            <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                            <SelectItem value="Deposit">Deposit</SelectItem>
+                            <SelectItem value="Deferred">Deferred</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
