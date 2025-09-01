@@ -447,9 +447,9 @@ export default function LeadDetails() {
                           <span className="hidden lg:inline">Edit</span>
                         </Button>
                         <Button
-                          variant="default"
+                          variant="outline"
                           size="sm"
-                          className="rounded-full shadow-sm px-2 md:px-3 [&_svg]:size-5"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
                           title="Convert to Student"
