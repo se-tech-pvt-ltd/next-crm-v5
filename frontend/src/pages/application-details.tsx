@@ -19,17 +19,10 @@ export default function ApplicationDetails() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: application, isLoading, error } = useQuery<Application>({
-    queryKey: ['/api/applications', params?.id],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/applications/${params?.id}`);
-      if (!res.ok) throw new Error('Failed to load application');
-      return res.json();
-    },
-    enabled: !!params?.id,
-    staleTime: 0,
-    refetchOnMount: true,
+  const { data: applications, isLoading, error } = useQuery<Application[]>({
+    queryKey: ['/api/applications'],
   });
+  const application = (applications || []).find((a) => a.id === params?.id);
 
   const { data: student } = useQuery<Student>({
     queryKey: application?.studentId ? ['/api/students', application.studentId] : ['noop'],
