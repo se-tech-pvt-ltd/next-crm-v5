@@ -261,7 +261,10 @@ Closed
                       <TableCell>
                         <div className="flex items-center text-sm">
                           <School className="w-3 h-3 mr-1" />
-                          {application.university}
+                          <span>{application.university}</span>
+                          {application.applicationCode && (
+                            <span className="ml-2 text-xs text-gray-500">({application.applicationCode})</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
