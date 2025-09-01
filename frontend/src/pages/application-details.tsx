@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
@@ -62,7 +61,7 @@ export default function ApplicationDetails() {
         intake: application.intake,
         channelPartner: application.channelPartner,
         googleDriveLink: application.googleDriveLink,
-        notes: application.notes,
+
       });
       setCurrentStatus(application.appStatus || 'Open');
     }
@@ -206,7 +205,7 @@ export default function ApplicationDetails() {
                             intake: application.intake,
                             channelPartner: application.channelPartner,
                             googleDriveLink: application.googleDriveLink,
-                            notes: application.notes,
+                    
                           }); }}>
                             <X className="w-4 h-4 mr-1" /> Cancel
                           </Button>
@@ -254,10 +253,6 @@ export default function ApplicationDetails() {
                         </p>
                       )}
                     </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <Label>Notes</Label>
-                      <Textarea value={isEditing ? (editData.notes || '') : (application.notes || '')} onChange={(e) => setEditData({ ...editData, notes: e.target.value })} disabled={!isEditing} />
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -293,7 +288,6 @@ export default function ApplicationDetails() {
                 <ActivityTracker
                   entityType="application"
                   entityId={application.id}
-                  initialInfo={application.notes}
                   initialInfoDate={application.createdAt as any}
                 />
               </div>
