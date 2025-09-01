@@ -389,7 +389,7 @@ export default function StudentDetails() {
 
 
 
-              <Card className="w-full">
+              <Card className="w-full lg:col-span-2">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm">Others</CardTitle>
                 </CardHeader>
