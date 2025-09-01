@@ -173,22 +173,20 @@ export default function AddApplication() {
 
                   <FormField
                     control={form.control}
-                    name="degree"
+                    name="appStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Degree</FormLabel>
-                        <Select value={field.value || ''} onValueChange={field.onChange}>
+                        <FormLabel>Application Status</FormLabel>
+                        <Select value={field.value || 'Open'} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select degree" />
+                              <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Bachelor's">Bachelor's</SelectItem>
-                            <SelectItem value="Master's">Master's</SelectItem>
-                            <SelectItem value="PhD">PhD</SelectItem>
-                            <SelectItem value="Diploma">Diploma</SelectItem>
-                            <SelectItem value="Certificate">Certificate</SelectItem>
+                            <SelectItem value="Open">Open</SelectItem>
+                            <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+                            <SelectItem value="Closed">Closed</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
