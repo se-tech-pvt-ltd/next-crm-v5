@@ -69,17 +69,19 @@ export interface Student {
 }
 
 export interface Application {
-  id: number;
+  id: string;
+  applicationCode: string | null;
   studentId: string;
   university: string;
   program: string;
-  degree: string | null;
-  intakeYear: string | null;
-  intakeSemester: string | null;
-  applicationFee: string | null;
-  status: string;
+  courseType: string | null;
+  appStatus: string;
+  caseStatus: string | null;
+  country: string | null;
+  channelPartner: string | null;
+  intake: string | null;
+  googleDriveLink: string | null;
   notes: string | null;
-  decisionDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
