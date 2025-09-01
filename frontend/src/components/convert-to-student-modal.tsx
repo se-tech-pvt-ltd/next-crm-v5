@@ -542,6 +542,21 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="passport" className="text-sm font-medium flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Passport</span>
+                  </Label>
+                  <Input
+                    id="passport"
+                    type="text"
+                    value={formData.passport}
+                    onChange={(e) => handleInputChange('passport', e.target.value)}
+                    placeholder="Enter passport number"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -605,20 +620,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center space-x-2">
-                    <Upload className="w-4 h-4" />
-                    <span>Passport</span>
-                  </Label>
-                  <FileUpload
-                    value={formData.passport}
-                    onChange={(value) => handleInputChange('passport', value)}
-                    accept="image/*,.pdf"
-                    allowTextInput={true}
-                    placeholder="Enter passport number or upload file"
-                  />
-                </div>
-
                 {formData.consultancyFee === 'Yes' && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center space-x-2">
