@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
@@ -14,11 +14,13 @@ import { type Student, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Award, Mail, Phone, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Mail, Phone, Calendar as CalendarIcon } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function StudentDetails() {
   const [match, params] = useRoute('/students/:id');
+  const { user: authUser } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -205,8 +207,7 @@ export default function StudentDetails() {
                       <div
                         className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
                           index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
-                        style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }}
+                        } ml-[0.625rem] w-[calc(100%-1.25rem)]`}
                       />
                     )}
                   </div>
@@ -216,43 +217,60 @@ export default function StudentDetails() {
           </div>
         )}
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
-          {/* Main Content */}
           <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
-            {/* Student Information */}
-            <Card className="w-full">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">Student Information</CardTitle>
-                  <div className="flex items-center space-x-2">
+            <CollapsibleCard
+              defaultOpen
+              persistKey={`student-details:${authUser?.id || 'anon'}:student-information`}
+              header={<CardTitle className="text-sm">Student Information</CardTitle>}
+            >
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-9 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-end mb-2 space-x-2">
                     {!isEditing ? (
                       <>
                         {student?.leadId && (
                           <Button
                             variant="outline"
                             size="sm"
+                            className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                             onClick={() => setLocation(`/leads/${student.leadId}`)}
                             disabled={isLoading}
+                            title="View Lead"
                           >
-                            View Lead
+                            <UserIcon />
+                            <span className="hidden lg:inline">View Lead</span>
                           </Button>
                         )}
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setIsEditing(true)}
                           disabled={isLoading}
+                          title="Edit"
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setIsAddApplicationOpen(true)}
                           disabled={isLoading}
+                          title="Add Application"
                         >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Add Application
+                          <Plus />
+                          <span className="hidden lg:inline">Application</span>
                         </Button>
                       </>
                     ) : (
@@ -279,21 +297,8 @@ export default function StudentDetails() {
                       </>
                     )}
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {isLoading ? (
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-9 w-full" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {/* Name */}
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center space-x-2">
                         <UserIcon className="w-4 h-4" />
@@ -307,8 +312,6 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Email */}
                     <div className="space-y-2">
                       <Label htmlFor="email" className="flex items-center space-x-2">
                         <Mail className="w-4 h-4" />
@@ -323,8 +326,6 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Phone */}
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="flex items-center space-x-2">
                         <Phone className="w-4 h-4" />
@@ -339,8 +340,6 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Date of Birth */}
                     <div className="space-y-2">
                       <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
                         <CalendarIcon className="w-4 h-4" />
@@ -355,55 +354,17 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Status */}
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
-                        <span>Status</span>
+                        <span>Passport</span>
                       </Label>
-                      {isEditing ? (
-                        <Select
-                          value={mapStatusDbToUi((editData.status as any) || student?.status)}
-                          onValueChange={(v) => setEditData({ ...editData, status: v as any })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Open">Open</SelectItem>
-                            <SelectItem value="Closed">Closed</SelectItem>
-                            <SelectItem value="Enrolled">Enrolled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={mapStatusDbToUi(student?.status)} />
-                      )}
+                      <Input
+                        value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
+                        onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
                     </div>
-
-                    {/* Expectation */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Expectation</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={(editData.expectation as any) || student?.expectation || 'High'}
-                          onValueChange={(v) => setEditData({ ...editData, expectation: v })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select expectation" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="High">High</SelectItem>
-                            <SelectItem value="Average">Average</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
-                      )}
-                    </div>
-
-                    {/* Counsellor */}
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
                         <span>Counsellor</span>
@@ -428,34 +389,33 @@ export default function StudentDetails() {
                         <Input disabled className="h-8 text-xs" value={getCounselorName(student?.counselorId)} />
                       )}
                     </div>
+                  </div>
+                </>
+              )}
+            </CollapsibleCard>
 
-                    {/* Passport */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Passport</span>
-                      </Label>
-                      <Input
-                        value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
-                        onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-                    {/* Address */}
-                    <div className="space-y-2 lg:col-span-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Address</span>
-                      </Label>
-                      <Input
-                        value={isEditing ? (editData.address || '') : (student?.address || '')}
-                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
 
-                    {/* ELT Test */}
+
+
+              <CollapsibleCard
+                defaultOpen
+                cardClassName="w-full lg:col-span-2"
+                persistKey={`student-details:${authUser?.id || 'anon'}:others`}
+                header={<CardTitle className="text-sm">Others</CardTitle>}
+              >
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-6 w-3/4" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
                         <span>ELT Test</span>
@@ -481,8 +441,6 @@ export default function StudentDetails() {
                         <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
                       )}
                     </div>
-
-                    {/* Consultancy Fee */}
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
                         <span>Consultancy Fee</span>
@@ -504,8 +462,6 @@ export default function StudentDetails() {
                         <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
                       )}
                     </div>
-
-                    {/* Scholarship */}
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
                         <span>Scholarship</span>
@@ -527,70 +483,47 @@ export default function StudentDetails() {
                         <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
                       )}
                     </div>
-
-                    {/* Notes */}
-                    <div className="space-y-2 lg:col-span-3">
-                      <Label htmlFor="notes" className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 opacity-0" />
-                        <span>Notes</span>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Address</span>
                       </Label>
-                      <Textarea
-                        id="notes"
-                        rows={3}
-                        value={isEditing ? (editData.notes || '') : (student?.notes || '')}
-                        onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
+                      <Input
+                        value={isEditing ? (editData.address || '') : (student?.address || '')}
+                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
                         disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Expectation</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.expectation as any) || student?.expectation || 'High'}
+                          onValueChange={(v) => setEditData({ ...editData, expectation: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select expectation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Average">Average</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
+                      )}
+                    </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </CollapsibleCard>
 
-            {/* Academic Information */}
-            <Card className="w-full">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center">
-                  <Award className="w-5 h-5 text-primary mr-2" />
-                  <span>Academic Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-6 w-3/4" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>English Proficiency</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.englishProficiency || 'Not assessed'}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Target Country</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.targetCountry || 'Not specified'}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            </div>
+
 
           </div>
 
-          {/* Activity Sidebar */}
           <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
             <h3 className="text-sm font-semibold mb-2 flex items-center">
               <CalendarIcon className="w-5 h-5 mr-2" />
@@ -610,7 +543,6 @@ export default function StudentDetails() {
                 <ActivityTracker
                   entityType="student"
                   entityId={params?.id || ''}
-                  initialInfo={student?.notes}
                   initialInfoDate={student?.createdAt as any}
                   initialInfoUserName={(function() {
                     const creatorId = (student as any)?.counselorId || null;

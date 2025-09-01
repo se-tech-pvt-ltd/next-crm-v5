@@ -13,7 +13,6 @@ import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchab
 import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { ActivityTracker } from '@/components/activity-tracker';
-import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Lead, type User, type Student } from '@/lib/types';
@@ -50,7 +49,6 @@ export default function LeadDetails() {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
-  const [showConvertModal, setShowConvertModal] = useState(false);
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
@@ -427,40 +425,48 @@ export default function LeadDetails() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                         onClick={() => setLocation(`/students/${convertedStudent.id}`)}
                         disabled={isLoading}
+                        title="View Student"
                       >
-                        <UserIcon className="w-4 h-4 mr-1" />
-                        View Student
+                        <UserIcon className="mr-0 md:mr-1" />
+                        <span className="hidden lg:inline">View Student</span>
                       </Button>
                     ) : (
                       <>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setIsEditing(true)}
                           disabled={isLoading}
+                          title="Edit"
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowConvertModal(true)}
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
+                          title="Convert to Student"
                         >
-                          <UserPlus className="w-4 h-4 mr-1" />
-                          Convert to Student
+                          <UserPlus />
+                          <span className="hidden lg:inline">Convert</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setShowMarkAsLostModal(true)}
                           disabled={isLoading || currentStatus === 'lost'}
+                          title="Mark as Lost"
                         >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Mark as Lost
+                          <XCircle />
+                          <span className="hidden lg:inline">Lost</span>
                         </Button>
                       </>
                     )
@@ -835,19 +841,6 @@ export default function LeadDetails() {
       </div>
       </div>
 
-      {/* Convert to Student Modal */}
-      <ConvertToStudentModal
-        open={showConvertModal}
-        onOpenChange={setShowConvertModal}
-        lead={lead}
-        onSuccess={() => {
-          setShowConvertModal(false);
-          setCurrentStatus('converted');
-          queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-          queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
-          queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
-        }}
-      />
 
       {/* Mark as Lost Modal */}
       <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>

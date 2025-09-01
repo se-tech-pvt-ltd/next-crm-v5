@@ -507,6 +507,7 @@ export default function Leads() {
                     <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -543,6 +544,13 @@ export default function Leads() {
                           </div>
                         ) : (
                           <span className="text-xs text-gray-400">Not specified</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="p-2 text-xs">
+                        {convertedLeadIds.has(lead.id) ? (
+                          <Badge className="bg-green-100 text-green-800">Yes</Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-800">No</Badge>
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
