@@ -31,8 +31,7 @@ import {
   Globe,
   Users,
   Award,
-  DollarSign,
-  Upload
+  DollarSign
 } from 'lucide-react';
 
 interface ConvertToStudentModalProps {
