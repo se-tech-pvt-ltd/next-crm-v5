@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
@@ -215,11 +216,22 @@ export default function StudentDetails() {
         )}
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
           <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
-            <Card className="w-full">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">Student Information</CardTitle>
-                  <div className="flex items-center space-x-2">
+            <CollapsibleCard
+              persistKey={`student-details:${authUser?.id || 'anon'}:student-information`}
+              header={<CardTitle className="text-sm">Student Information</CardTitle>}
+            >
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-9 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-end mb-2 space-x-2">
                     {!isEditing ? (
                       <>
                         {student?.leadId && (
@@ -282,19 +294,7 @@ export default function StudentDetails() {
                       </>
                     )}
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-9 w-full" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center space-x-2">
@@ -387,134 +387,133 @@ export default function StudentDetails() {
                       )}
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </>
+              )}
+            </CollapsibleCard>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
 
 
 
-              <Card className="w-full lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Others</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-6 w-3/4" />
-                        </div>
-                      ))}
+              <CollapsibleCard
+                cardClassName="w-full lg:col-span-2"
+                persistKey={`student-details:${authUser?.id || 'anon'}:others`}
+                header={<CardTitle className="text-sm">Others</CardTitle>}
+              >
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-6 w-3/4" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>ELT Test</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.eltTest as any) || student?.eltTest || ''}
+                          onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select test" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="IELTS">IELTS</SelectItem>
+                            <SelectItem value="PTE">PTE</SelectItem>
+                            <SelectItem value="OIDI">OIDI</SelectItem>
+                            <SelectItem value="Toefl">Toefl</SelectItem>
+                            <SelectItem value="Passwords">Passwords</SelectItem>
+                            <SelectItem value="No Test">No Test</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
+                      )}
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>ELT Test</span>
-                        </Label>
-                        {isEditing ? (
-                          <Select
-                            value={(editData.eltTest as any) || student?.eltTest || ''}
-                            onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Select test" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="IELTS">IELTS</SelectItem>
-                              <SelectItem value="PTE">PTE</SelectItem>
-                              <SelectItem value="OIDI">OIDI</SelectItem>
-                              <SelectItem value="Toefl">Toefl</SelectItem>
-                              <SelectItem value="Passwords">Passwords</SelectItem>
-                              <SelectItem value="No Test">No Test</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Consultancy Fee</span>
-                        </Label>
-                        {isEditing ? (
-                          <Select
-                            value={boolToUi(editData.consultancyFree ?? student?.consultancyFree ?? false)}
-                            onValueChange={(v) => setEditData({ ...editData, consultancyFree: uiToBool(v) })}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Select option" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Yes">Yes</SelectItem>
-                              <SelectItem value="No">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Scholarship</span>
-                        </Label>
-                        {isEditing ? (
-                          <Select
-                            value={boolToUi(editData.scholarship ?? student?.scholarship ?? false)}
-                            onValueChange={(v) => setEditData({ ...editData, scholarship: uiToBool(v) })}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Select option" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Yes">Yes</SelectItem>
-                              <SelectItem value="No">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Address</span>
-                        </Label>
-                        <Input
-                          value={isEditing ? (editData.address || '') : (student?.address || '')}
-                          onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Expectation</span>
-                        </Label>
-                        {isEditing ? (
-                          <Select
-                            value={(editData.expectation as any) || student?.expectation || 'High'}
-                            onValueChange={(v) => setEditData({ ...editData, expectation: v })}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Select expectation" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="High">High</SelectItem>
-                              <SelectItem value="Average">Average</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
-                        )}
-                      </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Consultancy Fee</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={boolToUi(editData.consultancyFree ?? student?.consultancyFree ?? false)}
+                          onValueChange={(v) => setEditData({ ...editData, consultancyFree: uiToBool(v) })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
+                      )}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Scholarship</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={boolToUi(editData.scholarship ?? student?.scholarship ?? false)}
+                          onValueChange={(v) => setEditData({ ...editData, scholarship: uiToBool(v) })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Address</span>
+                      </Label>
+                      <Input
+                        value={isEditing ? (editData.address || '') : (student?.address || '')}
+                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Expectation</span>
+                      </Label>
+                      {isEditing ? (
+                        <Select
+                          value={(editData.expectation as any) || student?.expectation || 'High'}
+                          onValueChange={(v) => setEditData({ ...editData, expectation: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select expectation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Average">Average</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CollapsibleCard>
 
             </div>
 
