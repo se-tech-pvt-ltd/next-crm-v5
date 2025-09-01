@@ -38,7 +38,9 @@ export class ApplicationController {
     try {
       const id = req.params.id;
       const currentUser = ApplicationController.getCurrentUser();
+      console.log('[GetApplication] id:', id);
       const application = await ApplicationService.getApplication(id, currentUser.id, currentUser.role);
+      console.log('[GetApplication] found:', !!application);
       if (!application) {
         return res.status(404).json({ message: "Application not found" });
       }
