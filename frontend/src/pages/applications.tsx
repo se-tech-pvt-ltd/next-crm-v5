@@ -235,7 +235,7 @@ export default function Applications() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button onClick={() => setIsAddApplicationModalOpen(true)}>
+                  <Button onClick={() => setLocation('/applications/add')}>
                     <Plus className="w-4 h-4 mr-2" />
                     New Application
                   </Button>
