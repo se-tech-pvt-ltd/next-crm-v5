@@ -41,6 +41,15 @@ export default function ConvertLeadToStudent() {
     },
   });
 
+  // Fetch dropdowns for Students module (status, expectation, ELT Test)
+  const { data: studentDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/students');
+      return response.json();
+    },
+  });
+
   const normalizeToText = (value: unknown): string => {
     if (!value) return '';
     if (Array.isArray(value)) return value.filter(Boolean).join(', ');
@@ -310,7 +319,7 @@ export default function ConvertLeadToStudent() {
                     <SelectItem value="IELTS">📝 IELTS</SelectItem>
                     <SelectItem value="PTE">📝 PTE</SelectItem>
                     <SelectItem value="OIDI">📝 OIDI</SelectItem>
-                    <SelectItem value="TOEFL">📝 TOEFL</SelectItem>
+                    <SelectItem value="TOEFL">��� TOEFL</SelectItem>
                     <SelectItem value="Passwords">🔑 Passwords</SelectItem>
                     <SelectItem value="No Test">❌ No Test</SelectItem>
                   </SelectContent>
