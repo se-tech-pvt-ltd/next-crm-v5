@@ -88,7 +88,7 @@ export default function Reports() {
   }, {} as Record<string, number>) || {};
 
   const applicationStatuses = applications?.reduce((acc, app) => {
-    const status = app.status || 'draft';
+    const status = app.appStatus || 'Open';
     acc[status] = (acc[status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>) || {};

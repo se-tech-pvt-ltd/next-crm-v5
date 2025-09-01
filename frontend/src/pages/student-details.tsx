@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
-import { AddApplicationModal } from '@/components/add-application-modal';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type Student, type User } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import { type Student, type User, type Application } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -26,7 +26,6 @@ export default function StudentDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [currentStatus, setCurrentStatus] = useState('');
-  const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
   const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
 
   const { data: student, isLoading, error } = useQuery<Student>({
@@ -40,10 +39,14 @@ export default function StudentDetails() {
     refetchOnMount: true,
   });
 
-
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
     staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: applications, isLoading: appsLoading } = useQuery<Application[]>({
+    queryKey: [`/api/applications/student/${params?.id}`],
+    enabled: !!params?.id,
   });
 
   useEffect(() => {
@@ -221,7 +224,60 @@ export default function StudentDetails() {
             <CollapsibleCard
               defaultOpen
               persistKey={`student-details:${authUser?.id || 'anon'}:student-information`}
-              header={<CardTitle className="text-sm">Student Information</CardTitle>}
+              header={(
+                <div className="flex items-center justify-between w-full">
+                  <CardTitle className="text-sm">Student Information</CardTitle>
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {!isEditing ? (
+                      <>
+                        {student?.leadId && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                            onClick={(e) => { e.stopPropagation(); setLocation(`/leads/${student.leadId}`); }}
+                            disabled={isLoading}
+                            title="View Lead"
+                          >
+                            <UserIcon />
+                            <span className="hidden lg:inline">View Lead</span>
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                          disabled={isLoading}
+                          title="Edit"
+                        >
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); handleSaveChanges(); }}
+                          disabled={updateStudentMutation.isPending}
+                        >
+                          <Save className="w-4 h-4 mr-1" />
+                          Save Changes
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setIsEditing(false); if (student) setEditData(student); }}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             >
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -234,70 +290,6 @@ export default function StudentDetails() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center justify-end mb-2 space-x-2">
-                    {!isEditing ? (
-                      <>
-                        {student?.leadId && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                            onClick={() => setLocation(`/leads/${student.leadId}`)}
-                            disabled={isLoading}
-                            title="View Lead"
-                          >
-                            <UserIcon />
-                            <span className="hidden lg:inline">View Lead</span>
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                          onClick={() => setIsEditing(true)}
-                          disabled={isLoading}
-                          title="Edit"
-                        >
-                          <Edit />
-                          <span className="hidden lg:inline">Edit</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                          onClick={() => setIsAddApplicationOpen(true)}
-                          disabled={isLoading}
-                          title="Add Application"
-                        >
-                          <Plus />
-                          <span className="hidden lg:inline">Application</span>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={handleSaveChanges}
-                          disabled={updateStudentMutation.isPending}
-                        >
-                          <Save className="w-4 h-4 mr-1" />
-                          Save Changes
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setIsEditing(false);
-                            if (student) setEditData(student);
-                          }}
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center space-x-2">
@@ -395,10 +387,6 @@ export default function StudentDetails() {
             </CollapsibleCard>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-
-
-
               <CollapsibleCard
                 defaultOpen
                 cardClassName="w-full lg:col-span-2"
@@ -518,9 +506,65 @@ export default function StudentDetails() {
                   </div>
                 )}
               </CollapsibleCard>
-
             </div>
 
+            <CollapsibleCard
+              defaultOpen
+              persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+              header={
+                <div className="w-full flex items-center justify-between">
+                  <CardTitle className="text-sm">Applications ({applications?.length || 0})</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                    onClick={() => setLocation(`/applications/add?studentId=${student?.id || ''}`)}
+                    disabled={isLoading}
+                    title="Add Application"
+                  >
+                    <Plus />
+                    <span className="hidden lg:inline">Add</span>
+                  </Button>
+                </div>
+              }
+            >
+              {appsLoading ? (
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  ))}
+                </div>
+              ) : (applications && applications.length > 0) ? (
+                <div className="space-y-2">
+                  {applications.map((application) => (
+                    <div key={application.id} className="border rounded-md p-3 bg-white cursor-pointer hover:bg-gray-50" onClick={() => setLocation(`/applications/${application.id}`)}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">
+                            {application.university}
+                            {application.applicationCode && (
+                              <span className="ml-1 text-xs text-gray-500">({application.applicationCode})</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` • ${application.courseType}` : ''}</div>
+                        </div>
+                        <Badge className="capitalize">{application.appStatus || 'Open'}</Badge>
+                      </div>
+                      <div className="mt-1 text-[11px] text-gray-500">
+                        <span>{application.intake || ''}</span>
+                        <span className="mx-2">•</span>
+                        <span>Created {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : 'N/A'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">No applications yet</div>
+              )}
+            </CollapsibleCard>
 
           </div>
 
@@ -557,7 +601,6 @@ export default function StudentDetails() {
         </div>
       </div>
 
-      <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id || ''} />
       <AddAdmissionModal open={isAddAdmissionOpen} onOpenChange={setIsAddAdmissionOpen} studentId={student?.id || ''} />
     </Layout>
   );

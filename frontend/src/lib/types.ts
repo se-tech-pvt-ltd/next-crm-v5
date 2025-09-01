@@ -69,17 +69,19 @@ export interface Student {
 }
 
 export interface Application {
-  id: number;
+  id: string;
+  applicationCode: string | null;
   studentId: string;
   university: string;
   program: string;
-  degree: string | null;
-  intakeYear: string | null;
-  intakeSemester: string | null;
-  applicationFee: string | null;
-  status: string;
+  courseType: string | null;
+  appStatus: string;
+  caseStatus: string | null;
+  country: string | null;
+  channelPartner: string | null;
+  intake: string | null;
+  googleDriveLink: string | null;
   notes: string | null;
-  decisionDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -181,13 +183,16 @@ export const insertApplicationSchema = z.object({
   studentId: z.string(),
   university: z.string().min(1, "University is required"),
   program: z.string().min(1, "Program is required"),
-  degree: z.string().optional(),
-  intakeYear: z.string().optional(),
-  intakeSemester: z.string().optional(),
-  applicationFee: z.string().optional(),
-  status: z.string().default("draft"),
+  courseType: z.string().optional(),
+  appStatus: z.enum(["Open","Needs Attention","Closed"]).default("Open"),
+  caseStatus: z.enum([
+    "Raw","Not Eligible","Documents Pending","Supervisor","Ready to Apply","Submitted","Rejected","COL Received","UOL Requested","UOL Received","Interview Outcome Awaiting","Deposit","Deferred"
+  ]).optional(),
+  country: z.string().optional(),
+  channelPartner: z.string().optional(),
+  intake: z.string().optional(),
+  googleDriveLink: z.string().url().optional().transform((v) => (v && v.trim().length === 0 ? undefined : v)),
   notes: z.string().optional(),
-  decisionDate: z.date().optional(),
 });
 
 export const insertAdmissionSchema = z.object({

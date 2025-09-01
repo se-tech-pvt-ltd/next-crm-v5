@@ -8,9 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { AddApplicationModal } from '@/components/add-application-modal';
-import { ApplicationDetailsModal } from '@/components/application-details-modal';
-import { StudentProfileModal } from '@/components/student-profile-modal';
+import { useLocation } from 'wouter';
 import { Application, Student } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -20,11 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
-  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
-  const [isStudentProfileModalOpen, setIsStudentProfileModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -37,7 +31,7 @@ export default function Applications() {
   });
 
   const updateApplicationMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<Application> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Application> }) => {
       const response = await apiRequest('PUT', `/api/applications/${id}`, data);
       return response.json();
     },
@@ -58,7 +52,7 @@ export default function Applications() {
   });
 
   const filteredApplications = applications?.filter(app => {
-    const statusMatch = statusFilter === 'all' || app.status === statusFilter;
+    const statusMatch = statusFilter === 'all' || app.appStatus === statusFilter;
     const universityMatch = universityFilter === 'all' || app.university === universityFilter;
     return statusMatch && universityMatch;
   }) || [];
@@ -79,18 +73,12 @@ export default function Applications() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft':
-        return 'bg-gray-100 text-gray-800';
-      case 'submitted':
+      case 'Open':
         return 'bg-blue-100 text-blue-800';
-      case 'under-review':
+      case 'Needs Attention':
         return 'bg-yellow-100 text-yellow-800';
-      case 'accepted':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'waitlisted':
-        return 'bg-orange-100 text-orange-800';
+      case 'Closed':
+        return 'bg-gray-200 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -121,12 +109,9 @@ export default function Applications() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="under-review">Under Review</SelectItem>
-                <SelectItem value="accepted">Accepted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                <SelectItem value="Open">Open</SelectItem>
+                <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+                <SelectItem value="Closed">Closed</SelectItem>
               </SelectContent>
             </Select>
             <Select value={universityFilter} onValueChange={setUniversityFilter}>
@@ -141,8 +126,8 @@ export default function Applications() {
               </SelectContent>
             </Select>
           </div>
-          
-          <Button onClick={() => setIsAddApplicationModalOpen(true)}>
+
+          <Button onClick={() => setLocation('/applications/add')}>
             <Plus className="w-4 h-4 mr-2" />
             New Application
           </Button>
@@ -168,12 +153,12 @@ export default function Applications() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
                 <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
-                Submitted
+                Open
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.status === 'submitted').length || 0}
+                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.appStatus === 'Open').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -182,12 +167,12 @@ export default function Applications() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
                 <Clock className="w-4 h-4 mr-2 text-yellow-500" />
-                Under Review
+Needs Attention
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.status === 'under-review').length || 0}
+                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.appStatus === 'Needs Attention').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -196,12 +181,12 @@ export default function Applications() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
                 <AlertCircle className="w-4 h-4 mr-2 text-green-500" />
-                Accepted
+Closed
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.status === 'accepted').length || 0}
+                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.appStatus === 'Closed').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -235,7 +220,7 @@ export default function Applications() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button onClick={() => setIsAddApplicationModalOpen(true)}>
+                  <Button onClick={() => setLocation('/applications/add')}>
                     <Plus className="w-4 h-4 mr-2" />
                     New Application
                   </Button>
@@ -250,8 +235,7 @@ export default function Applications() {
                     <TableHead>Program</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Intake</TableHead>
-                    <TableHead>Application Fee</TableHead>
-                    <TableHead>Submitted</TableHead>
+                    <TableHead>Created</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -260,10 +244,7 @@ export default function Applications() {
                     <TableRow 
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => {
-                        setSelectedApplication(application);
-                        setIsDetailsModalOpen(true);
-                      }}
+                      onClick={() => setLocation(`/applications/${application.id}`)}
                     >
                       <TableCell className="font-medium">
                         {getStudentName(application.studentId)}
@@ -271,31 +252,34 @@ export default function Applications() {
                       <TableCell>
                         <div className="flex items-center text-sm">
                           <School className="w-3 h-3 mr-1" />
-                          {application.university}
+                          <span>{application.university}</span>
+                          {application.applicationCode && (
+                            <span className="ml-2 text-xs text-gray-500">({application.applicationCode})</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
                           {application.program}
-                          {application.degree && (
-                            <div className="text-xs text-gray-500">{application.degree}</div>
+                          {application.courseType && (
+                            <div className="text-xs text-gray-500">{application.courseType}</div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(application.status || 'draft')}>
-                          {application.status || 'draft'}
+                        <Badge className={getStatusColor(application.appStatus || 'Open')}>
+                          {application.appStatus || 'Open'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {application.intakeSemester} {application.intakeYear}
+                          {application.intake || '—'}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center text-sm">
-                          <DollarSign className="w-3 h-3 mr-1" />
-                          {application.applicationFee || 'N/A'}
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {formatDate(application.createdAt)}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -317,10 +301,7 @@ export default function Applications() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedApplication(application);
-                                setIsDetailsModalOpen(true);
-                              }}
+                              onClick={() => setLocation(`/applications/${application.id}`)}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -336,27 +317,8 @@ export default function Applications() {
         </Card>
       </div>
 
-      <AddApplicationModal 
-        open={isAddApplicationModalOpen}
-        onOpenChange={setIsAddApplicationModalOpen}
-      />
       
-      <ApplicationDetailsModal 
-        open={isDetailsModalOpen}
-        onOpenChange={setIsDetailsModalOpen}
-        application={selectedApplication}
-        onOpenStudentProfile={(studentId) => {
-          setSelectedStudentId(studentId);
-          setIsStudentProfileModalOpen(true);
-          setIsDetailsModalOpen(false);
-        }}
-      />
       
-      <StudentProfileModal 
-        open={isStudentProfileModalOpen}
-        onOpenChange={setIsStudentProfileModalOpen}
-        studentId={selectedStudentId}
-      />
     </Layout>
   );
 }
