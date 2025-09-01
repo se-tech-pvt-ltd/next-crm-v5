@@ -172,6 +172,7 @@ export const dropdowns = mysqlTable("dropdown", {
   moduleName: varchar("module_name", { length: 255 }).notNull(),
   fieldName: varchar("field_name", { length: 255 }).notNull(),
   value: varchar("value", { length: 255 }).notNull(),
+  sequence: int("sequence"),
 });
 
 export const insertActivitySchema = createInsertSchema(activities).omit({
