@@ -141,8 +141,8 @@ export default function Applications() {
               </SelectContent>
             </Select>
           </div>
-          
-          <Button onClick={() => setIsAddApplicationModalOpen(true)}>
+
+          <Button onClick={() => setLocation('/applications/add')}>
             <Plus className="w-4 h-4 mr-2" />
             New Application
           </Button>
