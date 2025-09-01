@@ -287,23 +287,25 @@ export default function AddApplication() {
 
                   <FormField
                     control={form.control}
-                    name="status"
+                    name="channelPartner"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select value={field.value || 'draft'} onValueChange={field.onChange}>
+                        <FormLabel>Channel Partner</FormLabel>
+                        <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Select channel partner" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="draft">Draft</SelectItem>
-                            <SelectItem value="submitted">Submitted</SelectItem>
-                            <SelectItem value="under-review">Under Review</SelectItem>
-                            <SelectItem value="accepted">Accepted</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                            <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                            <SelectItem value="Scorp">Scorp</SelectItem>
+                            <SelectItem value="UKEC">UKEC</SelectItem>
+                            <SelectItem value="Crizac">Crizac</SelectItem>
+                            <SelectItem value="Direct">Direct</SelectItem>
+                            <SelectItem value="MSM Unify">MSM Unify</SelectItem>
+                            <SelectItem value="Adventus">Adventus</SelectItem>
+                            <SelectItem value="ABN">ABN</SelectItem>
+                            <SelectItem value="NSA">NSA</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
