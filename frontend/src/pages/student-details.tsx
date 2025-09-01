@@ -219,6 +219,7 @@ export default function StudentDetails() {
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
           <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
             <CollapsibleCard
+              defaultOpen
               persistKey={`student-details:${authUser?.id || 'anon'}:student-information`}
               header={<CardTitle className="text-sm">Student Information</CardTitle>}
             >
@@ -399,6 +400,7 @@ export default function StudentDetails() {
 
 
               <CollapsibleCard
+                defaultOpen
                 cardClassName="w-full lg:col-span-2"
                 persistKey={`student-details:${authUser?.id || 'anon'}:others`}
                 header={<CardTitle className="text-sm">Others</CardTitle>}
