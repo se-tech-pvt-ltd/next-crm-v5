@@ -43,7 +43,6 @@ export default function ApplicationDetails() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/applications', params?.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       toast({ title: 'Status updated' });
     },
