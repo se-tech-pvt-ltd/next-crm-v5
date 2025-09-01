@@ -238,9 +238,9 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Open"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-green-500"></Badge><span>Open</span></div></SelectItem>
-                    <SelectItem value="Closed"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-red-500"></Badge><span>Closed</span></div></SelectItem>
-                    <SelectItem value="Enrolled"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-blue-500"></Badge><span>Enrolled</span></div></SelectItem>
+                    {Array.isArray(studentDropdowns?.['status']) && studentDropdowns['status'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -319,7 +319,7 @@ export default function ConvertLeadToStudent() {
                     <SelectItem value="IELTS">📝 IELTS</SelectItem>
                     <SelectItem value="PTE">📝 PTE</SelectItem>
                     <SelectItem value="OIDI">📝 OIDI</SelectItem>
-                    <SelectItem value="TOEFL">��� TOEFL</SelectItem>
+                    <SelectItem value="TOEFL">📝 TOEFL</SelectItem>
                     <SelectItem value="Passwords">🔑 Passwords</SelectItem>
                     <SelectItem value="No Test">❌ No Test</SelectItem>
                   </SelectContent>
