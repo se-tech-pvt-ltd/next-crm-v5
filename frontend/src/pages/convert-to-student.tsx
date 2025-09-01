@@ -41,6 +41,15 @@ export default function ConvertLeadToStudent() {
     },
   });
 
+  // Fetch dropdowns for Students module (status, expectation, ELT Test)
+  const { data: studentDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/students');
+      return response.json();
+    },
+  });
+
   const normalizeToText = (value: unknown): string => {
     if (!value) return '';
     if (Array.isArray(value)) return value.filter(Boolean).join(', ');
@@ -113,6 +122,24 @@ export default function ConvertLeadToStudent() {
 
   const [formData, setFormData] = useState(initialFormData);
 
+  // Align defaults with fetched student dropdowns
+  useEffect(() => {
+    if (studentDropdowns) {
+      const ensureKey = (field: string, current: string) => {
+        const list: any[] = (studentDropdowns as any)[field] || [];
+        const keys = new Set(list.map(o => o.key));
+        if (current && keys.has(current)) return current;
+        return list[0]?.key || '';
+      };
+      setFormData(prev => ({
+        ...prev,
+        status: ensureKey('Status', prev.status),
+        expectation: ensureKey('Expectation', prev.expectation),
+        eltTest: ensureKey('ELT Test', prev.eltTest),
+      }));
+    }
+  }, [studentDropdowns]);
+
   useEffect(() => {
     if (lead) {
       setFormData(prev => ({
@@ -127,7 +154,7 @@ export default function ConvertLeadToStudent() {
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: lead.createdBy || '',
-        expectation: lead.expectation || 'High',
+        expectation: lead.expectation || prev.expectation,
       }));
     }
   }, [lead, dropdownData]);
@@ -229,9 +256,9 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Open"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-green-500"></Badge><span>Open</span></div></SelectItem>
-                    <SelectItem value="Closed"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-red-500"></Badge><span>Closed</span></div></SelectItem>
-                    <SelectItem value="Enrolled"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-blue-500"></Badge><span>Enrolled</span></div></SelectItem>
+                    {Array.isArray(studentDropdowns?.['Status']) && studentDropdowns['Status'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -246,8 +273,9 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select expectation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="High"><div className="flex items-center space-x-2"><Badge variant="destructive" className="w-2 h-2 rounded-full p-0"></Badge><span>High</span></div></SelectItem>
-                    <SelectItem value="Average"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-yellow-500"></Badge><span>Average</span></div></SelectItem>
+                    {Array.isArray(studentDropdowns?.['Expectation']) && studentDropdowns['Expectation'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -307,12 +335,9 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select test" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="IELTS">📝 IELTS</SelectItem>
-                    <SelectItem value="PTE">📝 PTE</SelectItem>
-                    <SelectItem value="OIDI">📝 OIDI</SelectItem>
-                    <SelectItem value="TOEFL">📝 TOEFL</SelectItem>
-                    <SelectItem value="Passwords">🔑 Passwords</SelectItem>
-                    <SelectItem value="No Test">❌ No Test</SelectItem>
+                    {Array.isArray(studentDropdowns?.['ELT Test']) && studentDropdowns['ELT Test'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
