@@ -133,8 +133,8 @@ export default function ConvertLeadToStudent() {
       };
       setFormData(prev => ({
         ...prev,
-        status: ensureKey('status', prev.status),
-        expectation: ensureKey('expectation', prev.expectation),
+        status: ensureKey('Status', prev.status),
+        expectation: ensureKey('Expectation', prev.expectation),
         eltTest: ensureKey('ELT Test', prev.eltTest),
       }));
     }
