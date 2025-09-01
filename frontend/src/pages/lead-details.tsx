@@ -425,41 +425,48 @@ export default function LeadDetails() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                         onClick={() => setLocation(`/students/${convertedStudent.id}`)}
                         disabled={isLoading}
+                        title="View Student"
                       >
-                        <UserIcon className="w-4 h-4 mr-1" />
-                        View Student
+                        <UserIcon className="mr-0 md:mr-1" />
+                        <span className="hidden lg:inline">View Student</span>
                       </Button>
                     ) : (
                       <>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setIsEditing(true)}
                           disabled={isLoading}
+                          title="Edit"
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
                         </Button>
                         <Button
                           variant="default"
                           size="sm"
-                          className="shadow-sm"
+                          className="rounded-full shadow-sm px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
+                          title="Convert to Student"
                         >
-                          <UserPlus className="w-4 h-4 mr-1" />
-                          Convert to Student
+                          <UserPlus />
+                          <span className="hidden lg:inline">Convert</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
                           onClick={() => setShowMarkAsLostModal(true)}
                           disabled={isLoading || currentStatus === 'lost'}
+                          title="Mark as Lost"
                         >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Mark as Lost
+                          <XCircle />
+                          <span className="hidden lg:inline">Lost</span>
                         </Button>
                       </>
                     )
