@@ -122,6 +122,22 @@ export default function ConvertLeadToStudent() {
 
   const [formData, setFormData] = useState(initialFormData);
 
+  // Align defaults with fetched student dropdowns
+  useEffect(() => {
+    if (studentDropdowns) {
+      const getFirstKey = (field: string) => {
+        const list = (studentDropdowns as any)[field];
+        return Array.isArray(list) && list.length > 0 ? list[0].key : '';
+      };
+      setFormData(prev => ({
+        ...prev,
+        status: prev.status || getFirstKey('status'),
+        expectation: prev.expectation || getFirstKey('expectation'),
+        eltTest: prev.eltTest || getFirstKey('ELT Test'),
+      }));
+    }
+  }, [studentDropdowns]);
+
   useEffect(() => {
     if (lead) {
       setFormData(prev => ({
@@ -136,7 +152,7 @@ export default function ConvertLeadToStudent() {
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: lead.createdBy || '',
-        expectation: lead.expectation || 'High',
+        expectation: lead.expectation || prev.expectation,
       }));
     }
   }, [lead, dropdownData]);
