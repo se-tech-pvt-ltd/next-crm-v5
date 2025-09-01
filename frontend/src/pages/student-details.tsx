@@ -1,4 +1,5 @@
 import { useRoute, useLocation } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -226,7 +227,60 @@ export default function StudentDetails() {
             <CollapsibleCard
               defaultOpen
               persistKey={`student-details:${authUser?.id || 'anon'}:student-information`}
-              header={<CardTitle className="text-sm">Student Information</CardTitle>}
+              header={(
+                <div className="flex items-center justify-between w-full">
+                  <CardTitle className="text-sm">Student Information</CardTitle>
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {!isEditing ? (
+                      <>
+                        {student?.leadId && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                            onClick={(e) => { e.stopPropagation(); setLocation(`/leads/${student.leadId}`); }}
+                            disabled={isLoading}
+                            title="View Lead"
+                          >
+                            <UserIcon />
+                            <span className="hidden lg:inline">View Lead</span>
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                          disabled={isLoading}
+                          title="Edit"
+                        >
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); handleSaveChanges(); }}
+                          disabled={updateStudentMutation.isPending}
+                        >
+                          <Save className="w-4 h-4 mr-1" />
+                          Save Changes
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setIsEditing(false); if (student) setEditData(student); }}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             >
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -239,59 +293,6 @@ export default function StudentDetails() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center justify-end mb-2 space-x-2">
-                    {!isEditing ? (
-                      <>
-                        {student?.leadId && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                            onClick={() => setLocation(`/leads/${student.leadId}`)}
-                            disabled={isLoading}
-                            title="View Lead"
-                          >
-                            <UserIcon />
-                            <span className="hidden lg:inline">View Lead</span>
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                          onClick={() => setIsEditing(true)}
-                          disabled={isLoading}
-                          title="Edit"
-                        >
-                          <Edit />
-                          <span className="hidden lg:inline">Edit</span>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={handleSaveChanges}
-                          disabled={updateStudentMutation.isPending}
-                        >
-                          <Save className="w-4 h-4 mr-1" />
-                          Save Changes
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setIsEditing(false);
-                            if (student) setEditData(student);
-                          }}
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center space-x-2">
