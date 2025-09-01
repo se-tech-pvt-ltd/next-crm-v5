@@ -50,7 +50,7 @@ export class ApplicationController {
 
   static async updateApplication(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const validatedData = insertApplicationSchema.partial().parse(req.body);
       const application = await ApplicationService.updateApplication(id, validatedData);
       if (!application) {
