@@ -86,7 +86,7 @@ export class ApplicationService {
     return application;
   }
 
-  static async updateApplication(id: number, updates: Partial<InsertApplication>): Promise<Application | undefined> {
+  static async updateApplication(id: string, updates: Partial<InsertApplication>): Promise<Application | undefined> {
     const currentApplication = await ApplicationModel.findById(id);
     if (!currentApplication) return undefined;
 
