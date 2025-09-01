@@ -50,7 +50,7 @@ export class ApplicationService {
     return application;
   }
 
-  static async getApplicationsByStudent(studentId: number, userId?: string, userRole?: string): Promise<Application[]> {
+  static async getApplicationsByStudent(studentId: string, userId?: string, userRole?: string): Promise<Application[]> {
     // Check role-based access for counselors
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
