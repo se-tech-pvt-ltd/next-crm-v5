@@ -544,7 +544,7 @@ export default function StudentDetails() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-medium">{application.university}</div>
-                          <div className="text-xs text-gray-600">{application.program}{application.degree ? ` • ${application.degree}` : ''}</div>
+                          <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` • ${application.courseType}` : ''}</div>
                         </div>
                         <Badge className="capitalize">{application.status || 'draft'}</Badge>
                       </div>
