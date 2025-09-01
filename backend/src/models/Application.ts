@@ -10,8 +10,11 @@ function generateCode() {
 
 export class ApplicationModel {
   static async findById(id: string): Promise<Application | undefined> {
-    const [application] = await db.select().from(applications).where(eq(applications.id, id));
-    return application;
+    console.log('[ApplicationModel.findById] id:', id);
+    const rows = await db.select().from(applications).where(eq(applications.id, id));
+    console.log('[ApplicationModel.findById] rows:', rows?.length);
+    const [application] = rows as any[];
+    return application as any;
   }
 
   static async findAll(): Promise<Application[]> {
