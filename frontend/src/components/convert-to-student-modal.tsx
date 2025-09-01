@@ -519,7 +519,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     value={formData.city}
                     onChange={(e) => handleInputChange('city', e.target.value)}
                     placeholder="Enter city"
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
