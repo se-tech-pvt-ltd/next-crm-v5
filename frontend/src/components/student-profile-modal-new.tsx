@@ -282,8 +282,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                                 <h3 className="font-medium">{application.university}</h3>
                                 <p className="text-sm text-gray-600">{application.program}</p>
                               </div>
-                              <Badge variant={application.status === 'accepted' ? 'default' : 'secondary'}>
-                                {application.status}
+                              <Badge variant={application.appStatus === 'Closed' ? 'default' : 'secondary'}>
+                                {application.appStatus}
                               </Badge>
                             </div>
                           </div>
