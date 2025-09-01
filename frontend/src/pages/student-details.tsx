@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,8 @@ import { AddApplicationModal } from '@/components/add-application-modal';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type Student, type User } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import { type Student, type User, type Application } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -40,10 +40,14 @@ export default function StudentDetails() {
     refetchOnMount: true,
   });
 
-
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
     staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: applications, isLoading: appsLoading } = useQuery<Application[]>({
+    queryKey: [`/api/applications/student/${params?.id}`],
+    enabled: !!params?.id,
   });
 
   useEffect(() => {
@@ -261,17 +265,6 @@ export default function StudentDetails() {
                           <Edit />
                           <span className="hidden lg:inline">Edit</span>
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                          onClick={() => setIsAddApplicationOpen(true)}
-                          disabled={isLoading}
-                          title="Add Application"
-                        >
-                          <Plus />
-                          <span className="hidden lg:inline">Application</span>
-                        </Button>
                       </>
                     ) : (
                       <>
@@ -395,10 +388,6 @@ export default function StudentDetails() {
             </CollapsibleCard>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-
-
-
               <CollapsibleCard
                 defaultOpen
                 cardClassName="w-full lg:col-span-2"
@@ -518,9 +507,60 @@ export default function StudentDetails() {
                   </div>
                 )}
               </CollapsibleCard>
-
             </div>
 
+            <CollapsibleCard
+              defaultOpen
+              persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+              header={
+                <div className="w-full flex items-center justify-between">
+                  <CardTitle className="text-sm">Applications ({applications?.length || 0})</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                    onClick={() => setIsAddApplicationOpen(true)}
+                    disabled={isLoading}
+                    title="Add Application"
+                  >
+                    <Plus />
+                    <span className="hidden lg:inline">Add</span>
+                  </Button>
+                </div>
+              }
+            >
+              {appsLoading ? (
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  ))}
+                </div>
+              ) : (applications && applications.length > 0) ? (
+                <div className="space-y-2">
+                  {applications.map((application) => (
+                    <div key={application.id} className="border rounded-md p-3 bg-white">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">{application.university}</div>
+                          <div className="text-xs text-gray-600">{application.program}{application.degree ? ` • ${application.degree}` : ''}</div>
+                        </div>
+                        <Badge className="capitalize">{application.status || 'draft'}</Badge>
+                      </div>
+                      <div className="mt-1 text-[11px] text-gray-500">
+                        <span>{application.intakeSemester || ''} {application.intakeYear || ''}</span>
+                        <span className="mx-2">•</span>
+                        <span>Created {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : 'N/A'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">No applications yet</div>
+              )}
+            </CollapsibleCard>
 
           </div>
 
