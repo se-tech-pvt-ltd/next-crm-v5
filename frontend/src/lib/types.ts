@@ -191,7 +191,7 @@ export const insertApplicationSchema = z.object({
   country: z.string().optional(),
   channelPartner: z.string().optional(),
   intake: z.string().optional(),
-  googleDriveLink: z.string().url().optional(),
+  googleDriveLink: z.string().url().optional().transform((v) => (v && v.trim().length === 0 ? undefined : v)),
   notes: z.string().optional(),
 });
 
