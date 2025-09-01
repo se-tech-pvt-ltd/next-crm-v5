@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { AddApplicationModal } from '@/components/add-application-modal';
+import { useLocation } from 'wouter';
 import { ApplicationDetailsModal } from '@/components/application-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Application, Student } from '@/lib/types';
@@ -20,7 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
-  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
@@ -336,10 +336,6 @@ export default function Applications() {
         </Card>
       </div>
 
-      <AddApplicationModal 
-        open={isAddApplicationModalOpen}
-        onOpenChange={setIsAddApplicationModalOpen}
-      />
       
       <ApplicationDetailsModal 
         open={isDetailsModalOpen}

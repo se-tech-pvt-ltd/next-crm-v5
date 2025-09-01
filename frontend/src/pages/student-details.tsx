@@ -6,7 +6,6 @@ import { CollapsibleCard } from '@/components/collapsible-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
-import { AddApplicationModal } from '@/components/add-application-modal';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { Layout } from '@/components/layout';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,7 +26,6 @@ export default function StudentDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [currentStatus, setCurrentStatus] = useState('');
-  const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
   const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
 
   const { data: student, isLoading, error } = useQuery<Student>({
@@ -520,7 +518,7 @@ export default function StudentDetails() {
                     variant="outline"
                     size="sm"
                     className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                    onClick={() => setIsAddApplicationOpen(true)}
+                    onClick={() => setLocation(`/applications/add?studentId=${student?.id || ''}`)}
                     disabled={isLoading}
                     title="Add Application"
                   >
@@ -598,7 +596,6 @@ export default function StudentDetails() {
         </div>
       </div>
 
-      <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id || ''} />
       <AddAdmissionModal open={isAddAdmissionOpen} onOpenChange={setIsAddAdmissionOpen} studentId={student?.id || ''} />
     </Layout>
   );
