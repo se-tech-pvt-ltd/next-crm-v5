@@ -34,6 +34,21 @@ export class ApplicationController {
     }
   }
 
+  static async getApplication(req: Request, res: Response) {
+    try {
+      const id = req.params.id;
+      const currentUser = ApplicationController.getCurrentUser();
+      const application = await ApplicationService.getApplication(id, currentUser.id, currentUser.role);
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+      res.json(application);
+    } catch (error) {
+      console.error("Get application error:", error);
+      res.status(500).json({ message: "Failed to fetch application" });
+    }
+  }
+
   static async createApplication(req: Request, res: Response) {
     try {
       const validatedData = insertApplicationSchema.parse(req.body);
