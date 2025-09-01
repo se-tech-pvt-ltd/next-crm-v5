@@ -205,8 +205,7 @@ export default function StudentDetails() {
                       <div
                         className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
                           index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
-                        style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }}
+                        } ml-[0.625rem] w-[calc(100%-1.25rem)]`}
                       />
                     )}
                   </div>
@@ -216,9 +215,7 @@ export default function StudentDetails() {
           </div>
         )}
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
-          {/* Main Content */}
           <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
-            {/* Student Information */}
             <Card className="w-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -293,7 +290,6 @@ export default function StudentDetails() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {/* Name */}
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center space-x-2">
                         <UserIcon className="w-4 h-4" />
@@ -307,8 +303,6 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Email */}
                     <div className="space-y-2">
                       <Label htmlFor="email" className="flex items-center space-x-2">
                         <Mail className="w-4 h-4" />
@@ -323,8 +317,6 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Phone */}
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="flex items-center space-x-2">
                         <Phone className="w-4 h-4" />
@@ -339,8 +331,6 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-
-                    {/* Date of Birth */}
                     <div className="space-y-2">
                       <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
                         <CalendarIcon className="w-4 h-4" />
@@ -355,181 +345,242 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-                    {/* Status */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Contact Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-2">
+                      {[...Array(2)].map((_, i) => (
+                        <div key={i} className="space-y-2">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-9 w-full" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-2">
+                      <div className="space-y-2 lg:col-span-1">
+                        <Label className="flex items-center space-x-2">
+                          <span>Address</span>
+                        </Label>
+                        <Input
+                          value={isEditing ? (editData.address || '') : (student?.address || '')}
+                          onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                          disabled={!isEditing}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>Passport</span>
+                        </Label>
+                        <Input
+                          value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
+                          onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
+                          disabled={!isEditing}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Status & Assignment</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-6 w-3/4" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>Status</span>
+                        </Label>
+                        {isEditing ? (
+                          <Select
+                            value={mapStatusDbToUi((editData.status as any) || student?.status)}
+                            onValueChange={(v) => setEditData({ ...editData, status: v as any })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Open">Open</SelectItem>
+                              <SelectItem value="Closed">Closed</SelectItem>
+                              <SelectItem value="Enrolled">Enrolled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input disabled className="h-8 text-xs" value={mapStatusDbToUi(student?.status)} />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>Expectation</span>
+                        </Label>
+                        {isEditing ? (
+                          <Select
+                            value={(editData.expectation as any) || student?.expectation || 'High'}
+                            onValueChange={(v) => setEditData({ ...editData, expectation: v })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select expectation" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="High">High</SelectItem>
+                              <SelectItem value="Average">Average</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
+                        )}
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>Counsellor</span>
+                        </Label>
+                        {isEditing ? (
+                          <Select
+                            value={editData.counselorId || (student?.counselorId || '')}
+                            onValueChange={(v) => setEditData({ ...editData, counselorId: v })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select counsellor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.isArray(users) && (users as any[]).map((u: User) => (
+                                <SelectItem key={u.id} value={u.id}>
+                                  {(u.firstName || '') + ' ' + (u.lastName || '')} ({u.email})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input disabled className="h-8 text-xs" value={getCounselorName(student?.counselorId)} />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Testing & Financials</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-6 w-3/4" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>ELT Test</span>
+                        </Label>
+                        {isEditing ? (
+                          <Select
+                            value={(editData.eltTest as any) || student?.eltTest || ''}
+                            onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select test" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="IELTS">IELTS</SelectItem>
+                              <SelectItem value="PTE">PTE</SelectItem>
+                              <SelectItem value="OIDI">OIDI</SelectItem>
+                              <SelectItem value="Toefl">Toefl</SelectItem>
+                              <SelectItem value="Passwords">Passwords</SelectItem>
+                              <SelectItem value="No Test">No Test</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>Consultancy Fee</span>
+                        </Label>
+                        {isEditing ? (
+                          <Select
+                            value={boolToUi(editData.consultancyFree ?? student?.consultancyFree ?? false)}
+                            onValueChange={(v) => setEditData({ ...editData, consultancyFree: uiToBool(v) })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2">
+                          <span>Scholarship</span>
+                        </Label>
+                        {isEditing ? (
+                          <Select
+                            value={boolToUi(editData.scholarship ?? student?.scholarship ?? false)}
+                            onValueChange={(v) => setEditData({ ...editData, scholarship: uiToBool(v) })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="w-full lg:col-span-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Notes</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {isLoading ? (
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Status</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={mapStatusDbToUi((editData.status as any) || student?.status)}
-                          onValueChange={(v) => setEditData({ ...editData, status: v as any })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Open">Open</SelectItem>
-                            <SelectItem value="Closed">Closed</SelectItem>
-                            <SelectItem value="Enrolled">Enrolled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={mapStatusDbToUi(student?.status)} />
-                      )}
+                      <Skeleton className="h-24 w-full" />
                     </div>
-
-                    {/* Expectation */}
+                  ) : (
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Expectation</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={(editData.expectation as any) || student?.expectation || 'High'}
-                          onValueChange={(v) => setEditData({ ...editData, expectation: v })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select expectation" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="High">High</SelectItem>
-                            <SelectItem value="Average">Average</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={student?.expectation || 'High'} />
-                      )}
-                    </div>
-
-                    {/* Counsellor */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Counsellor</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={editData.counselorId || (student?.counselorId || '')}
-                          onValueChange={(v) => setEditData({ ...editData, counselorId: v })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select counsellor" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.isArray(users) && (users as any[]).map((u: User) => (
-                              <SelectItem key={u.id} value={u.id}>
-                                {(u.firstName || '') + ' ' + (u.lastName || '')} ({u.email})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={getCounselorName(student?.counselorId)} />
-                      )}
-                    </div>
-
-                    {/* Passport */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Passport</span>
-                      </Label>
-                      <Input
-                        value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
-                        onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
-
-                    {/* Address */}
-                    <div className="space-y-2 lg:col-span-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Address</span>
-                      </Label>
-                      <Input
-                        value={isEditing ? (editData.address || '') : (student?.address || '')}
-                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
-
-                    {/* ELT Test */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>ELT Test</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={(editData.eltTest as any) || student?.eltTest || ''}
-                          onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select test" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="IELTS">IELTS</SelectItem>
-                            <SelectItem value="PTE">PTE</SelectItem>
-                            <SelectItem value="OIDI">OIDI</SelectItem>
-                            <SelectItem value="Toefl">Toefl</SelectItem>
-                            <SelectItem value="Passwords">Passwords</SelectItem>
-                            <SelectItem value="No Test">No Test</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
-                      )}
-                    </div>
-
-                    {/* Consultancy Fee */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Consultancy Fee</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={boolToUi(editData.consultancyFree ?? student?.consultancyFree ?? false)}
-                          onValueChange={(v) => setEditData({ ...editData, consultancyFree: uiToBool(v) })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select option" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.consultancyFree)} />
-                      )}
-                    </div>
-
-                    {/* Scholarship */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Scholarship</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select
-                          value={boolToUi(editData.scholarship ?? student?.scholarship ?? false)}
-                          onValueChange={(v) => setEditData({ ...editData, scholarship: uiToBool(v) })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select option" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input disabled className="h-8 text-xs" value={boolToUi(student?.scholarship)} />
-                      )}
-                    </div>
-
-                    {/* Notes */}
-                    <div className="space-y-2 lg:col-span-3">
                       <Label htmlFor="notes" className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4 opacity-0" />
                         <span>Notes</span>
@@ -542,12 +593,11 @@ export default function StudentDetails() {
                         disabled={!isEditing}
                       />
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Academic Information */}
             <Card className="w-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center">
@@ -590,7 +640,6 @@ export default function StudentDetails() {
 
           </div>
 
-          {/* Activity Sidebar */}
           <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
             <h3 className="text-sm font-semibold mb-2 flex items-center">
               <CalendarIcon className="w-5 h-5 mr-2" />
