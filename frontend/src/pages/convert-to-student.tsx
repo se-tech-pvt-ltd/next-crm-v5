@@ -255,8 +255,9 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder="Select expectation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="High"><div className="flex items-center space-x-2"><Badge variant="destructive" className="w-2 h-2 rounded-full p-0"></Badge><span>High</span></div></SelectItem>
-                    <SelectItem value="Average"><div className="flex items-center space-x-2"><Badge className="w-2 h-2 rounded-full p-0 bg-yellow-500"></Badge><span>Average</span></div></SelectItem>
+                    {Array.isArray(studentDropdowns?.['expectation']) && studentDropdowns['expectation'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
