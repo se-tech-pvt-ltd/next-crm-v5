@@ -549,7 +549,7 @@ export default function StudentDetails() {
                         <Badge className="capitalize">{application.appStatus || 'Open'}</Badge>
                       </div>
                       <div className="mt-1 text-[11px] text-gray-500">
-                        <span>{application.intakeSemester || ''} {application.intakeYear || ''}</span>
+                        <span>{application.intake || ''}</span>
                         <span className="mx-2">•</span>
                         <span>Created {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : 'N/A'}</span>
                       </div>
