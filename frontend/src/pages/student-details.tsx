@@ -1,4 +1,6 @@
 import { useRoute, useLocation } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CollapsibleCard } from '@/components/collapsible-card';
