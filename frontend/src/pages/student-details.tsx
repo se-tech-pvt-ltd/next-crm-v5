@@ -13,7 +13,7 @@ import { type Student, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Award, Mail, Phone, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Mail, Phone, Calendar as CalendarIcon } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function StudentDetails() {
@@ -344,6 +344,17 @@ export default function StudentDetails() {
                         className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <span>Passport</span>
+                      </Label>
+                      <Input
+                        value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
+                        onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -377,17 +388,6 @@ export default function StudentDetails() {
                           className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Passport</span>
-                        </Label>
-                        <Input
-                          value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')}
-                          onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -409,28 +409,6 @@ export default function StudentDetails() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2">
-                          <span>Status</span>
-                        </Label>
-                        {isEditing ? (
-                          <Select
-                            value={mapStatusDbToUi((editData.status as any) || student?.status)}
-                            onValueChange={(v) => setEditData({ ...editData, status: v as any })}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Open">Open</SelectItem>
-                              <SelectItem value="Closed">Closed</SelectItem>
-                              <SelectItem value="Enrolled">Enrolled</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input disabled className="h-8 text-xs" value={mapStatusDbToUi(student?.status)} />
-                        )}
-                      </div>
                       <div className="space-y-2">
                         <Label className="flex items-center space-x-2">
                           <span>Expectation</span>
@@ -571,45 +549,6 @@ export default function StudentDetails() {
 
             </div>
 
-            <Card className="w-full">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center">
-                  <Award className="w-5 h-5 text-primary mr-2" />
-                  <span>Academic Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-6 w-3/4" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>English Proficiency</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.englishProficiency || 'Not assessed'}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2">
-                        <span>Target Country</span>
-                      </Label>
-                      <div className="text-xs text-gray-800 min-h-[2rem] flex items-center">
-                        {student?.targetCountry || 'Not specified'}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
 
           </div>
 
