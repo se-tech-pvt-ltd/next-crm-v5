@@ -492,7 +492,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
