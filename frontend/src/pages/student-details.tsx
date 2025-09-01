@@ -1,6 +1,5 @@
 import { useRoute, useLocation } from 'wouter';
 import { useState, useEffect } from 'react';
-import { ApplicationDetailsModal } from '@/components/application-details-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CollapsibleCard } from '@/components/collapsible-card';
@@ -28,8 +27,6 @@ export default function StudentDetails() {
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [currentStatus, setCurrentStatus] = useState('');
   const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
-  const [isApplicationDetailsOpen, setIsApplicationDetailsOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
   const { data: student, isLoading, error } = useQuery<Student>({
     queryKey: ['/api/students', params?.id],
@@ -543,7 +540,7 @@ export default function StudentDetails() {
               ) : (applications && applications.length > 0) ? (
                 <div className="space-y-2">
                   {applications.map((application) => (
-                    <div key={application.id} className="border rounded-md p-3 bg-white cursor-pointer hover:bg-gray-50" onClick={() => { setSelectedApplication(application); setIsApplicationDetailsOpen(true); }}>
+                    <div key={application.id} className="border rounded-md p-3 bg-white cursor-pointer hover:bg-gray-50" onClick={() => setLocation(`/applications/${application.id}`)}>
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-medium">
@@ -604,11 +601,6 @@ export default function StudentDetails() {
         </div>
       </div>
 
-      <ApplicationDetailsModal
-        open={isApplicationDetailsOpen}
-        onOpenChange={setIsApplicationDetailsOpen}
-        application={selectedApplication}
-      />
       <AddAdmissionModal open={isAddAdmissionOpen} onOpenChange={setIsAddAdmissionOpen} studentId={student?.id || ''} />
     </Layout>
   );
