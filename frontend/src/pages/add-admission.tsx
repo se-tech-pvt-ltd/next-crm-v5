@@ -172,19 +172,90 @@ export default function AddAdmissionPage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Overview Fields */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> Admission Details</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> Overview</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {!presetApplicationId && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                  {/* Admission ID (read-only) */}
+                  <FormItem>
+                    <FormLabel>Admission ID</FormLabel>
+                    <FormControl>
+                      <Input value="Will be generated" disabled />
+                    </FormControl>
+                  </FormItem>
+
+                  {/* Status -> decision */}
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('decision', v); }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="accepted">Accepted</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                              <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                              <SelectItem value="conditional">Conditional</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Case Status (updates application) */}
+                  <FormField
+                    control={form.control}
+                    name="caseStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Case Status</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select case status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Raw">Raw</SelectItem>
+                              <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                              <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                              <SelectItem value="Supervisor">Supervisor</SelectItem>
+                              <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                              <SelectItem value="Submitted">Submitted</SelectItem>
+                              <SelectItem value="Rejected">Rejected</SelectItem>
+                              <SelectItem value="COL Received">COL Received</SelectItem>
+                              <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                              <SelectItem value="UOL Received">UOL Received</SelectItem>
+                              <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                              <SelectItem value="Deposit">Deposit</SelectItem>
+                              <SelectItem value="Deferred">Deferred</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Linked Application */}
+                  {!presetApplicationId ? (
                     <FormField
                       control={form.control}
                       name="applicationId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Application</FormLabel>
+                          <FormLabel>Linked Application</FormLabel>
                           <FormControl>
                             <Select
                               value={field.value ? String(field.value) : ''}
@@ -215,31 +286,35 @@ export default function AddAdmissionPage() {
                         </FormItem>
                       )}
                     />
+                  ) : (
+                    <FormItem>
+                      <FormLabel>Linked Application</FormLabel>
+                      <FormControl>
+                        <Input value={`${presetApplication?.university || ''} — ${presetApplication?.program || ''}`} disabled />
+                      </FormControl>
+                    </FormItem>
                   )}
 
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Financial and Dates */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-primary" /> Financial & Dates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                   <FormField
                     control={form.control}
-                    name="studentId"
+                    name="fullTuitionFee"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Student</FormLabel>
+                        <FormLabel>Full Tuition Fee</FormLabel>
                         <FormControl>
-                          {presetStudentId || selectedApp ? (
-                            <Input value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : selectedApp ? selectedApp.studentId : ''} disabled />
-                          ) : (
-                            <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select student" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {students?.map((s) => (
-                                  <SelectItem key={s.id} value={s.id}>
-                                    {s.name} ({s.email})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
+                          <Input placeholder="e.g., 20000" {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -248,12 +323,12 @@ export default function AddAdmissionPage() {
 
                   <FormField
                     control={form.control}
-                    name="university"
+                    name="scholarshipAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><School className="w-4 h-4" /> University</FormLabel>
+                        <FormLabel>Scholarship</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter university" {...field} />
+                          <Input placeholder="e.g., 5000" {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -262,12 +337,12 @@ export default function AddAdmissionPage() {
 
                   <FormField
                     control={form.control}
-                    name="program"
+                    name="netTuitionFee"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Program</FormLabel>
+                        <FormLabel>Net Tuition Fee</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter program" {...field} />
+                          <Input placeholder="Auto-calculated" {...field} value={field.value || ''} disabled />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -276,23 +351,54 @@ export default function AddAdmissionPage() {
 
                   <FormField
                     control={form.control}
-                    name="decision"
+                    name="depositAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Decision</FormLabel>
+                        <FormLabel>Initial Deposit</FormLabel>
                         <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select decision" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="accepted">Accepted</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                              <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                              <SelectItem value="conditional">Conditional</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Input placeholder="e.g., 2000" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="depositDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Deposit Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} value={field.value ? new Date(field.value as any).toISOString().split('T')[0] : ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="visaDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Visa Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} value={field.value ? new Date(field.value as any).toISOString().split('T')[0] : ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="googleDriveLink"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Google Drive Link</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://drive.google.com/..." {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -324,70 +430,7 @@ export default function AddAdmissionPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="scholarshipAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Scholarship Amount</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., $10,000" {...field} value={field.value || ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="depositAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Deposit Amount</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., $500" {...field} value={field.value || ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="depositDeadline"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Deposit Deadline</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} value={field.value ? new Date(field.value as any).toISOString().split('T')[0] : ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-primary" /> Additional Info</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <textarea className="w-full border rounded-md p-2 min-h-[120px]" placeholder="Enter any additional notes" {...field} value={field.value || ''} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
 
