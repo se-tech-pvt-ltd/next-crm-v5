@@ -204,16 +204,9 @@ export default function AddAdmissionPage() {
                     <FormLabel>Application</FormLabel>
                     <div className="mt-1">
                       {presetApplicationId || linkedApp ? (
-                        <div>
-                          <Button variant="link" className="p-0 h-8" onClick={() => linkedApp && setLocation(`/applications/${linkedApp.id}`)} disabled={!linkedApp}>
-                            {linkedApp?.applicationCode || `${linkedApp?.university || ''} — ${linkedApp?.program || ''}`}
-                          </Button>
-                          {linkedApp?.university && (
-                            <div className="mt-1 text-sm text-muted-foreground">
-                              University: {linkedApp.university}
-                            </div>
-                          )}
-                        </div>
+                        <Button variant="link" className="p-0 h-8" onClick={() => linkedApp && setLocation(`/applications/${linkedApp.id}`)} disabled={!linkedApp}>
+                          {linkedApp?.applicationCode || `${linkedApp?.university || ''} — ${linkedApp?.program || ''}`}
+                        </Button>
                       ) : (
                         <FormField
                           control={form.control}
@@ -251,6 +244,13 @@ export default function AddAdmissionPage() {
                           )}
                         />
                       )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <FormLabel>University</FormLabel>
+                    <div className="mt-1">
+                      <Input value={linkedApp?.university || ''} disabled placeholder="Select application" />
                     </div>
                   </div>
                 </div>
