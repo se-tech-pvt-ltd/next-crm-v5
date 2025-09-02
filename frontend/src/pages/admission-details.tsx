@@ -128,24 +128,26 @@ export default function AdmissionDetails() {
               </Card>
 
               <Card className="w-full">
-                <CardHeader className="pb-3 flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center"><Plane className="w-5 h-5 mr-2" />Visa Information</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <div className="text-[11px] text-gray-600">Visa Status</div>
-                    <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                      <SelectTrigger className="h-8 text-xs w-40">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not-applied">Not Applied</SelectItem>
-                        <SelectItem value="applied">Applied</SelectItem>
-                        <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="on-hold">On Hold</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center"><Plane className="w-5 h-5 mr-2" />Visa Information</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="text-[11px] text-gray-600">Visa Status</div>
+                      <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
+                        <SelectTrigger className="h-8 text-xs w-40">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="not-applied">Not Applied</SelectItem>
+                          <SelectItem value="applied">Applied</SelectItem>
+                          <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                          <SelectItem value="on-hold">On Hold</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -157,11 +159,13 @@ export default function AdmissionDetails() {
 
               {student && (
                 <Card className="w-full">
-                  <CardHeader className="pb-3 flex items-center justify-between">
-                    <CardTitle className="text-sm flex items-center"><UserIcon className="w-5 h-5 mr-2" />Student Information</CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setLocation(`/students/${student.id}`)}>
-                      <ExternalLink className="w-4 h-4 mr-2" /> View Profile
-                    </Button>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center"><UserIcon className="w-5 h-5 mr-2" />Student Information</CardTitle>
+                      <Button variant="outline" size="sm" onClick={() => setLocation(`/students/${student.id}`)}>
+                        <ExternalLink className="w-4 h-4 mr-2" /> View Profile
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
