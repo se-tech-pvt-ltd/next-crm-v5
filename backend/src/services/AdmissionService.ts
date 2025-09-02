@@ -24,7 +24,7 @@ export class AdmissionService {
         depositAmount: admissions.depositAmount,
         depositDeadline: admissions.depositDeadline,
         visaStatus: admissions.visaStatus,
-        notes: admissions.notes,
+        admissionId: admissions.admissionId,
         createdAt: admissions.createdAt,
         updatedAt: admissions.updatedAt
       })
@@ -83,7 +83,7 @@ export class AdmissionService {
 
     const admission = await AdmissionModel.create({
       ...admissionData,
-      notes: [admissionData.notes || '', `Admission ID: ${admissionCode}`].filter(Boolean).join('\n').trim(),
+      admissionId: admissionCode,
     } as InsertAdmission);
 
     // Log activity for the student

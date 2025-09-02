@@ -101,7 +101,7 @@ export const admissions = mysqlTable("admissions", {
   depositAmount: text("deposit_amount"),
   depositDeadline: timestamp("deposit_deadline"),
   visaStatus: text("visa_status").default("pending"),
-  notes: text("notes"),
+  admissionId: varchar("admission_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

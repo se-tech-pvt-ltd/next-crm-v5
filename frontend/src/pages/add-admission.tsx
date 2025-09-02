@@ -63,7 +63,6 @@ export default function AddAdmissionPage() {
       depositAmount: '',
       depositDeadline: undefined,
       visaStatus: 'pending',
-      notes: '',
       // UI-only fields requested
       status: '',
       caseStatus: '',
@@ -100,16 +99,6 @@ export default function AddAdmissionPage() {
         depositAmount: data.depositAmount || data.initialDeposit || null,
         depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
         visaStatus: data.visaStatus || 'pending',
-        notes: (() => {
-          const extra: string[] = [];
-          if (data.fullTuitionFee) extra.push(`Full Tuition Fee: ${data.fullTuitionFee}`);
-          if (data.netTuitionFee) extra.push(`Net Tuition Fee: ${data.netTuitionFee}`);
-          if (data.googleDriveLink) extra.push(`Drive: ${data.googleDriveLink}`);
-          if (data.caseStatus) extra.push(`Case Status: ${data.caseStatus}`);
-          if (data.visaDate && !data.decisionDate) extra.push(`Visa Date: ${new Date(data.visaDate).toISOString().split('T')[0]}`);
-          const base = data.notes || '';
-          return [base, extra.join(' | ')].filter(Boolean).join(' \n');
-        })(),
       } as any;
       const res = await apiRequest('POST', '/api/admissions', payload as any);
       if (!res.ok) throw new Error('Failed');

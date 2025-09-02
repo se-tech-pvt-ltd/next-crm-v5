@@ -100,7 +100,7 @@ export interface Admission {
   depositAmount: string | null;
   depositDeadline: Date | null;
   visaStatus: string | null;
-  notes: string | null;
+  admissionId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -208,7 +208,7 @@ export const insertAdmissionSchema = z.object({
   depositAmount: z.string().optional(),
   depositDeadline: z.date().optional(),
   visaStatus: z.string().default("pending"),
-  notes: z.string().optional(),
+  admissionId: z.string().optional(),
 });
 
 export const insertActivitySchema = z.object({
