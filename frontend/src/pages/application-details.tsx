@@ -216,7 +216,12 @@ export default function ApplicationDetails() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
                     <div className="flex items-center gap-3">
-                      {!isEditing ? (
+                      {admissionForApp ? (
+                        <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setLocation(`/admissions/${admissionForApp.id}`)} title="View Admission">
+                          <ExternalLink />
+                          <span className="hidden lg:inline">View Admission</span>
+                        </Button>
+                      ) : !isEditing ? (
                         <>
                           <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { const from = typeof window!== 'undefined' ? window.location.pathname : '/applications'; setLocation(`/admissions/new?applicationId=${application.id}&studentId=${application.studentId}&from=${encodeURIComponent(from)}`); }} title="Add Admission">
                             <Plus />
