@@ -64,8 +64,8 @@ export default function AddAdmissionPage() {
       visaStatus: 'pending',
       notes: '',
       // UI-only fields requested
-      status: 'Open',
-      caseStatus: 'Raw',
+      status: '',
+      caseStatus: '',
       fullTuitionFee: '',
       netTuitionFee: '',
       initialDeposit: '',
@@ -187,22 +187,8 @@ export default function AddAdmissionPage() {
   useEffect(() => {
     console.log('[Admission Dropdowns] Status options:', statusOptions);
     console.log('[Admission Dropdowns] Case Status options:', caseStatusOptions);
-    const currentStatus = form.getValues('status');
-    if (statusOptions && statusOptions.length > 0) {
-      const openOpt = statusOptions.find((o:any) => String(o.value || '').toLowerCase() === 'open');
-      const exists = statusOptions.some((o:any) => String(o.value) === String(currentStatus));
-      if (!currentStatus || !exists) {
-        const next = openOpt?.value ?? statusOptions[0].value;
-        form.setValue('status', next, { shouldValidate: true, shouldDirty: true });
-        form.setValue('decision', next, { shouldValidate: true, shouldDirty: true });
-      }
-    }
-    const currentCase = form.getValues('caseStatus');
-    if (caseStatusOptions && caseStatusOptions.length > 0 && !currentCase) {
-      const first = caseStatusOptions[0]?.value;
-      if (first) form.setValue('caseStatus', first, { shouldValidate: true, shouldDirty: true });
-    }
-  }, [statusOptions, caseStatusOptions, form]);
+    // Do not auto-select; require explicit user choice
+  }, [statusOptions, caseStatusOptions]);
 
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
@@ -329,7 +315,7 @@ export default function AddAdmissionPage() {
                         <FormControl>
                           <Select value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('decision', v); }}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                             <SelectContent>
                               {statusOptions?.map((opt: any) => (
@@ -351,9 +337,9 @@ export default function AddAdmissionPage() {
                       <FormItem>
                         <FormLabel>Case Status</FormLabel>
                         <FormControl>
-                          <Select value={field.value || (caseStatusOptions?.[0]?.value ?? '')} onValueChange={field.onChange}>
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select case status" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                             <SelectContent>
                               {caseStatusOptions?.map((opt: any) => (
