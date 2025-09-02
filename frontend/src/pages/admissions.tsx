@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { AdmissionDetailsModal } from '@/components/admission-details-modal';
 
 import { Admission, Student } from '@/lib/types';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
@@ -18,8 +17,6 @@ import { useLocation } from 'wouter';
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
-  const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [, setLocation] = useLocation();
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
@@ -246,10 +243,7 @@ export default function Admissions() {
                     <TableRow 
                       key={admission.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => {
-                        setSelectedAdmission(admission);
-                        setIsDetailsModalOpen(true);
-                      }}
+                      onClick={() => setLocation(`/admissions/${admission.id}`)}
                     >
                       <TableCell className="font-medium">
                         {getStudentName(admission.studentId)}
@@ -303,12 +297,7 @@ export default function Admissions() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedAdmission(admission);
-                                setIsDetailsModalOpen(true);
-                              }}
-                            >
+                            <DropdownMenuItem onClick={() => setLocation(`/admissions/${admission.id}`)}>
                               View Details
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -322,12 +311,6 @@ export default function Admissions() {
           </CardContent>
         </Card>
       </div>
-      
-      <AdmissionDetailsModal 
-        open={isDetailsModalOpen}
-        onOpenChange={setIsDetailsModalOpen}
-        admission={selectedAdmission}
-      />
       
     </Layout>
   );
