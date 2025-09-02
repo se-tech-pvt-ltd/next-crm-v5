@@ -445,7 +445,7 @@ export default function StudentDetails() {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
+                        <Input disabled className="h-8 text-xs" value={getDropdownLabel('ELT Test', (student?.eltTest as any) || (student as any)?.englishProficiency)} />
                       )}
                     </div>
                     <div className="space-y-2">
@@ -568,7 +568,7 @@ export default function StudentDetails() {
                               <span className="ml-1 text-xs text-gray-500">({application.applicationCode})</span>
                             )}
                           </div>
-                          <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` • ${application.courseType}` : ''}</div>
+                          <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` �� ${application.courseType}` : ''}</div>
                         </div>
                         <Badge className="capitalize">{application.appStatus || 'Open'}</Badge>
                       </div>
