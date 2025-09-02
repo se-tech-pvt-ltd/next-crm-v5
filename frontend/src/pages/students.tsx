@@ -194,11 +194,11 @@ export default function Students() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="applied">Applied</SelectItem>
-                    <SelectItem value="admitted">Admitted</SelectItem>
-                    <SelectItem value="enrolled">Enrolled</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    {(studentDropdowns as any)?.Status?.map((status: any) => (
+                      <SelectItem key={status.key || status.id || status.value} value={(status.value || '').toLowerCase()}>
+                        {status.value}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={countryFilter} onValueChange={setCountryFilter}>
