@@ -8,7 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CollapsibleCard } from '@/components/collapsible-card';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -347,25 +346,7 @@ export default function ApplicationDetails() {
                 </CardContent>
               </Card>
 
-              {/* Student Information */}
-              <CollapsibleCard
-                persistKey={`application-details:student:${application.id}`}
-                header={<CardTitle className="text-sm flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Student</span></CardTitle>}
-              >
-                <div className="flex items-center justify-between">
-                  {student ? (
-                    <div>
-                      <p className="font-medium">{student.name}</p>
-                      <p className="text-xs text-gray-600">{student.email}</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">Loading student...</p>
-                  )}
-                  {student && (
-                    <Button size="sm" variant="outline" onClick={() => setLocation(`/students/${student.id}`)}>View Profile</Button>
-                  )}
-                </div>
-              </CollapsibleCard>
+
             </div>
 
             {/* Activity Sidebar */}
