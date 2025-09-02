@@ -147,6 +147,9 @@ export default function AddAdmissionPage() {
     return applications?.find((a) => a.id === (idNum as any));
   })();
 
+  const linkedApp = selectedApp;
+  const linkedStudent = presetStudent || (students?.find((s) => s.id === (linkedApp?.studentId || presetStudentId)) as Student | undefined);
+
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
       <div className="w-full max-w-none sm:max-w-4xl mx-auto px-2 sm:px-0">
@@ -175,6 +178,78 @@ export default function AddAdmissionPage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Linked Entities */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> Linked Entities</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Student link */}
+                  <div>
+                    <FormLabel>Student</FormLabel>
+                    <div className="mt-1">
+                      {linkedStudent ? (
+                        <Button variant="link" className="p-0 h-8" onClick={() => setLocation(`/students/${linkedStudent.id}`)}>
+                          {linkedStudent.name}
+                        </Button>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Select application to link student</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Application link or selector */}
+                  <div>
+                    <FormLabel>Application</FormLabel>
+                    <div className="mt-1">
+                      {presetApplicationId || linkedApp ? (
+                        <Button variant="link" className="p-0 h-8" onClick={() => linkedApp && setLocation(`/applications/${linkedApp.id}`)} disabled={!linkedApp}>
+                          {linkedApp?.applicationCode || `${linkedApp?.university || ''} — ${linkedApp?.program || ''}`}
+                        </Button>
+                      ) : (
+                        <FormField
+                          control={form.control}
+                          name="applicationId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Select
+                                  value={field.value ? String(field.value) : ''}
+                                  onValueChange={(v) => {
+                                    const idNum = Number(v);
+                                    field.onChange(idNum);
+                                    const app = applications?.find((a) => a.id === (idNum as any));
+                                    if (app) {
+                                      form.setValue('studentId', app.studentId);
+                                      form.setValue('university', app.university);
+                                      form.setValue('program', app.program);
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select application" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {applications?.map((app) => (
+                                      <SelectItem key={app.id} value={String(app.id)}>
+                                        {app.applicationCode || `${app.university} — ${app.program}`}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Overview Fields */}
             <Card>
               <CardHeader className="pb-3">
@@ -242,53 +317,6 @@ export default function AddAdmissionPage() {
                       </FormItem>
                     )}
                   />
-
-                  {/* Linked Application */}
-                  {!presetApplicationId ? (
-                    <FormField
-                      control={form.control}
-                      name="applicationId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Linked Application</FormLabel>
-                          <FormControl>
-                            <Select
-                              value={field.value ? String(field.value) : ''}
-                              onValueChange={(v) => {
-                                const idNum = Number(v);
-                                field.onChange(idNum);
-                                const app = applications?.find((a) => a.id === (idNum as any));
-                                if (app) {
-                                  form.setValue('studentId', app.studentId);
-                                  form.setValue('university', app.university);
-                                  form.setValue('program', app.program);
-                                }
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select application" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {applications?.map((app) => (
-                                  <SelectItem key={app.id} value={String(app.id)}>
-                                    {app.university} — {app.program}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ) : (
-                    <FormItem>
-                      <FormLabel>Linked Application</FormLabel>
-                      <FormControl>
-                        <Input value={`${presetApplication?.university || ''} — ${presetApplication?.program || ''}`} disabled />
-                      </FormControl>
-                    </FormItem>
-                  )}
 
                 </div>
               </CardContent>
