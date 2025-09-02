@@ -87,7 +87,7 @@ export interface Application {
 }
 
 export interface Admission {
-  id: number;
+  id: string;
   applicationId: number;
   studentId: string;
   university: string;
