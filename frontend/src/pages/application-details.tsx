@@ -279,6 +279,16 @@ export default function ApplicationDetails() {
                       <Label className="flex items-center space-x-2"><span>Linked Student</span></Label>
                       <Input value={student ? `${student.name} (${student.email})` : application.studentId} disabled className="h-8 text-xs transition-all" />
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><School className="w-4 h-4" /><span>University</span></Label>
                       <Input value={isEditing ? (editData.university || '') : (application.university || '')} onChange={(e) => setEditData({ ...editData, university: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
@@ -299,11 +309,21 @@ export default function ApplicationDetails() {
                       <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
                       <Input value={isEditing ? (editData.intake || '') : (application.intake || '')} onChange={(e) => setEditData({ ...editData, intake: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center"><ExternalLink className="w-5 h-5 mr-2" />Operations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Channel Partner</span></Label>
                       <Input value={isEditing ? (editData.channelPartner || '') : (application.channelPartner || '')} onChange={(e) => setEditData({ ...editData, channelPartner: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-                    <div className="md:col-span-2 space-y-2">
+                    <div className="space-y-2 md:col-span-1">
                       <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>
                       {isEditing ? (
                         <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
