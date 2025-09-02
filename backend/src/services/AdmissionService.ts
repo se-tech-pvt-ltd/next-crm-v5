@@ -65,8 +65,27 @@ export class AdmissionService {
   }
 
   static async createAdmission(admissionData: InsertAdmission): Promise<Admission> {
-    const admission = await AdmissionModel.create(admissionData);
-    
+    // Generate daily sequence-based Admission ID (ADM-DDMMYY-XXX) and append into notes
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yy = String(now.getFullYear()).slice(-2);
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+
+    const [{ cnt }] = await db
+      .select({ cnt: sql<number>`COUNT(*)` })
+      .from(admissions)
+      .where(and(gte(admissions.createdAt, dayStart), lt(admissions.createdAt, nextDay)));
+
+    const seq = String((Number(cnt) || 0) + 1).padStart(3, '0');
+    const admissionCode = `ADM-${dd}${mm}${yy}-${seq}`;
+
+    const admission = await AdmissionModel.create({
+      ...admissionData,
+      notes: [admissionData.notes || '', `Admission ID: ${admissionCode}`].filter(Boolean).join('\n').trim(),
+    } as InsertAdmission);
+
     // Log activity for the student
     await ActivityService.logActivity(
       'student', 
