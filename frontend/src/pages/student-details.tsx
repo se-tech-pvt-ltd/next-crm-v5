@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import { Input } from '@/components/ui/input';
+import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
@@ -337,13 +338,12 @@ export default function StudentDetails() {
                         <CalendarIcon className="w-4 h-4" />
                         <span>Date of Birth</span>
                       </Label>
-                      <Input
+                      <DobPicker
                         id="dateOfBirth"
-                        type="date"
                         value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')}
-                        onChange={(e) => setEditData({ ...editData, dateOfBirth: e.target.value })}
+                        onChange={(v) => setEditData({ ...editData, dateOfBirth: v })}
                         disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                        className="h-8 text-xs"
                       />
                     </div>
                     <div className="space-y-2">
