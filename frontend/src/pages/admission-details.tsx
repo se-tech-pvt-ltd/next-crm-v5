@@ -141,26 +141,12 @@ export default function AdmissionDetails() {
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">Admission ID</div>
-                      <div className="text-sm font-medium break-all">{(admission as any).admissionId || admission.id}</div>
-                    </div>
-                    <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Status</div>
                       <Badge className="w-fit">{linkedApplication?.appStatus || 'Open'}</Badge>
                     </div>
                     <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Case Status</div>
                       <div className="text-sm">{linkedApplication?.caseStatus || 'Raw'}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">Linked Application</div>
-                      {linkedApplication ? (
-                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/applications/${linkedApplication.id}`)}>
-                          {linkedApplication.university} · {linkedApplication.program}
-                        </Button>
-                      ) : (
-                        <span className="text-sm text-gray-500">Not linked</span>
-                      )}
                     </div>
                     <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Full Tuition Fee</div>
