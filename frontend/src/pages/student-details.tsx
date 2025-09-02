@@ -52,6 +52,13 @@ export default function StudentDetails() {
       return response.json();
     },
   });
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    },
+  });
 
   const { data: applications, isLoading: appsLoading } = useQuery<Application[]>({
     queryKey: [`/api/applications/student/${params?.id}`],
