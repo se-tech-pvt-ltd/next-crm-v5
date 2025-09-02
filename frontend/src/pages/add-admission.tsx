@@ -45,9 +45,10 @@ export default function AddAdmissionPage() {
     enabled: !!presetStudentId,
   });
 
-  const form = useForm<InsertAdmission>({
-    resolver: zodResolver(insertAdmissionSchema),
+  const form = useForm<any>({
+    resolver: zodResolver(insertAdmissionSchema as any),
     defaultValues: {
+      // Required for submission
       applicationId: presetApplicationId ? Number(presetApplicationId) : 0,
       studentId: presetStudentId,
       university: presetApplication?.university || '',
@@ -61,7 +62,16 @@ export default function AddAdmissionPage() {
       depositDeadline: null as any,
       visaStatus: 'pending',
       notes: '',
-    } as any,
+      // UI-only fields requested
+      status: 'pending',
+      caseStatus: '',
+      fullTuitionFee: '',
+      netTuitionFee: '',
+      initialDeposit: '',
+      depositDate: null as any,
+      visaDate: null as any,
+      googleDriveLink: '',
+    },
   });
 
   const createMutation = useMutation({
