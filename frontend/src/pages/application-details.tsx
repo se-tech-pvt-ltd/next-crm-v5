@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -24,7 +23,8 @@ import {
   BookOpen,
   Edit,
   Save,
-  X
+  X,
+  Copy
 } from 'lucide-react';
 
 export default function ApplicationDetails() {
@@ -186,7 +186,6 @@ export default function ApplicationDetails() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
                     <div className="flex items-center gap-3">
-                      <Badge className={getStatusColor(currentStatus)}>{currentStatus}</Badge>
                       {!isEditing ? (
                         <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
                           <Edit />
@@ -242,15 +241,20 @@ export default function ApplicationDetails() {
                     </div>
                     <div className="md:col-span-2 space-y-2">
                       <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>
-                      <Input value={isEditing ? (editData.googleDriveLink || '') : (application.googleDriveLink || '')} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-                      {!isEditing && (
-                        <p className="text-[11px] text-gray-600">
-                          {application.googleDriveLink ? (
-                            <a className="text-blue-600 underline inline-flex items-center gap-1" href={application.googleDriveLink} target="_blank" rel="noreferrer">
-                              Open Link <ExternalLink className="w-3 h-3" />
-                            </a>
-                          ) : 'Not provided'}
-                        </p>
+                      {isEditing ? (
+                        <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={async (e) => { e.preventDefault(); if (!application.googleDriveLink) { toast({ title: 'No link', description: 'Google Drive link is not provided', variant: 'destructive' }); return; } try { await navigator.clipboard.writeText(application.googleDriveLink); toast({ title: 'Copied', description: 'Google Drive link copied to clipboard' }); } catch { toast({ title: 'Copy failed', description: 'Could not copy link', variant: 'destructive' }); } }} disabled={!application.googleDriveLink}>
+                            <Copy className="w-4 h-4 mr-1" /> Copy
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); if (application.googleDriveLink) window.open(application.googleDriveLink, '_blank', 'noopener'); }} disabled={!application.googleDriveLink}>
+                            <ExternalLink className="w-4 h-4 mr-1" /> Open
+                          </Button>
+                          {!application.googleDriveLink && (
+                            <span className="text-[11px] text-gray-500">Not provided</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
