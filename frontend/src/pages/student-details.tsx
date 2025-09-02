@@ -507,7 +507,7 @@ export default function StudentDetails() {
                       </Label>
                       {isEditing ? (
                         <Select
-                          value={(editData.expectation as any) || student?.expectation || 'High'}
+                          value={ensureKey('Expectation', (editData.expectation as any) || (student?.expectation as any) || '')}
                           onValueChange={(v) => setEditData({ ...editData, expectation: v })}
                         >
                           <SelectTrigger className="h-8 text-xs">
