@@ -64,8 +64,8 @@ export default function AddAdmissionPage() {
       visaStatus: 'pending',
       notes: '',
       // UI-only fields requested
-      status: 'pending',
-      caseStatus: '',
+      status: 'Open',
+      caseStatus: 'Raw',
       fullTuitionFee: '',
       netTuitionFee: '',
       initialDeposit: '',
