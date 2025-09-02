@@ -46,11 +46,17 @@ export default function AddAdmissionPage() {
     enabled: !!presetStudentId,
   });
 
+  const toIntHash = (s: string) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return Math.abs(h) || 1;
+  };
+
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
     defaultValues: {
       // Required for submission
-      applicationId: presetApplicationId ? Number(presetApplicationId) : 0,
+      applicationId: presetApplicationId ? (Number.isFinite(Number(presetApplicationId)) ? Number(presetApplicationId) : toIntHash(presetApplicationId)) : 0,
       studentId: presetStudentId,
       university: presetApplication?.university || '',
       program: presetApplication?.program || '',
@@ -153,8 +159,8 @@ export default function AddAdmissionPage() {
   // Ensure required values are set from linked application so form can submit
   useEffect(() => {
     if (linkedApp) {
-      const idNum = Number(linkedApp.id);
-      if (Number.isFinite(idNum) && form.getValues('applicationId') !== idNum) {
+      const idNum = Number.isFinite(Number(linkedApp.id)) ? Number(linkedApp.id) : toIntHash(String(linkedApp.id));
+      if (form.getValues('applicationId') !== idNum) {
         form.setValue('applicationId', idNum);
       }
       if (!form.getValues('studentId')) {
