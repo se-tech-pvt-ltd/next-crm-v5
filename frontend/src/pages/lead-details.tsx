@@ -217,7 +217,7 @@ export default function LeadDetails() {
 
 
   // Build status sequence from dropdown API (ordered by sequence)
-  const statusSequence = React.useMemo<string[]>(() => {
+  const statusSequence = useMemo<string[]>(() => {
     const list: any[] = (dropdownData as any)?.Status || [];
     if (!Array.isArray(list) || list.length === 0) return [];
     return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
