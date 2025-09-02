@@ -2,6 +2,7 @@ import { eq, desc } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { applications, type Application, type InsertApplication } from "../shared/schema.js";
 import { randomUUID } from "crypto";
+import { eq, desc, like } from "drizzle-orm";
 
 function generateDailyPrefix(date = new Date()) {
   const dd = String(date.getDate()).padStart(2, '0');
