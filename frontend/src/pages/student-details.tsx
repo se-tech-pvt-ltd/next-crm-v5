@@ -79,6 +79,20 @@ export default function StudentDetails() {
     if (s === 'Enrolled') return 'enrolled';
     return String(s).toLowerCase();
   };
+  const getDropdownLabel = (field: string, raw?: string | null) => {
+    if (!raw) return '';
+    const list: any[] = (studentDropdowns as any)?.[field] || [];
+    const match = list.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
+    return match?.value || String(raw);
+  };
+
+  const ensureKey = (field: string, raw?: string | null) => {
+    if (!raw) return '';
+    const list: any[] = (studentDropdowns as any)?.[field] || [];
+    const match = list.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
+    return match?.key || String(raw);
+  };
+
   const boolToUi = (b?: boolean | null) => (b ? 'Yes' : 'No');
   const uiToBool = (s: string) => ['yes', 'true', '1', 'on'].includes(String(s).toLowerCase());
   const getCounselorName = (id?: string | null) => {
