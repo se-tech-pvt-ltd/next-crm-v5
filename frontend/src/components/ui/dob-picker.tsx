@@ -19,7 +19,7 @@ export interface DobPickerProps {
 
 export function DobPicker({ id, value, onChange, disabled, className, fromYear, toYear }: DobPickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [view, setView] = React.useState<"year" | "calendar">("year");
+  const [view, setView] = React.useState<"year" | "month" | "calendar">("year");
   const parsed = value ? new Date(value) : undefined;
 
   const currentYear = new Date().getFullYear();
@@ -32,7 +32,15 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
     return arr;
   }, [startYear, endYear]);
 
+  const monthNames = React.useMemo(
+    () => [
+      "January","February","March","April","May","June","July","August","September","October","November","December"
+    ],
+    []
+  );
+
   const [tempYear, setTempYear] = React.useState<number | null>(parsed ? parsed.getFullYear() : null);
+  const [tempMonth, setTempMonth] = React.useState<number | null>(parsed ? parsed.getMonth() : null);
   const [monthAnchor, setMonthAnchor] = React.useState<Date | undefined>(parsed);
 
   React.useEffect(() => {
@@ -48,7 +56,14 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
 
   const onChooseYear = (y: number) => {
     setTempYear(y);
-    const base = new Date(y, (parsed?.getMonth() ?? 0), (parsed?.getDate() ?? 1));
+    setTempMonth(null);
+    setView("month");
+  };
+
+  const onChooseMonth = (m: number) => {
+    setTempMonth(m);
+    const y = tempYear ?? endYear;
+    const base = new Date(y, m, parsed?.getDate() ?? 1);
     setMonthAnchor(base);
     setView("calendar");
   };
@@ -83,6 +98,22 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
                   onClick={() => onChooseYear(y)}
                 >
                   {y}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : view === "month" ? (
+          <div className="w-[280px]">
+            <div className="grid grid-cols-3 gap-2">
+              {monthNames.map((name, idx) => (
+                <Button
+                  key={name}
+                  size="sm"
+                  variant={tempMonth === idx ? "default" : "outline"}
+                  className="h-8"
+                  onClick={() => onChooseMonth(idx)}
+                >
+                  {name.slice(0, 3)}
                 </Button>
               ))}
             </div>
