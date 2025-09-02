@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { type Application, type Student } from '@/lib/types';
 import {
   ArrowLeft,
@@ -23,7 +24,8 @@ import {
   Edit,
   Save,
   X,
-  Copy
+  Copy,
+  Plus
 } from 'lucide-react';
 
 export default function ApplicationDetails() {
@@ -49,6 +51,11 @@ export default function ApplicationDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Application>>({});
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
+  const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
+  const applicationIdNum = useMemo(() => {
+    const n = Number(application?.id);
+    return Number.isFinite(n) ? n : undefined;
+  }, [application?.id]);
 
   useEffect(() => {
     if (application) {
@@ -211,10 +218,16 @@ export default function ApplicationDetails() {
                     <CardTitle className="text-sm flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
                     <div className="flex items-center gap-3">
                       {!isEditing ? (
-                        <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
-                          <Edit />
-                          <span className="hidden lg:inline">Edit</span>
-                        </Button>
+                        <>
+                          <Button size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsAddAdmissionOpen(true)} title="Add Admission">
+                            <Plus />
+                            <span className="hidden lg:inline">Add Admission</span>
+                          </Button>
+                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
+                            <Edit />
+                            <span className="hidden lg:inline">Edit</span>
+                          </Button>
+                        </>
                       ) : (
                         <div className="flex items-center gap-2">
                           <Button size="sm" onClick={handleSave} disabled={updateApplicationMutation.isPending}>
@@ -366,6 +379,13 @@ export default function ApplicationDetails() {
           </div>
         </div>
       )}
+
+      <AddAdmissionModal
+        open={isAddAdmissionOpen}
+        onOpenChange={setIsAddAdmissionOpen}
+        applicationId={applicationIdNum}
+        studentId={application?.studentId || ''}
+      />
     </Layout>
   );
 }
