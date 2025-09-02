@@ -107,24 +107,63 @@ export default function AdmissionDetails() {
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">Program</div>
-                      <div className="text-sm font-medium">{admission.program}</div>
+                      <div className="text-[11px] text-gray-600">Admission ID</div>
+                      <div className="text-sm font-medium break-all">{admission.id}</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">University</div>
-                      <div className="text-sm font-medium">{admission.university}</div>
+                      <div className="text-[11px] text-gray-600">Status</div>
+                      <Badge className="w-fit">{linkedApplication?.appStatus || 'Open'}</Badge>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">Decision</div>
-                      <Badge className="w-fit">{admission.decision}</Badge>
+                      <div className="text-[11px] text-gray-600">Case Status</div>
+                      <div className="text-sm">{linkedApplication?.caseStatus || 'Raw'}</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">Decision Date</div>
-                      <div className="text-sm">{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</div>
+                      <div className="text-[11px] text-gray-600">Linked Application</div>
+                      {linkedApplication ? (
+                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/applications/${linkedApplication.id}`)}>
+                          {linkedApplication.university} · {linkedApplication.program}
+                        </Button>
+                      ) : (
+                        <span className="text-sm text-gray-500">Not linked</span>
+                      )}
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[11px] text-gray-600">Scholarship Amount</div>
+                      <div className="text-[11px] text-gray-600">Full Tuition Fee</div>
+                      <div className="text-sm">{(admission as any).tuitionFee || 'Not specified'}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Scholarship</div>
                       <div className="text-sm">{admission.scholarshipAmount || 'None'}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Net Tuition Fee</div>
+                      <div className="text-sm">{(() => { const t = parseFloat(String((admission as any).tuitionFee||'').replace(/[^0-9.-]/g,'')); const s = parseFloat(String(admission.scholarshipAmount||'').replace(/[^0-9.-]/g,'')); if (isNaN(t)) return 'Not specified'; const net = t - (isNaN(s)?0:s); return isNaN(net) ? 'Not specified' : net.toLocaleString(); })()}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Initial Deposit</div>
+                      <div className="text-sm">{admission.depositAmount || 'Not specified'}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Deposit Date</div>
+                      <div className="text-sm">{admission.depositDeadline ? new Date(admission.depositDeadline as any).toLocaleDateString() : 'Not specified'}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Visa Date</div>
+                      <div className="text-sm">{(function(){ const a:any = admission as any; const d = a.visaApprovalDate || a.visaInterviewDate || a.visaApplicationDate || null; return d ? new Date(d).toLocaleDateString() : 'Not provided'; })()}</div>
+                    </div>
+                    <div className="space-y-1 md:col-span-1 lg:col-span-1">
+                      <div className="text-[11px] text-gray-600">Google Drive Link</div>
+                      {linkedApplication?.googleDriveLink ? (
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); window.open(linkedApplication.googleDriveLink!, '_blank', 'noopener'); }}>
+                            <ExternalLink className="w-4 h-4 mr-1" /> Open
+                          </Button>
+                          <span className="text-[11px] text-gray-500 truncate max-w-[14rem]">{linkedApplication.googleDriveLink}</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500">Not provided</span>
+                      )}
                     </div>
                   </div>
                 </CardContent>
