@@ -241,12 +241,14 @@ export default function ApplicationDetails() {
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
-                      <Input value={application.applicationCode || 'Not provided'} disabled className="h-8 text-xs transition-all" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><span>App Status</span></Label>
-                      <Input value={currentStatus} disabled className="h-8 text-xs transition-all" />
+                      <Label className="flex items-center space-x-2"><span>Student</span></Label>
+                      {student ? (
+                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students/${student.id}`)}>
+                          {student.name}
+                        </Button>
+                      ) : (
+                        <Input value={application.studentId} disabled className="h-8 text-xs transition-all" />
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
@@ -276,8 +278,8 @@ export default function ApplicationDetails() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><span>Linked Student</span></Label>
-                      <Input value={student ? `${student.name} (${student.email})` : application.studentId} disabled className="h-8 text-xs transition-all" />
+                      <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
+                      <Input value={application.applicationCode || 'Not provided'} disabled className="h-8 text-xs transition-all" />
                     </div>
                   </div>
                 </CardContent>
