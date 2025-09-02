@@ -253,16 +253,29 @@ export default function LeadDetails() {
       }
       return response.json();
     },
+    onMutate: async (newStatusKey: string) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/leads', params?.id] });
+      const previousLead = queryClient.getQueryData(['/api/leads', params?.id]);
+      const previousStatus = currentStatus;
+      setCurrentStatus(newStatusKey);
+      if (previousLead && typeof previousLead === 'object') {
+        queryClient.setQueryData(['/api/leads', params?.id], { ...(previousLead as any), status: newStatusKey });
+      }
+      return { previousLead, previousStatus } as { previousLead: any; previousStatus: string };
+    },
+    onError: (error: any, _newStatusKey, context) => {
+      if (context?.previousStatus) setCurrentStatus(context.previousStatus);
+      if (context?.previousLead) queryClient.setQueryData(['/api/leads', params?.id], context.previousLead);
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
     onSuccess: (updatedLead) => {
       setCurrentStatus(updatedLead.status);
       queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
-      // Refresh only the activity timeline for this lead
-      queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
-      queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
     },
   });
 
