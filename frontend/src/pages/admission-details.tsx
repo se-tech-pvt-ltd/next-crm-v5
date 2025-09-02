@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
-import { type Admission, type Student } from '@/lib/types';
+import { type Admission, type Student, type Application } from '@/lib/types';
 import { ArrowLeft, Award, User as UserIcon, Plane, Calendar, ExternalLink } from 'lucide-react';
 
 export default function AdmissionDetails() {
