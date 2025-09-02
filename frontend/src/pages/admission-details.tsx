@@ -120,11 +120,11 @@ export default function AdmissionDetails() {
                         <span className="text-sm text-gray-500">Loading...</span>
                       )}
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       <div className="text-[11px] text-gray-600">Application ID</div>
                       {linkedApplication ? (
-                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/applications/${linkedApplication.id}`)}>
-                          {linkedApplication.id}
+                        <Button variant="link" className="h-5 p-0 text-xs leading-5" onClick={() => setLocation(`/applications/${linkedApplication.id}`)}>
+                          {linkedApplication.applicationCode || linkedApplication.id}
                         </Button>
                       ) : (
                         <span className="text-sm text-gray-500">Not linked</span>
