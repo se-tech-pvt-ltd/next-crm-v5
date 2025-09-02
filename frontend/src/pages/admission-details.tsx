@@ -31,9 +31,9 @@ export default function AdmissionDetails() {
     enabled: !!admission?.studentId,
   });
 
-  const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'pending');
+  const [currentVisaStatus, setCurrentVisaStatus] = useState<string>((admission?.visaStatus || 'pending').replace(/_/g, '-'));
   useEffect(() => {
-    if (admission) setCurrentVisaStatus(admission.visaStatus || 'pending');
+    if (admission) setCurrentVisaStatus((admission.visaStatus || 'pending').replace(/_/g, '-'));
   }, [admission]);
 
   const updateVisaStatusMutation = useMutation({
