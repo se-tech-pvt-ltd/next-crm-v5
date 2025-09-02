@@ -205,14 +205,43 @@ export default function LeadDetails() {
   });
 
   const handleSave = () => {
-    const updateData = {
-      ...editData,
-      country: Array.isArray(editData.country) ? editData.country : [editData.country].filter(Boolean),
-      program: Array.isArray(editData.program) ? editData.program : [editData.program].filter(Boolean),
-      counselorId: editData.counselorId === 'unassigned' ? null : editData.counselorId,
-      type: editData.type === 'not_specified' ? null : editData.type
+    const deepEqual = (a: any, b: any) => {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+        return true;
+      }
+      return a === b;
     };
-    updateLeadMutation.mutate(updateData);
+
+    const normalize = (key: string, val: any) => {
+      if (key === 'country' || key === 'program') {
+        if (val == null) return [] as any[];
+        return Array.isArray(val) ? val : [val].filter(Boolean);
+      }
+      return val;
+    };
+
+    const payload: any = {};
+    const keys = Object.keys(editData || {});
+    for (const key of keys) {
+      const newVal = normalize(key, (editData as any)[key]);
+      const oldVal = normalize(key, (lead as any)?.[key]);
+      if (!deepEqual(newVal, oldVal)) {
+        let valueToSend = newVal;
+        if (key === 'counselorId') valueToSend = newVal === 'unassigned' ? null : newVal;
+        if (key === 'type') valueToSend = newVal === 'not_specified' ? null : newVal;
+        (payload as any)[key] = valueToSend;
+      }
+    }
+
+    if (Object.keys(payload).length === 0) {
+      toast({ title: 'No changes', description: 'Nothing to update.' });
+      setIsEditing(false);
+      return;
+    }
+
+    updateLeadMutation.mutate(payload);
   };
 
 
