@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -486,12 +487,11 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <Calendar className="w-4 h-4" />
                     <span>Date of Birth</span>
                   </Label>
-                  <Input
+                  <DobPicker
                     id="dateOfBirth"
-                    type="date"
                     value={formData.dateOfBirth}
-                    onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                    className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                    onChange={(v) => handleInputChange('dateOfBirth', v)}
+                    className="h-8 text-xs"
                   />
                 </div>
               </div>
