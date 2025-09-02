@@ -14,6 +14,7 @@ import Applications from "@/pages/applications";
 import AddApplication from "@/pages/add-application";
 import ApplicationDetails from "@/pages/application-details";
 import Admissions from "@/pages/admissions";
+import AddAdmissionPage from "@/pages/add-admission";
 import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
@@ -72,6 +73,8 @@ function Router() {
       <Route path="/applications/new" component={AddApplication} />
       <Route path="/applications/:id" component={ApplicationDetails} />
       <Route path="/applications" component={Applications} />
+      <Route path="/admissions/add" component={AddAdmissionPage} />
+      <Route path="/admissions/new" component={AddAdmissionPage} />
       <Route path="/admissions" component={Admissions} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={Settings} />

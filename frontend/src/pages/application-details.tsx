@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { type Application, type Student } from '@/lib/types';
 import {
   ArrowLeft,
@@ -51,11 +50,6 @@ export default function ApplicationDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Application>>({});
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
-  const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
-  const applicationIdNum = useMemo(() => {
-    const n = Number(application?.id);
-    return Number.isFinite(n) ? n : undefined;
-  }, [application?.id]);
 
   useEffect(() => {
     if (application) {
@@ -219,7 +213,7 @@ export default function ApplicationDetails() {
                     <div className="flex items-center gap-3">
                       {!isEditing ? (
                         <>
-                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsAddAdmissionOpen(true)} title="Add Admission">
+                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { const from = typeof window!== 'undefined' ? window.location.pathname : '/applications'; setLocation(`/admissions/new?applicationId=${application.id}&studentId=${application.studentId}&from=${encodeURIComponent(from)}`); }} title="Add Admission">
                             <Plus />
                             <span className="hidden lg:inline">Add Admission</span>
                           </Button>
@@ -380,12 +374,6 @@ export default function ApplicationDetails() {
         </div>
       )}
 
-      <AddAdmissionModal
-        open={isAddAdmissionOpen}
-        onOpenChange={setIsAddAdmissionOpen}
-        applicationId={applicationIdNum}
-        studentId={application?.studentId || ''}
-      />
     </Layout>
   );
 }
