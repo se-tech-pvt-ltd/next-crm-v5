@@ -457,7 +457,30 @@ export default function AddAdmissionPage() {
                       <FormItem>
                         <FormLabel>Initial Deposit</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 2000" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="e.g., 2000"
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              const ok = /^\d*(?:\.\d{0,3})?$/.test(v);
+                              if (ok || v === '') field.onChange(v);
+                            }}
+                            onKeyDown={(e) => {
+                              const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+                              const ctrl = e.ctrlKey || e.metaKey;
+                              if (ctrl && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+                              if (allowed.includes(e.key)) return;
+                              if (e.key === '.') {
+                                if ((field.value || '').includes('.')) e.preventDefault();
+                                return;
+                              }
+                              if (!/\d/.test(e.key)) e.preventDefault();
+                            }}
+                            onPaste={(e) => {
+                              const text = (e.clipboardData || (window as any).clipboardData).getData('text');
+                              if (!/^\d*(?:\.\d{0,3})?$/.test(text)) e.preventDefault();
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
