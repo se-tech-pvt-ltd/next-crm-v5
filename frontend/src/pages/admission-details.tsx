@@ -102,6 +102,40 @@ export default function AdmissionDetails() {
             <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
               <Card className="w-full">
                 <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center">Linked Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Admission ID</div>
+                      <div className="text-sm font-medium break-all">{admission.id}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Student</div>
+                      {student ? (
+                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students/${student.id}`)}>
+                          {student.name}
+                        </Button>
+                      ) : (
+                        <span className="text-sm text-gray-500">Loading...</span>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">Application ID</div>
+                      {linkedApplication ? (
+                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/applications/${linkedApplication.id}`)}>
+                          {linkedApplication.id}
+                        </Button>
+                      ) : (
+                        <span className="text-sm text-gray-500">Not linked</span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center"><Award className="w-5 h-5 mr-2" />Admission Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
