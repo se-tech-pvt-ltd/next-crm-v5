@@ -3,9 +3,11 @@ import { db } from "../config/database.js";
 import { applications, type Application, type InsertApplication } from "../shared/schema.js";
 import { randomUUID } from "crypto";
 
-function generateCode() {
-  const num = Math.floor(Math.random() * 1_000_000);
-  return `APP-${num.toString().padStart(6, '0')}`;
+function generateDailyPrefix(date = new Date()) {
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yy = String(date.getFullYear()).slice(-2);
+  return `APP-${dd}${mm}${yy}-`;
 }
 
 export class ApplicationModel {
@@ -29,12 +31,34 @@ export class ApplicationModel {
 
   static async create(applicationData: InsertApplication): Promise<Application> {
     const id = randomUUID();
-    // Try generating a unique applicationCode a few times
-    let applicationCode = generateCode();
+
+    const prefix = generateDailyPrefix();
+
+    // Find the latest code for today and increment the 3-digit sequence (resets daily)
+    let nextSeq = 1;
+    try {
+      const latest = await db
+        .select()
+        .from(applications)
+        .where(like(applications.applicationCode, `${prefix}%`))
+        .orderBy(desc(applications.applicationCode))
+        .limit(1);
+      if (latest && latest.length > 0) {
+        const lastCode = (latest[0] as any).applicationCode as string;
+        const parts = lastCode?.split('-') || [];
+        const seqStr = parts[2] || '000';
+        const parsed = parseInt(seqStr, 10);
+        if (!Number.isNaN(parsed)) nextSeq = parsed + 1;
+      }
+    } catch {}
+
+    let applicationCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    // Safety: try a few times in case of race conditions
     for (let i = 0; i < 5; i++) {
       const existing = await db.select().from(applications).where(eq(applications.applicationCode, applicationCode));
       if (existing.length === 0) break;
-      applicationCode = generateCode();
+      nextSeq += 1;
+      applicationCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
     }
 
     await db
