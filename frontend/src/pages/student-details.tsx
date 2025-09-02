@@ -88,15 +88,21 @@ export default function StudentDetails() {
   };
   const getDropdownLabel = (field: string, raw?: string | null) => {
     if (!raw) return '';
-    const list: any[] = (studentDropdowns as any)?.[field] || [];
-    const match = list.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
+    const candidates = [
+      ...(((studentDropdowns as any)?.[field] || []) as any[]),
+      ...(((leadsDropdowns as any)?.[field] || []) as any[]),
+    ];
+    const match = candidates.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
     return match?.value || String(raw);
   };
 
   const ensureKey = (field: string, raw?: string | null) => {
     if (!raw) return '';
-    const list: any[] = (studentDropdowns as any)?.[field] || [];
-    const match = list.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
+    const candidates = [
+      ...(((studentDropdowns as any)?.[field] || []) as any[]),
+      ...(((leadsDropdowns as any)?.[field] || []) as any[]),
+    ];
+    const match = candidates.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
     return match?.key || String(raw);
   };
 
