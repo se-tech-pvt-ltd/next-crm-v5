@@ -188,13 +188,19 @@ export default function AddAdmissionPage() {
     console.log('[Admission Dropdowns] Status options:', statusOptions);
     console.log('[Admission Dropdowns] Case Status options:', caseStatusOptions);
     const currentStatus = form.getValues('status');
-    if (statusOptions && statusOptions.length > 0 && !currentStatus) {
-      form.setValue('status', statusOptions[0].value);
-      form.setValue('decision', statusOptions[0].value);
+    if (statusOptions && statusOptions.length > 0) {
+      const openOpt = statusOptions.find((o:any) => String(o.value || '').toLowerCase() === 'open');
+      const exists = statusOptions.some((o:any) => String(o.value) === String(currentStatus));
+      if (!currentStatus || !exists) {
+        const next = openOpt?.value ?? statusOptions[0].value;
+        form.setValue('status', next, { shouldValidate: true, shouldDirty: true });
+        form.setValue('decision', next, { shouldValidate: true, shouldDirty: true });
+      }
     }
     const currentCase = form.getValues('caseStatus');
     if (caseStatusOptions && caseStatusOptions.length > 0 && !currentCase) {
-      form.setValue('caseStatus', caseStatusOptions[0].value);
+      const first = caseStatusOptions[0]?.value;
+      if (first) form.setValue('caseStatus', first, { shouldValidate: true, shouldDirty: true });
     }
   }, [statusOptions, caseStatusOptions, form]);
 
