@@ -139,7 +139,7 @@ export class StudentService {
       leadId,
       'converted',
       'Lead converted',
-      `Lead ${student.name} was converted to student ${student.id}`
+      `Lead ${student.name} was converted to student ${student.name}`
     );
 
     return student;
