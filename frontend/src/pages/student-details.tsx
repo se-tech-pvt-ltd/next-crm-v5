@@ -514,8 +514,9 @@ export default function StudentDetails() {
                             <SelectValue placeholder="Select expectation" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="High">High</SelectItem>
-                            <SelectItem value="Average">Average</SelectItem>
+                            {Array.isArray((studentDropdowns as any)?.['Expectation']) && (studentDropdowns as any)['Expectation'].map((opt: any) => (
+                              <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ) : (
@@ -568,7 +569,7 @@ export default function StudentDetails() {
                               <span className="ml-1 text-xs text-gray-500">({application.applicationCode})</span>
                             )}
                           </div>
-                          <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` �� ${application.courseType}` : ''}</div>
+                          <div className="text-xs text-gray-600">{application.program}{application.courseType ? ` • ${application.courseType}` : ''}</div>
                         </div>
                         <Badge className="capitalize">{application.appStatus || 'Open'}</Badge>
                       </div>
