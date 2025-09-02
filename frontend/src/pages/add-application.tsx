@@ -13,7 +13,7 @@ import { insertApplicationSchema, type Student, type InsertApplication } from '@
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
-import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap } from 'lucide-react';
+import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save } from 'lucide-react';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -85,7 +85,7 @@ export default function AddApplication() {
             <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }}>
               <Button variant="outline" onClick={goBack} className="flex items-center space-x-2">
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <span>Back to Applications</span>
               </Button>
             </motion.div>
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -113,7 +113,7 @@ export default function AddApplication() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="studentId"
@@ -122,10 +122,10 @@ export default function AddApplication() {
                         <FormLabel>Student *</FormLabel>
                         <FormControl>
                           {presetStudentId ? (
-                            <Input value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'} disabled />
+                            <Input value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled />
                           ) : (
                             <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger>
+                              <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                                 <SelectValue placeholder="Select student" />
                               </SelectTrigger>
                               <SelectContent>
@@ -150,7 +150,7 @@ export default function AddApplication() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><School className="w-4 h-4" /> University *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter university name" {...field} />
+                          <Input placeholder="Enter university name" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -164,7 +164,7 @@ export default function AddApplication() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Program *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Computer Science" {...field} />
+                          <Input placeholder="e.g., Computer Science" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -179,7 +179,7 @@ export default function AddApplication() {
                         <FormLabel>Application Status</FormLabel>
                         <Select value={field.value || 'Open'} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
@@ -202,7 +202,7 @@ export default function AddApplication() {
                         <FormLabel>Case Status</FormLabel>
                         <Select value={field.value || 'Raw'} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Select case status" />
                             </SelectTrigger>
                           </FormControl>
@@ -235,7 +235,7 @@ export default function AddApplication() {
                         <FormLabel>Course Type</FormLabel>
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Select course type" />
                             </SelectTrigger>
                           </FormControl>
@@ -263,7 +263,7 @@ export default function AddApplication() {
                         <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country</FormLabel>
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Select country" />
                             </SelectTrigger>
                           </FormControl>
@@ -293,7 +293,7 @@ export default function AddApplication() {
                         <FormLabel>Channel Partner</FormLabel>
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Select channel partner" />
                             </SelectTrigger>
                           </FormControl>
@@ -330,7 +330,7 @@ export default function AddApplication() {
                         <FormLabel>Intake</FormLabel>
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Select intake" />
                             </SelectTrigger>
                           </FormControl>
@@ -356,7 +356,7 @@ export default function AddApplication() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Google Drive Link</FormLabel>
                         <FormControl>
-                          <Input placeholder="https://drive.google.com/..." {...field} />
+                          <Input placeholder="https://drive.google.com/..." className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -366,10 +366,25 @@ export default function AddApplication() {
               </CardContent>
             </Card>
 
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={goBack}>Cancel</Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Creating...' : 'Create Application'}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3 pt-4">
+              <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
+                <Button type="button" variant="outline" onClick={goBack} className="flex items-center justify-center space-x-2 w-full">
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Cancel</span>
+                </Button>
+              </motion.div>
+              <Button type="submit" disabled={createMutation.isPending} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto">
+                {createMutation.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Create Application</span>
+                  </>
+                )}
               </Button>
             </div>
           </form>
