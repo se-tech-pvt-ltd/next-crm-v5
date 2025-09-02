@@ -24,7 +24,8 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
 
   const currentYear = new Date().getFullYear();
   const startYear = fromYear ?? (currentYear - 80);
-  const endYear = toYear ?? currentYear;
+  const maxYear = currentYear - 15; // must be at least 15 years old
+  const endYear = Math.min(toYear ?? maxYear, maxYear);
   const years = React.useMemo(() => {
     const arr: number[] = [];
     for (let y = endYear; y >= startYear; y--) arr.push(y);
