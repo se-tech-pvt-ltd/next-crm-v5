@@ -242,7 +242,7 @@ export default function ApplicationDetails() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
-                      <Input value={application.id} disabled className="h-8 text-xs transition-all" />
+                      <Input value={application.applicationCode || 'Not provided'} disabled className="h-8 text-xs transition-all" />
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><span>App Status</span></Label>
