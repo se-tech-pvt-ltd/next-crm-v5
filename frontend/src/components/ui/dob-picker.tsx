@@ -95,6 +95,7 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
             captionLayout="dropdown-buttons"
             fromYear={startYear}
             toYear={endYear}
+            toDate={new Date(maxYear, 11, 31)}
             onSelect={handleSelectDate}
             initialFocus
           />
