@@ -437,8 +437,8 @@ export default function LeadDetails() {
                       <>
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3"
                           onClick={() => setIsEditing(true)}
                           disabled={isLoading}
                           title="Edit"
@@ -448,8 +448,8 @@ export default function LeadDetails() {
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3"
                           onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
                           title="Convert to Student"
@@ -459,8 +459,8 @@ export default function LeadDetails() {
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3"
                           onClick={() => setShowMarkAsLostModal(true)}
                           disabled={isLoading || currentStatus === 'lost'}
                           title="Mark as Lost"
