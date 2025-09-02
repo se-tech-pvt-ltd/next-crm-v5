@@ -50,7 +50,7 @@ export class AdmissionController {
 
   static async updateAdmission(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const validatedData = insertAdmissionSchema.partial().parse(req.body);
       const admission = await AdmissionService.updateAdmission(id, validatedData);
       if (!admission) {
