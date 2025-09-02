@@ -173,8 +173,8 @@ export default function AddAdmissionPage() {
       return res.json();
     },
   });
-  const statusOptions = (admissionDropdowns as any)?.Status || [];
-  const caseStatusOptions = (admissionDropdowns as any)?.['Case Status'] || [];
+  const statusOptions = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+  const caseStatusOptions = (admissionDropdowns as any)?.['Case Status'] || (admissionDropdowns as any)?.['case status'] || (admissionDropdowns as any)?.caseStatus || [];
 
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
