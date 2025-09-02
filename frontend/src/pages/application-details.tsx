@@ -23,7 +23,8 @@ import {
   Edit,
   Save,
   X,
-  Copy
+  Copy,
+  Plus
 } from 'lucide-react';
 
 export default function ApplicationDetails() {
@@ -211,10 +212,16 @@ export default function ApplicationDetails() {
                     <CardTitle className="text-sm flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
                     <div className="flex items-center gap-3">
                       {!isEditing ? (
-                        <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
-                          <Edit />
-                          <span className="hidden lg:inline">Edit</span>
-                        </Button>
+                        <>
+                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { const from = typeof window!== 'undefined' ? window.location.pathname : '/applications'; setLocation(`/admissions/new?applicationId=${application.id}&studentId=${application.studentId}&from=${encodeURIComponent(from)}`); }} title="Add Admission">
+                            <Plus />
+                            <span className="hidden lg:inline">Add Admission</span>
+                          </Button>
+                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
+                            <Edit />
+                            <span className="hidden lg:inline">Edit</span>
+                          </Button>
+                        </>
                       ) : (
                         <div className="flex items-center gap-2">
                           <Button size="sm" onClick={handleSave} disabled={updateApplicationMutation.isPending}>
@@ -366,6 +373,7 @@ export default function ApplicationDetails() {
           </div>
         </div>
       )}
+
     </Layout>
   );
 }

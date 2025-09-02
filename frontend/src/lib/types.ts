@@ -87,8 +87,8 @@ export interface Application {
 }
 
 export interface Admission {
-  id: number;
-  applicationId: number;
+  id: string;
+  applicationId: string;
   studentId: string;
   university: string;
   program: string;
@@ -196,7 +196,7 @@ export const insertApplicationSchema = z.object({
 });
 
 export const insertAdmissionSchema = z.object({
-  applicationId: z.number(),
+  applicationId: z.string(),
   studentId: z.string(),
   university: z.string().min(1, "University is required"),
   program: z.string().min(1, "Program is required"),

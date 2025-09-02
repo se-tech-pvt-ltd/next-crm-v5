@@ -9,17 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal';
-import { AddAdmissionModal } from '@/components/add-admission-modal';
+
 import { Admission, Student } from '@/lib/types';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useLocation } from 'wouter';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -123,7 +124,7 @@ export default function Admissions() {
             </Select>
           </div>
           
-          <Button onClick={() => setIsAddModalOpen(true)}>
+          <Button onClick={() => setLocation('/admissions/new')}>
             <Plus className="w-4 h-4 mr-2" />
             Add Admission Record
           </Button>
@@ -220,10 +221,10 @@ export default function Admissions() {
                   }
                 </p>
                 <div className="mt-6">
-                  <Button onClick={() => setIsAddModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Admission Record
-                  </Button>
+                  <Button onClick={() => setLocation('/admissions/new')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Admission Record
+          </Button>
                 </div>
               </div>
             ) : (
@@ -328,10 +329,6 @@ export default function Admissions() {
         admission={selectedAdmission}
       />
       
-      <AddAdmissionModal 
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-      />
     </Layout>
   );
 }

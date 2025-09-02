@@ -88,8 +88,8 @@ export const applications = mysqlTable("applications", {
 });
 
 export const admissions = mysqlTable("admissions", {
-  id: int("id").primaryKey().autoincrement(),
-  applicationId: int("application_id").notNull(),
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  applicationId: varchar("application_id", { length: 255 }).notNull(),
   studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),

@@ -4,6 +4,7 @@ import { admissions, students, type Admission, type InsertAdmission } from "../s
 import { AdmissionModel } from "../models/Admission.js";
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
+import { and, gte, lt, sql } from "drizzle-orm";
 
 export class AdmissionService {
   static async getAdmissions(userId?: string, userRole?: string): Promise<Admission[]> {
@@ -35,11 +36,11 @@ export class AdmissionService {
     return await AdmissionModel.findAll();
   }
 
-  static async getAdmission(id: number, userId?: string, userRole?: string): Promise<Admission | undefined> {
+  static async getAdmission(id: string, userId?: string, userRole?: string): Promise<Admission | undefined> {
     const admission = await AdmissionModel.findById(id);
-    
+
     if (!admission) return undefined;
-    
+
     // Check role-based access for counselors
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(admission.studentId);
@@ -47,7 +48,7 @@ export class AdmissionService {
         return undefined;
       }
     }
-    
+
     return admission;
   }
 
@@ -64,8 +65,27 @@ export class AdmissionService {
   }
 
   static async createAdmission(admissionData: InsertAdmission): Promise<Admission> {
-    const admission = await AdmissionModel.create(admissionData);
-    
+    // Generate daily sequence-based Admission ID (ADM-DDMMYY-XXX) and append into notes
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yy = String(now.getFullYear()).slice(-2);
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+
+    const [{ cnt }] = await db
+      .select({ cnt: sql<number>`COUNT(*)` })
+      .from(admissions)
+      .where(and(gte(admissions.createdAt, dayStart), lt(admissions.createdAt, nextDay)));
+
+    const seq = String((Number(cnt) || 0) + 1).padStart(3, '0');
+    const admissionCode = `ADM-${dd}${mm}${yy}-${seq}`;
+
+    const admission = await AdmissionModel.create({
+      ...admissionData,
+      notes: [admissionData.notes || '', `Admission ID: ${admissionCode}`].filter(Boolean).join('\n').trim(),
+    } as InsertAdmission);
+
     // Log activity for the student
     await ActivityService.logActivity(
       'student', 
@@ -87,12 +107,12 @@ export class AdmissionService {
     return admission;
   }
 
-  static async updateAdmission(id: number, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
+  static async updateAdmission(id: string, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
     const currentAdmission = await AdmissionModel.findById(id);
     if (!currentAdmission) return undefined;
 
     const admission = await AdmissionModel.update(id, updates);
-    
+
     if (admission) {
       // Log changes for each updated field
       for (const [fieldName, newValue] of Object.entries(updates)) {
@@ -123,10 +143,10 @@ export class AdmissionService {
     return admission;
   }
 
-  static async deleteAdmission(id: number): Promise<boolean> {
+  static async deleteAdmission(id: string): Promise<boolean> {
     const admission = await AdmissionModel.findById(id);
     const success = await AdmissionModel.delete(id);
-    
+
     if (success && admission) {
       await ActivityService.logActivity(
         'admission', 

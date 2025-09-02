@@ -5,17 +5,17 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:shadow active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow-none hover:shadow-none active:scale-[0.98]",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/80 shadow-sm",
+        default: "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/80",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input/60 bg-background hover:bg-primary/10 hover:text-primary hover:border-primary shadow-sm disabled:border-transparent disabled:bg-transparent",
+          "border border-input/60 bg-background hover:bg-primary/10 hover:text-primary hover:border-primary disabled:border-transparent disabled:bg-transparent",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-primary/10 hover:text-primary",
         link: "text-primary underline-offset-4 hover:underline",
       },
