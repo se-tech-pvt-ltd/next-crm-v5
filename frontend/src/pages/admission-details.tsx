@@ -150,7 +150,7 @@ export default function AdmissionDetails() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'} className="w-fit">
-                    {currentVisaStatus.replace('_', ' ').toUpperCase()}
+                    {currentVisaStatus.replace(/[_-]/g, ' ').toUpperCase()}
                   </Badge>
                 </CardContent>
               </Card>
