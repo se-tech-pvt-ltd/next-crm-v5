@@ -118,12 +118,6 @@ export default function AdmissionDetails() {
                       <div className="text-sm">{admission.scholarshipAmount || 'None'}</div>
                     </div>
                   </div>
-                  {admission.notes && (
-                    <div className="mt-2">
-                      <div className="text-[11px] text-gray-600">Notes</div>
-                      <div className="text-sm text-gray-800">{admission.notes}</div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
