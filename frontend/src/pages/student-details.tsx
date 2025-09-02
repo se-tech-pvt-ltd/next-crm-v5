@@ -45,6 +45,14 @@ export default function StudentDetails() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: studentDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/students');
+      return response.json();
+    },
+  });
+
   const { data: applications, isLoading: appsLoading } = useQuery<Application[]>({
     queryKey: [`/api/applications/student/${params?.id}`],
     enabled: !!params?.id,
