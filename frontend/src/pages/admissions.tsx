@@ -261,7 +261,7 @@ export default function Admissions() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-xs font-mono text-gray-700 truncate max-w-[12rem]">{admission.id}</div>
+                        <div className="text-xs font-mono text-gray-700 truncate max-w-[12rem]">{(admission as any).admissionId || admission.id}</div>
                       </TableCell>
                       <TableCell>
                         <Badge className={getDecisionColor(admission.decision)}>
