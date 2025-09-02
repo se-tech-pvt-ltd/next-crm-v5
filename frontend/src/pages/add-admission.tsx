@@ -10,6 +10,8 @@ import { Layout } from '@/components/layout';
 import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
+import { motion } from 'framer-motion';
 import { ArrowLeft, Save, PlusCircle, School, FileText, Calendar as CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
