@@ -64,6 +64,14 @@ export default function AdmissionDetails() {
     );
   }
 
+  if (!isLoading && !admission) {
+    return (
+      <Layout title={<Button variant="ghost" size="sm" onClick={() => setLocation('/admissions')} className="p-1 h-8 w-8"><ArrowLeft className="w-4 h-4" /></Button>}>
+        <Card><CardContent className="p-6">Admission not found</CardContent></Card>
+      </Layout>
+    );
+  }
+
   return (
     <Layout
       title={
