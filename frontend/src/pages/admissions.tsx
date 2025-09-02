@@ -329,10 +329,6 @@ export default function Admissions() {
         admission={selectedAdmission}
       />
       
-      <AddAdmissionModal 
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-      />
     </Layout>
   );
 }
