@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
@@ -74,12 +75,14 @@ export default function AddAdmissionPage() {
     },
   });
 
+  const watchedFull = form.watch('fullTuitionFee');
+  const watchedScholarship = form.watch('scholarshipAmount');
   useEffect(() => {
-    const full = Number(form.watch('fullTuitionFee')) || 0;
-    const scholarship = Number(form.watch('scholarshipAmount')) || 0;
+    const full = Number(watchedFull) || 0;
+    const scholarship = Number(watchedScholarship) || 0;
     const net = full > 0 ? Math.max(full - scholarship, 0) : 0;
     if (!Number.isNaN(net)) form.setValue('netTuitionFee', String(net));
-  }, [form.watch('fullTuitionFee'), form.watch('scholarshipAmount')]);
+  }, [watchedFull, watchedScholarship, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
