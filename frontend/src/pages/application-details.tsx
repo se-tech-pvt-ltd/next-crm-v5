@@ -47,6 +47,11 @@ export default function ApplicationDetails() {
     enabled: !!application?.studentId,
   });
 
+  const { data: admissions } = useQuery<Admission[]>({
+    queryKey: ['/api/admissions'],
+  });
+  const admissionForApp = useMemo(() => (admissions || []).find((a) => a.applicationId === application?.id), [admissions, application?.id]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Application>>({});
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
