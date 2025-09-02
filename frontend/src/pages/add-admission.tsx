@@ -150,6 +150,21 @@ export default function AddAdmissionPage() {
   const linkedApp = selectedApp;
   const linkedStudent = presetStudent || (students?.find((s) => s.id === (linkedApp?.studentId || presetStudentId)) as Student | undefined);
 
+  // Ensure required values are set from linked application so form can submit
+  useEffect(() => {
+    if (linkedApp) {
+      const idNum = Number(linkedApp.id);
+      if (Number.isFinite(idNum) && form.getValues('applicationId') !== idNum) {
+        form.setValue('applicationId', idNum);
+      }
+      if (!form.getValues('studentId')) {
+        form.setValue('studentId', linkedApp.studentId);
+      }
+      form.setValue('university', linkedApp.university || '');
+      form.setValue('program', linkedApp.program || '');
+    }
+  }, [linkedApp, form]);
+
   // Admission dropdowns (status, Case Status) similar to leads/new
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admission'],
