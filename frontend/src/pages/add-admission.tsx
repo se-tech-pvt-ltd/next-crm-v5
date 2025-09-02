@@ -74,20 +74,56 @@ export default function AddAdmissionPage() {
     },
   });
 
+  useEffect(() => {
+    const full = Number(form.watch('fullTuitionFee')) || 0;
+    const scholarship = Number(form.watch('scholarshipAmount')) || 0;
+    const net = full > 0 ? Math.max(full - scholarship, 0) : 0;
+    if (!Number.isNaN(net)) form.setValue('netTuitionFee', String(net));
+  }, [form.watch('fullTuitionFee'), form.watch('scholarshipAmount')]);
+
   const createMutation = useMutation({
-    mutationFn: async (data: InsertAdmission) => {
-      const payload = {
-        ...data,
-        depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : null,
-        decisionDate: data.decisionDate ? new Date(data.decisionDate) : null,
-      };
+    mutationFn: async (data: any) => {
+      const payload: InsertAdmission = {
+        applicationId: Number(data.applicationId),
+        studentId: data.studentId,
+        university: data.university,
+        program: data.program,
+        decision: data.status || data.decision || 'pending',
+        decisionDate: data.visaDate ? new Date(data.visaDate) : (data.decisionDate ? new Date(data.decisionDate) : null),
+        scholarshipAmount: data.scholarshipAmount || null,
+        conditions: data.conditions || null,
+        depositRequired: Boolean(data.depositRequired) || false,
+        depositAmount: data.depositAmount || data.initialDeposit || null,
+        depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
+        visaStatus: data.visaStatus || 'pending',
+        notes: (() => {
+          const extra: string[] = [];
+          if (data.fullTuitionFee) extra.push(`Full Tuition Fee: ${data.fullTuitionFee}`);
+          if (data.netTuitionFee) extra.push(`Net Tuition Fee: ${data.netTuitionFee}`);
+          if (data.googleDriveLink) extra.push(`Drive: ${data.googleDriveLink}`);
+          if (data.caseStatus) extra.push(`Case Status: ${data.caseStatus}`);
+          if (data.visaDate && !data.decisionDate) extra.push(`Visa Date: ${new Date(data.visaDate).toISOString().split('T')[0]}`);
+          const base = data.notes || '';
+          return [base, extra.join(' | ')].filter(Boolean).join(' \n');
+        })(),
+      } as any;
       const res = await apiRequest('POST', '/api/admissions', payload as any);
       if (!res.ok) throw new Error('Failed');
-      return res.json();
+      const created = await res.json();
+      try {
+        if (data.caseStatus && data.applicationId) {
+          await apiRequest('PUT', `/api/applications/${data.applicationId}`, { caseStatus: data.caseStatus });
+          queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        }
+        if (data.googleDriveLink && data.applicationId) {
+          await apiRequest('PUT', `/api/applications/${data.applicationId}`, { googleDriveLink: data.googleDriveLink });
+          queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        }
+      } catch {}
+      return created;
     },
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
-      if (created?.studentId) queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({ title: 'Success', description: 'Admission created.' });
       const target = from || (presetApplicationId ? `/applications/${presetApplicationId}` : '/admissions');
       setLocation(target);
@@ -97,7 +133,7 @@ export default function AddAdmissionPage() {
     },
   });
 
-  const onSubmit = (data: InsertAdmission) => createMutation.mutate(data);
+  const onSubmit = (data: any) => createMutation.mutate(data);
 
   const goBack = () => setLocation(from || (presetApplicationId ? `/applications/${presetApplicationId}` : '/admissions'));
 
