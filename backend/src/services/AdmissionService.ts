@@ -83,7 +83,7 @@ export class AdmissionService {
 
     const admission = await AdmissionModel.create({
       ...admissionData,
-      notes: [admissionData.notes || '', `Admission ID: ${admissionCode}`].filter(Boolean).join('\n').trim(),
+      admissionId: admissionCode,
     } as InsertAdmission);
 
     // Log activity for the student
