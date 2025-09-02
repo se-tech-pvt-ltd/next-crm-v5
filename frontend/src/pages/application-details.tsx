@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { type Application, type Student } from '@/lib/types';
+import { type Application, type Student, type Admission } from '@/lib/types';
 import {
   ArrowLeft,
   School,
