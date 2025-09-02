@@ -165,23 +165,16 @@ export default function AddAdmissionPage() {
     }
   }, [linkedApp, form]);
 
-  // Admission dropdowns (field-specific)
-  const caseStatusField = typeof window !== 'undefined' ? encodeURIComponent('Case Status') : 'Case%20Status';
-  const { data: statusOptions } = useQuery<any[]>({
-    queryKey: ['/api/dropdowns/module/Admission/field/status'],
+  // Admission dropdowns grouped by module (same approach as leads/add)
+  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Admission'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/dropdowns/module/Admission/field/status');
+      const res = await apiRequest('GET', '/api/dropdowns/module/Admission');
       return res.json();
     },
   });
-  const { data: caseStatusOptions } = useQuery<any[]>({
-    queryKey: ['/api/dropdowns/module/Admission/field/Case Status'],
-    queryFn: async () => {
-      const url = `/api/dropdowns/module/Admission/field/${caseStatusField}`;
-      const res = await apiRequest('GET', url);
-      return res.json();
-    },
-  });
+  const statusOptions = (admissionDropdowns as any)?.Status || [];
+  const caseStatusOptions = (admissionDropdowns as any)?.['Case Status'] || [];
 
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
@@ -312,7 +305,7 @@ export default function AddAdmissionPage() {
                             </SelectTrigger>
                             <SelectContent>
                               {statusOptions?.map((opt: any) => (
-                                <SelectItem key={opt.id} value={opt.value}>{opt.value}</SelectItem>
+                                <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -336,7 +329,7 @@ export default function AddAdmissionPage() {
                             </SelectTrigger>
                             <SelectContent>
                               {caseStatusOptions?.map((opt: any) => (
-                                <SelectItem key={opt.id} value={opt.value}>{opt.value}</SelectItem>
+                                <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
