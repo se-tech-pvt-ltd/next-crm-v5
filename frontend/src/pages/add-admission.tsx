@@ -165,16 +165,29 @@ export default function AddAdmissionPage() {
     }
   }, [linkedApp, form]);
 
-  // Admission dropdowns grouped by module (same approach as leads/add)
+  // Admission dropdowns grouped by module (same approach as leads/add) with debug logs
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admission'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/dropdowns/module/Admission');
-      return res.json();
+      const url = '/api/dropdowns/module/Admission';
+      console.log('[Admission Dropdowns] GET', url);
+      const res = await apiRequest('GET', url);
+      const json = await res.json();
+      console.log('[Admission Dropdowns] keys:', Object.keys(json || {}));
+      return json;
     },
   });
-  const statusOptions = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-  const caseStatusOptions = (admissionDropdowns as any)?.['Case Status'] || (admissionDropdowns as any)?.['case status'] || (admissionDropdowns as any)?.caseStatus || [];
+  const getOptions = (name: string) => {
+    const src = (admissionDropdowns as any) || {};
+    const found = Object.entries(src).find(([k]) => k.toLowerCase().trim() === name.toLowerCase());
+    return (found?.[1] as any[]) || [];
+  };
+  const statusOptions = getOptions('Status');
+  const caseStatusOptions = getOptions('Case Status');
+  useEffect(() => {
+    console.log('[Admission Dropdowns] Status options:', statusOptions);
+    console.log('[Admission Dropdowns] Case Status options:', caseStatusOptions);
+  }, [statusOptions, caseStatusOptions]);
 
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
