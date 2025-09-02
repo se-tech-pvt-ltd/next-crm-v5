@@ -110,10 +110,10 @@ export default function AdmissionDetails() {
                       <div className="text-[11px] text-gray-600">Admission ID</div>
                       <div className="text-sm font-medium break-all">{(admission as any).admissionId || admission.id}</div>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       <div className="text-[11px] text-gray-600">Student</div>
                       {student ? (
-                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students/${student.id}`)}>
+                        <Button variant="link" className="h-5 p-0 text-xs leading-5" onClick={() => setLocation(`/students/${student.id}`)}>
                           {student.name}
                         </Button>
                       ) : (
