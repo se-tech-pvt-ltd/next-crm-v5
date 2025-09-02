@@ -102,18 +102,25 @@ export default function AddAdmissionPage() {
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
       <div className="w-full max-w-none sm:max-w-4xl mx-auto px-2 sm:px-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <Button variant="outline" onClick={goBack} className="flex items-center space-x-2">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </Button>
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <PlusCircle className="w-5 h-5 text-primary" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-4">
+            <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }} className="sm:order-first">
+              <Button variant="outline" onClick={goBack} className="flex items-center justify-center space-x-2 w-full sm:w-auto">
+                <ArrowLeft className="w-4 h-4" />
+                <span>{from && from.includes('/applications/') ? 'Back to Application' : 'Back to Admissions'}</span>
+              </Button>
+            </motion.div>
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <PlusCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold truncate">Add New Admission</h1>
+                <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1">Create a university admission record for a student</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold truncate">Add Admission</h1>
-              <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1">Create a university admission record for a student</p>
-            </div>
+          </div>
+          <div className="hidden sm:block sm:order-last">
+            <HelpTooltip content="Provide admission decision details, scholarship/visa info, and important dates." />
           </div>
         </div>
 
