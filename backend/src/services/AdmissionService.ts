@@ -24,7 +24,7 @@ export class AdmissionService {
         depositAmount: admissions.depositAmount,
         depositDeadline: admissions.depositDeadline,
         visaStatus: admissions.visaStatus,
-        notes: admissions.notes,
+        admissionId: admissions.admissionId,
         createdAt: admissions.createdAt,
         updatedAt: admissions.updatedAt
       })
