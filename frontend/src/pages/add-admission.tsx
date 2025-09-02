@@ -167,9 +167,9 @@ export default function AddAdmissionPage() {
 
   // Admission dropdowns grouped by module (same approach as leads/add) with debug logs
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admission'],
+    queryKey: ['/api/dropdowns/module/Admissions'],
     queryFn: async () => {
-      const url = '/api/dropdowns/module/Admission';
+      const url = '/api/dropdowns/module/Admissions';
       console.log('[Admission Dropdowns] GET', url);
       const res = await apiRequest('GET', url);
       const json = await res.json();
