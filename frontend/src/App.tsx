@@ -63,11 +63,13 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/leads" component={Leads} />
       <Route path="/leads/add" component={AddLead} />
+      <Route path="/leads/new" component={AddLead} />
       <Route path="/leads/:id" component={LeadDetails} />
       <Route path="/leads/:id/convert" component={ConvertLeadToStudent} />
       <Route path="/students" component={Students} />
       <Route path="/students/:id" component={StudentDetails} />
       <Route path="/applications/add" component={AddApplication} />
+      <Route path="/applications/new" component={AddApplication} />
       <Route path="/applications/:id" component={ApplicationDetails} />
       <Route path="/applications" component={Applications} />
       <Route path="/admissions" component={Admissions} />
