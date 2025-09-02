@@ -193,9 +193,20 @@ export default function AdmissionDetails() {
                 <Calendar className="w-5 h-5 mr-2" />
                 Activity Timeline
               </h3>
-              <div className="flex-1 overflow-y-auto">
-                <ActivityTracker entityType="admission" entityId={admission.id} />
-              </div>
+              {isLoading ? (
+                <div className="space-y-4 flex-1">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto">
+                  <ActivityTracker entityType="admission" entityId={admission.id} />
+                </div>
+              )}
             </div>
           </div>
         </div>
