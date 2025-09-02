@@ -36,11 +36,11 @@ export class AdmissionService {
     return await AdmissionModel.findAll();
   }
 
-  static async getAdmission(id: number, userId?: string, userRole?: string): Promise<Admission | undefined> {
+  static async getAdmission(id: string, userId?: string, userRole?: string): Promise<Admission | undefined> {
     const admission = await AdmissionModel.findById(id);
-    
+
     if (!admission) return undefined;
-    
+
     // Check role-based access for counselors
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(admission.studentId);
@@ -48,7 +48,7 @@ export class AdmissionService {
         return undefined;
       }
     }
-    
+
     return admission;
   }
 
@@ -107,12 +107,12 @@ export class AdmissionService {
     return admission;
   }
 
-  static async updateAdmission(id: number, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
+  static async updateAdmission(id: string, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
     const currentAdmission = await AdmissionModel.findById(id);
     if (!currentAdmission) return undefined;
 
     const admission = await AdmissionModel.update(id, updates);
-    
+
     if (admission) {
       // Log changes for each updated field
       for (const [fieldName, newValue] of Object.entries(updates)) {
@@ -143,10 +143,10 @@ export class AdmissionService {
     return admission;
   }
 
-  static async deleteAdmission(id: number): Promise<boolean> {
+  static async deleteAdmission(id: string): Promise<boolean> {
     const admission = await AdmissionModel.findById(id);
     const success = await AdmissionModel.delete(id);
-    
+
     if (success && admission) {
       await ActivityService.logActivity(
         'admission', 
