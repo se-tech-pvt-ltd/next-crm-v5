@@ -46,17 +46,12 @@ export default function AddAdmissionPage() {
     enabled: !!presetStudentId,
   });
 
-  const toIntHash = (s: string) => {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-    return Math.abs(h) || 1;
-  };
 
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
     defaultValues: {
       // Required for submission
-      applicationId: presetApplicationId ? (Number.isFinite(Number(presetApplicationId)) ? Number(presetApplicationId) : toIntHash(presetApplicationId)) : 0,
+      applicationId: presetApplicationId || '',
       studentId: presetStudentId,
       university: presetApplication?.university || '',
       program: presetApplication?.program || '',
@@ -93,7 +88,7 @@ export default function AddAdmissionPage() {
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
       const payload: InsertAdmission = {
-        applicationId: Number(data.applicationId),
+        applicationId: String(data.applicationId),
         studentId: data.studentId,
         university: data.university,
         program: data.program,
@@ -148,9 +143,9 @@ export default function AddAdmissionPage() {
 
   const selectedApp = (() => {
     if (presetApplication) return presetApplication;
-    const idNum = Number(form.watch('applicationId'));
-    if (!Number.isFinite(idNum)) return undefined;
-    return applications?.find((a) => a.id === (idNum as any));
+    const id = String(form.watch('applicationId') || '');
+    if (!id) return undefined;
+    return applications?.find((a) => String(a.id) === id);
   })();
 
   const linkedApp = selectedApp;
@@ -159,9 +154,9 @@ export default function AddAdmissionPage() {
   // Ensure required values are set from linked application so form can submit
   useEffect(() => {
     if (linkedApp) {
-      const idNum = Number.isFinite(Number(linkedApp.id)) ? Number(linkedApp.id) : toIntHash(String(linkedApp.id));
-      if (form.getValues('applicationId') !== idNum) {
-        form.setValue('applicationId', idNum);
+      const idStr = String(linkedApp.id);
+      if (form.getValues('applicationId') !== idStr) {
+        form.setValue('applicationId', idStr);
       }
       if (!form.getValues('studentId')) {
         form.setValue('studentId', linkedApp.studentId);
@@ -263,9 +258,8 @@ export default function AddAdmissionPage() {
                                 <Select
                                   value={field.value ? String(field.value) : ''}
                                   onValueChange={(v) => {
-                                    const idNum = Number(v);
-                                    field.onChange(idNum);
-                                    const app = applications?.find((a) => a.id === (idNum as any));
+                                    field.onChange(v);
+                                    const app = applications?.find((a) => String(a.id) === v);
                                     if (app) {
                                       form.setValue('studentId', app.studentId);
                                       form.setValue('university', app.university);
@@ -278,7 +272,7 @@ export default function AddAdmissionPage() {
                                   </SelectTrigger>
                                   <SelectContent>
                                     {applications?.map((app) => (
-                                      <SelectItem key={app.id} value={String(app.id)}>
+                                      <SelectItem key={String(app.id)} value={String(app.id)}>
                                         {app.applicationCode || `${app.university} — ${app.program}`}
                                       </SelectItem>
                                     ))}
