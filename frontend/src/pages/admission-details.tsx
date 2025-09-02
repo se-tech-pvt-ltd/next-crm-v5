@@ -31,6 +31,15 @@ export default function AdmissionDetails() {
     enabled: !!admission?.studentId,
   });
 
+  const { data: linkedApplication } = useQuery<Application>({
+    queryKey: admission?.applicationId ? ['/api/applications', admission.applicationId] : ['noop'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', `/api/applications/${admission?.applicationId}`);
+      return res.json();
+    },
+    enabled: !!admission?.applicationId,
+  });
+
   const [currentVisaStatus, setCurrentVisaStatus] = useState<string>((admission?.visaStatus || 'pending').replace(/_/g, '-'));
   useEffect(() => {
     if (admission) setCurrentVisaStatus((admission.visaStatus || 'pending').replace(/_/g, '-'));
