@@ -231,6 +231,7 @@ export default function Admissions() {
                     <TableHead>Student</TableHead>
                     <TableHead>University</TableHead>
                     <TableHead>Program</TableHead>
+                    <TableHead>Admission ID</TableHead>
                     <TableHead>Decision</TableHead>
                     <TableHead>Scholarship</TableHead>
                     <TableHead>Visa Status</TableHead>
@@ -258,6 +259,9 @@ export default function Admissions() {
                         <div className="text-sm">
                           {admission.program}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs font-mono text-gray-700 truncate max-w-[12rem]">{admission.id}</div>
                       </TableCell>
                       <TableCell>
                         <Badge className={getDecisionColor(admission.decision)}>
