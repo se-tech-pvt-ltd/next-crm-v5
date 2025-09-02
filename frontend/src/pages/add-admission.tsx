@@ -165,16 +165,23 @@ export default function AddAdmissionPage() {
     }
   }, [linkedApp, form]);
 
-  // Admission dropdowns (status, Case Status) similar to leads/new
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admission'],
+  // Admission dropdowns (field-specific)
+  const caseStatusField = typeof window !== 'undefined' ? encodeURIComponent('Case Status') : 'Case%20Status';
+  const { data: statusOptions } = useQuery<any[]>({
+    queryKey: ['/api/dropdowns/module/Admission/field/status'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/dropdowns/module/Admission');
+      const res = await apiRequest('GET', '/api/dropdowns/module/Admission/field/status');
       return res.json();
     },
   });
-  const statusOptions = (admissionDropdowns as any)?.status || [];
-  const caseStatusOptions = (admissionDropdowns as any)?.['Case Status'] || (admissionDropdowns as any)?.caseStatus || [];
+  const { data: caseStatusOptions } = useQuery<any[]>({
+    queryKey: ['/api/dropdowns/module/Admission/field/Case Status'],
+    queryFn: async () => {
+      const url = `/api/dropdowns/module/Admission/field/${caseStatusField}`;
+      const res = await apiRequest('GET', url);
+      return res.json();
+    },
+  });
 
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
@@ -307,15 +314,6 @@ export default function AddAdmissionPage() {
                               {statusOptions?.map((opt: any) => (
                                 <SelectItem key={opt.id} value={opt.value}>{opt.value}</SelectItem>
                               ))}
-                              {(!statusOptions || statusOptions.length === 0) && (
-                                <>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="accepted">Accepted</SelectItem>
-                                  <SelectItem value="rejected">Rejected</SelectItem>
-                                  <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                                  <SelectItem value="conditional">Conditional</SelectItem>
-                                </>
-                              )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -340,23 +338,6 @@ export default function AddAdmissionPage() {
                               {caseStatusOptions?.map((opt: any) => (
                                 <SelectItem key={opt.id} value={opt.value}>{opt.value}</SelectItem>
                               ))}
-                              {(!caseStatusOptions || caseStatusOptions.length === 0) && (
-                                <>
-                                  <SelectItem value="Raw">Raw</SelectItem>
-                                  <SelectItem value="Not Eligible">Not Eligible</SelectItem>
-                                  <SelectItem value="Documents Pending">Documents Pending</SelectItem>
-                                  <SelectItem value="Supervisor">Supervisor</SelectItem>
-                                  <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
-                                  <SelectItem value="Submitted">Submitted</SelectItem>
-                                  <SelectItem value="Rejected">Rejected</SelectItem>
-                                  <SelectItem value="COL Received">COL Received</SelectItem>
-                                  <SelectItem value="UOL Requested">UOL Requested</SelectItem>
-                                  <SelectItem value="UOL Received">UOL Received</SelectItem>
-                                  <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
-                                  <SelectItem value="Deposit">Deposit</SelectItem>
-                                  <SelectItem value="Deferred">Deferred</SelectItem>
-                                </>
-                              )}
                             </SelectContent>
                           </Select>
                         </FormControl>
