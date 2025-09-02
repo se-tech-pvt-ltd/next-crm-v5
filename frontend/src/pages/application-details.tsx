@@ -61,7 +61,7 @@ export default function ApplicationDetails() {
         intake: application.intake,
         channelPartner: application.channelPartner,
         googleDriveLink: application.googleDriveLink,
-
+        caseStatus: application.caseStatus || 'Raw',
       });
       setCurrentStatus(application.appStatus || 'Open');
     }
@@ -222,15 +222,15 @@ export default function ApplicationDetails() {
                             <Save className="w-4 h-4 mr-1" /> Save Changes
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData({
-                            university: application.university,
-                            program: application.program,
-                            courseType: application.courseType,
-                            country: application.country,
-                            intake: application.intake,
-                            channelPartner: application.channelPartner,
-                            googleDriveLink: application.googleDriveLink,
-                    
-                          }); }}>
+                           university: application.university,
+                           program: application.program,
+                           courseType: application.courseType,
+                           country: application.country,
+                           intake: application.intake,
+                           channelPartner: application.channelPartner,
+                           googleDriveLink: application.googleDriveLink,
+                           caseStatus: application.caseStatus || 'Raw',
+                         }); }}>
                             <X className="w-4 h-4 mr-1" /> Cancel
                           </Button>
                         </div>
@@ -240,6 +240,45 @@ export default function ApplicationDetails() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
+                      <Input value={application.id} disabled className="h-8 text-xs transition-all" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>App Status</span></Label>
+                      <Input value={currentStatus} disabled className="h-8 text-xs transition-all" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
+                      {isEditing ? (
+                        <Select value={editData.caseStatus || 'Raw'} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select case status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Raw">Raw</SelectItem>
+                            <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                            <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                            <SelectItem value="Supervisor">Supervisor</SelectItem>
+                            <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                            <SelectItem value="Submitted">Submitted</SelectItem>
+                            <SelectItem value="Rejected">Rejected</SelectItem>
+                            <SelectItem value="COL Received">COL Received</SelectItem>
+                            <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                            <SelectItem value="UOL Received">UOL Received</SelectItem>
+                            <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                            <SelectItem value="Deposit">Deposit</SelectItem>
+                            <SelectItem value="Deferred">Deferred</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={application.caseStatus || 'Raw'} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Linked Student</span></Label>
+                      <Input value={student ? `${student.name} (${student.email})` : application.studentId} disabled className="h-8 text-xs transition-all" />
+                    </div>
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><School className="w-4 h-4" /><span>University</span></Label>
                       <Input value={isEditing ? (editData.university || '') : (application.university || '')} onChange={(e) => setEditData({ ...editData, university: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
