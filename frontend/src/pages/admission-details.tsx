@@ -108,7 +108,7 @@ export default function AdmissionDetails() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Admission ID</div>
-                      <div className="text-sm font-medium break-all">{admission.id}</div>
+                      <div className="text-sm font-medium break-all">{(admission as any).admissionId || admission.id}</div>
                     </div>
                     <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Student</div>
@@ -142,7 +142,7 @@ export default function AdmissionDetails() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Admission ID</div>
-                      <div className="text-sm font-medium break-all">{admission.id}</div>
+                      <div className="text-sm font-medium break-all">{(admission as any).admissionId || admission.id}</div>
                     </div>
                     <div className="space-y-1">
                       <div className="text-[11px] text-gray-600">Status</div>
