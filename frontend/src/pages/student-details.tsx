@@ -439,12 +439,9 @@ export default function StudentDetails() {
                             <SelectValue placeholder="Select test" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="IELTS">IELTS</SelectItem>
-                            <SelectItem value="PTE">PTE</SelectItem>
-                            <SelectItem value="OIDI">OIDI</SelectItem>
-                            <SelectItem value="Toefl">Toefl</SelectItem>
-                            <SelectItem value="Passwords">Passwords</SelectItem>
-                            <SelectItem value="No Test">No Test</SelectItem>
+                            {Array.isArray((studentDropdowns as any)?.['ELT Test']) && (studentDropdowns as any)['ELT Test'].map((opt: any) => (
+                              <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ) : (
