@@ -150,6 +150,17 @@ export default function AddAdmissionPage() {
   const linkedApp = selectedApp;
   const linkedStudent = presetStudent || (students?.find((s) => s.id === (linkedApp?.studentId || presetStudentId)) as Student | undefined);
 
+  // Admission dropdowns (status, Case Status) similar to leads/new
+  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Admission'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/dropdowns/module/Admission');
+      return res.json();
+    },
+  });
+  const statusOptions = (admissionDropdowns as any)?.status || [];
+  const caseStatusOptions = (admissionDropdowns as any)?.['Case Status'] || (admissionDropdowns as any)?.caseStatus || [];
+
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
       <div className="w-full max-w-none sm:max-w-4xl mx-auto px-2 sm:px-0">
@@ -278,11 +289,18 @@ export default function AddAdmissionPage() {
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="accepted">Accepted</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                              <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                              <SelectItem value="conditional">Conditional</SelectItem>
+                              {statusOptions?.map((opt: any) => (
+                                <SelectItem key={opt.id} value={opt.value}>{opt.value}</SelectItem>
+                              ))}
+                              {(!statusOptions || statusOptions.length === 0) && (
+                                <>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="accepted">Accepted</SelectItem>
+                                  <SelectItem value="rejected">Rejected</SelectItem>
+                                  <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                                  <SelectItem value="conditional">Conditional</SelectItem>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -304,19 +322,26 @@ export default function AddAdmissionPage() {
                               <SelectValue placeholder="Select case status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Raw">Raw</SelectItem>
-                              <SelectItem value="Not Eligible">Not Eligible</SelectItem>
-                              <SelectItem value="Documents Pending">Documents Pending</SelectItem>
-                              <SelectItem value="Supervisor">Supervisor</SelectItem>
-                              <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
-                              <SelectItem value="Submitted">Submitted</SelectItem>
-                              <SelectItem value="Rejected">Rejected</SelectItem>
-                              <SelectItem value="COL Received">COL Received</SelectItem>
-                              <SelectItem value="UOL Requested">UOL Requested</SelectItem>
-                              <SelectItem value="UOL Received">UOL Received</SelectItem>
-                              <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
-                              <SelectItem value="Deposit">Deposit</SelectItem>
-                              <SelectItem value="Deferred">Deferred</SelectItem>
+                              {caseStatusOptions?.map((opt: any) => (
+                                <SelectItem key={opt.id} value={opt.value}>{opt.value}</SelectItem>
+                              ))}
+                              {(!caseStatusOptions || caseStatusOptions.length === 0) && (
+                                <>
+                                  <SelectItem value="Raw">Raw</SelectItem>
+                                  <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                                  <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                                  <SelectItem value="Supervisor">Supervisor</SelectItem>
+                                  <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                                  <SelectItem value="Submitted">Submitted</SelectItem>
+                                  <SelectItem value="Rejected">Rejected</SelectItem>
+                                  <SelectItem value="COL Received">COL Received</SelectItem>
+                                  <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                                  <SelectItem value="UOL Received">UOL Received</SelectItem>
+                                  <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                                  <SelectItem value="Deposit">Deposit</SelectItem>
+                                  <SelectItem value="Deferred">Deferred</SelectItem>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -344,7 +369,30 @@ export default function AddAdmissionPage() {
                       <FormItem>
                         <FormLabel>Full Tuition Fee</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 20000" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="e.g., 20000"
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              const ok = /^\d*(?:\.\d{0,3})?$/.test(v);
+                              if (ok || v === '') field.onChange(v);
+                            }}
+                            onKeyDown={(e) => {
+                              const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+                              const ctrl = e.ctrlKey || e.metaKey;
+                              if (ctrl && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+                              if (allowed.includes(e.key)) return;
+                              if (e.key === '.') {
+                                if ((field.value || '').includes('.')) e.preventDefault();
+                                return;
+                              }
+                              if (!/\d/.test(e.key)) e.preventDefault();
+                            }}
+                            onPaste={(e) => {
+                              const text = (e.clipboardData || (window as any).clipboardData).getData('text');
+                              if (!/^\d*(?:\.\d{0,3})?$/.test(text)) e.preventDefault();
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -358,7 +406,30 @@ export default function AddAdmissionPage() {
                       <FormItem>
                         <FormLabel>Scholarship</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 5000" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="e.g., 5000"
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              const ok = /^\d*(?:\.\d{0,3})?$/.test(v);
+                              if (ok || v === '') field.onChange(v);
+                            }}
+                            onKeyDown={(e) => {
+                              const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+                              const ctrl = e.ctrlKey || e.metaKey;
+                              if (ctrl && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+                              if (allowed.includes(e.key)) return;
+                              if (e.key === '.') {
+                                if ((field.value || '').includes('.')) e.preventDefault();
+                                return;
+                              }
+                              if (!/\d/.test(e.key)) e.preventDefault();
+                            }}
+                            onPaste={(e) => {
+                              const text = (e.clipboardData || (window as any).clipboardData).getData('text');
+                              if (!/^\d*(?:\.\d{0,3})?$/.test(text)) e.preventDefault();
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -432,19 +503,21 @@ export default function AddAdmissionPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="googleDriveLink"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Google Drive Link</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://drive.google.com/..." {...field} value={field.value || ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                    <FormField
+                      control={form.control}
+                      name="googleDriveLink"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Google Drive Link</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://drive.google.com/..." {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
