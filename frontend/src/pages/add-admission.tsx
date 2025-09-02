@@ -351,7 +351,7 @@ export default function AddAdmissionPage() {
                       <FormItem>
                         <FormLabel>Case Status</FormLabel>
                         <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange}>
+                          <Select value={field.value || (caseStatusOptions?.[0]?.value ?? '')} onValueChange={field.onChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select case status" />
                             </SelectTrigger>
