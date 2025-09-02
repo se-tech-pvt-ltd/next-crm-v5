@@ -187,7 +187,16 @@ export default function AddAdmissionPage() {
   useEffect(() => {
     console.log('[Admission Dropdowns] Status options:', statusOptions);
     console.log('[Admission Dropdowns] Case Status options:', caseStatusOptions);
-  }, [statusOptions, caseStatusOptions]);
+    const currentStatus = form.getValues('status');
+    if (statusOptions && statusOptions.length > 0 && !currentStatus) {
+      form.setValue('status', statusOptions[0].value);
+      form.setValue('decision', statusOptions[0].value);
+    }
+    const currentCase = form.getValues('caseStatus');
+    if (caseStatusOptions && caseStatusOptions.length > 0 && !currentCase) {
+      form.setValue('caseStatus', caseStatusOptions[0].value);
+    }
+  }, [statusOptions, caseStatusOptions, form]);
 
   return (
     <Layout title="Add Admission" subtitle="Create a full admission record" helpText="Fill in admission decision and related details.">
@@ -336,7 +345,7 @@ export default function AddAdmissionPage() {
                       <FormItem>
                         <FormLabel>Case Status</FormLabel>
                         <FormControl>
-                          <Select value={field.value || 'Raw'} onValueChange={field.onChange}>
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select case status" />
                             </SelectTrigger>
