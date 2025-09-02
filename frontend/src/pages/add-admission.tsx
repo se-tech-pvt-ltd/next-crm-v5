@@ -407,6 +407,42 @@ export default function AddAdmissionPage() {
                     )}
                   />
 
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Visa Details */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-primary" /> Visa Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="visaStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Visa Status</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || 'pending'} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select visa status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="applied">Applied</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                              <SelectItem value="not-applied">Not Applied</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="visaDate"
@@ -434,32 +470,6 @@ export default function AddAdmissionPage() {
                       </FormItem>
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="visaStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Visa Status</FormLabel>
-                        <FormControl>
-                          <Select value={field.value || 'pending'} onValueChange={field.onChange}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select visa status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="applied">Applied</SelectItem>
-                              <SelectItem value="approved">Approved</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                              <SelectItem value="not-applied">Not Applied</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                 </div>
               </CardContent>
             </Card>
