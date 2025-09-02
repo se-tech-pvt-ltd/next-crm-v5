@@ -291,8 +291,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
               } as Activity;
               list = [...list, synthetic];
             }
-            // Custom ordering: note first, created second, then others by createdAt desc
-            const priority = (t: string) => (t === 'note' ? 0 : t === 'created' ? 1 : 2);
+            // Ordering: others (desc) at top, then notes, and "created" at the bottom
+            const priority = (t: string) => (t === 'created' ? 2 : t === 'note' ? 1 : 0);
             list.sort((a: any, b: any) => {
               const pa = priority(a.activityType);
               const pb = priority(b.activityType);

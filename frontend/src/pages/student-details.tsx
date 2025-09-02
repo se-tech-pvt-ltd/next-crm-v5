@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import { Input } from '@/components/ui/input';
+import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
@@ -44,6 +45,21 @@ export default function StudentDetails() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: studentDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/students');
+      return response.json();
+    },
+  });
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
+      return response.json();
+    },
+  });
+
   const { data: applications, isLoading: appsLoading } = useQuery<Application[]>({
     queryKey: [`/api/applications/student/${params?.id}`],
     enabled: !!params?.id,
@@ -70,6 +86,26 @@ export default function StudentDetails() {
     if (s === 'Enrolled') return 'enrolled';
     return String(s).toLowerCase();
   };
+  const getDropdownLabel = (field: string, raw?: string | null) => {
+    if (!raw) return '';
+    const candidates = [
+      ...(((studentDropdowns as any)?.[field] || []) as any[]),
+      ...(((leadsDropdowns as any)?.[field] || []) as any[]),
+    ];
+    const match = candidates.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
+    return match?.value || String(raw);
+  };
+
+  const ensureKey = (field: string, raw?: string | null) => {
+    if (!raw) return '';
+    const candidates = [
+      ...(((studentDropdowns as any)?.[field] || []) as any[]),
+      ...(((leadsDropdowns as any)?.[field] || []) as any[]),
+    ];
+    const match = candidates.find((o: any) => o.id === raw || o.key === raw || (o.value && String(o.value).toLowerCase() === String(raw).toLowerCase()));
+    return match?.key || String(raw);
+  };
+
   const boolToUi = (b?: boolean | null) => (b ? 'Yes' : 'No');
   const uiToBool = (s: string) => ['yes', 'true', '1', 'on'].includes(String(s).toLowerCase());
   const getCounselorName = (id?: string | null) => {
@@ -337,13 +373,12 @@ export default function StudentDetails() {
                         <CalendarIcon className="w-4 h-4" />
                         <span>Date of Birth</span>
                       </Label>
-                      <Input
+                      <DobPicker
                         id="dateOfBirth"
-                        type="date"
                         value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')}
-                        onChange={(e) => setEditData({ ...editData, dateOfBirth: e.target.value })}
+                        onChange={(v) => setEditData({ ...editData, dateOfBirth: v })}
                         disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                        className="h-8 text-xs"
                       />
                     </div>
                     <div className="space-y-2">
@@ -410,23 +445,20 @@ export default function StudentDetails() {
                       </Label>
                       {isEditing ? (
                         <Select
-                          value={(editData.eltTest as any) || student?.eltTest || ''}
+                          value={ensureKey('ELT Test', (editData.eltTest as any) || (student?.eltTest as any) || '')}
                           onValueChange={(v) => setEditData({ ...editData, eltTest: v })}
                         >
                           <SelectTrigger className="h-8 text-xs">
                             <SelectValue placeholder="Select test" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="IELTS">IELTS</SelectItem>
-                            <SelectItem value="PTE">PTE</SelectItem>
-                            <SelectItem value="OIDI">OIDI</SelectItem>
-                            <SelectItem value="Toefl">Toefl</SelectItem>
-                            <SelectItem value="Passwords">Passwords</SelectItem>
-                            <SelectItem value="No Test">No Test</SelectItem>
+                            {Array.isArray((studentDropdowns as any)?.['ELT Test']) && (studentDropdowns as any)['ELT Test'].map((opt: any) => (
+                              <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ) : (
-                        <Input disabled className="h-8 text-xs" value={student?.eltTest || student?.englishProficiency || ''} />
+                        <Input disabled className="h-8 text-xs" value={getDropdownLabel('ELT Test', (student?.eltTest as any) || (student as any)?.englishProficiency)} />
                       )}
                     </div>
                     <div className="space-y-2">
@@ -488,15 +520,16 @@ export default function StudentDetails() {
                       </Label>
                       {isEditing ? (
                         <Select
-                          value={(editData.expectation as any) || student?.expectation || 'High'}
+                          value={ensureKey('Expectation', (editData.expectation as any) || (student?.expectation as any) || '')}
                           onValueChange={(v) => setEditData({ ...editData, expectation: v })}
                         >
                           <SelectTrigger className="h-8 text-xs">
                             <SelectValue placeholder="Select expectation" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="High">High</SelectItem>
-                            <SelectItem value="Average">Average</SelectItem>
+                            {Array.isArray((studentDropdowns as any)?.['Expectation']) && (studentDropdowns as any)['Expectation'].map((opt: any) => (
+                              <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ) : (

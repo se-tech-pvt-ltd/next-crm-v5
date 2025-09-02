@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -205,80 +205,72 @@ export default function LeadDetails() {
   });
 
   const handleSave = () => {
-    const updateData = {
-      ...editData,
-      country: Array.isArray(editData.country) ? editData.country : [editData.country].filter(Boolean),
-      program: Array.isArray(editData.program) ? editData.program : [editData.program].filter(Boolean),
-      counselorId: editData.counselorId === 'unassigned' ? null : editData.counselorId,
-      type: editData.type === 'not_specified' ? null : editData.type
+    const deepEqual = (a: any, b: any) => {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+        return true;
+      }
+      return a === b;
     };
-    updateLeadMutation.mutate(updateData);
+
+    const normalize = (key: string, val: any) => {
+      if (key === 'country' || key === 'program') {
+        if (val == null) return [] as any[];
+        return Array.isArray(val) ? val : [val].filter(Boolean);
+      }
+      return val;
+    };
+
+    const payload: any = {};
+    const keys = Object.keys(editData || {});
+    for (const key of keys) {
+      const newVal = normalize(key, (editData as any)[key]);
+      const oldVal = normalize(key, (lead as any)?.[key]);
+      if (!deepEqual(newVal, oldVal)) {
+        let valueToSend = newVal;
+        if (key === 'counselorId') valueToSend = newVal === 'unassigned' ? null : newVal;
+        if (key === 'type') valueToSend = newVal === 'not_specified' ? null : newVal;
+        (payload as any)[key] = valueToSend;
+      }
+    }
+
+    if (Object.keys(payload).length === 0) {
+      toast({ title: 'No changes', description: 'Nothing to update.' });
+      setIsEditing(false);
+      return;
+    }
+
+    updateLeadMutation.mutate(payload);
   };
 
 
-  // Define the status sequence using provided IDs
-  const statusSequence = [
-    'b6ba479e-840f-11f0-a5b5-92e8d4b3e6a5',
-    'b6d98a94-840f-11f0-a5b5-92e8d4b3e6a5',
-    'b6f80223-840f-11f0-a5b5-92e8d4b3e6a5',
-    'b71e2fb9-840f-11f0-a5b5-92e8d4b3e6a5',
-    'b73cb47a-840f-11f0-a5b5-92e8d4b3e6a5'
-  ];
+  // Build status sequence from dropdown API (ordered by sequence)
+  const statusSequence = useMemo<string[]>(() => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0) return [];
+    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
+  }, [dropdownData]);
 
   const getStatusDisplayName = (statusId: string) => {
-    // Find the status in dropdown data using ID
-    const statusOption = dropdownData?.Status?.find((option: any) => option.id === statusId);
-    if (statusOption) {
-      return statusOption.value;
-    }
-
-    // Fallback - try with key field
-    const statusByKey = dropdownData?.Status?.find((option: any) => option.key === statusId);
-    if (statusByKey) {
-      return statusByKey.value;
-    }
-
-    // Final fallback
+    const list: any[] = (dropdownData as any)?.Status || [];
+    const byId = list.find((o: any) => o.id === statusId);
+    if (byId?.value) return byId.value;
+    const byKey = list.find((o: any) => o.key === statusId);
+    if (byKey?.value) return byKey.value;
+    const byValue = list.find((o: any) => o.value === statusId);
+    if (byValue?.value) return byValue.value;
     return formatStatus(statusId);
   };
 
   const getCurrentStatusIndex = () => {
-    if (!dropdownData?.Status || !currentStatus) {
-      console.log('Missing data:', { dropdownData: !!dropdownData?.Status, currentStatus });
-      return -1;
-    }
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0 || !currentStatus) return -1;
 
-    console.log('Current status:', currentStatus);
-    console.log('Available statuses:', dropdownData.Status);
-    console.log('Status sequence:', statusSequence);
+    const option = list.find((o: any) => o.key === currentStatus || o.id === currentStatus || o.value === currentStatus);
+    if (!option) return -1;
 
-    // Find the current status in dropdown data first
-    const currentStatusOption = dropdownData.Status.find((option: any) =>
-      option.key === currentStatus || option.id === currentStatus
-    );
-
-    console.log('Found status option:', currentStatusOption);
-
-    if (!currentStatusOption) {
-      // If we can't find by key/id, try finding by value (display name)
-      const statusByValue = dropdownData.Status.find((option: any) =>
-        option.value?.toLowerCase() === currentStatus?.toLowerCase()
-      );
-      console.log('Status by value:', statusByValue);
-
-      if (statusByValue) {
-        const index = statusSequence.findIndex(id => id === statusByValue.key);
-        console.log('Index by value:', index);
-        return index;
-      }
-
-      return -1;
-    }
-
-    // Find which position this status is in our sequence using the key, not id
-    const index = statusSequence.findIndex(id => id === currentStatusOption.key);
-    console.log('Final index:', index);
-    return index;
+    return statusSequence.findIndex((id) => id === (option.key || option.id));
   };
 
   const updateStatusMutation = useMutation({
@@ -290,16 +282,29 @@ export default function LeadDetails() {
       }
       return response.json();
     },
+    onMutate: async (newStatusKey: string) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/leads', params?.id] });
+      const previousLead = queryClient.getQueryData(['/api/leads', params?.id]);
+      const previousStatus = currentStatus;
+      setCurrentStatus(newStatusKey);
+      if (previousLead && typeof previousLead === 'object') {
+        queryClient.setQueryData(['/api/leads', params?.id], { ...(previousLead as any), status: newStatusKey });
+      }
+      return { previousLead, previousStatus } as { previousLead: any; previousStatus: string };
+    },
+    onError: (error: any, _newStatusKey, context) => {
+      if (context?.previousStatus) setCurrentStatus(context.previousStatus);
+      if (context?.previousLead) queryClient.setQueryData(['/api/leads', params?.id], context.previousLead);
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
     onSuccess: (updatedLead) => {
       setCurrentStatus(updatedLead.status);
       queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
-      // Refresh only the activity timeline for this lead
-      queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
-      queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/activities/lead/${params?.id}`] });
     },
   });
 
@@ -312,14 +317,13 @@ export default function LeadDetails() {
         <div className="flex items-center justify-between relative">
           {statusSequence.map((statusId, index) => {
             const isActive = index === currentIndex;
-            const isCompleted = index <= currentIndex; // Current and all previous should be green
+            const isCompleted = index <= currentIndex;
             const statusName = getStatusDisplayName(statusId);
 
             const handleClick = () => {
               if (updateStatusMutation.isPending) return;
               if (!lead) return;
-              // If already at this status, do nothing (no toggle back)
-              const targetKey = statusId; // statusSequence holds keys
+              const targetKey = statusId;
               if (currentStatus === targetKey) return;
               updateStatusMutation.mutate(targetKey);
             };
@@ -409,7 +413,7 @@ export default function LeadDetails() {
     >
       <div className="text-xs md:text-[12px]">
         {/* Status Progress Bar */}
-        {!isLoading && (!convertedStudent && <StatusProgressBar />)}
+        {!isLoading && !convertedStudent && statusSequence.length > 0 && <StatusProgressBar />}
 
         <div className="flex gap-0 min-h-[calc(100vh-12rem)] w-full">
         {/* Main Content */}
@@ -437,8 +441,8 @@ export default function LeadDetails() {
                       <>
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3"
                           onClick={() => setIsEditing(true)}
                           disabled={isLoading}
                           title="Edit"
@@ -448,8 +452,8 @@ export default function LeadDetails() {
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3"
                           onClick={() => setLocation(`/leads/${params?.id}/convert`)}
                           disabled={isLoading || currentStatus === 'converted'}
                           title="Convert to Student"
@@ -459,8 +463,8 @@ export default function LeadDetails() {
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="rounded-full px-2 md:px-3 [&_svg]:size-5"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3"
                           onClick={() => setShowMarkAsLostModal(true)}
                           disabled={isLoading || currentStatus === 'lost'}
                           title="Mark as Lost"

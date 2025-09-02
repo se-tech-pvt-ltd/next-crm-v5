@@ -4,12 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CollapsibleCard } from '@/components/collapsible-card';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +22,8 @@ import {
   BookOpen,
   Edit,
   Save,
-  X
+  X,
+  Copy
 } from 'lucide-react';
 
 export default function ApplicationDetails() {
@@ -61,7 +60,7 @@ export default function ApplicationDetails() {
         intake: application.intake,
         channelPartner: application.channelPartner,
         googleDriveLink: application.googleDriveLink,
-
+        caseStatus: application.caseStatus || 'Raw',
       });
       setCurrentStatus(application.appStatus || 'Open');
     }
@@ -149,6 +148,31 @@ export default function ApplicationDetails() {
     );
   };
 
+  const copyToClipboard = async (text: string) => {
+    if (!text) return false;
+    try {
+      if (navigator.clipboard && (window as any).isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
   if (!match) return <div>Not found</div>;
 
   if (error) {
@@ -186,7 +210,6 @@ export default function ApplicationDetails() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
                     <div className="flex items-center gap-3">
-                      <Badge className={getStatusColor(currentStatus)}>{currentStatus}</Badge>
                       {!isEditing ? (
                         <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
                           <Edit />
@@ -198,21 +221,72 @@ export default function ApplicationDetails() {
                             <Save className="w-4 h-4 mr-1" /> Save Changes
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData({
-                            university: application.university,
-                            program: application.program,
-                            courseType: application.courseType,
-                            country: application.country,
-                            intake: application.intake,
-                            channelPartner: application.channelPartner,
-                            googleDriveLink: application.googleDriveLink,
-                    
-                          }); }}>
+                           university: application.university,
+                           program: application.program,
+                           courseType: application.courseType,
+                           country: application.country,
+                           intake: application.intake,
+                           channelPartner: application.channelPartner,
+                           googleDriveLink: application.googleDriveLink,
+                           caseStatus: application.caseStatus || 'Raw',
+                         }); }}>
                             <X className="w-4 h-4 mr-1" /> Cancel
                           </Button>
                         </div>
                       )}
                     </div>
                   </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Student</span></Label>
+                      {student ? (
+                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students/${student.id}`)}>
+                          {student.name}
+                        </Button>
+                      ) : (
+                        <Input value={application.studentId} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
+                      {isEditing ? (
+                        <Select value={editData.caseStatus || 'Raw'} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select case status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Raw">Raw</SelectItem>
+                            <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                            <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                            <SelectItem value="Supervisor">Supervisor</SelectItem>
+                            <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                            <SelectItem value="Submitted">Submitted</SelectItem>
+                            <SelectItem value="Rejected">Rejected</SelectItem>
+                            <SelectItem value="COL Received">COL Received</SelectItem>
+                            <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                            <SelectItem value="UOL Received">UOL Received</SelectItem>
+                            <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                            <SelectItem value="Deposit">Deposit</SelectItem>
+                            <SelectItem value="Deferred">Deferred</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={application.caseStatus || 'Raw'} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
+                      <Input value={application.applicationCode || 'Not provided'} disabled className="h-8 text-xs transition-all" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -236,46 +310,43 @@ export default function ApplicationDetails() {
                       <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
                       <Input value={isEditing ? (editData.intake || '') : (application.intake || '')} onChange={(e) => setEditData({ ...editData, intake: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center"><ExternalLink className="w-5 h-5 mr-2" />Operations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Channel Partner</span></Label>
                       <Input value={isEditing ? (editData.channelPartner || '') : (application.channelPartner || '')} onChange={(e) => setEditData({ ...editData, channelPartner: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-                    <div className="md:col-span-2 space-y-2">
+                    <div className="space-y-2 md:col-span-1">
                       <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>
-                      <Input value={isEditing ? (editData.googleDriveLink || '') : (application.googleDriveLink || '')} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-                      {!isEditing && (
-                        <p className="text-[11px] text-gray-600">
-                          {application.googleDriveLink ? (
-                            <a className="text-blue-600 underline inline-flex items-center gap-1" href={application.googleDriveLink} target="_blank" rel="noreferrer">
-                              Open Link <ExternalLink className="w-3 h-3" />
-                            </a>
-                          ) : 'Not provided'}
-                        </p>
+                      {isEditing ? (
+                        <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={async (e) => { e.preventDefault(); if (!application.googleDriveLink) { toast({ title: 'No link', description: 'Google Drive link is not provided', variant: 'destructive' }); return; } const ok = await copyToClipboard(application.googleDriveLink); toast({ title: ok ? 'Copied' : 'Copy failed', description: ok ? 'Google Drive link copied to clipboard' : 'Could not copy link', variant: ok ? undefined : 'destructive' }); }} disabled={!application.googleDriveLink}>
+                            <Copy className="w-4 h-4 mr-1" /> Copy
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); if (application.googleDriveLink) window.open(application.googleDriveLink, '_blank', 'noopener'); }} disabled={!application.googleDriveLink}>
+                            <ExternalLink className="w-4 h-4 mr-1" /> Open
+                          </Button>
+                          {!application.googleDriveLink && (
+                            <span className="text-[11px] text-gray-500">Not provided</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Student Information */}
-              <CollapsibleCard
-                persistKey={`application-details:student:${application.id}`}
-                header={<CardTitle className="text-sm flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Student</span></CardTitle>}
-              >
-                <div className="flex items-center justify-between">
-                  {student ? (
-                    <div>
-                      <p className="font-medium">{student.name}</p>
-                      <p className="text-xs text-gray-600">{student.email}</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">Loading student...</p>
-                  )}
-                  {student && (
-                    <Button size="sm" variant="outline" onClick={() => setLocation(`/students/${student.id}`)}>View Profile</Button>
-                  )}
-                </div>
-              </CollapsibleCard>
+
             </div>
 
             {/* Activity Sidebar */}

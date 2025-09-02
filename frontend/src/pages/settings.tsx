@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -860,11 +861,10 @@ export default function Settings() {
                   </div>
                   <div>
                     <Label htmlFor="user-dob">Date of Birth</Label>
-                    <Input
+                    <DobPicker
                       id="user-dob"
-                      type="date"
                       value={newUserDateOfBirth}
-                      onChange={(e) => setNewUserDateOfBirth(e.target.value)}
+                      onChange={(v) => setNewUserDateOfBirth(v)}
                     />
                   </div>
                   <div>
@@ -1032,10 +1032,9 @@ export default function Settings() {
                             </div>
                             <div>
                               <Label>Date of Birth</Label>
-                              <Input
-                                type="date"
+                              <DobPicker
                                 value={editUserData.dateOfBirth}
-                                onChange={(e) => setEditUserData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                                onChange={(v) => setEditUserData(prev => ({ ...prev, dateOfBirth: v }))}
                               />
                             </div>
                             <div>

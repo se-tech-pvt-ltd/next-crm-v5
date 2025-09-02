@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Student, Application, Admission } from '@/lib/types';
 import { apiRequest } from '@/lib/queryClient';
@@ -261,11 +262,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       </div>
                       <div>
                         <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                        <Input
+                        <DobPicker
                           id="dateOfBirth"
-                          type="date"
-                          value={editData.dateOfBirth ? editData.dateOfBirth.toString().split('T')[0] : ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, dateOfBirth: new Date(e.target.value) }))}
+                          value={editData.dateOfBirth ? String(editData.dateOfBirth).split('T')[0] : ''}
+                          onChange={(v) => setEditData(prev => ({ ...prev, dateOfBirth: v }))}
                           disabled={!isEditing}
                         />
                       </div>

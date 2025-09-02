@@ -30,6 +30,15 @@ export default function Students() {
     queryKey: ['/api/students'],
   });
 
+  // Fetch dropdowns for Students module (for status labels)
+  const { data: studentDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dropdowns/module/students');
+      return response.json();
+    },
+  });
+
   const updateStudentMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => {
       const response = await apiRequest('PUT', `/api/students/${id}`, data);
@@ -51,8 +60,16 @@ export default function Students() {
     },
   });
 
+  const getStatusLabel = (raw?: string) => {
+    const list: any[] = (studentDropdowns as any)?.Status || [];
+    const s = raw || '';
+    const match = list.find((o: any) => o.id === s || o.key === s || o.value?.toLowerCase() === s.toLowerCase());
+    return (match?.value || s || '').toString();
+  };
+
   const filteredStudents = students?.filter(student => {
-    const statusMatch = statusFilter === 'all' || student.status === statusFilter;
+    const label = getStatusLabel(student.status).toLowerCase();
+    const statusMatch = statusFilter === 'all' || label === statusFilter;
     const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
     return statusMatch && countryMatch;
   }) || [];
@@ -177,11 +194,11 @@ export default function Students() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="applied">Applied</SelectItem>
-                    <SelectItem value="admitted">Admitted</SelectItem>
-                    <SelectItem value="enrolled">Enrolled</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    {(studentDropdowns as any)?.Status?.map((status: any) => (
+                      <SelectItem key={status.key || status.id || status.value} value={(status.value || '').toLowerCase()}>
+                        {status.value}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={countryFilter} onValueChange={setCountryFilter}>
@@ -247,7 +264,6 @@ export default function Students() {
                     <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Target Program</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Academic Background</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -290,14 +306,14 @@ export default function Students() {
                         </div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Badge className={getStatusColor(student.status || 'active')}>
-                          {student.status || 'active'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <span className="text-xs text-gray-500">
-                          {student.academicBackground || 'Not specified'}
-                        </span>
+                        {(() => {
+                          const label = getStatusLabel(student.status);
+                          return (
+                            <Badge className={getStatusColor(label.toLowerCase())}>
+                              {label || 'Active'}
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="p-2">
                         <DropdownMenu>

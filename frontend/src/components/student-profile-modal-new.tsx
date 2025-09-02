@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -222,11 +223,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       </div>
                       <div>
                         <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                        <Input
+                        <DobPicker
                           id="dateOfBirth"
-                          type="date"
                           value={editData.dateOfBirth || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                          onChange={(v) => setEditData(prev => ({ ...prev, dateOfBirth: v }))}
                           disabled={!isEditing}
                         />
                       </div>
