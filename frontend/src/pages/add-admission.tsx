@@ -183,14 +183,6 @@ export default function AddAdmissionPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                  {/* Admission ID (read-only) */}
-                  <FormItem>
-                    <FormLabel>Admission ID</FormLabel>
-                    <FormControl>
-                      <Input value="Will be generated" disabled />
-                    </FormControl>
-                  </FormItem>
-
                   {/* Status -> decision */}
                   <FormField
                     control={form.control}
