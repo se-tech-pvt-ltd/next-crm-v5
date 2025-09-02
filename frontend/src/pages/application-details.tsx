@@ -149,6 +149,31 @@ export default function ApplicationDetails() {
     );
   };
 
+  const copyToClipboard = async (text: string) => {
+    if (!text) return false;
+    try {
+      if (navigator.clipboard && (window as any).isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
   if (!match) return <div>Not found</div>;
 
   if (error) {
@@ -245,7 +270,7 @@ export default function ApplicationDetails() {
                         <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       ) : (
                         <div className="flex items-center gap-2">
-                          <Button size="sm" variant="outline" onClick={async (e) => { e.preventDefault(); if (!application.googleDriveLink) { toast({ title: 'No link', description: 'Google Drive link is not provided', variant: 'destructive' }); return; } try { await navigator.clipboard.writeText(application.googleDriveLink); toast({ title: 'Copied', description: 'Google Drive link copied to clipboard' }); } catch { toast({ title: 'Copy failed', description: 'Could not copy link', variant: 'destructive' }); } }} disabled={!application.googleDriveLink}>
+                          <Button size="sm" variant="outline" onClick={async (e) => { e.preventDefault(); if (!application.googleDriveLink) { toast({ title: 'No link', description: 'Google Drive link is not provided', variant: 'destructive' }); return; } const ok = await copyToClipboard(application.googleDriveLink); toast({ title: ok ? 'Copied' : 'Copy failed', description: ok ? 'Google Drive link copied to clipboard' : 'Could not copy link', variant: ok ? undefined : 'destructive' }); }} disabled={!application.googleDriveLink}>
                             <Copy className="w-4 h-4 mr-1" /> Copy
                           </Button>
                           <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); if (application.googleDriveLink) window.open(application.googleDriveLink, '_blank', 'noopener'); }} disabled={!application.googleDriveLink}>
