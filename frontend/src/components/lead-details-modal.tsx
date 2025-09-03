@@ -176,7 +176,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
     return statusId;
   };
 
-  const statusSequence = React.useMemo<string[]>(() => {
+  const statusSequence = useMemo<string[]>(() => {
     const list: any[] = (dropdownData as any)?.Status || [];
     if (!Array.isArray(list) || list.length === 0) return [];
     return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
