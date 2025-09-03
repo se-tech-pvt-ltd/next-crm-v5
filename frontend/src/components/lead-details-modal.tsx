@@ -193,11 +193,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <div className="flex items-center gap-2">
                     {isEditing ? (
                       <>
-                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save">
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateLeadMutation.isPending}>
                           <Save />
-                          <span className="hidden lg:inline">Save</span>
+                          <span className="hidden lg:inline">{updateLeadMutation.isPending ? 'Saving…' : 'Save'}</span>
                         </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); }} title="Cancel">
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); }} title="Cancel" disabled={updateLeadMutation.isPending}>
                           <X />
                           <span className="hidden lg:inline">Cancel</span>
                         </Button>
@@ -267,19 +267,19 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Full Name</span></Label>
-                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email" className="flex items-center space-x-2"><Mail className="w-4 h-4" /><span>Email Address</span></Label>
-                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
-                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
-                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                     </div>
                   </CardContent>
@@ -289,7 +289,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
-                      <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing}>
+                      <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                         <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.Type || []).map((option: any) => (
@@ -301,7 +301,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Lead Source</span></Label>
-                      <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing}>
+                      <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                         <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.Source || []).map((option: any) => (
@@ -313,7 +313,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><GraduationCap className="w-4 h-4" /><span>Study Level</span></Label>
-                      <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing}>
+                      <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                         <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study level" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.['Study Level'] || []).map((option: any) => (
@@ -325,7 +325,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Study Plan</span></Label>
-                      <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing}>
+                      <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                         <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study plan" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.['Study Plan'] || []).map((option: any) => (
@@ -343,13 +343,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                         onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
                         placeholder="Select countries"
                         searchPlaceholder="Search countries..."
-                        className={!isEditing ? 'pointer-events-none opacity-50' : ''}
+                        className={!isEditing || updateLeadMutation.isPending ? 'pointer-events-none opacity-50' : ''}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
-                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing}>
+                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                         <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
                         <SelectContent>
                           {users.map((u: any) => (
