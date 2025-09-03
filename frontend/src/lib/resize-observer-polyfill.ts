@@ -7,6 +7,9 @@
 
 import * as React from 'react';
 
+// Use native ResizeObserver reference before patching
+const NativeResizeObserver: typeof ResizeObserver | undefined = (typeof window !== 'undefined' ? (window as any).ResizeObserver : undefined);
+
 // Store the original console methods
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
