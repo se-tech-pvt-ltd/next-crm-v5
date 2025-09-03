@@ -20,7 +20,7 @@ import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen } from 'lucide-react';
+import { User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2, Users, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen } from 'lucide-react';
 
 interface LeadDetailsModalProps {
   open: boolean;
