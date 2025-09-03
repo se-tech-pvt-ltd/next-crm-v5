@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, Bell, UserPlus, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { HelpTooltipSimple as HelpTooltip } from './help-tooltip-simple';
