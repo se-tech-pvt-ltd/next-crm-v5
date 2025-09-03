@@ -31,10 +31,7 @@ export default function Applications() {
   });
 
   const updateApplicationMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Application> }) => {
-      const response = await apiRequest('PUT', `/api/applications/${id}`, data);
-      return response.json();
-    },
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Application> }) => ApplicationsService.updateApplication(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       toast({
