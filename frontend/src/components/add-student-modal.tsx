@@ -51,10 +51,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
   });
 
   const createStudentMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/students', data);
-      return response.json();
-    },
+    mutationFn: async (data: any) => StudentsService.createStudent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({
