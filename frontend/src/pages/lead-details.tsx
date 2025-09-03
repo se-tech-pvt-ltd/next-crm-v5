@@ -77,9 +77,9 @@ export default function LeadDetails() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: convertedStudent } = useQuery<Student | undefined>({
+  const { data: convertedStudent } = useQuery<Student | null>({
     queryKey: ['/api/students/by-lead', params?.id],
-    queryFn: async () => LeadsService.getStudentByLeadId(params?.id).catch(() => undefined),
+    queryFn: async () => LeadsService.getStudentByLeadId(params?.id),
     enabled: !!params?.id,
     staleTime: 0,
     refetchOnMount: true,

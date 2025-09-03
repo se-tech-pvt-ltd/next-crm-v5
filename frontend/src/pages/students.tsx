@@ -9,18 +9,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddApplicationModal } from '@/components/add-application-modal';
-import { StudentProfileModal } from '@/components/student-profile-modal';
+import { StudentDetailsModal } from '@/components/student-details-modal';
 import { Student } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useLocation } from 'wouter';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
-  const [, setLocation] = useLocation();
   const [countryFilter, setCountryFilter] = useState('all');
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -103,7 +101,8 @@ export default function Students() {
   };
 
   const handleViewProfile = (studentId: string) => {
-    setLocation(`/students/${studentId}`);
+    setSelectedStudentId(studentId);
+    setIsProfileModalOpen(true);
   };
 
   const handleCreateApplication = (studentId: string) => {
@@ -337,10 +336,19 @@ export default function Students() {
         </Card>
       </div>
 
-      <AddApplicationModal 
+      <AddApplicationModal
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
         studentId={selectedStudentId || undefined}
+      />
+
+      <StudentProfileModal
+        open={isProfileModalOpen}
+        onOpenChange={(open) => {
+          setIsProfileModalOpen(open);
+          if (!open) setSelectedStudentId(null);
+        }}
+        studentId={selectedStudentId}
       />
     </Layout>
   );

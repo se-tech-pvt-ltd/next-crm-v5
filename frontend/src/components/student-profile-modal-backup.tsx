@@ -114,6 +114,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
+          <DialogTitle className="sr-only">Loading Student</DialogTitle>
           <div className="text-center py-8">
             <p>Loading student profile...</p>
           </div>
@@ -126,6 +127,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
+          <DialogTitle className="sr-only">Student Not Found</DialogTitle>
           <div className="text-center py-8">
             <p>Student not found</p>
           </div>

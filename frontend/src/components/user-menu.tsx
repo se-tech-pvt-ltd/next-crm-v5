@@ -18,6 +18,10 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
 
   if (!user) return null;
 
+  const displayName = typeof user.email === 'string'
+    ? (user.email.includes('@') ? user.email.split('@')[0] : user.email)
+    : 'User';
+
   const getRoleDisplay = (role: string) => {
     switch (role) {
       case 'admin_staff':
@@ -61,7 +65,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                   </div>
                   {/* Tooltip for collapsed state */}
                   <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    {user.email.split('@')[0]} - {getRoleDisplay(user.role)}
+                    {displayName} - {getRoleDisplay(user.role)}
                   </div>
                 </div>
               ) : (
@@ -71,7 +75,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      {user.email.split('@')[0]}
+                      {displayName}
                     </p>
                     <p className="text-xs text-gray-500">
                       {getRoleDisplay(user.role)}
@@ -107,7 +111,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <User className="w-8 h-8 text-white" />
               </div>
-              <h3 className="font-semibold text-lg">{user.email.split('@')[0]}</h3>
+              <h3 className="font-semibold text-lg">{displayName}</h3>
               <Badge className={getRoleColor(user.role)}>
                 {getRoleDisplay(user.role)}
               </Badge>

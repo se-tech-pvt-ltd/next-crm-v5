@@ -584,11 +584,11 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
               </Button>
             </motion.div>
 
-            <Button type="submit" disabled={createLeadMutation.isPending || emailDuplicateStatus.isDuplicate || phoneDuplicateStatus.isDuplicate || checkingEmail || checkingPhone} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto">
+            <Button type="submit" disabled={createLeadMutation.isPending || emailDuplicateStatus.isDuplicate || phoneDuplicateStatus.isDuplicate || checkingEmail || checkingPhone} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
               {createLeadMutation.isPending ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  <span>Creating...</span>
+                  <span>Saving...</span>
                 </>
               ) : (checkingEmail || checkingPhone) ? (
                 <>
@@ -603,7 +603,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  <span>Create Lead</span>
+                  <span>Save</span>
                 </>
               )}
             </Button>

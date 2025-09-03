@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,7 +103,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   const [formData, setFormData] = useState(initialFormData);
 
   // Helper to normalize lead fields (arrays/JSON strings) into text
-  const normalizeToText = React.useCallback((value: unknown): string => {
+  const normalizeToText = useCallback((value: unknown): string => {
     if (!value) return '';
     if (Array.isArray(value)) return value.filter(Boolean).join(', ');
     if (typeof value === 'string') {
@@ -120,7 +120,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   }, []);
 
   // Map dropdown keys/ids to labels using dropdownData
-  const mapDropdownToLabels = React.useCallback((raw: unknown, fieldName: string): string => {
+  const mapDropdownToLabels = useCallback((raw: unknown, fieldName: string): string => {
     try {
       const options: any[] = dropdownData?.[fieldName] || [];
       const byKey = new Map(options.map(o => [o.key, o.value]));

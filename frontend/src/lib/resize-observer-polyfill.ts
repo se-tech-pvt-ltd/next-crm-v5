@@ -7,6 +7,9 @@
 
 import * as React from 'react';
 
+// Use native ResizeObserver reference before patching
+const NativeResizeObserver: typeof ResizeObserver | undefined = (typeof window !== 'undefined' ? (window as any).ResizeObserver : undefined);
+
 // Store the original console methods
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
@@ -120,7 +123,8 @@ export class StabilizedResizeObserver {
     this.callback = callback;
     this.delay = delay;
     
-    this.observer = new ResizeObserver((entries, observer) => {
+    const RO = NativeResizeObserver || ResizeObserver;
+    this.observer = new RO((entries, observer) => {
       // Collect entries to batch process them
       this.pendingEntries.push(...entries);
       
@@ -218,6 +222,15 @@ export function useStabilizedResizeObserver(
  */
 export const DebouncedResizeObserver = StabilizedResizeObserver;
 export const useDebouncedResizeObserver = useStabilizedResizeObserver;
+
+// Globally patch ResizeObserver to stabilized version to prevent loop-limit errors
+try {
+  if (typeof window !== 'undefined' && (window as any).ResizeObserver && !(window as any).__roPatched) {
+    (window as any).__roPatched = true;
+    // Assigning our stabilized wrapper; it internally uses native observer reference
+    (window as any).ResizeObserver = StabilizedResizeObserver as any;
+  }
+} catch {}
 
 /**
  * Cleanup function for tests or unmounting

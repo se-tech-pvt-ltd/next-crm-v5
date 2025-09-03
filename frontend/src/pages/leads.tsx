@@ -21,6 +21,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { LeadDetailsModal } from '@/components/lead-details-modal';
 import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
@@ -75,6 +76,8 @@ export default function Leads() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
@@ -487,7 +490,8 @@ export default function Leads() {
                       key={lead.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => {
-                        setLocation(`/leads/${lead.id}`);
+                        setSelectedLead(lead);
+                        setLeadModalOpen(true);
                       }}
                     >
                       <TableCell className="font-medium p-2 text-xs">{lead.name}</TableCell>
@@ -563,6 +567,18 @@ export default function Leads() {
           />
         </DialogContent>
       </Dialog>
+      <LeadDetailsModal
+        open={leadModalOpen}
+        onOpenChange={(open) => {
+          setLeadModalOpen(open);
+          if (!open) setSelectedLead(null);
+        }}
+        lead={selectedLead}
+        onLeadUpdate={(updated) => {
+          setSelectedLead(updated);
+          queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+        }}
+      />
     </Layout>
   );
 }

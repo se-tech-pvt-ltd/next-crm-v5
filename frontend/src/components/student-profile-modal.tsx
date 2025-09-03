@@ -91,6 +91,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
+          <DialogTitle className="sr-only">Loading Student</DialogTitle>
           <div className="text-center py-8">
             <p>Loading student...</p>
           </div>
@@ -103,6 +104,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
+          <DialogTitle className="sr-only">Student Not Found</DialogTitle>
           <div className="text-center py-8">
             <p>Student not found</p>
           </div>
@@ -114,26 +116,26 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          {/* Header with Fixed Position */}
-          <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-green-600" />
+          {/* Sticky header like LeadDetailsModal */}
+          <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+            <div className="px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                  <User className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold">{student.name}</h1>
-                  <p className="text-sm text-gray-600">{student.email}</p>
+                <div className="min-w-0">
+                  <h1 className="text-lg font-semibold truncate">{student.name}</h1>
+                  <p className="text-xs text-gray-600 truncate">{student.email}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div>
-                  <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
+              <div className="flex items-center gap-2">
+                <div className="hidden md:block">
+                  <Label htmlFor="header-status" className="text-[11px] text-gray-500">Status</Label>
                   <Select value={currentStatus} onValueChange={handleStatusChange}>
-                    <SelectTrigger className="w-32 h-8">
+                    <SelectTrigger className="h-8 text-xs w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -145,37 +147,64 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     </SelectContent>
                   </Select>
                 </div>
-                <Button 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="rounded-full px-2 [&_svg]:size-3"
                   onClick={() => setIsAddApplicationOpen(true)}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  title="Add Application"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add Application
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => setIsAddAdmissionOpen(true)}
-                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Admission
+                  <Plus />
+                  <span className="hidden lg:inline">Add App</span>
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="default"
-                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
-                  onClick={() => onOpenChange(false)}
+                  variant="outline"
+                  size="xs"
+                  className="rounded-full px-2 [&_svg]:size-3"
+                  onClick={() => setIsAddAdmissionOpen(true)}
+                  title="Add Admission"
                 >
-                  <X className="w-5 h-5" />
+                  <Plus />
+                  <span className="hidden lg:inline">Add Adm</span>
                 </Button>
+                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            {/* Status bar (simple) */}
+            <div className="px-4 pb-3">
+              <div className="w-full bg-gray-100 rounded-md p-1.5">
+                <div className="flex items-center justify-between relative">
+                  {['active','applied','admitted','enrolled','inactive'].map((s, index, arr) => {
+                    const currentIndex = arr.indexOf(currentStatus || '');
+                    const isCompleted = currentIndex >= 0 && index <= currentIndex;
+                    const label = s.charAt(0).toUpperCase() + s.slice(1);
+                    const handleClick = () => {
+                      if (s === currentStatus) return;
+                      handleStatusChange(s);
+                    };
+                    return (
+                      <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
+                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
+                          {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                        </div>
+                        <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{label}</span>
+                        {index < arr.length - 1 && (
+                          <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex h-[90vh]">
+          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-28">
+            <div className="flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
               <div className="space-y-6">
                 {/* Student Information */}
                 <Card>
@@ -415,17 +444,15 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
             </div>
 
-            {/* Right Sidebar - Activity Timeline */}
-            <div className="w-96 bg-gradient-to-br from-green-50 to-green-100 border-l overflow-hidden">
-              <div className="px-4 py-5 border-b bg-gradient-to-r from-green-600 to-green-700 text-white">
-                <h2 className="text-lg font-semibold">Activity Timeline</h2>
+            </div>
+
+            {/* Right Sidebar - Activity Timeline (match LeadDetailsModal) */}
+            <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
+              <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+                <h2 className="text-sm font-semibold">Activity Timeline</h2>
               </div>
-              <div className="overflow-y-auto h-full pt-2">
-                <ActivityTracker
-                  entityType="student"
-                  entityId={student.id}
-                  entityName={student.name}
-                />
+              <div className="flex-1 overflow-y-auto pt-2 min-h-0">
+                <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
               </div>
             </div>
           </div>
