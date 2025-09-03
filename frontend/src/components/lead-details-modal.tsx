@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import * as DropdownsService from '@/services/dropdowns';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
+import { StabilizedResizeObserver } from '@/lib/resize-observer-polyfill';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import { HelpTooltip } from './help-tooltip';
 import { ConvertToStudentModal } from './convert-to-student-modal';
@@ -37,6 +38,21 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
+
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const update = () => setHeaderHeight(headerRef.current?.offsetHeight || 0);
+    update();
+    const ro = new StabilizedResizeObserver(() => update(), 100);
+    if (headerRef.current) ro.observe(headerRef.current);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
 
   useEffect(() => {
     if (lead) {
@@ -270,11 +286,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] h-[95vh] overflow-hidden p-0">
+        <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
           {/* Header matching page style */}
-          <div className="bg-white border-b p-4 z-10">
+          <div ref={headerRef} className="absolute top-0 left-0 right-0 bg-white border-b p-4 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -377,9 +393,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
             )}
           </div>
 
-          <div className="flex h-[90vh]">
+          <div className="flex h-[90vh] min-h-0">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 min-h-0" style={{ paddingTop: Math.max(0, (headerHeight || 0) + 16) }}>
               <div className="space-y-4">
                 {/* Personal Information (matching page) */}
                 <Card className="w-full">
