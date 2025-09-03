@@ -24,7 +24,51 @@
     "db:push": "cd backend && npm run db:push",
     "install:all": "npm install && npm run install:frontend && npm run install:backend",
     "install:frontend": "cd frontend && npm install",
-    "install:backend": "cd backend && npm install"
+    "install:backend": "cd backend && npm install",
+    "lint": "eslint \"{frontend/src,backend/src}/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"{frontend/src,backend/src}/**/*.{ts,tsx}\" --fix"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": { "es2022": true },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": { "ecmaVersion": "latest", "sourceType": "module", "ecmaFeatures": { "jsx": true } },
+    "plugins": ["@typescript-eslint", "react", "react-hooks"],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:react/recommended",
+      "plugin:react-hooks/recommended"
+    ],
+    "settings": { "react": { "version": "detect" } },
+    "rules": {
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-uses-react": "off",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        { "selector": "variableLike", "format": ["camelCase", "PascalCase", "UPPER_CASE"] },
+        { "selector": "typeLike", "format": ["PascalCase"] }
+      ]
+    },
+    "overrides": [
+      {
+        "files": ["**/*.tsx"],
+        "rules": {
+          "no-restricted-syntax": [
+            "error",
+            {
+              "selector": "ClassDeclaration[superClass.name='Component'], ClassDeclaration[superClass.name='PureComponent'], ClassDeclaration[superClass.type='MemberExpression'][superClass.object.name='React'][superClass.property.name='Component'], ClassDeclaration[superClass.type='MemberExpression'][superClass.object.name='React'][superClass.property.name='PureComponent']",
+              "message": "Class components are not allowed. Use functional components with hooks."
+            }
+          ],
+          "react/function-component-definition": [
+            "error",
+            { "namedComponents": "arrow-function", "unnamedComponents": "arrow-function" }
+          ],
+          "react/jsx-pascal-case": "error"
+        }
+      }
+    ]
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.42.0",
