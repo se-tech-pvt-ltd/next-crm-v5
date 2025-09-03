@@ -103,7 +103,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   const [formData, setFormData] = useState(initialFormData);
 
   // Helper to normalize lead fields (arrays/JSON strings) into text
-  const normalizeToText = (value: unknown): string => {
+  const normalizeToText = React.useCallback((value: unknown): string => {
     if (!value) return '';
     if (Array.isArray(value)) return value.filter(Boolean).join(', ');
     if (typeof value === 'string') {
@@ -117,7 +117,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       return trimmed;
     }
     return String(value);
-  };
+  }, []);
 
   // Map dropdown keys/ids to labels using dropdownData
   const mapDropdownToLabels = React.useCallback((raw: unknown, fieldName: string): string => {
