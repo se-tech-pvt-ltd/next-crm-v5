@@ -201,9 +201,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
             </div>
           </div>
 
-          <div className="flex h-[90vh] min-h-0">
+          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+            <div className="flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
               <div className="space-y-6">
                 {/* Student Information */}
                 <Card>
@@ -443,8 +444,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
             </div>
 
+            </div>
+
             {/* Right Sidebar - Activity Timeline (match LeadDetailsModal) */}
-            <div className="border-l bg-white flex flex-col min-h-0 w-[24rem]">
+            <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
               <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
                 <h2 className="text-sm font-semibold">Activity Timeline</h2>
               </div>
