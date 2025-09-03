@@ -17,7 +17,9 @@ import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/sear
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { Layout } from '@/components/layout';
 import { insertLeadSchema } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as DropdownsService from '@/services/dropdowns';
+import * as LeadsService from '@/services/leads';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import {
@@ -82,27 +84,18 @@ export default function AddLead() {
   // Get dropdown data for Leads module
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    }
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
   // Get existing leads and students to prevent duplicates
   const { data: existingLeads } = useQuery({
     queryKey: ['/api/leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/leads');
-      return response.json();
-    }
+    queryFn: async () => LeadsService.getLeads()
   });
 
   const { data: existingStudents } = useQuery({
     queryKey: ['/api/students'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/students');
-      return response.json();
-    }
+    queryFn: async () => StudentsService.getStudents()
   });
 
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
@@ -264,10 +257,7 @@ export default function AddLead() {
   });
 
   const createLeadMutation = useMutation({
-    mutationFn: async (data: AddLeadFormData) => {
-      const response = await apiRequest('POST', '/api/leads', data);
-      return response.json();
-    },
+    mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
