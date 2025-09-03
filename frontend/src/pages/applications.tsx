@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { useLocation } from 'wouter';
 import { Application, Student } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
