@@ -7,7 +7,7 @@ import { ActivityTracker } from "./activity-tracker";
 import { School, User, X, ExternalLink } from "lucide-react";
 import { Application, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import * as ApplicationsService from "@/services/applications";
 import { useState } from "react";
 
 interface ApplicationDetailsModalProps {
@@ -29,7 +29,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!application) return;
-      return apiRequest('PUT', `/api/applications/${application.id}`, { appStatus: newStatus });
+      return ApplicationsService.updateApplication(application.id, { appStatus: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
