@@ -79,7 +79,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
           value: counselor.id,
           label: counselor.firstName && counselor.lastName
             ? `${counselor.firstName} ${counselor.lastName}`
-            : counselor.email.split('@')[0],
+            : (typeof counselor.email === 'string' ? (counselor.email.includes('@') ? counselor.email.split('@')[0] : counselor.email) : 'Unknown'),
           email: counselor.email,
           role: counselor.role === 'admin_staff' ? 'Admin' : 'Counselor'
         }))
@@ -342,7 +342,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                             { label: 'Australia 🇦🇺', value: 'australia' },
                             { label: 'Germany 🇩🇪', value: 'germany' },
                             { label: 'France 🇫🇷', value: 'france' },
-                            { label: 'Netherlands 🇳🇱', value: 'netherlands' },
+                            { label: 'Netherlands ��🇱', value: 'netherlands' },
                             { label: 'New Zealand 🇳🇿', value: 'new-zealand' },
                             { label: 'Switzerland 🇨🇭', value: 'switzerland' },
                             { label: 'Singapore 🇸🇬', value: 'singapore' },
