@@ -21,56 +21,34 @@ import {
 } from 'lucide-react';
 import { DashboardMetrics, PipelineData, Activity } from '@/lib/types';
 import React from 'react';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
-// Error boundary for the Dashboard component
-class DashboardErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Dashboard Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <Layout title="Dashboard" helpText="Dashboard error occurred">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3 text-destructive">
-                <AlertTriangle className="w-5 h-5" />
-                <div>
-                  <h3 className="font-semibold">Error Loading Dashboard</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {this.state.error?.message || 'An unexpected error occurred'}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3"
-                    onClick={() => window.location.reload()}
-                  >
-                    Reload Page
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Layout>
-      );
-    }
-
-    return this.props.children;
-  }
+function DashboardFallback({ error }: FallbackProps) {
+  return (
+    <Layout title="Dashboard" helpText="Dashboard error occurred">
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3 text-destructive">
+            <AlertTriangle className="w-5 h-5" />
+            <div>
+              <h3 className="font-semibold">Error Loading Dashboard</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {error?.message || 'An unexpected error occurred'}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => window.location.reload()}
+              >
+                Reload Page
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Layout>
+  );
 }
 
 function DashboardContent() {
@@ -529,8 +507,8 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <DashboardErrorBoundary>
+    <ErrorBoundary FallbackComponent={DashboardFallback}>
       <DashboardContent />
-    </DashboardErrorBoundary>
+    </ErrorBoundary>
   );
 }

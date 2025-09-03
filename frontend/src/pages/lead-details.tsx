@@ -18,7 +18,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { type Lead, type User, type Student } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import * as LeadsService from '@/services/leads';
+import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -56,36 +59,27 @@ export default function LeadDetails() {
   // Fast loading with optimistic caching
   const { data: lead, isLoading, error } = useQuery({
     queryKey: ['/api/leads', params?.id],
-    queryFn: async () => {
-      const response = await apiRequest('GET', `/api/leads/${params?.id}`);
-      return response.json();
-    },
+    queryFn: async () => LeadsService.getLead(params?.id),
     enabled: !!params?.id,
-    staleTime: 0, // Always fetch fresh data
+    staleTime: 0,
     refetchOnMount: true,
   });
 
   // Get dropdown data for Leads module
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    }
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    queryFn: async () => UsersService.getUsers(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: convertedStudent } = useQuery<Student | undefined>({
     queryKey: ['/api/students/by-lead', params?.id],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/students/by-lead/${params?.id}`);
-      if (res.status === 404) return undefined as any;
-      return res.json();
-    },
+    queryFn: async () => LeadsService.getStudentByLeadId(params?.id).catch(() => undefined),
     enabled: !!params?.id,
     staleTime: 0,
     refetchOnMount: true,
@@ -146,14 +140,7 @@ export default function LeadDetails() {
   };
 
   const updateLeadMutation = useMutation({
-    mutationFn: async (data: Partial<Lead>) => {
-      const response = await apiRequest('PUT', `/api/leads/${params?.id}`, data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update lead');
-      }
-      return response.json();
-    },
+    mutationFn: async (data: Partial<Lead>) => LeadsService.updateLead(params?.id, data),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
@@ -173,17 +160,7 @@ export default function LeadDetails() {
   });
 
   const markAsLostMutation = useMutation({
-    mutationFn: async ({ reason }: { reason: string }) => {
-      const response = await apiRequest('PUT', `/api/leads/${params?.id}`, {
-        status: 'lost',
-        lostReason: reason
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to mark lead as lost');
-      }
-      return response.json();
-    },
+    mutationFn: async ({ reason }: { reason: string }) => LeadsService.markLeadAsLost(params?.id, reason),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.setQueryData(['/api/leads', params?.id], updatedLead);
@@ -274,14 +251,7 @@ export default function LeadDetails() {
   };
 
   const updateStatusMutation = useMutation({
-    mutationFn: async (newStatusKey: string) => {
-      const response = await apiRequest('PUT', `/api/leads/${params?.id}`, { status: newStatusKey });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update status');
-      }
-      return response.json();
-    },
+    mutationFn: async (newStatusKey: string) => LeadsService.updateLead(params?.id, { status: newStatusKey }),
     onMutate: async (newStatusKey: string) => {
       await queryClient.cancelQueries({ queryKey: ['/api/leads', params?.id] });
       const previousLead = queryClient.getQueryData(['/api/leads', params?.id]);

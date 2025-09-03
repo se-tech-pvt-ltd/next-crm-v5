@@ -7,7 +7,7 @@ import { ActivityTracker } from "./activity-tracker";
 import { Award, User, X, ExternalLink, Plane } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import * as AdmissionsService from "@/services/admissions";
 import { useState } from "react";
 
 interface AdmissionDetailsModalProps {
@@ -29,7 +29,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   const updateVisaStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!admission) return;
-      return apiRequest('PUT', `/api/admissions/${admission.id}`, { visaStatus: newStatus });
+      return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });

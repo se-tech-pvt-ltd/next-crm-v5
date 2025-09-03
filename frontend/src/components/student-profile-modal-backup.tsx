@@ -65,13 +65,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   });
 
   const updateStudentMutation = useMutation({
-    mutationFn: async (data: Partial<Student>) => {
-      const response = await apiRequest(`/api/students/${studentId}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
-      return response;
-    },
+    mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(String(studentId), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });

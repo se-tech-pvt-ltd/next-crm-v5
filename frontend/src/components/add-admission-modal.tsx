@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as AdmissionsService from '@/services/admissions';
 import { useToast } from '@/hooks/use-toast';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -56,9 +56,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   });
 
   const createAdmissionMutation = useMutation({
-    mutationFn: async (admission: InsertAdmission) => {
-      return apiRequest('/api/admissions', 'POST', admission);
-    },
+    mutationFn: async (admission: InsertAdmission) => AdmissionsService.createAdmission(admission),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       toast({

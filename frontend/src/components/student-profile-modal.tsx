@@ -13,7 +13,8 @@ import { AddApplicationModal } from './add-application-modal';
 import { AddAdmissionModal } from './add-admission-modal';
 import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { User, Edit, Save, X, Plus, FileText, Award, Calendar, Phone, Mail } from 'lucide-react';
 
@@ -59,14 +60,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   }, [student]);
 
   const updateStudentMutation = useMutation({
-    mutationFn: async (data: Partial<Student>) => {
-      const response = await apiRequest('PUT', `/api/students/${student?.id}`, data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update student');
-      }
-      return response.json();
-    },
+    mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
     onSuccess: () => {
       toast({
         title: "Success",

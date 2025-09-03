@@ -1,131 +1,69 @@
-/**
- * Enhanced error boundary for ResizeObserver and layout errors
+/*
+ * Enhanced error boundary for ResizeObserver and layout errors - functional variant
  */
-
 import * as React from 'react';
-
-interface ResizeObserverErrorBoundaryState {
-  hasError: boolean;
-  errorCount: number;
-  lastErrorTime: number;
-}
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 interface ResizeObserverErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onError?: (error: Error, errorInfo: { componentStack: string }) => void;
 }
 
-const ERROR_RESET_INTERVAL = 5000; // 5 seconds
-const MAX_ERRORS_PER_INTERVAL = 3;
+const ERROR_RESET_DELAY = 100;
 
-export class ResizeObserverErrorBoundary extends React.Component<
-  ResizeObserverErrorBoundaryProps,
-  ResizeObserverErrorBoundaryState
-> {
-  private resetTimer: NodeJS.Timeout | null = null;
+function isLayoutError(error: unknown): boolean {
+  const message = (error as Error)?.message || '';
+  return [
+    'ResizeObserver',
+    'layout',
+    'reflow',
+    'viewport',
+    'dimension',
+  ].some((term) => message.toLowerCase().includes(term.toLowerCase()));
+}
 
-  constructor(props: ResizeObserverErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, errorCount: 0, lastErrorTime: 0 };
+function DefaultLayoutFallback({ error, resetErrorBoundary }: FallbackProps) {
+  React.useEffect(() => {
+    if (isLayoutError(error)) {
+      const t = setTimeout(() => resetErrorBoundary(), ERROR_RESET_DELAY);
+      return () => clearTimeout(t);
+    }
+  }, [error, resetErrorBoundary]);
+
+  if (!isLayoutError(error)) {
+    return null;
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ResizeObserverErrorBoundaryState> | null {
-    const errorMessage = error.message || '';
-    const now = Date.now();
-    
-    // Only catch ResizeObserver and layout-related errors
-    const isLayoutError = [
-      'ResizeObserver',
-      'layout',
-      'reflow',
-      'viewport',
-      'dimension'
-    ].some(term => errorMessage.toLowerCase().includes(term.toLowerCase()));
+  return (
+    <div style={{ display: 'contents', contain: 'layout' }}>
+      <div style={{ width: 0, height: 0, overflow: 'hidden' }}>Recovery in progress...</div>
+    </div>
+  );
+}
 
-    if (isLayoutError) {
-      return (prevState) => {
-        const timeSinceLastError = now - (prevState?.lastErrorTime || 0);
-        const shouldReset = timeSinceLastError > ERROR_RESET_INTERVAL;
-        
-        return {
-          hasError: true,
-          errorCount: shouldReset ? 1 : (prevState?.errorCount || 0) + 1,
-          lastErrorTime: now
-        };
-      };
-    }
+export function ResizeObserverErrorBoundary({ children, fallback, onError }: ResizeObserverErrorBoundaryProps) {
+  const FallbackComponent = React.useCallback(
+    (props: FallbackProps) => {
+      if (fallback) return <>{fallback}</>;
+      return <DefaultLayoutFallback {...props} />;
+    },
+    [fallback]
+  );
 
-    return null; // Let other errors bubble up
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const errorMessage = error.message || '';
-    const isLayoutError = [
-      'ResizeObserver',
-      'layout',
-      'reflow',
-      'viewport',
-      'dimension'
-    ].some(term => errorMessage.toLowerCase().includes(term.toLowerCase()));
-
-    if (isLayoutError) {
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('[ErrorBoundary] Layout error caught and handled:', error.message);
-      }
-      
-      // Auto-recovery for layout errors
-      if (this.state.errorCount < MAX_ERRORS_PER_INTERVAL) {
-        this.scheduleReset();
-      }
-      
-      // Call optional error handler
-      this.props.onError?.(error, errorInfo);
-    } else {
-      // Re-throw non-layout errors
-      throw error;
-    }
-  }
-
-  scheduleReset = () => {
-    if (this.resetTimer) {
-      clearTimeout(this.resetTimer);
-    }
-
-    this.resetTimer = setTimeout(() => {
-      this.setState({ hasError: false, errorCount: 0 });
-      this.resetTimer = null;
-    }, 100); // Quick recovery for layout issues
-  };
-
-  componentWillUnmount() {
-    if (this.resetTimer) {
-      clearTimeout(this.resetTimer);
-    }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // Provide custom fallback or invisible recovery
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-      
-      // For layout errors, render invisibly and auto-recover
-      return (
-        <div
-          style={{ display: 'contents', contain: 'layout' }}
-          key={`recovery-${this.state.lastErrorTime}`}
-        >
-          <div style={{ width: 0, height: 0, overflow: 'hidden' }}>
-            Recovery in progress...
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
+  return (
+    <ErrorBoundary
+      FallbackComponent={FallbackComponent}
+      onError={(error, errorInfo) => {
+        if (process.env.NODE_ENV === 'development' && isLayoutError(error)) {
+          console.debug('[ErrorBoundary] Layout error caught and handled:', (error as Error).message);
+        }
+        onError?.(error as Error, errorInfo);
+      }}
+    >
+      {children}
+    </ErrorBoundary>
+  );
 }
 
 /**
@@ -134,20 +72,19 @@ export class ResizeObserverErrorBoundary extends React.Component<
 export function useResizeObserverErrorSuppression() {
   React.useEffect(() => {
     const originalError = console.error;
-    
+
     console.error = (...args: any[]) => {
       const message = args[0]?.toString?.() || '';
       const isResizeObserverError = [
         'ResizeObserver loop completed with undelivered notifications',
         'ResizeObserver loop limit exceeded',
-        'ResizeObserver'
-      ].some(pattern => message.includes(pattern));
-      
+        'ResizeObserver',
+      ].some((pattern) => message.includes(pattern));
+
       if (isResizeObserverError) {
-        // Suppress ResizeObserver errors
         return;
       }
-      
+
       originalError.apply(console, args);
     };
 
@@ -166,12 +103,13 @@ export function withResizeObserverErrorBoundary<P extends object>(
 ) {
   const WrappedComponent = React.forwardRef<any, P>((props, ref) => (
     <ResizeObserverErrorBoundary fallback={fallback}>
-      <Component {...props} ref={ref} />
+      {/* @ts-expect-error ref compatibility for HOC wrapper */}
+      <Component {...(props as P)} ref={ref} />
     </ResizeObserverErrorBoundary>
   ));
 
   WrappedComponent.displayName = `withResizeObserverErrorBoundary(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }
 

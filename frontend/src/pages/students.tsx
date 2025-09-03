@@ -10,7 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal';
 import { Student } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as DropdownsService from '@/services/dropdowns';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -28,22 +29,17 @@ export default function Students() {
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
+    queryFn: async () => StudentsService.getStudents(),
   });
 
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/students');
-      return response.json();
-    },
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
 
   const updateStudentMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => {
-      const response = await apiRequest('PUT', `/api/students/${id}`, data);
-      return response.json();
-    },
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => StudentsService.updateStudent(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({

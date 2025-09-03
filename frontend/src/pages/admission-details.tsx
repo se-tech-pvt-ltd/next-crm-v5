@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityTracker } from '@/components/activity-tracker';
-import { apiRequest } from '@/lib/queryClient';
+import * as AdmissionsService from '@/services/admissions';
+import * as ApplicationsService from '@/services/applications';
+import * as StudentsService from '@/services/students';
 import { type Admission, type Student, type Application } from '@/lib/types';
 import { ArrowLeft, Award, User as UserIcon, Plane, Calendar, ExternalLink } from 'lucide-react';
 
@@ -19,24 +21,19 @@ export default function AdmissionDetails() {
 
   const { data: admissions, isLoading, error } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
+    queryFn: async () => AdmissionsService.getAdmissions() as any,
   });
   const admission = useMemo(() => (admissions || []).find((a) => a.id === params?.id), [admissions, params?.id]);
 
   const { data: student } = useQuery<Student>({
     queryKey: admission?.studentId ? ['/api/students', admission.studentId] : ['noop'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/students/${admission?.studentId}`);
-      return res.json();
-    },
+    queryFn: async () => StudentsService.getStudent(admission?.studentId),
     enabled: !!admission?.studentId,
   });
 
   const { data: linkedApplication } = useQuery<Application>({
     queryKey: admission?.applicationId ? ['/api/applications', admission.applicationId] : ['noop'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/applications/${admission?.applicationId}`);
-      return res.json();
-    },
+    queryFn: async () => ApplicationsService.getApplication(admission?.applicationId),
     enabled: !!admission?.applicationId,
   });
 
@@ -48,9 +45,7 @@ export default function AdmissionDetails() {
   const updateVisaStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!admission) return;
-      const res = await apiRequest('PUT', `/api/admissions/${admission.id}`, { visaStatus: newStatus });
-      if (!res.ok) throw new Error('Failed to update visa status');
-      return res.json();
+      return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });

@@ -9,7 +9,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/layout';
 import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import { http } from '@/services/http';
+import * as ApplicationsService from '@/services/applications';
+import * as AdmissionsService from '@/services/admissions';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import { motion } from 'framer-motion';
@@ -100,16 +102,14 @@ export default function AddAdmissionPage() {
         depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
         visaStatus: data.visaStatus || 'pending',
       } as any;
-      const res = await apiRequest('POST', '/api/admissions', payload as any);
-      if (!res.ok) throw new Error('Failed');
-      const created = await res.json();
+      const created = await AdmissionsService.createAdmission(payload as any);
       try {
         if (data.caseStatus && data.applicationId) {
-          await apiRequest('PUT', `/api/applications/${data.applicationId}`, { caseStatus: data.caseStatus });
+          await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
           queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         }
         if (data.googleDriveLink && data.applicationId) {
-          await apiRequest('PUT', `/api/applications/${data.applicationId}`, { googleDriveLink: data.googleDriveLink });
+          await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
           queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         }
       } catch {}
@@ -161,8 +161,7 @@ export default function AddAdmissionPage() {
     queryFn: async () => {
       const url = '/api/dropdowns/module/Admissions';
       console.log('[Admission Dropdowns] GET', url);
-      const res = await apiRequest('GET', url);
-      const json = await res.json();
+      const json = await http.get<any>(url);
       console.log('[Admission Dropdowns] keys:', Object.keys(json || {}));
       return json;
     },

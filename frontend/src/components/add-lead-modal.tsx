@@ -13,7 +13,9 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { insertLeadSchema } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as UsersService from '@/services/users';
+import * as LeadsService from '@/services/leads';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
 import { CommandMultiSelect } from './command-multi-select';
@@ -55,13 +57,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   // Get counselors with search functionality
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
     queryKey: ['/api/users', { search: counselorSearchQuery }],
-    queryFn: async () => {
-      const url = counselorSearchQuery
-        ? `/api/users?search=${encodeURIComponent(counselorSearchQuery)}&role=counselor,admin_staff`
-        : '/api/users?role=counselor,admin_staff&limit=20';
-      const response = await apiRequest('GET', url);
-      return response.json();
-    },
+    queryFn: async () => UsersService.getUsers(),
     enabled: true,
   });
 
@@ -104,10 +100,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   });
 
   const createLeadMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/leads', data);
-      return response.json();
-    },
+    mutationFn: async (data: any) => LeadsService.createLead(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({

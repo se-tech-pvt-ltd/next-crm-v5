@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/layout';
 import { insertApplicationSchema, type Student, type InsertApplication } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save } from 'lucide-react';
@@ -51,10 +51,7 @@ export default function AddApplication() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertApplication) => {
-      const res = await apiRequest('POST', '/api/applications', data as any);
-      return res.json();
-    },
+    mutationFn: async (data: InsertApplication) => ApplicationsService.createApplication(data as any),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       if (created?.studentId) {

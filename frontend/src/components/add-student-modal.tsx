@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertStudentSchema, type Lead } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
 
@@ -51,10 +51,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
   });
 
   const createStudentMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/students', data);
-      return response.json();
-    },
+    mutationFn: async (data: any) => StudentsService.createStudent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({

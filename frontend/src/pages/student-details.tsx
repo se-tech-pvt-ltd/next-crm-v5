@@ -13,7 +13,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { type Student, type User, type Application } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import * as StudentsService from '@/services/students';
+import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, User as UserIcon, Edit, Save, X, Plus, Mail, Phone, Calendar as CalendarIcon } from 'lucide-react';
@@ -31,10 +34,7 @@ export default function StudentDetails() {
 
   const { data: student, isLoading, error } = useQuery<Student>({
     queryKey: ['/api/students', params?.id],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/students/${params?.id}`);
-      return res.json();
-    },
+    queryFn: async () => StudentsService.getStudent(params?.id),
     enabled: !!params?.id,
     staleTime: 0,
     refetchOnMount: true,
@@ -42,22 +42,17 @@ export default function StudentDetails() {
 
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/students');
-      return response.json();
-    },
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
   const { data: leadsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    },
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
   });
 
   const { data: applications, isLoading: appsLoading } = useQuery<Application[]>({
@@ -115,14 +110,7 @@ export default function StudentDetails() {
   };
 
   const updateStudentMutation = useMutation({
-    mutationFn: async (data: Partial<Student>) => {
-      const response = await apiRequest('PUT', `/api/students/${student?.id}`, data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update student');
-      }
-      return response.json();
-    },
+    mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
     onSuccess: (updated) => {
       toast({ title: 'Success', description: 'Student updated successfully.' });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
@@ -136,14 +124,7 @@ export default function StudentDetails() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async (uiStatus: string) => {
-      const response = await apiRequest('PUT', `/api/students/${student?.id}`, { status: mapStatusUiToDb(uiStatus) });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update status');
-      }
-      return response.json();
-    },
+    mutationFn: async (uiStatus: string) => StudentsService.updateStudent(student?.id, { status: mapStatusUiToDb(uiStatus) }),
     onSuccess: (updated) => {
       setCurrentStatus(updated.status);
       queryClient.setQueryData(['/api/students', params?.id], updated);
