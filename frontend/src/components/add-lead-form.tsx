@@ -18,7 +18,6 @@ import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
-import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import {
   User,
   Mail,
