@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
+import { StabilizedResizeObserver } from '@/lib/resize-observer-polyfill';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import { HelpTooltip } from './help-tooltip';
 import { ConvertToStudentModal } from './convert-to-student-modal';
@@ -36,13 +37,16 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
-    const updateHeaderHeight = () => {
-      setHeaderHeight(headerRef.current?.offsetHeight || 0);
+    const update = () => setHeaderHeight(headerRef.current?.offsetHeight || 0);
+    update();
+    const ro = new StabilizedResizeObserver(() => update(), 100);
+    if (headerRef.current) ro.observe(headerRef.current);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
     };
-    updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
-  }, [statusSequence]);
+  }, []);
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
