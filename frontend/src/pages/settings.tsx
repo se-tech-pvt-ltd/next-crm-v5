@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3, Building, Upload, Image } from 'lucide-react';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
 
 interface DropdownOption {
   id: string;
