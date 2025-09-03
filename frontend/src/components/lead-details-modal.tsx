@@ -242,7 +242,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-                <Card className="w-full">
+                <Card className="w-full shadow-md border border-gray-200 bg-white">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Personal Information</CardTitle>
@@ -260,30 +260,30 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Full Name</span></Label>
-                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-8 text-xs" />
+                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email" className="flex items-center space-x-2"><Mail className="w-4 h-4" /><span>Email Address</span></Label>
-                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-8 text-xs" />
+                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
-                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-8 text-xs" />
+                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
-                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing} className="h-8 text-xs" />
+                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="text-sm flex items-center space-x-2"><Target className="w-5 h-5 text-primary" /><span>Lead Information</span></CardTitle>}>
+                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="text-sm flex items-center space-x-2"><Target className="w-5 h-5 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
                       <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select type" /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.Type || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -295,7 +295,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Lead Source</span></Label>
                       <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select source" /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.Source || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -307,7 +307,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><GraduationCap className="w-4 h-4" /><span>Study Level</span></Label>
                       <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select study level" /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study level" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.['Study Level'] || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -319,7 +319,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Study Plan</span></Label>
                       <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select study plan" /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study plan" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.['Study Plan'] || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -343,7 +343,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
                       <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
                         <SelectContent>
                           {users.map((u: any) => (
                             <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
@@ -377,7 +377,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
             <h3 className="text-base font-semibold">Mark Lead as Lost</h3>
             <p className="text-sm text-gray-600">Please select a reason why this lead is being marked as lost:</p>
             <Select value={lostReason} onValueChange={setLostReason}>
-              <SelectTrigger>
+              <SelectTrigger className="shadow-sm border border-gray-300 bg-white">
                 <SelectValue placeholder="Select a reason" />
               </SelectTrigger>
               <SelectContent>
