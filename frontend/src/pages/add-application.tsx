@@ -51,10 +51,7 @@ export default function AddApplication() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertApplication) => {
-      const res = await apiRequest('POST', '/api/applications', data as any);
-      return res.json();
-    },
+    mutationFn: async (data: InsertApplication) => ApplicationsService.createApplication(data as any),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       if (created?.studentId) {
