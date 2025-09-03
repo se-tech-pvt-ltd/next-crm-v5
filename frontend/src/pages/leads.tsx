@@ -551,6 +551,9 @@ export default function Leads() {
       </div>
       <Dialog open={addLeadOpen} onOpenChange={setAddLeadOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Add New Lead</DialogTitle>
+          </DialogHeader>
           <AddLeadForm
             onCancel={() => setAddLeadOpen(false)}
             onSuccess={() => {
