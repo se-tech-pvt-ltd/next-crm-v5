@@ -53,10 +53,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   });
 
   const createApplicationMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/applications', data);
-      return response.json();
-    },
+    mutationFn: async (data: any) => ApplicationsService.createApplication(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       if (studentId) {
