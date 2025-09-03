@@ -29,7 +29,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   const updateVisaStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!admission) return;
-      return apiRequest('PUT', `/api/admissions/${admission.id}`, { visaStatus: newStatus });
+      return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
