@@ -100,10 +100,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   });
 
   const createLeadMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/leads', data);
-      return response.json();
-    },
+    mutationFn: async (data: any) => LeadsService.createLead(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
@@ -358,7 +355,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                             { label: 'Austria 🇦🇹', value: 'austria' },
                             { label: 'Italy 🇮🇹', value: 'italy' },
                             { label: 'Spain 🇪🇸', value: 'spain' },
-                            { label: 'Japan ���🇵', value: 'japan' },
+                            { label: 'Japan 🇯🇵', value: 'japan' },
                             { label: 'South Korea 🇰🇷', value: 'south-korea' },
                             { label: 'Hong Kong 🇭🇰', value: 'hong-kong' },
                             { label: 'UAE 🇦🇪', value: 'uae' },
