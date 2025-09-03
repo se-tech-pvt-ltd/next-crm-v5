@@ -223,6 +223,15 @@ export function useStabilizedResizeObserver(
 export const DebouncedResizeObserver = StabilizedResizeObserver;
 export const useDebouncedResizeObserver = useStabilizedResizeObserver;
 
+// Globally patch ResizeObserver to stabilized version to prevent loop-limit errors
+try {
+  if (typeof window !== 'undefined' && (window as any).ResizeObserver && !(window as any).__roPatched) {
+    (window as any).__roPatched = true;
+    // Assigning our stabilized wrapper; it internally uses native observer reference
+    (window as any).ResizeObserver = StabilizedResizeObserver as any;
+  }
+} catch {}
+
 /**
  * Cleanup function for tests or unmounting
  */
