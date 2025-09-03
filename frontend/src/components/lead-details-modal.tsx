@@ -193,7 +193,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <div className="flex items-center gap-2">
                     {isEditing ? (
                       <>
-                        <Button size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={handleSaveChanges} title="Save">
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save">
                           <Save />
                           <span className="hidden lg:inline">Save</span>
                         </Button>
