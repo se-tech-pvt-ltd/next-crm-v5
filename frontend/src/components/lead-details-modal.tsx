@@ -12,6 +12,7 @@ import { ConvertToStudentModal } from './convert-to-student-modal';
 import { CommandMultiSelect } from './command-multi-select';
 import { type Lead } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { queryClient } from '@/lib/queryClient';
 import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
@@ -27,6 +28,7 @@ interface LeadDetailsModalProps {
 
 export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: LeadDetailsModalProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [showConvertModal, setShowConvertModal] = useState(false);
@@ -106,6 +108,18 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
   });
+
+  // Check if the lead has been converted to a student
+  const { data: convertedStudent } = useQuery({
+    queryKey: ['/api/students/by-lead', lead?.id],
+    queryFn: async () => LeadsService.getStudentByLeadId(lead?.id),
+    enabled: !!lead?.id,
+    staleTime: 60_000,
+  });
+
+  useEffect(() => {
+    if (convertedStudent && isEditing) setIsEditing(false);
+  }, [convertedStudent]);
 
   const handleSaveChanges = () => {
     if (!editData.name || !editData.email) {
@@ -191,7 +205,20 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <h1 className="text-lg font-semibold truncate">{lead.name}</h1>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isEditing ? (
+                    {convertedStudent ? (
+                      <>
+                        <Button
+                          variant="default"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                          onClick={() => { onOpenChange(false); setLocation(`/students/${convertedStudent.id}`); }}
+                          title="View Student"
+                        >
+                          <UserPlus />
+                          <span className="hidden lg:inline">View Student</span>
+                        </Button>
+                      </>
+                    ) : isEditing ? (
                       <>
                         <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateLeadMutation.isPending}>
                           <Save />
