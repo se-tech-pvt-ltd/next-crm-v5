@@ -74,28 +74,40 @@ export class LeadService {
     const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
     
     if (lead) {
-      // Log changes for each updated field
+      // Log only selected changes
       for (const [fieldName, newValue] of Object.entries(updates)) {
         if (fieldName === 'updatedAt') continue;
-        
+        if (fieldName !== 'status' && fieldName !== 'counselorId') continue;
+
         const oldValue = (currentLead as any)[fieldName];
         if (oldValue !== newValue) {
-          const fieldDisplayName = fieldName
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase());
-          
-          await ActivityService.logActivity(
-            'lead', 
-            id, 
-            'updated', 
-            `${fieldDisplayName} updated`,
-            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
-            fieldName,
-            String(oldValue || ''),
-            String(newValue || ''),
-            undefined,
-            "Next Bot"
-          );
+          if (fieldName === 'status') {
+            await ActivityService.logActivity(
+              'lead',
+              id,
+              'status_changed',
+              'Status updated',
+              `Status changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+              fieldName,
+              String(oldValue || ''),
+              String(newValue || ''),
+              undefined,
+              'Next Bot'
+            );
+          } else if (fieldName === 'counselorId') {
+            await ActivityService.logActivity(
+              'lead',
+              id,
+              'assigned',
+              'Admission officer changed',
+              `Admission officer changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+              fieldName,
+              String(oldValue || ''),
+              String(newValue || ''),
+              undefined,
+              'Next Bot'
+            );
+          }
         }
       }
     }
