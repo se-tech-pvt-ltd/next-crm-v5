@@ -9,7 +9,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
-import { apiRequest } from '@/lib/queryClient';
+import * as ApplicationsService from '@/services/applications';
+import * as StudentsService from '@/services/students';
+import * as AdmissionsService from '@/services/admissions';
 import { useToast } from '@/hooks/use-toast';
 import { type Application, type Student, type Admission } from '@/lib/types';
 import {
