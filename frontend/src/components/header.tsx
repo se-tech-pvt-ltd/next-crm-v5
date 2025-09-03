@@ -47,15 +47,15 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               <div className="relative hidden sm:block" role="search" aria-label="Global search">
                 <div className="relative">
                   <label htmlFor="global-search" className="sr-only">Search</label>
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} aria-hidden="true" />
-                  <Input
+                  <InputWithIcon
                     id="global-search"
                     type="text"
                     placeholder="Search students, leads..."
-                    className="w-48 lg:w-64 pl-10"
+                    className="w-48 lg:w-64"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     aria-controls={searchQuery && searchResults.length > 0 ? 'search-results' : undefined}
+                    leftIcon={<Search size={16} aria-hidden="true" />}
                   />
                 </div>
 
