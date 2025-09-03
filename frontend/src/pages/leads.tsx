@@ -567,6 +567,18 @@ export default function Leads() {
           />
         </DialogContent>
       </Dialog>
+      <LeadDetailsModal
+        open={leadModalOpen}
+        onOpenChange={(open) => {
+          setLeadModalOpen(open);
+          if (!open) setSelectedLead(null);
+        }}
+        lead={selectedLead}
+        onLeadUpdate={(updated) => {
+          setSelectedLead(updated);
+          queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+        }}
+      />
     </Layout>
   );
 }
