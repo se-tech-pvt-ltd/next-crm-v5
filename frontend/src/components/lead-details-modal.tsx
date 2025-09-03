@@ -281,6 +281,17 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                         <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
                         <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
                       </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
+                        <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                          <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                          <SelectContent>
+                            {users.map((u: any) => (
+                              <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -347,17 +358,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
-                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
-                        <SelectContent>
-                          {users.map((u: any) => (
-                            <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
                 </CollapsibleCard>
               </div>
