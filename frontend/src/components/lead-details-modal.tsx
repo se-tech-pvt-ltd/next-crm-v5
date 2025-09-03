@@ -16,7 +16,6 @@ import { CommandMultiSelect } from './command-multi-select';
 import { type Lead, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
