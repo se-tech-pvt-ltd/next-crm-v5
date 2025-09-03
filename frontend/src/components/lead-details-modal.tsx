@@ -18,6 +18,7 @@ import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadDetailsModalProps {
   open: boolean;
@@ -205,7 +206,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <h1 className="text-lg font-semibold truncate">{lead.name}</h1>
                   </div>
                   <div className="flex items-center gap-2">
-                    {convertedLoading ? null : convertedStudent ? (
+                    {convertedLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-20" />
+                        <Skeleton className="h-8 w-24" />
+                        <Skeleton className="h-8 w-16" />
+                      </div>
+                    ) : convertedStudent ? (
                       <Button
                         variant="default"
                         size="xs"
