@@ -549,6 +549,17 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
+      <Dialog open={addLeadOpen} onOpenChange={setAddLeadOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <AddLeadForm
+            onCancel={() => setAddLeadOpen(false)}
+            onSuccess={() => {
+              setAddLeadOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
