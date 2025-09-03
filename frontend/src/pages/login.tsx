@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useForm } from 'react-hook-form';
@@ -158,17 +159,15 @@ export default function Login({ onLogin }: LoginProps) {
                     <FormItem>
                       <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
-                          <Input
-                            {...field}
-                            type="email"
-                            placeholder="Enter your email"
-                            autoComplete="email"
-                            inputMode="email"
-                            className="h-12 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
-                          />
-                        </div>
+                        <InputWithIcon
+                          leftIcon={<Mail className="w-5 h-5" />}
+                          {...field}
+                          type="email"
+                          placeholder="Enter your email"
+                          autoComplete="email"
+                          inputMode="email"
+                          className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -182,29 +181,29 @@ export default function Login({ onLogin }: LoginProps) {
                     <FormItem>
                       <FormLabel className="text-gray-700 font-medium">Password</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
-                          <Input
-                            {...field}
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
-                            autoComplete="current-password"
-                            className="h-12 pl-10 pr-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            aria-pressed={showPassword}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                          >
-                            {showPassword ? (
-                              <EyeOff className="w-5 h-5" aria-hidden="true" />
-                            ) : (
-                              <Eye className="w-5 h-5" aria-hidden="true" />
-                            )}
-                          </button>
-                        </div>
+                        <InputWithIcon
+                          leftIcon={<Lock className="w-5 h-5" />}
+                          rightAdornment={
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              aria-pressed={showPassword}
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                              className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="w-5 h-5" aria-hidden="true" />
+                              ) : (
+                                <Eye className="w-5 h-5" aria-hidden="true" />
+                              )}
+                            </button>
+                          }
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          autoComplete="current-password"
+                          className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
