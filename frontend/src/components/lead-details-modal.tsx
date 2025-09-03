@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import * as LeadsService from '@/services/leads';
+import * as DropdownsService from '@/services/dropdowns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -157,21 +159,37 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
     updateLeadMutation.mutate(dataToSave);
   };
 
+  // Dropdowns for status mapping like the page
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
+  });
+
+  const getStatusDisplayName = (statusId: string) => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    const byId = list.find((o: any) => o.id === statusId);
+    if (byId?.value) return byId.value;
+    const byKey = list.find((o: any) => o.key === statusId);
+    if (byKey?.value) return byKey.value;
+    const byValue = list.find((o: any) => o.value === statusId);
+    if (byValue?.value) return byValue.value;
+    return statusId;
+  };
+
+  const statusSequence = React.useMemo<string[]>(() => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0) return [];
+    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
+  }, [dropdownData]);
+
   const statusUpdateMutation = useMutation({
-    mutationFn: async (status: string) => {
-      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { status });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update status');
-      }
-      return response.json();
-    },
+    mutationFn: async (status: string) => LeadsService.updateLead(lead?.id, { status }),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       onLeadUpdate?.(updatedLead);
       toast({
-        title: "Success",
-        description: "Lead status updated successfully.",
+        title: 'Status updated',
+        description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}`,
       });
     },
     onError: (error: any) => {
@@ -254,265 +272,293 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[95vw] h-[95vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
-          
-          {/* Header with Fixed Position */}
-          <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
+
+          {/* Header matching page style */}
+          <div className="absolute top-0 left-0 right-0 bg-white border-b p-4 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-6 h-6 text-blue-600" />
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold">{lead.name}</h1>
-                </div>
+                <h1 className="text-xl font-bold">{lead.name}</h1>
               </div>
-              <div className="flex items-center gap-3">
-                <div>
-                  <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
-                  <Select
-                    value={currentStatus}
-                    onValueChange={handleStatusChange}
-                  >
-                    <SelectTrigger className="w-32 h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="contacted">Contacted</SelectItem>
-                      <SelectItem value="qualified">Qualified</SelectItem>
-                      <SelectItem value="converted">Converted</SelectItem>
-                      <SelectItem value="lost">Lost</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex items-center gap-2">
                 <Button
-                  size="sm"
-                  onClick={() => setShowConvertModal(true)}
-                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  variant="outline"
+                  size="xs"
+                  className="rounded-full px-2 [&_svg]:size-3"
+                  onClick={() => setIsEditing(true)}
+                  disabled={false}
+                  title="Edit"
                 >
-                  <UserPlus className="w-4 h-4" />
-                  Convert to Student
+                  <Edit />
+                  <span className="hidden lg:inline">Edit</span>
                 </Button>
-                {lead.status !== 'lost' && (
-                  <Button 
-                    size="sm" 
-                    variant="destructive" 
-                    onClick={() => setShowMarkAsLostModal(true)}
-                  >
-                    Mark as Lost
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="rounded-full px-2 [&_svg]:size-3"
+                  onClick={() => setShowConvertModal(true)}
+                  title="Convert to Student"
+                >
+                  <UserPlus />
+                  <span className="hidden lg:inline">Convert</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="rounded-full px-2 [&_svg]:size-3"
+                  onClick={() => setShowMarkAsLostModal(true)}
+                  title="Mark as Lost"
+                >
+                  <XCircle />
+                  <span className="hidden lg:inline">Lost</span>
+                </Button>
                 <Button
                   variant="ghost"
-                  size="default"
-                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                  size="icon"
+                  className="rounded-full w-8 h-8"
                   onClick={() => onOpenChange(false)}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+            {/* Status progress bar from page */}
+            {statusSequence.length > 0 && (
+              <div className="mt-3">
+                <div className="w-full bg-gray-100 rounded-md p-1.5">
+                  <div className="flex items-center justify-between relative">
+                    {statusSequence.map((statusId, index) => {
+                      const isActive = (currentStatus === statusId);
+                      const currentIndex = statusSequence.indexOf(currentStatus);
+                      const isCompleted = index <= currentIndex;
+                      const statusName = getStatusDisplayName(statusId);
 
+                      const handleClick = () => {
+                        if (statusUpdateMutation.isPending) return;
+                        const targetKey = statusId;
+                        if (currentStatus === targetKey) return;
+                        statusUpdateMutation.mutate(targetKey);
+                      };
+
+                      return (
+                        <div
+                          key={statusId}
+                          className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                          onClick={handleClick}
+                          role="button"
+                          aria-label={`Set status to ${statusName}`}
+                        >
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                            isCompleted
+                              ? 'bg-green-500 border-green-500 text-white'
+                              : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                          }`}>
+                            {isCompleted && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                            {!isCompleted && <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                          </div>
+                          <span className={`mt-1 text-xs font-medium text-center ${
+                            isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                          }`}>
+                            {statusName}
+                          </span>
+                          {index < statusSequence.length - 1 && (
+                            <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                              index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                            }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex h-[90vh]">
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-28">
-              <div className="space-y-6">
-                {/* Lead Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold">Lead Information</h2>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditing(!isEditing)}
-                      >
-                        {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          value={editData.name || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
-                          disabled={!isEditing}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          value={editData.email || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))}
-                          disabled={!isEditing}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Phone</Label>
-                        <Input
-                          id="phone"
-                          value={editData.phone || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
-                          disabled={!isEditing}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="country">Countries of Interest</Label>
-                        <CommandMultiSelect
-                          options={countryOptions}
-                          value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
-                          onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
-                          placeholder="Select countries..."
-                          searchPlaceholder="Search countries..."
-                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="program">Programs of Interest</Label>
-                        <CommandMultiSelect
-                          options={programOptions}
-                          value={Array.isArray(editData.program) ? editData.program : (editData.program ? [editData.program] : [])}
-                          onChange={(values) => setEditData(prev => ({ ...prev, program: values }))}
-                          placeholder="Select programs..."
-                          searchPlaceholder="Search programs..."
-                          className={!isEditing ? "pointer-events-none opacity-50" : ""}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="source">Source</Label>
-                        <Select
-                          value={editData.source || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, source: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select source" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {sourceOptions.map((source) => (
-                              <SelectItem key={source.value} value={source.value}>
-                                {source.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="expectation">
-                          Expectation
-                          <HelpTooltip content="How likely is this lead to convert to a student?" />
-                        </Label>
-                        <Select
-                          value={editData.expectation || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, expectation: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select expectation" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {expectationOptions.map((expectation) => (
-                              <SelectItem key={expectation.value} value={expectation.value}>
-                                {expectation.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="type">Type</Label>
-                        <Select
-                          value={editData.type || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, type: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {typeOptions.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="counselor">Counselor</Label>
-                        <Select
-                          value={editData.counselorId || ''}
-                          onValueChange={(value) => setEditData(prev => ({ ...prev, counselorId: value }))}
-                          disabled={!isEditing}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select counselor" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {users.map((user: any) => (
-                              <SelectItem key={user.id} value={user.id}>
-                                {user.firstName} {user.lastName}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {currentStatus === 'lost' && (
-                        <div>
-                          <Label htmlFor="lostReason">Lost Reason</Label>
-                          <Select
-                            value={editData.lostReason || ''}
-                            onValueChange={(value) => setEditData(prev => ({ ...prev, lostReason: value }))}
-                            disabled={!isEditing}
+            <div className="flex-1 overflow-y-auto p-4 pt-28">
+              <div className="space-y-4">
+                {/* Personal Information (matching page) */}
+                <Card className="w-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm">Personal Information</CardTitle>
+                      {isEditing && (
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={handleSaveChanges}>
+                            <Save className="w-4 h-4 mr-1" />
+                            Save Changes
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setIsEditing(false);
+                              setEditData(lead);
+                            }}
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select lost reason" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {lostReasonOptions.map((reason) => (
-                                <SelectItem key={reason.value} value={reason.value}>
-                                  {reason.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <X className="w-4 h-4 mr-1" />
+                            Cancel
+                          </Button>
                         </div>
                       )}
                     </div>
-                    {isEditing && (
-                      <div className="mt-4 flex justify-end space-x-2">
-                        <Button variant="outline" onClick={() => setIsEditing(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleSaveChanges}>
-                          Save Changes
-                        </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="flex items-center space-x-2">
+                          <UserIcon className="w-4 h-4" />
+                          <span>Full Name</span>
+                        </Label>
+                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-                    )}
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email Address</span>
+                        </Label>
+                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4" />
+                          <span>Phone Number</span>
+                        </Label>
+                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="city" className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>City</span>
+                        </Label>
+                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
+
+                {/* Lead Information section matching page */}
+                <CollapsibleCard
+                  persistKey={`lead-details:modal:${lead.id}:lead-information`}
+                  header={<CardTitle className="text-sm flex items-center space-x-2"><Target className="w-5 h-5 text-primary" /><span>Lead Information</span></CardTitle>}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <Users className="w-4 h-4" />
+                        <span>Lead Type</span>
+                      </Label>
+                      <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing}>
+                        <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {/* map from dropdownData if available */}
+                          {((dropdownData as any)?.Type || []).map((option: any) => (
+                            <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <Globe className="w-4 h-4" />
+                        <span>Lead Source</span>
+                      </Label>
+                      <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing}>
+                        <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {((dropdownData as any)?.Source || []).map((option: any) => (
+                            <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <GraduationCap className="w-4 h-4" />
+                        <span>Study Level</span>
+                      </Label>
+                      <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing}>
+                        <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select study level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {((dropdownData as any)?.['Study Level'] || []).map((option: any) => (
+                            <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <BookOpen className="w-4 h-4" />
+                        <span>Study Plan</span>
+                      </Label>
+                      <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing}>
+                        <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select study plan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {((dropdownData as any)?.['Study Plan'] || []).map((option: any) => (
+                            <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="flex items-center space-x-2">
+                        <Globe className="w-4 h-4" />
+                        <span>Interested Countries</span>
+                      </Label>
+                      <CommandMultiSelect
+                        options={((dropdownData as any)?.['Interested Country'] || []).map((o: any) => ({ label: o.value, value: o.key }))}
+                        value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                        onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
+                        placeholder="Select countries"
+                        searchPlaceholder="Search countries..."
+                        className={!isEditing ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <Users className="w-4 h-4" />
+                        <span>Admission Officer</span>
+                      </Label>
+                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing}>
+                        <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select officer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users.map((u: any) => (
+                            <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CollapsibleCard>
               </div>
             </div>
 
-            {/* Right Sidebar - Activity Timeline */}
-            <div className="w-96 bg-gradient-to-br from-blue-50 to-blue-100 border-l overflow-hidden">
-              <div className="px-4 py-5 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-                <h2 className="text-lg font-semibold">Activity Timeline</h2>
+            {/* Right Sidebar - Activity Timeline (match colors) */}
+            <div className="w-96 bg-white border-l overflow-hidden">
+              <div className="px-4 py-3 border-b bg-white">
+                <h2 className="text-sm font-semibold">Activity Timeline</h2>
               </div>
               <div className="overflow-y-auto h-full pt-2">
-                <ActivityTracker
-                  entityType="lead"
-                  entityId={lead.id}
-                  entityName={lead.name}
-                />
+                <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>
             </div>
           </div>
