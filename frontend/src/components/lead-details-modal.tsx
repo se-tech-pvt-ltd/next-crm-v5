@@ -171,36 +171,36 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
     updateLeadMutation.mutate(dataToSave);
   };
 
+  const statusUpdateMutation = useMutation({
+    mutationFn: async (status: string) => {
+      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { status });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update status');
+      }
+      return response.json();
+    },
+    onSuccess: (updatedLead) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      onLeadUpdate?.(updatedLead);
+      toast({
+        title: "Success",
+        description: "Lead status updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      // Revert the status change on error
+      setCurrentStatus(lead?.status || '');
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update lead status.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
-    const statusUpdateMutation = useMutation({
-      mutationFn: async (status: string) => {
-        const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, { status });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to update status');
-        }
-        return response.json();
-      },
-      onSuccess: (updatedLead) => {
-        queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-        onLeadUpdate?.(updatedLead);
-        toast({
-          title: "Success",
-          description: "Lead status updated successfully.",
-        });
-      },
-      onError: (error: any) => {
-        // Revert the status change on error
-        setCurrentStatus(lead?.status || '');
-        toast({
-          title: "Error",
-          description: error.message || "Failed to update lead status.",
-          variant: "destructive",
-        });
-      },
-    });
-    
     statusUpdateMutation.mutate(newStatus);
   };
 
