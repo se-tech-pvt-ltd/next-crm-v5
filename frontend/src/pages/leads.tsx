@@ -4,6 +4,7 @@ import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -19,6 +20,8 @@ import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calend
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
   // Helper functions for display names using dropdown data
@@ -70,6 +73,7 @@ export default function Leads() {
   };
   const [, setLocation] = useLocation();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
@@ -82,9 +86,9 @@ export default function Leads() {
 
   const handleAddLeadClick = () => {
     setIsNavigating(true);
-    // Small delay for animation effect
     setTimeout(() => {
-      setLocation('/leads/add');
+      setAddLeadOpen(true);
+      setIsNavigating(false);
     }, 200);
   };
 
@@ -442,55 +446,29 @@ export default function Leads() {
                 ))}
               </div>
             ) : filteredLeads.length === 0 ? (
-              <div className="text-center py-4">
-                <UserPlus className="mx-auto h-10 w-10 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No leads found</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all'
-                    ? "Get started by adding your first lead."
-                    : `No leads with status "${statusFilter}".`
-                  }
-                </p>
-                <motion.div
-                  className="mt-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      className="h-8"
-                      onClick={handleAddLeadClick}
-                      disabled={isNavigating}
-                    >
-                      {isNavigating ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                          className="w-3 h-3 mr-1"
-                        >
-                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ rotate: 0 }}
-                          animate={{ rotate: 0 }}
-                          whileHover={{ rotate: 90 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                        </motion.div>
-                      )}
-                      <span className="text-sm">
-                        {isNavigating ? 'Opening...' : 'Add Lead'}
-                      </span>
-                    </Button>
+              <EmptyState
+                icon={<UserPlus className="h-10 w-10" />}
+                title="No leads found"
+                description={statusFilter === 'all' ? 'Get started by adding your first lead.' : `No leads with status "${statusFilter}".`}
+                action={
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button className="h-8" onClick={handleAddLeadClick} disabled={isNavigating}>
+                        {isNavigating ? (
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 mr-1">
+                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                          </motion.div>
+                        ) : (
+                          <motion.div initial={{ rotate: 0 }} animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                            <Plus className="w-3 h-3 mr-1" />
+                          </motion.div>
+                        )}
+                        <span className="text-sm">{isNavigating ? 'Opening...' : 'Add Lead'}</span>
+                      </Button>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              </div>
+                }
+              />
             ) : (
               <Table className="text-xs">
                 <TableHeader>
@@ -571,6 +549,20 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
+      <Dialog open={addLeadOpen} onOpenChange={setAddLeadOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Add New Lead</DialogTitle>
+          </DialogHeader>
+          <AddLeadForm
+            onCancel={() => setAddLeadOpen(false)}
+            onSuccess={() => {
+              setAddLeadOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }

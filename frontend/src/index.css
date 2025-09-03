@@ -189,7 +189,8 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -198,11 +199,19 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: hsl(var(--border));
-    border-radius: 3px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
     background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Firefox */
+  .scrollbar-thin {
+    scrollbar-color: hsl(var(--border)) transparent;
+    scrollbar-width: thin;
   }
 
   .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {

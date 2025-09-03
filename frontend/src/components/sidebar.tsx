@@ -136,13 +136,14 @@ export function Sidebar() {
   };
 
   return (
-    <div
+    <aside
+      aria-label="Primary navigation"
       className={`${sidebarWidth} bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out relative`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Toggle Button */}
-      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+      <div className="p-3 border-b border-gray-200 flex items-center justify-between" role="presentation">
         {isExpanded ? (
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -162,9 +163,11 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="sm"
+            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+            aria-expanded={isExpanded}
+            aria-controls="primary-nav"
             onClick={() => {
               setIsExpanded(!isExpanded);
-              // Clear any pending hover timeout when manually toggling
               if (hoverTimeout) {
                 clearTimeout(hoverTimeout);
                 setHoverTimeout(null);
@@ -178,7 +181,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 p-2 space-y-1">
+      <nav id="primary-nav" aria-label="Primary" className="flex-1 p-2 space-y-1">
         {navItems.map((item) => {
           const isActive = location === item.path;
 
@@ -203,6 +206,9 @@ export function Sidebar() {
                     : 'text-gray-700 hover:bg-gray-100'
                 } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
                 onClick={handleNavClick}
+                role="link"
+                aria-current={isActive ? 'page' : undefined}
+                aria-label={item.label}
               >
                 
                 <div className="relative">
@@ -245,6 +251,6 @@ export function Sidebar() {
       <div className={`border-t border-gray-200 ${isExpanded ? '' : 'px-2'}`}>
         <UserMenu collapsed={!isExpanded} />
       </div>
-    </div>
+    </aside>
   );
 }

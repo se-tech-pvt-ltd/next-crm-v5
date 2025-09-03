@@ -13,7 +13,10 @@ interface LayoutProps {
 export function Layout({ children, title, subtitle, showSearch = true, helpText }: LayoutProps) {
   return (
     <div className="flex h-full max-h-screen bg-gray-50 overflow-hidden">
-      <Sidebar />
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[999] focus:m-2 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">Skip to main content</a>
+      <aside aria-label="Primary" className="contents">
+        <Sidebar />
+      </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header
@@ -23,7 +26,7 @@ export function Layout({ children, title, subtitle, showSearch = true, helpText 
           helpText={helpText}
         />
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-1 sm:p-2 md:p-3 scrollbar-thin">
+        <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden p-1 sm:p-2 md:p-3 scrollbar-thin" role="main">
           <div className="min-w-0 w-full">
             {children}
           </div>

@@ -46,17 +46,10 @@ export function FileUpload({
     setIsUploading(true);
     
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch('/api/upload/file', {
-        method: 'POST',
-        body: formData,
-      });
+      const { uploadFile } = await import('@/services/uploads');
+      const result = await uploadFile(file);
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (result.success && result.fileUrl) {
         onChange(result.fileUrl);
         setInputMode('file');
         toast({

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -242,16 +243,11 @@ export default function Students() {
                 ))}
               </div>
             ) : filteredStudents.length === 0 ? (
-              <div className="text-center py-4">
-                <GraduationCap className="mx-auto h-10 w-10 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No students found</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all'
-                    ? "Students will appear here when leads are converted."
-                    : `No students with status "${statusFilter}".`
-                  }
-                </p>
-              </div>
+              <EmptyState
+                icon={<GraduationCap className="h-10 w-10" />}
+                title="No students found"
+                description={statusFilter === 'all' ? 'Students will appear here when leads are converted.' : `No students with status "${statusFilter}".`}
+              />
             ) : (
               <Table className="text-xs">
                 <TableHeader>
