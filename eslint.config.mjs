@@ -1,19 +1,9 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 
-const compat = new FlatCompat({ baseDirectory: process.cwd() });
-
 export default [
-  // Base recommended configs via compat for convenience
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended'
-  ),
   {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: ['node_modules/**', 'dist/**', 'build/**'],
@@ -32,16 +22,22 @@ export default [
     },
     settings: { react: { version: 'detect' } },
     rules: {
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
+      // TypeScript naming conventions
       '@typescript-eslint/naming-convention': [
         'error',
         { selector: 'variableLike', format: ['camelCase', 'PascalCase', 'UPPER_CASE'] },
         { selector: 'typeLike', format: ['PascalCase'] }
-      ]
+      ],
+      // React basics
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+      'react/jsx-pascal-case': 'error',
+      // Hooks rules (equivalent to recommended)
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn'
     }
   },
-  // React-only rules (functional components + hooks)
+  // React-only rules (functional components only)
   {
     files: ['**/*.tsx'],
     rules: {
@@ -56,8 +52,7 @@ export default [
       'react/function-component-definition': [
         'error',
         { namedComponents: 'arrow-function', unnamedComponents: 'arrow-function' }
-      ],
-      'react/jsx-pascal-case': 'error'
+      ]
     }
   }
 ];
