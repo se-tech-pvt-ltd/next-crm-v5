@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -208,22 +209,17 @@ export default function Admissions() {
                 ))}
               </div>
             ) : filteredAdmissions.length === 0 ? (
-              <div className="text-center py-8">
-                <Trophy className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No admissions found</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {decisionFilter === 'all' 
-                    ? "Admission records will appear here when universities make decisions."
-                    : `No admissions with decision "${decisionFilter}".`
-                  }
-                </p>
-                <div className="mt-6">
+              <EmptyState
+                icon={<Trophy className="h-12 w-12" />}
+                title="No admissions found"
+                description={decisionFilter === 'all' ? 'Admission records will appear here when universities make decisions.' : `No admissions with decision "${decisionFilter}".`}
+                action={
                   <Button onClick={() => setLocation('/admissions/new')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Admission Record
-          </Button>
-                </div>
-              </div>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Admission Record
+                  </Button>
+                }
+              />
             ) : (
               <Table>
                 <TableHeader>
