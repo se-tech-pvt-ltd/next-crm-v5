@@ -393,9 +393,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
             )}
           </div>
 
-          <div className="flex h-[90vh] min-h-0">
+          <div className="flex min-h-0" style={{ marginTop: headerHeight, height: `calc(90vh - ${headerHeight}px)` }}>
             {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-4 min-h-0" style={{ paddingTop: Math.max(0, (headerHeight || 0) + 16) }}>
+            <div className="flex-1 overflow-y-auto p-4 min-h-0">
               <div className="space-y-4">
                 {/* Personal Information (matching page) */}
                 <Card className="w-full">
