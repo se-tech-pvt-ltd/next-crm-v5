@@ -120,7 +120,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   };
 
   // Map dropdown keys/ids to labels using dropdownData
-  const mapDropdownToLabels = (raw: unknown, fieldName: string): string => {
+  const mapDropdownToLabels = React.useCallback((raw: unknown, fieldName: string): string => {
     try {
       const options: any[] = dropdownData?.[fieldName] || [];
       const byKey = new Map(options.map(o => [o.key, o.value]));
@@ -148,7 +148,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     } catch {
       return normalizeToText(raw);
     }
-  };
+  }, [dropdownData, normalizeToText]);
 
   // Pre-populate form when lead changes
   useEffect(() => {
