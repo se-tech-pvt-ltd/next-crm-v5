@@ -550,7 +550,7 @@ export default function Leads() {
         </Card>
       </div>
       <Dialog open={addLeadOpen} onOpenChange={setAddLeadOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           <DialogHeader>
             <DialogTitle className="sr-only">Add New Lead</DialogTitle>
           </DialogHeader>
