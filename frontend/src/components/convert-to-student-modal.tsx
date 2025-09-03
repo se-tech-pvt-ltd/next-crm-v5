@@ -14,7 +14,9 @@ import { FileUpload } from '@/components/ui/file-upload';
 import { HelpTooltip } from './help-tooltip';
 import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import * as StudentsService from '@/services/students';
+import * as DropdownsService from '@/services/dropdowns';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import {
@@ -50,6 +52,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   // Check for existing students to prevent duplicates
   const { data: existingStudents } = useQuery({
     queryKey: ['/api/students'],
+    queryFn: async () => StudentsService.getStudents(),
   });
 
   // Check for existing leads to prevent duplicates
@@ -65,10 +68,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   // Dropdowns for mapping keys -> labels
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    }
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
   const initialFormData = {
@@ -174,14 +174,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
 
   const convertToStudentMutation = useMutation({
-    mutationFn: async (studentData: any) => {
-      const res = await apiRequest('POST', '/api/students/convert-from-lead', {
-        ...studentData,
-        leadId: lead?.id,
-      });
-      const data = await res.json();
-      return data as Student;
-    },
+    mutationFn: async (studentData: any) => StudentsService.convertFromLead(lead?.id, studentData),
     onSuccess: (student: Student) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
