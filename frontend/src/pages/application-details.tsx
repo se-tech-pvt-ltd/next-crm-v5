@@ -37,20 +37,19 @@ export default function ApplicationDetails() {
 
   const { data: applications, isLoading, error } = useQuery<Application[]>({
     queryKey: ['/api/applications'],
+    queryFn: async () => ApplicationsService.getApplications() as any,
   });
   const application = useMemo(() => (applications || []).find((a) => a.id === params?.id), [applications, params?.id]);
 
   const { data: student } = useQuery<Student>({
     queryKey: application?.studentId ? ['/api/students', application.studentId] : ['noop'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/students/${application?.studentId}`);
-      return res.json();
-    },
+    queryFn: async () => StudentsService.getStudent(application?.studentId),
     enabled: !!application?.studentId,
   });
 
   const { data: admissions } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
+    queryFn: async () => AdmissionsService.getAdmissions() as any,
   });
   const admissionForApp = useMemo(() => (admissions || []).find((a) => a.applicationId === application?.id), [admissions, application?.id]);
 
@@ -77,9 +76,7 @@ export default function ApplicationDetails() {
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!application) return;
-      const res = await apiRequest('PUT', `/api/applications/${application.id}`, { appStatus: newStatus });
-      if (!res.ok) throw new Error('Failed to update status');
-      return res.json();
+      return ApplicationsService.updateApplication(application.id, { appStatus: newStatus });
     },
     onSuccess: (updated: Application) => {
       setCurrentStatus(updated.appStatus || 'Open');
@@ -93,12 +90,7 @@ export default function ApplicationDetails() {
   const updateApplicationMutation = useMutation({
     mutationFn: async (data: Partial<Application>) => {
       if (!application) return;
-      const res = await apiRequest('PUT', `/api/applications/${application.id}`, data);
-      if (!res.ok) {
-        const info = await res.json().catch(() => ({}));
-        throw new Error(info.message || 'Failed to update application');
-      }
-      return res.json();
+      return ApplicationsService.updateApplication(application.id, data);
     },
     onSuccess: (updated: Application) => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
