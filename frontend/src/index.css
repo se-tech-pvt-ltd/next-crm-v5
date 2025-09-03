@@ -329,3 +329,12 @@
     background-size: 20px 20px;
   }
 }
+
+/* Disable the red "not-allowed" cursor in Lead Details modal */
+.no-not-allowed :disabled,
+.no-not-allowed [aria-disabled="true"],
+.no-not-allowed [data-disabled],
+.no-not-allowed .cursor-not-allowed,
+.no-not-allowed label {
+  cursor: default !important;
+}
