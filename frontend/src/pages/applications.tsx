@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -207,22 +208,17 @@ Closed
                 ))}
               </div>
             ) : filteredApplications.length === 0 ? (
-              <div className="text-center py-8">
-                <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all' 
-                    ? "Applications will appear here when students apply to universities."
-                    : `No applications with status "${statusFilter}".`
-                  }
-                </p>
-                <div className="mt-6">
+              <EmptyState
+                icon={<GraduationCap className="h-12 w-12" />}
+                title="No applications found"
+                description={statusFilter === 'all' ? 'Applications will appear here when students apply to universities.' : `No applications with status "${statusFilter}".`}
+                action={
                   <Button onClick={() => setLocation('/applications/add')}>
                     <Plus className="w-4 h-4 mr-2" />
                     New Application
                   </Button>
-                </div>
-              </div>
+                }
+              />
             ) : (
               <Table>
                 <TableHeader>
