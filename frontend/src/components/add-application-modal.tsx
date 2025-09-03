@@ -11,7 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertApplicationSchema, type Student } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
 import { Check, ChevronsUpDown } from 'lucide-react';
