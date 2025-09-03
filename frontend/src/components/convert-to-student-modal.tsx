@@ -171,7 +171,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         expectation: lead.expectation || 'High',
       }));
     }
-  }, [lead, dropdownData]);
+  }, [lead, dropdownData, mapDropdownToLabels]);
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {
@@ -535,7 +535,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                       <SelectItem value="IELTS">📝 IELTS</SelectItem>
                       <SelectItem value="PTE">📝 PTE</SelectItem>
                       <SelectItem value="OIDI">📝 OIDI</SelectItem>
-                      <SelectItem value="TOEFL">📝 TOEFL</SelectItem>
+                      <SelectItem value="TOEFL">��� TOEFL</SelectItem>
                       <SelectItem value="Passwords">🔑 Passwords</SelectItem>
                       <SelectItem value="No Test">❌ No Test</SelectItem>
                     </SelectContent>
