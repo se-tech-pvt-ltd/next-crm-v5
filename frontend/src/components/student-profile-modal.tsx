@@ -60,14 +60,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   }, [student]);
 
   const updateStudentMutation = useMutation({
-    mutationFn: async (data: Partial<Student>) => {
-      const response = await apiRequest('PUT', `/api/students/${student?.id}`, data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update student');
-      }
-      return response.json();
-    },
+    mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
     onSuccess: () => {
       toast({
         title: "Success",
