@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import * as DropdownsService from '@/services/dropdowns';
+import * as LeadsService from '@/services/leads';
+import * as StudentsService from '@/services/students';
 import { Lead } from '@/lib/types';
 import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -89,18 +91,12 @@ export default function Leads() {
   // Get dropdown data for mapping IDs to display values
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    }
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
   const { data: leadsResponse, isLoading } = useQuery({
     queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
-    queryFn: async () => {
-      const response = await apiRequest('GET', `/api/leads?page=${currentPage}&limit=${pageSize}`);
-      return response.json();
-    },
+    queryFn: async () => LeadsService.getLeads({ page: currentPage, limit: pageSize }),
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -132,10 +128,7 @@ export default function Leads() {
   // });
 
   const updateLeadMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<Lead> }) => {
-      const response = await apiRequest('PUT', `/api/leads/${id}`, data);
-      return response.json();
-    },
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Lead> }) => LeadsService.updateLead(String(id), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
@@ -165,8 +158,7 @@ export default function Leads() {
 
       };
       
-      const response = await apiRequest('POST', '/api/students', studentData);
-      const student = await response.json();
+      const student = await StudentsService.createStudent(studentData as any);
       
       // Update lead status
       await updateLeadMutation.mutateAsync({ id: lead.id, data: { status: 'converted' } });
