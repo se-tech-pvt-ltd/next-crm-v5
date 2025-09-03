@@ -373,8 +373,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
       <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
         <DialogContent className="max-w-md">
+          <DialogTitle>Mark Lead as Lost</DialogTitle>
           <div className="space-y-4">
-            <h3 className="text-base font-semibold">Mark Lead as Lost</h3>
             <p className="text-sm text-gray-600">Please select a reason why this lead is being marked as lost:</p>
             <Select value={lostReason} onValueChange={setLostReason}>
               <SelectTrigger className="shadow-sm border border-gray-300 bg-white">
