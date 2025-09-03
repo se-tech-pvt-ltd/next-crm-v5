@@ -29,7 +29,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!application) return;
-      return apiRequest('PUT', `/api/applications/${application.id}`, { appStatus: newStatus });
+      return ApplicationsService.updateApplication(application.id, { appStatus: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
