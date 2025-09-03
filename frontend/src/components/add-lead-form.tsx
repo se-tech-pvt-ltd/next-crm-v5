@@ -356,13 +356,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
-                    {emailDuplicateStatus.isDuplicate && (
-                      <div className="flex items-center space-x-2 text-amber-600 text-sm mt-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>{emailDuplicateStatus.message}</span>
-                      </div>
-                    )}
+                    <div className="min-h-[1.25rem]">
+                      <FormMessage />
+                      {emailDuplicateStatus.isDuplicate && (
+                        <div className="flex items-center space-x-2 text-amber-600 text-sm">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span>{emailDuplicateStatus.message}</span>
+                        </div>
+                      )}
+                    </div>
                   </FormItem>
                 )} />
 
@@ -382,13 +384,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
-                    {phoneDuplicateStatus.isDuplicate && (
-                      <div className="flex items-center space-x-2 text-amber-600 text-sm mt-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>{phoneDuplicateStatus.message}</span>
-                      </div>
-                    )}
+                    <div className="min-h-[1.25rem]">
+                      <FormMessage />
+                      {phoneDuplicateStatus.isDuplicate && (
+                        <div className="flex items-center space-x-2 text-amber-600 text-sm">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span>{phoneDuplicateStatus.message}</span>
+                        </div>
+                      )}
+                    </div>
                   </FormItem>
                 )} />
 
