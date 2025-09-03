@@ -386,12 +386,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         )}
                       </div>
                     </FormControl>
-                    <div className="min-h-[1.25rem]">
-                      <FormMessage />
+                    <div className="h-6 overflow-hidden">
+                      {!phoneDuplicateStatus.isDuplicate && <FormMessage />}
                       {phoneDuplicateStatus.isDuplicate && (
                         <div className="flex items-center space-x-2 text-amber-600 text-sm">
                           <AlertTriangle className="w-4 h-4" />
-                          <span>{phoneDuplicateStatus.message}</span>
+                          <span className="truncate">{phoneDuplicateStatus.message}</span>
                         </div>
                       )}
                     </div>
