@@ -73,6 +73,7 @@ export default function Leads() {
   };
   const [, setLocation] = useLocation();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
