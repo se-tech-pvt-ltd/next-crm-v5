@@ -86,9 +86,9 @@ export default function Leads() {
 
   const handleAddLeadClick = () => {
     setIsNavigating(true);
-    // Small delay for animation effect
     setTimeout(() => {
-      setLocation('/leads/add');
+      setAddLeadOpen(true);
+      setIsNavigating(false);
     }, 200);
   };
 
