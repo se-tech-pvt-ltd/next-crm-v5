@@ -324,17 +324,10 @@ export default function Settings() {
     setIsUploading(true);
     
     try {
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      
-      const response = await fetch('/api/upload/profile-picture', {
-        method: 'POST',
-        body: formData,
-      });
+      const { uploadProfilePicture } = await import('@/services/uploads');
+      const result = await uploadProfilePicture(file);
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (result.success && result.fileUrl) {
         setNewUserProfileImageUrl(result.fileUrl);
         toast({
           title: "Success",
@@ -382,47 +375,25 @@ export default function Settings() {
     setIsEditUploading(true);
     
     try {
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      
-      const response = await fetch('/api/upload/profile-picture', {
-        method: 'POST',
-        body: formData,
-      });
+      const { uploadProfilePicture } = await import('@/services/uploads');
+      const result = await uploadProfilePicture(file);
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (result.success && result.fileUrl) {
         // Update local state
         setEditUserData(prev => ({ ...prev, profileImageUrl: result.fileUrl }));
-        
+
         // Also save to database immediately
         try {
-          const updateResponse = await fetch(`/api/users/${editingUserId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              profileImageUrl: result.fileUrl,
-            }),
-          });
+          const { updateUser } = await import('@/services/users');
+          await updateUser(editingUserId, { profileImageUrl: result.fileUrl });
 
-          if (updateResponse.ok) {
-            // Invalidate users cache to refresh profile images everywhere
-            queryClient.invalidateQueries({ queryKey: ['/api/users'] });
-            
-            toast({
-              title: "Success",
-              description: "Profile picture uploaded and saved successfully.",
-            });
-          } else {
-            toast({
-              title: "Warning",
-              description: "Image uploaded but failed to save to profile. Please click Save Changes.",
-              variant: "destructive",
-            });
-          }
+          // Invalidate users cache to refresh profile images everywhere
+          queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+
+          toast({
+            title: "Success",
+            description: "Profile picture uploaded and saved successfully.",
+          });
         } catch (saveError) {
           console.error('Save error:', saveError);
           toast({
