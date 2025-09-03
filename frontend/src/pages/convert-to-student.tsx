@@ -158,7 +158,7 @@ export default function ConvertLeadToStudent() {
         expectation: lead.expectation || prev.expectation,
       }));
     }
-  }, [lead, dropdownData, mapDropdownToLabels]);
+  }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
