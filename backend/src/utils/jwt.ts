@@ -6,7 +6,7 @@ const SECRET = process.env.JWT_SECRET || 'dev_insecure_secret_change_me';
 export type JwtPayload = { sub: string; role?: string } & Record<string, any>;
 
 export function signAccessToken(payload: JwtPayload, expiresIn: string = DEFAULT_EXPIRY): string {
-  return jwt.sign(payload, SECRET, { algorithm: 'HS256', expiresIn, subject: payload.sub });
+  return jwt.sign(payload, SECRET, { algorithm: 'HS256', expiresIn });
 }
 
 export function verifyAccessToken(token: string): JwtPayload | null {
