@@ -88,16 +88,8 @@ export class LeadController {
     try {
       const id = req.params.id;
       console.log('Updating lead:', id, 'with data:', req.body);
-      
-      // Handle array to JSON string conversion for country and program fields
-      const processedData = { ...req.body };
-      if (Array.isArray(processedData.country)) {
-        processedData.country = JSON.stringify(processedData.country);
-      }
-      if (Array.isArray(processedData.program)) {
-        processedData.program = JSON.stringify(processedData.program);
-      }
-      
+      const { processLeadUpdatePayload } = await import("../utils/helpers.js");
+      const processedData = processLeadUpdatePayload(req.body);
       const currentUser = LeadController.getCurrentUser();
       const validatedData = insertLeadSchema.partial().parse(processedData);
       const lead = await LeadService.updateLead(id, { ...validatedData, updatedBy: currentUser.id } as any, currentUser.id);
