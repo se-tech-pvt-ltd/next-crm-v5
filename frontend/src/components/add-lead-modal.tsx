@@ -57,13 +57,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
   // Get counselors with search functionality
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
     queryKey: ['/api/users', { search: counselorSearchQuery }],
-    queryFn: async () => {
-      const url = counselorSearchQuery
-        ? `/api/users?search=${encodeURIComponent(counselorSearchQuery)}&role=counselor,admin_staff`
-        : '/api/users?role=counselor,admin_staff&limit=20';
-      const response = await apiRequest('GET', url);
-      return response.json();
-    },
+    queryFn: async () => UsersService.getUsers(),
     enabled: true,
   });
 
@@ -364,7 +358,7 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
                             { label: 'Austria 🇦🇹', value: 'austria' },
                             { label: 'Italy 🇮🇹', value: 'italy' },
                             { label: 'Spain 🇪🇸', value: 'spain' },
-                            { label: 'Japan 🇯🇵', value: 'japan' },
+                            { label: 'Japan ���🇵', value: 'japan' },
                             { label: 'South Korea 🇰🇷', value: 'south-korea' },
                             { label: 'Hong Kong 🇭🇰', value: 'hong-kong' },
                             { label: 'UAE 🇦🇪', value: 'uae' },
