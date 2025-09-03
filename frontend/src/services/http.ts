@@ -17,10 +17,16 @@ async function request<T>(method: HttpMethod, url: string, body?: unknown): Prom
       method,
       headers: { 'Content-Type': 'application/json' },
       body: body == null ? undefined : JSON.stringify(body),
+      credentials: 'include',
     });
 
-    const text = await res.text();
-    const json = text ? JSON.parse(text) : undefined;
+    let json: any;
+    try {
+      const text = await res.text();
+      json = text ? JSON.parse(text) : undefined;
+    } catch {
+      json = undefined;
+    }
 
     if (!res.ok) {
       const message = (json && (json.message || json.error)) || `Request failed with status ${res.status}`;
