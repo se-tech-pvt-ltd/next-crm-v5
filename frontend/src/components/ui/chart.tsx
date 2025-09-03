@@ -53,9 +53,8 @@ const ChartContainer = React.forwardRef<
     return () => clearTimeout(timer)
   }, [])
 
-  // Stabilize config without complex deps
-  const configString = React.useMemo(() => JSON.stringify(config), [config])
-  const stableConfig = React.useMemo(() => config, [config, configString])
+  // Stabilize config
+  const stableConfig = React.useMemo(() => config, [config])
 
   // Error boundary for chart rendering
   const [renderError, setRenderError] = React.useState(false)
