@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { HelpTooltipSimple as HelpTooltip } from './help-tooltip-simple';
 import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
@@ -34,11 +33,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                 <p className="text-xs text-gray-500 line-clamp-1">{subtitle}</p>
               )}
             </div>
-            {helpText && (
-              <div className="hidden sm:block">
-                <HelpTooltip content={helpText} />
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-1 sm:space-x-3 flex-shrink-0">
