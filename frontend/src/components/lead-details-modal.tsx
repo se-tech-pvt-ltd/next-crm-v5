@@ -13,7 +13,9 @@ import { ConvertToStudentModal } from './convert-to-student-modal';
 import { CommandMultiSelect } from './command-multi-select';
 import { type Lead, type User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import * as LeadsService from '@/services/leads';
+import * as UsersService from '@/services/users';
 import { formatStatus } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, Edit, Save, X, UserPlus, Calendar, Users2, XCircle } from 'lucide-react';
@@ -89,14 +91,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   };
 
   const updateLeadMutation = useMutation({
-    mutationFn: async (data: Partial<Lead>) => {
-      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update lead');
-      }
-      return response.json();
-    },
+    mutationFn: async (data: Partial<Lead>) => LeadsService.updateLead(lead?.id, data),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       setIsEditing(false);
@@ -117,13 +112,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   });
 
   const markAsLostMutation = useMutation({
-    mutationFn: async ({ reason }: { reason: string }) => {
-      const response = await apiRequest('PUT', `/api/leads/${lead?.id}`, {
-        status: 'lost',
-        lostReason: reason
-      });
-      return response.json();
-    },
+    mutationFn: async ({ reason }: { reason: string }) => LeadsService.markLeadAsLost(lead?.id, reason),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       setShowMarkAsLostModal(false);
@@ -145,10 +134,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
   const { data: users = [] } = useQuery({
     queryKey: ['/api/users'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/users');
-      return response.json();
-    },
+    queryFn: async () => UsersService.getUsers(),
   });
 
   const handleSaveChanges = () => {
