@@ -39,28 +39,15 @@ export default function Login({ onLogin }: LoginProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      const user = await (await import('@/services/auth')).login(data);
+      onLogin({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        branch: user.branchId,
       });
-
-      if (response.ok) {
-        const user = await response.json();
-        onLogin({
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          branch: user.branchId,
-        });
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Invalid email or password. Please check your credentials and try again.');
-      }
-    } catch (err) {
-      setError('An error occurred during login. Please try again.');
+    } catch (err: any) {
+      setError(err?.message || 'Invalid email or password. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
