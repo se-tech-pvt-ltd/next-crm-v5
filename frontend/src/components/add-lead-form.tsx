@@ -314,9 +314,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             </div>
           </div>
         </div>
-        <div className="hidden sm:block sm:order-last">
-          <HelpTooltip content="Fill out the lead information to add them to your pipeline. Required fields are marked with an asterisk." />
-        </div>
       </div>
 
       <Form {...form}>
