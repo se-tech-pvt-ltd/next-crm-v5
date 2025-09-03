@@ -20,6 +20,8 @@ import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calend
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
   // Helper functions for display names using dropdown data
