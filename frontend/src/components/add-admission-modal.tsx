@@ -56,9 +56,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   });
 
   const createAdmissionMutation = useMutation({
-    mutationFn: async (admission: InsertAdmission) => {
-      return apiRequest('/api/admissions', 'POST', admission);
-    },
+    mutationFn: async (admission: InsertAdmission) => AdmissionsService.createAdmission(admission),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       toast({
