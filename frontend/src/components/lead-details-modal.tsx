@@ -110,7 +110,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   });
 
   // Check if the lead has been converted to a student
-  const { data: convertedStudent } = useQuery({
+  const { data: convertedStudent, isLoading: convertedLoading } = useQuery({
     queryKey: ['/api/students/by-lead', lead?.id],
     queryFn: async () => LeadsService.getStudentByLeadId(lead?.id),
     enabled: !!lead?.id,
@@ -205,19 +205,17 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <h1 className="text-lg font-semibold truncate">{lead.name}</h1>
                   </div>
                   <div className="flex items-center gap-2">
-                    {convertedStudent ? (
-                      <>
-                        <Button
-                          variant="default"
-                          size="xs"
-                          className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => { onOpenChange(false); setLocation(`/students/${convertedStudent.id}`); }}
-                          title="View Student"
-                        >
-                          <UserPlus />
-                          <span className="hidden lg:inline">View Student</span>
-                        </Button>
-                      </>
+                    {convertedLoading ? null : convertedStudent ? (
+                      <Button
+                        variant="default"
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                        onClick={() => { onOpenChange(false); setLocation(`/students/${convertedStudent.id}`); }}
+                        title="View Student"
+                      >
+                        <UserPlus />
+                        <span className="hidden lg:inline">View Student</span>
+                      </Button>
                     ) : isEditing ? (
                       <>
                         <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateLeadMutation.isPending}>
