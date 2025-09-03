@@ -191,18 +191,33 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <h1 className="text-lg font-semibold truncate">{lead.name}</h1>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
-                      <Edit />
-                      <span className="hidden lg:inline">Edit</span>
-                    </Button>
-                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowConvertModal(true)} title="Convert to Student">
-                      <UserPlus />
-                      <span className="hidden lg:inline">Convert</span>
-                    </Button>
-                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowMarkAsLostModal(true)} title="Mark as Lost">
-                      <XCircle />
-                      <span className="hidden lg:inline">Lost</span>
-                    </Button>
+                    {isEditing ? (
+                      <>
+                        <Button size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={handleSaveChanges} title="Save">
+                          <Save />
+                          <span className="hidden lg:inline">Save</span>
+                        </Button>
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); }} title="Cancel">
+                          <X />
+                          <span className="hidden lg:inline">Cancel</span>
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
+                        </Button>
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowConvertModal(true)} title="Convert to Student">
+                          <UserPlus />
+                          <span className="hidden lg:inline">Convert</span>
+                        </Button>
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowMarkAsLostModal(true)} title="Mark as Lost">
+                          <XCircle />
+                          <span className="hidden lg:inline">Lost</span>
+                        </Button>
+                      </>
+                    )}
                     <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
                       <X className="w-4 h-4" />
                     </Button>
@@ -246,14 +261,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Personal Information</CardTitle>
-                      {isEditing && (
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" onClick={handleSaveChanges}><Save className="w-4 h-4 mr-1" />Save Changes</Button>
-                          <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(lead); }}>
-                            <X className="w-4 h-4 mr-1" />Cancel
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">
