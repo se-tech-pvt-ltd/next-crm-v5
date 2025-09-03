@@ -24,7 +24,58 @@ export function hasPermission(userRole: string, requiredRole: string): boolean {
     'counselor': 1,
     'branch_manager': 2,
     'admin_staff': 3
-  };
-  
+  } as const;
   return (roleHierarchy as any)[userRole] >= (roleHierarchy as any)[requiredRole];
+}
+
+export function normalizeDate(value: unknown): string | undefined {
+  if (!value) return undefined;
+  const s = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) {
+    const mm = m[1].padStart(2, '0');
+    const dd = m[2].padStart(2, '0');
+    const yyyy = m[3];
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return undefined;
+}
+
+export function mapStudentFromLeadPayload(studentData: any) {
+  return {
+    name: studentData.name,
+    email: studentData.email,
+    phone: studentData.phone,
+    dateOfBirth: normalizeDate(studentData.dateOfBirth),
+    englishProficiency: studentData.englishProficiency || studentData.eltTest || undefined,
+    passportNumber: studentData.passport || studentData.passportNumber || undefined,
+    targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
+    status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
+    counselorId: studentData.counsellor || studentData.counselorId || undefined,
+    address: studentData.address || studentData.city || undefined,
+    consultancyFree: ['yes','true','1','on'].includes(String(studentData.consultancyFee ?? studentData.consultancy_free ?? studentData.consultancyFree ?? '').toLowerCase()),
+    scholarship: ['yes','true','1','on'].includes(String(studentData.scholarship ?? '').toLowerCase()),
+    expectation: studentData.expectation || '',
+    eltTest: studentData.eltTest || '',
+    notes: studentData.notes || undefined,
+  };
+}
+
+export function processLeadUpdatePayload(data: any) {
+  const processed = { ...data };
+  if (Array.isArray(processed.country)) {
+    processed.country = JSON.stringify(processed.country);
+  }
+  if (Array.isArray(processed.program)) {
+    processed.program = JSON.stringify(processed.program);
+  }
+  return processed;
 }
