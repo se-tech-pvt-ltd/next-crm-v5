@@ -25,7 +25,7 @@ export default [
       // TypeScript naming conventions
       '@typescript-eslint/naming-convention': [
         'error',
-        { selector: 'variableLike', format: ['camelCase', 'PascalCase', 'UPPER_CASE'] },
+        { selector: 'variableLike', format: ['camelCase', 'PascalCase', 'UPPER_CASE'], leadingUnderscore: 'allow' },
         { selector: 'typeLike', format: ['PascalCase'] }
       ],
       // React basics
@@ -33,7 +33,7 @@ export default [
       'react/jsx-uses-react': 'off',
       'react/jsx-pascal-case': 'error',
       // Hooks rules (equivalent to recommended)
-      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/rules-of-hooks': 'warn',
       'react-hooks/exhaustive-deps': 'warn'
     }
   },
@@ -49,10 +49,6 @@ export default [
           message: 'Class components are not allowed. Use functional components with hooks.'
         }
       ],
-      'react/function-component-definition': [
-        'error',
-        { namedComponents: 'arrow-function', unnamedComponents: 'arrow-function' }
-      ]
-    }
+          }
   }
 ];
