@@ -56,7 +56,6 @@ export function ResizeObserverErrorBoundary({ children, fallback, onError }: Res
       FallbackComponent={FallbackComponent}
       onError={(error, errorInfo) => {
         if (process.env.NODE_ENV === 'development' && isLayoutError(error)) {
-          // eslint-disable-next-line no-console
           console.debug('[ErrorBoundary] Layout error caught and handled:', (error as Error).message);
         }
         onError?.(error as Error, errorInfo);
