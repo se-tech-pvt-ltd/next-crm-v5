@@ -11,7 +11,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import * as LeadsService from '@/services/leads';
+import * as StudentsService from '@/services/students';
+import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { type Lead, type Student } from '@/lib/types';
 import { ArrowLeft, Award, Calendar, DollarSign, FileText, GraduationCap, MapPin, Target, Users } from 'lucide-react';
@@ -23,32 +27,23 @@ export default function ConvertLeadToStudent() {
 
   const { data: lead, isLoading: leadLoading } = useQuery<Lead>({
     queryKey: ['/api/leads', params?.id],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/leads/${params?.id}`);
-      return res.json();
-    },
+    queryFn: async () => LeadsService.getLead(params?.id),
     enabled: !!params?.id,
     staleTime: 0,
     refetchOnMount: true,
   });
 
-  const { data: existingStudents } = useQuery({ queryKey: ['/api/students'] });
-  const { data: users } = useQuery({ queryKey: ['/api/users'], staleTime: 5 * 60 * 1000 });
+  const { data: existingStudents } = useQuery({ queryKey: ['/api/students'], queryFn: async () => StudentsService.getStudents() });
+  const { data: users } = useQuery({ queryKey: ['/api/users'], queryFn: async () => UsersService.getUsers(), staleTime: 5 * 60 * 1000 });
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    },
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
   });
 
   // Fetch dropdowns for Students module (status, expectation, ELT Test)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/students');
-      return response.json();
-    },
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
 
   const normalizeToText = React.useCallback((value: unknown): string => {
@@ -165,13 +160,7 @@ export default function ConvertLeadToStudent() {
   };
 
   const convertToStudentMutation = useMutation({
-    mutationFn: async (studentData: any) => {
-      const res = await apiRequest('POST', '/api/students/convert-from-lead', {
-        ...studentData,
-        leadId: params?.id,
-      });
-      return res.json() as Promise<Student>;
-    },
+    mutationFn: async (studentData: any) => StudentsService.convertFromLead(params?.id, studentData),
     onSuccess: (student: Student) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
