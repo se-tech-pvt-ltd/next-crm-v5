@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddApplicationModal } from '@/components/add-application-modal';
-import { StudentProfileModal } from '@/components/student-profile-modal';
+import { StudentDetailsModal } from '@/components/student-details-modal';
 import { Student } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as StudentsService from '@/services/students';
