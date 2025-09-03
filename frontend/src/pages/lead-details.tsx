@@ -251,14 +251,7 @@ export default function LeadDetails() {
   };
 
   const updateStatusMutation = useMutation({
-    mutationFn: async (newStatusKey: string) => {
-      const response = await apiRequest('PUT', `/api/leads/${params?.id}`, { status: newStatusKey });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update status');
-      }
-      return response.json();
-    },
+    mutationFn: async (newStatusKey: string) => LeadsService.updateLead(params?.id, { status: newStatusKey }),
     onMutate: async (newStatusKey: string) => {
       await queryClient.cancelQueries({ queryKey: ['/api/leads', params?.id] });
       const previousLead = queryClient.getQueryData(['/api/leads', params?.id]);
