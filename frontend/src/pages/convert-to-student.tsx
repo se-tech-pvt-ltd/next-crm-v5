@@ -51,7 +51,7 @@ export default function ConvertLeadToStudent() {
     },
   });
 
-  const normalizeToText = (value: unknown): string => {
+  const normalizeToText = React.useCallback((value: unknown): string => {
     if (!value) return '';
     if (Array.isArray(value)) return value.filter(Boolean).join(', ');
     if (typeof value === 'string') {
@@ -65,7 +65,7 @@ export default function ConvertLeadToStudent() {
       return trimmed;
     }
     return String(value);
-  };
+  }, []);
 
   const mapDropdownToLabels = React.useCallback((raw: unknown, fieldName: string): string => {
     try {
