@@ -110,133 +110,111 @@ export default function AddLead() {
   });
 
   // Debounced duplicate checking functions
+  const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkEmailDuplicate = useCallback(
-    useMemo(
-      () => {
-        let timeoutId: NodeJS.Timeout;
-        return (email: string) => {
-          clearTimeout(timeoutId);
-          if (!email || !email.includes('@')) {
-            setEmailDuplicateStatus({ isDuplicate: false });
-            setCheckingEmail(false);
-            return;
+    (email: string) => {
+      if (emailTimeoutRef.current) clearTimeout(emailTimeoutRef.current);
+      if (!email || !email.includes('@')) {
+        setEmailDuplicateStatus({ isDuplicate: false });
+        setCheckingEmail(false);
+        return;
+      }
+      setCheckingEmail(true);
+      emailTimeoutRef.current = setTimeout(async () => {
+        try {
+          const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
+          if (Array.isArray(leadsData)) {
+            const duplicateLead = leadsData.find(
+              (lead: any) => lead.email?.toLowerCase() === email.toLowerCase()
+            );
+            if (duplicateLead) {
+              setEmailDuplicateStatus({
+                isDuplicate: true,
+                type: 'lead',
+                message: 'This email already exists as a lead'
+              });
+              setCheckingEmail(false);
+              return;
+            }
           }
 
-          setCheckingEmail(true);
-          timeoutId = setTimeout(async () => {
-            try {
-              // Check in existing leads - handle both array and paginated response
-              const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
-              if (Array.isArray(leadsData)) {
-                const duplicateLead = leadsData.find(
-                  (lead: any) => lead.email?.toLowerCase() === email.toLowerCase()
-                );
-                if (duplicateLead) {
-                  setEmailDuplicateStatus({
-                    isDuplicate: true,
-                    type: 'lead',
-                    message: 'This email already exists as a lead'
-                  });
-                  setCheckingEmail(false);
-                  return;
-                }
-              }
-
-              // Check in existing students - handle both array and paginated response
-              const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
-              if (Array.isArray(studentsData)) {
-                const duplicateStudent = studentsData.find(
-                  (student: any) => student.email?.toLowerCase() === email.toLowerCase()
-                );
-                if (duplicateStudent) {
-                  setEmailDuplicateStatus({
-                    isDuplicate: true,
-                    type: 'student',
-                    message: 'This contact is already registered as a student'
-                  });
-                  setCheckingEmail(false);
-                  return;
-                }
-              }
-
-              // No duplicates found
-              setEmailDuplicateStatus({ isDuplicate: false });
+          const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
+          if (Array.isArray(studentsData)) {
+            const duplicateStudent = studentsData.find(
+              (student: any) => student.email?.toLowerCase() === email.toLowerCase()
+            );
+            if (duplicateStudent) {
+              setEmailDuplicateStatus({
+                isDuplicate: true,
+                type: 'student',
+                message: 'This contact is already registered as a student'
+              });
               setCheckingEmail(false);
-            } catch (error) {
-              console.error('Error checking email duplicate:', error);
-              setEmailDuplicateStatus({ isDuplicate: false });
-              setCheckingEmail(false);
+              return;
             }
-          }, 300); // Reduced to 300ms for faster response
-        };
-      },
-      [existingLeads, existingStudents]
-    ),
+          }
+
+          setEmailDuplicateStatus({ isDuplicate: false });
+          setCheckingEmail(false);
+        } catch (error) {
+          console.error('Error checking email duplicate:', error);
+          setEmailDuplicateStatus({ isDuplicate: false });
+          setCheckingEmail(false);
+        }
+      }, 300);
+    },
     [existingLeads, existingStudents]
   );
 
+  const phoneTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkPhoneDuplicate = useCallback(
-    useMemo(
-      () => {
-        let timeoutId: NodeJS.Timeout;
-        return (phone: string) => {
-          clearTimeout(timeoutId);
-          if (!phone || phone.length < 3) {
-            setPhoneDuplicateStatus({ isDuplicate: false });
-            setCheckingPhone(false);
-            return;
+    (phone: string) => {
+      if (phoneTimeoutRef.current) clearTimeout(phoneTimeoutRef.current);
+      if (!phone || phone.length < 3) {
+        setPhoneDuplicateStatus({ isDuplicate: false });
+        setCheckingPhone(false);
+        return;
+      }
+      setCheckingPhone(true);
+      phoneTimeoutRef.current = setTimeout(async () => {
+        try {
+          const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
+          if (Array.isArray(leadsData)) {
+            const duplicateLead = leadsData.find((lead: any) => lead.phone === phone);
+            if (duplicateLead) {
+              setPhoneDuplicateStatus({
+                isDuplicate: true,
+                type: 'lead',
+                message: 'This phone number already exists as a lead'
+              });
+              setCheckingPhone(false);
+              return;
+            }
           }
 
-          setCheckingPhone(true);
-          timeoutId = setTimeout(async () => {
-            try {
-              // Check in existing leads - handle both array and paginated response
-              const leadsData = Array.isArray(existingLeads) ? existingLeads : existingLeads?.data;
-              if (Array.isArray(leadsData)) {
-                const duplicateLead = leadsData.find(
-                  (lead: any) => lead.phone === phone
-                );
-                if (duplicateLead) {
-                  setPhoneDuplicateStatus({
-                    isDuplicate: true,
-                    type: 'lead',
-                    message: 'This phone number already exists as a lead'
-                  });
-                  setCheckingPhone(false);
-                  return;
-                }
-              }
-
-              // Check in existing students - handle both array and paginated response
-              const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
-              if (Array.isArray(studentsData)) {
-                const duplicateStudent = studentsData.find(
-                  (student: any) => student.phone === phone
-                );
-                if (duplicateStudent) {
-                  setPhoneDuplicateStatus({
-                    isDuplicate: true,
-                    type: 'student',
-                    message: 'This phone number is already registered to a student'
-                  });
-                  setCheckingPhone(false);
-                  return;
-                }
-              }
-
-              // No duplicates found
-              setPhoneDuplicateStatus({ isDuplicate: false });
+          const studentsData = Array.isArray(existingStudents) ? existingStudents : existingStudents?.data;
+          if (Array.isArray(studentsData)) {
+            const duplicateStudent = studentsData.find((student: any) => student.phone === phone);
+            if (duplicateStudent) {
+              setPhoneDuplicateStatus({
+                isDuplicate: true,
+                type: 'student',
+                message: 'This phone number is already registered to a student'
+              });
               setCheckingPhone(false);
-            } catch (error) {
-              console.error('Error checking phone duplicate:', error);
-              setPhoneDuplicateStatus({ isDuplicate: false });
-              setCheckingPhone(false);
+              return;
             }
-          }, 300); // Reduced to 300ms for faster response
-        };
-      },
-      [existingLeads, existingStudents]
-    ),
+          }
+
+          setPhoneDuplicateStatus({ isDuplicate: false });
+          setCheckingPhone(false);
+        } catch (error) {
+          console.error('Error checking phone duplicate:', error);
+          setPhoneDuplicateStatus({ isDuplicate: false });
+          setCheckingPhone(false);
+        }
+      }, 300);
+    },
     [existingLeads, existingStudents]
   );
 
