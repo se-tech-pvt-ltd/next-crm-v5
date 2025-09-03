@@ -54,90 +54,90 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <main role="main" className="min-h-screen bg-white flex">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 flex-col justify-between relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
+      <aside aria-label="Branding" className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background Pattern (decorative) */}
+        <div className="absolute inset-0 opacity-10" aria-hidden="true">
           <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full"></div>
           <div className="absolute top-40 right-32 w-24 h-24 bg-white rounded-full"></div>
           <div className="absolute bottom-32 left-32 w-28 h-28 bg-white rounded-full"></div>
           <div className="absolute bottom-20 right-20 w-20 h-20 bg-white rounded-full"></div>
         </div>
-        
+
         {/* Logo and Title */}
-        <div className="relative z-10">
+        <header className="relative z-10">
           <div className="flex items-center space-x-3 mb-8">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-7 h-7 text-blue-600" />
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center" aria-hidden="true">
+              <GraduationCap className="w-7 h-7 text-blue-600" aria-hidden="true" />
             </div>
             <h1 className="text-3xl font-bold text-white">SetCrm</h1>
           </div>
-          
+
           <div className="space-y-6">
             <h2 className="text-4xl font-bold text-white leading-tight">
               Streamline Your<br />
               Education Management
             </h2>
             <p className="text-blue-100 text-lg leading-relaxed">
-              Comprehensive solution for student admissions, lead tracking, 
+              Comprehensive solution for student admissions, lead tracking,
               and institutional management all in one powerful platform.
             </p>
           </div>
-        </div>
+        </header>
 
         {/* Features */}
-        <div className="relative z-10 grid grid-cols-2 gap-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
+        <ul className="relative z-10 grid grid-cols-2 gap-6" aria-label="Key features">
+          <li className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center" aria-hidden="true">
+              <BookOpen className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-white font-semibold">Course Management</h3>
               <p className="text-blue-100 text-sm">Organize programs & curriculum</p>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-white" />
+          </li>
+
+          <li className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center" aria-hidden="true">
+              <Users className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-white font-semibold">Student Portal</h3>
               <p className="text-blue-100 text-sm">Manage enrollments & data</p>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-white" />
+          </li>
+
+          <li className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center" aria-hidden="true">
+              <BarChart3 className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-white font-semibold">Analytics & Reports</h3>
               <p className="text-blue-100 text-sm">Data-driven insights</p>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+          </li>
+
+          <li className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center" aria-hidden="true">
+              <Shield className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-white font-semibold">Secure Access</h3>
               <p className="text-blue-100 text-sm">Role-based permissions</p>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ul>
+      </aside>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <section aria-labelledby="login-title" className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center" aria-hidden="true">
+                <GraduationCap className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">SetCrm</h1>
             </div>
@@ -145,12 +145,12 @@ export default function Login({ onLogin }: LoginProps) {
 
           <div className="space-y-6">
             <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
+              <h2 id="login-title" className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
               <p className="text-gray-600">Please sign in to your account to continue</p>
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" aria-describedby={error ? "login-error" : undefined} aria-busy={isLoading}>
                 <FormField
                   control={form.control}
                   name="email"
@@ -159,11 +159,13 @@ export default function Login({ onLogin }: LoginProps) {
                       <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                           <Input
                             {...field}
                             type="email"
                             placeholder="Enter your email"
+                            autoComplete="email"
+                            inputMode="email"
                             className="h-12 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
                           />
                         </div>
@@ -181,22 +183,25 @@ export default function Login({ onLogin }: LoginProps) {
                       <FormLabel className="text-gray-700 font-medium">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter your password"
+                            autoComplete="current-password"
                             className="h-12 pl-10 pr-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
+                            aria-pressed={showPassword}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                           >
                             {showPassword ? (
-                              <EyeOff className="w-5 h-5" />
+                              <EyeOff className="w-5 h-5" aria-hidden="true" />
                             ) : (
-                              <Eye className="w-5 h-5" />
+                              <Eye className="w-5 h-5" aria-hidden="true" />
                             )}
                           </button>
                         </div>
@@ -221,14 +226,15 @@ export default function Login({ onLogin }: LoginProps) {
                   <button
                     type="button"
                     className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+                    aria-label="Forgot password"
                   >
                     Forgot password?
                   </button>
                 </div>
 
                 {error && (
-                  <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
-                    <AlertCircle className="h-4 w-4" />
+                  <Alert id="login-error" variant="destructive" className="bg-red-50 border-red-200 text-red-800" aria-live="assertive">
+                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
@@ -237,10 +243,11 @@ export default function Login({ onLogin }: LoginProps) {
                   type="submit"
                   className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50"
                   disabled={isLoading}
+                  aria-busy={isLoading}
                 >
                   {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="flex items-center space-x-2" aria-live="polite">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" aria-hidden="true"></div>
                       <span>Signing in...</span>
                     </div>
                   ) : (
@@ -253,14 +260,14 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="text-center">
               <p className="text-sm text-gray-500">
                 Don't have an account?{' '}
-                <button className="text-blue-600 hover:text-blue-500 font-medium">
+                <button className="text-blue-600 hover:text-blue-500 font-medium" aria-label="Contact Administrator">
                   Contact Administrator
                 </button>
               </p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
