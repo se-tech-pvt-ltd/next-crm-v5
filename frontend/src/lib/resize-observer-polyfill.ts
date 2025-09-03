@@ -123,7 +123,8 @@ export class StabilizedResizeObserver {
     this.callback = callback;
     this.delay = delay;
     
-    this.observer = new ResizeObserver((entries, observer) => {
+    const RO = NativeResizeObserver || ResizeObserver;
+    this.observer = new RO((entries, observer) => {
       // Collect entries to batch process them
       this.pendingEntries.push(...entries);
       
