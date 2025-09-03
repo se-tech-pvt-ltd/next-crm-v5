@@ -18,7 +18,8 @@ export default [
     plugins: {
       '@typescript-eslint': tsPlugin,
       react: reactPlugin,
-      'react-hooks': reactHooksPlugin
+      'react-hooks': reactHooksPlugin,
+      import: (await import('eslint-plugin-import')).default || (await import('eslint-plugin-import'))
     },
     settings: { react: { version: 'detect' } },
     rules: {
