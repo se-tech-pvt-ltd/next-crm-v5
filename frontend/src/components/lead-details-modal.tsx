@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import * as LeadsService from '@/services/leads';
 import * as DropdownsService from '@/services/dropdowns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
