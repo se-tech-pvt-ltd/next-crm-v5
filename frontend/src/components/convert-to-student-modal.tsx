@@ -171,7 +171,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         expectation: lead.expectation || 'High',
       }));
     }
-  }, [lead, dropdownData, mapDropdownToLabels]);
+  }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {
