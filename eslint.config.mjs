@@ -36,6 +36,15 @@ export default [
       // Hooks rules (equivalent to recommended)
       'react-hooks/rules-of-hooks': 'warn',
       'react-hooks/exhaustive-deps': 'warn',
+      // Enforce using services for API
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: '@/lib/queryClient', importNames: ['apiRequest'], message: 'Use src/services/* (http wrapper) for API calls.' }
+          ]
+        }
+      ],
       // Enforce frontend module boundaries (no mixing UI with business logic)
       'import/no-restricted-paths': [
         'error',
