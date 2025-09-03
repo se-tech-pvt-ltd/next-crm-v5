@@ -4,6 +4,7 @@ import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -442,55 +443,29 @@ export default function Leads() {
                 ))}
               </div>
             ) : filteredLeads.length === 0 ? (
-              <div className="text-center py-4">
-                <UserPlus className="mx-auto h-10 w-10 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No leads found</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {statusFilter === 'all'
-                    ? "Get started by adding your first lead."
-                    : `No leads with status "${statusFilter}".`
-                  }
-                </p>
-                <motion.div
-                  className="mt-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      className="h-8"
-                      onClick={handleAddLeadClick}
-                      disabled={isNavigating}
-                    >
-                      {isNavigating ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                          className="w-3 h-3 mr-1"
-                        >
-                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ rotate: 0 }}
-                          animate={{ rotate: 0 }}
-                          whileHover={{ rotate: 90 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                        </motion.div>
-                      )}
-                      <span className="text-sm">
-                        {isNavigating ? 'Opening...' : 'Add Lead'}
-                      </span>
-                    </Button>
+              <EmptyState
+                icon={<UserPlus className="h-10 w-10" />}
+                title="No leads found"
+                description={statusFilter === 'all' ? 'Get started by adding your first lead.' : `No leads with status "${statusFilter}".`}
+                action={
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button className="h-8" onClick={handleAddLeadClick} disabled={isNavigating}>
+                        {isNavigating ? (
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 mr-1">
+                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                          </motion.div>
+                        ) : (
+                          <motion.div initial={{ rotate: 0 }} animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                            <Plus className="w-3 h-3 mr-1" />
+                          </motion.div>
+                        )}
+                        <span className="text-sm">{isNavigating ? 'Opening...' : 'Add Lead'}</span>
+                      </Button>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              </div>
+                }
+              />
             ) : (
               <Table className="text-xs">
                 <TableHeader>
