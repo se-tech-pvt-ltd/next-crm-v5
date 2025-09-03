@@ -7,7 +7,7 @@ import { ActivityTracker } from "./activity-tracker";
 import { Award, User, X, ExternalLink, Plane } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import * as AdmissionsService from "@/services/admissions";
 import { useState } from "react";
 
 interface AdmissionDetailsModalProps {
