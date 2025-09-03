@@ -1,4 +1,4 @@
-import { http } from './http';
+import { http, HttpError } from './http';
 import type { Lead, Student } from '@/lib/types';
 
 export async function getLeads() {
@@ -20,9 +20,14 @@ export async function markLeadAsLost(id: string | undefined, reason: string) {
   return http.put<Lead>(`/api/leads/${id}`, { status: 'lost', lostReason: reason });
 }
 
-export async function getStudentByLeadId(id: string | undefined) {
+export async function getStudentByLeadId(id: string | undefined): Promise<Student | null> {
   if (!id) throw new Error('Lead ID is required');
-  return http.get<Student | undefined>(`/api/students/by-lead/${id}`);
+  try {
+    return await http.get<Student>(`/api/students/by-lead/${id}`);
+  } catch (err) {
+    if (err instanceof HttpError && err.status === 404) return null;
+    throw err;
+  }
 }
 
 export async function createLead(data: Partial<Lead>) {
