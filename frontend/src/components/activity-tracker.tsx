@@ -10,7 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
 import { Activity, User as UserType } from "@/lib/types";
-import { apiRequest } from "@/lib/queryClient";
+import * as DropdownsService from "@/services/dropdowns";
+import * as ActivitiesService from "@/services/activities";
 import { format } from "date-fns";
 
 interface ActivityTrackerProps {
@@ -53,10 +54,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   // Fetch Leads dropdowns (for mapping status IDs/keys to display names)
   const { data: leadsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/dropdowns/module/Leads');
-      return response.json();
-    }
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
   // Create a lookup function for user profile images
@@ -68,14 +66,12 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
       console.log('Adding activity:', { entityType, entityId, data });
-      const response = await apiRequest('POST', '/api/activities', {
+      const result = await ActivitiesService.createActivity({
         entityType,
-        entityId,
+        entityId: String(entityId),
         activityType: data.type,
-        title: `${ACTIVITY_TYPES.find(t => t.value === data.type)?.label || 'Activity'} added`,
-        description: data.content,
+        content: data.content,
       });
-      const result = await response.json();
       console.log('Activity created:', result);
       return result;
     },
