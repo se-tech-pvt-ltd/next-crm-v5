@@ -8,12 +8,12 @@ const compat = new FlatCompat({ baseDirectory: process.cwd() });
 
 export default [
   // Base recommended configs via compat for convenience
-  ...compat.extends([
+  ...compat.extends(
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-  ]),
+    'plugin:react-hooks/recommended'
+  ),
   {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: ['node_modules/**', 'dist/**', 'build/**'],
