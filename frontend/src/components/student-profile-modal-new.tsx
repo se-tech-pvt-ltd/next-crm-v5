@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,11 @@ import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
+import * as DropdownsService from '@/services/dropdowns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatStatus } from '@/lib/utils';
 import {
   User,
   Edit,
@@ -68,12 +70,53 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     enabled: !!studentId,
   });
 
+  // Get dropdown data for Students module
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('students')
+  });
+
   useEffect(() => {
     if (student) {
       setEditData(student);
       setCurrentStatus(student.status);
     }
   }, [student]);
+
+  // Build status sequence from dropdown API (ordered by sequence)
+  const statusSequence = useMemo<string[]>(() => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0) {
+      // Fallback to default student statuses
+      return ['active', 'applied', 'admitted', 'enrolled', 'inactive'];
+    }
+    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
+  }, [dropdownData]);
+
+  const getStatusDisplayName = (statusId: string) => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    const byId = list.find((o: any) => o.id === statusId);
+    if (byId?.value) return byId.value;
+    const byKey = list.find((o: any) => o.key === statusId);
+    if (byKey?.value) return byKey.value;
+    const byValue = list.find((o: any) => o.value === statusId);
+    if (byValue?.value) return byValue.value;
+    return formatStatus(statusId);
+  };
+
+  const getCurrentStatusIndex = () => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0 || !currentStatus) {
+      // Fallback logic for default statuses
+      const defaultStatuses = ['active', 'applied', 'admitted', 'enrolled', 'inactive'];
+      return defaultStatuses.findIndex(s => s === currentStatus);
+    }
+
+    const option = list.find((o: any) => o.key === currentStatus || o.id === currentStatus || o.value === currentStatus);
+    if (!option) return -1;
+
+    return statusSequence.findIndex((id) => id === (option.key || option.id));
+  };
 
   const updateStudentMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
@@ -94,6 +137,34 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatusKey: string) => StudentsService.updateStudent(student?.id, { status: newStatusKey }),
+    onMutate: async (newStatusKey: string) => {
+      await queryClient.cancelQueries({ queryKey: [`/api/students/${studentId}`] });
+      const previousStudent = queryClient.getQueryData([`/api/students/${studentId}`]);
+      const previousStatus = currentStatus;
+      setCurrentStatus(newStatusKey);
+      if (previousStudent && typeof previousStudent === 'object') {
+        queryClient.setQueryData([`/api/students/${studentId}`], { ...(previousStudent as any), status: newStatusKey });
+      }
+      return { previousStudent, previousStatus } as { previousStudent: any; previousStatus: string };
+    },
+    onError: (error: any, _newStatusKey, context) => {
+      if (context?.previousStatus) setCurrentStatus(context.previousStatus);
+      if (context?.previousStudent) queryClient.setQueryData([`/api/students/${studentId}`], context.previousStudent);
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
+    onSuccess: (updatedStudent) => {
+      setCurrentStatus(updatedStudent.status);
+      queryClient.setQueryData([`/api/students/${studentId}`], updatedStudent);
+      toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updatedStudent.status)}` });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/student/${studentId}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/activities/student/${studentId}`] });
+    },
+  });
+
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
     updateStudentMutation.mutate({ status: newStatus });
@@ -101,6 +172,64 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
 
   const handleSaveChanges = () => {
     updateStudentMutation.mutate(editData);
+  };
+
+  const StatusProgressBar = () => {
+    const currentIndex = getCurrentStatusIndex();
+
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
+        <div className="flex items-center justify-between relative">
+          {statusSequence.map((statusId, index) => {
+            const isActive = index === currentIndex;
+            const isCompleted = index <= currentIndex;
+            const statusName = getStatusDisplayName(statusId);
+
+            const handleClick = () => {
+              if (updateStatusMutation.isPending) return;
+              if (!student) return;
+              const targetKey = statusId;
+              if (currentStatus === targetKey) return;
+              updateStatusMutation.mutate(targetKey);
+            };
+
+            return (
+              <div
+                key={statusId}
+                className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                onClick={handleClick}
+                role="button"
+                aria-label={`Set status to ${statusName}`}
+              >
+                {/* Status Circle */}
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                  isCompleted
+                    ? 'bg-green-500 border-green-500 text-white'
+                    : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                }`}>
+                  {isCompleted && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  {!isCompleted && <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                </div>
+
+                {/* Status Label */}
+                <span className={`mt-1 text-xs font-medium text-center ${
+                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                }`}>
+                  {statusName}
+                </span>
+
+                {/* Connector Line */}
+                {index < statusSequence.length - 1 && (
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -136,6 +265,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
           <div className="text-xs md:text-[12px]">
+            {/* Status Progress Bar */}
+            {!isLoading && statusSequence.length > 0 && (
+              <div className="p-4 pb-0">
+                <StatusProgressBar />
+              </div>
+            )}
+
             <div className="flex gap-0 min-h-[calc(90vh-2rem)] w-full">
               {/* Main Content */}
               <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full p-6">
