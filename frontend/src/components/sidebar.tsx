@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -17,17 +17,19 @@ import { UserMenu } from './user-menu';
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [navigationLock, setNavigationLock] = useState(false);
+  const navigationLockRef = useRef(false);
 
   // Check if mobile screen
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setIsExpanded(false);
-      }
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // keep sidebar expanded on desktop, collapsed on mobile
+      setIsExpanded(!mobile);
     };
 
     checkMobile();
@@ -84,7 +86,7 @@ export function Sidebar() {
       label: 'Students', 
       icon: GraduationCap,
       count: studentsCount,
-      countColor: 'bg-purple'
+      countColor: 'bg-purple-600'
     },
     { 
       path: '/applications', 
@@ -127,10 +129,11 @@ export function Sidebar() {
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile) {
+    // Do not auto-collapse on desktop. Only collapse on mobile.
+    if (isMobile) {
       const timeout = setTimeout(() => {
         setIsExpanded(false);
-      }, 300); // 300ms delay before closing
+      }, 300); // 300ms delay before closing on mobile
       setHoverTimeout(timeout);
     }
   };
@@ -186,12 +189,13 @@ export function Sidebar() {
           const isActive = location === item.path;
 
           const handleNavClick = () => {
-            // Keep sidebar open briefly during navigation on desktop
-            if (!isMobile && hoverTimeout) {
+            // Clear any existing timeout
+            if (hoverTimeout) {
               clearTimeout(hoverTimeout);
               setHoverTimeout(null);
             }
-            // On mobile, close sidebar after navigation for better UX
+
+            // Only close sidebar on mobile after navigation
             if (isMobile && isExpanded) {
               setTimeout(() => setIsExpanded(false), 150);
             }
@@ -205,6 +209,17 @@ export function Sidebar() {
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
+                onMouseDown={() => {
+                  // set lock immediately on pointer down to avoid race with mouseleave
+                  if (!isMobile) {
+                    navigationLockRef.current = true;
+                    setNavigationLock(true);
+                    if (hoverTimeout) {
+                      clearTimeout(hoverTimeout);
+                      setHoverTimeout(null);
+                    }
+                  }
+                }}
                 onClick={handleNavClick}
                 role="link"
                 aria-current={isActive ? 'page' : undefined}

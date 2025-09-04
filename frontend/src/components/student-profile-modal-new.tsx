@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CollapsibleCard } from './collapsible-card';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
@@ -15,8 +16,29 @@ import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
+import * as DropdownsService from '@/services/dropdowns';
 import { useToast } from '@/hooks/use-toast';
-import { User, Edit, Save, X, Plus, FileText, Award, Calendar, Phone, Mail } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatStatus } from '@/lib/utils';
+import {
+  User,
+  Edit,
+  Save,
+  X,
+  Plus,
+  FileText,
+  Award,
+  Calendar,
+  Phone,
+  Mail,
+  MapPin,
+  GraduationCap,
+  Globe,
+  BookOpen,
+  Target,
+  User as UserIcon
+} from 'lucide-react';
 
 interface StudentProfileModalProps {
   open: boolean;
@@ -25,6 +47,7 @@ interface StudentProfileModalProps {
 }
 
 export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -47,12 +70,53 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     enabled: !!studentId,
   });
 
+  // Get dropdown data for Students module
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('students')
+  });
+
   useEffect(() => {
     if (student) {
       setEditData(student);
       setCurrentStatus(student.status);
     }
   }, [student]);
+
+  // Build status sequence from dropdown API (ordered by sequence)
+  const statusSequence = useMemo<string[]>(() => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0) {
+      // Fallback to default student statuses
+      return ['active', 'applied', 'admitted', 'enrolled', 'inactive'];
+    }
+    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
+  }, [dropdownData]);
+
+  const getStatusDisplayName = (statusId: string) => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    const byId = list.find((o: any) => o.id === statusId);
+    if (byId?.value) return byId.value;
+    const byKey = list.find((o: any) => o.key === statusId);
+    if (byKey?.value) return byKey.value;
+    const byValue = list.find((o: any) => o.value === statusId);
+    if (byValue?.value) return byValue.value;
+    return formatStatus(statusId);
+  };
+
+  const getCurrentStatusIndex = () => {
+    const list: any[] = (dropdownData as any)?.Status || [];
+    if (!Array.isArray(list) || list.length === 0 || !currentStatus) {
+      // Fallback logic for default statuses
+      const defaultStatuses = ['active', 'applied', 'admitted', 'enrolled', 'inactive'];
+      return defaultStatuses.findIndex(s => s === currentStatus);
+    }
+
+    const option = list.find((o: any) => o.key === currentStatus || o.id === currentStatus || o.value === currentStatus);
+    if (!option) return -1;
+
+    return statusSequence.findIndex((id) => id === (option.key || option.id));
+  };
 
   const updateStudentMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
@@ -73,19 +137,105 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatusKey: string) => StudentsService.updateStudent(student?.id, { status: newStatusKey }),
+    onMutate: async (newStatusKey: string) => {
+      await queryClient.cancelQueries({ queryKey: [`/api/students/${studentId}`] });
+      const previousStudent = queryClient.getQueryData([`/api/students/${studentId}`]);
+      const previousStatus = currentStatus;
+      setCurrentStatus(newStatusKey);
+      if (previousStudent && typeof previousStudent === 'object') {
+        queryClient.setQueryData([`/api/students/${studentId}`], { ...(previousStudent as any), status: newStatusKey });
+      }
+      return { previousStudent, previousStatus } as { previousStudent: any; previousStatus: string };
+    },
+    onError: (error: any, _newStatusKey, context) => {
+      if (context?.previousStatus) setCurrentStatus(context.previousStatus);
+      if (context?.previousStudent) queryClient.setQueryData([`/api/students/${studentId}`], context.previousStudent);
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    },
+    onSuccess: (updatedStudent) => {
+      setCurrentStatus(updatedStudent.status);
+      queryClient.setQueryData([`/api/students/${studentId}`], updatedStudent);
+      toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updatedStudent.status)}` });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/student/${studentId}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/activities/student/${studentId}`] });
+    },
+  });
+
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
-    updateStudentMutation.mutate({ status: newStatus });
+    updateStatusMutation.mutate(newStatus);
   };
 
   const handleSaveChanges = () => {
     updateStudentMutation.mutate(editData);
   };
 
+  const StatusProgressBar = () => {
+    const currentIndex = getCurrentStatusIndex();
+
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
+        <div className="flex items-center justify-between relative">
+          {statusSequence.map((statusId, index) => {
+            const isActive = index === currentIndex;
+            const isCompleted = index <= currentIndex;
+            const statusName = getStatusDisplayName(statusId);
+
+            const handleClick = () => {
+              if (updateStatusMutation.isPending) return;
+              if (!student) return;
+              const targetKey = statusId;
+              if (currentStatus === targetKey) return;
+              updateStatusMutation.mutate(targetKey);
+            };
+
+            return (
+              <div
+                key={statusId}
+                className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                onClick={handleClick}
+                role="button"
+                aria-label={`Set status to ${statusName}`}
+              >
+                {/* Status Circle */}
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                  isCompleted
+                    ? 'bg-green-500 border-green-500 text-white'
+                    : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                }`}>
+                  {isCompleted && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  {!isCompleted && <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                </div>
+
+                {/* Status Label */}
+                <span className={`mt-1 text-xs font-medium text-center ${
+                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                }`}>
+                  {statusName}
+                </span>
+
+                {/* Connector Line */}
+                {index < statusSequence.length - 1 && (
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Loading Student</DialogTitle>
           <div className="text-center py-8">
             <p>Loading student...</p>
@@ -98,7 +248,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (!student) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Not Found</DialogTitle>
           <div className="text-center py-8">
             <p>Student not found</p>
@@ -114,237 +264,428 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          {/* Header with Fixed Position */}
-          <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-green-600" />
+          <div className="text-xs md:text-[12px]">
+            {/* Status Progress Bar */}
+            {!isLoading && statusSequence.length > 0 && (
+              <div className="p-4 pb-0">
+                <div className="flex items-center justify-end mb-2 pr-12">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => setIsAddApplicationOpen(true)}
+                      title="Add Application"
+                    >
+                      <Plus />
+                      <span className="hidden lg:inline">Add Application</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => setIsAddAdmissionOpen(true)}
+                      title="Add Admission"
+                    >
+                      <Plus />
+                      <span className="hidden lg:inline">Add Admission</span>
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold">{student.name}</h1>
-                  <p className="text-sm text-gray-600">{student.email}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div>
-                  <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
-                  <Select value={currentStatus} onValueChange={handleStatusChange}>
-                    <SelectTrigger className="w-32 h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="applied">Applied</SelectItem>
-                      <SelectItem value="admitted">Admitted</SelectItem>
-                      <SelectItem value="enrolled">Enrolled</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button 
-                  size="sm" 
-                  onClick={() => setIsAddApplicationOpen(true)}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Application
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => setIsAddAdmissionOpen(true)}
-                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Admission
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="default"
-                  className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
-                  onClick={() => onOpenChange(false)}
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-          </div>
 
-          <div className="flex h-[90vh]">
-            {/* Main Content - Left Side */}
-            <div className="flex-1 overflow-y-auto p-6 pt-28">
-              <div className="space-y-6">
-                {/* Student Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold">Student Information</h2>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditing(!isEditing)}
-                      >
-                        {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                      </Button>
-                    </CardTitle>
+                <StatusProgressBar />
+              </div>
+            )}
+
+            <div className="flex gap-0 min-h-[calc(90vh-2rem)] w-full items-stretch">
+              {/* Main Content */}
+              <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full p-6">
+                {/* Header Section */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold">{student.name}</h1>
+                      <p className="text-sm text-gray-600">{student.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="default"
+                      className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                      onClick={() => onOpenChange(false)}
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Personal Information Section */}
+                <Card className="w-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm">Personal Information</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        {!isEditing ? (
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => setIsEditing(true)}
+                            disabled={isLoading}
+                            title="Edit"
+                          >
+                            <Edit />
+                            <span className="hidden lg:inline">Edit</span>
+                          </Button>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={handleSaveChanges}
+                              disabled={updateStudentMutation.isPending}
+                            >
+                              <Save className="w-4 h-4 mr-1" />
+                              Save Changes
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setIsEditing(false);
+                                setEditData(student);
+                              }}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name">Name</Label>
+                  <CardContent className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {/* Name */}
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="flex items-center space-x-2">
+                          <UserIcon className="w-4 h-4" />
+                          <span>Full Name</span>
+                        </Label>
                         <Input
                           id="name"
-                          value={editData.name || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                          value={isEditing ? (editData.name || '') : (student?.name || '')}
+                          onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                           disabled={!isEditing}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="email">Email</Label>
+
+                      {/* Email */}
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email Address</span>
+                        </Label>
                         <Input
                           id="email"
-                          value={editData.email || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))}
+                          type="email"
+                          value={isEditing ? (editData.email || '') : (student?.email || '')}
+                          onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                           disabled={!isEditing}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="phone">Phone</Label>
+
+                      {/* Phone */}
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4" />
+                          <span>Phone Number</span>
+                        </Label>
                         <Input
                           id="phone"
-                          value={editData.phone || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
+                          type="tel"
+                          value={isEditing ? (editData.phone || '') : (student?.phone || '')}
+                          onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                           disabled={!isEditing}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+
+                      {/* Date of Birth */}
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>Date of Birth</span>
+                        </Label>
                         <DobPicker
                           id="dateOfBirth"
-                          value={editData.dateOfBirth || ''}
-                          onChange={(v) => setEditData(prev => ({ ...prev, dateOfBirth: v }))}
+                          value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')}
+                          onChange={(v) => setEditData({ ...editData, dateOfBirth: v })}
                           disabled={!isEditing}
                         />
                       </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="notes">Notes</Label>
-                        <Textarea
-                          id="notes"
-                          value={editData.notes || ''}
-                          onChange={(e) => setEditData(prev => ({ ...prev, notes: e.target.value }))}
+
+                      {/* Address */}
+                      <div className="space-y-2">
+                        <Label htmlFor="address" className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>Address</span>
+                        </Label>
+                        <Input
+                          id="address"
+                          value={isEditing ? (editData.address || '') : (student?.address || '')}
+                          onChange={(e) => setEditData({ ...editData, address: e.target.value })}
                           disabled={!isEditing}
-                          rows={3}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+
+                      {/* Nationality */}
+                      <div className="space-y-2">
+                        <Label htmlFor="nationality" className="flex items-center space-x-2">
+                          <Globe className="w-4 h-4" />
+                          <span>Nationality</span>
+                        </Label>
+                        <Input
+                          id="nationality"
+                          value={isEditing ? (editData.nationality || '') : (student?.nationality || '')}
+                          onChange={(e) => setEditData({ ...editData, nationality: e.target.value })}
+                          disabled={!isEditing}
+                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
                     </div>
-                    {isEditing && (
-                      <div className="mt-4 flex justify-end space-x-2">
-                        <Button variant="outline" onClick={() => setIsEditing(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleSaveChanges}>
-                          Save Changes
-                        </Button>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
+
+                {/* Academic Information Section */}
+                <CollapsibleCard
+                  persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`}
+                  header={
+                    <CardTitle className="text-sm flex items-center space-x-2">
+                      <GraduationCap className="w-5 h-5 text-primary" />
+                      <span>Academic Information</span>
+                    </CardTitle>
+                  }
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {/* Target Country */}
+                    <div className="space-y-2">
+                      <Label htmlFor="targetCountry" className="flex items-center space-x-2">
+                        <Globe className="w-4 h-4" />
+                        <span>Target Country</span>
+                      </Label>
+                      <Input
+                        id="targetCountry"
+                        value={isEditing ? (editData.targetCountry || '') : (student?.targetCountry || '')}
+                        onChange={(e) => setEditData({ ...editData, targetCountry: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* Target Program */}
+                    <div className="space-y-2">
+                      <Label htmlFor="targetProgram" className="flex items-center space-x-2">
+                        <BookOpen className="w-4 h-4" />
+                        <span>Target Program</span>
+                      </Label>
+                      <Input
+                        id="targetProgram"
+                        value={isEditing ? (editData.targetProgram || '') : (student?.targetProgram || '')}
+                        onChange={(e) => setEditData({ ...editData, targetProgram: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* Academic Background */}
+                    <div className="space-y-2">
+                      <Label htmlFor="academicBackground" className="flex items-center space-x-2">
+                        <GraduationCap className="w-4 h-4" />
+                        <span>Academic Background</span>
+                      </Label>
+                      <Input
+                        id="academicBackground"
+                        value={isEditing ? (editData.academicBackground || '') : (student?.academicBackground || '')}
+                        onChange={(e) => setEditData({ ...editData, academicBackground: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* English Proficiency */}
+                    <div className="space-y-2">
+                      <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4" />
+                        <span>English Proficiency</span>
+                      </Label>
+                      <Input
+                        id="englishProficiency"
+                        value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')}
+                        onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* Budget */}
+                    <div className="space-y-2">
+                      <Label htmlFor="budget" className="flex items-center space-x-2">
+                        <Target className="w-4 h-4" />
+                        <span>Budget</span>
+                      </Label>
+                      <Input
+                        id="budget"
+                        value={isEditing ? (editData.budget || '') : (student?.budget || '')}
+                        onChange={(e) => setEditData({ ...editData, budget: e.target.value })}
+                        disabled={!isEditing}
+                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    {/* Notes */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-3">
+                      <Label htmlFor="notes" className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4" />
+                        <span>Notes</span>
+                      </Label>
+                      <Textarea
+                        id="notes"
+                        value={isEditing ? (editData.notes || '') : (student?.notes || '')}
+                        onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
+                        disabled={!isEditing}
+                        rows={3}
+                        className="text-xs transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+                </CollapsibleCard>
 
                 {/* Applications Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold flex items-center">
-                        <FileText className="w-5 h-5 mr-2" />
-                        Applications ({applications?.length || 0})
-                      </h2>
-                      <Button 
-                        size="sm" 
+                <CollapsibleCard
+                  persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+                  header={
+                    <CardTitle className="text-sm flex items-center justify-between w-full">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-5 h-5 text-primary" />
+                        <span>Applications ({applications?.length || 0})</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3"
                         onClick={() => setIsAddApplicationOpen(true)}
-                        className="flex items-center gap-2"
+                        title="Add Application"
                       >
-                        <Plus className="w-4 h-4" />
-                        Add Application
+                        <Plus />
+                        <span className="hidden lg:inline">Add</span>
                       </Button>
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {applications && applications.length > 0 ? (
-                      <div className="space-y-3">
-                        {applications.map((application) => (
-                          <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-medium">{application.university}</h3>
-                                <p className="text-sm text-gray-600">{application.program}</p>
-                              </div>
-                              <Badge variant={application.appStatus === 'Closed' ? 'default' : 'secondary'}>
-                                {application.appStatus}
-                              </Badge>
+                  }
+                >
+                  {applications && applications.length > 0 ? (
+                    <div className="space-y-3">
+                      {applications.map((application) => (
+                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{application.university}</h3>
+                              <p className="text-sm text-gray-600">{application.program}</p>
                             </div>
+                            <Badge variant={application.appStatus === 'Closed' ? 'default' : 'secondary'}>
+                              {application.appStatus}
+                            </Badge>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-center py-4">No applications yet</p>
-                    )}
-                  </CardContent>
-                </Card>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No applications yet</p>
+                  )}
+                </CollapsibleCard>
 
                 {/* Admissions Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold flex items-center">
-                        <Award className="w-5 h-5 mr-2" />
-                        Admissions ({admissions?.length || 0})
-                      </h2>
-                      <Button 
-                        size="sm" 
+                <CollapsibleCard
+                  persistKey={`student-details:${authUser?.id || 'anon'}:admissions`}
+                  header={
+                    <CardTitle className="text-sm flex items-center justify-between w-full">
+                      <div className="flex items-center space-x-2">
+                        <Award className="w-5 h-5 text-primary" />
+                        <span>Admissions ({admissions?.length || 0})</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3"
                         onClick={() => setIsAddAdmissionOpen(true)}
-                        className="flex items-center gap-2"
+                        title="Add Admission"
                       >
-                        <Plus className="w-4 h-4" />
-                        Add Admission
+                        <Plus />
+                        <span className="hidden lg:inline">Add</span>
                       </Button>
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {admissions && admissions.length > 0 ? (
-                      <div className="space-y-3">
-                        {admissions.map((admission) => (
-                          <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-medium">{admission.program}</h3>
-                                <p className="text-sm text-gray-600">Decision: {admission.decisionDate}</p>
-                              </div>
-                              <Badge variant="default">
-                                {admission.visaStatus || 'Pending'}
-                              </Badge>
+                  }
+                >
+                  {admissions && admissions.length > 0 ? (
+                    <div className="space-y-3">
+                      {admissions.map((admission) => (
+                        <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{admission.program}</h3>
+                              <p className="text-sm text-gray-600">Decision: {admission.decisionDate}</p>
                             </div>
+                            <Badge variant="default">
+                              {admission.visaStatus || 'Pending'}
+                            </Badge>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-center py-4">No admissions yet</p>
-                    )}
-                  </CardContent>
-                </Card>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No admissions yet</p>
+                  )}
+                </CollapsibleCard>
               </div>
-            </div>
 
-            {/* Right Sidebar - Activity Timeline */}
-            <div className="w-96 bg-gradient-to-br from-green-50 to-green-100 border-l overflow-hidden">
-              <div className="px-4 py-5 border-b bg-gradient-to-r from-green-600 to-green-700 text-white">
-                <h2 className="text-lg font-semibold">Activity Timeline</h2>
-              </div>
-              <div className="overflow-y-auto h-full pt-2">
-                <ActivityTracker
-                  entityType="student"
-                  entityId={student.id}
-                  entityName={student.name}
-                />
+              {/* Activity Sidebar */}
+              <div className="w-[30rem] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full">
+                {/* Add Activity box */}
+                <div className="mb-3">
+                  <div className="rounded-md p-2 bg-blue-50 border border-blue-100">
+                    <button type="button" className="w-full text-sm font-medium py-2 bg-white rounded-md hover:bg-white/90">+ Add Activity</button>
+                  </div>
+                </div>
+
+                <h3 className="text-sm font-semibold mb-2 flex items-center">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Activity Timeline
+                </h3>
+
+                {isLoading ? (
+                  <div className="space-y-4 flex-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex-1 min-h-0 overflow-y-auto">
+                    <ActivityTracker
+                      entityType="student"
+                      entityId={student.id}
+                      entityName={student.name}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

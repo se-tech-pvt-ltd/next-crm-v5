@@ -6,6 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { Lead, Student, Application, Admission } from '@/lib/types';
+import * as LeadsService from '@/services/leads';
+import * as StudentsService from '@/services/students';
+import * as ApplicationsService from '@/services/applications';
+import * as AdmissionsService from '@/services/admissions';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -19,21 +23,34 @@ import {
 } from 'lucide-react';
 
 export default function Reports() {
-  const { data: leads, isLoading: leadsLoading } = useQuery<Lead[]>({
+  const { data: leadsResponse, isLoading: leadsLoading } = useQuery({
     queryKey: ['/api/leads'],
+    queryFn: async () => {
+      const response = await fetch('/api/leads');
+      return await response.json();
+    }
   });
 
-  const { data: students, isLoading: studentsLoading } = useQuery<Student[]>({
+  const { data: studentsResponse, isLoading: studentsLoading } = useQuery({
     queryKey: ['/api/students'],
+    queryFn: () => StudentsService.getStudents(),
   });
 
-  const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
+  const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
     queryKey: ['/api/applications'],
+    queryFn: () => ApplicationsService.getApplications(),
   });
 
-  const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
+  const { data: admissionsResponse, isLoading: admissionsLoading } = useQuery({
     queryKey: ['/api/admissions'],
+    queryFn: () => AdmissionsService.getAdmissions(),
   });
+
+  // Extract data arrays from responses (handle both direct arrays and paginated responses)
+  const leads = leadsResponse?.data || [];
+  const students = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
+  const applications = Array.isArray(applicationsResponse) ? applicationsResponse : (applicationsResponse?.data || []);
+  const admissions = Array.isArray(admissionsResponse) ? admissionsResponse : (admissionsResponse?.data || []);
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
@@ -179,7 +196,7 @@ export default function Reports() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple">
+              <div className="text-2xl font-bold text-purple-600">
                 45
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -218,7 +235,7 @@ export default function Reports() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <GraduationCap className="w-4 h-4 text-purple" />
+                      <GraduationCap className="w-4 h-4 text-purple-600" />
                       <span className="text-sm font-medium">Students</span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -342,7 +359,7 @@ export default function Reports() {
                     <div className="flex items-center space-x-2">
                       <div className="w-24 bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-purple h-2 rounded-full" 
+                          className="bg-purple-600 h-2 rounded-full" 
                           style={{ width: `${(count / totalStudents) * 100}%` }}
                         ></div>
                       </div>

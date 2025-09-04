@@ -1,5 +1,5 @@
-import { db } from "../server/db";
-import { users } from "../shared/schema";
+import { db } from "../backend/src/config/database.js";
+import { users } from "../shared/schema.js";
 import * as bcrypt from "bcryptjs";
 
 async function seedUsers() {
