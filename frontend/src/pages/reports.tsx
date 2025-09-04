@@ -6,6 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
 import { Lead, Student, Application, Admission } from '@/lib/types';
+import * as LeadsService from '@/services/leads';
+import * as StudentsService from '@/services/students';
+import * as ApplicationsService from '@/services/applications';
+import * as AdmissionsService from '@/services/admissions';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -19,21 +23,31 @@ import {
 } from 'lucide-react';
 
 export default function Reports() {
-  const { data: leads, isLoading: leadsLoading } = useQuery<Lead[]>({
+  const { data: leadsResponse, isLoading: leadsLoading } = useQuery({
     queryKey: ['/api/leads'],
+    queryFn: async () => {
+      const response = await fetch('/api/leads');
+      return await response.json();
+    }
   });
 
   const { data: students, isLoading: studentsLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
+    queryFn: () => StudentsService.getStudents(),
   });
 
   const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
     queryKey: ['/api/applications'],
+    queryFn: () => ApplicationsService.getApplications(),
   });
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
+    queryFn: () => AdmissionsService.getAdmissions(),
   });
+
+  // Extract leads array from paginated response
+  const leads = leadsResponse?.data || [];
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
