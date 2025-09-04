@@ -166,21 +166,25 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </SelectContent>
                       </Select>
                     </div>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
                       onClick={() => setIsAddApplicationOpen(true)}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                      title="Add Application"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span className="hidden lg:inline">Add Application</span>
+                      <Plus />
+                      <span className="hidden lg:inline">Add App</span>
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
                       onClick={() => setIsAddAdmissionOpen(true)}
-                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                      title="Add Admission"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span className="hidden lg:inline">Add Admission</span>
+                      <Plus />
+                      <span className="hidden lg:inline">Add Adm</span>
                     </Button>
                     <Button
                       variant="ghost"
