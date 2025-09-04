@@ -17,7 +17,7 @@ import { UserMenu } from './user-menu';
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [navigationLock, setNavigationLock] = useState(false);
@@ -26,10 +26,10 @@ export function Sidebar() {
   // Check if mobile screen
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setIsExpanded(false);
-      }
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // keep sidebar expanded on desktop, collapsed on mobile
+      setIsExpanded(!mobile);
     };
 
     checkMobile();
@@ -129,10 +129,11 @@ export function Sidebar() {
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile && !navigationLockRef.current) {
+    // Do not auto-collapse on desktop. Only collapse on mobile.
+    if (isMobile) {
       const timeout = setTimeout(() => {
         setIsExpanded(false);
-      }, 300); // 300ms delay before closing
+      }, 300); // 300ms delay before closing on mobile
       setHoverTimeout(timeout);
     }
   };
@@ -194,19 +195,7 @@ export function Sidebar() {
               setHoverTimeout(null);
             }
 
-            // On desktop, lock navigation to keep sidebar open during transition
-            if (!isMobile) {
-              navigationLockRef.current = true;
-              setNavigationLock(true);
-              setIsExpanded(true);
-              // Release lock after navigation completes
-              setTimeout(() => {
-                navigationLockRef.current = false;
-                setNavigationLock(false);
-              }, 500);
-            }
-
-            // On mobile, close sidebar after navigation for better UX
+            // Only close sidebar on mobile after navigation
             if (isMobile && isExpanded) {
               setTimeout(() => setIsExpanded(false), 150);
             }
