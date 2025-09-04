@@ -31,23 +31,26 @@ export default function Reports() {
     }
   });
 
-  const { data: students, isLoading: studentsLoading } = useQuery<Student[]>({
+  const { data: studentsResponse, isLoading: studentsLoading } = useQuery({
     queryKey: ['/api/students'],
     queryFn: () => StudentsService.getStudents(),
   });
 
-  const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
+  const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
     queryKey: ['/api/applications'],
     queryFn: () => ApplicationsService.getApplications(),
   });
 
-  const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
+  const { data: admissionsResponse, isLoading: admissionsLoading } = useQuery({
     queryKey: ['/api/admissions'],
     queryFn: () => AdmissionsService.getAdmissions(),
   });
 
-  // Extract leads array from paginated response
+  // Extract data arrays from responses (handle both direct arrays and paginated responses)
   const leads = leadsResponse?.data || [];
+  const students = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
+  const applications = Array.isArray(applicationsResponse) ? applicationsResponse : (applicationsResponse?.data || []);
+  const admissions = Array.isArray(admissionsResponse) ? admissionsResponse : (admissionsResponse?.data || []);
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
