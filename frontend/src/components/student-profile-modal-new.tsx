@@ -450,13 +450,15 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <FileText className="w-5 h-5 text-primary" />
                         <span>Applications ({applications?.length || 0})</span>
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3"
                         onClick={() => setIsAddApplicationOpen(true)}
-                        className="flex items-center gap-2"
+                        title="Add Application"
                       >
-                        <Plus className="w-4 h-4" />
-                        Add Application
+                        <Plus />
+                        <span className="hidden lg:inline">Add</span>
                       </Button>
                     </CardTitle>
                   }
@@ -491,13 +493,15 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <Award className="w-5 h-5 text-primary" />
                         <span>Admissions ({admissions?.length || 0})</span>
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3"
                         onClick={() => setIsAddAdmissionOpen(true)}
-                        className="flex items-center gap-2"
+                        title="Add Admission"
                       >
-                        <Plus className="w-4 h-4" />
-                        Add Admission
+                        <Plus />
+                        <span className="hidden lg:inline">Add</span>
                       </Button>
                     </CardTitle>
                   }
