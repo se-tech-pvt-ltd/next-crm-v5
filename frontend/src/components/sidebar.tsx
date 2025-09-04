@@ -84,7 +84,7 @@ export function Sidebar() {
       label: 'Students', 
       icon: GraduationCap,
       count: studentsCount,
-      countColor: 'bg-purple'
+      countColor: 'bg-purple-600'
     },
     { 
       path: '/applications', 
