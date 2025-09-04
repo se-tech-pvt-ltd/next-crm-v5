@@ -268,7 +268,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
             {/* Status Progress Bar */}
             {!isLoading && statusSequence.length > 0 && (
               <div className="p-4 pb-0">
-                <div className="flex items-center justify-start mb-2">
+                <div className="flex items-center justify-end mb-2 pr-12">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
