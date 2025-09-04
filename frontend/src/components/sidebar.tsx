@@ -20,6 +20,7 @@ export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [navigationLock, setNavigationLock] = useState(false);
 
   // Check if mobile screen
   useEffect(() => {
@@ -127,7 +128,7 @@ export function Sidebar() {
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile) {
+    if (!isMobile && !navigationLock) {
       const timeout = setTimeout(() => {
         setIsExpanded(false);
       }, 300); // 300ms delay before closing
@@ -186,11 +187,22 @@ export function Sidebar() {
           const isActive = location === item.path;
 
           const handleNavClick = () => {
-            // Keep sidebar open briefly during navigation on desktop
-            if (!isMobile && hoverTimeout) {
+            // Clear any existing timeout
+            if (hoverTimeout) {
               clearTimeout(hoverTimeout);
               setHoverTimeout(null);
             }
+
+            // On desktop, lock navigation to keep sidebar open during transition
+            if (!isMobile) {
+              setNavigationLock(true);
+              setIsExpanded(true);
+              // Release lock after navigation completes
+              setTimeout(() => {
+                setNavigationLock(false);
+              }, 500);
+            }
+
             // On mobile, close sidebar after navigation for better UX
             if (isMobile && isExpanded) {
               setTimeout(() => setIsExpanded(false), 150);
