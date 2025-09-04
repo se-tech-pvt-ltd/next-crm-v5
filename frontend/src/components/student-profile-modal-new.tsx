@@ -19,23 +19,23 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  User, 
-  Edit, 
-  Save, 
-  X, 
-  Plus, 
-  FileText, 
-  Award, 
-  Calendar, 
-  Phone, 
-  Mail, 
+import {
+  User,
+  Edit,
+  Save,
+  X,
+  Plus,
+  FileText,
+  Award,
+  Calendar,
+  Phone,
+  Mail,
   MapPin,
   GraduationCap,
   Globe,
   BookOpen,
   Target,
-  UserIcon
+  User as UserIcon
 } from 'lucide-react';
 
 interface StudentProfileModalProps {
