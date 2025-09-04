@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -21,6 +21,7 @@ export function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [navigationLock, setNavigationLock] = useState(false);
+  const navigationLockRef = useRef(false);
 
   // Check if mobile screen
   useEffect(() => {
@@ -128,7 +129,7 @@ export function Sidebar() {
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile && !navigationLock) {
+    if (!isMobile && !navigationLockRef.current) {
       const timeout = setTimeout(() => {
         setIsExpanded(false);
       }, 300); // 300ms delay before closing
@@ -195,10 +196,12 @@ export function Sidebar() {
 
             // On desktop, lock navigation to keep sidebar open during transition
             if (!isMobile) {
+              navigationLockRef.current = true;
               setNavigationLock(true);
               setIsExpanded(true);
               // Release lock after navigation completes
               setTimeout(() => {
+                navigationLockRef.current = false;
                 setNavigationLock(false);
               }, 500);
             }
@@ -217,6 +220,17 @@ export function Sidebar() {
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
+                onMouseDown={() => {
+                  // set lock immediately on pointer down to avoid race with mouseleave
+                  if (!isMobile) {
+                    navigationLockRef.current = true;
+                    setNavigationLock(true);
+                    if (hoverTimeout) {
+                      clearTimeout(hoverTimeout);
+                      setHoverTimeout(null);
+                    }
+                  }
+                }}
                 onClick={handleNavClick}
                 role="link"
                 aria-current={isActive ? 'page' : undefined}
