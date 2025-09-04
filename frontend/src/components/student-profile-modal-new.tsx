@@ -655,34 +655,19 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
 
               {/* Activity Sidebar */}
-              <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col h-full">
-                <div className="flex items-center justify-end gap-2 mb-2">
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    className="rounded-full px-2 [&_svg]:size-3"
-                    onClick={() => setIsAddApplicationOpen(true)}
-                    title="Add Application"
-                  >
-                    <Plus />
-                    <span className="hidden lg:inline">Add Application</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    className="rounded-full px-2 [&_svg]:size-3"
-                    onClick={() => setIsAddAdmissionOpen(true)}
-                    title="Add Admission"
-                  >
-                    <Plus />
-                    <span className="hidden lg:inline">Add Admission</span>
-                  </Button>
+              <div className="w-[30rem] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full">
+                {/* Add Activity box */}
+                <div className="mb-3">
+                  <div className="rounded-md p-2 bg-blue-50 border border-blue-100">
+                    <button type="button" className="w-full text-sm font-medium py-2 bg-white rounded-md hover:bg-white/90">+ Add Activity</button>
+                  </div>
                 </div>
 
                 <h3 className="text-sm font-semibold mb-2 flex items-center">
                   <Calendar className="w-5 h-5 mr-2" />
                   Activity Timeline
                 </h3>
+
                 {isLoading ? (
                   <div className="space-y-4 flex-1">
                     {[...Array(5)].map((_, i) => (
