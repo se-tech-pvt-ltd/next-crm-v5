@@ -287,41 +287,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div>
-                      <Label htmlFor="header-status" className="text-xs text-gray-500">Status</Label>
-                      <Select value={currentStatus} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="w-32 h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="applied">Applied</SelectItem>
-                          <SelectItem value="admitted">Admitted</SelectItem>
-                          <SelectItem value="enrolled">Enrolled</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => setIsAddApplicationOpen(true)}
-                      title="Add Application"
-                    >
-                      <Plus />
-                      <span className="hidden lg:inline">Add App</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => setIsAddAdmissionOpen(true)}
-                      title="Add Admission"
-                    >
-                      <Plus />
-                      <span className="hidden lg:inline">Add Adm</span>
-                    </Button>
                     <Button
                       variant="ghost"
                       size="default"
@@ -666,6 +631,29 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
 
               {/* Activity Sidebar */}
               <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
+                <div className="flex items-center justify-end gap-2 mb-2">
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="rounded-full px-2 [&_svg]:size-3"
+                    onClick={() => setIsAddApplicationOpen(true)}
+                    title="Add Application"
+                  >
+                    <Plus />
+                    <span className="hidden lg:inline">Add Application</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="rounded-full px-2 [&_svg]:size-3"
+                    onClick={() => setIsAddAdmissionOpen(true)}
+                    title="Add Admission"
+                  >
+                    <Plus />
+                    <span className="hidden lg:inline">Add Admission</span>
+                  </Button>
+                </div>
+
                 <h3 className="text-sm font-semibold mb-2 flex items-center">
                   <Calendar className="w-5 h-5 mr-2" />
                   Activity Timeline
