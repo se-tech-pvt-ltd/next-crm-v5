@@ -297,7 +297,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
             )}
 
-            <div className="flex gap-0 min-h-[calc(90vh-2rem)] w-full">
+            <div className="flex gap-0 min-h-[calc(90vh-2rem)] w-full items-stretch">
               {/* Main Content */}
               <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full p-6">
                 {/* Header Section */}
