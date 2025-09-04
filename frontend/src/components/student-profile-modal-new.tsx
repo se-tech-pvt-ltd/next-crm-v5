@@ -167,7 +167,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
 
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
-    updateStudentMutation.mutate({ status: newStatus });
+    updateStatusMutation.mutate(newStatus);
   };
 
   const handleSaveChanges = () => {
