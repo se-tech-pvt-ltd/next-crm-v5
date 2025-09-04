@@ -220,7 +220,7 @@ function DashboardContent() {
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <GraduationCap className="text-purple" size={24} />
+                  <GraduationCap className="text-purple-600" size={24} />
                 </div>
               </div>
             </CardContent>
@@ -335,7 +335,7 @@ function DashboardContent() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-purple rounded-full"></div>
+                      <div className="w-3 h-3 bg-purple-600 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-900">Qualified Students</span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -431,7 +431,7 @@ function DashboardContent() {
                 </Button>
 
                 <Button variant="outline" className="h-auto p-3 flex flex-col items-start space-y-1">
-                  <div className="w-8 h-8 bg-purple rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                     <Edit className="text-white" size={16} />
                   </div>
                   <div>
