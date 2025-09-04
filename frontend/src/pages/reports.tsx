@@ -179,7 +179,7 @@ export default function Reports() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple">
+              <div className="text-2xl font-bold text-purple-600">
                 45
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -218,7 +218,7 @@ export default function Reports() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <GraduationCap className="w-4 h-4 text-purple" />
+                      <GraduationCap className="w-4 h-4 text-purple-600" />
                       <span className="text-sm font-medium">Students</span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -342,7 +342,7 @@ export default function Reports() {
                     <div className="flex items-center space-x-2">
                       <div className="w-24 bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-purple h-2 rounded-full" 
+                          className="bg-purple-600 h-2 rounded-full" 
                           style={{ width: `${(count / totalStudents) * 100}%` }}
                         ></div>
                       </div>
