@@ -97,6 +97,23 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   </div>
                 </div>
 
+                <div className="hidden md:block">
+                  <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
+                  <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
+                    <SelectTrigger className="h-8 text-xs w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_applied">Not Applied</SelectItem>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="on_hold">On Hold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="flex items-center gap-2">
                   {isEditing ? (
                     <>
