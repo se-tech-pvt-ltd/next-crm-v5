@@ -89,100 +89,62 @@ export default function Admissions() {
       subtitle="Track admission decisions and outcomes"
       helpText="Admissions track the final decisions from universities. Monitor acceptance rates, scholarships, and visa status."
     >
-      <div className="space-y-6">
-        {/* Header Actions */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
-            </div>
-            <Select value={decisionFilter} onValueChange={setDecisionFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by decision" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Decisions</SelectItem>
-                <SelectItem value="accepted">Accepted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                <SelectItem value="conditional">Conditional</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={universityFilter} onValueChange={setUniversityFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by university" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Universities</SelectItem>
-                {uniqueUniversities.map((university) => (
-                  <SelectItem key={university} value={university}>{university}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Button onClick={() => setLocation('/admissions/new')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Admission Record
-          </Button>
-        </div>
-
-        {/* Admissions Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="space-y-3">
+        {/* Admissions Overview Cards (match Students sizing) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <School className="w-4 h-4 mr-2 text-gray-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <School className="w-3 h-3 text-gray-500" />
                 Total Admissions
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {admissionsLoading ? <Skeleton className="h-8 w-16" /> : admissions?.length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold">
+                {admissionsLoading ? <Skeleton className="h-6 w-12" /> : admissions?.length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <CheckCircle className="w-3 h-3 text-green-500" />
                 Accepted
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {admissionsLoading ? <Skeleton className="h-8 w-16" /> : admissions?.filter(a => a.decision === 'accepted').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-green-600">
+                {admissionsLoading ? <Skeleton className="h-6 w-12" /> : admissions?.filter(a => a.decision === 'accepted').length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Clock className="w-4 h-4 mr-2 text-yellow-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Clock className="w-3 h-3 text-yellow-500" />
                 Waitlisted
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {admissionsLoading ? <Skeleton className="h-8 w-16" /> : admissions?.filter(a => a.decision === 'waitlisted').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-yellow-600">
+                {admissionsLoading ? <Skeleton className="h-6 w-12" /> : admissions?.filter(a => a.decision === 'waitlisted').length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Trophy className="w-4 h-4 mr-2 text-purple-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Trophy className="w-3 h-3 text-purple-500" />
                 Success Rate
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {admissionsLoading ? <Skeleton className="h-8 w-16" /> : (
-                  admissions?.length 
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-purple-600">
+                {admissionsLoading ? <Skeleton className="h-6 w-12" /> : (
+                  admissions?.length
                     ? Math.round((admissions.filter(a => a.decision === 'accepted').length / admissions.length) * 100)
                     : 0
                 )}%
@@ -191,109 +153,145 @@ export default function Admissions() {
           </Card>
         </div>
 
-        {/* Admissions Table */}
+        {/* Admissions Table with Filters (match Students) */}
         <Card>
-          <CardHeader>
-            <CardTitle>Admissions List</CardTitle>
+          <CardHeader className="p-3 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-3 h-3 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+                <Select value={decisionFilter} onValueChange={setDecisionFilter}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Filter by decision" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Decisions</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                    <SelectItem value="conditional">Conditional</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={universityFilter} onValueChange={setUniversityFilter}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Filter by university" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Universities</SelectItem>
+                    {uniqueUniversities.map((university) => (
+                      <SelectItem key={university} value={university}>
+                        {university}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {(decisionFilter !== 'all' || universityFilter !== 'all') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      setDecisionFilter('all');
+                      setUniversityFilter('all');
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {admissionsLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
                   </div>
                 ))}
               </div>
             ) : filteredAdmissions.length === 0 ? (
               <EmptyState
-                icon={<Trophy className="h-12 w-12" />}
+                icon={<Trophy className="h-10 w-10" />}
                 title="No admissions found"
                 description={decisionFilter === 'all' ? 'Admission records will appear here when universities make decisions.' : `No admissions with decision "${decisionFilter}".`}
-                action={
-                  <Button onClick={() => setLocation('/admissions/new')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Admission Record
-                  </Button>
-                }
               />
             ) : (
-              <Table>
+              <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>University</TableHead>
-                    <TableHead>Program</TableHead>
-                    <TableHead>Admission ID</TableHead>
-                    <TableHead>Decision</TableHead>
-                    <TableHead>Scholarship</TableHead>
-                    <TableHead>Visa Status</TableHead>
-                    <TableHead>Decision Date</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Student</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">University</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Program</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Admission ID</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Decision</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Scholarship</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Visa Status</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Decision Date</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAdmissions.map((admission) => (
-                    <TableRow 
+                    <TableRow
                       key={admission.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => setLocation(`/admissions/${admission.id}`)}
                     >
-                      <TableCell className="font-medium">
-                        {getStudentName(admission.studentId)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
+                      <TableCell className="font-medium p-2 text-xs">{getStudentName(admission.studentId)}</TableCell>
+                      <TableCell className="p-2 text-xs">
+                        <div className="flex items-center text-xs">
                           <School className="w-3 h-3 mr-1" />
                           {admission.university}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {admission.program}
-                        </div>
+                      <TableCell className="p-2 text-xs">
+                        <div className="text-xs">{admission.program}</div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-xs font-mono text-gray-700 truncate max-w-[12rem]">{(admission as any).admissionId || admission.id}</div>
+                      <TableCell className="p-2 text-xs">
+                        <div className="text-[11px] font-mono text-gray-700 truncate max-w-[12rem]">{(admission as any).admissionId || admission.id}</div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         <Badge className={getDecisionColor(admission.decision)}>
                           {admission.decision}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         {admission.scholarshipAmount ? (
-                          <div className="flex items-center text-sm text-green-600">
+                          <div className="flex items-center text-xs text-green-600">
                             <DollarSign className="w-3 h-3 mr-1" />
                             {admission.scholarshipAmount}
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-500">None</span>
+                          <span className="text-xs text-gray-500">None</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         <Badge className={getVisaStatusColor(admission.visaStatus || 'pending')}>
                           {admission.visaStatus || 'pending'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm text-gray-500">
+                      <TableCell className="p-2 text-xs">
+                        <div className="flex items-center text-xs text-gray-500">
                           <Calendar className="w-3 h-3 mr-1" />
                           {formatDate(admission.decisionDate)}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
+                            <Button
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
