@@ -649,8 +649,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
 
               {/* Activity Sidebar */}
-              <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0">
-                <h3 className="text-sm font-semibold mb-2 flex items-center">
+              <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
+                <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
                   <Calendar className="w-5 h-5 mr-2" />
                   Activity Timeline
                 </h3>
