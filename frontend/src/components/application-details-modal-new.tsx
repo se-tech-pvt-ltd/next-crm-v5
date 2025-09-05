@@ -46,7 +46,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Application Details</DialogTitle>
         
         {/* Header with Fixed Position */}
@@ -78,8 +78,9 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
               <Button
                 variant="ghost"
                 size="default"
-                className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
                 onClick={() => onOpenChange(false)}
+                aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -185,16 +186,17 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
             </div>
           </div>
 
-          {/* Right Sidebar - Activity Timeline */}
-          <div className="w-96 bg-gradient-to-br from-blue-50 to-blue-100 border-l overflow-hidden">
-            <div className="px-4 py-5 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-              <h2 className="text-lg font-semibold">Activity Timeline</h2>
-            </div>
-            <div className="overflow-y-auto h-full pt-2">
+          {/* Activity Sidebar (mirror student) */}
+          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
+            <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
+              Activity Timeline
+            </h3>
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <ActivityTracker
                 entityType="application"
                 entityId={application.id}
                 entityName={`${application.university} - ${application.program}`}
+                canAdd={false}
               />
             </div>
           </div>
