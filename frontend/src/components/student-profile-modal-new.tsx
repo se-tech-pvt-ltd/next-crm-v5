@@ -280,15 +280,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
-                      variant="ghost"
-                      size="default"
-                      className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
-                      onClick={() => onOpenChange(false)}
-                      aria-label="Close"
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
-                    <Button
                       variant="default"
                       size="xs"
                       className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
@@ -307,6 +298,15 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     >
                       <Plus />
                       <span className="hidden lg:inline">Add Admission</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="default"
+                      className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
+                      onClick={() => onOpenChange(false)}
+                      aria-label="Close"
+                    >
+                      <X className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
