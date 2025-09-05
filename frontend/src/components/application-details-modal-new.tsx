@@ -100,7 +100,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6 pt-28">
+          <div className="flex-1 overflow-y-auto p-6 pt-16">
             {/* Status bar under header (mirror student) */}
             <div className="mb-3">
               <ApplicationStatusBar currentStatus={currentStatus} onChange={handleStatusChange} />
