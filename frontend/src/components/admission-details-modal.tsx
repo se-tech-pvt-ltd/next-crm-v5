@@ -2,13 +2,16 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { Award, User, X, ExternalLink, Plane } from "lucide-react";
+import { Award, User, X, ExternalLink, Plane, Edit, Save } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import { useState, useEffect } from "react";
+import { useToast } from '@/hooks/use-toast';
 
 interface AdmissionDetailsModalProps {
   open: boolean;
@@ -19,6 +22,11 @@ interface AdmissionDetailsModalProps {
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
   const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<Partial<Admission>>({});
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: student } = useQuery({
     queryKey: [`/api/students/${admission?.studentId}`],
@@ -31,7 +39,24 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
       return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
     },
     onSuccess: () => {
-      // invalidate handled elsewhere
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+    },
+  });
+
+  const updateAdmissionMutation = useMutation({
+    mutationFn: async (data: Partial<Admission>) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, data);
+    },
+    onSuccess: () => {
+      toast({ title: 'Success', description: 'Admission updated.' });
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      setIsEditing(false);
+    },
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err?.message || 'Failed to update admission.', variant: 'destructive' });
     },
   });
 
@@ -42,7 +67,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
   useEffect(() => {
     setCurrentVisaStatus(admission?.visaStatus || 'not_applied');
+    setEditData(admission || {});
   }, [admission]);
+
+  const handleSaveChanges = () => {
+    updateAdmissionMutation.mutate(editData);
+  };
 
   if (!admission) return null;
 
@@ -66,23 +96,34 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                     <p className="text-xs text-gray-600 truncate">Admission Decision</p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2">
-                  <div className="hidden md:block">
-                    <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
-                    <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                      <SelectTrigger className="h-8 text-xs w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not_applied">Not Applied</SelectItem>
-                        <SelectItem value="applied">Applied</SelectItem>
-                        <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="on_hold">On Hold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {isEditing ? (
+                    <>
+                      <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateAdmissionMutation.isPending}>
+                        <Save />
+                        <span className="hidden lg:inline">{updateAdmissionMutation.isPending ? 'Saving…' : 'Save'}</span>
+                      </Button>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(admission); }} title="Cancel" disabled={updateAdmissionMutation.isPending}>
+                        <X />
+                        <span className="hidden lg:inline">Cancel</span>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                        <Edit />
+                        <span className="hidden lg:inline">Edit</span>
+                      </Button>
+                      {student && (
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
+                          <ExternalLink />
+                          <span className="hidden lg:inline">View Student</span>
+                        </Button>
+                      )}
+                    </>
+                  )}
+
                   <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
@@ -132,34 +173,65 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-600">Program</label>
-                        <p className="text-lg font-semibold">{admission.program}</p>
+                        {isEditing ? (
+                          <Input value={editData.program || ''} onChange={(e) => setEditData(prev => ({ ...prev, program: e.target.value }))} />
+                        ) : (
+                          <p className="text-lg font-semibold">{admission.program}</p>
+                        )}
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Decision Date</label>
-                        <p>{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                        {isEditing ? (
+                          <Input value={editData.decisionDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, decisionDate: e.target.value }))} />
+                        ) : (
+                          <p>{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                        )}
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
-                        <p>{admission.tuitionFee || 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.tuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, tuitionFee: e.target.value }))} />
+                        ) : (
+                          <p>{admission.tuitionFee || 'Not specified'}</p>
+                        )}
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Scholarship Amount</label>
-                        <p>{admission.scholarshipAmount || 'No scholarship'}</p>
+                        {isEditing ? (
+                          <Input value={editData.scholarshipAmount || ''} onChange={(e) => setEditData(prev => ({ ...prev, scholarshipAmount: e.target.value }))} />
+                        ) : (
+                          <p>{admission.scholarshipAmount || 'No scholarship'}</p>
+                        )}
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Start Date</label>
-                        <p>{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.startDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, startDate: e.target.value }))} />
+                        ) : (
+                          <p>{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
+                        )}
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">End Date</label>
-                        <p>{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.endDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, endDate: e.target.value }))} />
+                        ) : (
+                          <p>{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
+                        )}
                       </div>
                     </div>
-                    {admission.notes && (
+                    {isEditing ? (
                       <div className="mt-4">
                         <label className="text-sm font-medium text-gray-600">Notes</label>
-                        <p className="mt-1 text-gray-800">{admission.notes}</p>
+                        <Textarea value={editData.notes || ''} onChange={(e) => setEditData(prev => ({ ...prev, notes: e.target.value }))} rows={3} />
                       </div>
+                    ) : (
+                      admission.notes && (
+                        <div className="mt-4">
+                          <label className="text-sm font-medium text-gray-600">Notes</label>
+                          <p className="mt-1 text-gray-800">{admission.notes}</p>
+                        </div>
+                      )
                     )}
                   </CardContent>
                 </Card>
@@ -237,18 +309,19 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Right Sidebar - Activity Timeline */}
-            <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-                <h2 className="text-sm font-semibold">Activity Timeline</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto pt-2 min-h-0">
-                <ActivityTracker entityType="admission" entityId={admission.id} entityName={admission.program} />
-              </div>
+          {/* Right Sidebar - Activity Timeline */}
+          <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
+            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+              <h2 className="text-sm font-semibold">Activity Timeline</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto pt-2 min-h-0">
+              <ActivityTracker entityType="admission" entityId={admission.id} entityName={admission.program} />
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
