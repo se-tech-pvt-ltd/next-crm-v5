@@ -271,12 +271,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Header Section */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-green-600" />
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
                       <h1 className="text-xl font-bold">{student.name}</h1>
-                      <p className="text-sm text-gray-600">{student.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
