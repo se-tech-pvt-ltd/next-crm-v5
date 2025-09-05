@@ -18,6 +18,31 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
+  const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
+    const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
+    const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
+    const idx = steps.findIndex((s) => s === currentStatus);
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1.5">
+        <div className="flex items-center justify-between relative">
+          {steps.map((s, i) => {
+            const isCompleted = i <= idx && idx !== -1;
+            return (
+              <div key={s} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={() => onChange(s)}>
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${isCompleted ? 'bg-white' : 'bg-gray-300'}`} />
+                </div>
+                <span className={`mt-1 text-[10px] font-medium ${isCompleted ? 'text-blue-600' : 'text-gray-600'}`}>{labels[s]}</span>
+                {i < steps.length - 1 && (
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${i < idx ? 'bg-blue-600' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
   const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
   const queryClient = useQueryClient();
 
@@ -53,31 +78,14 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
         <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Award className="w-6 h-6 text-green-600" />
+              <div className="flex items-center justify-center">
+                <Award className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold">{admission.program}</h1>
-                <p className="text-sm text-gray-600">Admission Decision</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div>
-                <label className="text-xs text-gray-500">Visa Status</label>
-                <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="not_applied">Not Applied</SelectItem>
-                    <SelectItem value="applied">Applied</SelectItem>
-                    <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="on_hold">On Hold</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <Button
                 variant="ghost"
                 size="default"
@@ -94,6 +102,10 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
           <div className="flex-1 overflow-y-auto p-6 pt-28">
+            {/* Status bar under header (mirror student) */}
+            <div className="mb-3">
+              <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+            </div>
             <div className="space-y-6">
               {/* Admission Information */}
               <Card>
