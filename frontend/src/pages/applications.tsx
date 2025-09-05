@@ -20,6 +20,8 @@ export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -246,7 +248,7 @@ export default function Applications() {
                     <TableRow
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => setLocation(`/applications/${application.id}`)}
+                      onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}
                     >
                       <TableCell className="font-medium p-2 text-xs">
                         {getStudentName(application.studentId)}
@@ -297,7 +299,7 @@ export default function Applications() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => setLocation(`/applications/${application.id}`)}
+                              onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -313,8 +315,11 @@ export default function Applications() {
         </Card>
       </div>
 
-      
-      
+      <ApplicationDetailsModal
+        open={isDetailsOpen}
+        onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        application={selectedApplication}
+      />
     </Layout>
   );
 }
