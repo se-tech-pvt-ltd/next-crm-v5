@@ -74,7 +74,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         <DialogTitle className="sr-only">Application Details</DialogTitle>
         
         {/* Header with Fixed Position */}
-        <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
+        <div className="absolute top-0 left-0 right-0 bg-white border-b p-3 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center">
