@@ -81,7 +81,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                 <School className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{application.university}</h1>
+                <h1 className="text-xl font-bold">{application.university}</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
