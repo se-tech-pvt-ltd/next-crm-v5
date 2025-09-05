@@ -279,7 +279,27 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <p className="text-sm text-gray-600">{student.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => setIsAddApplicationOpen(true)}
+                      title="Add Application"
+                    >
+                      <Plus />
+                      <span className="hidden lg:inline">Add Application</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => setIsAddAdmissionOpen(true)}
+                      title="Add Admission"
+                    >
+                      <Plus />
+                      <span className="hidden lg:inline">Add Admission</span>
+                    </Button>
                     <Button
                       variant="ghost"
                       size="default"
@@ -294,30 +314,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Status Progress Bar moved above student details */}
                 {!isLoading && statusSequence.length > 0 && (
                   <div className="mb-2">
-                    <div className="flex items-center justify-end mb-2">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          className="rounded-full px-2 [&_svg]:size-3"
-                          onClick={() => setIsAddApplicationOpen(true)}
-                          title="Add Application"
-                        >
-                          <Plus />
-                          <span className="hidden lg:inline">Add Application</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          className="rounded-full px-2 [&_svg]:size-3"
-                          onClick={() => setIsAddAdmissionOpen(true)}
-                          title="Add Admission"
-                        >
-                          <Plus />
-                          <span className="hidden lg:inline">Add Admission</span>
-                        </Button>
-                      </div>
-                    </div>
                     <StatusProgressBar />
                   </div>
                 )}
