@@ -85,7 +85,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           {/* Left: Content */}
           <div className="flex flex-col min-h-0">
             {/* Sticky header inside scroll context */}
-            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 w-[60%] mx-auto lg:mx-0 lg:w-auto">
               <div className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
@@ -329,9 +329,14 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           </div>
 
           {/* Right Sidebar - Activity Timeline */}
-          <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
+          <div className="w-[360px] border-l bg-white flex flex-col min-h-0 pt-5 lg:pt-0">
             <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-              <h2 className="text-sm font-semibold">Activity Timeline</h2>
+              <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 4h1M7 20h1M16 4h1M16 20h1" />
+                </svg>
+                <h2 className="text-sm font-semibold">Activity Timeline</h2>
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto pt-2 min-h-0">
               <ActivityTracker entityType="admission" entityId={admission.id} entityName={admission.program} />
