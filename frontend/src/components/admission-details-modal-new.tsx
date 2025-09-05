@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { Award, User, X, ExternalLink, Plane } from "lucide-react";
+import { Award, User, X, ExternalLink, Plane, Calendar } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
@@ -234,6 +234,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           {/* Activity Sidebar (mirror student) */}
           <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
             <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
+              <Calendar className="w-5 h-5 mr-2" />
               Activity Timeline
             </h3>
             <div className="flex-1 min-h-0 overflow-y-auto">
@@ -241,7 +242,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 entityType="admission"
                 entityId={admission.id}
                 entityName={admission.program}
-                canAdd={false}
               />
             </div>
           </div>
