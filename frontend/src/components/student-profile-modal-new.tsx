@@ -265,39 +265,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
           <div className="text-xs md:text-[12px]">
-            {/* Status Progress Bar */}
-            {!isLoading && statusSequence.length > 0 && (
-              <div className="p-4 pb-0">
-                <div className="flex items-center justify-end mb-2 pr-12">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => setIsAddApplicationOpen(true)}
-                      title="Add Application"
-                    >
-                      <Plus />
-                      <span className="hidden lg:inline">Add Application</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => setIsAddAdmissionOpen(true)}
-                      title="Add Admission"
-                    >
-                      <Plus />
-                      <span className="hidden lg:inline">Add Admission</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <StatusProgressBar />
-              </div>
-            )}
-
-            <div className="flex gap-0 min-h-[calc(90vh-2rem)] w-full items-stretch">
+            <div className="flex gap-0 h-[calc(90vh-2rem)] w-full items-stretch">
               {/* Main Content */}
               <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full p-6">
                 {/* Header Section */}
