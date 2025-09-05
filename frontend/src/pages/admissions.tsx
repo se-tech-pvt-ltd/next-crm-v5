@@ -13,6 +13,7 @@ import { HelpTooltip } from '@/components/help-tooltip';
 import { Admission, Student } from '@/lib/types';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { useLocation } from 'wouter';
 
 export default function Admissions() {
