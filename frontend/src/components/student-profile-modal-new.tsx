@@ -649,14 +649,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
 
               {/* Activity Sidebar */}
-              <div className="w-[30rem] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0">
-                {/* Add Activity box */}
-                <div className="mb-3">
-                  <div className="rounded-md p-2 bg-blue-50 border border-blue-100">
-                    <button type="button" className="w-full text-sm font-medium py-2 bg-white rounded-md hover:bg-white/90">+ Add Activity</button>
-                  </div>
-                </div>
-
+              <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0">
                 <h3 className="text-sm font-semibold mb-2 flex items-center">
                   <Calendar className="w-5 h-5 mr-2" />
                   Activity Timeline
@@ -677,6 +670,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       entityType="student"
                       entityId={student.id}
                       entityName={student.name}
+                      canAdd={false}
                     />
                   </div>
                 )}
