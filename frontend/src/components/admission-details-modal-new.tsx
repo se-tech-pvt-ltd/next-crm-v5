@@ -232,7 +232,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           </div>
 
           {/* Activity Sidebar (mirror student) */}
-          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200 mt-12">
+          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 overflow-hidden border-l border-gray-200 pt-16">
             <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
               <Calendar className="w-5 h-5 mr-2" />
               Activity Timeline
