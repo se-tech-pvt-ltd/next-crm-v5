@@ -8,7 +8,7 @@ import { School, User, X, ExternalLink } from "lucide-react";
 import { Application, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ApplicationsService from "@/services/applications";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ApplicationDetailsModalProps {
   open: boolean;
@@ -42,6 +42,10 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     updateStatusMutation.mutate(newStatus);
   };
 
+  useEffect(() => {
+    setCurrentStatus(application?.appStatus || 'Open');
+  }, [application]);
+
   if (!application) return null;
 
   return (
@@ -49,23 +53,22 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Application Details</DialogTitle>
         
-        {/* Header with Fixed Position */}
-        <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <School className="w-6 h-6 text-blue-600" />
+        <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                <School className="w-5 h-5 text-blue-600" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">{application.university}</h1>
-                <p className="text-sm text-gray-600">{application.program}</p>
+              <div className="min-w-0">
+                <h1 className="text-lg font-semibold truncate">{application.university}</h1>
+                <p className="text-xs text-gray-600 truncate">{application.program}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div>
-                <label className="text-xs text-gray-500">Application Status</label>
+            <div className="flex items-center gap-2">
+              <div className="hidden md:block">
+                <label htmlFor="header-status" className="text-[11px] text-gray-500">Application Status</label>
                 <Select value={currentStatus} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-40 h-8">
+                  <SelectTrigger className="h-8 text-xs w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -75,19 +78,42 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                   </SelectContent>
                 </Select>
               </div>
-              <Button
-                variant="ghost"
-                size="default"
-                className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                <X className="w-4 h-4" />
               </Button>
+            </div>
+          </div>
+
+          {/* Status bar (simple) */}
+          <div className="px-4 pb-3">
+            <div className="w-full bg-gray-100 rounded-md p-1.5">
+              <div className="flex items-center justify-between relative">
+                {['Open','Needs Attention','Closed'].map((s, index, arr) => {
+                  const currentIndex = arr.indexOf(currentStatus || '');
+                  const isCompleted = currentIndex >= 0 && index <= currentIndex;
+                  const label = s;
+                  const handleClick = () => {
+                    if (s === currentStatus) return;
+                    handleStatusChange(s);
+                  };
+                  return (
+                    <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
+                        {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                      </div>
+                      <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{label}</span>
+                      {index < arr.length - 1 && (
+                        <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex h-[90vh]">
+        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
           {/* Main Content - Left Side */}
           <div className="flex-1 overflow-y-auto p-6 pt-28">
             <div className="space-y-6">
@@ -185,17 +211,12 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
             </div>
           </div>
 
-          {/* Right Sidebar - Activity Timeline */}
-          <div className="w-96 bg-gradient-to-br from-blue-50 to-blue-100 border-l overflow-hidden">
-            <div className="px-4 py-5 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-              <h2 className="text-lg font-semibold">Activity Timeline</h2>
+          <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
+            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+              <h2 className="text-sm font-semibold">Activity Timeline</h2>
             </div>
-            <div className="overflow-y-auto h-full pt-2">
-              <ActivityTracker
-                entityType="application"
-                entityId={application.id}
-                entityName={`${application.university} - ${application.program}`}
-              />
+            <div className="flex-1 overflow-y-auto pt-2 min-h-0">
+              <ActivityTracker entityType="application" entityId={application.id} entityName={`${application.university} - ${application.program}`} />
             </div>
           </div>
         </div>
