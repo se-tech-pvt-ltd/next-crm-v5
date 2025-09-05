@@ -14,6 +14,7 @@ import { Application, Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
+import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Applications() {
