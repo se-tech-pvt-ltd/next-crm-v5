@@ -281,9 +281,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
+                      className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                       onClick={() => setIsAddApplicationOpen(true)}
                       title="Add Application"
                     >
@@ -291,9 +291,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <span className="hidden lg:inline">Add Application</span>
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
+                      className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                       onClick={() => setIsAddAdmissionOpen(true)}
                       title="Add Admission"
                     >
