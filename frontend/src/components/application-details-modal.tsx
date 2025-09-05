@@ -2,13 +2,16 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { School, User, X, ExternalLink } from "lucide-react";
+import { School, User, X, ExternalLink, Edit, Save } from "lucide-react";
 import { Application, Student } from "@/lib/types";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ApplicationsService from "@/services/applications";
 import { useState, useEffect } from "react";
+import { useToast } from '@/hooks/use-toast';
 
 interface ApplicationDetailsModalProps {
   open: boolean;
@@ -19,6 +22,11 @@ interface ApplicationDetailsModalProps {
 
 export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<Partial<Application>>({});
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: student } = useQuery({
     queryKey: [`/api/students/${application?.studentId}`],
@@ -31,18 +39,40 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       return ApplicationsService.updateApplication(application.id, { appStatus: newStatus });
     },
     onSuccess: () => {
-      // handled elsewhere
+      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
     },
   });
+
+  const updateApplicationMutation = useMutation({
+    mutationFn: async (data: Partial<Application>) => {
+      if (!application) return;
+      return ApplicationsService.updateApplication(application.id, data);
+    },
+    onSuccess: () => {
+      toast({ title: 'Success', description: 'Application updated.' });
+      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
+      setIsEditing(false);
+    },
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err?.message || 'Failed to update application.', variant: 'destructive' });
+    },
+  });
+
+  useEffect(() => {
+    setCurrentStatus(application?.appStatus || 'Open');
+    setEditData(application || {});
+  }, [application]);
 
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus);
     updateStatusMutation.mutate(newStatus);
   };
 
-  useEffect(() => {
-    setCurrentStatus(application?.appStatus || 'Open');
-  }, [application]);
+  const handleSaveChanges = () => {
+    updateApplicationMutation.mutate(editData);
+  };
 
   if (!application) return null;
 
@@ -66,26 +96,41 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                     <p className="text-xs text-gray-600 truncate">{application.program}</p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2">
-                  <div className="hidden md:block">
-                    <label htmlFor="header-status" className="text-[11px] text-gray-500">Application Status</label>
-                    <Select value={currentStatus} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="h-8 text-xs w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Open">Open</SelectItem>
-                        <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                        <SelectItem value="Closed">Closed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {isEditing ? (
+                    <>
+                      <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateApplicationMutation.isPending}>
+                        <Save />
+                        <span className="hidden lg:inline">{updateApplicationMutation.isPending ? 'Saving…' : 'Save'}</span>
+                      </Button>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(application); }} title="Cancel" disabled={updateApplicationMutation.isPending}>
+                        <X />
+                        <span className="hidden lg:inline">Cancel</span>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                        <Edit />
+                        <span className="hidden lg:inline">Edit</span>
+                      </Button>
+                      {student && (
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
+                          <ExternalLink />
+                          <span className="hidden lg:inline">View Student</span>
+                        </Button>
+                      )}
+                    </>
+                  )}
+
                   <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
+              {/* Status bar (simple) */}
               <div className="px-4 pb-3">
                 <div className="w-full bg-gray-100 rounded-md p-1.5">
                   <div className="flex items-center justify-between relative">
@@ -129,38 +174,80 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-600">University</label>
-                        <p className="text-lg font-semibold">{application.university}</p>
+                        {isEditing ? (
+                          <Input value={editData.university || ''} onChange={(e) => setEditData(prev => ({ ...prev, university: e.target.value }))} />
+                        ) : (
+                          <p className="text-lg font-semibold">{application.university}</p>
+                        )}
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-600">Program</label>
-                        <p className="text-lg font-semibold">{application.program}</p>
+                        {isEditing ? (
+                          <Input value={editData.program || ''} onChange={(e) => setEditData(prev => ({ ...prev, program: e.target.value }))} />
+                        ) : (
+                          <p className="text-lg font-semibold">{application.program}</p>
+                        )}
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-600">Course Type</label>
-                        <p>{application.courseType || 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.courseType || ''} onChange={(e) => setEditData(prev => ({ ...prev, courseType: e.target.value }))} />
+                        ) : (
+                          <p>{application.courseType || 'Not specified'}</p>
+                        )}
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-600">Country</label>
-                        <p>{application.country || 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.country || ''} onChange={(e) => setEditData(prev => ({ ...prev, country: e.target.value }))} />
+                        ) : (
+                          <p>{application.country || 'Not specified'}</p>
+                        )}
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-600">Intake</label>
-                        <p>{application.intake || 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.intake || ''} onChange={(e) => setEditData(prev => ({ ...prev, intake: e.target.value }))} />
+                        ) : (
+                          <p>{application.intake || 'Not specified'}</p>
+                        )}
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-600">Channel Partner</label>
-                        <p>{application.channelPartner || 'Not specified'}</p>
+                        {isEditing ? (
+                          <Input value={editData.channelPartner || ''} onChange={(e) => setEditData(prev => ({ ...prev, channelPartner: e.target.value }))} />
+                        ) : (
+                          <p>{application.channelPartner || 'Not specified'}</p>
+                        )}
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-600">Google Drive Link</label>
-                        <p>{application.googleDriveLink ? <a className="text-blue-600 underline" href={application.googleDriveLink} target="_blank" rel="noreferrer">Open Link</a> : 'Not provided'}</p>
+                        {isEditing ? (
+                          <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData(prev => ({ ...prev, googleDriveLink: e.target.value }))} />
+                        ) : (
+                          <p>{application.googleDriveLink ? <a className="text-blue-600 underline" href={application.googleDriveLink} target="_blank" rel="noreferrer">Open Link</a> : 'Not provided'}</p>
+                        )}
                       </div>
                     </div>
-                    {application.notes && (
+
+                    {isEditing ? (
                       <div className="mt-4">
                         <label className="text-sm font-medium text-gray-600">Notes</label>
-                        <p className="mt-1 text-gray-800">{application.notes}</p>
+                        <Textarea value={editData.notes || ''} onChange={(e) => setEditData(prev => ({ ...prev, notes: e.target.value }))} rows={3} />
                       </div>
+                    ) : (
+                      application.notes && (
+                        <div className="mt-4">
+                          <label className="text-sm font-medium text-gray-600">Notes</label>
+                          <p className="mt-1 text-gray-800">{application.notes}</p>
+                        </div>
+                      )
                     )}
                   </CardContent>
                 </Card>
@@ -206,18 +293,19 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Right Sidebar - Activity Timeline */}
-            <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-                <h2 className="text-sm font-semibold">Activity Timeline</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto pt-2 min-h-0">
-                <ActivityTracker entityType="application" entityId={application.id} entityName={`${application.university} - ${application.program}`} />
-              </div>
+          {/* Right Sidebar - Activity Timeline */}
+          <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
+            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+              <h2 className="text-sm font-semibold">Activity Timeline</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto pt-2 min-h-0">
+              <ActivityTracker entityType="application" entityId={application.id} entityName={`${application.university} - ${application.program}`} />
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
