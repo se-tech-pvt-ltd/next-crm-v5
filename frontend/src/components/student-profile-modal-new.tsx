@@ -302,8 +302,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     <Button
                       variant="ghost"
                       size="default"
-                      className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                      className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
                       onClick={() => onOpenChange(false)}
+                      aria-label="Close"
                     >
                       <X className="w-5 h-5" />
                     </Button>
