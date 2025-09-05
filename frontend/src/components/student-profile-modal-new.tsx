@@ -299,15 +299,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <Plus />
                       <span className="hidden lg:inline">Add Admission</span>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="default"
-                      className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
-                      onClick={() => onOpenChange(false)}
-                      aria-label="Close"
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
                   </div>
                 </div>
 
@@ -587,7 +578,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   {applications && applications.length > 0 ? (
                     <div className="space-y-3">
                       {applications.map((application) => (
-                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium">{application.university}</h3>
@@ -630,7 +621,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   {admissions && admissions.length > 0 ? (
                     <div className="space-y-3">
                       {admissions.map((admission) => (
-                        <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium">{admission.program}</h3>
