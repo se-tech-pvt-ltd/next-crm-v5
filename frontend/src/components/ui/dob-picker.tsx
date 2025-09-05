@@ -74,8 +74,9 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
           id={id}
           disabled={disabled}
           variant="outline"
+          size="xs"
           className={cn(
-            "w-full justify-start text-left font-normal h-8 text-xs",
+            "w-full justify-start text-left font-normal h-8 text-xs px-3",
             !value && "text-muted-foreground",
             className
           )}
