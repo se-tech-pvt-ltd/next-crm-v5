@@ -85,7 +85,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
           {/* Left: Content */}
           <div className="flex flex-col min-h-0">
             {/* Sticky header inside scroll context */}
-            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 w-[60%] mx-auto lg:mx-0 lg:w-auto">
+            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 max-[991px]:w-[60%] max-[991px]:mx-auto lg:mx-0 lg:w-auto">
               <div className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
@@ -310,7 +310,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
           </div>
 
           {/* Right Sidebar - Activity Timeline */}
-          <div className="w-[360px] border-l bg-white flex flex-col min-h-0 pt-5 lg:pt-0">
+          <div className="w-[360px] border-l bg-white flex flex-col min-h-0 pt-5 lg:pt-0 max-[991px]:pt-5">
             <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
               <div className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
