@@ -119,86 +119,76 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
         <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          {/* Sticky header like LeadDetailsModal */}
           <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             <div className="px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
                   <User className="w-5 h-5 text-primary" />
                 </div>
-                <div className="min-w-0">
-                  <h1 className="text-lg font-semibold truncate">{student.name}</h1>
-                  <p className="text-xs text-gray-600 truncate">{student.email}</p>
-                </div>
+                <h1 className="text-lg font-semibold truncate">{student.name}</h1>
               </div>
               <div className="flex items-center gap-2">
-                <div className="hidden md:block">
-                  <Label htmlFor="header-status" className="text-[11px] text-gray-500">Status</Label>
-                  <Select value={currentStatus} onValueChange={handleStatusChange}>
-                    <SelectTrigger className="h-8 text-xs w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="applied">Applied</SelectItem>
-                      <SelectItem value="admitted">Admitted</SelectItem>
-                      <SelectItem value="enrolled">Enrolled</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  className="rounded-full px-2 [&_svg]:size-3"
-                  onClick={() => setIsAddApplicationOpen(true)}
-                  title="Add Application"
-                >
-                  <Plus />
-                  <span className="hidden lg:inline">Add App</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  className="rounded-full px-2 [&_svg]:size-3"
-                  onClick={() => setIsAddAdmissionOpen(true)}
-                  title="Add Admission"
-                >
-                  <Plus />
-                  <span className="hidden lg:inline">Add Adm</span>
-                </Button>
+                {isEditing ? (
+                  <>
+                    <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateStudentMutation.isPending}>
+                      <Save />
+                      <span className="hidden lg:inline">{updateStudentMutation.isPending ? 'Saving…' : 'Save'}</span>
+                    </Button>
+                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(student); }} title="Cancel" disabled={updateStudentMutation.isPending}>
+                      <X />
+                      <span className="hidden lg:inline">Cancel</span>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                      <Edit />
+                      <span className="hidden lg:inline">Edit</span>
+                    </Button>
+                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)} title="Add Application">
+                      <Plus />
+                      <span className="hidden lg:inline">Add App</span>
+                    </Button>
+                    <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddAdmissionOpen(true)} title="Add Admission">
+                      <Plus />
+                      <span className="hidden lg:inline">Add Adm</span>
+                    </Button>
+                  </>
+                )}
                 <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
                   <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            {/* Status bar (simple) */}
-            <div className="px-4 pb-3">
-              <div className="w-full bg-gray-100 rounded-md p-1.5">
-                <div className="flex items-center justify-between relative">
-                  {['active','applied','admitted','enrolled','inactive'].map((s, index, arr) => {
-                    const currentIndex = arr.indexOf(currentStatus || '');
-                    const isCompleted = currentIndex >= 0 && index <= currentIndex;
-                    const label = s.charAt(0).toUpperCase() + s.slice(1);
-                    const handleClick = () => {
-                      if (s === currentStatus) return;
-                      handleStatusChange(s);
-                    };
-                    return (
-                      <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
-                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
-                          {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+
+            {['active','applied','admitted','enrolled','inactive'].length > 0 && (
+              <div className="px-4 pb-3">
+                <div className="w-full bg-gray-100 rounded-md p-1.5">
+                  <div className="flex items-center justify-between relative">
+                    {['active','applied','admitted','enrolled','inactive'].map((s, index, arr) => {
+                      const currentIndex = arr.indexOf(currentStatus || '');
+                      const isCompleted = currentIndex >= 0 && index <= currentIndex;
+                      const statusName = s.charAt(0).toUpperCase() + s.slice(1);
+                      const handleClick = () => {
+                        if (currentStatus === s) return;
+                        handleStatusChange(s);
+                      };
+                      return (
+                        <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
+                            {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                          </div>
+                          <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
+                          {index < arr.length - 1 && (
+                            <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                          )}
                         </div>
-                        <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{label}</span>
-                        {index < arr.length - 1 && (
-                          <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
