@@ -654,7 +654,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
 
               {/* Activity Sidebar */}
-              <div className="w-[30rem] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full">
+              <div className="w-[30rem] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0">
                 {/* Add Activity box */}
                 <div className="mb-3">
                   <div className="rounded-md p-2 bg-blue-50 border border-blue-100">
