@@ -85,91 +85,95 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           {/* Left: Content */}
           <div className="flex flex-col min-h-0">
             {/* Sticky header inside scroll context */}
-            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 max-[991px]:w-[60%] max-[991px]:mx-auto lg:mx-0 lg:w-auto">
-              <div className="px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-lg font-semibold truncate">{admission.program}</h1>
-                    <p className="text-xs text-gray-600 truncate">Admission Decision</p>
-                  </div>
-                </div>
+            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 max-[991px]:w-[100%] max-[991px]:mx-0 lg:mx-0 lg:w-auto">
+              <div className="w-full">
+                <div className="w-full max-[991px]:w-[60%] max-[991px]:mx-auto">
+                  <div className="px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                        <Award className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <h1 className="text-lg font-semibold truncate">{admission.program}</h1>
+                        <p className="text-xs text-gray-600 truncate">Admission Decision</p>
+                      </div>
+                    </div>
 
-                <div className="hidden md:block">
-                  <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
-                  <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                    <SelectTrigger className="h-8 text-xs w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="not_applied">Not Applied</SelectItem>
-                      <SelectItem value="applied">Applied</SelectItem>
-                      <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="on_hold">On Hold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div className="hidden md:block">
+                      <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
+                      <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
+                        <SelectTrigger className="h-8 text-xs w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="not_applied">Not Applied</SelectItem>
+                          <SelectItem value="applied">Applied</SelectItem>
+                          <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                          <SelectItem value="on_hold">On Hold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="flex items-center gap-2">
-                  {isEditing ? (
-                    <>
-                      <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateAdmissionMutation.isPending}>
-                        <Save />
-                        <span className="hidden lg:inline">{updateAdmissionMutation.isPending ? 'Saving…' : 'Save'}</span>
-                      </Button>
-                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(admission); }} title="Cancel" disabled={updateAdmissionMutation.isPending}>
-                        <X />
-                        <span className="hidden lg:inline">Cancel</span>
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
-                        <Edit />
-                        <span className="hidden lg:inline">Edit</span>
-                      </Button>
-                      {student && (
-                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
-                          <ExternalLink />
-                          <span className="hidden lg:inline">View Student</span>
-                        </Button>
-                      )}
-                    </>
-                  )}
-
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="px-4 pb-3">
-                <div className="w-full bg-gray-100 rounded-md p-1.5">
-                  <div className="flex items-center justify-between relative">
-                    {['not_applied','applied','interview_scheduled','approved','on_hold','rejected'].map((s, index, arr) => {
-                      const currentIndex = arr.indexOf(currentVisaStatus || '');
-                      const isCompleted = currentIndex >= 0 && index <= currentIndex;
-                      const label = s.charAt(0).toUpperCase() + s.slice(1).replace('_',' ');
-                      const handleClick = () => {
-                        if (s === currentVisaStatus) return;
-                        handleVisaStatusChange(s);
-                      };
-                      return (
-                        <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
-                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
-                            {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
-                          </div>
-                          <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{label}</span>
-                          {index < arr.length - 1 && (
-                            <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                    <div className="flex items-center gap-2">
+                      {isEditing ? (
+                        <>
+                          <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateAdmissionMutation.isPending}>
+                            <Save />
+                            <span className="hidden lg:inline">{updateAdmissionMutation.isPending ? 'Saving…' : 'Save'}</span>
+                          </Button>
+                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(admission); }} title="Cancel" disabled={updateAdmissionMutation.isPending}>
+                            <X />
+                            <span className="hidden lg:inline">Cancel</span>
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                            <Edit />
+                            <span className="hidden lg:inline">Edit</span>
+                          </Button>
+                          {student && (
+                            <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
+                              <ExternalLink />
+                              <span className="hidden lg:inline">View Student</span>
+                            </Button>
                           )}
-                        </div>
-                      );
-                    })}
+                        </>
+                      )}
+
+                      <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="px-4 pb-3">
+                    <div className="w-full bg-gray-100 rounded-md p-1.5">
+                      <div className="flex items-center justify-between relative">
+                        {['not_applied','applied','interview_scheduled','approved','on_hold','rejected'].map((s, index, arr) => {
+                          const currentIndex = arr.indexOf(currentVisaStatus || '');
+                          const isCompleted = currentIndex >= 0 && index <= currentIndex;
+                          const label = s.charAt(0).toUpperCase() + s.slice(1).replace('_',' ');
+                          const handleClick = () => {
+                            if (s === currentVisaStatus) return;
+                            handleVisaStatusChange(s);
+                          };
+                          return (
+                            <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
+                              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
+                                {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                              </div>
+                              <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{label}</span>
+                              {index < arr.length - 1 && (
+                                <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
