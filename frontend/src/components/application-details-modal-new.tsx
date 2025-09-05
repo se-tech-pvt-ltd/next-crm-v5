@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { School, User, X, ExternalLink } from "lucide-react";
+import { School, User, X, ExternalLink, Calendar } from "lucide-react";
 import { Application, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ApplicationsService from "@/services/applications";
@@ -203,6 +203,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
           {/* Activity Sidebar (mirror student) */}
           <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
             <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
+              <Calendar className="w-5 h-5 mr-2" />
               Activity Timeline
             </h3>
             <div className="flex-1 min-h-0 overflow-y-auto">
@@ -210,7 +211,6 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                 entityType="application"
                 entityId={application.id}
                 entityName={`${application.university} - ${application.program}`}
-                canAdd={false}
               />
             </div>
           </div>
