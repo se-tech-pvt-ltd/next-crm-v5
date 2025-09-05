@@ -19,6 +19,8 @@ export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -242,7 +244,7 @@ export default function Admissions() {
                     <TableRow
                       key={admission.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => setLocation(`/admissions/${admission.id}`)}
+                      onClick={() => { setSelectedAdmission(admission); setIsDetailsOpen(true); }}
                     >
                       <TableCell className="font-medium p-2 text-xs">{getStudentName(admission.studentId)}</TableCell>
                       <TableCell className="p-2 text-xs">
@@ -295,7 +297,7 @@ export default function Admissions() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setLocation(`/admissions/${admission.id}`)}>
+                            <DropdownMenuItem onClick={() => { setSelectedAdmission(admission); setIsDetailsOpen(true); }}>
                               View Details
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -309,7 +311,12 @@ export default function Admissions() {
           </CardContent>
         </Card>
       </div>
-      
+
+      <AdmissionDetailsModal
+        open={isDetailsOpen}
+        onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedAdmission(null); }}
+        admission={selectedAdmission}
+      />
     </Layout>
   );
 }
