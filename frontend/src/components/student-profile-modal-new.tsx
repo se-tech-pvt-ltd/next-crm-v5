@@ -267,7 +267,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           <div className="text-xs md:text-[12px]">
             <div className="flex gap-0 h-[calc(90vh-2rem)] w-full items-stretch">
               {/* Main Content */}
-              <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full p-6">
+              <div className="flex-1 flex flex-col space-y-4 min-w-0 min-h-0 w-full p-6 overflow-y-auto">
                 {/* Header Section */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
