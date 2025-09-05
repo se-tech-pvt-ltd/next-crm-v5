@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { Award, User, X, ExternalLink, Plane } from "lucide-react";
+import { Award, User, X, ExternalLink, Plane, Calendar } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
@@ -18,6 +18,31 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
+  const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
+    const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
+    const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
+    const idx = steps.findIndex((s) => s === currentStatus);
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1.5">
+        <div className="flex items-center justify-between relative">
+          {steps.map((s, i) => {
+            const isCompleted = i <= idx && idx !== -1;
+            return (
+              <div key={s} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={() => onChange(s)}>
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${isCompleted ? 'bg-white' : 'bg-gray-300'}`} />
+                </div>
+                <span className={`mt-1 text-[10px] font-medium ${isCompleted ? 'text-blue-600' : 'text-gray-600'}`}>{labels[s]}</span>
+                {i < steps.length - 1 && (
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${i < idx ? 'bg-blue-600' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
   const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
   const queryClient = useQueryClient();
 
@@ -46,43 +71,27 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Admission Details</DialogTitle>
         
         {/* Header with Fixed Position */}
-        <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
+        <div className="absolute top-0 left-0 right-0 bg-white border-b p-3 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Award className="w-6 h-6 text-green-600" />
+              <div className="flex items-center justify-center">
+                <Award className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{admission.program}</h1>
-                <p className="text-sm text-gray-600">Admission Decision</p>
+                <h1 className="text-xl font-bold">{admission.program}</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div>
-                <label className="text-xs text-gray-500">Visa Status</label>
-                <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="not_applied">Not Applied</SelectItem>
-                    <SelectItem value="applied">Applied</SelectItem>
-                    <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="on_hold">On Hold</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <Button
                 variant="ghost"
                 size="default"
-                className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
                 onClick={() => onOpenChange(false)}
+                aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -92,7 +101,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6 pt-28">
+          <div className="flex-1 overflow-y-auto p-6 pt-16">
+            {/* Status bar under header (mirror student) */}
+            <div className="mb-3">
+              <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+            </div>
             <div className="space-y-6">
               {/* Admission Information */}
               <Card>
@@ -218,12 +231,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
             </div>
           </div>
 
-          {/* Right Sidebar - Activity Timeline */}
-          <div className="w-96 bg-gradient-to-br from-green-50 to-green-100 border-l overflow-hidden">
-            <div className="px-4 py-5 border-b bg-gradient-to-r from-green-600 to-green-700 text-white">
-              <h2 className="text-lg font-semibold">Activity Timeline</h2>
-            </div>
-            <div className="overflow-y-auto h-full pt-2">
+          {/* Activity Sidebar (mirror student) */}
+          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 overflow-hidden border-l border-gray-200 pt-12">
+            <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
+              <Calendar className="w-5 h-5 mr-2" />
+              Activity Timeline
+            </h3>
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <ActivityTracker
                 entityType="admission"
                 entityId={admission.id}

@@ -14,12 +14,15 @@ import { Application, Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
+import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -93,109 +96,118 @@ export default function Applications() {
       subtitle="Track university applications"
       helpText="Applications are submitted to universities on behalf of students. Track their progress and manage deadlines."
     >
-      <div className="space-y-6">
-        {/* Header Actions */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Open">Open</SelectItem>
-                <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                <SelectItem value="Closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={universityFilter} onValueChange={setUniversityFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by university" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Universities</SelectItem>
-                {uniqueUniversities.map((university) => (
-                  <SelectItem key={university} value={university}>{university}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <div className="space-y-3">
 
-          <Button onClick={() => setLocation('/applications/add')}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Application
-          </Button>
-        </div>
-
-        {/* Applications Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Applications Overview Cards (match Students sizing) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <FileText className="w-4 h-4 mr-2 text-gray-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <FileText className="w-3 h-3 text-gray-500" />
                 Total Applications
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold">
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <CheckCircle className="w-3 h-3 text-blue-500" />
                 Open
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.appStatus === 'Open').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-blue-600">
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Open').length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Clock className="w-4 h-4 mr-2 text-yellow-500" />
-Needs Attention
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <Clock className="w-3 h-3 text-yellow-500" />
+                Needs Attention
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.appStatus === 'Needs Attention').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-yellow-600">
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Needs Attention').length || 0}
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <AlertCircle className="w-4 h-4 mr-2 text-green-500" />
-Closed
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <AlertCircle className="w-3 h-3 text-green-500" />
+                Closed
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {applicationsLoading ? <Skeleton className="h-8 w-16" /> : applications?.filter(a => a.appStatus === 'Closed').length || 0}
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-green-600">
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Closed').length || 0}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Applications Table */}
+        {/* Applications Table with Filters (match Students) */}
         <Card>
-          <CardHeader>
-            <CardTitle>Applications List</CardTitle>
+          <CardHeader className="p-3 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-3 h-3 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="Open">Open</SelectItem>
+                    <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={universityFilter} onValueChange={setUniversityFilter}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Filter by university" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Universities</SelectItem>
+                    {uniqueUniversities.map((university) => (
+                      <SelectItem key={university} value={university}>
+                        {university}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {(statusFilter !== 'all' || universityFilter !== 'all') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setUniversityFilter('all');
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {applicationsLoading ? (
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
@@ -220,81 +232,75 @@ Closed
                 }
               />
             ) : (
-              <Table>
+              <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>University</TableHead>
-                    <TableHead>Program</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Intake</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Student</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">University</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Program</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Intake</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Created</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredApplications.map((application) => (
-                    <TableRow 
+                    <TableRow
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => setLocation(`/applications/${application.id}`)}
+                      onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}
                     >
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium p-2 text-xs">
                         {getStudentName(application.studentId)}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
+                      <TableCell className="p-2 text-xs">
+                        <div className="flex items-center text-xs">
                           <School className="w-3 h-3 mr-1" />
                           <span>{application.university}</span>
                           {application.applicationCode && (
-                            <span className="ml-2 text-xs text-gray-500">({application.applicationCode})</span>
+                            <span className="ml-2 text-[11px] text-gray-500">({application.applicationCode})</span>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
+                      <TableCell className="p-2 text-xs">
+                        <div className="text-xs">
                           {application.program}
                           {application.courseType && (
-                            <div className="text-xs text-gray-500">{application.courseType}</div>
+                            <div className="text-[11px] text-gray-500">{application.courseType}</div>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(application.appStatus || 'Open')}>
                           {application.appStatus || 'Open'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
+                      <TableCell className="p-2 text-xs">
+                        <div className="text-xs">
                           {application.intake || '—'}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm text-gray-500">
+                      <TableCell className="p-2 text-xs">
+                        <div className="flex items-center text-xs text-gray-500">
                           <Calendar className="w-3 h-3 mr-1" />
                           {formatDate(application.createdAt)}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(application.createdAt)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
+                            <Button
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => setLocation(`/applications/${application.id}`)}
+                              onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -310,8 +316,11 @@ Closed
         </Card>
       </div>
 
-      
-      
+      <ApplicationDetailsModal
+        open={isDetailsOpen}
+        onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        application={selectedApplication}
+      />
     </Layout>
   );
 }

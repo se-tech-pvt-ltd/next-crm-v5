@@ -1,6 +1,5 @@
 import * as React from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -75,13 +74,13 @@ export function DobPicker({ id, value, onChange, disabled, className, fromYear, 
           id={id}
           disabled={disabled}
           variant="outline"
+          size="xs"
           className={cn(
-            "w-full justify-start text-left font-normal h-8 text-xs",
+            "w-full justify-start text-left font-normal h-8 text-xs px-2.5 text-gray-900 hover:text-gray-900",
             !value && "text-muted-foreground",
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
           {value ? value : "Select date"}
         </Button>
       </PopoverTrigger>

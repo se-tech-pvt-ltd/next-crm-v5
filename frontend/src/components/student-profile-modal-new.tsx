@@ -235,7 +235,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Loading Student</DialogTitle>
           <div className="text-center py-8">
             <p>Loading student...</p>
@@ -248,7 +248,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (!student) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Not Found</DialogTitle>
           <div className="text-center py-8">
             <p>Student not found</p>
@@ -261,19 +261,28 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
           <div className="text-xs md:text-[12px]">
-            {/* Status Progress Bar */}
-            {!isLoading && statusSequence.length > 0 && (
-              <div className="p-4 pb-0">
-                <div className="flex items-center justify-end mb-2 pr-12">
+            <div className="flex gap-0 h-[calc(90vh-2rem)] w-full items-stretch">
+              {/* Main Content */}
+              <div className="flex-1 flex flex-col space-y-4 min-w-0 min-h-0 w-full p-6 overflow-y-auto">
+                {/* Header Section */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center">
+                      <User className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold">{student.name}</h1>
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
+                      className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                       onClick={() => setIsAddApplicationOpen(true)}
                       title="Add Application"
                     >
@@ -281,50 +290,36 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <span className="hidden lg:inline">Add Application</span>
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
+                      className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                       onClick={() => setIsAddAdmissionOpen(true)}
                       title="Add Admission"
                     >
                       <Plus />
                       <span className="hidden lg:inline">Add Admission</span>
                     </Button>
-                  </div>
-                </div>
-
-                <StatusProgressBar />
-              </div>
-            )}
-
-            <div className="flex gap-0 min-h-[calc(90vh-2rem)] w-full items-stretch">
-              {/* Main Content */}
-              <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full p-6">
-                {/* Header Section */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold">{student.name}</h1>
-                      <p className="text-sm text-gray-600">{student.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
                     <Button
                       variant="ghost"
                       size="default"
-                      className="w-10 h-10 p-0 rounded-full bg-black hover:bg-gray-800 text-white ml-2"
+                      className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
                       onClick={() => onOpenChange(false)}
+                      aria-label="Close"
                     >
                       <X className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
 
+                {/* Status Progress Bar moved above student details */}
+                {!isLoading && statusSequence.length > 0 && (
+                  <div className="mb-2">
+                    <StatusProgressBar />
+                  </div>
+                )}
+
                 {/* Personal Information Section */}
-                <Card className="w-full">
+                <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Personal Information</CardTitle>
@@ -466,6 +461,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Academic Information Section */}
                 <CollapsibleCard
                   persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <CardTitle className="text-sm flex items-center space-x-2">
                       <GraduationCap className="w-5 h-5 text-primary" />
@@ -570,6 +566,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Applications Section */}
                 <CollapsibleCard
                   persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <CardTitle className="text-sm flex items-center justify-between w-full">
                       <div className="flex items-center space-x-2">
@@ -592,7 +589,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   {applications && applications.length > 0 ? (
                     <div className="space-y-3">
                       {applications.map((application) => (
-                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium">{application.university}</h3>
@@ -613,6 +610,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Admissions Section */}
                 <CollapsibleCard
                   persistKey={`student-details:${authUser?.id || 'anon'}:admissions`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <CardTitle className="text-sm flex items-center justify-between w-full">
                       <div className="flex items-center space-x-2">
@@ -635,7 +633,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   {admissions && admissions.length > 0 ? (
                     <div className="space-y-3">
                       {admissions.map((admission) => (
-                        <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium">{admission.program}</h3>
@@ -655,15 +653,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               </div>
 
               {/* Activity Sidebar */}
-              <div className="w-[30rem] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full">
-                {/* Add Activity box */}
-                <div className="mb-3">
-                  <div className="rounded-md p-2 bg-blue-50 border border-blue-100">
-                    <button type="button" className="w-full text-sm font-medium py-2 bg-white rounded-md hover:bg-white/90">+ Add Activity</button>
-                  </div>
-                </div>
-
-                <h3 className="text-sm font-semibold mb-2 flex items-center">
+              <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
+                <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
                   <Calendar className="w-5 h-5 mr-2" />
                   Activity Timeline
                 </h3>
@@ -683,6 +674,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       entityType="student"
                       entityId={student.id}
                       entityName={student.name}
+                      canAdd={false}
                     />
                   </div>
                 )}
