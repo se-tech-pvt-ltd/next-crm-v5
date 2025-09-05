@@ -18,6 +18,30 @@ interface ApplicationDetailsModalProps {
 }
 
 export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
+  const ApplicationStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
+    const steps = ["Open", "Needs Attention", "Closed"];
+    const idx = steps.findIndex((s) => s === currentStatus);
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1.5">
+        <div className="flex items-center justify-between relative">
+          {steps.map((s, i) => {
+            const isCompleted = i <= idx;
+            return (
+              <div key={s} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={() => onChange(s)}>
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${isCompleted ? 'bg-white' : 'bg-gray-300'}`} />
+                </div>
+                <span className={`mt-1 text-xs font-medium ${isCompleted ? 'text-blue-600' : 'text-gray-600'}`}>{s}</span>
+                {i < steps.length - 1 && (
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${i < idx ? 'bg-blue-600' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
   const queryClient = useQueryClient();
 
@@ -53,28 +77,14 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="flex items-center justify-center">
                 <School className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold">{application.university}</h1>
-                <p className="text-sm text-gray-600">{application.program}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div>
-                <label className="text-xs text-gray-500">Application Status</label>
-                <Select value={currentStatus} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-40 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Open">Open</SelectItem>
-                    <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                    <SelectItem value="Closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <Button
                 variant="ghost"
                 size="default"
@@ -91,6 +101,10 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
           <div className="flex-1 overflow-y-auto p-6 pt-28">
+            {/* Status bar under header (mirror student) */}
+            <div className="mb-3">
+              <ApplicationStatusBar currentStatus={currentStatus} onChange={handleStatusChange} />
+            </div>
             <div className="space-y-6">
               {/* Application Information */}
               <Card>
