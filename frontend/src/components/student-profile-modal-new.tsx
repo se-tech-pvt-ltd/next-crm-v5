@@ -235,7 +235,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Loading Student</DialogTitle>
           <div className="text-center py-8">
             <p>Loading student...</p>
@@ -248,7 +248,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (!student) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Not Found</DialogTitle>
           <div className="text-center py-8">
             <p>Student not found</p>
@@ -261,7 +261,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
           <div className="text-xs md:text-[12px]">
