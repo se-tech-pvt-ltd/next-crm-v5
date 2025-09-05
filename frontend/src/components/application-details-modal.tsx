@@ -97,6 +97,20 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                   </div>
                 </div>
 
+                <div className="hidden md:block">
+                  <label htmlFor="header-status" className="text-[11px] text-gray-500">Application Status</label>
+                  <Select value={currentStatus} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="h-8 text-xs w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Open">Open</SelectItem>
+                      <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+                      <SelectItem value="Closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="flex items-center gap-2">
                   {isEditing ? (
                     <>
