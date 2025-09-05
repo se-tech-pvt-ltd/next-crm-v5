@@ -319,7 +319,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 )}
 
                 {/* Personal Information Section */}
-                <Card className="w-full">
+                <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Personal Information</CardTitle>
@@ -461,6 +461,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Academic Information Section */}
                 <CollapsibleCard
                   persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <CardTitle className="text-sm flex items-center space-x-2">
                       <GraduationCap className="w-5 h-5 text-primary" />
@@ -565,6 +566,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Applications Section */}
                 <CollapsibleCard
                   persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <CardTitle className="text-sm flex items-center justify-between w-full">
                       <div className="flex items-center space-x-2">
@@ -608,6 +610,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 {/* Admissions Section */}
                 <CollapsibleCard
                   persistKey={`student-details:${authUser?.id || 'anon'}:admissions`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <CardTitle className="text-sm flex items-center justify-between w-full">
                       <div className="flex items-center space-x-2">
