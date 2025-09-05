@@ -75,14 +75,14 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
         <DialogTitle className="sr-only">Admission Details</DialogTitle>
         
         {/* Header with Fixed Position */}
-        <div className="absolute top-0 left-0 right-0 bg-white border-b p-6 z-10">
+        <div className="absolute top-0 left-0 right-0 bg-white border-b p-3 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center">
                 <Award className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{admission.program}</h1>
+                <h1 className="text-xl font-bold">{admission.program}</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -101,7 +101,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
         <div className="flex h-[90vh]">
           {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6 pt-28">
+          <div className="flex-1 overflow-y-auto p-6 pt-16">
             {/* Status bar under header (mirror student) */}
             <div className="mb-3">
               <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
@@ -232,7 +232,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           </div>
 
           {/* Activity Sidebar (mirror student) */}
-          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
+          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200 mt-12">
             <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
               <Calendar className="w-5 h-5 mr-2" />
               Activity Timeline
