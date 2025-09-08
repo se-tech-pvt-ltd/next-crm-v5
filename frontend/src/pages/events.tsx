@@ -12,10 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, X } from 'lucide-react';
-import { ActivityTracker } from '@/components/activity-tracker';
-import { CollapsibleCard } from '@/components/collapsible-card';
-import { useAuth } from '@/contexts/AuthContext';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
 
 const STATUS_OPTIONS = [
   { label: 'Attending', value: 'attending' },
@@ -33,7 +30,6 @@ export default function EventsPage() {
   const [viewReg, setViewReg] = useState<any | null>(null);
   const [filterEventId, setFilterEventId] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { user: authUser } = useAuth();
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
@@ -380,102 +376,75 @@ export default function EventsPage() {
 
         {/* View Registration Modal */}
         <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
-          <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
-            <DialogTitle className="sr-only">Registration Details</DialogTitle>
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Registration Details</DialogTitle>
+            </DialogHeader>
             {viewReg && (
-              <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
-                <div className="flex flex-col min-h-0">
-                  <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-                    <div className="px-3 py-2 flex items-center justify-between">
-                      <div className="flex-1">
-                        {viewReg && <StatusProgressBarReg />}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {viewReg && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { setIsViewRegOpen(false); setEditingReg(viewReg); setIsEditRegOpen(true); }}
-                              title="Edit"
-                            >
-                              <Edit />
-                              <span className="hidden lg:inline">Edit</span>
-                            </Button>
-                            <Button
-                              size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => convertMutation.mutate(viewReg.id)}
-                              disabled={convertMutation.isPending}
-                              title="Convert to Lead"
-                            >
-                              <UserPlus />
-                              <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
-                            </Button>
-                          </>
-                        )}
-                        <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => { setIsViewRegOpen(false); }}>
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <StatusProgressBarReg />
                   </div>
-
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-                    <CollapsibleCard
-                      persistKey={`registration-details:${authUser?.id || 'anon'}:${viewReg.id}`}
-                      cardClassName="shadow-sm hover:shadow-md transition-shadow"
-                      header={<CardTitle className="text-xs">Registration Information</CardTitle>}
-                      lockedOpen
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => { setIsViewRegOpen(false); setEditingReg(viewReg); setIsEditRegOpen(true); }}
+                      title="Edit"
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        <div>
-                          <Label>Registration ID</Label>
-                          <div className="text-xs">{viewReg.registrationCode}</div>
-                        </div>
-                        <div>
-                          <Label>Status</Label>
-                          <div className="text-xs capitalize">{viewReg.status}</div>
-                        </div>
-                        <div>
-                          <Label>Name</Label>
-                          <div className="text-xs">{viewReg.name}</div>
-                        </div>
-                        <div>
-                          <Label>Number</Label>
-                          <div className="text-xs">{viewReg.number || '-'}</div>
-                        </div>
-                        <div>
-                          <Label>Email</Label>
-                          <div className="text-xs">{viewReg.email || '-'}</div>
-                        </div>
-                        <div>
-                          <Label>City</Label>
-                          <div className="text-xs">{viewReg.city || '-'}</div>
-                        </div>
-                        <div>
-                          <Label>Source</Label>
-                          <div className="text-xs">{viewReg.source || '-'}</div>
-                        </div>
-                        <div>
-                          <Label>Event</Label>
-                          <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
-                        </div>
-                        <div>
-                          <Label>Created</Label>
-                          <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
-                        </div>
-                      </div>
-                    </CollapsibleCard>
+                      <Edit />
+                      <span className="hidden lg:inline">Edit</span>
+                    </Button>
+                    <Button
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => convertMutation.mutate(viewReg.id)}
+                      disabled={convertMutation.isPending}
+                      title="Convert to Lead"
+                    >
+                      <UserPlus />
+                      <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                    </Button>
                   </div>
                 </div>
-                <div className="border-l bg-white flex flex-col min-h-0">
-                  <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white">
-                    <h2 className="text-xs font-semibold">Activity Timeline</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Registration ID</Label>
+                    <div className="text-xs">{viewReg.registrationCode}</div>
                   </div>
-                  <div className="flex-1 overflow-y-auto pt-1 min-h-0">
-                    <ActivityTracker entityType="event-registration" entityId={viewReg.id} entityName={viewReg.name} />
+                  <div>
+                    <Label>Status</Label>
+                    <div className="text-xs capitalize">{viewReg.status}</div>
+                  </div>
+                  <div>
+                    <Label>Name</Label>
+                    <div className="text-xs">{viewReg.name}</div>
+                  </div>
+                  <div>
+                    <Label>Number</Label>
+                    <div className="text-xs">{viewReg.number || '-'}</div>
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <div className="text-xs">{viewReg.email || '-'}</div>
+                  </div>
+                  <div>
+                    <Label>City</Label>
+                    <div className="text-xs">{viewReg.city || '-'}</div>
+                  </div>
+                  <div>
+                    <Label>Source</Label>
+                    <div className="text-xs">{viewReg.source || '-'}</div>
+                  </div>
+                  <div>
+                    <Label>Event</Label>
+                    <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
+                  </div>
+                  <div>
+                    <Label>Created</Label>
+                    <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
                   </div>
                 </div>
               </div>
