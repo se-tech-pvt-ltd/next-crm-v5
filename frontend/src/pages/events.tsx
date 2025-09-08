@@ -15,10 +15,10 @@ import * as DropdownsService from '@/services/dropdowns';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
 
 const STATUS_OPTIONS = [
-  { label: 'Attending', value: 'attending' },
   { label: 'Not Sure', value: 'not_sure' },
-  { label: 'Will Not Attend', value: 'will_not_attend' },
   { label: 'Unable to Contact', value: 'unable_to_contact' },
+  { label: 'Will Not Attend', value: 'will_not_attend' },
+  { label: 'Attending', value: 'attending' },
 ];
 
 export default function EventsPage() {
