@@ -4,10 +4,10 @@ import { randomUUID } from "crypto";
 import { desc, eq, like } from "drizzle-orm";
 
 function generateDailyPrefix(date = new Date()) {
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
   const yy = String(date.getFullYear()).slice(-2);
-  return `REG-${dd}${mm}${yy}-`;
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `EVT-${yy}${mm}${dd}-`;
 }
 
 export class EventRegistrationModel {
@@ -40,18 +40,18 @@ export class EventRegistrationModel {
       if (latest && latest.length > 0) {
         const lastCode = (latest[0] as any).registrationCode as string;
         const parts = lastCode?.split('-') || [];
-        const seqStr = parts[2] || '000';
+        const seqStr = parts[2] || '0000';
         const parsed = parseInt(seqStr, 10);
         if (!Number.isNaN(parsed)) nextSeq = parsed + 1;
       }
     } catch {}
 
-    let registrationCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    let registrationCode = `${prefix}${String(nextSeq).padStart(4, '0')}`;
     for (let i = 0; i < 5; i++) {
       const existing = await db.select().from(eventRegistrations).where(eq(eventRegistrations.registrationCode, registrationCode));
       if (existing.length === 0) break;
       nextSeq += 1;
-      registrationCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+      registrationCode = `${prefix}${String(nextSeq).padStart(4, '0')}`;
     }
 
     await db.insert(eventRegistrations).values({ ...data, id, registrationCode });
