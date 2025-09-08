@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
 
 const STATUS_OPTIONS = [
   { label: 'Attending', value: 'attending' },
@@ -23,7 +23,11 @@ const STATUS_OPTIONS = [
 
 export default function EventsPage() {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isAddRegOpen, setIsAddRegOpen] = useState(false);
+  const [isEditRegOpen, setIsEditRegOpen] = useState(false);
+  const [editingReg, setEditingReg] = useState<any | null>(null);
   const [filterEventId, setFilterEventId] = useState<string>('all');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data: events, refetch: refetchEvents } = useQuery({
     queryKey: ['/api/events'],
@@ -54,9 +58,15 @@ export default function EventsPage() {
     onError: () => toast({ title: 'Failed to create event', variant: 'destructive' }),
   });
 
+  const addRegMutation = useMutation({
+    mutationFn: (data: RegService.RegistrationPayload) => RegService.createRegistration(data),
+    onSuccess: () => { toast({ title: 'Registration added' }); refetchRegs(); setIsAddRegOpen(false); },
+    onError: () => toast({ title: 'Failed to add registration', variant: 'destructive' }),
+  });
+
   const updateRegMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<RegService.RegistrationPayload> }) => RegService.updateRegistration(id, data),
-    onSuccess: () => { toast({ title: 'Updated' }); refetchRegs(); },
+    onSuccess: () => { toast({ title: 'Updated' }); refetchRegs(); setIsEditRegOpen(false); setEditingReg(null); },
     onError: () => toast({ title: 'Update failed', variant: 'destructive' }),
   });
 
@@ -73,6 +83,7 @@ export default function EventsPage() {
   });
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
+  const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
 
   const handleCreateEvent = () => {
     if (!newEvent.name || !newEvent.type || !newEvent.date || !newEvent.venue || !newEvent.time) {
@@ -82,6 +93,61 @@ export default function EventsPage() {
     addEventMutation.mutate(newEvent);
   };
 
+  const openAddRegistration = () => {
+    if (!filterEventId || filterEventId === 'all') {
+      toast({ title: 'Select an Event first', variant: 'destructive' });
+      return;
+    }
+    setRegForm({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: filterEventId });
+    setIsAddRegOpen(true);
+  };
+
+  const handleImportClick = () => {
+    if (!filterEventId || filterEventId === 'all') {
+      toast({ title: 'Select an Event to import into', variant: 'destructive' });
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const parseCsvAndImport = async (file: File) => {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length === 0) return;
+    const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const idx = (k: string) => header.indexOf(k);
+    const nameIdx = idx('name');
+    const numberIdx = idx('number');
+    const emailIdx = idx('email');
+    const cityIdx = idx('city');
+    const sourceIdx = idx('source');
+    const statusIdx = idx('status');
+
+    let success = 0, failed = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',');
+      const payload: RegService.RegistrationPayload = {
+        name: cols[nameIdx]?.trim() || '',
+        number: cols[numberIdx]?.trim() || '',
+        email: cols[emailIdx]?.trim() || '',
+        city: cols[cityIdx]?.trim() || '',
+        source: cols[sourceIdx]?.trim() || '',
+        status: (cols[statusIdx]?.trim()?.toLowerCase() || 'attending'),
+        eventId: filterEventId,
+      } as any;
+      if (!payload.name) { failed++; continue; }
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await RegService.createRegistration(payload);
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
+    refetchRegs();
+  };
+
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
 
   return (
@@ -89,7 +155,12 @@ export default function EventsPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-sm font-semibold flex items-center gap-2"><Calendar className="w-4 h-4" />Events</h1>
-          <Button size="xs" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+          <div className="flex items-center gap-2">
+            <Button size="xs" variant="outline" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
+            <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) parseCsvAndImport(f); e.currentTarget.value = ''; }} />
+            <Button size="xs" variant="outline" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV</Button>
+            <Button size="xs" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+          </div>
         </div>
 
         <Card>
@@ -160,6 +231,7 @@ export default function EventsPage() {
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="flex items-center gap-2">
+                          <Button size="xs" variant="outline" className="rounded-full px-2" onClick={() => { setEditingReg(r); setIsEditRegOpen(true); }} title="Edit"><Edit className="w-3 h-3" /><span className="hidden lg:inline">Edit</span></Button>
                           <Button size="xs" variant="outline" className="rounded-full px-2" onClick={() => convertMutation.mutate(r.id)} title="Convert to Lead"><UserPlus className="w-3 h-3" /><span className="hidden lg:inline">Convert</span></Button>
                           <Button size="xs" variant="outline" className="rounded-full px-2" onClick={() => deleteRegMutation.mutate(r.id)} title="Delete"><Trash2 className="w-3 h-3" /><span className="hidden lg:inline">Delete</span></Button>
                         </div>
@@ -172,6 +244,107 @@ export default function EventsPage() {
           </CardContent>
         </Card>
 
+        {/* Create Registration Modal */}
+        <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Registration</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <Label>Status</Label>
+                <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Name</Label>
+                <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
+              </div>
+              <div>
+                <Label>Number</Label>
+                <Input value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input type="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>City</Label>
+                <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} />
+              </div>
+              <div>
+                <Label>Source</Label>
+                <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                  <SelectContent>
+                    {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
+              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Registration Modal */}
+        <Dialog open={isEditRegOpen} onOpenChange={setIsEditRegOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Registration</DialogTitle>
+            </DialogHeader>
+            {editingReg && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Status</Label>
+                  <Select value={editingReg.status} onValueChange={(v) => setEditingReg({ ...editingReg, status: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Name</Label>
+                  <Input value={editingReg.name || ''} onChange={(e) => setEditingReg({ ...editingReg, name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Number</Label>
+                  <Input value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input type="email" value={editingReg.email || ''} onChange={(e) => setEditingReg({ ...editingReg, email: e.target.value })} />
+                </div>
+                <div>
+                  <Label>City</Label>
+                  <Input value={editingReg.city || ''} onChange={(e) => setEditingReg({ ...editingReg, city: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Source</Label>
+                  <Select value={editingReg.source || ''} onValueChange={(v) => setEditingReg({ ...editingReg, source: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                    <SelectContent>
+                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsEditRegOpen(false)}>Cancel</Button>
+              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Event Modal */}
         <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
           <DialogContent>
             <DialogHeader>
