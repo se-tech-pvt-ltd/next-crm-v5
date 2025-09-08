@@ -175,6 +175,15 @@ export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  date: z.union([z.string(), z.date()]).transform((v) => {
+    if (v instanceof Date) return v;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return d;
+  }),
 });
 
 export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({
