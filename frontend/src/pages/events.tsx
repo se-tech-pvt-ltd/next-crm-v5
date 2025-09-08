@@ -196,7 +196,7 @@ export default function EventsPage() {
               </div>
               <div>
                 <Label>Time</Label>
-                <Input placeholder="e.g. 3:00 PM" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} />
+                <Input type="time" step="60" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
