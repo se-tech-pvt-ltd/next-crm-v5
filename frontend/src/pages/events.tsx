@@ -106,15 +106,22 @@ export default function EventsPage() {
         : RegService.getRegistrations(),
   });
 
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+  const { data: eventsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Events'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Events'),
   });
 
   const sourceOptions = useMemo(() => {
-    const list: any[] = (leadsDropdowns as any)?.Sources || [];
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => {
+      const sa = typeof a.sequence === 'number' ? a.sequence : Number(a.sequence ?? 0);
+      const sb = typeof b.sequence === 'number' ? b.sequence : Number(b.sequence ?? 0);
+      return sa - sb;
+    });
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
-  }, [leadsDropdowns]);
+  }, [eventsDropdowns]);
 
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
