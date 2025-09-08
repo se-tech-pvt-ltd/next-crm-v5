@@ -123,6 +123,19 @@ export default function EventsPage() {
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [eventsDropdowns]);
 
+  const getSourceLabel = useMemo(() => {
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
+    if (!Array.isArray(list)) list = [];
+    const map = new Map<string, string>();
+    for (const o of list) {
+      if (o?.id) map.set(String(o.id), o.value);
+      if (o?.key) map.set(String(o.key), o.value);
+      if (o?.value) map.set(String(o.value), o.value);
+    }
+    return (val?: string) => (val ? (map.get(String(val)) || val) : '');
+  }, [eventsDropdowns]);
+
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
     onSuccess: () => { toast({ title: 'Event created' }); refetchEvents(); setIsAddEventOpen(false); },
@@ -533,7 +546,7 @@ export default function EventsPage() {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="text-xs">{viewReg.source || '-'}</div>
+                        <div className="text-xs">{getSourceLabel(viewReg.source) || '-'}</div>
                       )}
                     </div>
                   </div>
