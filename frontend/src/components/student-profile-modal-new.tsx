@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
-import { AddAdmissionModal } from './add-admission-modal';
 import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -53,8 +52,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
-  const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
-
+  
   const { data: student, isLoading } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
     enabled: !!studentId,
@@ -288,16 +286,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     >
                       <Plus />
                       <span className="hidden lg:inline">Add Application</span>
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
-                      onClick={() => setIsAddAdmissionOpen(true)}
-                      title="Add Admission"
-                    >
-                      <Plus />
-                      <span className="hidden lg:inline">Add Admission</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -617,16 +605,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <Award className="w-5 h-5 text-primary" />
                         <span>Admissions ({admissions?.length || 0})</span>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="rounded-full px-2 [&_svg]:size-3"
-                        onClick={() => setIsAddAdmissionOpen(true)}
-                        title="Add Admission"
-                      >
-                        <Plus />
-                        <span className="hidden lg:inline">Add</span>
-                      </Button>
                     </CardTitle>
                   }
                 >
@@ -691,12 +669,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
         studentId={student.id}
       />
 
-      {/* Add Admission Modal */}
-      <AddAdmissionModal
-        open={isAddAdmissionOpen}
-        onOpenChange={setIsAddAdmissionOpen}
-        studentId={student.id}
-      />
     </>
   );
 }
