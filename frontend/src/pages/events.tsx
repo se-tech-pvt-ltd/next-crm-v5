@@ -35,6 +35,64 @@ export default function EventsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { user: authUser } = useAuth();
 
+  const StatusProgressBarReg = () => {
+    if (!viewReg) return null;
+    const sequence = STATUS_OPTIONS.map(s => s.value);
+    const currentIndex = sequence.findIndex(v => v === viewReg.status);
+
+    const getLabel = (value: string) => STATUS_OPTIONS.find(o => o.value === value)?.label || value;
+
+    const handleClick = async (target: string) => {
+      if (!viewReg) return;
+      if (target === viewReg.status) return;
+      const prev = viewReg.status;
+      setViewReg({ ...viewReg, status: target });
+      try {
+        // @ts-ignore mutateAsync exists on useMutation
+        await updateRegMutation.mutateAsync({ id: viewReg.id, data: { status: target } });
+      } catch {
+        setViewReg(v => (v ? { ...v, status: prev } : v));
+      }
+    };
+
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1 mb-2">
+        <div className="flex items-center justify-between relative">
+          {sequence.map((statusId, index) => {
+            const isActive = index === currentIndex;
+            const isCompleted = currentIndex >= 0 && index <= currentIndex;
+            const statusName = getLabel(statusId);
+            return (
+              <div
+                key={statusId}
+                className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                onClick={() => handleClick(statusId)}
+                role="button"
+                aria-label={`Set status to ${statusName}`}
+              >
+                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                  isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                }`}>
+                  {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
+                </div>
+                <span className={`mt-1 text-[11px] font-medium text-center ${
+                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                }`}>
+                  {statusName}
+                </span>
+                {index < sequence.length - 1 && (
+                  <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const { data: events, refetch: refetchEvents } = useQuery({
     queryKey: ['/api/events'],
     queryFn: EventsService.getEvents,
@@ -329,7 +387,9 @@ export default function EventsPage() {
                 <div className="flex flex-col min-h-0">
                   <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
                     <div className="px-3 py-2 flex items-center justify-between">
-                      <div className="text-xs font-semibold">Registration Details</div>
+                      <div className="flex-1">
+                        {viewReg && <StatusProgressBarReg />}
+                      </div>
                       <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => { setIsViewRegOpen(false); }}>
                         <X className="w-4 h-4" />
                       </Button>
