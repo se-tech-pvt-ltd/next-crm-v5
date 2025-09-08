@@ -379,7 +379,10 @@ export default function EventsPage() {
           <DialogContent className="max-w-xl">
             {viewReg && (
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 space-y-2">
+                  <div className="flex-1">
+                    <StatusProgressBarReg />
+                  </div>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xs">Registration Information</CardTitle>
                     <div className="flex items-center gap-2">
@@ -407,7 +410,6 @@ export default function EventsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <StatusProgressBarReg />
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <Label>Registration ID</Label>
