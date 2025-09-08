@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
-import { type Student, type Application, type Admission } from '@/lib/types';
+import { type Student, type Application } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
@@ -26,7 +26,6 @@ import {
   X,
   Plus,
   FileText,
-  Award,
   Calendar,
   Phone,
   Mail,
@@ -62,10 +61,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     enabled: !!studentId,
   });
 
-  const { data: admissions } = useQuery<Admission[]>({
-    queryKey: [`/api/admissions/student/${studentId}`],
-    enabled: !!studentId,
-  });
 
   // Get dropdown data for Students module
   const { data: dropdownData } = useQuery({
@@ -425,25 +420,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   )}
                 </CollapsibleCard>
 
-                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:admissions`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-xs flex items-center justify-between w-full"><div className="flex items-center space-x-2"><Award className="w-4 h-4 text-primary" /><span>Admissions ({admissions?.length || 0})</span></div></CardTitle>}>
-                  {admissions && admissions.length > 0 ? (
-                    <div className="space-y-3">
-                      {admissions.map((admission) => (
-                        <div key={admission.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-medium">{admission.program}</h3>
-                              <p className="text-xs text-gray-600">Decision: {admission.decisionDate}</p>
-                            </div>
-                            <Badge variant="default">{admission.visaStatus || 'Pending'}</Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No admissions yet</p>
-                  )}
-                </CollapsibleCard>
               </div>
             </div>
 
