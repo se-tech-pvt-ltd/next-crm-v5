@@ -187,16 +187,19 @@ export default function EventsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(registrations || []).map((r: any) => (
                     <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
                       <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                      <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                      <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <Select value={r.status} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { status: v } })}>
                           <SelectTrigger className="h-8 text-xs w-44" onClick={(e) => e.stopPropagation()}><SelectValue /></SelectTrigger>
@@ -205,9 +208,6 @@ export default function EventsPage() {
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
