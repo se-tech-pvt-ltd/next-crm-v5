@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useLocation } from 'wouter';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -26,6 +27,8 @@ export default function Students() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const [, setLocation] = useLocation();
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -100,6 +103,17 @@ export default function Students() {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const paramId = params.get('studentId');
+      if (paramId) {
+        setSelectedStudentId(paramId);
+        setIsProfileModalOpen(true);
+      }
+    }
+  }, []);
 
   const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
@@ -347,7 +361,10 @@ export default function Students() {
         open={isProfileModalOpen}
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
-          if (!open) setSelectedStudentId(null);
+          if (!open) {
+            setSelectedStudentId(null);
+            setLocation('/students');
+          }
         }}
         studentId={selectedStudentId}
       />
