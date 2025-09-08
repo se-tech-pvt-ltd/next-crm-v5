@@ -22,22 +22,40 @@ export class EventController {
   }
   static async create(req: Request, res: Response) {
     try {
-      const data = insertEventSchema.parse(req.body);
+      const raw = { ...req.body } as any;
+      if (raw.date && typeof raw.date === 'string') {
+        const d = new Date(raw.date);
+        if (!Number.isNaN(d.getTime())) raw.date = d;
+      }
+      const data = insertEventSchema.parse(raw);
       const created = await EventService.createEvent(data);
       res.status(201).json(created);
     } catch (e) {
-      if (e instanceof z.ZodError) return res.status(400).json({ message: "Invalid event data", errors: e.errors });
+      if (e instanceof z.ZodError) {
+        console.error('Event create validation errors:', e.errors);
+        return res.status(400).json({ message: "Invalid event data", errors: e.errors });
+      }
+      console.error('Event create error:', e);
       res.status(500).json({ message: "Failed to create event" });
     }
   }
   static async update(req: Request, res: Response) {
     try {
-      const data = insertEventSchema.partial().parse(req.body);
+      const raw = { ...req.body } as any;
+      if (raw.date && typeof raw.date === 'string') {
+        const d = new Date(raw.date);
+        if (!Number.isNaN(d.getTime())) raw.date = d;
+      }
+      const data = insertEventSchema.partial().parse(raw);
       const updated = await EventService.updateEvent(req.params.id, data);
       if (!updated) return res.status(404).json({ message: "Event not found" });
       res.json(updated);
     } catch (e) {
-      if (e instanceof z.ZodError) return res.status(400).json({ message: "Invalid event data", errors: e.errors });
+      if (e instanceof z.ZodError) {
+        console.error('Event update validation errors:', e.errors);
+        return res.status(400).json({ message: "Invalid event data", errors: e.errors });
+      }
+      console.error('Event update error:', e);
       res.status(500).json({ message: "Failed to update event" });
     }
   }
