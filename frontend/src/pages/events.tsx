@@ -26,6 +26,8 @@ export default function EventsPage() {
   const [isAddRegOpen, setIsAddRegOpen] = useState(false);
   const [isEditRegOpen, setIsEditRegOpen] = useState(false);
   const [editingReg, setEditingReg] = useState<any | null>(null);
+  const [isViewRegOpen, setIsViewRegOpen] = useState(false);
+  const [viewReg, setViewReg] = useState<any | null>(null);
   const [filterEventId, setFilterEventId] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -193,11 +195,11 @@ export default function EventsPage() {
                 </TableHeader>
                 <TableBody>
                   {(registrations || []).map((r: any) => (
-                    <TableRow key={r.id}>
+                    <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
                       <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <Select value={r.status} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { status: v } })}>
-                          <SelectTrigger className="h-8 text-xs w-44"><SelectValue /></SelectTrigger>
+                          <SelectTrigger className="h-8 text-xs w-44" onClick={(e) => e.stopPropagation()}><SelectValue /></SelectTrigger>
                           <SelectContent>
                             {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
@@ -311,6 +313,55 @@ export default function EventsPage() {
               <Button variant="outline" onClick={() => setIsEditRegOpen(false)}>Cancel</Button>
               <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name}>Save</Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Registration Modal */}
+        <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Registration Details</DialogTitle>
+            </DialogHeader>
+            {viewReg && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Registration ID</Label>
+                  <div className="text-xs">{viewReg.registrationCode}</div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <div className="text-xs capitalize">{viewReg.status}</div>
+                </div>
+                <div>
+                  <Label>Name</Label>
+                  <div className="text-xs">{viewReg.name}</div>
+                </div>
+                <div>
+                  <Label>Number</Label>
+                  <div className="text-xs">{viewReg.number || '-'}</div>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="text-xs">{viewReg.email || '-'}</div>
+                </div>
+                <div>
+                  <Label>City</Label>
+                  <div className="text-xs">{viewReg.city || '-'}</div>
+                </div>
+                <div>
+                  <Label>Source</Label>
+                  <div className="text-xs">{viewReg.source || '-'}</div>
+                </div>
+                <div>
+                  <Label>Event</Label>
+                  <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
+                </div>
+                <div>
+                  <Label>Created</Label>
+                  <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 
