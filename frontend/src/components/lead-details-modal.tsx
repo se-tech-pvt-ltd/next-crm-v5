@@ -250,7 +250,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                           </div>
                         ) : (
                           <>
-                            {convertedStudent && (
+                            {convertedStudent ? (
                               <Button
                                 variant="default"
                                 size="xs"
@@ -261,8 +261,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                                 <UserPlus />
                                 <span className="hidden lg:inline">View Student</span>
                               </Button>
-                            )}
-                            {!isEditing ? (
+                            ) : !isEditing ? (
                               <>
                                 <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
                                   <Edit />
