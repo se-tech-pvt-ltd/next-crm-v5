@@ -14,6 +14,8 @@ import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, X } from 'lucide-react';
 import { ActivityTracker } from '@/components/activity-tracker';
+import { CollapsibleCard } from '@/components/collapsible-card';
+import { useAuth } from '@/contexts/AuthContext';
 
 const STATUS_OPTIONS = [
   { label: 'Attending', value: 'attending' },
@@ -31,6 +33,7 @@ export default function EventsPage() {
   const [viewReg, setViewReg] = useState<any | null>(null);
   const [filterEventId, setFilterEventId] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { user: authUser } = useAuth();
 
   const { data: events, refetch: refetchEvents } = useQuery({
     queryKey: ['/api/events'],
@@ -334,51 +337,50 @@ export default function EventsPage() {
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-                    <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-xs">Registration Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                          <div>
-                            <Label>Registration ID</Label>
-                            <div className="text-xs">{viewReg.registrationCode}</div>
-                          </div>
-                          <div>
-                            <Label>Status</Label>
-                            <div className="text-xs capitalize">{viewReg.status}</div>
-                          </div>
-                          <div>
-                            <Label>Name</Label>
-                            <div className="text-xs">{viewReg.name}</div>
-                          </div>
-                          <div>
-                            <Label>Number</Label>
-                            <div className="text-xs">{viewReg.number || '-'}</div>
-                          </div>
-                          <div>
-                            <Label>Email</Label>
-                            <div className="text-xs">{viewReg.email || '-'}</div>
-                          </div>
-                          <div>
-                            <Label>City</Label>
-                            <div className="text-xs">{viewReg.city || '-'}</div>
-                          </div>
-                          <div>
-                            <Label>Source</Label>
-                            <div className="text-xs">{viewReg.source || '-'}</div>
-                          </div>
-                          <div>
-                            <Label>Event</Label>
-                            <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
-                          </div>
-                          <div>
-                            <Label>Created</Label>
-                            <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
-                          </div>
+                    <CollapsibleCard
+                      persistKey={`registration-details:${authUser?.id || 'anon'}:${viewReg.id}`}
+                      cardClassName="shadow-sm hover:shadow-md transition-shadow"
+                      header={<CardTitle className="text-xs">Registration Information</CardTitle>}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        <div>
+                          <Label>Registration ID</Label>
+                          <div className="text-xs">{viewReg.registrationCode}</div>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div>
+                          <Label>Status</Label>
+                          <div className="text-xs capitalize">{viewReg.status}</div>
+                        </div>
+                        <div>
+                          <Label>Name</Label>
+                          <div className="text-xs">{viewReg.name}</div>
+                        </div>
+                        <div>
+                          <Label>Number</Label>
+                          <div className="text-xs">{viewReg.number || '-'}</div>
+                        </div>
+                        <div>
+                          <Label>Email</Label>
+                          <div className="text-xs">{viewReg.email || '-'}</div>
+                        </div>
+                        <div>
+                          <Label>City</Label>
+                          <div className="text-xs">{viewReg.city || '-'}</div>
+                        </div>
+                        <div>
+                          <Label>Source</Label>
+                          <div className="text-xs">{viewReg.source || '-'}</div>
+                        </div>
+                        <div>
+                          <Label>Event</Label>
+                          <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
+                        </div>
+                        <div>
+                          <Label>Created</Label>
+                          <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
+                        </div>
+                      </div>
+                    </CollapsibleCard>
                   </div>
                 </div>
                 <div className="border-l bg-white flex flex-col min-h-0">
