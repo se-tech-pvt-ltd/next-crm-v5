@@ -409,14 +409,10 @@ export default function EventsPage() {
                     </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <Label>Registration ID</Label>
                     <div className="text-xs">{viewReg.registrationCode}</div>
-                  </div>
-                  <div>
-                    <Label>Status</Label>
-                    <div className="text-xs capitalize">{viewReg.status}</div>
                   </div>
                   <div>
                     <Label>Name</Label>
@@ -437,14 +433,6 @@ export default function EventsPage() {
                   <div>
                     <Label>Source</Label>
                     <div className="text-xs">{viewReg.source || '-'}</div>
-                  </div>
-                  <div>
-                    <Label>Event</Label>
-                    <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
-                  </div>
-                  <div>
-                    <Label>Created</Label>
-                    <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
                   </div>
                 </div>
               </div>
