@@ -17,7 +17,6 @@ import { queryClient } from '@/lib/queryClient';
 import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
-import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -37,7 +36,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
-  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -219,7 +217,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                         variant="default"
                         size="xs"
                         className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
-                        onClick={() => { onOpenChange(false); setIsStudentProfileOpen(true); }}
+                        onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
                         title="View Student"
                       >
                         <UserPlus />
@@ -434,11 +432,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
           </div>
         </DialogContent>
       </Dialog>
-      <StudentProfileModal
-        open={isStudentProfileOpen}
-        onOpenChange={setIsStudentProfileOpen}
-        studentId={convertedStudent?.id || null}
-      />
     </>
   );
 }
