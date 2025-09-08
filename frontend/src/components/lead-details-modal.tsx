@@ -37,6 +37,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -218,7 +219,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                         variant="default"
                         size="xs"
                         className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
-                        onClick={() => { onOpenChange(false); setLocation(`/students/${convertedStudent.id}`); }}
+                        onClick={() => { onOpenChange(false); setIsStudentProfileOpen(true); }}
                         title="View Student"
                       >
                         <UserPlus />
@@ -433,6 +434,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
           </div>
         </DialogContent>
       </Dialog>
+      <StudentProfileModal
+        open={isStudentProfileOpen}
+        onOpenChange={setIsStudentProfileOpen}
+        studentId={convertedStudent?.id || null}
+      />
     </>
   );
 }
