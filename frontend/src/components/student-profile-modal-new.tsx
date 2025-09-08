@@ -233,7 +233,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Loading Student</DialogTitle>
           <div className="text-center py-8">
             <p>Loading student...</p>
@@ -246,7 +246,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   if (!student) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Not Found</DialogTitle>
           <div className="text-center py-8">
             <p>Student not found</p>
@@ -259,89 +259,82 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          <div className="text-xs md:text-[12px]">
-            <div className="flex gap-0 h-[calc(90vh-2rem)] w-full items-stretch">
-              {/* Main Content */}
-              <div className="flex-1 flex flex-col space-y-4 min-w-0 min-h-0 w-full p-6 overflow-y-auto">
-                {/* Header Section */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center">
-                      <User className="w-6 h-6 text-blue-600" />
+          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
+            {/* Left: Content */}
+            <div className="flex flex-col min-h-0">
+              {/* Sticky header inside scroll context */}
+              <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                      <User className="w-5 h-5 text-primary" />
                     </div>
-                    <div>
-                      <h1 className="text-xl font-bold">{student.name}</h1>
-                    </div>
+                    <h1 className="text-lg font-semibold truncate">{student.name}</h1>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="default"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
-                      onClick={() => setIsAddApplicationOpen(true)}
-                      title="Add Application"
-                    >
-                      <Plus />
-                      <span className="hidden lg:inline">Add Application</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="default"
-                      className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
-                      onClick={() => onOpenChange(false)}
-                      aria-label="Close"
-                    >
-                      <X className="w-5 h-5" />
+                    {!isEditing ? (
+                      <>
+                        <Button
+                          variant="default"
+                          size="xs"
+                          className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                          onClick={() => setIsAddApplicationOpen(true)}
+                          title="Add Application"
+                        >
+                          <Plus />
+                          <span className="hidden lg:inline">Add Application</span>
+                        </Button>
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                          <Edit />
+                          <span className="hidden lg:inline">Edit</span>
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateStudentMutation.isPending}>
+                          <Save />
+                          <span className="hidden lg:inline">{updateStudentMutation.isPending ? 'Saving…' : 'Save'}</span>
+                        </Button>
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(student); }} title="Cancel" disabled={updateStudentMutation.isPending}>
+                          <X />
+                          <span className="hidden lg:inline">Cancel</span>
+                        </Button>
+                      </>
+                    )}
+                    <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-
-                {/* Status Progress Bar moved above student details */}
-                {!isLoading && statusSequence.length > 0 && (
-                  <div className="mb-2">
+                {statusSequence.length > 0 && (
+                  <div className="px-4 pb-3">
                     <StatusProgressBar />
                   </div>
                 )}
+              </div>
 
-                {/* Personal Information Section */}
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
                 <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Personal Information</CardTitle>
                       <div className="flex items-center space-x-2">
                         {!isEditing ? (
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => setIsEditing(true)}
-                            disabled={isLoading}
-                            title="Edit"
-                          >
+                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} disabled={isLoading} title="Edit">
                             <Edit />
                             <span className="hidden lg:inline">Edit</span>
                           </Button>
                         ) : (
                           <>
-                            <Button
-                              size="sm"
-                              onClick={handleSaveChanges}
-                              disabled={updateStudentMutation.isPending}
-                            >
+                            <Button size="sm" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending}>
                               <Save className="w-4 h-4 mr-1" />
                               Save Changes
                             </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setIsEditing(false);
-                                setEditData(student);
-                              }}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(student); }}>
                               <X className="w-4 h-4 mr-1" />
                               Cancel
                             </Button>
@@ -352,228 +345,100 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {/* Name */}
                       <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center space-x-2">
                           <UserIcon className="w-4 h-4" />
                           <span>Full Name</span>
                         </Label>
-                        <Input
-                          id="name"
-                          value={isEditing ? (editData.name || '') : (student?.name || '')}
-                          onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
+                        <Input id="name" value={isEditing ? (editData.name || '') : (student?.name || '')} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-
-                      {/* Email */}
                       <div className="space-y-2">
                         <Label htmlFor="email" className="flex items-center space-x-2">
                           <Mail className="w-4 h-4" />
                           <span>Email Address</span>
                         </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={isEditing ? (editData.email || '') : (student?.email || '')}
-                          onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
+                        <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-
-                      {/* Phone */}
                       <div className="space-y-2">
                         <Label htmlFor="phone" className="flex items-center space-x-2">
                           <Phone className="w-4 h-4" />
                           <span>Phone Number</span>
                         </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={isEditing ? (editData.phone || '') : (student?.phone || '')}
-                          onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
+                        <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-
-                      {/* Date of Birth */}
                       <div className="space-y-2">
                         <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4" />
                           <span>Date of Birth</span>
                         </Label>
-                        <DobPicker
-                          id="dateOfBirth"
-                          value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')}
-                          onChange={(v) => setEditData({ ...editData, dateOfBirth: v })}
-                          disabled={!isEditing}
-                        />
+                        <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
                       </div>
-
-                      {/* Address */}
                       <div className="space-y-2">
                         <Label htmlFor="address" className="flex items-center space-x-2">
                           <MapPin className="w-4 h-4" />
                           <span>Address</span>
                         </Label>
-                        <Input
-                          id="address"
-                          value={isEditing ? (editData.address || '') : (student?.address || '')}
-                          onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
+                        <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-
-                      {/* Nationality */}
                       <div className="space-y-2">
                         <Label htmlFor="nationality" className="flex items-center space-x-2">
                           <Globe className="w-4 h-4" />
                           <span>Nationality</span>
                         </Label>
-                        <Input
-                          id="nationality"
-                          value={isEditing ? (editData.nationality || '') : (student?.nationality || '')}
-                          onChange={(e) => setEditData({ ...editData, nationality: e.target.value })}
-                          disabled={!isEditing}
-                          className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                        />
+                        <Input id="nationality" value={isEditing ? (editData.nationality || '') : (student?.nationality || '')} onChange={(e) => setEditData({ ...editData, nationality: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Academic Information Section */}
-                <CollapsibleCard
-                  persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`}
-                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
-                  header={
-                    <CardTitle className="text-sm flex items-center space-x-2">
-                      <GraduationCap className="w-5 h-5 text-primary" />
-                      <span>Academic Information</span>
-                    </CardTitle>
-                  }
-                >
+                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-sm flex items-center space-x-2"><GraduationCap className="w-5 h-5 text-primary" /><span>Academic Information</span></CardTitle>}>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {/* Target Country */}
                     <div className="space-y-2">
                       <Label htmlFor="targetCountry" className="flex items-center space-x-2">
                         <Globe className="w-4 h-4" />
                         <span>Target Country</span>
                       </Label>
-                      <Input
-                        id="targetCountry"
-                        value={isEditing ? (editData.targetCountry || '') : (student?.targetCountry || '')}
-                        onChange={(e) => setEditData({ ...editData, targetCountry: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
+                      <Input id="targetCountry" value={isEditing ? (editData.targetCountry || '') : (student?.targetCountry || '')} onChange={(e) => setEditData({ ...editData, targetCountry: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-
-                    {/* Target Program */}
                     <div className="space-y-2">
                       <Label htmlFor="targetProgram" className="flex items-center space-x-2">
                         <BookOpen className="w-4 h-4" />
                         <span>Target Program</span>
                       </Label>
-                      <Input
-                        id="targetProgram"
-                        value={isEditing ? (editData.targetProgram || '') : (student?.targetProgram || '')}
-                        onChange={(e) => setEditData({ ...editData, targetProgram: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
+                      <Input id="targetProgram" value={isEditing ? (editData.targetProgram || '') : (student?.targetProgram || '')} onChange={(e) => setEditData({ ...editData, targetProgram: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-
-                    {/* Academic Background */}
                     <div className="space-y-2">
                       <Label htmlFor="academicBackground" className="flex items-center space-x-2">
                         <GraduationCap className="w-4 h-4" />
                         <span>Academic Background</span>
                       </Label>
-                      <Input
-                        id="academicBackground"
-                        value={isEditing ? (editData.academicBackground || '') : (student?.academicBackground || '')}
-                        onChange={(e) => setEditData({ ...editData, academicBackground: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
+                      <Input id="academicBackground" value={isEditing ? (editData.academicBackground || '') : (student?.academicBackground || '')} onChange={(e) => setEditData({ ...editData, academicBackground: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-
-                    {/* English Proficiency */}
                     <div className="space-y-2">
                       <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
                         <span>English Proficiency</span>
                       </Label>
-                      <Input
-                        id="englishProficiency"
-                        value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')}
-                        onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
+                      <Input id="englishProficiency" value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')} onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-
-                    {/* Budget */}
                     <div className="space-y-2">
                       <Label htmlFor="budget" className="flex items-center space-x-2">
                         <Target className="w-4 h-4" />
                         <span>Budget</span>
                       </Label>
-                      <Input
-                        id="budget"
-                        value={isEditing ? (editData.budget || '') : (student?.budget || '')}
-                        onChange={(e) => setEditData({ ...editData, budget: e.target.value })}
-                        disabled={!isEditing}
-                        className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
+                      <Input id="budget" value={isEditing ? (editData.budget || '') : (student?.budget || '')} onChange={(e) => setEditData({ ...editData, budget: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-
-                    {/* Notes */}
                     <div className="space-y-2 md:col-span-2 lg:col-span-3">
                       <Label htmlFor="notes" className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
                         <span>Notes</span>
                       </Label>
-                      <Textarea
-                        id="notes"
-                        value={isEditing ? (editData.notes || '') : (student?.notes || '')}
-                        onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                        disabled={!isEditing}
-                        rows={3}
-                        className="text-xs transition-all focus:ring-2 focus:ring-primary/20"
-                      />
+                      <Textarea id="notes" value={isEditing ? (editData.notes || '') : (student?.notes || '')} onChange={(e) => setEditData({ ...editData, notes: e.target.value })} disabled={!isEditing} rows={3} className="text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
                   </div>
                 </CollapsibleCard>
 
-                {/* Applications Section */}
-                <CollapsibleCard
-                  persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
-                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
-                  header={
-                    <CardTitle className="text-sm flex items-center justify-between w-full">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-5 h-5 text-primary" />
-                        <span>Applications ({applications?.length || 0})</span>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="rounded-full px-2 [&_svg]:size-3"
-                        onClick={() => setIsAddApplicationOpen(true)}
-                        title="Add Application"
-                      >
-                        <Plus />
-                        <span className="hidden lg:inline">Add</span>
-                      </Button>
-                    </CardTitle>
-                  }
-                >
+                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:applications`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-sm flex items-center justify-between w-full"><div className="flex items-center space-x-2"><FileText className="w-5 h-5 text-primary" /><span>Applications ({applications?.length || 0})</span></div><Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)} title="Add Application"><Plus /><span className="hidden lg:inline">Add</span></Button></CardTitle>}>
                   {applications && applications.length > 0 ? (
                     <div className="space-y-3">
                       {applications.map((application) => (
@@ -595,19 +460,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   )}
                 </CollapsibleCard>
 
-                {/* Admissions Section */}
-                <CollapsibleCard
-                  persistKey={`student-details:${authUser?.id || 'anon'}:admissions`}
-                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
-                  header={
-                    <CardTitle className="text-sm flex items-center justify-between w-full">
-                      <div className="flex items-center space-x-2">
-                        <Award className="w-5 h-5 text-primary" />
-                        <span>Admissions ({admissions?.length || 0})</span>
-                      </div>
-                    </CardTitle>
-                  }
-                >
+                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:admissions`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-sm flex items-center justify-between w-full"><div className="flex items-center space-x-2"><Award className="w-5 h-5 text-primary" /><span>Admissions ({admissions?.length || 0})</span></div></CardTitle>}>
                   {admissions && admissions.length > 0 ? (
                     <div className="space-y-3">
                       {admissions.map((admission) => (
@@ -617,9 +470,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                               <h3 className="font-medium">{admission.program}</h3>
                               <p className="text-sm text-gray-600">Decision: {admission.decisionDate}</p>
                             </div>
-                            <Badge variant="default">
-                              {admission.visaStatus || 'Pending'}
-                            </Badge>
+                            <Badge variant="default">{admission.visaStatus || 'Pending'}</Badge>
                           </div>
                         </div>
                       ))}
@@ -629,33 +480,15 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   )}
                 </CollapsibleCard>
               </div>
+            </div>
 
-              {/* Activity Sidebar */}
-              <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 border-l border-gray-200">
-                <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Activity Timeline
-                </h3>
-
-                {isLoading ? (
-                  <div className="space-y-4 flex-1">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex-1 min-h-0 overflow-y-auto">
-                    <ActivityTracker
-                      entityType="student"
-                      entityId={student.id}
-                      entityName={student.name}
-                      canAdd={false}
-                    />
-                  </div>
-                )}
+            {/* Right: Timeline */}
+            <div className="border-l bg-white flex flex-col min-h-0">
+              <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+                <h2 className="text-sm font-semibold">Activity Timeline</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto pt-2 min-h-0">
+                <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
               </div>
             </div>
           </div>
