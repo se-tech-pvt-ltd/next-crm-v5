@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
 import { type Student, type Application, type Admission } from '@/lib/types';
@@ -400,13 +399,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <span>Budget</span>
                       </Label>
                       <Input id="budget" value={isEditing ? (editData.budget || '') : (student?.budget || '')} onChange={(e) => setEditData({ ...editData, budget: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div className="space-y-2 md:col-span-2 lg:col-span-3">
-                      <Label htmlFor="notes" className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4" />
-                        <span>Notes</span>
-                      </Label>
-                      <Textarea id="notes" value={isEditing ? (editData.notes || '') : (student?.notes || '')} onChange={(e) => setEditData({ ...editData, notes: e.target.value })} disabled={!isEditing} rows={3} className="text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
                   </div>
                 </CollapsibleCard>
