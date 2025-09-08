@@ -394,6 +394,7 @@ export default function EventsPage() {
         {/* View Registration Modal */}
         <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
           <DialogContent className="max-w-2xl">
+            <DialogTitle className="sr-only">Registration Details</DialogTitle>
             {viewReg && (
               <Card>
                 <CardHeader className="pb-2 space-y-2">
