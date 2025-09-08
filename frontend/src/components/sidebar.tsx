@@ -61,6 +61,9 @@ export function Sidebar() {
   const { data: admissionsData } = useQuery({
     queryKey: ['/api/admissions'],
   });
+  const { data: eventsData } = useQuery({
+    queryKey: ['/api/events'],
+  });
 
   const newLeadsCount = Array.isArray(leadsData) ? leadsData.filter((lead: any) => lead.status === 'new')?.length || 0 : 0;
   const studentsCount = Array.isArray(studentsData) ? studentsData.length : 0;
@@ -102,9 +105,16 @@ export function Sidebar() {
       count: acceptedAdmissionsCount,
       countColor: 'bg-emerald-500'
     },
-    { 
-      path: '/reports', 
-      label: 'Reports', 
+    {
+      path: '/events',
+      label: 'Events',
+      icon: Calendar,
+      count: Array.isArray(eventsData) ? eventsData.length : 0,
+      countColor: 'bg-blue-500'
+    },
+    {
+      path: '/reports',
+      label: 'Reports',
       icon: BarChart3,
       count: undefined
     },

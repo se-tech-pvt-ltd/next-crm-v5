@@ -106,6 +106,32 @@ export const admissions = mysqlTable("admissions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Events module
+export const events = mysqlTable("events", {
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
+  date: date("date").notNull(),
+  venue: varchar("venue", { length: 255 }).notNull(),
+  time: varchar("time", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const eventRegistrations = mysqlTable("event_registrations", {
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  registrationCode: varchar("registration_code", { length: 255 }).notNull(),
+  status: varchar("status", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  number: varchar("number", { length: 50 }),
+  email: varchar("email", { length: 255 }),
+  city: varchar("city", { length: 255 }),
+  source: varchar("source", { length: 255 }),
+  eventId: varchar("event_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
@@ -145,11 +171,26 @@ export const insertAdmissionSchema = createInsertSchema(admissions).omit({
   updatedAt: true,
 });
 
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({
+  id: true,
+  registrationCode: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type InsertStudent = z.infer<typeof insertStudentSchema>;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type InsertAdmission = z.infer<typeof insertAdmissionSchema>;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
 
 export const activities = mysqlTable("activities", {
   id: int("id").primaryKey().autoincrement(),
@@ -194,3 +235,5 @@ export type Lead = typeof leads.$inferSelect;
 export type Student = typeof students.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type Admission = typeof admissions.$inferSelect;
+export type Event = typeof events.$inferSelect;
+export type EventRegistration = typeof eventRegistrations.$inferSelect;

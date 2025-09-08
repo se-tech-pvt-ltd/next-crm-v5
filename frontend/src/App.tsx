@@ -78,6 +78,7 @@ function Router() {
       <Route path="/admissions/new" component={AddAdmissionPage} />
       <Route path="/admissions/:id" component={AdmissionDetails} />
       <Route path="/admissions" component={Admissions} />
+      <Route path="/events" component={(await import('@/pages/events')).default} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={Settings} />
       {/* Fallback to 404 */}
