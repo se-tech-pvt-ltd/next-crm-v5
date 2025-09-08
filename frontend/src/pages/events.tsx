@@ -390,9 +390,35 @@ export default function EventsPage() {
                       <div className="flex-1">
                         {viewReg && <StatusProgressBarReg />}
                       </div>
-                      <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => { setIsViewRegOpen(false); }}>
-                        <X className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {viewReg && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3"
+                              onClick={() => { setIsViewRegOpen(false); setEditingReg(viewReg); setIsEditRegOpen(true); }}
+                              title="Edit"
+                            >
+                              <Edit />
+                              <span className="hidden lg:inline">Edit</span>
+                            </Button>
+                            <Button
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3"
+                              onClick={() => convertMutation.mutate(viewReg.id)}
+                              disabled={convertMutation.isPending}
+                              title="Convert to Lead"
+                            >
+                              <UserPlus />
+                              <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                            </Button>
+                          </>
+                        )}
+                        <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => { setIsViewRegOpen(false); }}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
