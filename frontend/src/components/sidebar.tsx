@@ -8,7 +8,8 @@ import {
   BarChart3, 
   Settings,
   Menu,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
