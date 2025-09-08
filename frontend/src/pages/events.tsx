@@ -341,6 +341,7 @@ export default function EventsPage() {
                       persistKey={`registration-details:${authUser?.id || 'anon'}:${viewReg.id}`}
                       cardClassName="shadow-sm hover:shadow-md transition-shadow"
                       header={<CardTitle className="text-xs">Registration Information</CardTitle>}
+                      lockedOpen
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                         <div>
