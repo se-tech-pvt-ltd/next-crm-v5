@@ -199,92 +199,40 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
               {/* Sticky header inside scroll context */}
               <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
                 <div className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                      <UserIcon className="w-5 h-5 text-primary" />
-                    </div>
-                    <h1 className="text-lg font-semibold truncate">{lead.name}</h1>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {convertedLoading ? (
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-8 w-20" />
-                        <Skeleton className="h-8 w-24" />
-                        <Skeleton className="h-8 w-16" />
+                  <div className="flex-1">
+                    {statusSequence.length > 0 && (
+                      <div className="w-full bg-gray-100 rounded-md p-1.5">
+                        <div className="flex items-center justify-between relative">
+                          {statusSequence.map((statusId, index) => {
+                            const currentIndex = statusSequence.indexOf(currentStatus);
+                            const isCompleted = index <= currentIndex;
+                            const statusName = getStatusDisplayName(statusId);
+                            const handleClick = () => {
+                              if (statusUpdateMutation.isPending) return;
+                              if (currentStatus === statusId) return;
+                              statusUpdateMutation.mutate(statusId);
+                            };
+                            return (
+                              <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
+                                  {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                                </div>
+                                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
+                                {index < statusSequence.length - 1 && (
+                                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    ) : convertedStudent ? (
-                      <Button
-                        variant="default"
-                        size="xs"
-                        className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
-                        onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
-                        title="View Student"
-                      >
-                        <UserPlus />
-                        <span className="hidden lg:inline">View Student</span>
-                      </Button>
-                    ) : isEditing ? (
-                      <>
-                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateLeadMutation.isPending}>
-                          <Save />
-                          <span className="hidden lg:inline">{updateLeadMutation.isPending ? 'Saving…' : 'Save'}</span>
-                        </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); }} title="Cancel" disabled={updateLeadMutation.isPending}>
-                          <X />
-                          <span className="hidden lg:inline">Cancel</span>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
-                          <Edit />
-                          <span className="hidden lg:inline">Edit</span>
-                        </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowConvertModal(true)} title="Convert to Student">
-                          <UserPlus />
-                          <span className="hidden lg:inline">Convert</span>
-                        </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowMarkAsLostModal(true)} title="Mark as Lost">
-                          <XCircle />
-                          <span className="hidden lg:inline">Lost</span>
-                        </Button>
-                      </>
                     )}
-                    <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                      <X className="w-4 h-4" />
-                    </Button>
                   </div>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
 
-                {statusSequence.length > 0 && (
-                  <div className="px-4 pb-3">
-                    <div className="w-full bg-gray-100 rounded-md p-1.5">
-                      <div className="flex items-center justify-between relative">
-                        {statusSequence.map((statusId, index) => {
-                          const currentIndex = statusSequence.indexOf(currentStatus);
-                          const isCompleted = index <= currentIndex;
-                          const statusName = getStatusDisplayName(statusId);
-                          const handleClick = () => {
-                            if (statusUpdateMutation.isPending) return;
-                            if (currentStatus === statusId) return;
-                            statusUpdateMutation.mutate(statusId);
-                          };
-                          return (
-                            <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
-                                {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
-                              </div>
-                              <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
-                              {index < statusSequence.length - 1 && (
-                                <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Scrollable body */}
@@ -293,6 +241,57 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Personal Information</CardTitle>
+                      <div className="flex items-center gap-2">
+                        {convertedLoading ? (
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-8 w-20" />
+                            <Skeleton className="h-8 w-24" />
+                            <Skeleton className="h-8 w-16" />
+                          </div>
+                        ) : (
+                          <>
+                            {convertedStudent && (
+                              <Button
+                                variant="default"
+                                size="xs"
+                                className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                                onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
+                                title="View Student"
+                              >
+                                <UserPlus />
+                                <span className="hidden lg:inline">View Student</span>
+                              </Button>
+                            )}
+                            {!isEditing ? (
+                              <>
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                                  <Edit />
+                                  <span className="hidden lg:inline">Edit</span>
+                                </Button>
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowConvertModal(true)} title="Convert to Student">
+                                  <UserPlus />
+                                  <span className="hidden lg:inline">Convert</span>
+                                </Button>
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowMarkAsLostModal(true)} title="Mark as Lost">
+                                  <XCircle />
+                                  <span className="hidden lg:inline">Lost</span>
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateLeadMutation.isPending}>
+                                  <Save />
+                                  <span className="hidden lg:inline">{updateLeadMutation.isPending ? 'Saving…' : 'Save'}</span>
+                                </Button>
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); }} title="Cancel" disabled={updateLeadMutation.isPending}>
+                                  <X />
+                                  <span className="hidden lg:inline">Cancel</span>
+                                </Button>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">
