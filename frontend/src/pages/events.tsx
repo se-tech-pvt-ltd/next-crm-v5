@@ -185,14 +185,10 @@ export default function EventsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Event</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Actions</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -210,32 +206,6 @@ export default function EventsPage() {
                       <TableCell className="p-2 text-xs">{r.name}</TableCell>
                       <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Select value={r.source || ''} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { source: v } })}>
-                          <SelectTrigger className="h-8 text-xs w-44"><SelectValue placeholder="Select Source" /></SelectTrigger>
-                          <SelectContent>
-                            {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Select value={r.eventId} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { eventId: v } })}>
-                          <SelectTrigger className="h-8 text-xs w-64"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {(events || []).map((e: any) => (
-                              <SelectItem key={e.id} value={e.id}>{e.name} ({e.date})</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="flex items-center gap-2">
-                          <Button size="xs" variant="outline" className="rounded-full px-2" onClick={() => { setEditingReg(r); setIsEditRegOpen(true); }} title="Edit"><Edit className="w-3 h-3" /><span className="hidden lg:inline">Edit</span></Button>
-                          <Button size="xs" variant="outline" className="rounded-full px-2" onClick={() => convertMutation.mutate(r.id)} title="Convert to Lead"><UserPlus className="w-3 h-3" /><span className="hidden lg:inline">Convert</span></Button>
-                          <Button size="xs" variant="outline" className="rounded-full px-2" onClick={() => deleteRegMutation.mutate(r.id)} title="Delete"><Trash2 className="w-3 h-3" /><span className="hidden lg:inline">Delete</span></Button>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
