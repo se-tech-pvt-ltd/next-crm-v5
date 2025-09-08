@@ -8,7 +8,8 @@ import {
   BarChart3, 
   Settings,
   Menu,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +62,9 @@ export function Sidebar() {
   const { data: admissionsData } = useQuery({
     queryKey: ['/api/admissions'],
   });
+  const { data: eventsData } = useQuery({
+    queryKey: ['/api/events'],
+  });
 
   const newLeadsCount = Array.isArray(leadsData) ? leadsData.filter((lead: any) => lead.status === 'new')?.length || 0 : 0;
   const studentsCount = Array.isArray(studentsData) ? studentsData.length : 0;
@@ -102,9 +106,16 @@ export function Sidebar() {
       count: acceptedAdmissionsCount,
       countColor: 'bg-emerald-500'
     },
-    { 
-      path: '/reports', 
-      label: 'Reports', 
+    {
+      path: '/events',
+      label: 'Events',
+      icon: Calendar,
+      count: Array.isArray(eventsData) ? eventsData.length : 0,
+      countColor: 'bg-blue-500'
+    },
+    {
+      path: '/reports',
+      label: 'Reports',
       icon: BarChart3,
       count: undefined
     },
@@ -116,7 +127,7 @@ export function Sidebar() {
     },
   ];
 
-  const sidebarWidth = isExpanded ? 'w-64' : 'w-16';
+  const sidebarWidth = isExpanded ? 'w-48' : 'w-16';
 
   const handleMouseEnter = () => {
     if (!isMobile) {

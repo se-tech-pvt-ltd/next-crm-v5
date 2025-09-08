@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
 import { type Student, type Application, type Admission } from '@/lib/types';
@@ -209,10 +208,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <div>
                           <Label htmlFor="dateOfBirth">Date of Birth</Label>
                           <DobPicker id="dateOfBirth" value={editData.dateOfBirth || ''} onChange={(v) => setEditData(prev => ({ ...prev, dateOfBirth: v }))} disabled={!isEditing} />
-                        </div>
-                        <div className="md:col-span-2">
-                          <Label htmlFor="notes">Notes</Label>
-                          <Textarea id="notes" value={editData.notes || ''} onChange={(e) => setEditData(prev => ({ ...prev, notes: e.target.value }))} disabled={!isEditing} rows={3} />
                         </div>
                       </div>
                       {isEditing && (

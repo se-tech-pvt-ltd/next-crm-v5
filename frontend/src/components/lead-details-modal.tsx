@@ -250,19 +250,18 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                           </div>
                         ) : (
                           <>
-                            {convertedStudent && (
+                            {convertedStudent ? (
                               <Button
-                                variant="default"
+                                variant="outline"
                                 size="xs"
-                                className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                                className="rounded-full h-7 text-[11px] px-2 [&_svg]:size-3"
                                 onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
                                 title="View Student"
                               >
                                 <UserPlus />
                                 <span className="hidden lg:inline">View Student</span>
                               </Button>
-                            )}
-                            {!isEditing ? (
+                            ) : !isEditing ? (
                               <>
                                 <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
                                   <Edit />
