@@ -198,10 +198,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
             <div className="flex flex-col min-h-0">
               {/* Sticky header inside scroll context */}
               <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-                <div className="px-4 py-3 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between">
                   <div className="flex-1">
                     {statusSequence.length > 0 && (
-                      <div className="w-full bg-gray-100 rounded-md p-1.5">
+                      <div className="w-full bg-gray-100 rounded-md p-1">
                         <div className="flex items-center justify-between relative">
                           {statusSequence.map((statusId, index) => {
                             const currentIndex = statusSequence.indexOf(currentStatus);
@@ -214,12 +214,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                             };
                             return (
                               <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
-                                  {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
+                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
+                                  {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
                                 </div>
-                                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
+                                <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
                                 {index < statusSequence.length - 1 && (
-                                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                                  <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                                 )}
                               </div>
                             );
@@ -236,11 +236,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
               </div>
 
               {/* Scrollable body */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+              <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
                 <Card className="w-full shadow-md border border-gray-200 bg-white">
-                  <CardHeader className="pb-3">
+                  <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm">Personal Information</CardTitle>
+                      <CardTitle className="text-xs">Personal Information</CardTitle>
                       <div className="flex items-center gap-2">
                         {convertedLoading ? (
                           <div className="flex items-center gap-2">
@@ -298,24 +298,24 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Full Name</span></Label>
-                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email" className="flex items-center space-x-2"><Mail className="w-4 h-4" /><span>Email Address</span></Label>
-                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
-                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
-                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                        <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
                         <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
                         <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                          <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
                           <SelectContent>
                             {users.map((u: any) => (
                               <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
@@ -327,12 +327,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                   </CardContent>
                 </Card>
 
-                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="text-sm flex items-center space-x-2"><Target className="w-5 h-5 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
+                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="text-xs flex items-center space-x-2"><Target className="w-4 h-4 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
                       <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.Type || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -344,7 +344,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Lead Source</span></Label>
                       <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.Source || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -356,7 +356,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><GraduationCap className="w-4 h-4" /><span>Study Level</span></Label>
                       <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study level" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study level" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.['Study Level'] || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -368,7 +368,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Study Plan</span></Label>
                       <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study plan" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study plan" /></SelectTrigger>
                         <SelectContent>
                           {((dropdownData as any)?.['Study Plan'] || []).map((option: any) => (
                             <SelectItem key={option.key} value={option.key}>{option.value}</SelectItem>
@@ -396,10 +396,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
 
             {/* Right: Timeline */}
             <div className="border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-                <h2 className="text-sm font-semibold">Activity Timeline</h2>
+              <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white">
+                <h2 className="text-xs font-semibold">Activity Timeline</h2>
               </div>
-              <div className="flex-1 overflow-y-auto pt-2 min-h-0">
+              <div className="flex-1 overflow-y-auto pt-1 min-h-0">
                 <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>
             </div>
@@ -413,7 +413,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
         <DialogContent className="max-w-md">
           <DialogTitle>Mark Lead as Lost</DialogTitle>
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">Please select a reason why this lead is being marked as lost:</p>
+            <p className="text-xs text-gray-600">Please select a reason why this lead is being marked as lost:</p>
             <Select value={lostReason} onValueChange={setLostReason}>
               <SelectTrigger className="shadow-sm border border-gray-300 bg-white">
                 <SelectValue placeholder="Select a reason" />
