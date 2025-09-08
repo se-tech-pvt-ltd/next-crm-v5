@@ -30,6 +30,8 @@ export default function EventsPage() {
   const [viewReg, setViewReg] = useState<any | null>(null);
   const [filterEventId, setFilterEventId] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isEditingView, setIsEditingView] = useState(false);
+  const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
@@ -169,6 +171,21 @@ export default function EventsPage() {
     }
     fileInputRef.current?.click();
   };
+
+  useEffect(() => {
+    if (viewReg) {
+      setViewEditData({
+        name: viewReg.name,
+        number: viewReg.number,
+        email: viewReg.email,
+        city: viewReg.city,
+        source: viewReg.source,
+        eventId: viewReg.eventId,
+        status: viewReg.status,
+      });
+      setIsEditingView(false);
+    }
+  }, [viewReg]);
 
   const parseCsvAndImport = async (file: File) => {
     const text = await file.text();
@@ -386,27 +403,75 @@ export default function EventsPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xs">Registration Information</CardTitle>
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="rounded-full px-2 [&_svg]:size-3"
-                        onClick={() => { setIsViewRegOpen(false); setEditingReg(viewReg); setIsEditRegOpen(true); }}
-                        title="Edit"
-                      >
-                        <Edit />
-                        <span className="hidden lg:inline">Edit</span>
-                      </Button>
-                      <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => convertMutation.mutate(viewReg.id)}
-                      disabled={convertMutation.isPending}
-                      title="Convert to Lead"
-                    >
-                        <UserPlus />
-                        <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
-                      </Button>
+                      {!isEditingView ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => setIsEditingView(true)}
+                            title="Edit"
+                          >
+                            <Edit />
+                            <span className="hidden lg:inline">Edit</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => convertMutation.mutate(viewReg.id)}
+                            disabled={convertMutation.isPending}
+                            title="Convert to Lead"
+                          >
+                            <UserPlus />
+                            <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={async () => {
+                              if (!viewReg) return;
+                              const payload = {
+                                name: viewEditData.name || '',
+                                number: viewEditData.number || '',
+                                email: viewEditData.email || '',
+                                city: viewEditData.city || '',
+                                source: viewEditData.source || '',
+                              } as Partial<RegService.RegistrationPayload>;
+                              try {
+                                // @ts-ignore mutateAsync exists
+                                await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
+                                setIsEditingView(false);
+                                setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
+                              } catch {}
+                            }}
+                            disabled={updateRegMutation.isPending || !viewEditData.name}
+                            title="Save"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => { setIsEditingView(false); setViewEditData({
+                              name: viewReg.name,
+                              number: viewReg.number,
+                              email: viewReg.email,
+                              city: viewReg.city,
+                              source: viewReg.source,
+                              eventId: viewReg.eventId,
+                              status: viewReg.status,
+                            }); }}
+                            title="Cancel"
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -418,23 +483,48 @@ export default function EventsPage() {
                     </div>
                     <div>
                       <Label>Name</Label>
-                      <div className="text-xs">{viewReg.name}</div>
+                      {isEditingView ? (
+                        <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.name}</div>
+                      )}
                     </div>
                     <div>
                       <Label>Number</Label>
-                      <div className="text-xs">{viewReg.number || '-'}</div>
+                      {isEditingView ? (
+                        <Input value={viewEditData.number || ''} onChange={(e) => setViewEditData(v => ({ ...v, number: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.number || '-'}</div>
+                      )}
                     </div>
                     <div>
                       <Label>Email</Label>
-                      <div className="text-xs">{viewReg.email || '-'}</div>
+                      {isEditingView ? (
+                        <Input type="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.email || '-'}</div>
+                      )}
                     </div>
                     <div>
                       <Label>City</Label>
-                      <div className="text-xs">{viewReg.city || '-'}</div>
+                      {isEditingView ? (
+                        <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.city || '-'}</div>
+                      )}
                     </div>
                     <div>
                       <Label>Source</Label>
-                      <div className="text-xs">{viewReg.source || '-'}</div>
+                      {isEditingView ? (
+                        <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
+                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                          <SelectContent>
+                            {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="text-xs">{viewReg.source || '-'}</div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
