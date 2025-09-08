@@ -15,10 +15,10 @@ import * as DropdownsService from '@/services/dropdowns';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
 
 const STATUS_OPTIONS = [
-  { label: 'Attending', value: 'attending' },
   { label: 'Not Sure', value: 'not_sure' },
-  { label: 'Will Not Attend', value: 'will_not_attend' },
   { label: 'Unable to Contact', value: 'unable_to_contact' },
+  { label: 'Will Not Attend', value: 'will_not_attend' },
+  { label: 'Attending', value: 'attending' },
 ];
 
 export default function EventsPage() {
@@ -30,6 +30,68 @@ export default function EventsPage() {
   const [viewReg, setViewReg] = useState<any | null>(null);
   const [filterEventId, setFilterEventId] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isEditingView, setIsEditingView] = useState(false);
+  const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
+
+  const isValidEmail = (s?: string) => !s || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+  const StatusProgressBarReg = () => {
+    if (!viewReg) return null;
+    const sequence = STATUS_OPTIONS.map(s => s.value);
+    const currentIndex = sequence.findIndex(v => v === viewReg.status);
+
+    const getLabel = (value: string) => STATUS_OPTIONS.find(o => o.value === value)?.label || value;
+
+    const handleClick = async (target: string) => {
+      if (!viewReg) return;
+      if (target === viewReg.status) return;
+      const prev = viewReg.status;
+      setViewReg({ ...viewReg, status: target });
+      try {
+        // @ts-ignore mutateAsync exists on useMutation
+        await updateRegMutation.mutateAsync({ id: viewReg.id, data: { status: target } });
+      } catch {
+        setViewReg(v => (v ? { ...v, status: prev } : v));
+      }
+    };
+
+    return (
+      <div className="w-full bg-gray-100 rounded-md p-1 mb-2">
+        <div className="flex items-center justify-between relative">
+          {sequence.map((statusId, index) => {
+            const isActive = index === currentIndex;
+            const isCompleted = currentIndex >= 0 && index <= currentIndex;
+            const statusName = getLabel(statusId);
+            return (
+              <div
+                key={statusId}
+                className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                onClick={() => handleClick(statusId)}
+                role="button"
+                aria-label={`Set status to ${statusName}`}
+              >
+                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                  isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                }`}>
+                  {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
+                </div>
+                <span className={`mt-1 text-[11px] font-medium text-center ${
+                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                }`}>
+                  {statusName}
+                </span>
+                {index < sequence.length - 1 && (
+                  <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
+                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   const { data: events, refetch: refetchEvents } = useQuery({
     queryKey: ['/api/events'],
@@ -44,15 +106,35 @@ export default function EventsPage() {
         : RegService.getRegistrations(),
   });
 
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+  const { data: eventsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Events'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Events'),
   });
 
   const sourceOptions = useMemo(() => {
-    const list: any[] = (leadsDropdowns as any)?.Sources || [];
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => {
+      const sa = typeof a.sequence === 'number' ? a.sequence : Number(a.sequence ?? 0);
+      const sb = typeof b.sequence === 'number' ? b.sequence : Number(b.sequence ?? 0);
+      return sa - sb;
+    });
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
-  }, [leadsDropdowns]);
+  }, [eventsDropdowns]);
+
+  const getSourceLabel = useMemo(() => {
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
+    if (!Array.isArray(list)) list = [];
+    const map = new Map<string, string>();
+    for (const o of list) {
+      if (o?.id) map.set(String(o.id), o.value);
+      if (o?.key) map.set(String(o.key), o.value);
+      if (o?.value) map.set(String(o.value), o.value);
+    }
+    return (val?: string) => (val ? (map.get(String(val)) || val) : '');
+  }, [eventsDropdowns]);
 
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
@@ -111,6 +193,21 @@ export default function EventsPage() {
     }
     fileInputRef.current?.click();
   };
+
+  useEffect(() => {
+    if (viewReg) {
+      setViewEditData({
+        name: viewReg.name,
+        number: viewReg.number,
+        email: viewReg.email,
+        city: viewReg.city,
+        source: viewReg.source,
+        eventId: viewReg.eventId,
+        status: viewReg.status,
+      });
+      setIsEditingView(false);
+    }
+  }, [viewReg]);
 
   const parseCsvAndImport = async (file: File) => {
     const text = await file.text();
@@ -187,16 +284,19 @@ export default function EventsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(registrations || []).map((r: any) => (
                     <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
                       <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                      <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                      <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <Select value={r.status} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { status: v } })}>
                           <SelectTrigger className="h-8 text-xs w-44" onClick={(e) => e.stopPropagation()}><SelectValue /></SelectTrigger>
@@ -205,9 +305,6 @@ export default function EventsPage() {
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -238,11 +335,11 @@ export default function EventsPage() {
               </div>
               <div>
                 <Label>Number</Label>
-                <Input value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
+                <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
               </div>
               <div>
                 <Label>Email</Label>
-                <Input type="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
+                <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
               </div>
               <div>
                 <Label>City</Label>
@@ -260,7 +357,7 @@ export default function EventsPage() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name}>Save</Button>
+              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name || (regForm.email ? !isValidEmail(regForm.email) : false)}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -288,11 +385,11 @@ export default function EventsPage() {
                 </div>
                 <div>
                   <Label>Number</Label>
-                  <Input value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
+                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
                 </div>
                 <div>
                   <Label>Email</Label>
-                  <Input type="email" value={editingReg.email || ''} onChange={(e) => setEditingReg({ ...editingReg, email: e.target.value })} />
+                  <Input type="email" inputMode="email" autoComplete="email" value={editingReg.email || ''} onChange={(e) => setEditingReg({ ...editingReg, email: e.target.value })} />
                 </div>
                 <div>
                   <Label>City</Label>
@@ -311,56 +408,150 @@ export default function EventsPage() {
             )}
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsEditRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name}>Save</Button>
+              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name || (editingReg?.email ? !isValidEmail(editingReg.email) : false)}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
 
         {/* View Registration Modal */}
         <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registration Details</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="max-w-2xl">
+            <DialogTitle className="sr-only">Registration Details</DialogTitle>
             {viewReg && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label>Registration ID</Label>
-                  <div className="text-xs">{viewReg.registrationCode}</div>
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <div className="text-xs capitalize">{viewReg.status}</div>
-                </div>
-                <div>
-                  <Label>Name</Label>
-                  <div className="text-xs">{viewReg.name}</div>
-                </div>
-                <div>
-                  <Label>Number</Label>
-                  <div className="text-xs">{viewReg.number || '-'}</div>
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <div className="text-xs">{viewReg.email || '-'}</div>
-                </div>
-                <div>
-                  <Label>City</Label>
-                  <div className="text-xs">{viewReg.city || '-'}</div>
-                </div>
-                <div>
-                  <Label>Source</Label>
-                  <div className="text-xs">{viewReg.source || '-'}</div>
-                </div>
-                <div>
-                  <Label>Event</Label>
-                  <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
-                </div>
-                <div>
-                  <Label>Created</Label>
-                  <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
-                </div>
-              </div>
+              <Card>
+                <CardHeader className="pb-2 space-y-2">
+                  <div className="flex-1">
+                    <StatusProgressBarReg />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs">Registration Information</CardTitle>
+                    <div className="flex items-center gap-2">
+                      {!isEditingView ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => setIsEditingView(true)}
+                            title="Edit"
+                          >
+                            <Edit />
+                            <span className="hidden lg:inline">Edit</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => convertMutation.mutate(viewReg.id)}
+                            disabled={convertMutation.isPending}
+                            title="Convert to Lead"
+                          >
+                            <UserPlus />
+                            <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={async () => {
+                              if (!viewReg) return;
+                              const payload = {
+                                name: viewEditData.name || '',
+                                number: viewEditData.number || '',
+                                email: viewEditData.email || '',
+                                city: viewEditData.city || '',
+                                source: viewEditData.source || '',
+                              } as Partial<RegService.RegistrationPayload>;
+                              try {
+                                // @ts-ignore mutateAsync exists
+                                await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
+                                setIsEditingView(false);
+                                setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
+                              } catch {}
+                            }}
+                            disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
+                            title="Save"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-full px-2 [&_svg]:size-3"
+                            onClick={() => { setIsEditingView(false); setViewEditData({
+                              name: viewReg.name,
+                              number: viewReg.number,
+                              email: viewReg.email,
+                              city: viewReg.city,
+                              source: viewReg.source,
+                              eventId: viewReg.eventId,
+                              status: viewReg.status,
+                            }); }}
+                            title="Cancel"
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <Label>Registration ID</Label>
+                      <div className="text-xs">{viewReg.registrationCode}</div>
+                    </div>
+                    <div>
+                      <Label>Name</Label>
+                      {isEditingView ? (
+                        <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.name}</div>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Number</Label>
+                      {isEditingView ? (
+                        <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={viewEditData.number || ''} onChange={(e) => setViewEditData(v => ({ ...v, number: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.number || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      {isEditingView ? (
+                        <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.email || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <Label>City</Label>
+                      {isEditingView ? (
+                        <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} />
+                      ) : (
+                        <div className="text-xs">{viewReg.city || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Source</Label>
+                      {isEditingView ? (
+                        <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
+                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                          <SelectContent>
+                            {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="text-xs">{getSourceLabel(viewReg.source) || '-'}</div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </DialogContent>
         </Dialog>

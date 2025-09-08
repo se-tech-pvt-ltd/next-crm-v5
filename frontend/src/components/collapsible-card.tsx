@@ -11,6 +11,7 @@ interface CollapsibleCardProps {
   contentClassName?: string;
   cardClassName?: string;
   persistKey?: string; // when provided, remember open/close in localStorage
+  lockedOpen?: boolean; // when true, panel is always open and not collapsible
 }
 
 export function CollapsibleCard({
@@ -21,8 +22,10 @@ export function CollapsibleCard({
   contentClassName,
   cardClassName,
   persistKey,
+  lockedOpen = false,
 }: CollapsibleCardProps) {
   const [open, setOpen] = useState<boolean>(() => {
+    if (lockedOpen) return true;
     if (!persistKey) return defaultOpen;
     if (typeof window === "undefined") return defaultOpen;
     try {
@@ -37,6 +40,10 @@ export function CollapsibleCard({
 
   // When the key changes (navigating to another lead), re-read persisted state
   useEffect(() => {
+    if (lockedOpen) {
+      setOpen(true);
+      return;
+    }
     if (!persistKey) return;
     try {
       const stored = localStorage.getItem(persistKey);
@@ -45,14 +52,30 @@ export function CollapsibleCard({
       else setOpen(defaultOpen);
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persistKey]);
+  }, [persistKey, lockedOpen]);
 
   useEffect(() => {
+    if (lockedOpen) return;
     if (!persistKey) return;
     try {
       localStorage.setItem(persistKey, open ? "1" : "0");
     } catch {}
-  }, [open, persistKey]);
+  }, [open, persistKey, lockedOpen]);
+
+  if (lockedOpen) {
+    return (
+      <Card className={cn("w-full", cardClassName)}>
+        <CardHeader className={cn("pb-3", headerClassName)}>
+          <div className="flex items-center justify-between">
+            {header}
+          </div>
+        </CardHeader>
+        <CardContent className={cn("space-y-4", contentClassName)}>
+          {children}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={cn("w-full", cardClassName)}>
