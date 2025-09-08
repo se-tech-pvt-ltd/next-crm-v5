@@ -12,7 +12,8 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, X } from 'lucide-react';
+import { ActivityTracker } from '@/components/activity-tracker';
 
 const STATUS_OPTIONS = [
   { label: 'Attending', value: 'attending' },
@@ -318,47 +319,75 @@ export default function EventsPage() {
 
         {/* View Registration Modal */}
         <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registration Details</DialogTitle>
-            </DialogHeader>
+          <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+            <DialogTitle className="sr-only">Registration Details</DialogTitle>
             {viewReg && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label>Registration ID</Label>
-                  <div className="text-xs">{viewReg.registrationCode}</div>
+              <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
+                <div className="flex flex-col min-h-0">
+                  <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+                    <div className="px-3 py-2 flex items-center justify-between">
+                      <div className="text-xs font-semibold">Registration Details</div>
+                      <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => { setIsViewRegOpen(false); }}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+                    <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-xs">Registration Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                          <div>
+                            <Label>Registration ID</Label>
+                            <div className="text-xs">{viewReg.registrationCode}</div>
+                          </div>
+                          <div>
+                            <Label>Status</Label>
+                            <div className="text-xs capitalize">{viewReg.status}</div>
+                          </div>
+                          <div>
+                            <Label>Name</Label>
+                            <div className="text-xs">{viewReg.name}</div>
+                          </div>
+                          <div>
+                            <Label>Number</Label>
+                            <div className="text-xs">{viewReg.number || '-'}</div>
+                          </div>
+                          <div>
+                            <Label>Email</Label>
+                            <div className="text-xs">{viewReg.email || '-'}</div>
+                          </div>
+                          <div>
+                            <Label>City</Label>
+                            <div className="text-xs">{viewReg.city || '-'}</div>
+                          </div>
+                          <div>
+                            <Label>Source</Label>
+                            <div className="text-xs">{viewReg.source || '-'}</div>
+                          </div>
+                          <div>
+                            <Label>Event</Label>
+                            <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
+                          </div>
+                          <div>
+                            <Label>Created</Label>
+                            <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
-                <div>
-                  <Label>Status</Label>
-                  <div className="text-xs capitalize">{viewReg.status}</div>
-                </div>
-                <div>
-                  <Label>Name</Label>
-                  <div className="text-xs">{viewReg.name}</div>
-                </div>
-                <div>
-                  <Label>Number</Label>
-                  <div className="text-xs">{viewReg.number || '-'}</div>
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <div className="text-xs">{viewReg.email || '-'}</div>
-                </div>
-                <div>
-                  <Label>City</Label>
-                  <div className="text-xs">{viewReg.city || '-'}</div>
-                </div>
-                <div>
-                  <Label>Source</Label>
-                  <div className="text-xs">{viewReg.source || '-'}</div>
-                </div>
-                <div>
-                  <Label>Event</Label>
-                  <div className="text-xs">{(events || []).find((e: any) => e.id === viewReg.eventId)?.name || viewReg.eventId}</div>
-                </div>
-                <div>
-                  <Label>Created</Label>
-                  <div className="text-xs">{viewReg.createdAt ? new Date(viewReg.createdAt).toLocaleString() : '-'}</div>
+                <div className="border-l bg-white flex flex-col min-h-0">
+                  <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white">
+                    <h2 className="text-xs font-semibold">Activity Timeline</h2>
+                  </div>
+                  <div className="flex-1 overflow-y-auto pt-1 min-h-0">
+                    <ActivityTracker entityType="event-registration" entityId={viewReg.id} entityName={viewReg.name} />
+                  </div>
                 </div>
               </div>
             )}
