@@ -376,7 +376,7 @@ export default function EventsPage() {
 
         {/* View Registration Modal */}
         <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
-          <DialogContent className="max-w-xl">
+          <DialogContent className="max-w-2xl">
             {viewReg && (
               <Card>
                 <CardHeader className="pb-2 space-y-2">
@@ -397,12 +397,13 @@ export default function EventsPage() {
                         <span className="hidden lg:inline">Edit</span>
                       </Button>
                       <Button
-                        size="xs"
-                        className="rounded-full px-2 [&_svg]:size-3"
-                        onClick={() => convertMutation.mutate(viewReg.id)}
-                        disabled={convertMutation.isPending}
-                        title="Convert to Lead"
-                      >
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-2 [&_svg]:size-3"
+                      onClick={() => convertMutation.mutate(viewReg.id)}
+                      disabled={convertMutation.isPending}
+                      title="Convert to Lead"
+                    >
                         <UserPlus />
                         <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
                       </Button>
