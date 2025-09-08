@@ -377,65 +377,65 @@ export default function EventsPage() {
         {/* View Registration Modal */}
         <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
           <DialogContent className="max-w-xl">
-            <DialogHeader>
-              <DialogTitle>Registration Details</DialogTitle>
-            </DialogHeader>
             {viewReg && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <StatusProgressBarReg />
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs">Registration Information</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3"
+                        onClick={() => { setIsViewRegOpen(false); setEditingReg(viewReg); setIsEditRegOpen(true); }}
+                        title="Edit"
+                      >
+                        <Edit />
+                        <span className="hidden lg:inline">Edit</span>
+                      </Button>
+                      <Button
+                        size="xs"
+                        className="rounded-full px-2 [&_svg]:size-3"
+                        onClick={() => convertMutation.mutate(viewReg.id)}
+                        disabled={convertMutation.isPending}
+                        title="Convert to Lead"
+                      >
+                        <UserPlus />
+                        <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => { setIsViewRegOpen(false); setEditingReg(viewReg); setIsEditRegOpen(true); }}
-                      title="Edit"
-                    >
-                      <Edit />
-                      <span className="hidden lg:inline">Edit</span>
-                    </Button>
-                    <Button
-                      size="xs"
-                      className="rounded-full px-2 [&_svg]:size-3"
-                      onClick={() => convertMutation.mutate(viewReg.id)}
-                      disabled={convertMutation.isPending}
-                      title="Convert to Lead"
-                    >
-                      <UserPlus />
-                      <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
-                    </Button>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <StatusProgressBarReg />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <Label>Registration ID</Label>
+                      <div className="text-xs">{viewReg.registrationCode}</div>
+                    </div>
+                    <div>
+                      <Label>Name</Label>
+                      <div className="text-xs">{viewReg.name}</div>
+                    </div>
+                    <div>
+                      <Label>Number</Label>
+                      <div className="text-xs">{viewReg.number || '-'}</div>
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <div className="text-xs">{viewReg.email || '-'}</div>
+                    </div>
+                    <div>
+                      <Label>City</Label>
+                      <div className="text-xs">{viewReg.city || '-'}</div>
+                    </div>
+                    <div>
+                      <Label>Source</Label>
+                      <div className="text-xs">{viewReg.source || '-'}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <Label>Registration ID</Label>
-                    <div className="text-xs">{viewReg.registrationCode}</div>
-                  </div>
-                  <div>
-                    <Label>Name</Label>
-                    <div className="text-xs">{viewReg.name}</div>
-                  </div>
-                  <div>
-                    <Label>Number</Label>
-                    <div className="text-xs">{viewReg.number || '-'}</div>
-                  </div>
-                  <div>
-                    <Label>Email</Label>
-                    <div className="text-xs">{viewReg.email || '-'}</div>
-                  </div>
-                  <div>
-                    <Label>City</Label>
-                    <div className="text-xs">{viewReg.city || '-'}</div>
-                  </div>
-                  <div>
-                    <Label>Source</Label>
-                    <div className="text-xs">{viewReg.source || '-'}</div>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )}
           </DialogContent>
         </Dialog>
