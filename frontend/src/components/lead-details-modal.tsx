@@ -17,6 +17,7 @@ import { queryClient } from '@/lib/queryClient';
 import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
