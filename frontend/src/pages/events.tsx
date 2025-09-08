@@ -33,6 +33,8 @@ export default function EventsPage() {
   const [isEditingView, setIsEditingView] = useState(false);
   const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
 
+  const isValidEmail = (s?: string) => !s || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
     const sequence = STATUS_OPTIONS.map(s => s.value);
@@ -313,11 +315,11 @@ export default function EventsPage() {
               </div>
               <div>
                 <Label>Number</Label>
-                <Input value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
+                <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
               </div>
               <div>
                 <Label>Email</Label>
-                <Input type="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
+                <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
               </div>
               <div>
                 <Label>City</Label>
@@ -335,7 +337,7 @@ export default function EventsPage() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name}>Save</Button>
+              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name || (regForm.email ? !isValidEmail(regForm.email) : false)}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -363,11 +365,11 @@ export default function EventsPage() {
                 </div>
                 <div>
                   <Label>Number</Label>
-                  <Input value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
+                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
                 </div>
                 <div>
                   <Label>Email</Label>
-                  <Input type="email" value={editingReg.email || ''} onChange={(e) => setEditingReg({ ...editingReg, email: e.target.value })} />
+                  <Input type="email" inputMode="email" autoComplete="email" value={editingReg.email || ''} onChange={(e) => setEditingReg({ ...editingReg, email: e.target.value })} />
                 </div>
                 <div>
                   <Label>City</Label>
@@ -386,7 +388,7 @@ export default function EventsPage() {
             )}
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsEditRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name}>Save</Button>
+              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name || (editingReg?.email ? !isValidEmail(editingReg.email) : false)}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -449,7 +451,7 @@ export default function EventsPage() {
                                 setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
                               } catch {}
                             }}
-                            disabled={updateRegMutation.isPending || !viewEditData.name}
+                            disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
                             title="Save"
                           >
                             Save
@@ -493,7 +495,7 @@ export default function EventsPage() {
                     <div>
                       <Label>Number</Label>
                       {isEditingView ? (
-                        <Input value={viewEditData.number || ''} onChange={(e) => setViewEditData(v => ({ ...v, number: e.target.value }))} />
+                        <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={viewEditData.number || ''} onChange={(e) => setViewEditData(v => ({ ...v, number: e.target.value }))} />
                       ) : (
                         <div className="text-xs">{viewReg.number || '-'}</div>
                       )}
@@ -501,7 +503,7 @@ export default function EventsPage() {
                     <div>
                       <Label>Email</Label>
                       {isEditingView ? (
-                        <Input type="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} />
+                        <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} />
                       ) : (
                         <div className="text-xs">{viewReg.email || '-'}</div>
                       )}
