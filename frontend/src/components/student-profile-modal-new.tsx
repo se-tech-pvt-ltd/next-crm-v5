@@ -268,52 +268,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
               {/* Sticky header inside scroll context */}
               <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
                 <div className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                      <User className="w-5 h-5 text-primary" />
-                    </div>
-                    <h1 className="text-lg font-semibold truncate">{student.name}</h1>
+                  <div className="flex-1">
+                    {statusSequence.length > 0 && <StatusProgressBar />}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {!isEditing ? (
-                      <>
-                        <Button
-                          variant="default"
-                          size="xs"
-                          className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => setIsAddApplicationOpen(true)}
-                          title="Add Application"
-                        >
-                          <Plus />
-                          <span className="hidden lg:inline">Add Application</span>
-                        </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
-                          <Edit />
-                          <span className="hidden lg:inline">Edit</span>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateStudentMutation.isPending}>
-                          <Save />
-                          <span className="hidden lg:inline">{updateStudentMutation.isPending ? 'Saving…' : 'Save'}</span>
-                        </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(student); }} title="Cancel" disabled={updateStudentMutation.isPending}>
-                          <X />
-                          <span className="hidden lg:inline">Cancel</span>
-                        </Button>
-                      </>
-                    )}
-                    <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-                {statusSequence.length > 0 && (
-                  <div className="px-4 pb-3">
-                    <StatusProgressBar />
-                  </div>
-                )}
               </div>
 
               {/* Scrollable body */}
@@ -324,10 +285,22 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <CardTitle className="text-sm">Personal Information</CardTitle>
                       <div className="flex items-center space-x-2">
                         {!isEditing ? (
-                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} disabled={isLoading} title="Edit">
-                            <Edit />
-                            <span className="hidden lg:inline">Edit</span>
-                          </Button>
+                          <>
+                            <Button
+                              variant="default"
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                              onClick={() => setIsAddApplicationOpen(true)}
+                              title="Add Application"
+                            >
+                              <Plus />
+                              <span className="hidden lg:inline">Add Application</span>
+                            </Button>
+                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} disabled={isLoading} title="Edit">
+                              <Edit />
+                              <span className="hidden lg:inline">Edit</span>
+                            </Button>
+                          </>
                         ) : (
                           <>
                             <Button size="sm" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending}>
