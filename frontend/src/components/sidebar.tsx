@@ -127,7 +127,7 @@ export function Sidebar() {
     },
   ];
 
-  const sidebarWidth = isExpanded ? 'w-64' : 'w-16';
+  const sidebarWidth = isExpanded ? 'w-48' : 'w-16';
 
   const handleMouseEnter = () => {
     if (!isMobile) {
