@@ -14,6 +14,8 @@ import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save } from 'lucide-react';
+import * as DropdownsService from '@/services/dropdowns';
+import { useMemo } from 'react';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
