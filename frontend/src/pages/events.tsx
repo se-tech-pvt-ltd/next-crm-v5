@@ -611,7 +611,7 @@ export default function EventsPage() {
                               <TableCell className="p-2 text-xs">{r.name}</TableCell>
                               <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
                               <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}</TableCell>
+                              <TableCell className="p-2 text-xs">{getStatusLabel(r.status) || r.status}</TableCell>
                               <TableCell className="p-2 text-xs">{((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1') ? 'Yes' : 'No'}</TableCell>
                               <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
                               <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
