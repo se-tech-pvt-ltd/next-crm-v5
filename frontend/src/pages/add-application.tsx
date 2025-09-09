@@ -301,16 +301,20 @@ export default function AddApplication() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="UK">UK</SelectItem>
-                            <SelectItem value="USA">USA</SelectItem>
-                            <SelectItem value="Canada">Canada</SelectItem>
-                            <SelectItem value="Australia">Australia</SelectItem>
-                            <SelectItem value="Germany">Germany</SelectItem>
-                            <SelectItem value="France">France</SelectItem>
-                            <SelectItem value="Spain">Spain</SelectItem>
-                            <SelectItem value="Georgia">Georgia</SelectItem>
-                            <SelectItem value="Cyprus">Cyprus</SelectItem>
-                            <SelectItem value="Ireland">Ireland</SelectItem>
+                            {countryOptions.length > 0 ? countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                              <>
+                                <SelectItem value="UK">UK</SelectItem>
+                                <SelectItem value="USA">USA</SelectItem>
+                                <SelectItem value="Canada">Canada</SelectItem>
+                                <SelectItem value="Australia">Australia</SelectItem>
+                                <SelectItem value="Germany">Germany</SelectItem>
+                                <SelectItem value="France">France</SelectItem>
+                                <SelectItem value="Spain">Spain</SelectItem>
+                                <SelectItem value="Georgia">Georgia</SelectItem>
+                                <SelectItem value="Cyprus">Cyprus</SelectItem>
+                                <SelectItem value="Ireland">Ireland</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
