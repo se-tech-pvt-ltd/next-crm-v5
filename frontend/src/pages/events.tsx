@@ -344,8 +344,8 @@ export default function EventsPage() {
 
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
-    const allowedStatusLabels = STATUS_OPTIONS.map(o => o.label).join(', ');
-    const allowedStatusValues = STATUS_OPTIONS.map(o => o.value).join(', ');
+    const allowedStatusLabels = statusOptions.map(o => o.label).join(', ');
+    const allowedStatusValues = statusOptions.map(o => o.value).join(', ');
 
     for (let i = 1; i < matrix.length; i++) {
       const rowNo = i + 1;
