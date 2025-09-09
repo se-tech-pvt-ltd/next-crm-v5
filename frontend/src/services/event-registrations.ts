@@ -3,10 +3,10 @@ import { http } from './http';
 export interface RegistrationPayload {
   status: string;
   name: string;
-  number?: string;
-  email?: string;
-  city?: string;
-  source?: string;
+  number: string;
+  email: string;
+  city: string;
+  source: string;
   eventId: string;
 }
 

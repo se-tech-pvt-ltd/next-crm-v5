@@ -35,6 +35,10 @@ export class EventRegistrationController {
       res.status(201).json(created);
     } catch (e) {
       if (e instanceof z.ZodError) return res.status(400).json({ message: "Invalid registration data", errors: e.errors });
+      if (e instanceof Error && (e.message === 'DUPLICATE_EMAIL' || e.message === 'DUPLICATE_NUMBER')) {
+        const field = e.message === 'DUPLICATE_EMAIL' ? 'email' : 'number';
+        return res.status(409).json({ message: `Duplicate ${field} for this event` });
+      }
       res.status(500).json({ message: "Failed to create registration" });
     }
   }

@@ -1,7 +1,7 @@
 import { db } from "../config/database.js";
 import { eventRegistrations, type EventRegistration, type InsertEventRegistration } from "../shared/schema.js";
 import { randomUUID } from "crypto";
-import { desc, eq, like } from "drizzle-orm";
+import { and, desc, eq, like } from "drizzle-orm";
 
 function generateDailyPrefix(date = new Date()) {
   const yy = String(date.getFullYear()).slice(-2);
@@ -23,6 +23,18 @@ export class EventRegistrationModel {
 
   static async findByEvent(eventId: string): Promise<EventRegistration[]> {
     return await db.select().from(eventRegistrations).where(eq(eventRegistrations.eventId, eventId)).orderBy(desc(eventRegistrations.createdAt));
+  }
+
+  static async existsByEventEmail(eventId: string, email?: string): Promise<boolean> {
+    if (!email) return false;
+    const rows = await db.select().from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.email, email))).limit(1);
+    return (rows as any[]).length > 0;
+  }
+
+  static async existsByEventNumber(eventId: string, number?: string): Promise<boolean> {
+    if (!number) return false;
+    const rows = await db.select().from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.number, number))).limit(1);
+    return (rows as any[]).length > 0;
   }
 
   static async create(data: InsertEventRegistration): Promise<EventRegistration> {

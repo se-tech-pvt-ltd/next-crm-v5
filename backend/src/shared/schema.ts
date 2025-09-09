@@ -191,6 +191,14 @@ export const insertEventRegistrationSchema = createInsertSchema(eventRegistratio
   registrationCode: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  status: z.string().min(1, 'Status is required'),
+  name: z.string().min(1, 'Name is required'),
+  number: z.string().min(1, 'Number is required'),
+  email: z.string().min(1, 'Email is required').email('Invalid email'),
+  city: z.string().min(1, 'City is required'),
+  source: z.string().min(1, 'Source is required'),
+  eventId: z.string().min(1, 'Event is required'),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
