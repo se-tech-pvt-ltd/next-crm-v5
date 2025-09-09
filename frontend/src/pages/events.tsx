@@ -263,6 +263,25 @@ export default function EventsPage() {
     }
   };
 
+  const palettes = [
+    { gradientFrom: 'from-rose-500/80',    gradientTo: 'to-rose-300/40',    text: 'text-rose-600',    cardBorder: 'border-rose-200',    badgeBg: 'bg-rose-50',    badgeText: 'text-rose-700',    badgeBorder: 'border-rose-200' },
+    { gradientFrom: 'from-violet-500/80',  gradientTo: 'to-violet-300/40',  text: 'text-violet-600',  cardBorder: 'border-violet-200',  badgeBg: 'bg-violet-50',  badgeText: 'text-violet-700',  badgeBorder: 'border-violet-200' },
+    { gradientFrom: 'from-emerald-500/80', gradientTo: 'to-emerald-300/40', text: 'text-emerald-600', cardBorder: 'border-emerald-200', badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700', badgeBorder: 'border-emerald-200' },
+    { gradientFrom: 'from-amber-500/80',   gradientTo: 'to-amber-300/40',   text: 'text-amber-600',   cardBorder: 'border-amber-200',   badgeBg: 'bg-amber-50',   badgeText: 'text-amber-800',  badgeBorder: 'border-amber-200' },
+    { gradientFrom: 'from-sky-500/80',     gradientTo: 'to-sky-300/40',     text: 'text-sky-600',     cardBorder: 'border-sky-200',     badgeBg: 'bg-sky-50',     badgeText: 'text-sky-700',     badgeBorder: 'border-sky-200' },
+    { gradientFrom: 'from-fuchsia-500/80', gradientTo: 'to-fuchsia-300/40', text: 'text-fuchsia-600', cardBorder: 'border-fuchsia-200', badgeBg: 'bg-fuchsia-50', badgeText: 'text-fuchsia-700', badgeBorder: 'border-fuchsia-200' },
+    { gradientFrom: 'from-cyan-500/80',    gradientTo: 'to-cyan-300/40',    text: 'text-cyan-600',    cardBorder: 'border-cyan-200',    badgeBg: 'bg-cyan-50',    badgeText: 'text-cyan-700',    badgeBorder: 'border-cyan-200' },
+    { gradientFrom: 'from-lime-500/80',    gradientTo: 'to-lime-300/40',    text: 'text-lime-700',    cardBorder: 'border-lime-200',    badgeBg: 'bg-lime-50',    badgeText: 'text-lime-800',    badgeBorder: 'border-lime-200' },
+  ] as const;
+
+  const getPalette = (key?: string) => {
+    const s = String(key ?? 'default');
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+    const idx = hash % palettes.length;
+    return palettes[idx];
+  };
+
   return (
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
@@ -278,25 +297,27 @@ export default function EventsPage() {
 
         {!showList && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card className="group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden" onClick={() => { setFilterEventId('all'); setShowList(true); }}>
-              <div className="h-1 bg-gradient-to-r from-primary/60 to-primary/20 group-hover:from-primary group-hover:to-primary/40" />
-              <CardHeader className="pb-1">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  All Events
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-1">
-                <div className="text-xs text-gray-600">View registrations from all events</div>
-                <div className="mt-3 inline-flex items-center text-[11px] text-primary group-hover:translate-x-0.5 transition">
-                  View Registrations
-                  <ArrowRight className="ml-1 w-3 h-3" />
-                </div>
-              </CardContent>
-            </Card>
-            {(events || []).map((e: any) => (
-              <Card key={e.id} className="group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden" onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
-                <div className="h-1 bg-gradient-to-r from-primary/60 to-primary/20 group-hover:from-primary group-hover:to-primary/40" />
+            {(() => { const p = getPalette('all'); return (
+              <Card className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId('all'); setShowList(true); }}>
+                <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
+                <CardHeader className="pb-1">
+                  <CardTitle className={`text-sm flex items-center gap-2 ${p.text}`}>
+                    <Calendar className="w-4 h-4" />
+                    All Events
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-1">
+                  <div className="text-xs text-gray-600">View registrations from all events</div>
+                  <div className={`mt-3 inline-flex items-center text-[11px] ${p.text} group-hover:translate-x-0.5 transition`}>
+                    View Registrations
+                    <ArrowRight className="ml-1 w-3 h-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            ); })()}
+            {(events || []).map((e: any) => { const p = getPalette(e.type); return (
+              <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
                 <CardHeader className="pb-1">
                   <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
                 </CardHeader>
@@ -311,17 +332,17 @@ export default function EventsPage() {
                     <span className="truncate">{e.venue}</span>
                   </div>
                   <div>
-                    <span className="inline-flex items-center text-[10px] uppercase tracking-wide text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">{e.type}</span>
+                    <span className={`inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border ${p.badgeBg} ${p.badgeText} ${p.badgeBorder}`}>{e.type}</span>
                   </div>
                   <div className="pt-1">
-                    <div className="inline-flex items-center text-[11px] text-primary group-hover:translate-x-0.5 transition">
+                    <div className={`inline-flex items-center text-[11px] group-hover:translate-x-0.5 transition ${p.text}`}>
                       View Registrations
                       <ArrowRight className="ml-1 w-3 h-3" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ); })}
           </div>
         )}
 
