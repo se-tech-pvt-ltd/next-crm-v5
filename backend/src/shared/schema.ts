@@ -129,6 +129,7 @@ export const eventRegistrations = mysqlTable("event_registrations", {
   city: varchar("city", { length: 255 }),
   source: varchar("source", { length: 255 }),
   eventId: varchar("event_id", { length: 255 }).notNull(),
+  isConverted: int("is_converted").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
