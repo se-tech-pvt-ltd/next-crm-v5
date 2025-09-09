@@ -594,57 +594,67 @@ export default function EventsPage() {
                 return (
                   <>
                     <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {pageItems.map((r: any) => (
-                            <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
-                              <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{getStatusLabel(r.status) || r.status}</TableCell>
-                              <TableCell className="p-2 text-xs">{((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1') ? 'Yes' : 'No'}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                      {((filterEventId && filterEventId !== 'all') && total === 0) ? (
+                        <EmptyState
+                          icon={<UserPlus className="h-10 w-10" />}
+                          title="No registrations found"
+                          description="There are no registrations for this event."
+                        />
+                      ) : (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {pageItems.map((r: any) => (
+                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                                <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
+                                <TableCell className="p-2 text-xs">{getStatusLabel(r.status) || r.status}</TableCell>
+                                <TableCell className="p-2 text-xs">{((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1') ? 'Yes' : 'No'}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
+                                <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 text-xs">
-                      <div>Showing {total === 0 ? 0 : start + 1}-{end} of {total}</div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <span>Rows:</span>
-                          <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
-                            <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="25">25</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button size="xs" variant="outline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
-                          <div className="px-2">Page {safePage} of {totalPages}</div>
-                          <Button size="xs" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                    {((filterEventId && filterEventId !== 'all') && total === 0) ? null : (
+                      <div className="flex items-center justify-between mt-3 text-xs">
+                        <div>Showing {total === 0 ? 0 : start + 1}-{end} of {total}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <span>Rows:</span>
+                            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                              <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button size="xs" variant="outline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+                            <div className="px-2">Page {safePage} of {totalPages}</div>
+                            <Button size="xs" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 );
               })()}
