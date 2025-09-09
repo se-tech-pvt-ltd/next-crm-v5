@@ -232,19 +232,23 @@ export default function AddApplication() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Raw">Raw</SelectItem>
-                            <SelectItem value="Not Eligible">Not Eligible</SelectItem>
-                            <SelectItem value="Documents Pending">Documents Pending</SelectItem>
-                            <SelectItem value="Supervisor">Supervisor</SelectItem>
-                            <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
-                            <SelectItem value="Submitted">Submitted</SelectItem>
-                            <SelectItem value="Rejected">Rejected</SelectItem>
-                            <SelectItem value="COL Received">COL Received</SelectItem>
-                            <SelectItem value="UOL Requested">UOL Requested</SelectItem>
-                            <SelectItem value="UOL Received">UOL Received</SelectItem>
-                            <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
-                            <SelectItem value="Deposit">Deposit</SelectItem>
-                            <SelectItem value="Deferred">Deferred</SelectItem>
+                            {caseStatusOptions.length > 0 ? caseStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                              <>
+                                <SelectItem value="Raw">Raw</SelectItem>
+                                <SelectItem value="Not Eligible">Not Eligible</SelectItem>
+                                <SelectItem value="Documents Pending">Documents Pending</SelectItem>
+                                <SelectItem value="Supervisor">Supervisor</SelectItem>
+                                <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
+                                <SelectItem value="Submitted">Submitted</SelectItem>
+                                <SelectItem value="Rejected">Rejected</SelectItem>
+                                <SelectItem value="COL Received">COL Received</SelectItem>
+                                <SelectItem value="UOL Requested">UOL Requested</SelectItem>
+                                <SelectItem value="UOL Received">UOL Received</SelectItem>
+                                <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
+                                <SelectItem value="Deposit">Deposit</SelectItem>
+                                <SelectItem value="Deferred">Deferred</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
