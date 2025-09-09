@@ -13,6 +13,7 @@ import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft } from 'lucide-react';
+import { AddLeadModal } from '@/components/add-lead-modal';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 
