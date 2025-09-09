@@ -72,39 +72,11 @@ export function Sidebar() {
   const acceptedAdmissionsCount = Array.isArray(admissionsData) ? admissionsData.filter((admission: any) => admission.decision === 'accepted')?.length || 0 : 0;
 
   const navItems = [
-    { 
-      path: '/', 
-      label: 'Dashboard', 
+    {
+      path: '/',
+      label: 'Dashboard',
       icon: LayoutDashboard,
       count: undefined
-    },
-    { 
-      path: '/leads', 
-      label: 'Leads', 
-      icon: Users,
-      count: newLeadsCount,
-      countColor: 'bg-emerald-500'
-    },
-    { 
-      path: '/students', 
-      label: 'Students', 
-      icon: GraduationCap,
-      count: studentsCount,
-      countColor: 'bg-purple-600'
-    },
-    { 
-      path: '/applications', 
-      label: 'Applications', 
-      icon: GraduationCap,
-      count: applicationsCount,
-      countColor: 'bg-amber-500'
-    },
-    { 
-      path: '/admissions', 
-      label: 'Admissions', 
-      icon: Trophy,
-      count: acceptedAdmissionsCount,
-      countColor: 'bg-emerald-500'
     },
     {
       path: '/events',
@@ -114,14 +86,42 @@ export function Sidebar() {
       countColor: 'bg-blue-500'
     },
     {
+      path: '/leads',
+      label: 'Leads',
+      icon: Users,
+      count: newLeadsCount,
+      countColor: 'bg-emerald-500'
+    },
+    {
+      path: '/students',
+      label: 'Students',
+      icon: GraduationCap,
+      count: studentsCount,
+      countColor: 'bg-purple-600'
+    },
+    {
+      path: '/applications',
+      label: 'Applications',
+      icon: GraduationCap,
+      count: applicationsCount,
+      countColor: 'bg-amber-500'
+    },
+    {
+      path: '/admissions',
+      label: 'Admissions',
+      icon: Trophy,
+      count: acceptedAdmissionsCount,
+      countColor: 'bg-emerald-500'
+    },
+    {
       path: '/reports',
       label: 'Reports',
       icon: BarChart3,
       count: undefined
     },
-    { 
-      path: '/settings', 
-      label: 'Settings', 
+    {
+      path: '/settings',
+      label: 'Settings',
       icon: Settings,
       count: undefined
     },
