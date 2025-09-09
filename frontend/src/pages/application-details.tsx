@@ -52,7 +52,7 @@ export default function ApplicationDetails() {
     let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || [];
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   }, [applicationsDropdowns]);
 
   const { data: student } = useQuery<Student>({
