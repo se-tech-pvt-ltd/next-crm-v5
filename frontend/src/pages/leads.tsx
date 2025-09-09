@@ -317,7 +317,6 @@ export default function Leads() {
                         {status.value}
                       </SelectItem>
                     ))}
-                    <SelectItem value="converted">Converted</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={sourceFilter} onValueChange={(value) => {
