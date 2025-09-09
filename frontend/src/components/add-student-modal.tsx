@@ -32,6 +32,15 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
 
   const selectedLead = leadId ? leads?.find(l => l.id === leadId) : null;
 
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
+  });
+
+  const dropdownsForStudents = () => {
+    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
+  };
+
   const form = useForm({
     resolver: zodResolver(insertStudentSchema),
     defaultValues: {
