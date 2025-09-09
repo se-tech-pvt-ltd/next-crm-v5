@@ -169,6 +169,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
 
         // Set default expectation from lead
         expectation: lead.expectation || 'High',
+        counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || '',
       }));
     }
   }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
