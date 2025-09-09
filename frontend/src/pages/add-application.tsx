@@ -47,7 +47,7 @@ export default function AddApplication() {
     }
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   };
 
   const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Status', 'status', 'AppStatus', 'Application Status']), [applicationsDropdowns]);
@@ -56,6 +56,58 @@ export default function AddApplication() {
   const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns]);
   const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns]);
   const intakeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']), [applicationsDropdowns]);
+
+  useEffect(() => {
+    // Pre-select defaults for application form when dropdowns load
+    if (!appStatusOptions || appStatusOptions.length === 0) return;
+    try {
+      const cur = form.getValues('appStatus');
+      if (!cur) {
+        const def = appStatusOptions.find(o => o.isDefault);
+        if (def) form.setValue('appStatus', def.value);
+      }
+    } catch {}
+
+    try {
+      const curCase = form.getValues('caseStatus');
+      if (!curCase) {
+        const defC = caseStatusOptions.find(o => o.isDefault);
+        if (defC) form.setValue('caseStatus', defC.value);
+      }
+    } catch {}
+
+    try {
+      const curCourse = form.getValues('courseType');
+      if (!curCourse) {
+        const defCt = courseTypeOptions.find(o => o.isDefault);
+        if (defCt) form.setValue('courseType', defCt.value);
+      }
+    } catch {}
+
+    try {
+      const curCountry = form.getValues('country');
+      if ((!curCountry || curCountry === '') && countryOptions.length > 0) {
+        const defCountry = countryOptions.find(o => o.isDefault);
+        if (defCountry) form.setValue('country', defCountry.value);
+      }
+    } catch {}
+
+    try {
+      const curChannel = form.getValues('channelPartner');
+      if (!curChannel) {
+        const defCh = channelPartnerOptions.find(o => o.isDefault);
+        if (defCh) form.setValue('channelPartner', defCh.value);
+      }
+    } catch {}
+
+    try {
+      const curIntake = form.getValues('intake');
+      if (!curIntake) {
+        const defI = intakeOptions.find(o => o.isDefault);
+        if (defI) form.setValue('intake', defI.value);
+      }
+    } catch {}
+  }, [appStatusOptions, caseStatusOptions, courseTypeOptions, countryOptions, channelPartnerOptions, intakeOptions]);
 
   const form = useForm<InsertApplication>({
     resolver: zodResolver(insertApplicationSchema),
