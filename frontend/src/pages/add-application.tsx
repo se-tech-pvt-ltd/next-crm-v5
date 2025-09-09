@@ -269,14 +269,18 @@ export default function AddApplication() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="ELT">ELT</SelectItem>
-                            <SelectItem value="Foundation">Foundation</SelectItem>
-                            <SelectItem value="Bachelors">Bachelors</SelectItem>
-                            <SelectItem value="Masters">Masters</SelectItem>
-                            <SelectItem value="Top Up">Top Up</SelectItem>
-                            <SelectItem value="Pre Masters">Pre Masters</SelectItem>
-                            <SelectItem value="MRes/PHD">MRes/PHD</SelectItem>
-                            <SelectItem value="Diploma">Diploma</SelectItem>
+                            {courseTypeOptions.length > 0 ? courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                              <>
+                                <SelectItem value="ELT">ELT</SelectItem>
+                                <SelectItem value="Foundation">Foundation</SelectItem>
+                                <SelectItem value="Bachelors">Bachelors</SelectItem>
+                                <SelectItem value="Masters">Masters</SelectItem>
+                                <SelectItem value="Top Up">Top Up</SelectItem>
+                                <SelectItem value="Pre Masters">Pre Masters</SelectItem>
+                                <SelectItem value="MRes/PHD">MRes/PHD</SelectItem>
+                                <SelectItem value="Diploma">Diploma</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
