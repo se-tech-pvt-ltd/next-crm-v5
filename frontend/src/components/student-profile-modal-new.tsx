@@ -364,6 +364,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </Label>
                         <Input id="nationality" value={isEditing ? (editData.nationality || '') : (student?.nationality || '')} onChange={(e) => setEditData({ ...editData, nationality: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="passportNumber" className="flex items-center space-x-2">
+                          <UserIcon className="w-4 h-4" />
+                          <span>Passport Number</span>
+                        </Label>
+                        <Input id="passportNumber" value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')} onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
