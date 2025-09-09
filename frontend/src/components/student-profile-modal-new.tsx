@@ -417,28 +417,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   </div>
                 </CollapsibleCard>
 
-                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:applications`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-xs flex items-center justify-between w-full"><div className="flex items-center space-x-2"><FileText className="w-4 h-4 text-primary" /><span>Applications ({applications?.length || 0})</span></div><Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)} title="Add Application"><Plus /><span className="hidden lg:inline">Add</span></Button></CardTitle>}>
-                  {applications && applications.length > 0 ? (
-                    <div className="space-y-3">
-                      {applications.map((application) => (
-                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-medium">{application.university}</h3>
-                              <p className="text-xs text-gray-600">{application.program}</p>
-                            </div>
-                            <Badge variant={application.appStatus === 'Closed' ? 'default' : 'secondary'}>
-                              {application.appStatus}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No applications yet</p>
-                  )}
-                </CollapsibleCard>
-
               </div>
             </div>
 
