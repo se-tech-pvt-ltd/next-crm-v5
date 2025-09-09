@@ -47,6 +47,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
       budget: '',
       status: 'active',
       notes: selectedLead?.notes || '',
+      expectation: selectedLead?.expectation || '',
+      counselorId: selectedLead?.counselorId || selectedLead?.counsellor || '',
+      consultancyFree: false,
+      scholarship: false,
     },
   });
 
