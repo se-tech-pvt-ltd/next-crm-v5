@@ -78,8 +78,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
 
   const initialFormData = {
     // Student status and expectation
-    status: 'Open',
-    expectation: 'High',
+    status: '',
+    expectation: '',
 
     // From Lead (inherited fields)
     type: '',
