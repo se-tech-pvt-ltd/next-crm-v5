@@ -93,8 +93,8 @@ export default function ConvertLeadToStudent() {
   }, [dropdownData, normalizeToText]);
 
   const initialFormData = {
-    status: 'Open',
-    expectation: 'High',
+    status: '',
+    expectation: '',
     type: '',
     name: '',
     phone: '',
