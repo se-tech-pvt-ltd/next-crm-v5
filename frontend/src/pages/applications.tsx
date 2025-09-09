@@ -187,9 +187,11 @@ export default function Applications() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Open">Open</SelectItem>
-                    <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                    <SelectItem value="Closed">Closed</SelectItem>
+                    {statusOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>
