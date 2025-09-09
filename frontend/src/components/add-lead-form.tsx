@@ -255,12 +255,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
         title: 'Success! 🎉',
         description: 'Lead has been created successfully and added to your pipeline.',
       });
+
+      // If opened from an event registration, mark registration converted
+      try {
+        if (initialData && (initialData as any).eventRegId) {
+          await RegService.updateRegistration((initialData as any).eventRegId, { isConverted: 1, is_converted: 1 });
+          queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] });
+        }
+      } catch (e) {
+        // ignore
+      }
+
       form.reset();
       if (onSuccess) onSuccess();
     },
@@ -272,6 +283,24 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       });
     },
   });
+
+  // Reset form values when initialData provided
+  useEffect(() => {
+    if (initialData) {
+      const values: any = {
+        name: initialData.name || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        city: initialData.city || '',
+        source: initialData.source || '',
+        status: initialData.status || '',
+        counselorId: initialData.counselorId || '',
+        country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
+        program: initialData.program || '',
+      };
+      form.reset(values);
+    }
+  }, [initialData]);
 
   const onSubmit = (data: AddLeadFormData) => {
     if (emailDuplicateStatus.isDuplicate) {
