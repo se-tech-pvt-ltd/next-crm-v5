@@ -639,7 +639,14 @@ export default function EventsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>Event Name</Label>
-                <Input value={newEvent.name} onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })} />
+                <Input
+                  value={newEvent.name}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                    setNewEvent({ ...newEvent, name: title });
+                  }}
+                />
               </div>
               <div>
                 <Label>Type</Label>
