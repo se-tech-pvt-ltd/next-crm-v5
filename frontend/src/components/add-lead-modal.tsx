@@ -18,7 +18,6 @@ import * as UsersService from '@/services/users';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
-import { HelpTooltip } from './help-tooltip';
 import { CommandMultiSelect } from './command-multi-select';
 import {
   User,
