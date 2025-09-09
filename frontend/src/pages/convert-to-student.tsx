@@ -151,6 +151,7 @@ export default function ConvertLeadToStudent() {
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: lead.createdBy || '',
         expectation: lead.expectation || prev.expectation,
+        counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || prev.counsellor || '',
       }));
     }
   }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
