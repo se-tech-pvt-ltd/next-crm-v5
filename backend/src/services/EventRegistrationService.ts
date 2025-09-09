@@ -17,12 +17,11 @@ export class EventRegistrationService {
   }
 
   static async createRegistration(data: InsertEventRegistration): Promise<EventRegistration> {
-    if (await EventRegistrationModel.existsByEventEmail(data.eventId, data.email)) {
-      const err = new Error('DUPLICATE_EMAIL');
-      throw err;
-    }
-    if (await EventRegistrationModel.existsByEventNumber(data.eventId, data.number)) {
-      const err = new Error('DUPLICATE_NUMBER');
+    const dupEmail = await EventRegistrationModel.existsByEventEmail(data.eventId, data.email);
+    const dupNumber = await EventRegistrationModel.existsByEventNumber(data.eventId, data.number);
+    if (dupEmail || dupNumber) {
+      const err = new Error('DUPLICATE');
+      (err as any).fields = { email: dupEmail, number: dupNumber };
       throw err;
     }
     return await EventRegistrationModel.create(data);
