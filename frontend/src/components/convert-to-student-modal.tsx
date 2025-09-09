@@ -463,7 +463,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Select counsellor" />
+                      <SelectValue placeholder="Please select" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(users) && users.map((user: any) => (
