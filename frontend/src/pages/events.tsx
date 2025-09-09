@@ -741,7 +741,7 @@ export default function EventsPage() {
                     <CardTitle className="text-xs">Registration Information</CardTitle>
                     <div className="flex items-center gap-2">
                       {(() => {
-                        const converted = viewReg && ((viewReg as any).isConverted === 1 || (viewReg as any).isConverted === '1');
+                        const converted = viewReg && ((viewReg as any).isConverted === 1 || (viewReg as any).isConverted === '1' || (viewReg as any).is_converted === 1 || (viewReg as any).is_converted === '1');
                         if (converted) {
                           return (
                             <span className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-100">Converted</span>
