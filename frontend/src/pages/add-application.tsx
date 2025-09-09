@@ -199,7 +199,7 @@ export default function AddApplication() {
                           ) : (
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                                <SelectValue placeholder="Select student" />
+                              <SelectValue placeholder="Please select" />
                               </SelectTrigger>
                               <SelectContent>
                                 {students?.map((s) => (
