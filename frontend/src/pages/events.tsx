@@ -283,7 +283,6 @@ export default function EventsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">ID</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
@@ -291,13 +290,11 @@ export default function EventsPage() {
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Event ID</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(registrations || []).map((r: any) => (
                     <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
-                      <TableCell className="p-2 text-xs">{r.id}</TableCell>
                       <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
                       <TableCell className="p-2 text-xs">{r.name}</TableCell>
                       <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
@@ -307,7 +304,6 @@ export default function EventsPage() {
                       </TableCell>
                       <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">{r.source || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.eventId}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
