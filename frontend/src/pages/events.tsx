@@ -263,6 +263,16 @@ export default function EventsPage() {
     }
   };
 
+  const formatEventTime = (t?: string) => {
+    if (!t) return '';
+    const [hh, mm = '00'] = String(t).split(':');
+    const h = Number(hh);
+    if (Number.isNaN(h)) return t;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hr12 = ((h % 12) || 12);
+    return `${hr12}:${String(mm).padStart(2, '0')} ${ampm}`;
+  };
+
   const palettes = [
     { gradientFrom: 'from-rose-500/80',    gradientTo: 'to-rose-300/40',    text: 'text-rose-600',    cardBorder: 'border-rose-200',    badgeBg: 'bg-rose-50',    badgeText: 'text-rose-700',    badgeBorder: 'border-rose-200' },
     { gradientFrom: 'from-violet-500/80',  gradientTo: 'to-violet-300/40',  text: 'text-violet-600',  cardBorder: 'border-violet-200',  badgeBg: 'bg-violet-50',  badgeText: 'text-violet-700',  badgeBorder: 'border-violet-200' },
@@ -313,7 +323,7 @@ export default function EventsPage() {
                   <div className="flex items-center text-xs text-gray-700">
                     <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
                     <span>{formatEventDate(e.date)}</span>
-                    {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{e.time}</span></>) : null}
+                    {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
                   </div>
                   <div className="flex items-center text-xs text-gray-700">
                     <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
