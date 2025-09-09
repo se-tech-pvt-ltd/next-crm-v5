@@ -269,8 +269,10 @@ export default function EventsPage() {
     const sourceIdx = idx('source');
     const statusIdx = idx('status');
 
-    const seenEmails = new Set<string>();
-    const seenNumbers = new Set<string>();
+    const seenEmails = new Map<string, number>();
+    const seenNumbers = new Map<string, number>();
+    const allowedStatusLabels = STATUS_OPTIONS.map(o => o.label).join(', ');
+    const allowedStatusValues = STATUS_OPTIONS.map(o => o.value).join(', ');
 
     for (let i = 1; i < lines.length; i++) {
       const rowNo = i + 1;
@@ -289,14 +291,22 @@ export default function EventsPage() {
       if (!email) rowErrors.push('Email is required');
       if (!city) rowErrors.push('City is required');
       if (!source) rowErrors.push('Source is required');
-      if (!status) rowErrors.push('Status is invalid');
+      if (!status) rowErrors.push(`Status is invalid: got "${statusRaw}". Allowed: ${allowedStatusLabels} (values: ${allowedStatusValues})`);
       if (email && !isValidEmail(email)) rowErrors.push('Email is invalid');
 
       const emailKey = email.toLowerCase();
-      if (seenEmails.has(emailKey)) rowErrors.push('Duplicate email within file');
-      else seenEmails.add(emailKey);
-      if (seenNumbers.has(number)) rowErrors.push('Duplicate number within file');
-      else seenNumbers.add(number);
+      if (seenEmails.has(emailKey)) {
+        const firstRow = seenEmails.get(emailKey)!;
+        rowErrors.push(`Duplicate email within file (Row ${firstRow})`);
+      } else {
+        seenEmails.set(emailKey, rowNo);
+      }
+      if (seenNumbers.has(number)) {
+        const firstRowN = seenNumbers.get(number)!;
+        rowErrors.push(`Duplicate number within file (Row ${firstRowN})`);
+      } else {
+        seenNumbers.set(number, rowNo);
+      }
 
       const existsEmail = (registrations || []).some((r: any) => r.eventId === filterEventId && r.email && email && String(r.email).toLowerCase() === emailKey);
       const existsNumber = (registrations || []).some((r: any) => r.eventId === filterEventId && r.number && number && String(r.number) === String(number));
