@@ -46,6 +46,7 @@ export class EventRegistrationService {
       city: reg.city || "",
       source: reg.source || "",
       status: "new",
+      eventRegId: reg.id,
     } as any;
 
     const lead = await LeadService.createLead(payload);
