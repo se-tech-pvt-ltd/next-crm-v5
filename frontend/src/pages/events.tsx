@@ -783,7 +783,7 @@ export default function EventsPage() {
                                 variant="outline"
                                 size="xs"
                                 className="rounded-full px-2 [&_svg]:size-3"
-                                onClick={() => convertMutation.mutate(viewReg.id)}
+                                onClick={() => openConvertToLeadModal(viewReg)}
                                 disabled={convertMutation.isPending}
                                 title="Convert to Lead"
                               >
