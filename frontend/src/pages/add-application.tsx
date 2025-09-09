@@ -35,6 +35,28 @@ export default function AddApplication() {
     enabled: !!presetStudentId,
   });
 
+  const { data: applicationsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+  });
+
+  const makeOptions = (dd: any, candidates: string[]) => {
+    let list: any[] = [];
+    for (const k of candidates) {
+      if (dd && Array.isArray(dd[k])) { list = dd[k]; break; }
+    }
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  };
+
+  const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Status', 'status', 'AppStatus', 'Application Status']), [applicationsDropdowns]);
+  const caseStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Case Status', 'caseStatus', 'CaseStatus', 'case_status']), [applicationsDropdowns]);
+  const courseTypeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']), [applicationsDropdowns]);
+  const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns]);
+  const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns]);
+  const intakeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']), [applicationsDropdowns]);
+
   const form = useForm<InsertApplication>({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
