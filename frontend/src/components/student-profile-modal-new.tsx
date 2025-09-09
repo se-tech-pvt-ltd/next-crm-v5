@@ -413,6 +413,35 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       </Label>
                       <Input id="budget" value={isEditing ? (editData.budget || '') : (student?.budget || '')} onChange={(e) => setEditData({ ...editData, budget: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Counsellor</span></Label>
+                      <Select value={isEditing ? (editData.counselorId || '') : (student?.counselorId || '')} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing}>
+                        <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                        <SelectContent>
+                          {(dropdownsForStudent() || []).map((opt: any) => (
+                            <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
+                      <Input value={isEditing ? (editData.expectation || '') : (student?.expectation || '')} onChange={(e) => setEditData({ ...editData, expectation: e.target.value })} disabled={!isEditing} className="h-7 text-[11px]" />
+                    </div>
+
+                    <div className="space-y-2 flex items-center">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox checked={!!(isEditing ? editData.consultancyFree : student?.consultancyFree)} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} disabled={!isEditing} />
+                        <span className="text-sm">Consultancy Free</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Checkbox checked={!!(isEditing ? editData.scholarship : student?.scholarship)} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} disabled={!isEditing} />
+                        <span className="text-sm">Scholarship</span>
+                      </div>
+                    </div>
+
                   </div>
                 </CollapsibleCard>
 
