@@ -37,8 +37,19 @@ export default function AdmissionDetails() {
     let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: (o.id || o.key || o.value).toString() }));
+    return list.map((o: any) => ({ label: o.value, value: (o.id || o.key || o.value).toString(), isDefault: Boolean(o.isDefault || o.is_default) }));
   }, [admissionsDropdowns]);
+
+  useEffect(() => {
+    if (!visaStatusOptions || visaStatusOptions.length === 0) return;
+    try {
+      if (!admission?.visaStatus) {
+        const def = visaStatusOptions.find(o => (o as any).isDefault);
+        if (def) setCurrentVisaStatus((def as any).value.toString());
+        else setCurrentVisaStatus('');
+      }
+    } catch {}
+  }, [visaStatusOptions]);
 
   const { data: student } = useQuery<Student>({
     queryKey: admission?.studentId ? ['/api/students', admission.studentId] : ['noop'],
