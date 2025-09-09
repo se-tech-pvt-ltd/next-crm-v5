@@ -901,6 +901,9 @@ export default function EventsPage() {
           </DialogContent>
         </Dialog>
 
+        {/* Add Lead Modal (used for converting registrations) */}
+        <AddLeadModal open={addLeadModalOpen} onOpenChange={(o) => setAddLeadModalOpen(o)} initialData={leadInitialData || undefined} />
+
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
           <DialogContent className="max-w-2xl">
