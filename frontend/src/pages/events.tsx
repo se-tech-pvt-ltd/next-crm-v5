@@ -303,7 +303,7 @@ export default function EventsPage() {
                         {STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}
                       </TableCell>
                       <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.source || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
