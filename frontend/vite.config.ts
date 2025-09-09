@@ -1,12 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-
+// Removed runtime error overlay plugin due to instability of overlay
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
       process.env.REPL_ID !== undefined
       ? [
@@ -30,6 +28,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
+    hmr: { overlay: false },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

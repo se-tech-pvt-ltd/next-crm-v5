@@ -1,6 +1,7 @@
 import { type EventRegistration, type InsertEventRegistration, type InsertLead, leads } from "../shared/schema.js";
 import { EventRegistrationModel } from "../models/EventRegistration.js";
 import { LeadService } from "./LeadService.js";
+import { type EventRegistration, type InsertEventRegistration, type InsertLead } from "../shared/schema.js";
 
 export class EventRegistrationService {
   static async getRegistrations(): Promise<EventRegistration[]> {
@@ -16,6 +17,13 @@ export class EventRegistrationService {
   }
 
   static async createRegistration(data: InsertEventRegistration): Promise<EventRegistration> {
+    const dupEmail = await EventRegistrationModel.existsByEventEmail(data.eventId, data.email);
+    const dupNumber = await EventRegistrationModel.existsByEventNumber(data.eventId, data.number);
+    if (dupEmail || dupNumber) {
+      const err = new Error('DUPLICATE');
+      (err as any).fields = { email: dupEmail, number: dupNumber };
+      throw err;
+    }
     return await EventRegistrationModel.create(data);
   }
 

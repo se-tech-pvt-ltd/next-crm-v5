@@ -12,7 +12,9 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { format } from 'date-fns';
+import * as XLSX from 'xlsx';
 
 const STATUS_OPTIONS = [
   { label: 'Not Sure', value: 'not_sure' },
@@ -32,8 +34,19 @@ export default function EventsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingView, setIsEditingView] = useState(false);
   const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
+  const [showList, setShowList] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const isValidEmail = (s?: string) => !s || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  // Import CSV wizard state
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importStep, setImportStep] = useState<1 | 2 | 3>(1);
+  const [importFileName, setImportFileName] = useState<string>('');
+  const [importErrors, setImportErrors] = useState<{ row: number; message: string }[]>([]);
+  const [importValidRows, setImportValidRows] = useState<RegService.RegistrationPayload[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+
+  const isValidEmail = (s?: string) => !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s || '');
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
@@ -145,7 +158,10 @@ export default function EventsPage() {
   const addRegMutation = useMutation({
     mutationFn: (data: RegService.RegistrationPayload) => RegService.createRegistration(data),
     onSuccess: () => { toast({ title: 'Registration added' }); refetchRegs(); setIsAddRegOpen(false); },
-    onError: () => toast({ title: 'Failed to add registration', variant: 'destructive' }),
+    onError: (e: any) => {
+      const msg = e?.response?.data?.message || e?.message || 'Failed to add registration';
+      toast({ title: msg, variant: 'destructive' });
+    },
   });
 
   const updateRegMutation = useMutation({
@@ -191,7 +207,11 @@ export default function EventsPage() {
       toast({ title: 'Select an Event to import into', variant: 'destructive' });
       return;
     }
-    fileInputRef.current?.click();
+    setIsImportOpen(true);
+    setImportStep(1);
+    setImportFileName('');
+    setImportErrors([]);
+    setImportValidRows([]);
   };
 
   useEffect(() => {
@@ -209,11 +229,79 @@ export default function EventsPage() {
     }
   }, [viewReg]);
 
-  const parseCsvAndImport = async (file: File) => {
-    const text = await file.text();
-    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-    if (lines.length === 0) return;
-    const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const downloadSampleCsv = () => {
+    const wb = XLSX.utils.book_new();
+    // Sheet 1: registrations sample
+    const registrationsAOA = [
+      ['name','number','email','city','source','status'],
+      ['John Doe','+11234567890','john@example.com','New York','Website','attending'],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(registrationsAOA);
+    XLSX.utils.book_append_sheet(wb, ws1, 'registrations');
+
+    // Sheet 2: dropdowns (allowed values)
+    const allowedStatus = STATUS_OPTIONS.map(o => [o.label, o.value]);
+    const allowedSources = (sourceOptions && sourceOptions.length > 0)
+      ? sourceOptions.map((o: any) => [o.label, o.value])
+      : [['Website','Website']];
+    const aoa: any[][] = [];
+    aoa.push(['Status - Allowed values']);
+    aoa.push(['Label','Value']);
+    for (const row of allowedStatus) aoa.push(row);
+    aoa.push([]);
+    aoa.push(['Source - Allowed values']);
+    aoa.push(['Label','Value']);
+    for (const row of allowedSources) aoa.push(row);
+    const ws2 = XLSX.utils.aoa_to_sheet(aoa);
+    XLSX.utils.book_append_sheet(wb, ws2, 'dropdowns');
+
+    const wbout = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'event-registrations-sample.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const normalizeStatus = (s: string) => {
+    const v = String(s || '').trim();
+    if (!v) return '';
+    const byValue = STATUS_OPTIONS.find(o => o.value.toLowerCase() === v.toLowerCase());
+    if (byValue) return byValue.value;
+    const byLabel = STATUS_OPTIONS.find(o => o.label.toLowerCase() === v.toLowerCase());
+    return byLabel ? byLabel.value : '';
+  };
+
+  const validateCsvText = async (file: File) => {
+    const isExcel = /\.xlsx?$/i.test(file.name) || /sheet|excel/i.test(file.type || '');
+    let matrix: any[][] = [];
+    if (isExcel) {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const sheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      matrix = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+    } else {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      matrix = lines.map(l => l.split(',').map(s => s.trim()));
+    }
+
+    const errors: { row: number; message: string }[] = [];
+    const valid: RegService.RegistrationPayload[] = [];
+    if (matrix.length === 0) {
+      setImportErrors([{ row: 0, message: 'Empty file' }]);
+      setImportValidRows([]);
+      return;
+    }
+
+    const header = (matrix[0] || []).map((h: any) => String(h || '').trim().toLowerCase());
+    const need = ['name', 'number', 'email', 'city', 'source', 'status'];
+    for (const col of need) if (!header.includes(col)) errors.push({ row: 0, message: `Missing column: ${col}` });
+    if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); return; }
+
     const idx = (k: string) => header.indexOf(k);
     const nameIdx = idx('name');
     const numberIdx = idx('number');
@@ -222,32 +310,105 @@ export default function EventsPage() {
     const sourceIdx = idx('source');
     const statusIdx = idx('status');
 
-    let success = 0, failed = 0;
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',');
-      const payload: RegService.RegistrationPayload = {
-        name: cols[nameIdx]?.trim() || '',
-        number: cols[numberIdx]?.trim() || '',
-        email: cols[emailIdx]?.trim() || '',
-        city: cols[cityIdx]?.trim() || '',
-        source: cols[sourceIdx]?.trim() || '',
-        status: (cols[statusIdx]?.trim()?.toLowerCase() || 'attending'),
-        eventId: filterEventId,
-      } as any;
-      if (!payload.name) { failed++; continue; }
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await RegService.createRegistration(payload);
-        success++;
-      } catch {
-        failed++;
+    const seenEmails = new Map<string, number>();
+    const seenNumbers = new Map<string, number>();
+    const allowedStatusLabels = STATUS_OPTIONS.map(o => o.label).join(', ');
+    const allowedStatusValues = STATUS_OPTIONS.map(o => o.value).join(', ');
+
+    for (let i = 1; i < matrix.length; i++) {
+      const rowNo = i + 1;
+      const cols = matrix[i] || [];
+      const name = String(cols[nameIdx] ?? '').trim();
+      const number = String(cols[numberIdx] ?? '').trim();
+      const email = String(cols[emailIdx] ?? '').trim();
+      const city = String(cols[cityIdx] ?? '').trim();
+      const source = String(cols[sourceIdx] ?? '').trim();
+      const statusRaw = String(cols[statusIdx] ?? '').trim();
+      const status = normalizeStatus(statusRaw);
+
+      const rowErrors: string[] = [];
+      if (!name) rowErrors.push('Name is required');
+      if (!number) rowErrors.push('Number is required');
+      if (!email) rowErrors.push('Email is required');
+      if (!city) rowErrors.push('City is required');
+      if (!source) rowErrors.push('Source is required');
+      if (!status) rowErrors.push(`Status is invalid: got "${statusRaw}". Allowed: ${allowedStatusLabels} (values: ${allowedStatusValues})`);
+      if (email && !isValidEmail(email)) rowErrors.push('Email is invalid');
+
+      const emailKey = email.toLowerCase();
+      if (seenEmails.has(emailKey)) {
+        const firstRow = seenEmails.get(emailKey)!;
+        rowErrors.push(`Duplicate email within file (Row ${firstRow})`);
+      } else {
+        seenEmails.set(emailKey, rowNo);
+      }
+      if (seenNumbers.has(number)) {
+        const firstRowN = seenNumbers.get(number)!;
+        rowErrors.push(`Duplicate number within file (Row ${firstRowN})`);
+      } else {
+        seenNumbers.set(number, rowNo);
+      }
+
+      const existsEmail = (registrations || []).some((r: any) => r.eventId === filterEventId && r.email && email && String(r.email).toLowerCase() === emailKey);
+      const existsNumber = (registrations || []).some((r: any) => r.eventId === filterEventId && r.number && number && String(r.number) === String(number));
+      if (existsEmail) rowErrors.push('Duplicate email in this event');
+      if (existsNumber) rowErrors.push('Duplicate number in this event');
+
+      if (rowErrors.length > 0) {
+        errors.push({ row: rowNo, message: rowErrors.join('; ') });
+      } else {
+        valid.push({ status, name, number, email, city, source, eventId: filterEventId } as RegService.RegistrationPayload);
       }
     }
-    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
-    refetchRegs();
+
+    setImportErrors(errors);
+    setImportValidRows(valid);
   };
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
+  const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
+  const selectedLabel = filterEventId === 'all' ? 'All Events' : (selectedEvent ? `${selectedEvent.name} (${selectedEvent.date})` : '');
+
+  useEffect(() => { setPage(1); }, [filterEventId, registrations]);
+
+  const formatEventDate = (d: any) => {
+    try {
+      const date = (typeof d === 'string' || typeof d === 'number') ? new Date(d) : d;
+      if (!date || Number.isNaN(date.getTime())) return String(d ?? '');
+      return format(date, 'EEE, MMM d, yyyy');
+    } catch {
+      return String(d ?? '');
+    }
+  };
+
+  const formatEventTime = (t?: string) => {
+    if (!t) return '';
+    const [hh, mm = '00'] = String(t).split(':');
+    const h = Number(hh);
+    if (Number.isNaN(h)) return t;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hr12 = ((h % 12) || 12);
+    return `${hr12}:${String(mm).padStart(2, '0')} ${ampm}`;
+  };
+
+  const palettes = [
+    { gradientFrom: 'from-rose-500/80',    gradientTo: 'to-rose-300/40',    text: 'text-rose-600',    cardBorder: 'border-rose-200',    badgeBg: 'bg-rose-50',    badgeText: 'text-rose-700',    badgeBorder: 'border-rose-200' },
+    { gradientFrom: 'from-violet-500/80',  gradientTo: 'to-violet-300/40',  text: 'text-violet-600',  cardBorder: 'border-violet-200',  badgeBg: 'bg-violet-50',  badgeText: 'text-violet-700',  badgeBorder: 'border-violet-200' },
+    { gradientFrom: 'from-emerald-500/80', gradientTo: 'to-emerald-300/40', text: 'text-emerald-600', cardBorder: 'border-emerald-200', badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700', badgeBorder: 'border-emerald-200' },
+    { gradientFrom: 'from-amber-500/80',   gradientTo: 'to-amber-300/40',   text: 'text-amber-600',   cardBorder: 'border-amber-200',   badgeBg: 'bg-amber-50',   badgeText: 'text-amber-800',  badgeBorder: 'border-amber-200' },
+    { gradientFrom: 'from-sky-500/80',     gradientTo: 'to-sky-300/40',     text: 'text-sky-600',     cardBorder: 'border-sky-200',     badgeBg: 'bg-sky-50',     badgeText: 'text-sky-700',     badgeBorder: 'border-sky-200' },
+    { gradientFrom: 'from-fuchsia-500/80', gradientTo: 'to-fuchsia-300/40', text: 'text-fuchsia-600', cardBorder: 'border-fuchsia-200', badgeBg: 'bg-fuchsia-50', badgeText: 'text-fuchsia-700', badgeBorder: 'border-fuchsia-200' },
+    { gradientFrom: 'from-cyan-500/80',    gradientTo: 'to-cyan-300/40',    text: 'text-cyan-600',    cardBorder: 'border-cyan-200',    badgeBg: 'bg-cyan-50',    badgeText: 'text-cyan-700',    badgeBorder: 'border-cyan-200' },
+    { gradientFrom: 'from-lime-500/80',    gradientTo: 'to-lime-300/40',    text: 'text-lime-700',    cardBorder: 'border-lime-200',    badgeBg: 'bg-lime-50',    badgeText: 'text-lime-800',    badgeBorder: 'border-lime-200' },
+  ] as const;
+
+  const getPalette = (key?: string) => {
+    const s = String(key ?? 'default');
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+    const idx = hash % palettes.length;
+    return palettes[idx];
+  };
 
   return (
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
@@ -255,63 +416,128 @@ export default function EventsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-sm font-semibold flex items-center gap-2"><Calendar className="w-4 h-4" />Events</h1>
           <div className="flex items-center gap-2">
-            <Button size="xs" variant="outline" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
-            <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) parseCsvAndImport(f); e.currentTarget.value = ''; }} />
-            <Button size="xs" variant="outline" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV</Button>
-            <Button size="xs" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+            {showList && filterEventId && filterEventId !== 'all' && (
+              <>
+                <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
+                <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async (e) => { const input = e.target as HTMLInputElement; const f = input.files?.[0]; input.value = ''; if (f) { setImportFileName(f.name); await validateCsvText(f); setImportStep(3); } }} />
+                <Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV/Excel</Button>
+              </>
+            )}
+            {!showList && (
+              <Button size="xs" variant="default" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+            )}
           </div>
         </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Event Registrations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 mb-3">
-              <Label className="text-xs">Event</Label>
-              <Select value={filterEventId} onValueChange={setFilterEventId}>
-                <SelectTrigger className="h-8 w-64 text-xs"><SelectValue placeholder="Select Event" /></SelectTrigger>
-                <SelectContent>
-                  {eventOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {!showList && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(events || []).map((e: any) => { const p = getPalette(e.type); return (
+              <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
+                <CardHeader className="pb-1">
+                  <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-1 space-y-2">
+                  <div className="flex items-center text-xs text-gray-700">
+                    <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                    <span>{formatEventDate(e.date)}</span>
+                    {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                  </div>
+                  <div className="flex items-center text-xs text-gray-700">
+                    <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                    <span className="truncate">{e.venue}</span>
+                  </div>
+                  <div>
+                    <span className={`inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border ${p.badgeBg} ${p.badgeText} ${p.badgeBorder}`}>{e.type}</span>
+                  </div>
+                  <div className="pt-1">
+                    <div className={`inline-flex items-center text-[11px] group-hover:translate-x-0.5 transition ${p.text}`}>
+                      View Registrations
+                      <ArrowRight className="ml-1 w-3 h-3" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ); })}
+          </div>
+        )}
 
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(registrations || []).map((r: any) => (
-                    <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
-                      <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Select value={r.status} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { status: v } })}>
-                          <SelectTrigger className="h-8 text-xs w-44" onClick={(e) => e.stopPropagation()}><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+        {showList && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Event Registrations{selectedLabel ? ` - ${selectedLabel}` : ''}</CardTitle>
+                <Button size="xs" variant="outline" onClick={() => setShowList(false)} className="rounded-full px-3">Back to Events</Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const list = (registrations || []) as any[];
+                const total = list.length;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                const safePage = Math.min(Math.max(1, page), totalPages);
+                const start = (safePage - 1) * pageSize;
+                const end = Math.min(start + pageSize, total);
+                const pageItems = list.slice(start, end);
+                if (safePage !== page) setPage(safePage);
+                return (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {pageItems.map((r: any) => (
+                            <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                              <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
+                              <TableCell className="p-2 text-xs">{STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
+                              <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-3 text-xs">
+                      <div>Showing {total === 0 ? 0 : start + 1}-{end} of {total}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <span>Rows:</span>
+                          <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                            <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button size="xs" variant="outline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+                          <div className="px-2">Page {safePage} of {totalPages}</div>
+                          <Button size="xs" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Create Registration Modal */}
         <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
@@ -357,7 +583,19 @@ export default function EventsPage() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name || (regForm.email ? !isValidEmail(regForm.email) : false)}>Save</Button>
+              <Button onClick={() => {
+                const missing = !regForm.status || !regForm.name || !regForm.number || !regForm.email || !regForm.city || !regForm.source || !regForm.eventId;
+                if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
+                if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
+                const existsEmail = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
+                const existsNumber = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.number && regForm.number && String(r.number) === String(regForm.number));
+                if (existsEmail || existsNumber) {
+                  const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
+                  toast({ title: msg, variant: 'destructive' });
+                  return;
+                }
+                addRegMutation.mutate(regForm);
+              }} disabled={addRegMutation.isPending}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -556,6 +794,86 @@ export default function EventsPage() {
           </DialogContent>
         </Dialog>
 
+        {/* Import CSV Wizard */}
+        <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Import Registrations (CSV/Excel)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-xs">
+                <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
+                <div className="w-6 h-[1px] bg-gray-200" />
+                <div className={`flex-1 px-2 py-1 rounded border ${importStep>=2?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>2. Upload</div>
+                <div className="w-6 h-[1px] bg-gray-200" />
+                <div className={`flex-1 px-2 py-1 rounded border ${importStep>=3?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>3. Validate & Insert</div>
+              </div>
+
+              {importStep === 1 && (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-600">Download the sample CSV, fill it, then proceed to upload. Event will be set to the currently selected event.</p>
+                  <div className="flex gap-2">
+                    <Button size="xs" onClick={downloadSampleCsv}>Download Sample Excel</Button>
+                    <Button size="xs" variant="outline" onClick={() => { setImportStep(2); }}>Next</Button>
+                  </div>
+                </div>
+              )}
+
+              {importStep === 2 && (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-600">Choose your CSV or Excel file to validate. No data will be inserted yet.</p>
+                  <div className="flex items-center gap-2">
+                    <Button size="xs" onClick={() => fileInputRef.current?.click()}>Choose File</Button>
+                    <span className="text-xs text-gray-700 truncate">{importFileName || 'No file selected'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="xs" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                  </div>
+                </div>
+              )}
+
+              {importStep === 3 && (
+                <div className="space-y-3">
+                  <div className="text-xs">
+                    <div>File: <span className="font-medium">{importFileName || 'N/A'}</span></div>
+                    <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-green-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
+                    <div className="mt-1">Ready to insert: <span className="font-medium">{importValidRows.length}</span></div>
+                  </div>
+                  {importErrors.length > 0 && (
+                    <div className="max-h-40 overflow-auto border rounded p-2 bg-red-50 text-red-700 text-[11px]">
+                      {importErrors.slice(0, 50).map((e, i) => (
+                        <div key={i}>Row {e.row}: {e.message}</div>
+                      ))}
+                      {importErrors.length > 50 && (<div>+{importErrors.length - 50} more…</div>)}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="xs" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
+                    <Button size="xs" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
+                      setIsImporting(true);
+                      let success = 0; let failed = 0;
+                      for (const row of importValidRows) {
+                        try { // eslint-disable-next-line no-await-in-loop
+                          await RegService.createRegistration(row);
+                          success++;
+                        } catch { failed++; }
+                      }
+                      setIsImporting(false);
+                      toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
+                      setIsImportOpen(false);
+                      setImportStep(1);
+                      setImportErrors([]);
+                      setImportValidRows([]);
+                      setImportFileName('');
+                      refetchRegs();
+                    }}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Create Event Modal */}
         <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
           <DialogContent>
@@ -565,23 +883,39 @@ export default function EventsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>Event Name</Label>
-                <Input value={newEvent.name} onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })} />
+                <Input
+                  value={newEvent.name}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                    setNewEvent({ ...newEvent, name: title });
+                  }}
+                />
               </div>
               <div>
                 <Label>Type</Label>
                 <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
               </div>
               <div>
-                <Label>Date</Label>
-                <Input type="date" value={newEvent.date} onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })} />
+                <Label>Date & Time</Label>
+                <Input
+                  type="datetime-local"
+                  step="60"
+                  value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (!v) {
+                      setNewEvent({ ...newEvent, date: '', time: '' });
+                      return;
+                    }
+                    const [d, t] = v.split('T');
+                    setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
+                  }}
+                />
               </div>
               <div>
                 <Label>Venue</Label>
                 <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
-              </div>
-              <div>
-                <Label>Time</Label>
-                <Input type="time" step="60" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
