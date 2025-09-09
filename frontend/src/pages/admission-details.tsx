@@ -210,13 +210,17 @@ export default function AdmissionDetails() {
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not-applied">Not Applied</SelectItem>
-                          <SelectItem value="applied">Applied</SelectItem>
-                          <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                          <SelectItem value="on-hold">On Hold</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
+                          {visaStatusOptions.length > 0 ? visaStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                            <>
+                              <SelectItem value="not-applied">Not Applied</SelectItem>
+                              <SelectItem value="applied">Applied</SelectItem>
+                              <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                              <SelectItem value="on-hold">On Hold</SelectItem>
+                              <SelectItem value="pending">Pending</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
