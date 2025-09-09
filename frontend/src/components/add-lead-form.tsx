@@ -340,7 +340,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       return;
     }
 
-    createLeadMutation.mutate(data);
+    const payload: any = { ...data };
+    if (initialData && (initialData as any).eventRegId) {
+      payload.eventRegId = (initialData as any).eventRegId;
+    }
+
+    createLeadMutation.mutate(payload);
   };
 
   return (
