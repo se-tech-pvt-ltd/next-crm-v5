@@ -17,12 +17,6 @@ import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 
-const STATUS_OPTIONS = [
-  { label: 'Not Sure', value: 'not_sure' },
-  { label: 'Unable to Contact', value: 'unable_to_contact' },
-  { label: 'Will Not Attend', value: 'will_not_attend' },
-  { label: 'Attending', value: 'attending' },
-];
 
 export default function EventsPage() {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
