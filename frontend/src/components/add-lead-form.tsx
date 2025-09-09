@@ -287,20 +287,39 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   // Reset form values when initialData provided
   useEffect(() => {
     if (initialData) {
+      // helper to map display label to dropdown key
+      const mapLabelToKey = (group: string, label?: string) => {
+        if (!label) return '';
+        const list = (dropdownData && (dropdownData as any)[group]) || [];
+        const found = list.find((opt: any) => {
+          if (!opt) return false;
+          const val = String(opt.value || opt.label || '').toLowerCase();
+          const key = String(opt.key || opt.id || '').toLowerCase();
+          return val === String(label).toLowerCase() || key === String(label).toLowerCase();
+        });
+        return found ? (found.key || found.id || found.value) : label;
+      };
+
+      // If opened from an event registration, prefer the specified defaults
+      const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
+      const defaultStatusLabel = (initialData as any).eventRegId ? 'Raw' : undefined;
+      const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
+
       const values: any = {
         name: initialData.name || '',
         email: initialData.email || '',
         phone: initialData.phone || '',
         city: initialData.city || '',
-        source: initialData.source || '',
-        status: initialData.status || '',
+        source: mapLabelToKey('Source', initialData.source || defaultSourceLabel),
+        status: mapLabelToKey('Status', initialData.status || defaultStatusLabel),
         counselorId: initialData.counselorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
+        type: mapLabelToKey('Type', initialData.type || defaultTypeLabel),
       };
       form.reset(values);
     }
-  }, [initialData]);
+  }, [initialData, dropdownData]);
 
   const onSubmit = (data: AddLeadFormData) => {
     if (emailDuplicateStatus.isDuplicate) {
