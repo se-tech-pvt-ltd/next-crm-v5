@@ -32,6 +32,7 @@ export default function EventsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingView, setIsEditingView] = useState(false);
   const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
+  const [showList, setShowList] = useState(false);
 
   const isValidEmail = (s?: string) => !s || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
@@ -248,6 +249,8 @@ export default function EventsPage() {
   };
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
+  const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
+  const selectedLabel = filterEventId === 'all' ? 'All Events' : (selectedEvent ? `${selectedEvent.name} (${selectedEvent.date})` : '');
 
   return (
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
@@ -262,55 +265,73 @@ export default function EventsPage() {
           </div>
         </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Event Registrations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 mb-3">
-              <Label className="text-xs">Event</Label>
-              <Select value={filterEventId} onValueChange={setFilterEventId}>
-                <SelectTrigger className="h-8 w-64 text-xs"><SelectValue placeholder="Select Event" /></SelectTrigger>
-                <SelectContent>
-                  {eventOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {!showList && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Card className="cursor-pointer hover:bg-gray-50" onClick={() => { setFilterEventId('all'); setShowList(true); }}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">All Events</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-xs text-gray-600">View registrations from all events</div>
+              </CardContent>
+            </Card>
+            {(events || []).map((e: any) => (
+              <Card key={e.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">{e.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xs text-gray-700">Type: {e.type}</div>
+                  <div className="text-xs text-gray-700">Date: {e.date}</div>
+                  <div className="text-xs text-gray-700">Venue: {e.venue}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(registrations || []).map((r: any) => (
-                    <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
-                      <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">
-                        {STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+        {showList && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Event Registrations{selectedLabel ? ` - ${selectedLabel}` : ''}</CardTitle>
+                <Button size="xs" variant="outline" onClick={() => setShowList(false)} className="rounded-full px-3">Back to Events</Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {(registrations || []).map((r: any) => (
+                      <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                        <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                        <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                        <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">
+                          {STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}
+                        </TableCell>
+                        <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Create Registration Modal */}
         <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
