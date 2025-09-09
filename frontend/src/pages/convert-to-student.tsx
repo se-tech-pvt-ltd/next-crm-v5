@@ -323,7 +323,7 @@ export default function ConvertLeadToStudent() {
                 </Label>
                 <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
                   <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Select test" />
+                    <SelectValue placeholder="Please select" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(studentDropdowns?.['ELT Test']) && studentDropdowns['ELT Test'].map((opt: any) => (
