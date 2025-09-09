@@ -12,7 +12,8 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { format } from 'date-fns';
 
 const STATUS_OPTIONS = [
   { label: 'Not Sure', value: 'not_sure' },
@@ -252,6 +253,16 @@ export default function EventsPage() {
   const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
   const selectedLabel = filterEventId === 'all' ? 'All Events' : (selectedEvent ? `${selectedEvent.name} (${selectedEvent.date})` : '');
 
+  const formatEventDate = (d: any) => {
+    try {
+      const date = (typeof d === 'string' || typeof d === 'number') ? new Date(d) : d;
+      if (!date || Number.isNaN(date.getTime())) return String(d ?? '');
+      return format(date, 'EEE, MMM d, yyyy');
+    } catch {
+      return String(d ?? '');
+    }
+  };
+
   return (
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
@@ -266,24 +277,48 @@ export default function EventsPage() {
         </div>
 
         {!showList && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <Card className="cursor-pointer hover:bg-gray-50" onClick={() => { setFilterEventId('all'); setShowList(true); }}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">All Events</CardTitle>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden" onClick={() => { setFilterEventId('all'); setShowList(true); }}>
+              <div className="h-1 bg-gradient-to-r from-primary/60 to-primary/20 group-hover:from-primary group-hover:to-primary/40" />
+              <CardHeader className="pb-1">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  All Events
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-1">
                 <div className="text-xs text-gray-600">View registrations from all events</div>
+                <div className="mt-3 inline-flex items-center text-[11px] text-primary group-hover:translate-x-0.5 transition">
+                  View Registrations
+                  <ArrowRight className="ml-1 w-3 h-3" />
+                </div>
               </CardContent>
             </Card>
             {(events || []).map((e: any) => (
-              <Card key={e.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">{e.name}</CardTitle>
+              <Card key={e.id} className="group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden" onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                <div className="h-1 bg-gradient-to-r from-primary/60 to-primary/20 group-hover:from-primary group-hover:to-primary/40" />
+                <CardHeader className="pb-1">
+                  <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-xs text-gray-700">Type: {e.type}</div>
-                  <div className="text-xs text-gray-700">Date: {e.date}</div>
-                  <div className="text-xs text-gray-700">Venue: {e.venue}</div>
+                <CardContent className="pt-1 space-y-2">
+                  <div className="flex items-center text-xs text-gray-700">
+                    <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                    <span>{formatEventDate(e.date)}</span>
+                    {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{e.time}</span></>) : null}
+                  </div>
+                  <div className="flex items-center text-xs text-gray-700">
+                    <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                    <span className="truncate">{e.venue}</span>
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center text-[10px] uppercase tracking-wide text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">{e.type}</span>
+                  </div>
+                  <div className="pt-1">
+                    <div className="inline-flex items-center text-[11px] text-primary group-hover:translate-x-0.5 transition">
+                      View Registrations
+                      <ArrowRight className="ml-1 w-3 h-3" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
