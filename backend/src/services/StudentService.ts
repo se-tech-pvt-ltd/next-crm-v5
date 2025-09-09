@@ -16,6 +16,27 @@ export class StudentService {
     return out;
   }
 
+  // Replace expectation (stored id) with the dropdown label if available
+  static async enrichExpectations(rows: any[]) {
+    if (!Array.isArray(rows) || rows.length === 0) return rows;
+    const dropdowns = await DropdownModel.findByModule('students');
+    const expectationOptions = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase() === 'expectation');
+    const map: Record<string, string> = {};
+    expectationOptions.forEach((opt: any) => {
+      map[opt.id] = opt.value;
+      // also map common alternative keys
+      if (opt.key) map[opt.key] = opt.value;
+      if (opt.value) map[opt.value] = opt.value;
+    });
+
+    return rows.map((r: any) => {
+      const copy = { ...r } as any;
+      const raw = copy.expectation;
+      if (raw && map[raw]) copy.expectation = map[raw];
+      return copy;
+    });
+  }
+
   static async getStudents(userId?: string, userRole?: string): Promise<Student[]> {
     let rows: any[];
     if (userRole === 'counselor' && userId) {
@@ -23,7 +44,8 @@ export class StudentService {
     } else {
       rows = await StudentModel.findAll();
     }
-    return rows.map(this.mapStudentForApi);
+    const enriched = await this.enrichExpectations(rows);
+    return enriched.map(this.mapStudentForApi);
   }
 
   static async getStudent(id: string, userId?: string, userRole?: string): Promise<Student | undefined> {
