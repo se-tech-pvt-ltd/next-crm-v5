@@ -17,6 +17,7 @@ import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRig
 import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
+import { queryClient } from '@/lib/queryClient';
 
 
 export default function EventsPage() {
