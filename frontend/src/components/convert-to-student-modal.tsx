@@ -172,12 +172,31 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: lead.createdBy || '',
 
-        // Set default expectation from lead
-        expectation: lead.expectation || 'High',
+        // Set default expectation from lead if present; otherwise keep empty to show placeholder
+        expectation: lead.expectation || prev.expectation || '',
         counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || '',
       }));
     }
   }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
+
+  // When student dropdowns load, pick defaults where is_default/isDefault === 1. If none, leave value empty so placeholder shows "Please select"
+  useEffect(() => {
+    if (!studentDropdowns) return;
+    const pickDefault = (listName: string) => {
+      const list: any[] = studentDropdowns[listName] || [];
+      if (!Array.isArray(list) || list.length === 0) return '';
+      const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
+      if (def) return def.key ?? def.id ?? def.value ?? '';
+      return '';
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      status: prev.status || pickDefault('Status'),
+      expectation: prev.expectation || pickDefault('Expectation'),
+      eltTest: prev.eltTest || pickDefault('ELT Test'),
+    }));
+  }, [studentDropdowns]);
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => StudentsService.convertFromLead(lead?.id, studentData),
