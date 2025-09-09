@@ -295,7 +295,7 @@ export default function AddApplication() {
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select course type" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
