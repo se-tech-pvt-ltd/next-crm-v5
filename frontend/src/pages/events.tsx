@@ -367,7 +367,6 @@ export default function EventsPage() {
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
   const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
-  const selectedLabel = filterEventId === 'all' ? 'All Events' : (selectedEvent ? `${selectedEvent.name} (${selectedEvent.date})` : '');
 
   useEffect(() => { setPage(1); }, [filterEventId, registrations]);
 
