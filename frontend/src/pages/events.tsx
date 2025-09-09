@@ -35,6 +35,8 @@ export default function EventsPage() {
   const [isEditingView, setIsEditingView] = useState(false);
   const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
   const [showList, setShowList] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Import CSV wizard state
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -367,6 +369,8 @@ export default function EventsPage() {
   const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
   const selectedLabel = filterEventId === 'all' ? 'All Events' : (selectedEvent ? `${selectedEvent.name} (${selectedEvent.date})` : '');
 
+  useEffect(() => { setPage(1); }, [filterEventId, registrations]);
+
   const formatEventDate = (d: any) => {
     try {
       const date = (typeof d === 'string' || typeof d === 'number') ? new Date(d) : d;
@@ -467,36 +471,70 @@ export default function EventsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                      <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                      <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                      <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                      <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                      <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                      <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(registrations || []).map((r: any) => (
-                      <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
-                        <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
-                        <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                        <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                        <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                        <TableCell className="p-2 text-xs">
-                          {STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}
-                        </TableCell>
-                        <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
-                        <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              {(() => {
+                const list = (registrations || []) as any[];
+                const total = list.length;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                const safePage = Math.min(Math.max(1, page), totalPages);
+                const start = (safePage - 1) * pageSize;
+                const end = Math.min(start + pageSize, total);
+                const pageItems = list.slice(start, end);
+                if (safePage !== page) setPage(safePage);
+                return (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {pageItems.map((r: any) => (
+                            <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                              <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
+                              <TableCell className="p-2 text-xs">{STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}</TableCell>
+                              <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
+                              <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-3 text-xs">
+                      <div>Showing {total === 0 ? 0 : start + 1}-{end} of {total}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <span>Rows:</span>
+                          <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                            <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button size="xs" variant="outline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+                          <div className="px-2">Page {safePage} of {totalPages}</div>
+                          <Button size="xs" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </CardContent>
           </Card>
         )}
