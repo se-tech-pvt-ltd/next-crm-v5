@@ -214,11 +214,41 @@ export default function EventsPage() {
     }
   }, [viewReg]);
 
-  const parseCsvAndImport = async (file: File) => {
+  const downloadSampleCsv = () => {
+    const sample = ['name,number,email,city,source,status', 'John Doe,+11234567890,john@example.com,New York,Website,attending'].join('\n');
+    const blob = new Blob([sample], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'event-registrations-sample.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const normalizeStatus = (s: string) => {
+    const v = String(s || '').trim();
+    if (!v) return '';
+    const byValue = STATUS_OPTIONS.find(o => o.value.toLowerCase() === v.toLowerCase());
+    if (byValue) return byValue.value;
+    const byLabel = STATUS_OPTIONS.find(o => o.label.toLowerCase() === v.toLowerCase());
+    return byLabel ? byLabel.value : '';
+  };
+
+  const validateCsvText = async (file: File) => {
     const text = await file.text();
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-    if (lines.length === 0) return;
+    const errors: { row: number; message: string }[] = [];
+    const valid: RegService.RegistrationPayload[] = [];
+    if (lines.length === 0) {
+      setImportErrors([{ row: 0, message: 'Empty file' }]);
+      setImportValidRows([]);
+      return;
+    }
     const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const need = ['name', 'number', 'email', 'city', 'source', 'status'];
+    for (const col of need) if (!header.includes(col)) errors.push({ row: 0, message: `Missing column: ${col}` });
+    if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); return; }
+
     const idx = (k: string) => header.indexOf(k);
     const nameIdx = idx('name');
     const numberIdx = idx('number');
@@ -227,29 +257,49 @@ export default function EventsPage() {
     const sourceIdx = idx('source');
     const statusIdx = idx('status');
 
-    let success = 0, failed = 0;
+    const seenEmails = new Set<string>();
+    const seenNumbers = new Set<string>();
+
     for (let i = 1; i < lines.length; i++) {
+      const rowNo = i + 1;
       const cols = lines[i].split(',');
-      const payload: RegService.RegistrationPayload = {
-        name: cols[nameIdx]?.trim() || '',
-        number: cols[numberIdx]?.trim() || '',
-        email: cols[emailIdx]?.trim() || '',
-        city: cols[cityIdx]?.trim() || '',
-        source: cols[sourceIdx]?.trim() || '',
-        status: (cols[statusIdx]?.trim()?.toLowerCase() || 'attending'),
-        eventId: filterEventId,
-      } as any;
-      if (!payload.name) { failed++; continue; }
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await RegService.createRegistration(payload);
-        success++;
-      } catch {
-        failed++;
+      const name = cols[nameIdx]?.trim() || '';
+      const number = cols[numberIdx]?.trim() || '';
+      const email = cols[emailIdx]?.trim() || '';
+      const city = cols[cityIdx]?.trim() || '';
+      const source = cols[sourceIdx]?.trim() || '';
+      const statusRaw = cols[statusIdx]?.trim() || '';
+      const status = normalizeStatus(statusRaw);
+
+      const rowErrors: string[] = [];
+      if (!name) rowErrors.push('Name is required');
+      if (!number) rowErrors.push('Number is required');
+      if (!email) rowErrors.push('Email is required');
+      if (!city) rowErrors.push('City is required');
+      if (!source) rowErrors.push('Source is required');
+      if (!status) rowErrors.push('Status is invalid');
+      if (email && !isValidEmail(email)) rowErrors.push('Email is invalid');
+
+      const emailKey = email.toLowerCase();
+      if (seenEmails.has(emailKey)) rowErrors.push('Duplicate email within file');
+      else seenEmails.add(emailKey);
+      if (seenNumbers.has(number)) rowErrors.push('Duplicate number within file');
+      else seenNumbers.add(number);
+
+      const existsEmail = (registrations || []).some((r: any) => r.eventId === filterEventId && r.email && email && String(r.email).toLowerCase() === emailKey);
+      const existsNumber = (registrations || []).some((r: any) => r.eventId === filterEventId && r.number && number && String(r.number) === String(number));
+      if (existsEmail) rowErrors.push('Duplicate email in this event');
+      if (existsNumber) rowErrors.push('Duplicate number in this event');
+
+      if (rowErrors.length > 0) {
+        errors.push({ row: rowNo, message: rowErrors.join('; ') });
+      } else {
+        valid.push({ status, name, number, email, city, source, eventId: filterEventId } as RegService.RegistrationPayload);
       }
     }
-    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
-    refetchRegs();
+
+    setImportErrors(errors);
+    setImportValidRows(valid);
   };
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
@@ -642,6 +692,86 @@ export default function EventsPage() {
                 </CardContent>
               </Card>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Import CSV Wizard */}
+        <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Import Registrations (CSV)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-xs">
+                <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
+                <div className="w-6 h-[1px] bg-gray-200" />
+                <div className={`flex-1 px-2 py-1 rounded border ${importStep>=2?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>2. Upload</div>
+                <div className="w-6 h-[1px] bg-gray-200" />
+                <div className={`flex-1 px-2 py-1 rounded border ${importStep>=3?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>3. Validate & Insert</div>
+              </div>
+
+              {importStep === 1 && (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-600">Download the sample CSV, fill it, then proceed to upload. Event will be set to the currently selected event.</p>
+                  <div className="flex gap-2">
+                    <Button size="xs" onClick={downloadSampleCsv}>Download Sample CSV</Button>
+                    <Button size="xs" variant="outline" onClick={() => { setImportStep(2); }}>Next</Button>
+                  </div>
+                </div>
+              )}
+
+              {importStep === 2 && (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-600">Choose your CSV file to validate. No data will be inserted yet.</p>
+                  <div className="flex items-center gap-2">
+                    <Button size="xs" onClick={() => fileInputRef.current?.click()}>Choose CSV</Button>
+                    <span className="text-xs text-gray-700 truncate">{importFileName || 'No file selected'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="xs" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                  </div>
+                </div>
+              )}
+
+              {importStep === 3 && (
+                <div className="space-y-3">
+                  <div className="text-xs">
+                    <div>File: <span className="font-medium">{importFileName || 'N/A'}</span></div>
+                    <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-green-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
+                    <div className="mt-1">Ready to insert: <span className="font-medium">{importValidRows.length}</span></div>
+                  </div>
+                  {importErrors.length > 0 && (
+                    <div className="max-h-40 overflow-auto border rounded p-2 bg-red-50 text-red-700 text-[11px]">
+                      {importErrors.slice(0, 50).map((e, i) => (
+                        <div key={i}>Row {e.row}: {e.message}</div>
+                      ))}
+                      {importErrors.length > 50 && (<div>+{importErrors.length - 50} more…</div>)}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="xs" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
+                    <Button size="xs" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
+                      setIsImporting(true);
+                      let success = 0; let failed = 0;
+                      for (const row of importValidRows) {
+                        try { // eslint-disable-next-line no-await-in-loop
+                          await RegService.createRegistration(row);
+                          success++;
+                        } catch { failed++; }
+                      }
+                      setIsImporting(false);
+                      toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
+                      setIsImportOpen(false);
+                      setImportStep(1);
+                      setImportErrors([]);
+                      setImportValidRows([]);
+                      setImportFileName('');
+                      refetchRegs();
+                    }}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
 
