@@ -15,6 +15,8 @@ import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { useLocation } from 'wouter';
+import * as DropdownsService from '@/services/dropdowns';
+import { useMemo } from 'react';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
