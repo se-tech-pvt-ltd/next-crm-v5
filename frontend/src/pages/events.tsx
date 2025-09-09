@@ -182,6 +182,22 @@ export default function EventsPage() {
     onError: () => toast({ title: 'Conversion failed', variant: 'destructive' }),
   });
 
+  const [addLeadModalOpen, setAddLeadModalOpen] = useState(false);
+  const [leadInitialData, setLeadInitialData] = useState<any | null>(null);
+
+  const openConvertToLeadModal = (reg: any) => {
+    setLeadInitialData({
+      name: reg.name,
+      email: reg.email,
+      phone: reg.number,
+      city: reg.city,
+      source: reg.source,
+      status: 'new',
+      eventRegId: reg.id,
+    });
+    setAddLeadModalOpen(true);
+  };
+
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
 
