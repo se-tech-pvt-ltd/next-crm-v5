@@ -131,6 +131,27 @@ export default function EventsPage() {
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [eventsDropdowns]);
 
+  const statusOptions = useMemo(() => {
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  }, [eventsDropdowns]);
+
+  const getStatusLabel = useMemo(() => {
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
+    if (!Array.isArray(list)) list = [];
+    const map = new Map<string, string>();
+    for (const o of list) {
+      if (o?.id) map.set(String(o.id), o.value);
+      if (o?.key) map.set(String(o.key), o.value);
+      if (o?.value) map.set(String(o.value), o.value);
+    }
+    return (val?: string) => (val ? (map.get(String(val)) || val) : '');
+  }, [eventsDropdowns]);
+
   const getSourceLabel = useMemo(() => {
     const dd: any = eventsDropdowns as any;
     let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
