@@ -230,7 +230,9 @@ export default function EventsPage() {
       toast({ title: 'Select an Event first', variant: 'destructive' });
       return;
     }
-    setRegForm({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: filterEventId });
+    const defaultStatus = statusOptions.find((o: any) => o.isDefault);
+    const defaultSource = sourceOptions.find((o: any) => o.isDefault);
+    setRegForm({ status: defaultStatus ? defaultStatus.value : '', name: '', number: '', email: '', city: '', source: defaultSource ? String(defaultSource.value) : '', eventId: filterEventId });
     setIsAddRegOpen(true);
   };
 
