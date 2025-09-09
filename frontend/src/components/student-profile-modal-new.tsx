@@ -313,6 +313,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   <CardContent className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       <div className="space-y-2">
+                        <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
+                        <div className="text-sm text-gray-700">{student?.id || 'N/A'}</div>
+                      </div>
+
+                      <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center space-x-2">
                           <UserIcon className="w-4 h-4" />
                           <span>Full Name</span>
