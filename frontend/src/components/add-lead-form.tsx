@@ -340,6 +340,31 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         type: mapLabelToKeyRobust('Type', initialData.type || defaultTypeLabel),
       };
       form.reset(values);
+    } else if (dropdownData) {
+      // No initial data: apply default selections from dropdownData if present
+      try {
+        const statusList = (dropdownData as any).Status || [];
+        const defaultStatus = statusList.find((s: any) => Boolean(s.isDefault || s.is_default));
+        if (defaultStatus && !form.getValues('status')) {
+          form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
+        }
+      } catch {}
+
+      try {
+        const sourceList = (dropdownData as any).Source || [];
+        const defaultSource = sourceList.find((s: any) => Boolean(s.isDefault || s.is_default));
+        if (defaultSource && !form.getValues('source')) {
+          form.setValue('source', defaultSource.key || defaultSource.id || defaultSource.value);
+        }
+      } catch {}
+
+      try {
+        const typeList = (dropdownData as any).Type || [];
+        const defaultType = typeList.find((s: any) => Boolean(s.isDefault || s.is_default));
+        if (defaultType && !form.getValues('type')) {
+          form.setValue('type', defaultType.key || defaultType.id || defaultType.value);
+        }
+      } catch {}
     }
   }, [initialData, dropdownData]);
 
