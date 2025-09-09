@@ -32,6 +32,19 @@ export default function Applications() {
     queryKey: ['/api/applications'],
   });
 
+  const { data: applicationsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+  });
+
+  const statusOptions = useMemo(() => {
+    const dd: any = applicationsDropdowns as any;
+    let list: any[] = dd?.Status || dd?.status || dd?.AppStatus || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  }, [applicationsDropdowns]);
+
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
   });
