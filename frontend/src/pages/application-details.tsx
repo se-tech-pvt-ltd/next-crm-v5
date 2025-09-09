@@ -43,6 +43,19 @@ export default function ApplicationDetails() {
   });
   const application = useMemo(() => (applications || []).find((a) => a.id === params?.id), [applications, params?.id]);
 
+  const { data: applicationsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+  });
+
+  const caseStatusOptions = useMemo(() => {
+    const dd: any = applicationsDropdowns as any;
+    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  }, [applicationsDropdowns]);
+
   const { data: student } = useQuery<Student>({
     queryKey: application?.studentId ? ['/api/students', application.studentId] : ['noop'],
     queryFn: async () => StudentsService.getStudent(application?.studentId),
