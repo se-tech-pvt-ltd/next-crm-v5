@@ -289,7 +289,7 @@ export default function ApplicationDetails() {
                       {isEditing ? (
                         <Select value={editData.caseStatus || 'Raw'} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select case status" />
+                            <SelectValue placeholder="Please select" />
                           </SelectTrigger>
                           <SelectContent>
                             {caseStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
