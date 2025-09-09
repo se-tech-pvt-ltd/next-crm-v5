@@ -653,7 +653,7 @@ export default function EventsPage() {
 
         {/* Create Registration Modal */}
         <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
             <DialogHeader>
               <DialogTitle>Add Registration</DialogTitle>
             </DialogHeader>
