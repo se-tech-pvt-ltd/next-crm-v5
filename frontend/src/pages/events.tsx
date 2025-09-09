@@ -903,7 +903,15 @@ export default function EventsPage() {
         </Dialog>
 
         {/* Add Lead Modal (used for converting registrations) */}
-        <AddLeadModal open={addLeadModalOpen} onOpenChange={(o) => setAddLeadModalOpen(o)} initialData={leadInitialData || undefined} />
+        <Dialog open={addLeadModalOpen} onOpenChange={setAddLeadModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <AddLeadForm
+              onCancel={() => setAddLeadModalOpen(false)}
+              onSuccess={() => { setAddLeadModalOpen(false); queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); }}
+              initialData={leadInitialData || undefined}
+            />
+          </DialogContent>
+        </Dialog>
 
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
