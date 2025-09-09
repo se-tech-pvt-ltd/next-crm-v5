@@ -231,7 +231,6 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
                 </p>
               </div>
             </div>
-            <HelpTooltip content="Fill out the lead information to add them to your pipeline. Required fields are marked with an asterisk." />
           </div>
         </DialogHeader>
 
