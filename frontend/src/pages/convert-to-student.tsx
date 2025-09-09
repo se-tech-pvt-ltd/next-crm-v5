@@ -244,7 +244,7 @@ export default function ConvertLeadToStudent() {
                 </Label>
                 <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
                   <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Please select" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(studentDropdowns?.['Status']) && studentDropdowns['Status'].map((opt: any) => (
