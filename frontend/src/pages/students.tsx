@@ -292,21 +292,13 @@ export default function Students() {
                       <TableCell className="font-medium p-2 text-xs">{student.name}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="space-y-1">
-                          <div className="flex items-center text-xs">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {student.email}
-                          </div>
-                          {student.phone && (
-                            <div className="flex items-center text-xs text-gray-500">
+                          {student.phone ? (
+                            <div className="flex items-center text-xs">
                               <Phone className="w-3 h-3 mr-1" />
                               {student.phone}
                             </div>
-                          )}
-                          {student.counselorId && (
-                            <div className="flex items-center text-xs text-gray-500">
-                              <Users className="w-3 h-3 mr-1" />
-                              {getCounsellorName(student.counselorId)}
-                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-500">-</div>
                           )}
                         </div>
                       </TableCell>
