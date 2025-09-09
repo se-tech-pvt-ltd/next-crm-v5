@@ -218,7 +218,7 @@ export default function AdmissionDetails() {
                       <div className="text-[11px] text-gray-600">Visa Status</div>
                       <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
                         <SelectTrigger className="h-8 text-xs w-40">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Please select" />
                         </SelectTrigger>
                         <SelectContent>
                           {visaStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
