@@ -376,13 +376,17 @@ export default function AddApplication() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="October 2025">October 2025</SelectItem>
-                            <SelectItem value="November 2025">November 2025</SelectItem>
-                            <SelectItem value="December 2025">December 2025</SelectItem>
-                            <SelectItem value="January 2026">January 2026</SelectItem>
-                            <SelectItem value="February 2026">February 2026</SelectItem>
-                            <SelectItem value="March 2026">March 2026</SelectItem>
-                            <SelectItem value="April 2026">April 2026</SelectItem>
+                            {intakeOptions.length > 0 ? intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                              <>
+                                <SelectItem value="October 2025">October 2025</SelectItem>
+                                <SelectItem value="November 2025">November 2025</SelectItem>
+                                <SelectItem value="December 2025">December 2025</SelectItem>
+                                <SelectItem value="January 2026">January 2026</SelectItem>
+                                <SelectItem value="February 2026">February 2026</SelectItem>
+                                <SelectItem value="March 2026">March 2026</SelectItem>
+                                <SelectItem value="April 2026">April 2026</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
