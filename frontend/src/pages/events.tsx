@@ -390,6 +390,58 @@ export default function EventsPage() {
     return `${hr12}:${String(mm).padStart(2, '0')} ${ampm}`;
   };
 
+  const getEventDateTime = (e: any): Date | null => {
+    if (!e || !e.date) return null;
+    try {
+      const d = (typeof e.date === 'string' || typeof e.date === 'number') ? new Date(e.date) : new Date(e.date);
+      if (e.time) {
+        const [hh, mm = '00'] = String(e.time).split(':');
+        const h = Number(hh);
+        const m = Number(mm);
+        if (!Number.isNaN(h) && !Number.isNaN(m)) {
+          d.setHours(h, m, 0, 0);
+        }
+      }
+      return d;
+    } catch {
+      return null;
+    }
+  };
+
+  const getCountdownString = (target: Date | null) => {
+    if (!target) return '';
+    const now = new Date();
+    let diff = Math.max(0, target.getTime() - now.getTime());
+    if (diff === 0) return 'Starting now';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    diff -= days * (1000 * 60 * 60 * 24);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    diff -= hours * (1000 * 60 * 60);
+    const minutes = Math.floor(diff / (1000 * 60));
+    diff -= minutes * (1000 * 60);
+    const seconds = Math.floor(diff / 1000);
+    const parts: string[] = [];
+    if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+    if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+    if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+    if (days === 0 && hours === 0 && minutes === 0) parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
+    if (parts.length === 0) return 'Less than a minute';
+    if (parts.length === 1) return `In ${parts[0]}`;
+    const last = parts.pop();
+    return `In ${parts.join(', ')} and ${last}`;
+  };
+
+  const [countdown, setCountdown] = useState('');
+  useEffect(() => {
+    const update = () => {
+      const dt = getEventDateTime(selectedEvent);
+      setCountdown(getCountdownString(dt));
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [selectedEvent]);
+
   const palettes = [
     { gradientFrom: 'from-rose-500/80',    gradientTo: 'to-rose-300/40',    text: 'text-rose-600',    cardBorder: 'border-rose-200',    badgeBg: 'bg-rose-50',    badgeText: 'text-rose-700',    badgeBorder: 'border-rose-200' },
     { gradientFrom: 'from-violet-500/80',  gradientTo: 'to-violet-300/40',  text: 'text-violet-600',  cardBorder: 'border-violet-200',  badgeBg: 'bg-violet-50',  badgeText: 'text-violet-700',  badgeBorder: 'border-violet-200' },
