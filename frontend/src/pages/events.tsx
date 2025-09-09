@@ -128,7 +128,7 @@ export default function EventsPage() {
       const sb = typeof b.sequence === 'number' ? b.sequence : Number(b.sequence ?? 0);
       return sa - sb;
     });
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   }, [eventsDropdowns]);
 
   const statusOptions = useMemo(() => {
@@ -136,7 +136,7 @@ export default function EventsPage() {
     let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   }, [eventsDropdowns]);
 
   const getStatusLabel = useMemo(() => {
