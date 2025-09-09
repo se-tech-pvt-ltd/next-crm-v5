@@ -273,16 +273,29 @@ export default function EventsPage() {
   };
 
   const validateCsvText = async (file: File) => {
-    const text = await file.text();
-    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    const isExcel = /\.xlsx?$/i.test(file.name) || /sheet|excel/i.test(file.type || '');
+    let matrix: any[][] = [];
+    if (isExcel) {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const sheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      matrix = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+    } else {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      matrix = lines.map(l => l.split(',').map(s => s.trim()));
+    }
+
     const errors: { row: number; message: string }[] = [];
     const valid: RegService.RegistrationPayload[] = [];
-    if (lines.length === 0) {
+    if (matrix.length === 0) {
       setImportErrors([{ row: 0, message: 'Empty file' }]);
       setImportValidRows([]);
       return;
     }
-    const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+
+    const header = (matrix[0] || []).map((h: any) => String(h || '').trim().toLowerCase());
     const need = ['name', 'number', 'email', 'city', 'source', 'status'];
     for (const col of need) if (!header.includes(col)) errors.push({ row: 0, message: `Missing column: ${col}` });
     if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); return; }
@@ -300,15 +313,15 @@ export default function EventsPage() {
     const allowedStatusLabels = STATUS_OPTIONS.map(o => o.label).join(', ');
     const allowedStatusValues = STATUS_OPTIONS.map(o => o.value).join(', ');
 
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = 1; i < matrix.length; i++) {
       const rowNo = i + 1;
-      const cols = lines[i].split(',');
-      const name = cols[nameIdx]?.trim() || '';
-      const number = cols[numberIdx]?.trim() || '';
-      const email = cols[emailIdx]?.trim() || '';
-      const city = cols[cityIdx]?.trim() || '';
-      const source = cols[sourceIdx]?.trim() || '';
-      const statusRaw = cols[statusIdx]?.trim() || '';
+      const cols = matrix[i] || [];
+      const name = String(cols[nameIdx] ?? '').trim();
+      const number = String(cols[numberIdx] ?? '').trim();
+      const email = String(cols[emailIdx] ?? '').trim();
+      const city = String(cols[cityIdx] ?? '').trim();
+      const source = String(cols[sourceIdx] ?? '').trim();
+      const statusRaw = String(cols[statusIdx] ?? '').trim();
       const status = normalizeStatus(statusRaw);
 
       const rowErrors: string[] = [];
@@ -402,8 +415,8 @@ export default function EventsPage() {
             {showList && filterEventId && filterEventId !== 'all' && (
               <>
                 <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
-                <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={async (e) => { const input = e.target as HTMLInputElement; const f = input.files?.[0]; input.value = ''; if (f) { setImportFileName(f.name); await validateCsvText(f); setImportStep(3); } }} />
-                <Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV</Button>
+                <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async (e) => { const input = e.target as HTMLInputElement; const f = input.files?.[0]; input.value = ''; if (f) { setImportFileName(f.name); await validateCsvText(f); setImportStep(3); } }} />
+                <Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV/Excel</Button>
               </>
             )}
             {!showList && (
@@ -747,7 +760,7 @@ export default function EventsPage() {
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Import Registrations (CSV)</DialogTitle>
+              <DialogTitle>Import Registrations (CSV/Excel)</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs">
@@ -762,7 +775,7 @@ export default function EventsPage() {
                 <div className="space-y-3">
                   <p className="text-xs text-gray-600">Download the sample CSV, fill it, then proceed to upload. Event will be set to the currently selected event.</p>
                   <div className="flex gap-2">
-                    <Button size="xs" onClick={downloadSampleCsv}>Download Sample CSV</Button>
+                    <Button size="xs" onClick={downloadSampleCsv}>Download Sample Excel</Button>
                     <Button size="xs" variant="outline" onClick={() => { setImportStep(2); }}>Next</Button>
                   </div>
                 </div>
@@ -770,9 +783,9 @@ export default function EventsPage() {
 
               {importStep === 2 && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600">Choose your CSV file to validate. No data will be inserted yet.</p>
+                  <p className="text-xs text-gray-600">Choose your CSV or Excel file to validate. No data will be inserted yet.</p>
                   <div className="flex items-center gap-2">
-                    <Button size="xs" onClick={() => fileInputRef.current?.click()}>Choose CSV</Button>
+                    <Button size="xs" onClick={() => fileInputRef.current?.click()}>Choose File</Button>
                     <span className="text-xs text-gray-700 truncate">{importFileName || 'No file selected'}</span>
                   </div>
                   <div className="flex gap-2">
