@@ -712,7 +712,7 @@ export default function EventsPage() {
                 <div className="flex flex-col">
                   <Label className="mb-1">Source</Label>
                   <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Please select" /></SelectTrigger>
                     <SelectContent>
                       {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                     </SelectContent>
