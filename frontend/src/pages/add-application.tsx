@@ -335,14 +335,18 @@ export default function AddApplication() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Scorp">Scorp</SelectItem>
-                            <SelectItem value="UKEC">UKEC</SelectItem>
-                            <SelectItem value="Crizac">Crizac</SelectItem>
-                            <SelectItem value="Direct">Direct</SelectItem>
-                            <SelectItem value="MSM Unify">MSM Unify</SelectItem>
-                            <SelectItem value="Adventus">Adventus</SelectItem>
-                            <SelectItem value="ABN">ABN</SelectItem>
-                            <SelectItem value="NSA">NSA</SelectItem>
+                            {channelPartnerOptions.length > 0 ? channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                              <>
+                                <SelectItem value="Scorp">Scorp</SelectItem>
+                                <SelectItem value="UKEC">UKEC</SelectItem>
+                                <SelectItem value="Crizac">Crizac</SelectItem>
+                                <SelectItem value="Direct">Direct</SelectItem>
+                                <SelectItem value="MSM Unify">MSM Unify</SelectItem>
+                                <SelectItem value="Adventus">Adventus</SelectItem>
+                                <SelectItem value="ABN">ABN</SelectItem>
+                                <SelectItem value="NSA">NSA</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
