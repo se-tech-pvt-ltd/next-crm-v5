@@ -272,7 +272,7 @@ export default function EventsPage() {
     XLSX.utils.book_append_sheet(wb, ws1, 'registrations');
 
     // Sheet 2: dropdowns (allowed values)
-    const allowedStatus = STATUS_OPTIONS.map(o => [o.label, o.value]);
+    const allowedStatus = statusOptions.map(o => [o.label, o.value]);
     const allowedSources = (sourceOptions && sourceOptions.length > 0)
       ? sourceOptions.map((o: any) => [o.label, o.value])
       : [['Website','Website']];
