@@ -966,7 +966,16 @@ export default function EventsPage() {
             </DialogHeader>
             <AddLeadForm
               onCancel={() => setAddLeadModalOpen(false)}
-              onSuccess={() => { setAddLeadModalOpen(false); queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); }}
+              onSuccess={() => {
+                setAddLeadModalOpen(false);
+                try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+                refetchRegs?.();
+                setShowList(true);
+                setIsViewRegOpen(false);
+                setIsAddRegOpen(false);
+                setIsEditRegOpen(false);
+                setViewReg(null);
+              }}
               initialData={leadInitialData || undefined}
             />
           </DialogContent>
