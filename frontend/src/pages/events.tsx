@@ -571,16 +571,25 @@ export default function EventsPage() {
                 <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
               </div>
               <div>
-                <Label>Date</Label>
-                <Input type="date" value={newEvent.date} onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })} />
+                <Label>Date & Time</Label>
+                <Input
+                  type="datetime-local"
+                  step="60"
+                  value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (!v) {
+                      setNewEvent({ ...newEvent, date: '', time: '' });
+                      return;
+                    }
+                    const [d, t] = v.split('T');
+                    setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
+                  }}
+                />
               </div>
               <div>
                 <Label>Venue</Label>
                 <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
-              </div>
-              <div>
-                <Label>Time</Label>
-                <Input type="time" step="60" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
