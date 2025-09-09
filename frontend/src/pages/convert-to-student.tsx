@@ -120,20 +120,27 @@ export default function ConvertLeadToStudent() {
 
   // Align defaults with fetched student dropdowns
   useEffect(() => {
-    if (studentDropdowns) {
-      const pickDefault = (field: string) => {
-        const list: any[] = (studentDropdowns as any)[field] || [];
-        if (!Array.isArray(list) || list.length === 0) return '';
-        const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
-        return def ? (def.key ?? def.id ?? def.value ?? '') : '';
-      };
-      setFormData(prev => ({
-        ...prev,
-        status: prev.status || pickDefault('Status'),
-        expectation: prev.expectation || pickDefault('Expectation'),
-        eltTest: prev.eltTest || pickDefault('ELT Test'),
-      }));
-    }
+    if (!studentDropdowns) return;
+    const findList = (candidates: string[]) => {
+      for (const c of candidates) {
+        const v = (studentDropdowns as any)[c];
+        if (Array.isArray(v) && v.length > 0) return v as any[];
+      }
+      return [] as any[];
+    };
+    const pickDefaultFrom = (candidates: string[]) => {
+      const list = findList(candidates);
+      if (!list || list.length === 0) return '';
+      const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
+      return def ? (def.key ?? def.id ?? def.value ?? '') : '';
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      status: prev.status || pickDefaultFrom(['Status', 'status']),
+      expectation: prev.expectation || pickDefaultFrom(['Expectation', 'expectation']),
+      eltTest: prev.eltTest || pickDefaultFrom(['ELT Test', 'ELTTest', 'ELT_Test']),
+    }));
   }, [studentDropdowns]);
 
   useEffect(() => {
