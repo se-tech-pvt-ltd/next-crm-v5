@@ -14,6 +14,7 @@ import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import * as XLSX from 'xlsx';
 
 const STATUS_OPTIONS = [
   { label: 'Not Sure', value: 'not_sure' },

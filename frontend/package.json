@@ -13,17 +13,34 @@
   },
   "eslintConfig": {
     "root": true,
-    "env": { "browser": true, "es2022": true },
+    "env": {
+      "browser": true,
+      "es2022": true
+    },
     "parser": "@typescript-eslint/parser",
-    "parserOptions": { "ecmaVersion": "latest", "sourceType": "module", "ecmaFeatures": { "jsx": true } },
-    "plugins": ["@typescript-eslint", "react", "react-hooks"],
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "plugins": [
+      "@typescript-eslint",
+      "react",
+      "react-hooks"
+    ],
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended",
       "plugin:react/recommended",
       "plugin:react-hooks/recommended"
     ],
-    "settings": { "react": { "version": "detect" } },
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
+    },
     "rules": {
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
@@ -88,6 +105,7 @@
     "tw-animate-css": "^1.2.5",
     "vaul": "^1.1.2",
     "wouter": "^3.3.5",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {
