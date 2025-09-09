@@ -446,8 +446,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Select expectation" />
-                    </SelectTrigger>
+                    <SelectValue placeholder="Please select" />
+                  </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(studentDropdowns?.['Expectation']) ? studentDropdowns['Expectation'].map((opt: any) => (
                         <SelectItem key={opt.key || opt.id || opt.value} value={opt.key || opt.id || opt.value}>{opt.value}</SelectItem>
