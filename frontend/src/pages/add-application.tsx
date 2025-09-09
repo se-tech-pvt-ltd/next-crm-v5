@@ -205,13 +205,7 @@ export default function AddApplication() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {appStatusOptions.length > 0 ? appStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
-                              <>
-                                <SelectItem value="Open">Open</SelectItem>
-                                <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                                <SelectItem value="Closed">Closed</SelectItem>
-                              </>
-                            )}
+                            {appStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
