@@ -905,6 +905,9 @@ export default function EventsPage() {
         {/* Add Lead Modal (used for converting registrations) */}
         <Dialog open={addLeadModalOpen} onOpenChange={setAddLeadModalOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <DialogHeader>
+              <DialogTitle className="sr-only">Add New Lead</DialogTitle>
+            </DialogHeader>
             <AddLeadForm
               onCancel={() => setAddLeadModalOpen(false)}
               onSuccess={() => { setAddLeadModalOpen(false); queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); }}
@@ -985,7 +988,7 @@ export default function EventsPage() {
                       setImportValidRows([]);
                       setImportFileName('');
                       refetchRegs();
-                    }}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                    }}>{isImporting ? 'Importing��' : `Insert ${importValidRows.length} rows`}</Button>
                   </div>
                 </div>
               )}
