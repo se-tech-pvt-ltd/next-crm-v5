@@ -656,10 +656,7 @@ export default function EventsPage() {
         <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
             <DialogHeader>
-              <div className="flex items-center justify-between">
-                <DialogTitle>Add Registration</DialogTitle>
-                <span className="text-xs text-gray-500">Add attendee to the selected event</span>
-              </div>
+              <DialogTitle>Add Registration</DialogTitle>
             </DialogHeader>
 
             <form
@@ -701,7 +698,7 @@ export default function EventsPage() {
                 </div>
 
                 <div className="flex flex-col">
-                  <Label className="mb-1">Name</Label>
+                  <Label className="mb-1">Full Name</Label>
                   <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
                 </div>
 
@@ -711,19 +708,20 @@ export default function EventsPage() {
                 </div>
 
                 <div className="flex flex-col">
-                  <Label className="mb-1">Number</Label>
-                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\\-\\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} className="h-9" />
+                  <Label className="mb-1">Phone Number</Label>
+                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\\-\\s]*$" value={regForm.number} onChange={(e) => { setRegForm({ ...regForm, number: e.target.value }); }} className="h-9" />
                 </div>
 
                 <div className="flex flex-col">
-                  <Label className="mb-1">Email</Label>
-                  <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} className="h-9" />
+                  <Label className="mb-1">Email Address</Label>
+                  <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
+                  {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
                 </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t">
                 <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={addRegMutation.isPending}>{addRegMutation.isPending ? 'Saving…' : 'Save Registration'}</Button>
+                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving…' : 'Save Registration'}</Button>
               </div>
             </form>
           </DialogContent>
