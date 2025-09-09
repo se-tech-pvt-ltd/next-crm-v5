@@ -35,9 +35,24 @@ export class EventRegistrationController {
       res.status(201).json(created);
     } catch (e) {
       if (e instanceof z.ZodError) return res.status(400).json({ message: "Invalid registration data", errors: e.errors });
-      if (e instanceof Error && (e.message === 'DUPLICATE_EMAIL' || e.message === 'DUPLICATE_NUMBER')) {
-        const field = e.message === 'DUPLICATE_EMAIL' ? 'email' : 'number';
-        return res.status(409).json({ message: `Duplicate ${field} for this event` });
+      if (e instanceof Error) {
+        if (e.message === 'DUPLICATE') {
+          const f = (e as any).fields || {};
+          const emailDup = !!f.email;
+          const numberDup = !!f.number;
+          const msg = emailDup && numberDup
+            ? 'Duplicate email and number for this event'
+            : emailDup
+              ? 'Duplicate email for this event'
+              : numberDup
+                ? 'Duplicate number for this event'
+                : 'Duplicate for this event';
+          return res.status(409).json({ message: msg, fields: { email: emailDup, number: numberDup } });
+        }
+        if (e.message === 'DUPLICATE_EMAIL' || e.message === 'DUPLICATE_NUMBER') {
+          const field = e.message === 'DUPLICATE_EMAIL' ? 'email' : 'number';
+          return res.status(409).json({ message: `Duplicate ${field} for this event`, fields: { email: e.message === 'DUPLICATE_EMAIL', number: e.message === 'DUPLICATE_NUMBER' } });
+        }
       }
       res.status(500).json({ message: "Failed to create registration" });
     }
