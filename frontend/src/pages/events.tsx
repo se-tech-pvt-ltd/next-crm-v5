@@ -228,12 +228,37 @@ export default function EventsPage() {
   }, [viewReg]);
 
   const downloadSampleCsv = () => {
-    const sample = ['name,number,email,city,source,status', 'John Doe,+11234567890,john@example.com,New York,Website,attending'].join('\n');
-    const blob = new Blob([sample], { type: 'text/csv;charset=utf-8;' });
+    const wb = XLSX.utils.book_new();
+    // Sheet 1: registrations sample
+    const registrationsAOA = [
+      ['name','number','email','city','source','status'],
+      ['John Doe','+11234567890','john@example.com','New York','Website','attending'],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(registrationsAOA);
+    XLSX.utils.book_append_sheet(wb, ws1, 'registrations');
+
+    // Sheet 2: dropdowns (allowed values)
+    const allowedStatus = STATUS_OPTIONS.map(o => [o.label, o.value]);
+    const allowedSources = (sourceOptions && sourceOptions.length > 0)
+      ? sourceOptions.map((o: any) => [o.label, o.value])
+      : [['Website','Website']];
+    const aoa: any[][] = [];
+    aoa.push(['Status - Allowed values']);
+    aoa.push(['Label','Value']);
+    for (const row of allowedStatus) aoa.push(row);
+    aoa.push([]);
+    aoa.push(['Source - Allowed values']);
+    aoa.push(['Label','Value']);
+    for (const row of allowedSources) aoa.push(row);
+    const ws2 = XLSX.utils.aoa_to_sheet(aoa);
+    XLSX.utils.book_append_sheet(wb, ws2, 'dropdowns');
+
+    const wbout = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'event-registrations-sample.csv';
+    a.download = 'event-registrations-sample.xlsx';
     a.click();
     URL.revokeObjectURL(url);
   };
