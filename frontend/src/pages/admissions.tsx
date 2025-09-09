@@ -186,10 +186,11 @@ export default function Admissions() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Decisions</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                    <SelectItem value="conditional">Conditional</SelectItem>
+                    {decisionOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>
