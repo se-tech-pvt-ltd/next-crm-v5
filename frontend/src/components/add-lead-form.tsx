@@ -58,9 +58,10 @@ export interface AddLeadFormProps {
   onCancel?: () => void;
   onSuccess?: () => void;
   showBackButton?: boolean;
+  initialData?: Partial<any>;
 }
 
-export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false }: AddLeadFormProps) {
+export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false, initialData }: AddLeadFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
