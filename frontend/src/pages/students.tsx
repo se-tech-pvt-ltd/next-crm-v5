@@ -266,9 +266,11 @@ export default function Students() {
               <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">ID</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Target Program</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Expectation</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
@@ -280,6 +282,7 @@ export default function Students() {
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => handleViewProfile(student.id)}
                     >
+                      <TableCell className="font-medium p-2 text-xs">{student.id}</TableCell>
                       <TableCell className="font-medium p-2 text-xs">{student.name}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="space-y-1">
@@ -291,6 +294,12 @@ export default function Students() {
                             <div className="flex items-center text-xs text-gray-500">
                               <Phone className="w-3 h-3 mr-1" />
                               {student.phone}
+                            </div>
+                          )}
+                          {student.counselorId && (
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Users className="w-3 h-3 mr-1" />
+                              {getCounsellorName(student.counselorId)}
                             </div>
                           )}
                         </div>
@@ -311,6 +320,7 @@ export default function Students() {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell className="p-2 text-xs">{student.expectation || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">
                         {(() => {
                           const label = getStatusLabel(student.status);
