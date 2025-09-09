@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 
@@ -476,8 +476,12 @@ export default function EventsPage() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">Event Registrations</CardTitle>
-                <Button size="xs" variant="outline" onClick={() => setShowList(false)} className="rounded-full px-3">Back to Events</Button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setShowList(false)} className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50">
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <CardTitle className="text-sm flex items-center">Event Registrations</CardTitle>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
