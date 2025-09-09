@@ -288,33 +288,21 @@ export default function EventsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-sm font-semibold flex items-center gap-2"><Calendar className="w-4 h-4" />Events</h1>
           <div className="flex items-center gap-2">
-            <Button size="xs" variant="outline" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
-            <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) parseCsvAndImport(f); e.currentTarget.value = ''; }} />
-            <Button size="xs" variant="outline" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV</Button>
-            <Button size="xs" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+            {showList && filterEventId && filterEventId !== 'all' && (
+              <>
+                <Button size="xs" variant="outline" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
+                <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) parseCsvAndImport(f); e.currentTarget.value = ''; }} />
+                <Button size="xs" variant="outline" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV</Button>
+              </>
+            )}
+            {!showList && (
+              <Button size="xs" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+            )}
           </div>
         </div>
 
         {!showList && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(() => { const p = getPalette('all'); return (
-              <Card className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId('all'); setShowList(true); }}>
-                <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
-                <CardHeader className="pb-1">
-                  <CardTitle className={`text-sm flex items-center gap-2 ${p.text}`}>
-                    <Calendar className="w-4 h-4" />
-                    All Events
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-1">
-                  <div className="text-xs text-gray-600">View registrations from all events</div>
-                  <div className={`mt-3 inline-flex items-center text-[11px] ${p.text} group-hover:translate-x-0.5 transition`}>
-                    View Registrations
-                    <ArrowRight className="ml-1 w-3 h-3" />
-                  </div>
-                </CardContent>
-              </Card>
-            ); })()}
             {(events || []).map((e: any) => { const p = getPalette(e.type); return (
               <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
                 <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
