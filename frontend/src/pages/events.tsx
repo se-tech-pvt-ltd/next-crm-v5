@@ -35,6 +35,14 @@ export default function EventsPage() {
   const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
   const [showList, setShowList] = useState(false);
 
+  // Import CSV wizard state
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importStep, setImportStep] = useState<1 | 2 | 3>(1);
+  const [importFileName, setImportFileName] = useState<string>('');
+  const [importErrors, setImportErrors] = useState<{ row: number; message: string }[]>([]);
+  const [importValidRows, setImportValidRows] = useState<RegService.RegistrationPayload[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+
   const isValidEmail = (s?: string) => !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s || '');
 
   const StatusProgressBarReg = () => {
@@ -196,7 +204,11 @@ export default function EventsPage() {
       toast({ title: 'Select an Event to import into', variant: 'destructive' });
       return;
     }
-    fileInputRef.current?.click();
+    setIsImportOpen(true);
+    setImportStep(1);
+    setImportFileName('');
+    setImportErrors([]);
+    setImportValidRows([]);
   };
 
   useEffect(() => {
