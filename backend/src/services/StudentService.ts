@@ -16,23 +16,42 @@ export class StudentService {
     return out;
   }
 
-  // Replace expectation (stored id) with the dropdown label if available
-  static async enrichExpectations(rows: any[]) {
+  // Enrich dropdown-backed fields (expectation, eltTest, englishProficiency, etc.)
+  static async enrichDropdownFields(rows: any[]) {
     if (!Array.isArray(rows) || rows.length === 0) return rows;
     const dropdowns = await DropdownModel.findByModule('students');
-    const expectationOptions = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase() === 'expectation');
-    const map: Record<string, string> = {};
-    expectationOptions.forEach((opt: any) => {
-      map[opt.id] = opt.value;
-      // also map common alternative keys
-      if (opt.key) map[opt.key] = opt.value;
-      if (opt.value) map[opt.value] = opt.value;
+    // group dropdowns by normalized field name
+    const groups: Record<string, any[]> = {};
+    (dropdowns || []).forEach((d: any) => {
+      const fn = (d.fieldName || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!groups[fn]) groups[fn] = [];
+      groups[fn].push(d);
     });
+
+    // helper to map raw value to label for a given normalized field
+    const mapForField = (fn: string) => {
+      const list = groups[fn] || [];
+      const map: Record<string, string> = {};
+      list.forEach((opt: any) => {
+        if (opt.id) map[opt.id] = opt.value;
+        if (opt.key) map[opt.key] = opt.value;
+        if (opt.value) map[opt.value] = opt.value;
+      });
+      return map;
+    };
+
+    const expectationMap = mapForField('expectation');
+    const eltMap = mapForField('elttest');
+    const eltMapAlt = mapForField('elttest');
+    const englishMap = mapForField('englishproficiency');
 
     return rows.map((r: any) => {
       const copy = { ...r } as any;
-      const raw = copy.expectation;
-      if (raw && map[raw]) copy.expectation = map[raw];
+      // expectation
+      if (copy.expectation && expectationMap[copy.expectation]) copy.expectation = expectationMap[copy.expectation];
+      // eltTest / english proficiency
+      if (copy.eltTest && (eltMap[copy.eltTest] || eltMapAlt[copy.eltTest])) copy.eltTest = eltMap[copy.eltTest] || eltMapAlt[copy.eltTest];
+      if (copy.englishProficiency && englishMap[copy.englishProficiency]) copy.englishProficiency = englishMap[copy.englishProficiency];
       return copy;
     });
   }
