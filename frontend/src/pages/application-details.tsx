@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as DropdownsService from '@/services/dropdowns';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,19 @@ export default function ApplicationDetails() {
   });
   const application = useMemo(() => (applications || []).find((a) => a.id === params?.id), [applications, params?.id]);
 
+  const { data: applicationsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+  });
+
+  const caseStatusOptions = useMemo(() => {
+    const dd: any = applicationsDropdowns as any;
+    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
+  }, [applicationsDropdowns]);
+
   const { data: student } = useQuery<Student>({
     queryKey: application?.studentId ? ['/api/students', application.studentId] : ['noop'],
     queryFn: async () => StudentsService.getStudent(application?.studentId),
@@ -67,11 +81,21 @@ export default function ApplicationDetails() {
         intake: application.intake,
         channelPartner: application.channelPartner,
         googleDriveLink: application.googleDriveLink,
-        caseStatus: application.caseStatus || 'Raw',
+        caseStatus: application.caseStatus || '',
       });
       setCurrentStatus(application.appStatus || 'Open');
     }
   }, [application]);
+
+  // When application dropdowns load, pick default for Case Status if none provided
+  useEffect(() => {
+    try {
+      if (!editData.caseStatus && caseStatusOptions && caseStatusOptions.length > 0) {
+        const def = caseStatusOptions.find(o => (o as any).isDefault || (o as any).is_default || false);
+        if (def) setEditData(d => ({ ...(d || {}), caseStatus: (def as any).value }));
+      }
+    } catch {}
+  }, [caseStatusOptions]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -265,22 +289,10 @@ export default function ApplicationDetails() {
                       {isEditing ? (
                         <Select value={editData.caseStatus || 'Raw'} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select case status" />
+                            <SelectValue placeholder="Please select" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Raw">Raw</SelectItem>
-                            <SelectItem value="Not Eligible">Not Eligible</SelectItem>
-                            <SelectItem value="Documents Pending">Documents Pending</SelectItem>
-                            <SelectItem value="Supervisor">Supervisor</SelectItem>
-                            <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
-                            <SelectItem value="Submitted">Submitted</SelectItem>
-                            <SelectItem value="Rejected">Rejected</SelectItem>
-                            <SelectItem value="COL Received">COL Received</SelectItem>
-                            <SelectItem value="UOL Requested">UOL Requested</SelectItem>
-                            <SelectItem value="UOL Received">UOL Received</SelectItem>
-                            <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
-                            <SelectItem value="Deposit">Deposit</SelectItem>
-                            <SelectItem value="Deferred">Deferred</SelectItem>
+                            {caseStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       ) : (

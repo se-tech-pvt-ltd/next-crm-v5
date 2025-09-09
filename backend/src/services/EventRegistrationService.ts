@@ -39,6 +39,14 @@ export class EventRegistrationService {
     const reg = await EventRegistrationModel.findById(id);
     if (!reg) return undefined;
 
+    // disallow if already converted
+    if ((reg as any).isConverted === 1 || (reg as any).isConverted === '1') {
+      const err = new Error('ALREADY_CONVERTED');
+      // @ts-expect-error attach code
+      (err as any).code = 'ALREADY_CONVERTED';
+      throw err;
+    }
+
     const payload: InsertLead = {
       name: reg.name,
       email: reg.email || "",
@@ -46,9 +54,19 @@ export class EventRegistrationService {
       city: reg.city || "",
       source: reg.source || "",
       status: "new",
+      eventRegId: reg.id,
     } as any;
 
     const lead = await LeadService.createLead(payload);
+
+    // mark registration as converted
+    try {
+      await EventRegistrationModel.update(id, ( { isConverted: 1 } ) as any);
+    } catch (e) {
+      // log and continue
+      console.warn('[EventRegistrationService.convertToLead] Failed to mark registration converted', e);
+    }
+
     return lead;
   }
 }

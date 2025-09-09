@@ -37,6 +37,7 @@ export const leads = mysqlTable("leads", {
   lostReason: text("lost_reason"),
   notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
+  eventRegId: varchar("event_reg_id", { length: 255 }),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
@@ -45,6 +46,7 @@ export const leads = mysqlTable("leads", {
 
 export const students = mysqlTable("students", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  studentId: varchar("student_id", { length: 50 }).notNull(),
   leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
@@ -128,6 +130,7 @@ export const eventRegistrations = mysqlTable("event_registrations", {
   city: varchar("city", { length: 255 }),
   source: varchar("source", { length: 255 }),
   eventId: varchar("event_id", { length: 255 }).notNull(),
+  isConverted: int("is_converted").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -144,6 +147,7 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 }).extend({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
+  eventRegId: z.string().optional().nullable(),
   createdBy: z.string().optional().nullable(),
   updatedBy: z.string().optional().nullable(),
 }).partial({ id: true }); // id is optional since it will be generated
@@ -157,6 +161,7 @@ export const insertStudentSchema = createInsertSchema(students).omit({
   scholarship: z.boolean().optional(),
   expectation: z.string().optional(),
   eltTest: z.string().optional(),
+  studentId: z.string().optional(),
 }).partial({ id: true });
 
 export const insertApplicationSchema = createInsertSchema(applications).omit({
@@ -231,6 +236,7 @@ export const dropdowns = mysqlTable("dropdown", {
   fieldName: varchar("field_name", { length: 255 }).notNull(),
   value: varchar("value", { length: 255 }).notNull(),
   sequence: int("sequence"),
+  isDefault: boolean("is_default").notNull().default(false),
 });
 
 export const insertActivitySchema = createInsertSchema(activities).omit({

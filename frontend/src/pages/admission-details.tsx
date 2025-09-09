@@ -1,7 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { Layout } from '@/components/layout';
+import * as DropdownsService from '@/services/dropdowns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +26,30 @@ export default function AdmissionDetails() {
     queryFn: async () => AdmissionsService.getAdmissions() as any,
   });
   const admission = useMemo(() => (admissions || []).find((a) => a.id === params?.id), [admissions, params?.id]);
+
+  const { data: admissionsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions')
+  });
+
+  const visaStatusOptions = useMemo(() => {
+    const dd: any = admissionsDropdowns as any;
+    let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: (o.id || o.key || o.value).toString(), isDefault: Boolean(o.isDefault || o.is_default) }));
+  }, [admissionsDropdowns]);
+
+  useEffect(() => {
+    if (!visaStatusOptions || visaStatusOptions.length === 0) return;
+    try {
+      if (!admission?.visaStatus) {
+        const def = visaStatusOptions.find(o => (o as any).isDefault);
+        if (def) setCurrentVisaStatus((def as any).value.toString());
+        else setCurrentVisaStatus('');
+      }
+    } catch {}
+  }, [visaStatusOptions]);
 
   const { data: student } = useQuery<Student>({
     queryKey: admission?.studentId ? ['/api/students', admission.studentId] : ['noop'],
@@ -192,16 +218,10 @@ export default function AdmissionDetails() {
                       <div className="text-[11px] text-gray-600">Visa Status</div>
                       <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
                         <SelectTrigger className="h-8 text-xs w-40">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Please select" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not-applied">Not Applied</SelectItem>
-                          <SelectItem value="applied">Applied</SelectItem>
-                          <SelectItem value="interview-scheduled">Interview Scheduled</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                          <SelectItem value="on-hold">On Hold</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
+                          {visaStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>

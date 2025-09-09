@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
-import { HelpTooltip } from './help-tooltip';
 import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -71,10 +70,16 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
+  // Student module dropdowns (Status, Expectation, ELT Test, etc.)
+  const { data: studentDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
+  });
+
   const initialFormData = {
     // Student status and expectation
-    status: 'Open',
-    expectation: 'High',
+    status: '',
+    expectation: '',
 
     // From Lead (inherited fields)
     type: '',
@@ -167,11 +172,37 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: lead.createdBy || '',
 
-        // Set default expectation from lead
-        expectation: lead.expectation || 'High',
+        // Set default expectation from lead if present; otherwise keep empty to show placeholder
+        expectation: lead.expectation || prev.expectation || '',
+        counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || '',
       }));
     }
   }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
+
+  // When student dropdowns load, pick defaults where is_default/isDefault === 1. If none, leave value empty so placeholder shows "Please select"
+  useEffect(() => {
+    if (!studentDropdowns) return;
+    const findList = (candidates: string[]) => {
+      for (const c of candidates) {
+        const v = (studentDropdowns as any)[c];
+        if (Array.isArray(v) && v.length > 0) return v as any[];
+      }
+      return [] as any[];
+    };
+    const pickDefaultFrom = (candidates: string[]) => {
+      const list = findList(candidates);
+      if (!list || list.length === 0) return '';
+      const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
+      return def ? (def.key ?? def.id ?? def.value ?? '') : '';
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      status: prev.status || pickDefaultFrom(['Status', 'status']),
+      expectation: prev.expectation || pickDefaultFrom(['Expectation', 'expectation']),
+      eltTest: prev.eltTest || pickDefaultFrom(['ELT Test', 'ELTTest', 'ELT_Test']),
+    }));
+  }, [studentDropdowns]);
 
   const convertToStudentMutation = useMutation({
     mutationFn: async (studentData: any) => StudentsService.convertFromLead(lead?.id, studentData),
@@ -274,7 +305,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
+        className="max-w-6xl max-h-[90vh] overflow-y-auto"
         style={{ touchAction: 'pan-y' }}
       >
         <DialogHeader>
@@ -290,7 +321,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                 </p>
               </div>
             </div>
-            <HelpTooltip content="Complete all necessary fields to convert this lead into a student profile. Required fields are marked with an asterisk." />
           </div>
         </DialogHeader>
 
@@ -405,27 +435,12 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Please select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Open">
-                        <div className="flex items-center space-x-2">
-                          <Badge className="w-2 h-2 rounded-full p-0 bg-green-500"></Badge>
-                          <span>Open</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Closed">
-                        <div className="flex items-center space-x-2">
-                          <Badge className="w-2 h-2 rounded-full p-0 bg-red-500"></Badge>
-                          <span>Closed</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Enrolled">
-                        <div className="flex items-center space-x-2">
-                          <Badge className="w-2 h-2 rounded-full p-0 bg-blue-500"></Badge>
-                          <span>Enrolled</span>
-                        </div>
-                      </SelectItem>
+                      {Array.isArray(studentDropdowns?.['Status']) ? studentDropdowns['Status'].map((opt: any) => (
+                        <SelectItem key={opt.key || opt.id || opt.value} value={opt.key || opt.id || opt.value}>{opt.value}</SelectItem>
+                      )) : null}
                     </SelectContent>
                   </Select>
                 </div>
@@ -437,21 +452,12 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Select expectation" />
-                    </SelectTrigger>
+                    <SelectValue placeholder="Please select" />
+                  </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="High">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="destructive" className="w-2 h-2 rounded-full p-0"></Badge>
-                          <span>High</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Average">
-                        <div className="flex items-center space-x-2">
-                          <Badge className="w-2 h-2 rounded-full p-0 bg-yellow-500"></Badge>
-                          <span>Average</span>
-                        </div>
-                      </SelectItem>
+                      {Array.isArray(studentDropdowns?.['Expectation']) ? studentDropdowns['Expectation'].map((opt: any) => (
+                        <SelectItem key={opt.key || opt.id || opt.value} value={opt.key || opt.id || opt.value}>{opt.value}</SelectItem>
+                      )) : null}
                     </SelectContent>
                   </Select>
                 </div>
@@ -463,7 +469,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Select counsellor" />
+                      <SelectValue placeholder="Please select" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(users) && users.map((user: any) => (
@@ -522,15 +528,12 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Select test" />
+                      <SelectValue placeholder="Please select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="IELTS">📝 IELTS</SelectItem>
-                      <SelectItem value="PTE">📝 PTE</SelectItem>
-                      <SelectItem value="OIDI">📝 OIDI</SelectItem>
-                      <SelectItem value="TOEFL">��� TOEFL</SelectItem>
-                      <SelectItem value="Passwords">🔑 Passwords</SelectItem>
-                      <SelectItem value="No Test">❌ No Test</SelectItem>
+                      {Array.isArray(studentDropdowns?.['ELT Test']) ? studentDropdowns['ELT Test'].map((opt: any) => (
+                        <SelectItem key={opt.key || opt.id || opt.value} value={opt.key || opt.id || opt.value}>{opt.value}</SelectItem>
+                      )) : null}
                     </SelectContent>
                   </Select>
                 </div>

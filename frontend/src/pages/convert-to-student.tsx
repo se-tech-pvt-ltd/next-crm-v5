@@ -93,8 +93,8 @@ export default function ConvertLeadToStudent() {
   }, [dropdownData, normalizeToText]);
 
   const initialFormData = {
-    status: 'Open',
-    expectation: 'High',
+    status: '',
+    expectation: '',
     type: '',
     name: '',
     phone: '',
@@ -120,20 +120,27 @@ export default function ConvertLeadToStudent() {
 
   // Align defaults with fetched student dropdowns
   useEffect(() => {
-    if (studentDropdowns) {
-      const ensureKey = (field: string, current: string) => {
-        const list: any[] = (studentDropdowns as any)[field] || [];
-        const keys = new Set(list.map(o => o.key));
-        if (current && keys.has(current)) return current;
-        return list[0]?.key || '';
-      };
-      setFormData(prev => ({
-        ...prev,
-        status: ensureKey('Status', prev.status),
-        expectation: ensureKey('Expectation', prev.expectation),
-        eltTest: ensureKey('ELT Test', prev.eltTest),
-      }));
-    }
+    if (!studentDropdowns) return;
+    const findList = (candidates: string[]) => {
+      for (const c of candidates) {
+        const v = (studentDropdowns as any)[c];
+        if (Array.isArray(v) && v.length > 0) return v as any[];
+      }
+      return [] as any[];
+    };
+    const pickDefaultFrom = (candidates: string[]) => {
+      const list = findList(candidates);
+      if (!list || list.length === 0) return '';
+      const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
+      return def ? (def.key ?? def.id ?? def.value ?? '') : '';
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      status: prev.status || pickDefaultFrom(['Status', 'status']),
+      expectation: prev.expectation || pickDefaultFrom(['Expectation', 'expectation']),
+      eltTest: prev.eltTest || pickDefaultFrom(['ELT Test', 'ELTTest', 'ELT_Test']),
+    }));
   }, [studentDropdowns]);
 
   useEffect(() => {
@@ -151,6 +158,7 @@ export default function ConvertLeadToStudent() {
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: lead.createdBy || '',
         expectation: lead.expectation || prev.expectation,
+        counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || prev.counsellor || '',
       }));
     }
   }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
@@ -243,7 +251,7 @@ export default function ConvertLeadToStudent() {
                 </Label>
                 <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
                   <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Please select" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(studentDropdowns?.['Status']) && studentDropdowns['Status'].map((opt: any) => (
@@ -277,7 +285,7 @@ export default function ConvertLeadToStudent() {
                 </Label>
                 <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
                   <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Select counsellor" />
+                    <SelectValue placeholder="Please select" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(users) && users.map((user: any) => (
@@ -322,7 +330,7 @@ export default function ConvertLeadToStudent() {
                 </Label>
                 <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
                   <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Select test" />
+                    <SelectValue placeholder="Please select" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(studentDropdowns?.['ELT Test']) && studentDropdowns['ELT Test'].map((opt: any) => (

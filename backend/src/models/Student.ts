@@ -20,10 +20,11 @@ export class StudentModel {
   }
 
   static async create(studentData: InsertStudent): Promise<Student> {
-    const studentId = uuidv4();
+    const newId = uuidv4();
     const insertPayload = {
       ...(studentData as any),
-      id: studentId,
+      id: newId,
+      studentId: (studentData as any).studentId || `STD-${uuidv4().slice(0,8)}`,
       consultancyFree: (studentData as any).consultancyFree ?? false,
       scholarship: (studentData as any).scholarship ?? false,
       expectation: (studentData as any).expectation ?? '',
@@ -32,7 +33,7 @@ export class StudentModel {
     } as any;
     console.log('[StudentModel.create] inserting:', JSON.stringify(insertPayload));
     await db.insert(students).values(insertPayload);
-    const createdStudent = await StudentModel.findById(studentId);
+    const createdStudent = await StudentModel.findById(newId);
     if (!createdStudent) {
       throw new Error(`Failed to create student - record not found after insert with ID: ${studentId}`);
     }

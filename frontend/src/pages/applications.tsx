@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import * as DropdownsService from '@/services/dropdowns';
+import { useMemo } from 'react';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -29,6 +31,19 @@ export default function Applications() {
   const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
     queryKey: ['/api/applications'],
   });
+
+  const { data: applicationsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+  });
+
+  const statusOptions = useMemo(() => {
+    const dd: any = applicationsDropdowns as any;
+    let list: any[] = dd?.Status || dd?.status || dd?.AppStatus || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  }, [applicationsDropdowns]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -172,9 +187,11 @@ export default function Applications() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Open">Open</SelectItem>
-                    <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                    <SelectItem value="Closed">Closed</SelectItem>
+                    {statusOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>

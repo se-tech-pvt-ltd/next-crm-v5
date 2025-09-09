@@ -12,6 +12,8 @@ import { insertStudentSchema, type Lead } from '@/lib/types';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
+import { Checkbox } from '@/components/ui/checkbox';
+import * as DropdownsService from '@/services/dropdowns';
 
 interface AddStudentModalProps {
   open: boolean;
@@ -30,6 +32,15 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
 
   const selectedLead = leadId ? leads?.find(l => l.id === leadId) : null;
 
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/students'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
+  });
+
+  const dropdownsForStudents = () => {
+    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
+  };
+
   const form = useForm({
     resolver: zodResolver(insertStudentSchema),
     defaultValues: {
@@ -47,6 +58,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
       budget: '',
       status: 'active',
       notes: selectedLead?.notes || '',
+      expectation: selectedLead?.expectation || '',
+      counselorId: selectedLead?.counselorId || selectedLead?.counsellor || '',
+      consultancyFree: false,
+      scholarship: false,
     },
   });
 
@@ -166,6 +181,71 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                     <FormControl>
                       <Input placeholder="Enter passport number" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="expectation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expectation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Student expectation" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="counselorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Counsellor</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select counsellor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(dropdownsForStudents() || []).map((opt: any) => (
+                            <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="consultancyFree"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox checked={field.value || false} onCheckedChange={(v) => field.onChange(!!v)} />
+                    </FormControl>
+                    <FormLabel>Consultancy Free</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="scholarship"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox checked={field.value || false} onCheckedChange={(v) => field.onChange(!!v)} />
+                    </FormControl>
+                    <FormLabel>Scholarship</FormLabel>
                     <FormMessage />
                   </FormItem>
                 )}

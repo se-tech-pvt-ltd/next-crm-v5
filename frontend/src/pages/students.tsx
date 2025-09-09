@@ -99,6 +99,12 @@ export default function Students() {
     }
   };
 
+  const getCounsellorName = (id?: string) => {
+    const list: any[] = (studentDropdowns as any)?.Counsellor || (studentDropdowns as any)?.Counselor || (studentDropdowns as any)?.counsellor || [];
+    const match = list.find((o: any) => o.key === id || o.id === id || o.value === id);
+    return match?.value || id || '';
+  };
+
   const formatDate = (date: Date | null) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
@@ -266,9 +272,11 @@ export default function Students() {
               <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">ID</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Target Program</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Expectation</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
@@ -280,18 +288,17 @@ export default function Students() {
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => handleViewProfile(student.id)}
                     >
+                      <TableCell className="font-medium p-2 text-xs">{student.student_id || student.id}</TableCell>
                       <TableCell className="font-medium p-2 text-xs">{student.name}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="space-y-1">
-                          <div className="flex items-center text-xs">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {student.email}
-                          </div>
-                          {student.phone && (
-                            <div className="flex items-center text-xs text-gray-500">
+                          {student.phone ? (
+                            <div className="flex items-center text-xs">
                               <Phone className="w-3 h-3 mr-1" />
                               {student.phone}
                             </div>
+                          ) : (
+                            <div className="text-xs text-gray-500">-</div>
                           )}
                         </div>
                       </TableCell>
@@ -311,6 +318,7 @@ export default function Students() {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell className="p-2 text-xs">{student.expectation || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">
                         {(() => {
                           const label = getStatusLabel(student.status);

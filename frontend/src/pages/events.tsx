@@ -8,20 +8,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/empty-state';
 import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft } from 'lucide-react';
+import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
+import { queryClient } from '@/lib/queryClient';
 
-const STATUS_OPTIONS = [
-  { label: 'Not Sure', value: 'not_sure' },
-  { label: 'Unable to Contact', value: 'unable_to_contact' },
-  { label: 'Will Not Attend', value: 'will_not_attend' },
-  { label: 'Attending', value: 'attending' },
-];
 
 export default function EventsPage() {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -50,10 +47,10 @@ export default function EventsPage() {
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
-    const sequence = STATUS_OPTIONS.map(s => s.value);
+    const sequence = statusOptions.map(s => s.value);
     const currentIndex = sequence.findIndex(v => v === viewReg.status);
 
-    const getLabel = (value: string) => STATUS_OPTIONS.find(o => o.value === value)?.label || value;
+    const getLabel = (value: string) => getStatusLabel(value) || value;
 
     const handleClick = async (target: string) => {
       if (!viewReg) return;
@@ -133,7 +130,28 @@ export default function EventsPage() {
       const sb = typeof b.sequence === 'number' ? b.sequence : Number(b.sequence ?? 0);
       return sa - sb;
     });
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
+  }, [eventsDropdowns]);
+
+  const statusOptions = useMemo(() => {
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
+  }, [eventsDropdowns]);
+
+  const getStatusLabel = useMemo(() => {
+    const dd: any = eventsDropdowns as any;
+    let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
+    if (!Array.isArray(list)) list = [];
+    const map = new Map<string, string>();
+    for (const o of list) {
+      if (o?.id) map.set(String(o.id), o.value);
+      if (o?.key) map.set(String(o.key), o.value);
+      if (o?.value) map.set(String(o.value), o.value);
+    }
+    return (val?: string) => (val ? (map.get(String(val)) || val) : '');
   }, [eventsDropdowns]);
 
   const getSourceLabel = useMemo(() => {
@@ -178,12 +196,39 @@ export default function EventsPage() {
 
   const convertMutation = useMutation({
     mutationFn: (id: string) => RegService.convertToLead(id),
-    onSuccess: () => toast({ title: 'Converted to Lead' }),
+    onSuccess: () => {
+      toast({ title: 'Converted to Lead' });
+      try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+      refetchRegs?.();
+      setShowList(true);
+      setIsViewRegOpen(false);
+      setIsAddRegOpen(false);
+      setIsEditRegOpen(false);
+      setAddLeadModalOpen(false);
+      setViewReg(null);
+    },
     onError: () => toast({ title: 'Conversion failed', variant: 'destructive' }),
   });
 
+  const [addLeadModalOpen, setAddLeadModalOpen] = useState(false);
+  const [leadInitialData, setLeadInitialData] = useState<any | null>(null);
+
+  const openConvertToLeadModal = (reg: any) => {
+    setLeadInitialData({
+      name: reg.name,
+      email: reg.email,
+      phone: reg.number,
+      city: reg.city,
+      source: reg.source,
+      status: 'new',
+      eventRegId: reg.id,
+    });
+    setAddLeadModalOpen(true);
+  };
+
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
+  const [emailError, setEmailError] = useState(false);
 
   const handleCreateEvent = () => {
     if (!newEvent.name || !newEvent.type || !newEvent.date || !newEvent.venue || !newEvent.time) {
@@ -198,7 +243,9 @@ export default function EventsPage() {
       toast({ title: 'Select an Event first', variant: 'destructive' });
       return;
     }
-    setRegForm({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: filterEventId });
+    const defaultStatus = statusOptions.find((o: any) => o.isDefault);
+    const defaultSource = sourceOptions.find((o: any) => o.isDefault);
+    setRegForm({ status: defaultStatus ? defaultStatus.value : '', name: '', number: '', email: '', city: '', source: defaultSource ? String(defaultSource.value) : '', eventId: filterEventId });
     setIsAddRegOpen(true);
   };
 
@@ -240,7 +287,7 @@ export default function EventsPage() {
     XLSX.utils.book_append_sheet(wb, ws1, 'registrations');
 
     // Sheet 2: dropdowns (allowed values)
-    const allowedStatus = STATUS_OPTIONS.map(o => [o.label, o.value]);
+    const allowedStatus = statusOptions.map(o => [o.label, o.value]);
     const allowedSources = (sourceOptions && sourceOptions.length > 0)
       ? sourceOptions.map((o: any) => [o.label, o.value])
       : [['Website','Website']];
@@ -268,9 +315,9 @@ export default function EventsPage() {
   const normalizeStatus = (s: string) => {
     const v = String(s || '').trim();
     if (!v) return '';
-    const byValue = STATUS_OPTIONS.find(o => o.value.toLowerCase() === v.toLowerCase());
+    const byValue = statusOptions.find(o => String(o.value).toLowerCase() === v.toLowerCase());
     if (byValue) return byValue.value;
-    const byLabel = STATUS_OPTIONS.find(o => o.label.toLowerCase() === v.toLowerCase());
+    const byLabel = statusOptions.find(o => String(o.label).toLowerCase() === v.toLowerCase());
     return byLabel ? byLabel.value : '';
   };
 
@@ -312,8 +359,8 @@ export default function EventsPage() {
 
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
-    const allowedStatusLabels = STATUS_OPTIONS.map(o => o.label).join(', ');
-    const allowedStatusValues = STATUS_OPTIONS.map(o => o.value).join(', ');
+    const allowedStatusLabels = statusOptions.map(o => o.label).join(', ');
+    const allowedStatusValues = statusOptions.map(o => o.value).join(', ');
 
     for (let i = 1; i < matrix.length; i++) {
       const rowNo = i + 1;
@@ -367,7 +414,6 @@ export default function EventsPage() {
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
   const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
-  const selectedLabel = filterEventId === 'all' ? 'All Events' : (selectedEvent ? `${selectedEvent.name} (${selectedEvent.date})` : '');
 
   useEffect(() => { setPage(1); }, [filterEventId, registrations]);
 
@@ -390,6 +436,58 @@ export default function EventsPage() {
     const hr12 = ((h % 12) || 12);
     return `${hr12}:${String(mm).padStart(2, '0')} ${ampm}`;
   };
+
+  const getEventDateTime = (e: any): Date | null => {
+    if (!e || !e.date) return null;
+    try {
+      const d = (typeof e.date === 'string' || typeof e.date === 'number') ? new Date(e.date) : new Date(e.date);
+      if (e.time) {
+        const [hh, mm = '00'] = String(e.time).split(':');
+        const h = Number(hh);
+        const m = Number(mm);
+        if (!Number.isNaN(h) && !Number.isNaN(m)) {
+          d.setHours(h, m, 0, 0);
+        }
+      }
+      return d;
+    } catch {
+      return null;
+    }
+  };
+
+  const getCountdownString = (target: Date | null) => {
+    if (!target) return '';
+    const now = new Date();
+    let diff = Math.max(0, target.getTime() - now.getTime());
+    if (diff === 0) return 'Starting now';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    diff -= days * (1000 * 60 * 60 * 24);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    diff -= hours * (1000 * 60 * 60);
+    const minutes = Math.floor(diff / (1000 * 60));
+    diff -= minutes * (1000 * 60);
+    const seconds = Math.floor(diff / 1000);
+    const parts: string[] = [];
+    if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+    if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+    if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+    if (days === 0 && hours === 0 && minutes === 0) parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
+    if (parts.length === 0) return 'Less than a minute';
+    if (parts.length === 1) return `In ${parts[0]}`;
+    const last = parts.pop();
+    return `In ${parts.join(', ')} and ${last}`;
+  };
+
+  const [countdown, setCountdown] = useState('');
+  useEffect(() => {
+    const update = () => {
+      const dt = getEventDateTime(selectedEvent);
+      setCountdown(getCountdownString(dt));
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [selectedEvent]);
 
   const palettes = [
     { gradientFrom: 'from-rose-500/80',    gradientTo: 'to-rose-300/40',    text: 'text-rose-600',    cardBorder: 'border-rose-200',    badgeBg: 'bg-rose-50',    badgeText: 'text-rose-700',    badgeBorder: 'border-rose-200' },
@@ -414,17 +512,29 @@ export default function EventsPage() {
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-sm font-semibold flex items-center gap-2"><Calendar className="w-4 h-4" />Events</h1>
-          <div className="flex items-center gap-2">
-            {showList && filterEventId && filterEventId !== 'all' && (
-              <>
-                <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
-                <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async (e) => { const input = e.target as HTMLInputElement; const f = input.files?.[0]; input.value = ''; if (f) { setImportFileName(f.name); await validateCsvText(f); setImportStep(3); } }} />
-                <Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import CSV/Excel</Button>
-              </>
+          <h1 className="text-sm font-semibold flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Events</span>
+            {showList && selectedEvent && (
+              <span className="ml-2 inline-flex items-center gap-3">
+                <span className="inline-flex items-center bg-primary-50 text-primary-700 rounded-md px-2 py-0.5 text-xs font-semibold border border-primary-200 shadow-sm">
+                  {selectedEvent.name}
+                </span>
+                <span className="text-[11px] text-gray-500">on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}</span>
+              </span>
             )}
+          </h1>
+          <div className="flex items-center gap-2">
             {!showList && (
               <Button size="xs" variant="default" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+            )}
+            {showList && selectedEvent && (
+              <div className="ml-2 inline-flex items-center">
+                <span className="text-[11px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 inline-flex items-center">
+                  <Clock className="w-3.5 h-3.5 text-indigo-600 mr-1" />
+                  <span>{countdown}</span>
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -466,8 +576,21 @@ export default function EventsPage() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">Event Registrations{selectedLabel ? ` - ${selectedLabel}` : ''}</CardTitle>
-                <Button size="xs" variant="outline" onClick={() => setShowList(false)} className="rounded-full px-3">Back to Events</Button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setShowList(false)} className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50">
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <CardTitle className="text-sm flex items-center">Event Registrations</CardTitle>
+                </div>
+                <div className="flex items-center gap-2">
+                  {filterEventId && filterEventId !== 'all' && (
+                    <>
+                      <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
+                      <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async (e) => { const input = e.target as HTMLInputElement; const f = input.files?.[0]; input.value = ''; if (f) { setImportFileName(f.name); await validateCsvText(f); setImportStep(3); } }} />
+                      <Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import</Button>
+                    </>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -483,55 +606,67 @@ export default function EventsPage() {
                 return (
                   <>
                     <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                            <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {pageItems.map((r: any) => (
-                            <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
-                              <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.name}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}</TableCell>
-                              <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
-                              <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                      {((filterEventId && filterEventId !== 'all') && total === 0) ? (
+                        <EmptyState
+                          icon={<UserPlus className="h-10 w-10" />}
+                          title="No registrations found"
+                          description="There are no registrations for this event."
+                        />
+                      ) : (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {pageItems.map((r: any) => (
+                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                                <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.name}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
+                                <TableCell className="p-2 text-xs">{getStatusLabel(r.status) || r.status}</TableCell>
+                                <TableCell className="p-2 text-xs">{((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1') ? 'Yes' : 'No'}</TableCell>
+                                <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
+                                <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 text-xs">
-                      <div>Showing {total === 0 ? 0 : start + 1}-{end} of {total}</div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <span>Rows:</span>
-                          <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
-                            <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="10">10</SelectItem>
-                              <SelectItem value="25">25</SelectItem>
-                              <SelectItem value="50">50</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button size="xs" variant="outline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
-                          <div className="px-2">Page {safePage} of {totalPages}</div>
-                          <Button size="xs" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                    {((filterEventId && filterEventId !== 'all') && total === 0) ? null : (
+                      <div className="flex items-center justify-between mt-3 text-xs">
+                        <div>Showing {total === 0 ? 0 : start + 1}-{end} of {total}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <span>Rows:</span>
+                            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                              <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button size="xs" variant="outline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+                            <div className="px-2">Page {safePage} of {totalPages}</div>
+                            <Button size="xs" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 );
               })()}
@@ -541,49 +676,14 @@ export default function EventsPage() {
 
         {/* Create Registration Modal */}
         <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
             <DialogHeader>
               <DialogTitle>Add Registration</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <Label>Status</Label>
-                <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Name</Label>
-                <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
-              </div>
-              <div>
-                <Label>Number</Label>
-                <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
-              </div>
-              <div>
-                <Label>City</Label>
-                <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} />
-              </div>
-              <div>
-                <Label>Source</Label>
-                <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
-                  <SelectContent>
-                    {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => {
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
                 const missing = !regForm.status || !regForm.name || !regForm.number || !regForm.email || !regForm.city || !regForm.source || !regForm.eventId;
                 if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
                 if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
@@ -595,14 +695,63 @@ export default function EventsPage() {
                   return;
                 }
                 addRegMutation.mutate(regForm);
-              }} disabled={addRegMutation.isPending}>Save</Button>
-            </div>
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex flex-col">
+                  <Label className="mb-1">Status</Label>
+                  <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Source</Label>
+                  <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Please select" /></SelectTrigger>
+                    <SelectContent>
+                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Full Name</Label>
+                  <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">City</Label>
+                  <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} className="h-9" />
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Phone Number</Label>
+                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\\-\\s]*$" value={regForm.number} onChange={(e) => { setRegForm({ ...regForm, number: e.target.value }); }} className="h-9" />
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Email Address</Label>
+                  <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
+                  {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving…' : 'Save Registration'}</Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
         {/* Edit Registration Modal */}
         <Dialog open={isEditRegOpen} onOpenChange={setIsEditRegOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
             <DialogHeader>
               <DialogTitle>Edit Registration</DialogTitle>
             </DialogHeader>
@@ -613,14 +762,29 @@ export default function EventsPage() {
                   <Select value={editingReg.status} onValueChange={(v) => setEditingReg({ ...editingReg, status: v })}>
                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
+                  <Label>Source</Label>
+                  <Select value={editingReg.source || ''} onValueChange={(v) => setEditingReg({ ...editingReg, source: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Please select" /></SelectTrigger>
+                    <SelectContent>
+                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
                   <Label>Name</Label>
                   <Input value={editingReg.name || ''} onChange={(e) => setEditingReg({ ...editingReg, name: e.target.value })} />
                 </div>
+                <div>
+                  <Label>City</Label>
+                  <Input value={editingReg.city || ''} onChange={(e) => setEditingReg({ ...editingReg, city: e.target.value })} />
+                </div>
+
                 <div>
                   <Label>Number</Label>
                   <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
@@ -628,19 +792,6 @@ export default function EventsPage() {
                 <div>
                   <Label>Email</Label>
                   <Input type="email" inputMode="email" autoComplete="email" value={editingReg.email || ''} onChange={(e) => setEditingReg({ ...editingReg, email: e.target.value })} />
-                </div>
-                <div>
-                  <Label>City</Label>
-                  <Input value={editingReg.city || ''} onChange={(e) => setEditingReg({ ...editingReg, city: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Source</Label>
-                  <Select value={editingReg.source || ''} onValueChange={(v) => setEditingReg({ ...editingReg, source: v })}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
-                    <SelectContent>
-                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
             )}
@@ -664,75 +815,88 @@ export default function EventsPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xs">Registration Information</CardTitle>
                     <div className="flex items-center gap-2">
-                      {!isEditingView ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => setIsEditingView(true)}
-                            title="Edit"
-                          >
-                            <Edit />
-                            <span className="hidden lg:inline">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => convertMutation.mutate(viewReg.id)}
-                            disabled={convertMutation.isPending}
-                            title="Convert to Lead"
-                          >
-                            <UserPlus />
-                            <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={async () => {
-                              if (!viewReg) return;
-                              const payload = {
-                                name: viewEditData.name || '',
-                                number: viewEditData.number || '',
-                                email: viewEditData.email || '',
-                                city: viewEditData.city || '',
-                                source: viewEditData.source || '',
-                              } as Partial<RegService.RegistrationPayload>;
-                              try {
-                                // @ts-ignore mutateAsync exists
-                                await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
-                                setIsEditingView(false);
-                                setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
-                              } catch {}
-                            }}
-                            disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
-                            title="Save"
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => { setIsEditingView(false); setViewEditData({
-                              name: viewReg.name,
-                              number: viewReg.number,
-                              email: viewReg.email,
-                              city: viewReg.city,
-                              source: viewReg.source,
-                              eventId: viewReg.eventId,
-                              status: viewReg.status,
-                            }); }}
-                            title="Cancel"
-                          >
-                            Cancel
-                          </Button>
-                        </>
-                      )}
+                      {(() => {
+                        const converted = viewReg && ((viewReg as any).isConverted === 1 || (viewReg as any).isConverted === '1' || (viewReg as any).is_converted === 1 || (viewReg as any).is_converted === '1');
+                        if (converted) {
+                          return (
+                            <span className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-100">Converted</span>
+                          );
+                        }
+
+                        if (!isEditingView) {
+                          return (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                className="rounded-full px-2 [&_svg]:size-3"
+                                onClick={() => setIsEditingView(true)}
+                                title="Edit"
+                              >
+                                <Edit />
+                                <span className="hidden lg:inline">Edit</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                className="rounded-full px-2 [&_svg]:size-3"
+                                onClick={() => openConvertToLeadModal(viewReg)}
+                                disabled={convertMutation.isPending}
+                                title="Convert to Lead"
+                              >
+                                <UserPlus />
+                                <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                              </Button>
+                            </>
+                          );
+                        }
+
+                        return (
+                          <>
+                            <Button
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3"
+                              onClick={async () => {
+                                if (!viewReg) return;
+                                const payload = {
+                                  name: viewEditData.name || '',
+                                  number: viewEditData.number || '',
+                                  email: viewEditData.email || '',
+                                  city: viewEditData.city || '',
+                                  source: viewEditData.source || '',
+                                } as Partial<RegService.RegistrationPayload>;
+                                try {
+                                  // @ts-ignore mutateAsync exists
+                                  await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
+                                  setIsEditingView(false);
+                                  setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
+                                } catch {}
+                              }}
+                              disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
+                              title="Save"
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3"
+                              onClick={() => { setIsEditingView(false); setViewEditData({
+                                name: viewReg.name,
+                                number: viewReg.number,
+                                email: viewReg.email,
+                                city: viewReg.city,
+                                source: viewReg.source,
+                                eventId: viewReg.eventId,
+                                status: viewReg.status,
+                              }); }}
+                              title="Cancel"
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </CardHeader>
@@ -778,7 +942,7 @@ export default function EventsPage() {
                       <Label>Source</Label>
                       {isEditingView ? (
                         <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
-                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Please select" /></SelectTrigger>
                           <SelectContent>
                             {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                           </SelectContent>
@@ -791,6 +955,29 @@ export default function EventsPage() {
                 </CardContent>
               </Card>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Lead Modal (used for converting registrations) */}
+        <Dialog open={addLeadModalOpen} onOpenChange={setAddLeadModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <DialogHeader>
+              <DialogTitle className="sr-only">Add New Lead</DialogTitle>
+            </DialogHeader>
+            <AddLeadForm
+              onCancel={() => setAddLeadModalOpen(false)}
+              onSuccess={() => {
+                setAddLeadModalOpen(false);
+                try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+                refetchRegs?.();
+                setShowList(true);
+                setIsViewRegOpen(false);
+                setIsAddRegOpen(false);
+                setIsEditRegOpen(false);
+                setViewReg(null);
+              }}
+              initialData={leadInitialData || undefined}
+            />
           </DialogContent>
         </Dialog>
 
@@ -866,7 +1053,7 @@ export default function EventsPage() {
                       setImportValidRows([]);
                       setImportFileName('');
                       refetchRegs();
-                    }}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                    }}>{isImporting ? 'Importing��' : `Insert ${importValidRows.length} rows`}</Button>
                   </div>
                 </div>
               )}

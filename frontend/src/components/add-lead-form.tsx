@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
+import * as RegService from '@/services/event-registrations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,9 +60,10 @@ export interface AddLeadFormProps {
   onCancel?: () => void;
   onSuccess?: () => void;
   showBackButton?: boolean;
+  initialData?: Partial<any>;
 }
 
-export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false }: AddLeadFormProps) {
+export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false, initialData }: AddLeadFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -252,12 +255,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
         title: 'Success! 🎉',
         description: 'Lead has been created successfully and added to your pipeline.',
       });
+
+      // If opened from an event registration, mark registration converted
+      try {
+        if (initialData && (initialData as any).eventRegId) {
+          await RegService.updateRegistration((initialData as any).eventRegId, { isConverted: 1, is_converted: 1 });
+          queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] });
+        }
+      } catch (e) {
+        // ignore
+      }
+
       form.reset();
       if (onSuccess) onSuccess();
     },
@@ -269,6 +283,90 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       });
     },
   });
+
+  // Reset form values when initialData provided
+  useEffect(() => {
+    if (initialData) {
+      // helper to map display label to dropdown key
+      const mapLabelToKey = (group: string, label?: string) => {
+        if (!label) return '';
+        const list = (dropdownData && (dropdownData as any)[group]) || [];
+        const found = list.find((opt: any) => {
+          if (!opt) return false;
+          const val = String(opt.value || opt.label || '').toLowerCase();
+          const key = String(opt.key || opt.id || '').toLowerCase();
+          return val === String(label).toLowerCase() || key === String(label).toLowerCase();
+        });
+        return found ? (found.key || found.id || found.value) : label;
+      };
+
+      // If opened from an event registration, prefer the specified defaults
+      const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
+      const defaultStatusLabel = (initialData as any).eventRegId ? 'Raw' : undefined;
+      const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
+
+      const mapLabelToKeyRobust = (group: string, label?: string) => {
+        const mapped = mapLabelToKey(group, label);
+        if (mapped && mapped !== label) return mapped;
+        // try case-insensitive contains match
+        if (!dropdownData) return label || '';
+        const list = (dropdownData as any)[group] || [];
+        const lname = (label || '').toLowerCase();
+        // first exact match on value or key
+        for (const opt of list) {
+          const val = String(opt.value || opt.label || '').toLowerCase();
+          const key = String(opt.key || opt.id || '').toLowerCase();
+          if (val === lname || key === lname) return opt.key || opt.id || opt.value;
+        }
+        // then contains
+        for (const opt of list) {
+          const val = String(opt.value || opt.label || '').toLowerCase();
+          const key = String(opt.key || opt.id || '').toLowerCase();
+          if (val.includes(lname) || key.includes(lname)) return opt.key || opt.id || opt.value;
+        }
+        return label || '';
+      };
+
+      const values: any = {
+        name: initialData.name || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        city: initialData.city || '',
+        source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
+        status: mapLabelToKeyRobust('Status', initialData.status || defaultStatusLabel),
+        counselorId: initialData.counselorId || '',
+        country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
+        program: initialData.program || '',
+        type: mapLabelToKeyRobust('Type', initialData.type || defaultTypeLabel),
+      };
+      form.reset(values);
+    } else if (dropdownData) {
+      // No initial data: apply default selections from dropdownData if present
+      try {
+        const statusList = (dropdownData as any).Status || [];
+        const defaultStatus = statusList.find((s: any) => Boolean(s.isDefault || s.is_default));
+        if (defaultStatus && !form.getValues('status')) {
+          form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
+        }
+      } catch {}
+
+      try {
+        const sourceList = (dropdownData as any).Source || [];
+        const defaultSource = sourceList.find((s: any) => Boolean(s.isDefault || s.is_default));
+        if (defaultSource && !form.getValues('source')) {
+          form.setValue('source', defaultSource.key || defaultSource.id || defaultSource.value);
+        }
+      } catch {}
+
+      try {
+        const typeList = (dropdownData as any).Type || [];
+        const defaultType = typeList.find((s: any) => Boolean(s.isDefault || s.is_default));
+        if (defaultType && !form.getValues('type')) {
+          form.setValue('type', defaultType.key || defaultType.id || defaultType.value);
+        }
+      } catch {}
+    }
+  }, [initialData, dropdownData]);
 
   const onSubmit = (data: AddLeadFormData) => {
     if (emailDuplicateStatus.isDuplicate) {
@@ -289,7 +387,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       return;
     }
 
-    createLeadMutation.mutate(data);
+    const payload: any = { ...data };
+    if (initialData && (initialData as any).eventRegId) {
+      payload.eventRegId = (initialData as any).eventRegId;
+    }
+
+    createLeadMutation.mutate(payload);
   };
 
   return (

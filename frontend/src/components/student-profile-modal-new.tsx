@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
-import { AddApplicationModal } from './add-application-modal';
 import { type Student, type Application } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -108,6 +108,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     if (!option) return -1;
 
     return statusSequence.findIndex((id) => id === (option.key || option.id));
+  };
+
+  const dropdownsForStudent = () => {
+    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
   };
 
   const updateStudentMutation = useMutation({
@@ -313,6 +317,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   <CardContent className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       <div className="space-y-2">
+                        <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
+                        <div className="text-sm text-gray-700">{student?.student_id || student?.id || 'N/A'}</div>
+                      </div>
+
+                      <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center space-x-2">
                           <UserIcon className="w-4 h-4" />
                           <span>Full Name</span>
@@ -347,12 +356,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </Label>
                         <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
+
                       <div className="space-y-2">
-                        <Label htmlFor="nationality" className="flex items-center space-x-2">
-                          <Globe className="w-4 h-4" />
-                          <span>Nationality</span>
+                        <Label htmlFor="passportNumber" className="flex items-center space-x-2">
+                          <UserIcon className="w-4 h-4" />
+                          <span>Passport Number</span>
                         </Label>
-                        <Input id="nationality" value={isEditing ? (editData.nationality || '') : (student?.nationality || '')} onChange={(e) => setEditData({ ...editData, nationality: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                        <Input id="passportNumber" value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')} onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
                     </div>
                   </CardContent>
@@ -368,56 +378,46 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <Input id="targetCountry" value={isEditing ? (editData.targetCountry || '') : (student?.targetCountry || '')} onChange={(e) => setEditData({ ...editData, targetCountry: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="targetProgram" className="flex items-center space-x-2">
-                        <BookOpen className="w-4 h-4" />
-                        <span>Target Program</span>
-                      </Label>
-                      <Input id="targetProgram" value={isEditing ? (editData.targetProgram || '') : (student?.targetProgram || '')} onChange={(e) => setEditData({ ...editData, targetProgram: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="academicBackground" className="flex items-center space-x-2">
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Academic Background</span>
-                      </Label>
-                      <Input id="academicBackground" value={isEditing ? (editData.academicBackground || '') : (student?.academicBackground || '')} onChange={(e) => setEditData({ ...editData, academicBackground: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div className="space-y-2">
                       <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
                         <span>English Proficiency</span>
                       </Label>
                       <Input id="englishProficiency" value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')} onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="budget" className="flex items-center space-x-2">
-                        <Target className="w-4 h-4" />
-                        <span>Budget</span>
-                      </Label>
-                      <Input id="budget" value={isEditing ? (editData.budget || '') : (student?.budget || '')} onChange={(e) => setEditData({ ...editData, budget: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                  </div>
-                </CollapsibleCard>
 
-                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:applications`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-xs flex items-center justify-between w-full"><div className="flex items-center space-x-2"><FileText className="w-4 h-4 text-primary" /><span>Applications ({applications?.length || 0})</span></div><Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)} title="Add Application"><Plus /><span className="hidden lg:inline">Add</span></Button></CardTitle>}>
-                  {applications && applications.length > 0 ? (
-                    <div className="space-y-3">
-                      {applications.map((application) => (
-                        <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-medium">{application.university}</h3>
-                              <p className="text-xs text-gray-600">{application.program}</p>
-                            </div>
-                            <Badge variant={application.appStatus === 'Closed' ? 'default' : 'secondary'}>
-                              {application.appStatus}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Counsellor</span></Label>
+                      {isEditing ? (
+                        <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
+                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                          <SelectContent>
+                            {(dropdownsForStudent() || []).map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="text-sm text-gray-700">{(dropdownsForStudent() || []).find((d: any) => (d.key || d.id) === student?.counselorId)?.value || 'Unassigned'}</div>
+                      )}
                     </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No applications yet</p>
-                  )}
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
+                      <Input value={isEditing ? (editData.expectation || '') : (student?.expectation || '')} onChange={(e) => setEditData({ ...editData, expectation: e.target.value })} disabled={!isEditing} className="h-7 text-[11px]" />
+                    </div>
+
+                    <div className="space-y-2 flex items-center">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox checked={!!(isEditing ? editData.consultancyFree : student?.consultancyFree)} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} disabled={!isEditing} />
+                        <span className="text-sm">Consultancy Free</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Checkbox checked={!!(isEditing ? editData.scholarship : student?.scholarship)} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} disabled={!isEditing} />
+                        <span className="text-sm">Scholarship</span>
+                      </div>
+                    </div>
+
+                  </div>
                 </CollapsibleCard>
 
               </div>
@@ -435,13 +435,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Add Application Modal */}
-      <AddApplicationModal
-        open={isAddApplicationOpen}
-        onOpenChange={setIsAddApplicationOpen}
-        studentId={student.id}
-      />
 
     </>
   );

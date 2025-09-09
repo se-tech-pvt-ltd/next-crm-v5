@@ -15,6 +15,8 @@ import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { useLocation } from 'wouter';
+import * as DropdownsService from '@/services/dropdowns';
+import { useMemo } from 'react';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
@@ -26,6 +28,19 @@ export default function Admissions() {
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
   });
+
+  const { data: admissionsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions')
+  });
+
+  const decisionOptions = useMemo(() => {
+    const dd: any = admissionsDropdowns as any;
+    let list: any[] = dd?.Decision || dd?.decision || dd?.Decisions || dd?.decisionStatus || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  }, [admissionsDropdowns]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -171,10 +186,11 @@ export default function Admissions() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Decisions</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                    <SelectItem value="conditional">Conditional</SelectItem>
+                    {decisionOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>

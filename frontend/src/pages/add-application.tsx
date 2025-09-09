@@ -14,6 +14,8 @@ import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save } from 'lucide-react';
+import * as DropdownsService from '@/services/dropdowns';
+import { useMemo } from 'react';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -33,6 +35,80 @@ export default function AddApplication() {
     enabled: !!presetStudentId,
   });
 
+  const { data: applicationsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+  });
+
+  const makeOptions = (dd: any, candidates: string[]) => {
+    let list: any[] = [];
+    for (const k of candidates) {
+      if (dd && Array.isArray(dd[k])) { list = dd[k]; break; }
+    }
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
+  };
+
+  const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Status', 'status', 'AppStatus', 'Application Status']), [applicationsDropdowns]);
+  const caseStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Case Status', 'caseStatus', 'CaseStatus', 'case_status']), [applicationsDropdowns]);
+  const courseTypeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']), [applicationsDropdowns]);
+  const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns]);
+  const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns]);
+  const intakeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']), [applicationsDropdowns]);
+
+  useEffect(() => {
+    // Pre-select defaults for application form when dropdowns load
+    if (!appStatusOptions || appStatusOptions.length === 0) return;
+    try {
+      const cur = form.getValues('appStatus');
+      if (!cur) {
+        const def = appStatusOptions.find(o => o.isDefault);
+        if (def) form.setValue('appStatus', def.value);
+      }
+    } catch {}
+
+    try {
+      const curCase = form.getValues('caseStatus');
+      if (!curCase) {
+        const defC = caseStatusOptions.find(o => o.isDefault);
+        if (defC) form.setValue('caseStatus', defC.value);
+      }
+    } catch {}
+
+    try {
+      const curCourse = form.getValues('courseType');
+      if (!curCourse) {
+        const defCt = courseTypeOptions.find(o => o.isDefault);
+        if (defCt) form.setValue('courseType', defCt.value);
+      }
+    } catch {}
+
+    try {
+      const curCountry = form.getValues('country');
+      if ((!curCountry || curCountry === '') && countryOptions.length > 0) {
+        const defCountry = countryOptions.find(o => o.isDefault);
+        if (defCountry) form.setValue('country', defCountry.value);
+      }
+    } catch {}
+
+    try {
+      const curChannel = form.getValues('channelPartner');
+      if (!curChannel) {
+        const defCh = channelPartnerOptions.find(o => o.isDefault);
+        if (defCh) form.setValue('channelPartner', defCh.value);
+      }
+    } catch {}
+
+    try {
+      const curIntake = form.getValues('intake');
+      if (!curIntake) {
+        const defI = intakeOptions.find(o => o.isDefault);
+        if (defI) form.setValue('intake', defI.value);
+      }
+    } catch {}
+  }, [appStatusOptions, caseStatusOptions, courseTypeOptions, countryOptions, channelPartnerOptions, intakeOptions]);
+
   const form = useForm<InsertApplication>({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
@@ -40,8 +116,8 @@ export default function AddApplication() {
       university: '',
       program: '',
       courseType: '',
-      appStatus: 'Open',
-      caseStatus: 'Raw',
+      appStatus: '',
+      caseStatus: '',
       country: '',
       channelPartner: '',
       intake: '',
@@ -123,7 +199,7 @@ export default function AddApplication() {
                           ) : (
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                                <SelectValue placeholder="Select student" />
+                              <SelectValue placeholder="Please select" />
                               </SelectTrigger>
                               <SelectContent>
                                 {students?.map((s) => (
@@ -177,13 +253,11 @@ export default function AddApplication() {
                         <Select value={field.value || 'Open'} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Open">Open</SelectItem>
-                            <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                            <SelectItem value="Closed">Closed</SelectItem>
+                            {appStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -200,23 +274,11 @@ export default function AddApplication() {
                         <Select value={field.value || 'Raw'} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select case status" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Raw">Raw</SelectItem>
-                            <SelectItem value="Not Eligible">Not Eligible</SelectItem>
-                            <SelectItem value="Documents Pending">Documents Pending</SelectItem>
-                            <SelectItem value="Supervisor">Supervisor</SelectItem>
-                            <SelectItem value="Ready to Apply">Ready to Apply</SelectItem>
-                            <SelectItem value="Submitted">Submitted</SelectItem>
-                            <SelectItem value="Rejected">Rejected</SelectItem>
-                            <SelectItem value="COL Received">COL Received</SelectItem>
-                            <SelectItem value="UOL Requested">UOL Requested</SelectItem>
-                            <SelectItem value="UOL Received">UOL Received</SelectItem>
-                            <SelectItem value="Interview Outcome Awaiting">Interview Outcome Awaiting</SelectItem>
-                            <SelectItem value="Deposit">Deposit</SelectItem>
-                            <SelectItem value="Deferred">Deferred</SelectItem>
+                            {caseStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -233,18 +295,11 @@ export default function AddApplication() {
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select course type" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="ELT">ELT</SelectItem>
-                            <SelectItem value="Foundation">Foundation</SelectItem>
-                            <SelectItem value="Bachelors">Bachelors</SelectItem>
-                            <SelectItem value="Masters">Masters</SelectItem>
-                            <SelectItem value="Top Up">Top Up</SelectItem>
-                            <SelectItem value="Pre Masters">Pre Masters</SelectItem>
-                            <SelectItem value="MRes/PHD">MRes/PHD</SelectItem>
-                            <SelectItem value="Diploma">Diploma</SelectItem>
+                            {courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -261,20 +316,11 @@ export default function AddApplication() {
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select country" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="UK">UK</SelectItem>
-                            <SelectItem value="USA">USA</SelectItem>
-                            <SelectItem value="Canada">Canada</SelectItem>
-                            <SelectItem value="Australia">Australia</SelectItem>
-                            <SelectItem value="Germany">Germany</SelectItem>
-                            <SelectItem value="France">France</SelectItem>
-                            <SelectItem value="Spain">Spain</SelectItem>
-                            <SelectItem value="Georgia">Georgia</SelectItem>
-                            <SelectItem value="Cyprus">Cyprus</SelectItem>
-                            <SelectItem value="Ireland">Ireland</SelectItem>
+                            {countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -291,18 +337,11 @@ export default function AddApplication() {
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select channel partner" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Scorp">Scorp</SelectItem>
-                            <SelectItem value="UKEC">UKEC</SelectItem>
-                            <SelectItem value="Crizac">Crizac</SelectItem>
-                            <SelectItem value="Direct">Direct</SelectItem>
-                            <SelectItem value="MSM Unify">MSM Unify</SelectItem>
-                            <SelectItem value="Adventus">Adventus</SelectItem>
-                            <SelectItem value="ABN">ABN</SelectItem>
-                            <SelectItem value="NSA">NSA</SelectItem>
+                            {channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -328,17 +367,11 @@ export default function AddApplication() {
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select intake" />
+                              <SelectValue placeholder="Please select" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="October 2025">October 2025</SelectItem>
-                            <SelectItem value="November 2025">November 2025</SelectItem>
-                            <SelectItem value="December 2025">December 2025</SelectItem>
-                            <SelectItem value="January 2026">January 2026</SelectItem>
-                            <SelectItem value="February 2026">February 2026</SelectItem>
-                            <SelectItem value="March 2026">March 2026</SelectItem>
-                            <SelectItem value="April 2026">April 2026</SelectItem>
+                            {intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
