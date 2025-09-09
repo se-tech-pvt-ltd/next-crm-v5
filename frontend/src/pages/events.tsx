@@ -417,8 +417,11 @@ export default function EventsPage() {
             <Calendar className="w-4 h-4" />
             <span>Events</span>
             {showList && selectedEvent && (
-              <span className="text-xs font-normal text-gray-600">
-                • {selectedEvent.name} on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}
+              <span className="ml-2 inline-flex items-center gap-2">
+                <span className="inline-flex items-center bg-primary-50 text-primary-700 rounded-md px-2 py-0.5 text-xs font-semibold border border-primary-200 shadow-sm">
+                  {selectedEvent.name}
+                </span>
+                <span className="text-[11px] text-gray-500">on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}</span>
               </span>
             )}
           </h1>
