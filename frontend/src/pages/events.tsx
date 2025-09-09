@@ -655,49 +655,15 @@ export default function EventsPage() {
         <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
             <DialogHeader>
-              <DialogTitle>Add Registration</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle>Add Registration</DialogTitle>
+                <span className="text-xs text-gray-500">Add attendee to the selected event</span>
+              </div>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <Label>Status</Label>
-                <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Source</Label>
-                <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
-                  <SelectContent>
-                    {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <div>
-                <Label>Name</Label>
-                <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
-              </div>
-              <div>
-                <Label>City</Label>
-                <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} />
-              </div>
-
-              <div>
-                <Label>Number</Label>
-                <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => {
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
                 const missing = !regForm.status || !regForm.name || !regForm.number || !regForm.email || !regForm.city || !regForm.source || !regForm.eventId;
                 if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
                 if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
@@ -709,8 +675,56 @@ export default function EventsPage() {
                   return;
                 }
                 addRegMutation.mutate(regForm);
-              }} disabled={addRegMutation.isPending}>Save</Button>
-            </div>
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex flex-col">
+                  <Label className="mb-1">Status</Label>
+                  <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Source</Label>
+                  <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                    <SelectContent>
+                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Name</Label>
+                  <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">City</Label>
+                  <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} className="h-9" />
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Number</Label>
+                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\\-\\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} className="h-9" />
+                </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Email</Label>
+                  <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} className="h-9" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={addRegMutation.isPending}>{addRegMutation.isPending ? 'Saving…' : 'Save Registration'}</Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
