@@ -414,7 +414,15 @@ export default function EventsPage() {
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-sm font-semibold flex items-center gap-2"><Calendar className="w-4 h-4" />Events</h1>
+          <h1 className="text-sm font-semibold flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Events</span>
+            {showList && selectedEvent && (
+              <span className="text-xs font-normal text-gray-600">
+                • {selectedEvent.name} on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}
+              </span>
+            )}
+          </h1>
           <div className="flex items-center gap-2">
             {showList && filterEventId && filterEventId !== 'all' && (
               <>
@@ -466,7 +474,7 @@ export default function EventsPage() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">Event Registrations{selectedLabel ? ` - ${selectedLabel}` : ''}</CardTitle>
+                <CardTitle className="text-sm">Event Registrations</CardTitle>
                 <Button size="xs" variant="outline" onClick={() => setShowList(false)} className="rounded-full px-3">Back to Events</Button>
               </div>
             </CardHeader>
