@@ -567,6 +567,7 @@ export default function EventsPage() {
                             <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
                             <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                             <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                            <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
                             <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
                             <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                           </TableRow>
@@ -579,6 +580,7 @@ export default function EventsPage() {
                               <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
                               <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
                               <TableCell className="p-2 text-xs">{STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}</TableCell>
+                              <TableCell className="p-2 text-xs">{((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1') ? 'Yes' : 'No'}</TableCell>
                               <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
                               <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
                             </TableRow>
