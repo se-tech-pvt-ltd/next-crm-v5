@@ -196,7 +196,17 @@ export default function EventsPage() {
 
   const convertMutation = useMutation({
     mutationFn: (id: string) => RegService.convertToLead(id),
-    onSuccess: () => toast({ title: 'Converted to Lead' }),
+    onSuccess: () => {
+      toast({ title: 'Converted to Lead' });
+      try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+      refetchRegs?.();
+      setShowList(true);
+      setIsViewRegOpen(false);
+      setIsAddRegOpen(false);
+      setIsEditRegOpen(false);
+      setAddLeadModalOpen(false);
+      setViewReg(null);
+    },
     onError: () => toast({ title: 'Conversion failed', variant: 'destructive' }),
   });
 
