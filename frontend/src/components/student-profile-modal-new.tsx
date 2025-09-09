@@ -111,6 +111,10 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     return statusSequence.findIndex((id) => id === (option.key || option.id));
   };
 
+  const dropdownsForStudent = () => {
+    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
+  };
+
   const updateStudentMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
     onSuccess: () => {
