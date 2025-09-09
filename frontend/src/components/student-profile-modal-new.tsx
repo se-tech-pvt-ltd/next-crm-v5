@@ -357,13 +357,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </Label>
                         <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="nationality" className="flex items-center space-x-2">
-                          <Globe className="w-4 h-4" />
-                          <span>Nationality</span>
-                        </Label>
-                        <Input id="nationality" value={isEditing ? (editData.nationality || '') : (student?.nationality || '')} onChange={(e) => setEditData({ ...editData, nationality: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="passportNumber" className="flex items-center space-x-2">
@@ -386,32 +379,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       <Input id="targetCountry" value={isEditing ? (editData.targetCountry || '') : (student?.targetCountry || '')} onChange={(e) => setEditData({ ...editData, targetCountry: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="targetProgram" className="flex items-center space-x-2">
-                        <BookOpen className="w-4 h-4" />
-                        <span>Target Program</span>
-                      </Label>
-                      <Input id="targetProgram" value={isEditing ? (editData.targetProgram || '') : (student?.targetProgram || '')} onChange={(e) => setEditData({ ...editData, targetProgram: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="academicBackground" className="flex items-center space-x-2">
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Academic Background</span>
-                      </Label>
-                      <Input id="academicBackground" value={isEditing ? (editData.academicBackground || '') : (student?.academicBackground || '')} onChange={(e) => setEditData({ ...editData, academicBackground: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div className="space-y-2">
                       <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
                         <span>English Proficiency</span>
                       </Label>
                       <Input id="englishProficiency" value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')} onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="budget" className="flex items-center space-x-2">
-                        <Target className="w-4 h-4" />
-                        <span>Budget</span>
-                      </Label>
-                      <Input id="budget" value={isEditing ? (editData.budget || '') : (student?.budget || '')} onChange={(e) => setEditData({ ...editData, budget: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
 
                     <div className="space-y-2">
