@@ -161,6 +161,7 @@ export const insertStudentSchema = createInsertSchema(students).omit({
   scholarship: z.boolean().optional(),
   expectation: z.string().optional(),
   eltTest: z.string().optional(),
+  studentId: z.string().optional(),
 }).partial({ id: true });
 
 export const insertApplicationSchema = createInsertSchema(applications).omit({
