@@ -63,8 +63,14 @@ export class StudentService {
     } else {
       rows = await StudentModel.findAll();
     }
-    const enriched = await this.enrichExpectations(rows);
-    return enriched.map(this.mapStudentForApi);
+    const enriched = await this.enrichDropdownFields(rows);
+    // also attach counselor display name from dropdowns
+    const dropdowns = await DropdownModel.findByModule('students');
+    const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
+    const counselorMap: Record<string,string> = {};
+    counselorList.forEach((c: any) => { if (c.id) counselorMap[c.id]=c.value; if (c.key) counselorMap[c.key]=c.value; });
+    const withCounselorName = enriched.map((r: any) => ({ ...r, counselor: counselorMap[r.counselorId] || r.counselor || null }));
+    return withCounselorName.map(this.mapStudentForApi);
   }
 
   static async getStudent(id: string, userId?: string, userRole?: string): Promise<Student | undefined> {
@@ -76,7 +82,13 @@ export class StudentService {
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
       return undefined;
     }
-    const [enriched] = await this.enrichExpectations([student]);
+    const [enriched] = await this.enrichDropdownFields([student]);
+    // counselor name
+    const dropdowns = await DropdownModel.findByModule('students');
+    const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
+    const counselorMap: Record<string,string> = {};
+    counselorList.forEach((c: any) => { if (c.id) counselorMap[c.id]=c.value; if (c.key) counselorMap[c.key]=c.value; });
+    enriched.counselor = counselorMap[enriched.counselorId] || enriched.counselor || null;
     return this.mapStudentForApi(enriched) as any;
   }
 
@@ -86,7 +98,12 @@ export class StudentService {
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
       return undefined;
     }
-    const [enriched] = await this.enrichExpectations([student]);
+    const [enriched] = await this.enrichDropdownFields([student]);
+    const dropdowns = await DropdownModel.findByModule('students');
+    const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
+    const counselorMap: Record<string,string> = {};
+    counselorList.forEach((c: any) => { if (c.id) counselorMap[c.id]=c.value; if (c.key) counselorMap[c.key]=c.value; });
+    enriched.counselor = counselorMap[enriched.counselorId] || enriched.counselor || null;
     return this.mapStudentForApi(enriched) as any;
   }
 
