@@ -146,6 +146,7 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 }).extend({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
+  eventRegId: z.string().optional().nullable(),
   createdBy: z.string().optional().nullable(),
   updatedBy: z.string().optional().nullable(),
 }).partial({ id: true }); // id is optional since it will be generated
