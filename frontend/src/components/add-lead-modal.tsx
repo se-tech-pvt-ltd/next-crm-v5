@@ -37,9 +37,10 @@ import {
 interface AddLeadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: Partial<any>;
 }
 
-export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
+export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
@@ -99,14 +100,44 @@ export function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) {
     },
   });
 
+  // Reset form when initialData changes or when opened
+  useEffect(() => {
+    if (open && initialData) {
+      const values: any = {
+        name: initialData.name || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        city: initialData.city || undefined,
+        source: initialData.source || '',
+        status: initialData.status || 'new',
+        counselorId: initialData.counselorId || '',
+        country: initialData.country || '',
+        program: initialData.program || '',
+      };
+      form.reset(values);
+    }
+  }, [open, initialData]);
+
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => LeadsService.createLead(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
         title: "Success! 🎉",
         description: "Lead has been created successfully and added to your pipeline.",
       });
+
+      // If we were given an event registration id, mark registration as converted
+      try {
+        if (initialData && (initialData as any).eventRegId) {
+          // @ts-ignore
+          await (await import('@/services/event-registrations')).updateRegistration((initialData as any).eventRegId, { isConverted: 1, is_converted: 1 });
+          queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] });
+        }
+      } catch (e) {
+        // ignore
+      }
+
       form.reset();
       onOpenChange(false);
     },
