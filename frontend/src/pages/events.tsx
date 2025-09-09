@@ -769,7 +769,7 @@ export default function EventsPage() {
                 <div>
                   <Label>Source</Label>
                   <Select value={editingReg.source || ''} onValueChange={(v) => setEditingReg({ ...editingReg, source: v })}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Please select" /></SelectTrigger>
                     <SelectContent>
                       {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                     </SelectContent>
