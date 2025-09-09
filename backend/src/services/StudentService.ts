@@ -57,8 +57,8 @@ export class StudentService {
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
       return undefined;
     }
-
-    return this.mapStudentForApi(student) as any;
+    const [enriched] = await this.enrichExpectations([student]);
+    return this.mapStudentForApi(enriched) as any;
   }
 
   static async getStudentByLeadId(leadId: string, userId?: string, userRole?: string): Promise<Student | undefined> {
@@ -67,7 +67,8 @@ export class StudentService {
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
       return undefined;
     }
-    return this.mapStudentForApi(student) as any;
+    const [enriched] = await this.enrichExpectations([student]);
+    return this.mapStudentForApi(enriched) as any;
   }
 
   static async createStudent(studentData: InsertStudent): Promise<Student> {
