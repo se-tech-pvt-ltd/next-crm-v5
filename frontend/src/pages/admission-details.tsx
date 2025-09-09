@@ -27,6 +27,19 @@ export default function AdmissionDetails() {
   });
   const admission = useMemo(() => (admissions || []).find((a) => a.id === params?.id), [admissions, params?.id]);
 
+  const { data: admissionsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions')
+  });
+
+  const visaStatusOptions = useMemo(() => {
+    const dd: any = admissionsDropdowns as any;
+    let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: (o.id || o.key || o.value).toString() }));
+  }, [admissionsDropdowns]);
+
   const { data: student } = useQuery<Student>({
     queryKey: admission?.studentId ? ['/api/students', admission.studentId] : ['noop'],
     queryFn: async () => StudentsService.getStudent(admission?.studentId),
