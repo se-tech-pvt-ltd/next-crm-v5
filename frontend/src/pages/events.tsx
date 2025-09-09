@@ -298,12 +298,7 @@ export default function EventsPage() {
                       <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Select value={r.status} onValueChange={(v) => updateRegMutation.mutate({ id: r.id, data: { status: v } })}>
-                          <SelectTrigger className="h-8 text-xs w-44" onClick={(e) => e.stopPropagation()}><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        {STATUS_OPTIONS.find(opt => opt.value === r.status)?.label || r.status}
                       </TableCell>
                     </TableRow>
                   ))}
