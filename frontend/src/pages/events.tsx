@@ -439,9 +439,12 @@ export default function EventsPage() {
                 if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
                 if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
                 const existsEmail = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
-                if (existsEmail) { toast({ title: 'Duplicate email for this event', variant: 'destructive' }); return; }
                 const existsNumber = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.number && regForm.number && String(r.number) === String(regForm.number));
-                if (existsNumber) { toast({ title: 'Duplicate number for this event', variant: 'destructive' }); return; }
+                if (existsEmail || existsNumber) {
+                  const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
+                  toast({ title: msg, variant: 'destructive' });
+                  return;
+                }
                 addRegMutation.mutate(regForm);
               }} disabled={addRegMutation.isPending}>Save</Button>
             </div>
