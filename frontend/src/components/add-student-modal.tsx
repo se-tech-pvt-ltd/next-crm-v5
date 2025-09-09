@@ -177,6 +177,71 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
 
               <FormField
                 control={form.control}
+                name="expectation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expectation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Student expectation" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="counselorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Counsellor</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select counsellor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(dropdownsForStudents() || []).map((opt: any) => (
+                            <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="consultancyFree"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox checked={field.value || false} onCheckedChange={(v) => field.onChange(!!v)} />
+                    </FormControl>
+                    <FormLabel>Consultancy Free</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="scholarship"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox checked={field.value || false} onCheckedChange={(v) => field.onChange(!!v)} />
+                    </FormControl>
+                    <FormLabel>Scholarship</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="targetCountry"
                 render={({ field }) => (
                   <FormItem>
