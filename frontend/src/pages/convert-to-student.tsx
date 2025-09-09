@@ -121,17 +121,17 @@ export default function ConvertLeadToStudent() {
   // Align defaults with fetched student dropdowns
   useEffect(() => {
     if (studentDropdowns) {
-      const ensureKey = (field: string, current: string) => {
+      const pickDefault = (field: string) => {
         const list: any[] = (studentDropdowns as any)[field] || [];
-        const keys = new Set(list.map(o => o.key));
-        if (current && keys.has(current)) return current;
-        return list[0]?.key || '';
+        if (!Array.isArray(list) || list.length === 0) return '';
+        const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
+        return def ? (def.key ?? def.id ?? def.value ?? '') : '';
       };
       setFormData(prev => ({
         ...prev,
-        status: ensureKey('Status', prev.status),
-        expectation: ensureKey('Expectation', prev.expectation),
-        eltTest: ensureKey('ELT Test', prev.eltTest),
+        status: prev.status || pickDefault('Status'),
+        expectation: prev.expectation || pickDefault('Expectation'),
+        eltTest: prev.eltTest || pickDefault('ELT Test'),
       }));
     }
   }, [studentDropdowns]);
