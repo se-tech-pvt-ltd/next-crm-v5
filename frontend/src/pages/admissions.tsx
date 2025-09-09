@@ -29,6 +29,19 @@ export default function Admissions() {
     queryKey: ['/api/admissions'],
   });
 
+  const { data: admissionsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions')
+  });
+
+  const decisionOptions = useMemo(() => {
+    const dd: any = admissionsDropdowns as any;
+    let list: any[] = dd?.Decision || dd?.decision || dd?.Decisions || dd?.decisionStatus || [];
+    if (!Array.isArray(list)) list = [];
+    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+  }, [admissionsDropdowns]);
+
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
   });
