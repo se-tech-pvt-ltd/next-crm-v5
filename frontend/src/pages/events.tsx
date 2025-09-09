@@ -48,7 +48,7 @@ export default function EventsPage() {
     const sequence = statusOptions.map(s => s.value);
     const currentIndex = sequence.findIndex(v => v === viewReg.status);
 
-    const getLabel = (value: string) => STATUS_OPTIONS.find(o => o.value === value)?.label || value;
+    const getLabel = (value: string) => getStatusLabel(value) || value;
 
     const handleClick = async (target: string) => {
       if (!viewReg) return;
