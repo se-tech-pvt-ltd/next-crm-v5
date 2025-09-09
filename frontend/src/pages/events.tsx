@@ -473,21 +473,21 @@ export default function EventsPage() {
                 <span className="inline-flex items-center bg-primary-50 text-primary-700 rounded-md px-2 py-0.5 text-xs font-semibold border border-primary-200 shadow-sm">
                   {selectedEvent.name}
                 </span>
-                <div className="flex flex-col">
-                  <span className="text-[11px] text-gray-500">on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}</span>
-                  {countdown && (
-                    <span className="mt-1 inline-flex items-center gap-2 text-[11px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-                      <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>{countdown}</span>
-                    </span>
-                  )}
-                </div>
+                <span className="text-[11px] text-gray-500">on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}</span>
               </span>
             )}
           </h1>
           <div className="flex items-center gap-2">
             {!showList && (
               <Button size="xs" variant="default" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+            )}
+            {showList && selectedEvent && (
+              <div className="ml-2 inline-flex items-center">
+                <span className="text-[11px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 inline-flex items-center">
+                  <Clock className="w-3.5 h-3.5 text-indigo-600 mr-1" />
+                  <span>{countdown}</span>
+                </span>
+              </div>
             )}
           </div>
         </div>
