@@ -182,19 +182,25 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   // When student dropdowns load, pick defaults where is_default/isDefault === 1. If none, leave value empty so placeholder shows "Please select"
   useEffect(() => {
     if (!studentDropdowns) return;
-    const pickDefault = (listName: string) => {
-      const list: any[] = studentDropdowns[listName] || [];
-      if (!Array.isArray(list) || list.length === 0) return '';
+    const findList = (candidates: string[]) => {
+      for (const c of candidates) {
+        const v = (studentDropdowns as any)[c];
+        if (Array.isArray(v) && v.length > 0) return v as any[];
+      }
+      return [] as any[];
+    };
+    const pickDefaultFrom = (candidates: string[]) => {
+      const list = findList(candidates);
+      if (!list || list.length === 0) return '';
       const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
-      if (def) return def.key ?? def.id ?? def.value ?? '';
-      return '';
+      return def ? (def.key ?? def.id ?? def.value ?? '') : '';
     };
 
     setFormData(prev => ({
       ...prev,
-      status: prev.status || pickDefault('Status'),
-      expectation: prev.expectation || pickDefault('Expectation'),
-      eltTest: prev.eltTest || pickDefault('ELT Test'),
+      status: prev.status || pickDefaultFrom(['Status', 'status']),
+      expectation: prev.expectation || pickDefaultFrom(['Expectation', 'expectation']),
+      eltTest: prev.eltTest || pickDefaultFrom(['ELT Test', 'ELTTest', 'ELT_Test']),
     }));
   }, [studentDropdowns]);
 
