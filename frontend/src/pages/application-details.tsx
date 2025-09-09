@@ -81,11 +81,21 @@ export default function ApplicationDetails() {
         intake: application.intake,
         channelPartner: application.channelPartner,
         googleDriveLink: application.googleDriveLink,
-        caseStatus: application.caseStatus || 'Raw',
+        caseStatus: application.caseStatus || '',
       });
       setCurrentStatus(application.appStatus || 'Open');
     }
   }, [application]);
+
+  // When application dropdowns load, pick default for Case Status if none provided
+  useEffect(() => {
+    try {
+      if (!editData.caseStatus && caseStatusOptions && caseStatusOptions.length > 0) {
+        const def = caseStatusOptions.find(o => (o as any).isDefault || (o as any).is_default || false);
+        if (def) setEditData(d => ({ ...(d || {}), caseStatus: (def as any).value }));
+      }
+    } catch {}
+  }, [caseStatusOptions]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
