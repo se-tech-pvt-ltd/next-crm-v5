@@ -35,7 +35,7 @@ export default function EventsPage() {
   const [viewEditData, setViewEditData] = useState<Partial<RegService.RegistrationPayload>>({});
   const [showList, setShowList] = useState(false);
 
-  const isValidEmail = (s?: string) => !s || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  const isValidEmail = (s?: string) => !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s || '');
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
@@ -147,7 +147,10 @@ export default function EventsPage() {
   const addRegMutation = useMutation({
     mutationFn: (data: RegService.RegistrationPayload) => RegService.createRegistration(data),
     onSuccess: () => { toast({ title: 'Registration added' }); refetchRegs(); setIsAddRegOpen(false); },
-    onError: () => toast({ title: 'Failed to add registration', variant: 'destructive' }),
+    onError: (e: any) => {
+      const msg = e?.response?.data?.message || e?.message || 'Failed to add registration';
+      toast({ title: msg, variant: 'destructive' });
+    },
   });
 
   const updateRegMutation = useMutation({
@@ -431,7 +434,16 @@ export default function EventsPage() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => addRegMutation.mutate(regForm)} disabled={addRegMutation.isPending || !regForm.name || (regForm.email ? !isValidEmail(regForm.email) : false)}>Save</Button>
+              <Button onClick={() => {
+                const missing = !regForm.status || !regForm.name || !regForm.number || !regForm.email || !regForm.city || !regForm.source || !regForm.eventId;
+                if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
+                if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
+                const existsEmail = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
+                if (existsEmail) { toast({ title: 'Duplicate email for this event', variant: 'destructive' }); return; }
+                const existsNumber = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.number && regForm.number && String(r.number) === String(regForm.number));
+                if (existsNumber) { toast({ title: 'Duplicate number for this event', variant: 'destructive' }); return; }
+                addRegMutation.mutate(regForm);
+              }} disabled={addRegMutation.isPending}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
