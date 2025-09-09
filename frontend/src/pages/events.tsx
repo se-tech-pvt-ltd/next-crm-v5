@@ -668,22 +668,6 @@ export default function EventsPage() {
                 </Select>
               </div>
               <div>
-                <Label>Name</Label>
-                <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
-              </div>
-              <div>
-                <Label>Number</Label>
-                <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
-              </div>
-              <div>
-                <Label>City</Label>
-                <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} />
-              </div>
-              <div>
                 <Label>Source</Label>
                 <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Source" /></SelectTrigger>
@@ -691,6 +675,24 @@ export default function EventsPage() {
                     {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div>
+                <Label>Name</Label>
+                <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
+              </div>
+              <div>
+                <Label>City</Label>
+                <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} />
+              </div>
+
+              <div>
+                <Label>Number</Label>
+                <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={regForm.number} onChange={(e) => setRegForm({ ...regForm, number: e.target.value })} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
