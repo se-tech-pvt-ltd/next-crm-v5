@@ -740,75 +740,88 @@ export default function EventsPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xs">Registration Information</CardTitle>
                     <div className="flex items-center gap-2">
-                      {!isEditingView ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => setIsEditingView(true)}
-                            title="Edit"
-                          >
-                            <Edit />
-                            <span className="hidden lg:inline">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => convertMutation.mutate(viewReg.id)}
-                            disabled={convertMutation.isPending}
-                            title="Convert to Lead"
-                          >
-                            <UserPlus />
-                            <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={async () => {
-                              if (!viewReg) return;
-                              const payload = {
-                                name: viewEditData.name || '',
-                                number: viewEditData.number || '',
-                                email: viewEditData.email || '',
-                                city: viewEditData.city || '',
-                                source: viewEditData.source || '',
-                              } as Partial<RegService.RegistrationPayload>;
-                              try {
-                                // @ts-ignore mutateAsync exists
-                                await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
-                                setIsEditingView(false);
-                                setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
-                              } catch {}
-                            }}
-                            disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
-                            title="Save"
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-full px-2 [&_svg]:size-3"
-                            onClick={() => { setIsEditingView(false); setViewEditData({
-                              name: viewReg.name,
-                              number: viewReg.number,
-                              email: viewReg.email,
-                              city: viewReg.city,
-                              source: viewReg.source,
-                              eventId: viewReg.eventId,
-                              status: viewReg.status,
-                            }); }}
-                            title="Cancel"
-                          >
-                            Cancel
-                          </Button>
-                        </>
-                      )}
+                      {(() => {
+                        const converted = viewReg && ((viewReg as any).isConverted === 1 || (viewReg as any).isConverted === '1');
+                        if (converted) {
+                          return (
+                            <span className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-100">Converted</span>
+                          );
+                        }
+
+                        if (!isEditingView) {
+                          return (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                className="rounded-full px-2 [&_svg]:size-3"
+                                onClick={() => setIsEditingView(true)}
+                                title="Edit"
+                              >
+                                <Edit />
+                                <span className="hidden lg:inline">Edit</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                className="rounded-full px-2 [&_svg]:size-3"
+                                onClick={() => convertMutation.mutate(viewReg.id)}
+                                disabled={convertMutation.isPending}
+                                title="Convert to Lead"
+                              >
+                                <UserPlus />
+                                <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
+                              </Button>
+                            </>
+                          );
+                        }
+
+                        return (
+                          <>
+                            <Button
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3"
+                              onClick={async () => {
+                                if (!viewReg) return;
+                                const payload = {
+                                  name: viewEditData.name || '',
+                                  number: viewEditData.number || '',
+                                  email: viewEditData.email || '',
+                                  city: viewEditData.city || '',
+                                  source: viewEditData.source || '',
+                                } as Partial<RegService.RegistrationPayload>;
+                                try {
+                                  // @ts-ignore mutateAsync exists
+                                  await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
+                                  setIsEditingView(false);
+                                  setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
+                                } catch {}
+                              }}
+                              disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
+                              title="Save"
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              className="rounded-full px-2 [&_svg]:size-3"
+                              onClick={() => { setIsEditingView(false); setViewEditData({
+                                name: viewReg.name,
+                                number: viewReg.number,
+                                email: viewReg.email,
+                                city: viewReg.city,
+                                source: viewReg.source,
+                                eventId: viewReg.eventId,
+                                status: viewReg.status,
+                              }); }}
+                              title="Cancel"
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </CardHeader>
