@@ -305,17 +305,39 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       const defaultStatusLabel = (initialData as any).eventRegId ? 'Raw' : undefined;
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
 
+      const mapLabelToKeyRobust = (group: string, label?: string) => {
+        const mapped = mapLabelToKey(group, label);
+        if (mapped && mapped !== label) return mapped;
+        // try case-insensitive contains match
+        if (!dropdownData) return label || '';
+        const list = (dropdownData as any)[group] || [];
+        const lname = (label || '').toLowerCase();
+        // first exact match on value or key
+        for (const opt of list) {
+          const val = String(opt.value || opt.label || '').toLowerCase();
+          const key = String(opt.key || opt.id || '').toLowerCase();
+          if (val === lname || key === lname) return opt.key || opt.id || opt.value;
+        }
+        // then contains
+        for (const opt of list) {
+          const val = String(opt.value || opt.label || '').toLowerCase();
+          const key = String(opt.key || opt.id || '').toLowerCase();
+          if (val.includes(lname) || key.includes(lname)) return opt.key || opt.id || opt.value;
+        }
+        return label || '';
+      };
+
       const values: any = {
         name: initialData.name || '',
         email: initialData.email || '',
         phone: initialData.phone || '',
         city: initialData.city || '',
-        source: mapLabelToKey('Source', initialData.source || defaultSourceLabel),
-        status: mapLabelToKey('Status', initialData.status || defaultStatusLabel),
+        source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
+        status: mapLabelToKeyRobust('Status', initialData.status || defaultStatusLabel),
         counselorId: initialData.counselorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
-        type: mapLabelToKey('Type', initialData.type || defaultTypeLabel),
+        type: mapLabelToKeyRobust('Type', initialData.type || defaultTypeLabel),
       };
       form.reset(values);
     }
