@@ -99,6 +99,12 @@ export default function Students() {
     }
   };
 
+  const getCounsellorName = (id?: string) => {
+    const list: any[] = (studentDropdowns as any)?.Counsellor || (studentDropdowns as any)?.Counselor || (studentDropdowns as any)?.counsellor || [];
+    const match = list.find((o: any) => o.key === id || o.id === id || o.value === id);
+    return match?.value || id || '';
+  };
+
   const formatDate = (date: Date | null) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
