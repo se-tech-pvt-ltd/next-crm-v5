@@ -45,7 +45,7 @@ export default function EventsPage() {
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
-    const sequence = STATUS_OPTIONS.map(s => s.value);
+    const sequence = statusOptions.map(s => s.value);
     const currentIndex = sequence.findIndex(v => v === viewReg.status);
 
     const getLabel = (value: string) => STATUS_OPTIONS.find(o => o.value === value)?.label || value;
