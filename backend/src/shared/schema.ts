@@ -45,7 +45,7 @@ export const leads = mysqlTable("leads", {
 });
 
 export const students = mysqlTable("students", {
-  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  id: varchar("student_id", { length: 255 }).primaryKey().notNull(),
   leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
