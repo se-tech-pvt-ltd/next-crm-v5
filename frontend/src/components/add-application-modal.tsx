@@ -16,6 +16,7 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 
 interface AddApplicationModalProps {
@@ -28,6 +29,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -116,9 +118,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   {studentId ? (
                     <FormItem>
                       <FormLabel>Student *</FormLabel>
-                      <FormControl>
-                        <Input value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'} disabled />
-                      </FormControl>
+                      <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}>
+                        {presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'View student'}
+                      </Button>
                       <FormMessage />
                     </FormItem>
                   ) : (
