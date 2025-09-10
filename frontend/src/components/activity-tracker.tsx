@@ -51,10 +51,26 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryKey: ['/api/users'],
   });
 
-  // Fetch Leads dropdowns (for mapping status IDs/keys to display names)
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
+  // Fetch module-specific dropdowns (for mapping status IDs/keys to display names)
+  const moduleNameForEntity = (et: string) => {
+    const t = (et || '').toLowerCase();
+    switch (t) {
+      case 'lead':
+        return 'Leads';
+      case 'student':
+        return 'students';
+      case 'application':
+        return 'applications';
+      case 'admission':
+        return 'admissions';
+      default:
+        return t.endsWith('s') ? t : `${t}s`;
+    }
+  };
+  const moduleName = moduleNameForEntity(entityType);
+  const { data: moduleDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module', moduleName],
+    queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
   });
 
   // Create a lookup function for user profile images
@@ -137,9 +153,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   // Map status id/key/value to display label from dropdowns
   const getStatusLabel = (idOrKey?: string) => {
-    if (!idOrKey || !leadsDropdowns?.Status) return idOrKey || '';
-    const status = leadsDropdowns.Status.find((opt: any) =>
-      opt.id === idOrKey || opt.key === idOrKey || opt.value?.toLowerCase() === idOrKey.toLowerCase()
+    if (!idOrKey || !moduleDropdowns?.Status) return idOrKey || '';
+    const status = moduleDropdowns.Status.find((opt: any) =>
+      opt.id === idOrKey || opt.key === idOrKey || (typeof opt.value === 'string' && typeof idOrKey === 'string' && opt.value.toLowerCase() === idOrKey.toLowerCase())
     );
     return status?.value || idOrKey;
   };
@@ -328,7 +344,11 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                       </div>
                       {(activity.description || (activity as any).title) && (
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
-                          {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || (activity as any).title) : (activity.description || (activity as any).title)}
+                          {moduleDropdowns?.Status
+                            ? (activity.fieldName?.toLowerCase() === 'status' && ((activity.oldValue ?? '') !== '' || (activity.newValue ?? '') !== '')
+                                ? `Status changed from "${getStatusLabel(activity.oldValue || '')}" to "${getStatusLabel(activity.newValue || '')}"`
+                                : mapStatusIdsInText(activity.description || (activity as any).title))
+                            : (activity.description || (activity as any).title)}
                         </div>
                       )}
                     </div>
