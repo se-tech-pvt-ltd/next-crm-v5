@@ -339,8 +339,11 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                       <div>
                         <FormLabel>Full Tuition Fee</FormLabel>
                         <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
                           value={form.watch('fullTuitionFee') || ''}
-                          onChange={(e) => form.setValue('fullTuitionFee', e.target.value)}
+                          onChange={(e) => form.setValue('fullTuitionFee', String(e.target.value).replace(/[^0-9.]/g, ''))}
                           placeholder="e.g., 20000"
                         />
                       </div>
@@ -348,8 +351,11 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                       <div>
                         <FormLabel>Scholarship</FormLabel>
                         <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
                           value={form.watch('scholarshipAmount') || ''}
-                          onChange={(e) => form.setValue('scholarshipAmount', e.target.value)}
+                          onChange={(e) => form.setValue('scholarshipAmount', String(e.target.value).replace(/[^0-9.]/g, ''))}
                           placeholder="e.g., 5000"
                         />
                       </div>
@@ -361,7 +367,14 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
                       <div>
                         <FormLabel>Initial Deposit</FormLabel>
-                        <Input value={form.watch('initialDeposit') || ''} onChange={(e) => form.setValue('initialDeposit', e.target.value)} placeholder="e.g., 500" />
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          value={form.watch('initialDeposit') || ''}
+                          onChange={(e) => form.setValue('initialDeposit', String(e.target.value).replace(/[^0-9.]/g, ''))}
+                          placeholder="e.g., 500"
+                        />
                       </div>
 
                       <div>
