@@ -387,6 +387,14 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
             </div>
           </div>
         </div>
+
+        <AddAdmissionModal
+          open={isAddAdmissionOpen}
+          onOpenChange={setIsAddAdmissionOpen}
+          applicationId={currentApp?.id as any}
+          studentId={currentApp?.studentId}
+        />
+
       </DialogContent>
     </Dialog>
   );
