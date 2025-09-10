@@ -205,46 +205,46 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                       <div>
                         <FormLabel>Application</FormLabel>
                         <div className="mt-1">
-                          {(applicationId || form.getValues('applicationId')) ? (
-                            (() => {
-                              const aid = String(applicationId || form.getValues('applicationId'));
-                              const selectedApp = applications?.find((a) => String(a.id) === aid);
-                              if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
-                              return (
-                                <Button variant="link" className="p-0 h-8 text-sm" onClick={() => window.open(`/applications/${selectedApp.id}`, '_blank')}>
-                                  {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
-                                </Button>
-                              );
-                            })()
-                          ) : (
-                            <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
-                              <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn(!form.getValues('applicationId') && 'text-muted-foreground')}>Select application <ChevronsUpDown className="ml-2 h-4 w-4" /></Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-full p-0">
-                                <Command>
-                                  <CommandInput placeholder="Search by student name, email, or university..." />
-                                  <CommandList>
-                                    <CommandEmpty>No applications found.</CommandEmpty>
-                                    <CommandGroup>
-                                      {applications?.map((app) => {
-                                        const student = students?.find((s) => s.id === app.studentId);
-                                        return (
-                                          <CommandItem key={String(app.id)} onSelect={() => { handleApplicationChange(String(app.id)); setApplicationDropdownOpen(false); }}>
-                                            <div className="flex flex-col">
-                                              <span className="font-medium">{student?.name}</span>
-                                              <span className="text-sm text-gray-500">{student?.email}</span>
-                                              <span className="text-sm text-blue-600">{app.university} - {app.program}</span>
-                                            </div>
-                                          </CommandItem>
-                                        );
-                                      })}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
-                          )}
+                          {(() => {
+                            const aid = String(form.watch('applicationId') || applicationId || '');
+                            if (!aid) return (
+                              <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" className={cn(!form.getValues('applicationId') && 'text-muted-foreground')}>Select application <ChevronsUpDown className="ml-2 h-4 w-4" /></Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                  <Command>
+                                    <CommandInput placeholder="Search by student name, email, or university..." />
+                                    <CommandList>
+                                      <CommandEmpty>No applications found.</CommandEmpty>
+                                      <CommandGroup>
+                                        {applications?.map((app) => {
+                                          const student = students?.find((s) => s.id === app.studentId);
+                                          return (
+                                            <CommandItem key={String(app.id)} onSelect={() => { handleApplicationChange(String(app.id)); setApplicationDropdownOpen(false); }}>
+                                              <div className="flex flex-col">
+                                                <span className="font-medium">{student?.name}</span>
+                                                <span className="text-sm text-gray-500">{student?.email}</span>
+                                                <span className="text-sm text-blue-600">{app.university} - {app.program}</span>
+                                              </div>
+                                            </CommandItem>
+                                          );
+                                        })}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            );
+
+                            const selectedApp = applications?.find((a) => String(a.id) === aid);
+                            if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
+                            return (
+                              <Button variant="link" className="p-0 h-8 text-sm" onClick={() => window.open(`/applications/${selectedApp.id}`, '_blank')}>
+                                {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
+                              </Button>
+                            );
+                          })()}
                         </div>
                       </div>
 
