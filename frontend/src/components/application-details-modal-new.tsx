@@ -42,6 +42,13 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
   const queryClient = useQueryClient();
 
   const [currentApp, setCurrentApp] = useState<Application | null>(application || null);
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
+  const openStudentProfile = (sid: string) => {
+    setSelectedStudentId(sid);
+    setIsStudentProfileOpen(true);
+  };
   useEffect(() => {
     setCurrentApp(application || null);
   }, [application]);
@@ -276,7 +283,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><span>Student</span></Label>
                           {student ? (
-                            <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students/${student.id}`)}>
+                            <Button type="button" variant="link" className="h-8 p-0 text-xs" onClick={() => openStudentProfile(student.id)}>
                               {student.name}
                             </Button>
                           ) : (
@@ -395,6 +402,15 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
           applicationId={currentApp?.id as any}
           studentId={currentApp?.studentId}
         />
+
+        <AddAdmissionModal
+          open={isAddAdmissionOpen}
+          onOpenChange={setIsAddAdmissionOpen}
+          applicationId={currentApp?.id as any}
+          studentId={currentApp?.studentId}
+        />
+
+        <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={selectedStudentId} />
 
       </DialogContent>
     </Dialog>
