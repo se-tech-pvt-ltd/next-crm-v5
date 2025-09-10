@@ -416,13 +416,6 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
           studentId={currentApp?.studentId}
         />
 
-        <AddAdmissionModal
-          open={isAddAdmissionOpen}
-          onOpenChange={setIsAddAdmissionOpen}
-          applicationId={currentApp?.id as any}
-          studentId={currentApp?.studentId}
-        />
-
         <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={selectedStudentId} />
 
       </DialogContent>
