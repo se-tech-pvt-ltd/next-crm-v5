@@ -360,28 +360,29 @@ export default function Students() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      <AddApplicationModal
-        open={isAddApplicationModalOpen}
-        onOpenChange={setIsAddApplicationModalOpen}
-        studentId={selectedStudentId || undefined}
-      />
+      </div>
 
       <StudentProfileModal
         open={isProfileModalOpen}
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            setSelectedStudentId(null);
             setLocation('/students');
           }
         }}
         studentId={selectedStudentId}
         onOpenApplication={(app) => { setSelectedApplicationForDetails(app); setIsAppDetailsOpen(true); }}
+        onOpenAddApplication={(sid) => { setSelectedStudentId(sid || selectedStudentId); setIsAddApplicationModalOpen(true); }}
       />
 
       <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplicationForDetails(null); }} application={selectedApplicationForDetails} />
+
+      <AddApplicationModal
+        open={isAddApplicationModalOpen}
+        onOpenChange={(open) => { setIsAddApplicationModalOpen(open); if (!open) setSelectedStudentId(null); }}
+        studentId={selectedStudentId || undefined}
+      />
     </Layout>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -86,6 +86,24 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     createApplicationMutation.mutate(data);
   };
 
+  const selectedStudentId = form.watch('studentId');
+  const selectedStudent = students?.find((s) => s.id === selectedStudentId) || presetStudent;
+
+  useEffect(() => {
+    if (studentId) {
+      form.setValue('studentId', studentId);
+    }
+    if (presetStudent && presetStudent.id) {
+      form.setValue('studentId', presetStudent.id);
+    }
+  }, [studentId, presetStudent]);
+
+  const openStudentProfile = (sid?: string) => {
+    if (!sid) return;
+    onOpenChange(false);
+    setTimeout(() => setLocation(`/students/${sid}`), 0);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
@@ -109,92 +127,42 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           <div className="flex-1 overflow-y-auto p-6 pt-2">
             <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Linked Entities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-xs">
+                      <div className="text-[11px] text-gray-500">Student ID</div>
+                      <div className="font-medium">
+                        {presetStudent?.student_id || selectedStudent?.student_id || selectedStudent?.id ? (
+                          <Button type="button" variant="link" className="p-0 h-6" onClick={() => openStudentProfile(presetStudent?.id || selectedStudent?.id)}>
+                            {presetStudent?.student_id || selectedStudent?.student_id || selectedStudent?.id}
+                          </Button>
+                        ) : (
+                          '-'
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs">
+                      <div className="text-[11px] text-gray-500">Student Name</div>
+                      <div className="font-medium">{presetStudent?.name || selectedStudent?.name || '-'}</div>
+                    </div>
+                    <div className="text-xs">
+                      <div className="text-[11px] text-gray-500">Email</div>
+                      <div className="font-medium">{presetStudent?.email || selectedStudent?.email || '-'}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Student & Program</CardTitle>
+                  <CardTitle className="text-sm">Program Details</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {studentId ? (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Student *</FormLabel>
-                      <FormControl>
-                        <Input
-                          value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'}
-                          readOnly
-                          onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}
-                          className="cursor-pointer"
-                          title="Click to open student"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  ) : (
-                    <FormField
-                      control={form.control}
-                      name="studentId"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Student *</FormLabel>
-                          <Popover open={studentDropdownOpen} onOpenChange={setStudentDropdownOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className={cn(
-                                    "w-full justify-between",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value
-                                    ? students?.find((student) => student.id === field.value)
-                                      ? `${students.find((student) => student.id === field.value)?.name} (${students.find((student) => student.id === field.value)?.email})`
-                                      : "Select student"
-                                    : "Select student"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                              <Command>
-                                <CommandInput placeholder="Search by name or email..." />
-                                <CommandList>
-                                  <CommandEmpty>No students found.</CommandEmpty>
-                                  <CommandGroup>
-                                    {students?.map((student) => (
-                                      <CommandItem
-                                        value={`${student.name} ${student.email}`}
-                                        key={student.id}
-                                        onSelect={() => {
-                                          field.onChange(student.id);
-                                          setStudentDropdownOpen(false);
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            student.id === field.value
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                        <div className="flex flex-col">
-                                          <span className="font-medium">{student.name}</span>
-                                          <span className="text-sm text-gray-500">{student.email}</span>
-                                        </div>
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  <input type="hidden" {...form.register('studentId')} />
 
                   <FormField
                     control={form.control}
@@ -205,6 +173,35 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormControl>
                           <Input placeholder="Enter university name" {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+
+                  <FormField
+                    control={form.control}
+                    name="channelPartner"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Channel Partner</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select channel partner" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Scorp">Scorp</SelectItem>
+                            <SelectItem value="UKEC">UKEC</SelectItem>
+                            <SelectItem value="Crizac">Crizac</SelectItem>
+                            <SelectItem value="Direct">Direct</SelectItem>
+                            <SelectItem value="MSM Unify">MSM Unify</SelectItem>
+                            <SelectItem value="Adventus">Adventus</SelectItem>
+                            <SelectItem value="ABN">ABN</SelectItem>
+                            <SelectItem value="NSA">NSA</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -372,33 +369,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="channelPartner"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Channel Partner</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select channel partner" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Scorp">Scorp</SelectItem>
-                            <SelectItem value="UKEC">UKEC</SelectItem>
-                            <SelectItem value="Crizac">Crizac</SelectItem>
-                            <SelectItem value="Direct">Direct</SelectItem>
-                            <SelectItem value="MSM Unify">MSM Unify</SelectItem>
-                            <SelectItem value="Adventus">Adventus</SelectItem>
-                            <SelectItem value="ABN">ABN</SelectItem>
-                            <SelectItem value="NSA">NSA</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
@@ -442,7 +412,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 Cancel
               </Button>
               <Button type="submit" disabled={createApplicationMutation.isPending}>
-                {createApplicationMutation.isPending ? 'Creating...' : 'Create Application'}
+                {createApplicationMutation.isPending ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </form>

@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
-import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { type Student, type Application } from '@/lib/types';
 import { useLocation } from 'wouter';
@@ -46,15 +45,15 @@ interface StudentProfileModalProps {
   onOpenChange: (open: boolean) => void;
   studentId: string | null;
   onOpenApplication?: (app: Application) => void;
+  onOpenAddApplication?: (studentId?: string | null) => void;
 }
 
-export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication }: StudentProfileModalProps) {
+export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication, onOpenAddApplication }: StudentProfileModalProps) {
   const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
-  const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [, setLocation] = useLocation();
@@ -332,7 +331,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               variant="outline"
                               size="xs"
                               className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => setIsAddApplicationOpen(true)}
+                              onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
                               title="Add Application"
                             >
                               <Plus />
@@ -514,7 +513,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
                         )}
                       </CardTitle>
-                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)}>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
                         <Plus />
                         <span className="hidden lg:inline">Add Application</span>
                       </Button>
@@ -564,7 +563,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         </DialogContent>
       </Dialog>
 
-      <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id} />
 
       <ApplicationDetailsModal
         open={isAppDetailsOpen}

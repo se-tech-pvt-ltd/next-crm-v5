@@ -253,7 +253,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                             </Button>
                           ) : !isEditing ? (
                             <>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsAddAdmissionOpen(true)} title="Add Admission">
+                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { setTimeout(() => setIsAddAdmissionOpen(true), 160); }} title="Add Admission">
                                 <Plus />
                                 <span className="hidden lg:inline">Add Admission</span>
                               </Button>
