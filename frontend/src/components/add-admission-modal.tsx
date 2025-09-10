@@ -41,6 +41,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     enabled: !applicationId
   });
 
+  const { data: linkedApp } = useQuery<Application | null>({
+    queryKey: ['/api/applications', String(applicationId)],
+    queryFn: async () => {
+      if (!applicationId) return null;
+      const res = await ApplicationsService.getApplication(String(applicationId));
+      return res as Application;
+    },
+    enabled: !!applicationId
+  });
+
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
     defaultValues: {
@@ -126,7 +136,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (form.getValues('applicationId') !== idStr) form.setValue('applicationId', idStr);
     }
     if (studentId && !form.getValues('studentId')) form.setValue('studentId', studentId);
-  }, [applicationId, studentId, form]);
+
+    // If we have a linked application (when modal opened with applicationId), populate university and program
+    if (linkedApp) {
+      form.setValue('applicationId', String(linkedApp.id));
+      if (!form.getValues('studentId')) form.setValue('studentId', linkedApp.studentId);
+      form.setValue('university', linkedApp.university || '');
+      form.setValue('program', linkedApp.program || '');
+    }
+  }, [applicationId, studentId, linkedApp, form]);
 
   const getOptions = (name: string, admissionDropdowns: Record<string, any[]> | undefined) => {
     const src = (admissionDropdowns as any) || {};
