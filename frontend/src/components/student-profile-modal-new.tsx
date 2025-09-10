@@ -564,7 +564,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         </DialogContent>
       </Dialog>
 
-      <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id} />
 
       <ApplicationDetailsModal
         open={isAppDetailsOpen}
