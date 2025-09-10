@@ -138,7 +138,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                           <Edit />
                           <span className="hidden lg:inline">Edit</span>
                         </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)} title="Add Application">
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); setTimeout(() => setIsAddApplicationOpen(true), 160); }} title="Add Application">
                           <Plus />
                           <span className="hidden lg:inline">Add App</span>
                         </Button>
@@ -299,7 +299,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
                         <h2 className="text-lg font-semibold flex items-center"><FileText className="w-5 h-5 mr-2" />Applications ({applications?.length || 0})</h2>
-                        <Button size="sm" onClick={() => setIsAddApplicationOpen(true)} className="flex items-center gap-2"><Plus className="w-4 h-4" />Add Application</Button>
+                        <Button size="sm" onClick={() => { onOpenChange(false); setTimeout(() => setIsAddApplicationOpen(true), 160); }} className="flex items-center gap-2"><Plus className="w-4 h-4" />Add Application</Button>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
