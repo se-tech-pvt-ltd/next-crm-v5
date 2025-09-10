@@ -73,6 +73,23 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
   });
 
+  // Generic dropdown label resolution
+  const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const getOptionsForField = (fieldName?: string): any[] => {
+    if (!fieldName || !moduleDropdowns) return [];
+    const target = normalize(fieldName);
+    const entry = Object.entries(moduleDropdowns as any).find(([k]) => normalize(String(k)) === target);
+    return (entry?.[1] as any[]) || [];
+  };
+  const getLabelForField = (fieldName?: string | null, value?: string | null) => {
+    if (!fieldName) return value || '';
+    if (!value) return '';
+    if (normalize(fieldName) === 'status') return getStatusLabel(value);
+    const options = getOptionsForField(fieldName);
+    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
+    return hit?.value || value;
+  };
+
   // Create a lookup function for user profile images
   const getUserProfileImage = (userId: string) => {
     const user = users.find((u: UserType) => u.id === userId);
@@ -344,11 +361,21 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                       </div>
                       {(activity.description || (activity as any).title) && (
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
-                          {moduleDropdowns?.Status
-                            ? (activity.fieldName?.toLowerCase() === 'status' && ((activity.oldValue ?? '') !== '' || (activity.newValue ?? '') !== '')
-                                ? `Status changed from "${getStatusLabel(activity.oldValue || '')}" to "${getStatusLabel(activity.newValue || '')}"`
-                                : mapStatusIdsInText(activity.description || (activity as any).title))
-                            : (activity.description || (activity as any).title)}
+                          {(() => {
+                            const hasValues = ((activity.oldValue ?? '') !== '' || (activity.newValue ?? '') !== '');
+                            if (moduleDropdowns && activity.fieldName && hasValues) {
+                              const fromLabel = getLabelForField(activity.fieldName, activity.oldValue || 'empty');
+                              const toLabel = getLabelForField(activity.fieldName, activity.newValue || 'empty');
+                              const fieldLabel = (activity.fieldName || '')
+                                .replace(/([A-Z])/g, ' $1')
+                                .replace(/^./, (str) => str.toUpperCase());
+                              return `${fieldLabel} changed from "${fromLabel}" to "${toLabel}"`;
+                            }
+                            if ((moduleDropdowns as any)?.Status) {
+                              return mapStatusIdsInText(activity.description || (activity as any).title);
+                            }
+                            return (activity.description || (activity as any).title);
+                          })()}
                         </div>
                       )}
                     </div>
