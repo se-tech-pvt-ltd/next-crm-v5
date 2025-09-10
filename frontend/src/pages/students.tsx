@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentDetailsModal } from '@/components/student-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
+import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { Student } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as StudentsService from '@/services/students';
@@ -25,6 +26,8 @@ export default function Students() {
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedApplicationForDetails, setSelectedApplicationForDetails] = useState<any | null>(null);
+  const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -375,7 +378,10 @@ export default function Students() {
           }
         }}
         studentId={selectedStudentId}
+        onOpenApplication={(app) => { setSelectedApplicationForDetails(app); setIsAppDetailsOpen(true); }}
       />
+
+      <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplicationForDetails(null); }} application={selectedApplicationForDetails} />
     </Layout>
   );
 }

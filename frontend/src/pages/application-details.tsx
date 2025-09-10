@@ -15,6 +15,7 @@ import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
 import { useToast } from '@/hooks/use-toast';
 import { type Application, type Student, type Admission } from '@/lib/types';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
 import {
   ArrowLeft,
   School,
@@ -70,6 +71,7 @@ export default function ApplicationDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Application>>({});
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
+  const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
 
   useEffect(() => {
     if (application) {
@@ -241,7 +243,7 @@ export default function ApplicationDetails() {
                         </Button>
                       ) : !isEditing ? (
                         <>
-                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { const from = typeof window!== 'undefined' ? window.location.pathname : '/applications'; setLocation(`/admissions/new?applicationId=${application.id}&studentId=${application.studentId}&from=${encodeURIComponent(from)}`); }} title="Add Admission">
+                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsAddAdmissionOpen(true)} title="Add Admission">
                             <Plus />
                             <span className="hidden lg:inline">Add Admission</span>
                           </Button>
@@ -389,6 +391,13 @@ export default function ApplicationDetails() {
           </div>
         </div>
       )}
+
+      <AddAdmissionModal
+        open={isAddAdmissionOpen}
+        onOpenChange={setIsAddAdmissionOpen}
+        applicationId={application?.id as any}
+        studentId={application?.studentId}
+      />
 
     </Layout>
   );

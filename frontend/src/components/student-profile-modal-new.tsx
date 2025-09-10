@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
+import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { type Student, type Application } from '@/lib/types';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -44,15 +45,18 @@ interface StudentProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   studentId: string | null;
+  onOpenApplication?: (app: Application) => void;
 }
 
-export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {
+export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication }: StudentProfileModalProps) {
   const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
+  const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [, setLocation] = useLocation();
   
   const { data: student, isLoading } = useQuery<Student>({
@@ -532,7 +536,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <button
                           key={app.id}
                           type="button"
-                          onClick={() => { onOpenChange(false); setLocation(`/applications/${app.id}`); }}
+                          onClick={() => { if (typeof onOpenApplication === 'function') { onOpenApplication(app); onOpenChange(false); } else { setSelectedApplication(app); setIsAppDetailsOpen(true); onOpenChange(false); } }}
                           className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
                           <div className="min-w-0">
@@ -568,6 +572,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
       </Dialog>
 
       <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id} />
+
+      <ApplicationDetailsModal
+        open={isAppDetailsOpen}
+        onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        application={selectedApplication}
+      />
 
     </>
   );
