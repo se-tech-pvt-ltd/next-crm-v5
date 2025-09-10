@@ -398,7 +398,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 Cancel
               </Button>
               <Button type="submit" disabled={createApplicationMutation.isPending}>
-                {createApplicationMutation.isPending ? 'Creating...' : 'Create Application'}
+                {createApplicationMutation.isPending ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </form>
