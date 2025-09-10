@@ -317,7 +317,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-xs">Personal Information</CardTitle>
+                      <CardTitle className="text-xs">Student Information</CardTitle>
                       <div className="flex items-center space-x-2">
                         {!isEditing ? (
                           <>
@@ -365,34 +365,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </Label>
                         <Input id="name" value={isEditing ? (editData.name || '') : (student?.name || '')} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email Address</span>
-                        </Label>
-                        <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone" className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4" />
-                          <span>Phone Number</span>
-                        </Label>
-                        <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>Date of Birth</span>
-                        </Label>
-                        <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="address" className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4" />
-                          <span>Address</span>
-                        </Label>
-                        <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="passportNumber" className="flex items-center space-x-2">
@@ -400,6 +372,38 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                           <span>Passport Number</span>
                         </Label>
                         <Input id="passportNumber" value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')} onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email Address</span>
+                        </Label>
+                        <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4" />
+                          <span>Phone Number</span>
+                        </Label>
+                        <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>Date of Birth</span>
+                        </Label>
+                        <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="address" className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>Address</span>
+                        </Label>
+                        <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
                     </div>
                   </CardContent>
