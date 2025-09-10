@@ -15,6 +15,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -66,6 +67,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students')
+  });
+
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
   });
 
   // Helpers to resolve dropdown-backed labels (case-insensitive field keys)
@@ -127,7 +133,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   };
 
   const dropdownsForStudent = () => {
-    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
+    const data = dropdownData as any;
+    if (data && typeof data === 'object') {
+      const entry = Object.entries(data).find(([k]) => normalize(String(k)).includes('counsel'));
+      return (entry?.[1] as any[]) || [];
+    }
+    return [] as any[];
+  };
+
+  const counselorOptions = () => {
+    const opts = dropdownsForStudent();
+    if (opts.length > 0) return opts.map((o: any) => ({ id: o.key || o.id || o.value, value: o.value }));
+    return (users as User[]).map((u) => ({ id: u.id, value: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || 'User' }));
   };
 
   const updateStudentMutation = useMutation({
@@ -420,13 +437,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
                           <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                           <SelectContent>
-                            {(dropdownsForStudent() || []).map((opt: any) => (
-                              <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
+                            {counselorOptions().map((opt: any) => (
+                              <SelectItem key={opt.id} value={opt.id}>{opt.value}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="text-sm text-gray-700">{(dropdownsForStudent() || []).find((d: any) => (d.key || d.id) === student?.counselorId)?.value || 'Unassigned'}</div>
+                        <div className="text-sm text-gray-700">{(() => { const found = counselorOptions().find((d: any) => d.id === student?.counselorId); return found?.value || 'Unassigned'; })()}</div>
                       )}
                     </div>
 
