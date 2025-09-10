@@ -536,7 +536,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <button
                           key={app.id}
                           type="button"
-                          onClick={() => { setSelectedApplication(app); setIsAppDetailsOpen(true); onOpenChange(false); }}
+                          onClick={() => { if (typeof (props as any)?.onOpenApplication === 'function') { (props as any).onOpenApplication(app); onOpenChange(false); } else { setSelectedApplication(app); setIsAppDetailsOpen(true); onOpenChange(false); } }}
                           className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
                           <div className="min-w-0">
