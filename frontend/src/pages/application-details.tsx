@@ -72,6 +72,7 @@ export default function ApplicationDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Application>>({});
   const [currentStatus, setCurrentStatus] = useState<string>(application?.appStatus || 'Open');
+  const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
 
   useEffect(() => {
     if (application) {
