@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AddAdmissionModalProps {
   open: boolean;
