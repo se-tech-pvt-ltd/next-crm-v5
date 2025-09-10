@@ -296,7 +296,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><span>Student</span></Label>
                           {student ? (
-                            <Button type="button" variant="link" className="h-8 p-0 text-xs" onClick={() => openStudentProfile(student.id)}>
+                            <Button type="button" variant="link" className="h-8 p-0 text-xs" onClick={() => { openStudentProfile(student.id); }}>
                               {student.name}
                             </Button>
                           ) : (
