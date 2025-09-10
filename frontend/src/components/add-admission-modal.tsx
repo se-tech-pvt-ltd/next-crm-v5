@@ -165,6 +165,11 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const statusOptions = getOptions('Status', admissionDropdowns);
   const caseStatusOptions = getOptions('Case Status', admissionDropdowns);
 
+  const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
+  const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
+  const [currentStudentIdLocal, setCurrentStudentIdLocal] = useState<string | null>(null);
+
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
     if (selectedApp) {
@@ -173,6 +178,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       form.setValue('university', selectedApp.university || '');
       form.setValue('program', selectedApp.program || '');
     }
+  };
+
+  const openApplicationDetails = (app: Application) => {
+    setCurrentApplicationObj(app);
+    setIsAppDetailsOpen(true);
+  };
+
+  const openStudentProfile = (sid: string) => {
+    setCurrentStudentIdLocal(sid);
+    setIsStudentProfileOpen(true);
   };
 
   return (
@@ -209,7 +224,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         <FormLabel>Student</FormLabel>
                         <div className="mt-1">
                           {studentId || form.getValues('studentId') ? (
-                            <Button type="button" variant="link" className="p-0 h-8" onClick={() => { const sid = studentId || form.getValues('studentId'); if (sid) window.open(`/students/${sid}`, '_blank'); }}>
+                            <Button type="button" variant="link" className="p-0 h-8" onClick={() => { const sid = studentId || form.getValues('studentId'); if (sid) openStudentProfile(sid); }}>
                               {(() => {
                                 const sid = studentId || form.getValues('studentId');
                                 const s = students?.find((x) => x.id === sid);
@@ -260,7 +275,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                             const selectedApp = applications?.find((a) => String(a.id) === aid);
                             if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
                             return (
-                              <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => window.open(`/applications/${selectedApp.id}`, '_blank')}>
+                              <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => openApplicationDetails(selectedApp)}>
                                 {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
                               </Button>
                             );
@@ -385,6 +400,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
         </div>
       </DialogContent>
+
+      {/* Details Modals */}
+      <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={setIsAppDetailsOpen} application={currentApplicationObj} onOpenStudentProfile={(sid) => openStudentProfile(sid)} />
+      <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={currentStudentIdLocal} />
     </Dialog>
   );
 }
