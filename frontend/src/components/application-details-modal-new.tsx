@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { type Application, type Student, type Admission } from '@/lib/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { StudentProfileModal } from './student-profile-modal-new';
 import {
   School,
   User as UserIcon,
