@@ -15,6 +15,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -68,6 +69,31 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     queryFn: async () => DropdownsService.getModuleDropdowns('students')
   });
 
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+  });
+
+  // Helpers to resolve dropdown-backed labels (case-insensitive field keys)
+  const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const getFieldOptions = (fieldName: string): any[] => {
+    const data = dropdownData as any;
+    if (!data) return [];
+    const target = normalize(fieldName);
+    const candidates = [target];
+    if (target === 'englishproficiency') {
+      candidates.push('elttest', 'elt', 'englishtest', 'english');
+    }
+    const entry = Object.entries(data).find(([k]) => candidates.includes(normalize(String(k))));
+    return (entry?.[1] as any[]) || [];
+  };
+  const getDropdownLabel = (fieldName: string, value?: string | null) => {
+    if (!value) return '';
+    const options = getFieldOptions(fieldName);
+    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
+    return hit?.value || value;
+  };
+
   useEffect(() => {
     if (student) {
       setEditData(student);
@@ -111,7 +137,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   };
 
   const dropdownsForStudent = () => {
-    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
+    const data = dropdownData as any;
+    if (data && typeof data === 'object') {
+      const entry = Object.entries(data).find(([k]) => normalize(String(k)).includes('counsel'));
+      return (entry?.[1] as any[]) || [];
+    }
+    return [] as any[];
+  };
+
+  const counselorOptions = () => {
+    const opts = dropdownsForStudent();
+    if (opts.length > 0) return opts.map((o: any) => ({ id: o.key || o.id || o.value, value: o.value }));
+    return (users as User[]).map((u) => ({ id: u.id, value: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || 'User' }));
   };
 
   const updateStudentMutation = useMutation({
@@ -382,7 +419,20 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <FileText className="w-4 h-4" />
                         <span>English Proficiency</span>
                       </Label>
-                      <Input id="englishProficiency" value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')} onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      {isEditing ? (
+                        <Select value={editData.englishProficiency || ''} onValueChange={(v) => setEditData({ ...editData, englishProficiency: v })}>
+                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
+                          <SelectContent>
+                            {getFieldOptions('englishProficiency').map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                                {opt.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled className="h-7 text-[11px]" />
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -391,30 +441,58 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
                           <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                           <SelectContent>
-                            {(dropdownsForStudent() || []).map((opt: any) => (
-                              <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
+                            {counselorOptions().map((opt: any) => (
+                              <SelectItem key={opt.id} value={opt.id}>{opt.value}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="text-sm text-gray-700">{(dropdownsForStudent() || []).find((d: any) => (d.key || d.id) === student?.counselorId)?.value || 'Unassigned'}</div>
+                        <div className="text-sm text-gray-700">{(() => { const found = counselorOptions().find((d: any) => d.id === student?.counselorId); return found?.value || 'Unassigned'; })()}</div>
                       )}
                     </div>
 
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
-                      <Input value={isEditing ? (editData.expectation || '') : (student?.expectation || '')} onChange={(e) => setEditData({ ...editData, expectation: e.target.value })} disabled={!isEditing} className="h-7 text-[11px]" />
+                      {isEditing ? (
+                        <Select value={editData.expectation || ''} onValueChange={(v) => setEditData({ ...editData, expectation: v })}>
+                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select expectation" /></SelectTrigger>
+                          <SelectContent>
+                            {getFieldOptions('expectation').map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                                {opt.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
+                      )}
                     </div>
 
-                    <div className="space-y-2 flex items-center">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox checked={!!(isEditing ? editData.consultancyFree : student?.consultancyFree)} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} disabled={!isEditing} />
-                        <span className="text-sm">Consultancy Free</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Checkbox checked={!!(isEditing ? editData.scholarship : student?.scholarship)} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} disabled={!isEditing} />
-                        <span className="text-sm">Scholarship</span>
-                      </div>
+                    <div className="space-y-2">
+                      {isEditing ? (
+                        <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox checked={!!editData.consultancyFree} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} />
+                            <span className="text-sm">Consultancy Free</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Checkbox checked={!!editData.scholarship} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} />
+                            <span className="text-sm">Scholarship</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <div className="text-[11px] text-gray-600">Consultancy Fee</div>
+                            <div className="font-medium">{student?.consultancyFree ? 'Yes' : 'No'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[11px] text-gray-600">Scholarship</div>
+                            <div className="font-medium">{student?.scholarship ? 'Yes' : 'No'}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                   </div>
