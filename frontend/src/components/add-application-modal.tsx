@@ -93,7 +93,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Student & Program</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="studentId"
@@ -278,7 +278,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Status & Links</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="appStatus"
