@@ -156,6 +156,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="no-not-allowed max-w-4xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+        <DialogTitle className="sr-only">Add Admission</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
