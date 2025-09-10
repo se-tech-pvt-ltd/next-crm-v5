@@ -572,6 +572,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
 
       <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id} />
 
+      <ApplicationDetailsModal
+        open={isAppDetailsOpen}
+        onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        application={selectedApplication}
+      />
+
     </>
   );
 }
