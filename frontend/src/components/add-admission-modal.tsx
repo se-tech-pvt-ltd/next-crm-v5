@@ -207,7 +207,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         <FormLabel>Student</FormLabel>
                         <div className="mt-1">
                           {studentId || form.getValues('studentId') ? (
-                            <Button variant="link" className="p-0 h-8" onClick={() => { const sid = studentId || form.getValues('studentId'); if (sid) window.open(`/students/${sid}`, '_blank'); }}>
+                            <Button type="button" variant="link" className="p-0 h-8" onClick={() => { const sid = studentId || form.getValues('studentId'); if (sid) window.open(`/students/${sid}`, '_blank'); }}>
                               {(() => {
                                 const sid = studentId || form.getValues('studentId');
                                 const s = students?.find((x) => x.id === sid);
@@ -228,7 +228,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                             if (!aid) return (
                               <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
                                 <PopoverTrigger asChild>
-                                  <Button variant="outline" className={cn(!form.getValues('applicationId') && 'text-muted-foreground')}>Select application <ChevronsUpDown className="ml-2 h-4 w-4" /></Button>
+                                  <Button type="button" variant="outline" className={cn(!form.getValues('applicationId') && 'text-muted-foreground')}>Select application <ChevronsUpDown className="ml-2 h-4 w-4" /></Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-full p-0">
                                   <Command>
@@ -258,7 +258,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                             const selectedApp = applications?.find((a) => String(a.id) === aid);
                             if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
                             return (
-                              <Button variant="link" className="p-0 h-8 text-sm" onClick={() => window.open(`/applications/${selectedApp.id}`, '_blank')}>
+                              <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => window.open(`/applications/${selectedApp.id}`, '_blank')}>
                                 {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
                               </Button>
                             );
