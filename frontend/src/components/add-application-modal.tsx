@@ -89,6 +89,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const selectedStudentId = form.watch('studentId');
   const selectedStudent = students?.find((s) => s.id === selectedStudentId) || presetStudent;
 
+  useEffect(() => {
+    if (studentId) {
+      form.setValue('studentId', studentId);
+    }
+    if (presetStudent && presetStudent.id) {
+      form.setValue('studentId', presetStudent.id);
+    }
+  }, [studentId, presetStudent]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
