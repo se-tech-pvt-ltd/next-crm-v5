@@ -453,7 +453,20 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
 
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
-                      <Input value={isEditing ? (editData.expectation || '') : (student?.expectation || '')} onChange={(e) => setEditData({ ...editData, expectation: e.target.value })} disabled={!isEditing} className="h-7 text-[11px]" />
+                      {isEditing ? (
+                        <Select value={editData.expectation || ''} onValueChange={(v) => setEditData({ ...editData, expectation: v })}>
+                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select expectation" /></SelectTrigger>
+                          <SelectContent>
+                            {getFieldOptions('expectation').map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                                {opt.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
+                      )}
                     </div>
 
                     <div className="space-y-2 flex items-center">
