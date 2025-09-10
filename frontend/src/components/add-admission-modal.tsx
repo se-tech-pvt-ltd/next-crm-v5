@@ -177,117 +177,172 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Linked Entities Panel */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-                  {/* Application selector */}
-                  <div>
-                    <FormLabel>Application</FormLabel>
-                    <div className="mt-1">
-                      {applicationId ? (
-                        <div className="text-sm text-gray-700">{String(applicationId)}</div>
-                      ) : (
-                        <div>
-                          <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className={cn(!form.getValues('applicationId') && 'text-muted-foreground')}>Select application <ChevronsUpDown className="ml-2 h-4 w-4" /></Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                              <Command>
-                                <CommandInput placeholder="Search by student name, email, or university..." />
-                                <CommandList>
-                                  <CommandEmpty>No applications found.</CommandEmpty>
-                                  <CommandGroup>
-                                    {applications?.map((app) => {
-                                      const student = students?.find((s) => s.id === app.studentId);
-                                      return (
-                                        <CommandItem key={String(app.id)} onSelect={() => { handleApplicationChange(String(app.id)); setApplicationDropdownOpen(false); }}>
-                                          <div className="flex flex-col">
-                                            <span className="font-medium">{student?.name}</span>
-                                            <span className="text-sm text-gray-500">{student?.email}</span>
-                                            <span className="text-sm text-blue-600">{app.university} - {app.program}</span>
-                                          </div>
-                                        </CommandItem>
-                                      );
-                                    })}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">Linked Entities</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <FormLabel>Student</FormLabel>
+                        <div className="mt-1">
+                          {studentId || form.getValues('studentId') ? (
+                            <Button variant="link" className="p-0 h-8" onClick={() => { const sid = studentId || form.getValues('studentId'); if (sid) window.open(`/students/${sid}`, '_blank'); }}>
+                              {(() => {
+                                const sid = studentId || form.getValues('studentId');
+                                const s = students?.find((x) => x.id === sid);
+                                return s?.name || sid || 'Student';
+                              })()}
+                            </Button>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Select application to link student</span>
+                          )}
                         </div>
-                      )}
+                      </div>
+
+                      <div>
+                        <FormLabel>Application</FormLabel>
+                        <div className="mt-1">
+                          {applicationId ? (
+                            <div className="text-sm text-gray-700">{String(applicationId)}</div>
+                          ) : (
+                            <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
+                              <PopoverTrigger asChild>
+                                <Button variant="outline" className={cn(!form.getValues('applicationId') && 'text-muted-foreground')}>Select application <ChevronsUpDown className="ml-2 h-4 w-4" /></Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0">
+                                <Command>
+                                  <CommandInput placeholder="Search by student name, email, or university..." />
+                                  <CommandList>
+                                    <CommandEmpty>No applications found.</CommandEmpty>
+                                    <CommandGroup>
+                                      {applications?.map((app) => {
+                                        const student = students?.find((s) => s.id === app.studentId);
+                                        return (
+                                          <CommandItem key={String(app.id)} onSelect={() => { handleApplicationChange(String(app.id)); setApplicationDropdownOpen(false); }}>
+                                            <div className="flex flex-col">
+                                              <span className="font-medium">{student?.name}</span>
+                                              <span className="text-sm text-gray-500">{student?.email}</span>
+                                              <span className="text-sm text-blue-600">{app.university} - {app.program}</span>
+                                            </div>
+                                          </CommandItem>
+                                        );
+                                      })}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <FormLabel>University</FormLabel>
+                        <Input value={form.watch('university') || ''} disabled placeholder="Select application" />
+                      </div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div>
-                    <FormLabel>University</FormLabel>
-                    <Input value={form.watch('university') || ''} disabled placeholder="Select application" />
-                  </div>
+                {/* Overview Panel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <FormLabel>Status</FormLabel>
+                        <Select value={form.watch('status') || ''} onValueChange={(v) => form.setValue('status', v)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statusOptions?.map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  <div>
-                    <FormLabel>Program</FormLabel>
-                    <Input value={form.watch('program') || ''} disabled placeholder="Select application" />
-                  </div>
-                </div>
+                      <div>
+                        <FormLabel>Case Status</FormLabel>
+                        <Select value={form.watch('caseStatus') || ''} onValueChange={(v) => form.setValue('caseStatus', v)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {caseStatusOptions?.map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* Overview panel */}
-                <div className="p-2">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Financials & Dates Panel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">Financials & Dates</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <FormLabel>Full Tuition Fee</FormLabel>
+                        <Input
+                          value={form.watch('fullTuitionFee') || ''}
+                          onChange={(e) => form.setValue('fullTuitionFee', e.target.value)}
+                          placeholder="e.g., 20000"
+                        />
+                      </div>
+
+                      <div>
+                        <FormLabel>Scholarship</FormLabel>
+                        <Input
+                          value={form.watch('scholarshipAmount') || ''}
+                          onChange={(e) => form.setValue('scholarshipAmount', e.target.value)}
+                          placeholder="e.g., 5000"
+                        />
+                      </div>
+
+                      <div>
+                        <FormLabel>Net Tuition</FormLabel>
+                        <Input value={form.watch('netTuitionFee') || ''} disabled />
+                      </div>
+
+                      <div>
+                        <FormLabel>Initial Deposit</FormLabel>
+                        <Input value={form.watch('initialDeposit') || ''} onChange={(e) => form.setValue('initialDeposit', e.target.value)} placeholder="e.g., 500" />
+                      </div>
+
+                      <div>
+                        <FormLabel>Deposit Date</FormLabel>
+                        <Input type="date" value={form.watch('depositDate') ? new Date(form.watch('depositDate')).toISOString().split('T')[0] : ''} onChange={(e) => form.setValue('depositDate', e.target.value)} />
+                      </div>
+
+                      <div>
+                        <FormLabel>Visa Date</FormLabel>
+                        <Input type="date" value={form.watch('visaDate') ? new Date(form.watch('visaDate')).toISOString().split('T')[0] : ''} onChange={(e) => form.setValue('visaDate', e.target.value)} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Others Panel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">Others</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div>
-                      <FormLabel>Status</FormLabel>
-                      <Select value={form.watch('status') || ''} onValueChange={(v) => form.setValue('status', v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Please select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {statusOptions?.map((opt: any) => (
-                            <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Google Drive Link</FormLabel>
+                      <Input value={form.watch('googleDriveLink') || ''} onChange={(e) => form.setValue('googleDriveLink', e.target.value)} placeholder="https://drive.google.com/..." />
                     </div>
-
-                    <div>
-                      <FormLabel>Case Status</FormLabel>
-                      <Select value={form.watch('caseStatus') || ''} onValueChange={(v) => form.setValue('caseStatus', v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Please select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {caseStatusOptions?.map((opt: any) => (
-                            <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* Financial & dates panel */}
-                <div className="p-2">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <FormLabel>Full Tuition Fee</FormLabel>
-                      <Input value={form.watch('fullTuitionFee') || ''} onChange={(e) => form.setValue('fullTuitionFee', e.target.value)} placeholder="e.g., 20000" />
-                    </div>
-
-                    <div>
-                      <FormLabel>Scholarship</FormLabel>
-                      <Input value={form.watch('scholarshipAmount') || ''} onChange={(e) => form.setValue('scholarshipAmount', e.target.value)} placeholder="e.g., 5000" />
-                    </div>
-
-                    <div>
-                      <FormLabel>Net Tuition</FormLabel>
-                      <Input value={form.watch('netTuitionFee') || ''} disabled />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Notes */}
-                <div className="p-2">
-                  <FormLabel>Notes</FormLabel>
-                  <Textarea value={form.watch('notes') || ''} onChange={(e) => form.setValue('notes', e.target.value)} />
-                </div>
+                  </CardContent>
+                </Card>
 
                 <div className="flex justify-end space-x-2 p-2">
                   <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
