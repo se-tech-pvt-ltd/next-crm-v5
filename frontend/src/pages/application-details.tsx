@@ -244,7 +244,7 @@ export default function ApplicationDetails() {
                         </Button>
                       ) : !isEditing ? (
                         <>
-                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { const from = typeof window!== 'undefined' ? window.location.pathname : '/applications'; setLocation(`/admissions/new?applicationId=${application.id}&studentId=${application.studentId}&from=${encodeURIComponent(from)}`); }} title="Add Admission">
+                          <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsAddAdmissionOpen(true)} title="Add Admission">
                             <Plus />
                             <span className="hidden lg:inline">Add Admission</span>
                           </Button>
