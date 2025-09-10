@@ -380,6 +380,7 @@ export default function Students() {
         }}
         studentId={selectedStudentId}
         onOpenApplication={(app) => { setSelectedApplicationForDetails(app); setIsAppDetailsOpen(true); }}
+        onOpenAddApplication={(sid) => { setSelectedStudentId(sid || selectedStudentId); setIsAddApplicationModalOpen(true); }}
       />
 
       <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplicationForDetails(null); }} application={selectedApplicationForDetails} />
