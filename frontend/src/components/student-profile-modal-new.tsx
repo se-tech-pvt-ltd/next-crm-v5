@@ -80,7 +80,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     const data = dropdownData as any;
     if (!data) return [];
     const target = normalize(fieldName);
-    const entry = Object.entries(data).find(([k]) => normalize(String(k)) === target);
+    const candidates = [target];
+    if (target === 'englishproficiency') {
+      candidates.push('elttest', 'elt', 'englishtest', 'english');
+    }
+    const entry = Object.entries(data).find(([k]) => candidates.includes(normalize(String(k))));
     return (entry?.[1] as any[]) || [];
   };
   const getDropdownLabel = (fieldName: string, value?: string | null) => {
