@@ -98,6 +98,12 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     }
   }, [studentId, presetStudent]);
 
+  const openStudentProfile = (sid?: string) => {
+    if (!sid) return;
+    onOpenChange(false);
+    setTimeout(() => setLocation(`/students/${sid}`), 0);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
