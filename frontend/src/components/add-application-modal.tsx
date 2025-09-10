@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertApplicationSchema, type Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
@@ -33,14 +34,18 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     enabled: !studentId,
   });
 
-  const selectedStudent = studentId ? students?.find(s => s.id === studentId) : null;
+  const { data: presetStudent } = useQuery<Student>({
+    queryKey: [`/api/students/${studentId}`],
+    enabled: !!studentId,
+    queryFn: async () => StudentsService.getStudent(studentId as string),
+  });
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
       studentId: studentId || '',
       university: '',
-      program: selectedStudent?.targetProgram || '',
+      program: presetStudent?.targetProgram || '',
       courseType: '',
       appStatus: 'Open',
       caseStatus: 'Raw',
@@ -108,70 +113,80 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <CardTitle className="text-sm">Student & Program</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="studentId"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Student *</FormLabel>
-                        <Popover open={studentDropdownOpen} onOpenChange={setStudentDropdownOpen}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? students?.find((student) => student.id === field.value)
-                                    ? `${students.find((student) => student.id === field.value)?.name} (${students.find((student) => student.id === field.value)?.email})`
-                                    : "Select student"
-                                  : "Select student"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
-                            <Command>
-                              <CommandInput placeholder="Search by name or email..." />
-                              <CommandList>
-                                <CommandEmpty>No students found.</CommandEmpty>
-                                <CommandGroup>
-                                  {students?.map((student) => (
-                                    <CommandItem
-                                      value={`${student.name} ${student.email}`}
-                                      key={student.id}
-                                      onSelect={() => {
-                                        field.onChange(student.id);
-                                        setStudentDropdownOpen(false);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          student.id === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      <div className="flex flex-col">
-                                        <span className="font-medium">{student.name}</span>
-                                        <span className="text-sm text-gray-500">{student.email}</span>
-                                      </div>
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {studentId ? (
+                    <FormItem>
+                      <FormLabel>Student *</FormLabel>
+                      <FormControl>
+                        <Input value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'} disabled />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="studentId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Student *</FormLabel>
+                          <Popover open={studentDropdownOpen} onOpenChange={setStudentDropdownOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? students?.find((student) => student.id === field.value)
+                                      ? `${students.find((student) => student.id === field.value)?.name} (${students.find((student) => student.id === field.value)?.email})`
+                                      : "Select student"
+                                    : "Select student"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput placeholder="Search by name or email..." />
+                                <CommandList>
+                                  <CommandEmpty>No students found.</CommandEmpty>
+                                  <CommandGroup>
+                                    {students?.map((student) => (
+                                      <CommandItem
+                                        value={`${student.name} ${student.email}`}
+                                        key={student.id}
+                                        onSelect={() => {
+                                          field.onChange(student.id);
+                                          setStudentDropdownOpen(false);
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            student.id === field.value
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                        <div className="flex flex-col">
+                                          <span className="font-medium">{student.name}</span>
+                                          <span className="text-sm text-gray-500">{student.email}</span>
+                                        </div>
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}
