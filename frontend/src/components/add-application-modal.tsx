@@ -164,19 +164,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="program"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Program *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Computer Science, Business Administration" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
@@ -206,19 +193,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="program"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Program *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Computer Science, Business Administration" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
