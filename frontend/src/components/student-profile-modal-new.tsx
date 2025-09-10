@@ -322,9 +322,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         {!isEditing ? (
                           <>
                             <Button
-                              variant="default"
+                              variant="outline"
                               size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                              className="rounded-full px-2 [&_svg]:size-3"
                               onClick={() => setIsAddApplicationOpen(true)}
                               title="Add Application"
                             >
