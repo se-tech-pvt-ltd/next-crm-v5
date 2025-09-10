@@ -145,7 +145,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Program</CardTitle>
+                  <CardTitle className="text-sm">Program Details</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input type="hidden" {...form.register('studentId')} />
