@@ -332,7 +332,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               variant="outline"
                               size="xs"
                               className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => setIsAddApplicationOpen(true)}
+                              onClick={() => { onOpenChange(false); setTimeout(() => setIsAddApplicationOpen(true), 160); }}
                               title="Add Application"
                             >
                               <Plus />
@@ -514,7 +514,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
                         )}
                       </CardTitle>
-                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)}>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); setTimeout(() => setIsAddApplicationOpen(true), 160); }}>
                         <Plus />
                         <span className="hidden lg:inline">Add Application</span>
                       </Button>
