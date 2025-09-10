@@ -37,12 +37,24 @@ interface ApplicationDetailsModalProps {
   onOpenStudentProfile?: (studentId: string) => void;
 }
 
-export function ApplicationDetailsModal({ open, onOpenChange, application }: ApplicationDetailsModalProps) {
+export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const [currentApp, setCurrentApp] = useState<Application | null>(application || null);
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
+  const openStudentProfile = (sid: string) => {
+    if (typeof onOpenStudentProfile === 'function') {
+      onOpenStudentProfile(sid);
+      onOpenChange(false);
+      return;
+    }
+    setSelectedStudentId(sid);
+    setIsStudentProfileOpen(true);
+  };
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
