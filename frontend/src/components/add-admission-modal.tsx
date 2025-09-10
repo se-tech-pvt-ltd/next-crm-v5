@@ -168,11 +168,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                 <p className="text-xs text-gray-500">Create a university admission record for a student</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <div className="flex items-center gap-2" />
           </div>
         </DialogHeader>
 
