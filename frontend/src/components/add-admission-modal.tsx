@@ -14,7 +14,7 @@ import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
-import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 
@@ -169,7 +169,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>Close</Button>
+              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </DialogHeader>
@@ -304,7 +306,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
               <h3 className="text-sm font-semibold">Help</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-              <div className="text-xs text-gray-500">Provide decision, financials, and visa info for the admission.</div>
+              <div className="text-xs text-gray-500"></div>
             </div>
           </div>
         </div>
