@@ -118,11 +118,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   {studentId ? (
                     <FormItem className="flex flex-col">
                       <FormLabel>Student *</FormLabel>
-                      <div className="mt-1">
-                        <Button type="button" variant="link" className="p-0 h-8 text-sm text-left" onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}>
-                          {presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'View student'}
-                        </Button>
-                      </div>
+                      <FormControl>
+                        <Input
+                          value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'}
+                          readOnly
+                          onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}
+                          className="cursor-pointer"
+                          title="Click to open student"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   ) : (
