@@ -316,6 +316,28 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
               <Card>
                 <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Linked Entities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-xs">
+                      <div className="text-[11px] text-gray-500">Student ID</div>
+                      <div className="font-medium">{presetStudent?.student_id || selectedStudent?.student_id || selectedStudent?.id || '-'}</div>
+                    </div>
+                    <div className="text-xs">
+                      <div className="text-[11px] text-gray-500">Student Name</div>
+                      <div className="font-medium">{presetStudent?.name || selectedStudent?.name || '-'}</div>
+                    </div>
+                    <div className="text-xs">
+                      <div className="text-[11px] text-gray-500">Email</div>
+                      <div className="font-medium">{presetStudent?.email || selectedStudent?.email || '-'}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Status & Links</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
