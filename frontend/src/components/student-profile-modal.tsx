@@ -139,7 +139,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                           <Edit />
                           <span className="hidden lg:inline">Edit</span>
                         </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); setTimeout(() => setIsAddApplicationOpen(true), 160); }} title="Add Application">
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof (arguments[0] as any) !== 'object' && typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } else { setTimeout(() => setIsAddApplicationOpen(true), 160); } }} title="Add Application">
                           <Plus />
                           <span className="hidden lg:inline">Add App</span>
                         </Button>
