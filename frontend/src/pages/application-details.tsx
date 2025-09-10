@@ -15,6 +15,8 @@ import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
 import { useToast } from '@/hooks/use-toast';
 import { type Application, type Student, type Admission } from '@/lib/types';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
+import { useState } from 'react';
 import {
   ArrowLeft,
   School,
