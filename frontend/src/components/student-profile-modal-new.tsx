@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
-import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { type Student, type Application } from '@/lib/types';
 import { useLocation } from 'wouter';
