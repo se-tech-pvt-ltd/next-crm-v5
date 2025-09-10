@@ -1,5 +1,5 @@
 import { useRoute, useLocation } from 'wouter';
-import { StudentProfileModal } from '@/components/student-profile-modal';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 
 export default function StudentDetails() {
   const [match, params] = useRoute('/students/:id');

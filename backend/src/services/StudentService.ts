@@ -195,7 +195,7 @@ export class StudentService {
     } else {
       rows = await db.select().from(students).where(searchConditions);
     }
-    const enriched = await this.enrichExpectations(rows);
+    const enriched = await this.enrichDropdownFields(rows);
     return enriched.map(this.mapStudentForApi);
   }
 
@@ -218,7 +218,7 @@ export class StudentService {
       `Lead ${student.name} was converted to student ${student.name}`
     );
 
-    const [enriched] = await this.enrichExpectations([student]);
+    const [enriched] = await this.enrichDropdownFields([student]);
     return this.mapStudentForApi(enriched) as any;
   }
 
@@ -234,7 +234,7 @@ export class StudentService {
       `Student ${student.name} was added to the system`
     );
 
-    const [enriched] = await this.enrichExpectations([student]);
+    const [enriched] = await this.enrichDropdownFields([student]);
     return this.mapStudentForApi(enriched) as any;
   }
 

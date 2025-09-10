@@ -12,9 +12,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertApplicationSchema, type Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
+import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 
 interface AddApplicationModalProps {
@@ -27,20 +29,25 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
     enabled: !studentId,
   });
 
-  const selectedStudent = studentId ? students?.find(s => s.id === studentId) : null;
+  const { data: presetStudent } = useQuery<Student>({
+    queryKey: [`/api/students/${studentId}`],
+    enabled: !!studentId,
+    queryFn: async () => StudentsService.getStudent(studentId as string),
+  });
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
     defaultValues: {
       studentId: studentId || '',
       university: '',
-      program: selectedStudent?.targetProgram || '',
+      program: presetStudent?.targetProgram || '',
       courseType: '',
       appStatus: 'Open',
       caseStatus: 'Raw',
@@ -81,83 +88,113 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[1000px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+        <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
-          <DialogTitle>Create New Application</DialogTitle>
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <PlusCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Add New Application</h2>
+                <p className="text-xs text-gray-500">Create a university application for a student</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2" />
+          </div>
         </DialogHeader>
 
-        <Form {...form}>
+        <div className="flex h-[90vh]">
+          <div className="flex-1 overflow-y-auto p-6 pt-2">
+            <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Student & Program</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="studentId"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Student *</FormLabel>
-                        <Popover open={studentDropdownOpen} onOpenChange={setStudentDropdownOpen}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? students?.find((student) => student.id === field.value)
-                                    ? `${students.find((student) => student.id === field.value)?.name} (${students.find((student) => student.id === field.value)?.email})`
-                                    : "Select student"
-                                  : "Select student"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
-                            <Command>
-                              <CommandInput placeholder="Search by name or email..." />
-                              <CommandList>
-                                <CommandEmpty>No students found.</CommandEmpty>
-                                <CommandGroup>
-                                  {students?.map((student) => (
-                                    <CommandItem
-                                      value={`${student.name} ${student.email}`}
-                                      key={student.id}
-                                      onSelect={() => {
-                                        field.onChange(student.id);
-                                        setStudentDropdownOpen(false);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          student.id === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      <div className="flex flex-col">
-                                        <span className="font-medium">{student.name}</span>
-                                        <span className="text-sm text-gray-500">{student.email}</span>
-                                      </div>
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {studentId ? (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Student *</FormLabel>
+                      <FormControl>
+                        <Input
+                          value={presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'Loading student...'}
+                          readOnly
+                          onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}
+                          className="cursor-pointer"
+                          title="Click to open student"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="studentId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Student *</FormLabel>
+                          <Popover open={studentDropdownOpen} onOpenChange={setStudentDropdownOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? students?.find((student) => student.id === field.value)
+                                      ? `${students.find((student) => student.id === field.value)?.name} (${students.find((student) => student.id === field.value)?.email})`
+                                      : "Select student"
+                                    : "Select student"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput placeholder="Search by name or email..." />
+                                <CommandList>
+                                  <CommandEmpty>No students found.</CommandEmpty>
+                                  <CommandGroup>
+                                    {students?.map((student) => (
+                                      <CommandItem
+                                        value={`${student.name} ${student.email}`}
+                                        key={student.id}
+                                        onSelect={() => {
+                                          field.onChange(student.id);
+                                          setStudentDropdownOpen(false);
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            student.id === field.value
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                        <div className="flex flex-col">
+                                          <span className="font-medium">{student.name}</span>
+                                          <span className="text-sm text-gray-500">{student.email}</span>
+                                        </div>
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}
@@ -278,7 +315,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Status & Links</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="appStatus"
@@ -409,7 +446,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               </Button>
             </div>
           </form>
-        </Form>
+            </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

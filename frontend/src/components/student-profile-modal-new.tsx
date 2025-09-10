@@ -7,6 +7,7 @@ import { CollapsibleCard } from './collapsible-card';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
@@ -35,7 +36,6 @@ import {
   Mail,
   MapPin,
   GraduationCap,
-  Globe,
   BookOpen,
   Target,
   User as UserIcon
@@ -410,7 +410,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           <MapPin className="w-4 h-4" />
                           <span>Address</span>
                         </Label>
-                        <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                        <Textarea id="address" rows={3} value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
                     </div>
                   </CardContent>
@@ -418,13 +418,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
                 <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-xs flex items-center space-x-2"><GraduationCap className="w-4 h-4 text-primary" /><span>Academic Information</span></CardTitle>}>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="targetCountry" className="flex items-center space-x-2">
-                        <Globe className="w-4 h-4" />
-                        <span>Target Country</span>
-                      </Label>
-                      <Input id="targetCountry" value={isEditing ? (editData.targetCountry || '') : (student?.targetCountry || '')} onChange={(e) => setEditData({ ...editData, targetCountry: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />

@@ -55,13 +55,6 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     setSelectedStudentId(sid);
     setIsStudentProfileOpen(true);
   };
-  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-
-  const openStudentProfile = (sid: string) => {
-    setSelectedStudentId(sid);
-    setIsStudentProfileOpen(true);
-  };
   useEffect(() => {
     setCurrentApp(application || null);
   }, [application]);
