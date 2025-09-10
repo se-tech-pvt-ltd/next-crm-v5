@@ -135,7 +135,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-xs">
                       <div className="text-[11px] text-gray-500">Student ID</div>
-                      <div className="font-medium">{presetStudent?.student_id || selectedStudent?.student_id || selectedStudent?.id || '-'}</div>
+                      <div className="font-medium">
+                        {presetStudent?.student_id || selectedStudent?.student_id || selectedStudent?.id ? (
+                          <Button type="button" variant="link" className="p-0 h-6" onClick={() => openStudentProfile(presetStudent?.id || selectedStudent?.id)}>
+                            {presetStudent?.student_id || selectedStudent?.student_id || selectedStudent?.id}
+                          </Button>
+                        ) : (
+                          '-'
+                        )}
+                      </div>
                     </div>
                     <div className="text-xs">
                       <div className="text-[11px] text-gray-500">Student Name</div>
