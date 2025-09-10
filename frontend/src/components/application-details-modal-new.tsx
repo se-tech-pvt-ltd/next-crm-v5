@@ -210,24 +210,15 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
         <div className="grid grid-cols-[1fr_30rem] h-[90vh] min-h-0">
           <div className="flex flex-col min-h-0">
             <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-              <div className="px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                    <School className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-lg font-semibold truncate">Application Details</h1>
-                    <p className="text-xs text-gray-600 truncate">View and edit application details</p>
-                  </div>
+              <div className="px-4 py-2 flex items-center justify-between">
+                <div className="flex-1 pr-3">
+                  <StatusProgressBar />
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-              </div>
-              <div className="px-4 pb-3">
-                <StatusProgressBar />
               </div>
             </div>
 
