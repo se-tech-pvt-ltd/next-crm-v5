@@ -204,8 +204,17 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                       <div>
                         <FormLabel>Application</FormLabel>
                         <div className="mt-1">
-                          {applicationId ? (
-                            <div className="text-sm text-gray-700">{String(applicationId)}</div>
+                          {(applicationId || form.getValues('applicationId')) ? (
+                            (() => {
+                              const aid = String(applicationId || form.getValues('applicationId'));
+                              const selectedApp = applications?.find((a) => String(a.id) === aid);
+                              if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
+                              return (
+                                <Button variant="link" className="p-0 h-8 text-sm" onClick={() => window.open(`/applications/${selectedApp.id}`, '_blank')}>
+                                  {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
+                                </Button>
+                              );
+                            })()
                           ) : (
                             <Popover open={applicationDropdownOpen} onOpenChange={setApplicationDropdownOpen}>
                               <PopoverTrigger asChild>
