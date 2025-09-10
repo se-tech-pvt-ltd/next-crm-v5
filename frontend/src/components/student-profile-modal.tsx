@@ -8,7 +8,6 @@ import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
-import { AddApplicationModal } from './add-application-modal';
 import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
