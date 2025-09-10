@@ -22,7 +22,7 @@ interface StudentProfileModalProps {
   onOpenAddApplication?: (studentId?: string | null) => void;
 }
 
-export function StudentProfileModal({ open, onOpenChange, studentId }: StudentProfileModalProps) {
+export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddApplication }: StudentProfileModalProps) {
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isEditing, setIsEditing] = useState(false);
