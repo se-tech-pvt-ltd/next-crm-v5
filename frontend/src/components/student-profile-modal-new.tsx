@@ -48,7 +48,7 @@ interface StudentProfileModalProps {
   onOpenAddApplication?: (studentId?: string | null) => void;
 }
 
-export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication }: StudentProfileModalProps) {
+export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication, onOpenAddApplication }: StudentProfileModalProps) {
   const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
