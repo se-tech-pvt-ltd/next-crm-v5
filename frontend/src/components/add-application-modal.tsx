@@ -116,11 +116,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {studentId ? (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Student *</FormLabel>
-                      <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}>
-                        {presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'View student'}
-                      </Button>
+                      <div className="mt-1">
+                        <Button type="button" variant="link" className="p-0 h-8 text-sm text-left" onClick={() => { onOpenChange(false); setTimeout(() => setLocation(`/students/${studentId}`), 0); }}>
+                          {presetStudent ? `${presetStudent.name} (${presetStudent.email})` : 'View student'}
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   ) : (
