@@ -14,7 +14,7 @@ import { insertApplicationSchema, type Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AddApplicationModalProps {
@@ -81,12 +81,26 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+        <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
-          <DialogTitle>Create New Application</DialogTitle>
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <PlusCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Add New Application</h2>
+                <p className="text-xs text-gray-500">Create a university application for a student</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2" />
+          </div>
         </DialogHeader>
 
-        <Form {...form}>
+        <div className="flex h-[90vh]">
+          <div className="flex-1 overflow-y-auto p-6 pt-2">
+            <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-4">
               <Card>
@@ -409,7 +423,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               </Button>
             </div>
           </form>
-        </Form>
+            </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
