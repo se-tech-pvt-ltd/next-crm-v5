@@ -14,6 +14,7 @@ import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { type Student, type Application } from '@/lib/types';
 import { useLocation } from 'wouter';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
