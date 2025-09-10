@@ -361,63 +361,6 @@ export default function Students() {
           </CardContent>
         </Card>
 
-        {/* Linked Entities */}
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm font-medium">Linked Entities</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {isLoading ? (
-              <div className="space-y-2">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-3 w-40" />
-                    <Skeleton className="h-3 w-48" />
-                    <Skeleton className="h-3 w-56" />
-                  </div>
-                ))}
-              </div>
-            ) : filteredStudents.length === 0 ? (
-              <EmptyState
-                icon={<GraduationCap className="h-10 w-10" />}
-                title="No linked entities"
-                description={statusFilter === 'all' ? 'No students available.' : `No students with status "${statusFilter}".`}
-              />
-            ) : (
-              <Table className="text-xs">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">Student ID</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Student Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredStudents.map((student) => (
-                    <TableRow
-                      key={student.id}
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleViewProfile(student.id)}
-                    >
-                      <TableCell className="p-2 text-xs">{(student as any).student_id || student.id}</TableCell>
-                      <TableCell className="p-2 text-xs">{student.name}</TableCell>
-                      <TableCell className="p-2 text-xs">
-                        {student.email ? (
-                          <div className="flex items-center text-xs">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {student.email}
-                          </div>
-                        ) : (
-                          <div className="text-xs text-gray-500">-</div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
       <AddApplicationModal
