@@ -10,7 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
+import { AddApplicationModal } from './add-application-modal';
 import { type Student, type Application } from '@/lib/types';
+import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
@@ -51,6 +53,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: student, isLoading } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
@@ -317,14 +320,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                 <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-xs">Personal Information</CardTitle>
+                      <CardTitle className="text-xs">Student Information</CardTitle>
                       <div className="flex items-center space-x-2">
                         {!isEditing ? (
                           <>
                             <Button
-                              variant="default"
+                              variant="outline"
                               size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                              className="rounded-full px-2 [&_svg]:size-3"
                               onClick={() => setIsAddApplicationOpen(true)}
                               title="Add Application"
                             >
@@ -365,34 +368,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         </Label>
                         <Input id="name" value={isEditing ? (editData.name || '') : (student?.name || '')} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email Address</span>
-                        </Label>
-                        <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone" className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4" />
-                          <span>Phone Number</span>
-                        </Label>
-                        <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>Date of Birth</span>
-                        </Label>
-                        <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="address" className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4" />
-                          <span>Address</span>
-                        </Label>
-                        <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="passportNumber" className="flex items-center space-x-2">
@@ -400,6 +375,38 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                           <span>Passport Number</span>
                         </Label>
                         <Input id="passportNumber" value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')} onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email Address</span>
+                        </Label>
+                        <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4" />
+                          <span>Phone Number</span>
+                        </Label>
+                        <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>Date of Birth</span>
+                        </Label>
+                        <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="address" className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>Address</span>
+                        </Label>
+                        <Input id="address" value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                       </div>
                     </div>
                   </CardContent>
@@ -485,17 +492,63 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
                             <div className="text-[11px] text-gray-600">Consultancy Fee</div>
-                            <div className="font-medium">{student?.consultancyFree ? 'Yes' : 'No'}</div>
+                            <div className="text-sm text-gray-700">{student?.consultancyFree ? 'Yes' : 'No'}</div>
                           </div>
                           <div>
                             <div className="text-[11px] text-gray-600">Scholarship</div>
-                            <div className="font-medium">{student?.scholarship ? 'Yes' : 'No'}</div>
+                            <div className="text-sm text-gray-700">{student?.scholarship ? 'Yes' : 'No'}</div>
                           </div>
                         </div>
                       )}
                     </div>
 
                   </div>
+                </CollapsibleCard>
+
+                <CollapsibleCard
+                  persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
+                  header={
+                    <div className="flex items-center justify-between w-full">
+                      <CardTitle className="text-xs flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <span>Applications</span>
+                        {Array.isArray(applications) && (
+                          <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
+                        )}
+                      </CardTitle>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)}>
+                        <Plus />
+                        <span className="hidden lg:inline">Add Application</span>
+                      </Button>
+                    </div>
+                  }
+                >
+                  {(!applications || applications.length === 0) ? (
+                    <div className="text-xs text-gray-500">No applications yet.</div>
+                  ) : (
+                    <div className="divide-y">
+                      {applications.map((app) => (
+                        <button
+                          key={app.id}
+                          type="button"
+                          onClick={() => { onOpenChange(false); setLocation(`/applications/${app.id}`); }}
+                          className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        >
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate">{app.university} — {app.program}</div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {(app.country || '-')}{app.intake ? ` • ${app.intake}` : ''}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant="outline" className="text-[10px]">{app.appStatus}</Badge>
+                            {app.caseStatus && <Badge variant="secondary" className="text-[10px]">{app.caseStatus}</Badge>}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </CollapsibleCard>
 
               </div>
@@ -513,6 +566,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
           </div>
         </DialogContent>
       </Dialog>
+
+      <AddApplicationModal open={isAddApplicationOpen} onOpenChange={setIsAddApplicationOpen} studentId={student?.id} />
 
     </>
   );
