@@ -374,7 +374,6 @@ export default function Students() {
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            setSelectedStudentId(null);
             setLocation('/students');
           }
         }}
@@ -384,6 +383,12 @@ export default function Students() {
       />
 
       <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplicationForDetails(null); }} application={selectedApplicationForDetails} />
+
+      <AddApplicationModal
+        open={isAddApplicationModalOpen}
+        onOpenChange={(open) => { setIsAddApplicationModalOpen(open); if (!open) setSelectedStudentId(null); }}
+        studentId={selectedStudentId || undefined}
+      />
     </Layout>
   );
 }
