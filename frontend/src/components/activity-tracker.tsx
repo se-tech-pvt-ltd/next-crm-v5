@@ -51,11 +51,44 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryKey: ['/api/users'],
   });
 
-  // Fetch Leads dropdowns (for mapping status IDs/keys to display names)
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
+  // Fetch module-specific dropdowns (for mapping status IDs/keys to display names)
+  const moduleNameForEntity = (et: string) => {
+    const t = (et || '').toLowerCase();
+    switch (t) {
+      case 'lead':
+        return 'Leads';
+      case 'student':
+        return 'students';
+      case 'application':
+        return 'applications';
+      case 'admission':
+        return 'admissions';
+      default:
+        return t.endsWith('s') ? t : `${t}s`;
+    }
+  };
+  const moduleName = moduleNameForEntity(entityType);
+  const { data: moduleDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module', moduleName],
+    queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
   });
+
+  // Generic dropdown label resolution
+  const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const getOptionsForField = (fieldName?: string): any[] => {
+    if (!fieldName || !moduleDropdowns) return [];
+    const target = normalize(fieldName);
+    const entry = Object.entries(moduleDropdowns as any).find(([k]) => normalize(String(k)) === target);
+    return (entry?.[1] as any[]) || [];
+  };
+  const getLabelForField = (fieldName?: string | null, value?: string | null) => {
+    if (!fieldName) return value || '';
+    if (!value) return '';
+    if (normalize(fieldName) === 'status') return getStatusLabel(value);
+    const options = getOptionsForField(fieldName);
+    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
+    return hit?.value || value;
+  };
 
   // Create a lookup function for user profile images
   const getUserProfileImage = (userId: string) => {
@@ -137,9 +170,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   // Map status id/key/value to display label from dropdowns
   const getStatusLabel = (idOrKey?: string) => {
-    if (!idOrKey || !leadsDropdowns?.Status) return idOrKey || '';
-    const status = leadsDropdowns.Status.find((opt: any) =>
-      opt.id === idOrKey || opt.key === idOrKey || opt.value?.toLowerCase() === idOrKey.toLowerCase()
+    if (!idOrKey || !moduleDropdowns?.Status) return idOrKey || '';
+    const status = moduleDropdowns.Status.find((opt: any) =>
+      opt.id === idOrKey || opt.key === idOrKey || (typeof opt.value === 'string' && typeof idOrKey === 'string' && opt.value.toLowerCase() === idOrKey.toLowerCase())
     );
     return status?.value || idOrKey;
   };
@@ -328,7 +361,21 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                       </div>
                       {(activity.description || (activity as any).title) && (
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
-                          {leadsDropdowns?.Status ? mapStatusIdsInText(activity.description || (activity as any).title) : (activity.description || (activity as any).title)}
+                          {(() => {
+                            const hasValues = ((activity.oldValue ?? '') !== '' || (activity.newValue ?? '') !== '');
+                            if (moduleDropdowns && activity.fieldName && hasValues) {
+                              const fromLabel = getLabelForField(activity.fieldName, activity.oldValue || 'empty');
+                              const toLabel = getLabelForField(activity.fieldName, activity.newValue || 'empty');
+                              const fieldLabel = (activity.fieldName || '')
+                                .replace(/([A-Z])/g, ' $1')
+                                .replace(/^./, (str) => str.toUpperCase());
+                              return `${fieldLabel} changed from "${fromLabel}" to "${toLabel}"`;
+                            }
+                            if ((moduleDropdowns as any)?.Status) {
+                              return mapStatusIdsInText(activity.description || (activity as any).title);
+                            }
+                            return (activity.description || (activity as any).title);
+                          })()}
                         </div>
                       )}
                     </div>

@@ -41,6 +41,15 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
     return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
   };
 
+  const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const getFieldOptions = (fieldName: string): any[] => {
+    const data = dropdownData as any;
+    if (!data) return [];
+    const target = normalize(fieldName);
+    const entry = Object.entries(data).find(([k]) => normalize(String(k)) === target);
+    return (entry?.[1] as any[]) || [];
+  };
+
   const form = useForm({
     resolver: zodResolver(insertStudentSchema),
     defaultValues: {
@@ -193,7 +202,18 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Expectation</FormLabel>
                     <FormControl>
-                      <Input placeholder="Student expectation" {...field} />
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select expectation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getFieldOptions('expectation').map((opt: any) => (
+                            <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                              {opt.value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
