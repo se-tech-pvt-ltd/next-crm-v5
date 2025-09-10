@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ActivityTracker } from './activity-tracker';
 import { AddApplicationModal } from './add-application-modal';
 import { type Student, type Application } from '@/lib/types';
+import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
@@ -52,6 +53,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAddApplicationOpen, setIsAddApplicationOpen] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: student, isLoading } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
@@ -527,7 +529,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   ) : (
                     <div className="divide-y">
                       {applications.map((app) => (
-                        <div key={app.id} className="flex items-center justify-between py-2">
+                        <button
+                          key={app.id}
+                          type="button"
+                          onClick={() => { onOpenChange(false); setLocation(`/applications/${app.id}`); }}
+                          className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        >
                           <div className="min-w-0">
                             <div className="text-sm font-medium truncate">{app.university} — {app.program}</div>
                             <div className="text-xs text-gray-500 truncate">
@@ -538,7 +545,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                             <Badge variant="outline" className="text-[10px]">{app.appStatus}</Badge>
                             {app.caseStatus && <Badge variant="secondary" className="text-[10px]">{app.caseStatus}</Badge>}
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )}
