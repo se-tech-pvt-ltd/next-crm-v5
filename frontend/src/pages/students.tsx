@@ -288,8 +288,8 @@ export default function Students() {
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => handleViewProfile(student.id)}
                     >
-                      <TableCell className="font-medium p-2 text-xs">{student.student_id || student.id}</TableCell>
-                      <TableCell className="font-medium p-2 text-xs">{student.name}</TableCell>
+                      <TableCell className="p-2 text-xs">{student.student_id || student.id}</TableCell>
+                      <TableCell className="p-2 text-xs">{student.name}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="space-y-1">
                           {student.phone ? (

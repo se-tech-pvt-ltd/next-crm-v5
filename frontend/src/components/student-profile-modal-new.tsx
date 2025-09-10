@@ -485,11 +485,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
                             <div className="text-[11px] text-gray-600">Consultancy Fee</div>
-                            <div className="font-medium">{student?.consultancyFree ? 'Yes' : 'No'}</div>
+                            <div className="text-sm text-gray-700">{student?.consultancyFree ? 'Yes' : 'No'}</div>
                           </div>
                           <div>
                             <div className="text-[11px] text-gray-600">Scholarship</div>
-                            <div className="font-medium">{student?.scholarship ? 'Yes' : 'No'}</div>
+                            <div className="text-sm text-gray-700">{student?.scholarship ? 'Yes' : 'No'}</div>
                           </div>
                         </div>
                       )}
