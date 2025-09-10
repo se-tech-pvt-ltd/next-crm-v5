@@ -363,12 +363,6 @@ export default function Students() {
 
       </div>
 
-      <AddApplicationModal
-        open={isAddApplicationModalOpen}
-        onOpenChange={setIsAddApplicationModalOpen}
-        studentId={selectedStudentId || undefined}
-      />
-
       <StudentProfileModal
         open={isProfileModalOpen}
         onOpenChange={(open) => {
