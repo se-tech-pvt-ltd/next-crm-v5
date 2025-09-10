@@ -416,7 +416,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
       {/* Details Modals */}
       <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={setIsAppDetailsOpen} application={currentApplicationObj} onOpenStudentProfile={(sid) => openStudentProfile(sid)} />
-      <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={currentStudentIdLocal} />
+      <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={currentStudentIdLocal} onOpenApplication={(app) => { setCurrentApplicationObj(app); setIsAppDetailsOpen(true); }} />
     </Dialog>
   );
 }
