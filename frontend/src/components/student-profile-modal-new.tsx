@@ -68,6 +68,22 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
     queryFn: async () => DropdownsService.getModuleDropdowns('students')
   });
 
+  // Helpers to resolve dropdown-backed labels (case-insensitive field keys)
+  const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const getFieldOptions = (fieldName: string): any[] => {
+    const data = dropdownData as any;
+    if (!data) return [];
+    const target = normalize(fieldName);
+    const entry = Object.entries(data).find(([k]) => normalize(String(k)) === target);
+    return (entry?.[1] as any[]) || [];
+  };
+  const getDropdownLabel = (fieldName: string, value?: string | null) => {
+    if (!value) return '';
+    const options = getFieldOptions(fieldName);
+    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
+    return hit?.value || value;
+  };
+
   useEffect(() => {
     if (student) {
       setEditData(student);
@@ -382,7 +398,20 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                         <FileText className="w-4 h-4" />
                         <span>English Proficiency</span>
                       </Label>
-                      <Input id="englishProficiency" value={isEditing ? (editData.englishProficiency || '') : (student?.englishProficiency || '')} onChange={(e) => setEditData({ ...editData, englishProficiency: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                      {isEditing ? (
+                        <Select value={editData.englishProficiency || ''} onValueChange={(v) => setEditData({ ...editData, englishProficiency: v })}>
+                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
+                          <SelectContent>
+                            {getFieldOptions('englishProficiency').map((opt: any) => (
+                              <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                                {opt.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled className="h-7 text-[11px]" />
+                      )}
                     </div>
 
                     <div className="space-y-2">
