@@ -70,6 +70,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
+  const watchedAppId = form.watch('applicationId');
   useEffect(() => {
     const full = Number(watchedFull) || 0;
     const scholarship = Number(watchedScholarship) || 0;
