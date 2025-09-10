@@ -469,15 +469,30 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                       )}
                     </div>
 
-                    <div className="space-y-2 flex items-center">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox checked={!!(isEditing ? editData.consultancyFree : student?.consultancyFree)} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} disabled={!isEditing} />
-                        <span className="text-sm">Consultancy Free</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Checkbox checked={!!(isEditing ? editData.scholarship : student?.scholarship)} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} disabled={!isEditing} />
-                        <span className="text-sm">Scholarship</span>
-                      </div>
+                    <div className="space-y-2">
+                      {isEditing ? (
+                        <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox checked={!!editData.consultancyFree} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} />
+                            <span className="text-sm">Consultancy Free</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Checkbox checked={!!editData.scholarship} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} />
+                            <span className="text-sm">Scholarship</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <div className="text-[11px] text-gray-600">Consultancy Fee</div>
+                            <div className="font-medium">{student?.consultancyFree ? 'Yes' : 'No'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[11px] text-gray-600">Scholarship</div>
+                            <div className="font-medium">{student?.scholarship ? 'Yes' : 'No'}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                   </div>
