@@ -503,6 +503,47 @@ export function StudentProfileModal({ open, onOpenChange, studentId }: StudentPr
                   </div>
                 </CollapsibleCard>
 
+                <CollapsibleCard
+                  persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
+                  header={
+                    <div className="flex items-center justify-between w-full">
+                      <CardTitle className="text-xs flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <span>Applications</span>
+                        {Array.isArray(applications) && (
+                          <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
+                        )}
+                      </CardTitle>
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsAddApplicationOpen(true)}>
+                        <Plus />
+                        <span className="hidden lg:inline">Add Application</span>
+                      </Button>
+                    </div>
+                  }
+                >
+                  {(!applications || applications.length === 0) ? (
+                    <div className="text-xs text-gray-500">No applications yet.</div>
+                  ) : (
+                    <div className="divide-y">
+                      {applications.map((app) => (
+                        <div key={app.id} className="flex items-center justify-between py-2">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate">{app.university} — {app.program}</div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {(app.country || '-')}{app.intake ? ` • ${app.intake}` : ''}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant="outline" className="text-[10px]">{app.appStatus}</Badge>
+                            {app.caseStatus && <Badge variant="secondary" className="text-[10px]">{app.caseStatus}</Badge>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleCard>
+
               </div>
             </div>
 
