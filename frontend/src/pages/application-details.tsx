@@ -393,6 +393,13 @@ export default function ApplicationDetails() {
         </div>
       )}
 
+      <AddAdmissionModal
+        open={isAddAdmissionOpen}
+        onOpenChange={setIsAddAdmissionOpen}
+        applicationId={application?.id as any}
+        studentId={application?.studentId}
+      />
+
     </Layout>
   );
 }
