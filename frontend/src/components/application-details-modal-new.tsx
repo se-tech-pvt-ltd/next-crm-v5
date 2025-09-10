@@ -73,6 +73,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application }: App
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Application>>({});
   const [currentStatus, setCurrentStatus] = useState<string>(currentApp?.appStatus || 'Open');
+  const [isAddAdmissionOpen, setIsAddAdmissionOpen] = useState(false);
 
   useEffect(() => {
     if (currentApp) {
