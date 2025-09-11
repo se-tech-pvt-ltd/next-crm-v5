@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
+import { StudentProfileModal } from './student-profile-modal-new';
 
 interface AddApplicationModalProps {
   open: boolean;
