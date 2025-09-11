@@ -267,7 +267,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                                   <Edit />
                                   <span className="hidden lg:inline">Edit</span>
                                 </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setConvertLead(lead); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => { onOpenChange(false); setShowConvertModal(true); }); } catch { onOpenChange(false); setShowConvertModal(true); } }} title="Convert to Student">
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { if (typeof onOpenConvert === 'function') { try { onOpenConvert(lead); } catch { onOpenChange(false); setLocation(`/leads/${lead?.id}/convert`); } } else { onOpenChange(false); setLocation(`/leads/${lead?.id}/convert`); } }} title="Convert to Student">
                                   <UserPlus />
                                   <span className="hidden lg:inline">Convert</span>
                                 </Button>
