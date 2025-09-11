@@ -125,7 +125,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
-                <div className="flex-1 overflow-y-auto p-6 pt-2">
+                <div className="flex-1 overflow-y-auto p-6 pt-2 pb-24">
                   <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
