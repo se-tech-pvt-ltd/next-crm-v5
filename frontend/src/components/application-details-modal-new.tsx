@@ -120,7 +120,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         intake: mapToOptionValue(currentApp.intake || '', intakeOptions),
         channelPartner: currentApp.channelPartner,
         googleDriveLink: currentApp.googleDriveLink,
-        caseStatus: currentApp.caseStatus || '',
+        caseStatus: mapToOptionValue(currentApp.caseStatus || '', caseStatusOptions),
       });
       setCurrentStatus(currentApp.appStatus || 'Open');
     }
