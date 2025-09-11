@@ -246,7 +246,7 @@ export default function EventsPage() {
     const defaultStatus = statusOptions.find((o: any) => o.isDefault);
     const defaultSource = sourceOptions.find((o: any) => o.isDefault);
     setRegForm({ status: defaultStatus ? defaultStatus.value : '', name: '', number: '', email: '', city: '', source: defaultSource ? String(defaultSource.value) : '', eventId: filterEventId });
-    setIsAddRegOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddRegOpen(true)); } catch { setIsAddRegOpen(true); }
   };
 
   const handleImportClick = () => {
