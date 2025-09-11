@@ -8,6 +8,18 @@ import "./lib/resize-observer-polyfill";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    {/* ModalManagerProvider ensures only one modal is open at a time */}
+    {(() => {
+      try {
+        const { ModalManagerProvider } = require('./contexts/ModalManagerContext');
+        return (
+          <ModalManagerProvider>
+            <App />
+          </ModalManagerProvider>
+        );
+      } catch {
+        return <App />;
+      }
+    })()}
   </StrictMode>
 );
