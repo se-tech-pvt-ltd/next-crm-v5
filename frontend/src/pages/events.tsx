@@ -223,7 +223,7 @@ export default function EventsPage() {
       status: 'new',
       eventRegId: reg.id,
     });
-    setAddLeadModalOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
