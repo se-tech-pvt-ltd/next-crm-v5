@@ -187,7 +187,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const openStudentProfile = (sid: string) => {
     setCurrentStudentIdLocal(sid);
-    setIsStudentProfileOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
   };
 
   return (
