@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+console.log('[modal] loaded: frontend/src/components/convert-to-student-modal.tsx');
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
