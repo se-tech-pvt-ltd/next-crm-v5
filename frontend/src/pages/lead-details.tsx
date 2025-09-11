@@ -400,7 +400,7 @@ export default function LeadDetails() {
                         variant="outline"
                         size="sm"
                         className="rounded-full px-2 md:px-3 [&_svg]:size-5"
-                        onClick={() => setLocation(`/students/${convertedStudent.id}`)}
+                        onClick={() => setLocation(`/students?studentId=${convertedStudent.id}`)}
                         disabled={isLoading}
                         title="View Student"
                       >
