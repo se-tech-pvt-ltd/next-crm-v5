@@ -356,15 +356,48 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                         </div>
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Course Type</span></Label>
-                          <Input value={isEditing ? (editData.courseType || '') : (currentApp.courseType || '')} onChange={(e) => setEditData({ ...editData, courseType: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.courseType as string) || ''} onValueChange={(v) => setEditData({ ...editData, courseType: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.courseType || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Country</span></Label>
-                          <Input value={isEditing ? (editData.country || '') : (currentApp.country || '')} onChange={(e) => setEditData({ ...editData, country: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.country as string) || ''} onValueChange={(v) => setEditData({ ...editData, country: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.country || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
-                          <Input value={isEditing ? (editData.intake || '') : (currentApp.intake || '')} onChange={(e) => setEditData({ ...editData, intake: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.intake as string) || ''} onValueChange={(v) => setEditData({ ...editData, intake: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.intake || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                       </div>
                     </CardContent>
