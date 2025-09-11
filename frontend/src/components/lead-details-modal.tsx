@@ -267,7 +267,20 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                                   <Edit />
                                   <span className="hidden lg:inline">Edit</span>
                                 </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { if (typeof onOpenConvert === 'function') { try { onOpenConvert(lead); } catch { onOpenChange(false); setLocation(`/leads/${lead?.id}/convert`); } } else { onOpenChange(false); setLocation(`/leads/${lead?.id}/convert`); } }} title="Convert to Student">
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => {
+                                  try {
+                                    // close this modal first
+                                    try { onOpenChange(false); } catch {}
+                                    if (typeof onOpenConvert === 'function') {
+                                      onOpenConvert(lead);
+                                    } else {
+                                      setLocation(`/leads/${lead?.id}/convert`);
+                                    }
+                                  } catch (e) {
+                                    try { onOpenChange(false); } catch {}
+                                    setLocation(`/leads/${lead?.id}/convert`);
+                                  }
+                                }} title="Convert to Student">
                                   <UserPlus />
                                   <span className="hidden lg:inline">Convert</span>
                                 </Button>
