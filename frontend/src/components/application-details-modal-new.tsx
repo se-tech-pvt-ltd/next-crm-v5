@@ -115,9 +115,9 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       setEditData({
         university: currentApp.university,
         program: currentApp.program,
-        courseType: currentApp.courseType,
-        country: currentApp.country,
-        intake: currentApp.intake,
+        courseType: mapToOptionValue(currentApp.courseType || '', courseTypeOptions),
+        country: mapToOptionValue(currentApp.country || '', countryOptions),
+        intake: mapToOptionValue(currentApp.intake || '', intakeOptions),
         channelPartner: currentApp.channelPartner,
         googleDriveLink: currentApp.googleDriveLink,
         caseStatus: currentApp.caseStatus || '',
