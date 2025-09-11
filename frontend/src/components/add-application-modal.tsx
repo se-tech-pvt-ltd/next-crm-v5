@@ -120,11 +120,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     onOpenChange(false);
     setTimeout(() => {
       try {
-        const { useModalManager } = require('@/contexts/ModalManagerContext');
-        const { openModal } = useModalManager();
-        window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } }));
-      } catch {
-        setLocation(`/students?studentId=${sid}`);
+        // Open local StudentProfileModal to avoid relying on global routing/events
+        setLocalProfileId(sid);
+        setLocalProfileOpen(true);
+      } catch (e) {
+        // fallback to existing approach
+        try { window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } })); } catch {}
+        try { setLocation(`/students?studentId=${sid}`); } catch {}
       }
     }, 240);
   };
