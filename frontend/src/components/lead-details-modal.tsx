@@ -26,6 +26,7 @@ interface LeadDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   lead: Lead | null;
   onLeadUpdate?: (updatedLead: Lead) => void;
+  onOpenConvert?: (lead: Lead | null) => void;
 }
 
 export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: LeadDetailsModalProps) {
