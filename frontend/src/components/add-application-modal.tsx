@@ -106,7 +106,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] h-[90vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] h-[90vh] p-0 overflow-hidden grid grid-rows-[auto_1fr_auto]">
         <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between">
