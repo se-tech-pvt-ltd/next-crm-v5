@@ -34,6 +34,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [showConvertModal, setShowConvertModal] = useState(false);
+  const [convertLead, setConvertLead] = useState<Lead | null>(null);
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
@@ -268,7 +269,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                                   <Edit />
                                   <span className="hidden lg:inline">Edit</span>
                                 </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setShowConvertModal(true)); } catch { onOpenChange(false); setShowConvertModal(true); } }} title="Convert to Student">
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setConvertLead(lead); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setShowConvertModal(true)); } catch { onOpenChange(false); setShowConvertModal(true); } }} title="Convert to Student">
                                   <UserPlus />
                                   <span className="hidden lg:inline">Convert</span>
                                 </Button>
@@ -407,7 +408,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
         </DialogContent>
       </Dialog>
 
-      <ConvertToStudentModal open={showConvertModal} onOpenChange={setShowConvertModal} lead={lead} />
+      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => { setShowConvertModal(open); if (!open) setConvertLead(null); }} lead={convertLead || lead} />
 
       <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
         <DialogContent className="max-w-md">
