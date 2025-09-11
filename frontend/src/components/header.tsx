@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Bell, UserPlus, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
