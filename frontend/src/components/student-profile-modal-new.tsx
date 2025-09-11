@@ -81,6 +81,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   }, [studentId, isLoading, isError, student, setLocation]);
 
 
+  // On mount, ensure any other registered modals are closed so this modal appears on top
+  useEffect(() => {
+    try {
+      const { useModalManager } = require('@/contexts/ModalManagerContext');
+      const { openModal } = useModalManager();
+      // openModal closes all registered modals before running provided fn
+      openModal(() => {});
+    } catch (e) {
+      // ignore if modal manager not available
+    }
+  }, []);
+
   // Get dropdown data for Students module
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
