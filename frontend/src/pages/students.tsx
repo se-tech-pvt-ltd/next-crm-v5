@@ -118,10 +118,12 @@ export default function Students() {
       const params = new URLSearchParams(window.location.search);
       const paramId = params.get('studentId');
       if (paramId) {
+        // Force selected id and reopen modal (close then open) to ensure it mounts cleanly
         setSelectedStudentId(paramId);
+        setIsProfileModalOpen(false);
         setTimeout(() => {
-          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
-        }, 0);
+          setIsProfileModalOpen(true);
+        }, 60);
       }
     }
 
@@ -129,9 +131,11 @@ export default function Students() {
       const id = e?.detail?.id || new URLSearchParams(window.location.search).get('studentId') || new URLSearchParams(window.location.search).get('id');
       if (id) {
         setSelectedStudentId(id);
+        // close any existing profile modal then reopen to ensure fresh mount
+        setIsProfileModalOpen(false);
         setTimeout(() => {
-          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
-        }, 0);
+          setIsProfileModalOpen(true);
+        }, 60);
       }
     };
 
