@@ -83,7 +83,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             const { openModal } = useModalManager();
             openModal(() => setLocation(`/students?studentId=${sid}`));
           } catch {
-            setLocation(`/students/${sid}`);
+            setLocation(`/students?studentId=${sid}`);
           }
         }, 120);
       }
@@ -122,7 +122,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         const { openModal } = useModalManager();
         openModal(() => setLocation(`/students?studentId=${sid}`));
       } catch {
-        setLocation(`/students/${sid}`);
+        setLocation(`/students?studentId=${sid}`);
       }
     }, 0);
   };
