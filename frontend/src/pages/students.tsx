@@ -122,7 +122,7 @@ export default function Students() {
         try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
       }
     }
-  }, []);
+  }, [location]);
 
   const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
