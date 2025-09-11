@@ -173,7 +173,7 @@ export default function ConvertLeadToStudent() {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({ title: 'Success', description: 'Lead converted to student successfully.' });
-      setLocation(`/students/${student.id}`);
+      setLocation(`/students?studentId=${student.id}`);
     },
     onError: (error: Error) => {
       toast({ title: 'Error', description: error.message || 'Failed to convert lead to student.', variant: 'destructive' });
