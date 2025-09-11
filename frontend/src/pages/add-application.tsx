@@ -144,7 +144,7 @@ export default function AddApplication() {
 
   const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
 
-  const goBack = () => setLocation(presetStudentId ? `/students/${presetStudentId}` : '/applications');
+  const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
   return (
     <Layout
