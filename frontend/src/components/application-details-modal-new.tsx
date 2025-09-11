@@ -72,6 +72,27 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   }, [applicationsDropdowns]);
 
+  const makeOptions = useCallback((keys: string[]) => {
+    const dd: any = applicationsDropdowns as any;
+    for (const k of keys) {
+      const list = dd?.[k] || dd?.[k.toLowerCase()] || dd?.[k.replace(/ /g, '')] || dd?.[k.replace(/ /g, '')?.toLowerCase()];
+      if (Array.isArray(list)) {
+        return [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0))).map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+      }
+    }
+    return [] as {label:string;value:string}[];
+  }, [applicationsDropdowns]);
+
+  const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
+  const countryOptions = useMemo(() => makeOptions(['Country','country']), [makeOptions]);
+  const intakeOptions = useMemo(() => makeOptions(['Intake','intake']), [makeOptions]);
+
+  const mapToOptionValue = useCallback((raw: string | undefined, options: {label:string;value:string}[]) => {
+    if (!raw) return '';
+    const found = options.find(o => o.value === raw || o.label === raw || (String(o.value) === String(raw)));
+    return found ? found.value : raw;
+  }, []);
+
   const { data: student } = useQuery<Student>({
     queryKey: currentApp?.studentId ? ['/api/students', currentApp.studentId] : ['noop'],
     queryFn: async () => StudentsService.getStudent(currentApp?.studentId),
