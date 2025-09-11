@@ -131,7 +131,7 @@ export default function Students() {
 
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
-    setIsAddApplicationModalOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); }
   };
 
   return (
@@ -373,7 +373,7 @@ export default function Students() {
         }}
         studentId={selectedStudentId}
         onOpenApplication={(app) => { setSelectedApplicationForDetails(app); setIsAppDetailsOpen(true); }}
-        onOpenAddApplication={(sid) => { setSelectedStudentId(sid || selectedStudentId); setIsAddApplicationModalOpen(true); }}
+        onOpenAddApplication={(sid) => { setSelectedStudentId(sid || selectedStudentId); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); } }}
       />
 
       <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplicationForDetails(null); }} application={selectedApplicationForDetails} />
