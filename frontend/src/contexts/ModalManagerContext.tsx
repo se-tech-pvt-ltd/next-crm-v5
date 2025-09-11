@@ -22,10 +22,13 @@ export function ModalManagerProvider({ children }: { children: ReactNode }) {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const register = (id: string, closeFn: CloseFn) => {
+    const stack = new Error().stack;
+    console.log(`[ModalManager] register: ${id}\n${stack}`);
     registryRef.current.set(id, { close: closeFn });
   };
 
   const unregister = (id: string) => {
+    console.log(`[ModalManager] unregister: ${id}`);
     registryRef.current.delete(id);
     if (activeModal === id) setActiveModal(null);
   };
@@ -37,20 +40,23 @@ export function ModalManagerProvider({ children }: { children: ReactNode }) {
   const closeModal = (id?: string) => {
     const target = id ?? activeModal;
     if (!target) return;
+    console.log(`[ModalManager] closeModal: ${target}`);
     const item = registryRef.current.get(target);
     if (item) {
       try {
         item.close(false);
       } catch (e) {
-        // ignore
+        console.error('[ModalManager] close error', e);
       }
       if (activeModal === target) setActiveModal(null);
     }
   };
 
   const openModal = async (openFn: () => void) => {
+    console.log('[ModalManager] openModal requested, current active:', activeModal);
     // Close current active modal first
     if (activeModal) {
+      console.log('[ModalManager] openModal closing active modal:', activeModal);
       closeModal(activeModal);
       // wait for animations / unmount (match dialog animation duration)
       await new Promise((r) => setTimeout(r, 160));
