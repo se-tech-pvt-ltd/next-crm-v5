@@ -6,7 +6,46 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Dialog = DialogPrimitive.Root
+const Dialog = (props: any) => {
+  const { register, unregister, setActiveModal } = (() => {
+    try {
+      // Lazy import hook to avoid circular during module eval
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { useModalManager } = require('@/contexts/ModalManagerContext');
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      return useModalManager();
+    } catch {
+      return { register: () => {}, unregister: () => {}, setActiveModal: () => {} } as any;
+    }
+  })();
+
+  const idRef = React.useRef<string>(Math.random().toString(36).slice(2));
+
+  // Register when onOpenChange is provided so ModalManager can close it
+  React.useEffect(() => {
+    const id = idRef.current;
+    if (props.onOpenChange) {
+      const closeFn = (open: boolean) => {
+        try {
+          props.onOpenChange(open);
+        } catch {}
+      };
+      register(id, closeFn);
+      return () => unregister(id);
+    }
+    return;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.onOpenChange]);
+
+  React.useEffect(() => {
+    const id = idRef.current;
+    if (props.open) setActiveModal(id);
+    else setActiveModal(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.open]);
+
+  return <DialogPrimitive.Root {...props} />;
+}
 
 const DialogTrigger = DialogPrimitive.Trigger
 

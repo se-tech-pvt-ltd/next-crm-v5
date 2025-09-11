@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+console.log('[modal] loaded: frontend/src/components/application-details-modal-new.tsx');
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
@@ -53,7 +54,11 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       return;
     }
     setSelectedStudentId(sid);
-    setIsStudentProfileOpen(true);
+    // Close the current application modal first
+    try {
+      onOpenChange(false);
+    } catch {}
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
   };
   useEffect(() => {
     setCurrentApp(application || null);

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+console.log('[modal] loaded: frontend/src/components/student-details-modal.tsx');
 import * as DropdownsService from '@/services/dropdowns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -148,7 +149,15 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
                         <Edit />
                         <span className="hidden lg:inline">Edit</span>
                       </Button>
-                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setLocation(`/applications/add?studentId=${student.id}`)} title="Add Application">
+                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => {
+                      try {
+                        const { useModalManager } = require('@/contexts/ModalManagerContext');
+                        const { openModal } = useModalManager();
+                        openModal(() => setLocation(`/applications/add?studentId=${student.id}`));
+                      } catch {
+                        setLocation(`/applications/add?studentId=${student.id}`);
+                      }
+                    }} title="Add Application">
                         <Plus />
                         <span className="hidden lg:inline">Add App</span>
                       </Button>

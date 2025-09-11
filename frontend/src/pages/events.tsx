@@ -223,7 +223,7 @@ export default function EventsPage() {
       status: 'new',
       eventRegId: reg.id,
     });
-    setAddLeadModalOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
@@ -246,7 +246,7 @@ export default function EventsPage() {
     const defaultStatus = statusOptions.find((o: any) => o.isDefault);
     const defaultSource = sourceOptions.find((o: any) => o.isDefault);
     setRegForm({ status: defaultStatus ? defaultStatus.value : '', name: '', number: '', email: '', city: '', source: defaultSource ? String(defaultSource.value) : '', eventId: filterEventId });
-    setIsAddRegOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddRegOpen(true)); } catch { setIsAddRegOpen(true); }
   };
 
   const handleImportClick = () => {
@@ -254,7 +254,7 @@ export default function EventsPage() {
       toast({ title: 'Select an Event to import into', variant: 'destructive' });
       return;
     }
-    setIsImportOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsImportOpen(true)); } catch { setIsImportOpen(true); }
     setImportStep(1);
     setImportFileName('');
     setImportErrors([]);
@@ -526,7 +526,7 @@ export default function EventsPage() {
           </h1>
           <div className="flex items-center gap-2">
             {!showList && (
-              <Button size="xs" variant="default" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+              <Button size="xs" variant="default" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddEventOpen(true)); } catch { setIsAddEventOpen(true); } }} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
             )}
             {showList && selectedEvent && (
               <div className="ml-2 inline-flex items-center">
@@ -628,7 +628,7 @@ export default function EventsPage() {
                           </TableHeader>
                           <TableBody>
                             {pageItems.map((r: any) => (
-                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsViewRegOpen(true)); } catch { setIsViewRegOpen(true); } }}>
                                 <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.name}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>

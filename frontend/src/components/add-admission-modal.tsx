@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+console.log('[modal] loaded: frontend/src/components/add-admission-modal.tsx');
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -182,12 +183,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const openApplicationDetails = (app: Application) => {
     setCurrentApplicationObj(app);
-    setIsAppDetailsOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); }
   };
 
   const openStudentProfile = (sid: string) => {
     setCurrentStudentIdLocal(sid);
-    setIsStudentProfileOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
   };
 
   return (
@@ -416,7 +417,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
       {/* Details Modals */}
       <ApplicationDetailsModal open={isAppDetailsOpen} onOpenChange={setIsAppDetailsOpen} application={currentApplicationObj} onOpenStudentProfile={(sid) => openStudentProfile(sid)} />
-      <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={currentStudentIdLocal} onOpenApplication={(app) => { setCurrentApplicationObj(app); setIsAppDetailsOpen(true); }} />
+      <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={currentStudentIdLocal} onOpenApplication={(app) => { setCurrentApplicationObj(app); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); } }} />
     </Dialog>
   );
 }

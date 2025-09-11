@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+console.log('[modal] loaded: frontend/src/components/add-application-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -76,7 +77,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       const sid = application?.studentId || studentId;
       if (sid) {
         // Navigate to student page which opens the profile modal
-        setTimeout(() => setLocation(`/students/${sid}`), 120);
+        setTimeout(() => {
+          try {
+            const { useModalManager } = require('@/contexts/ModalManagerContext');
+            const { openModal } = useModalManager();
+            openModal(() => setLocation(`/students/${sid}`));
+          } catch {
+            setLocation(`/students/${sid}`);
+          }
+        }, 120);
       }
     },
     onError: (error) => {
@@ -107,7 +116,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const openStudentProfile = (sid?: string) => {
     if (!sid) return;
     onOpenChange(false);
-    setTimeout(() => setLocation(`/students/${sid}`), 0);
+    setTimeout(() => {
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setLocation(`/students/${sid}`));
+      } catch {
+        setLocation(`/students/${sid}`);
+      }
+    }, 0);
   };
 
   return (

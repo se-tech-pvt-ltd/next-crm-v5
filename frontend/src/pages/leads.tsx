@@ -90,7 +90,13 @@ export default function Leads() {
   const handleAddLeadClick = () => {
     setIsNavigating(true);
     setTimeout(() => {
-      setAddLeadOpen(true);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setAddLeadOpen(true));
+      } catch {
+        setAddLeadOpen(true);
+      }
       setIsNavigating(false);
     }, 200);
   };
@@ -490,7 +496,13 @@ export default function Leads() {
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => {
                         setSelectedLead(lead);
-                        setLeadModalOpen(true);
+                        try {
+                          const { useModalManager } = require('@/contexts/ModalManagerContext');
+                          const { openModal } = useModalManager();
+                          openModal(() => setLeadModalOpen(true));
+                        } catch {
+                          setLeadModalOpen(true);
+                        }
                       }}
                     >
                       <TableCell className="font-medium p-2 text-xs">{lead.name}</TableCell>

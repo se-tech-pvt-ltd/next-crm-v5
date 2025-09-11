@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+console.log('[component] loaded: frontend/src/components/user-menu.tsx');
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +88,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+            <DropdownMenuItem onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileOpen(true)); } catch { setIsProfileOpen(true); } }}>
               <User className="w-4 h-4 mr-2" />
               View Profile
             </DropdownMenuItem>
