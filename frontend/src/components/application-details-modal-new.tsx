@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,6 +72,28 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   }, [applicationsDropdowns]);
 
+  const makeOptions = useCallback((keys: string[]) => {
+    const dd: any = applicationsDropdowns as any;
+    for (const k of keys) {
+      const list = dd?.[k] || dd?.[k.toLowerCase()] || dd?.[k.replace(/ /g, '')] || dd?.[k.replace(/ /g, '')?.toLowerCase()];
+      if (Array.isArray(list)) {
+        return [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0))).map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+      }
+    }
+    return [] as {label:string;value:string}[];
+  }, [applicationsDropdowns]);
+
+  const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
+  const countryOptions = useMemo(() => makeOptions(['Country','country']), [makeOptions]);
+  const intakeOptions = useMemo(() => makeOptions(['Intake','intake']), [makeOptions]);
+  const channelPartnerOptions = useMemo(() => makeOptions(['Channel Partner','ChannelPartners','channelPartner','channel_partners','Channel Partner(s)','ChannelPartner']), [makeOptions]);
+
+  const mapToOptionValue = useCallback((raw: string | undefined, options: {label:string;value:string}[]) => {
+    if (!raw) return '';
+    const found = options.find(o => o.value === raw || o.label === raw || (String(o.value) === String(raw)));
+    return found ? found.value : raw;
+  }, []);
+
   const { data: student } = useQuery<Student>({
     queryKey: currentApp?.studentId ? ['/api/students', currentApp.studentId] : ['noop'],
     queryFn: async () => StudentsService.getStudent(currentApp?.studentId),
@@ -94,12 +116,12 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       setEditData({
         university: currentApp.university,
         program: currentApp.program,
-        courseType: currentApp.courseType,
-        country: currentApp.country,
-        intake: currentApp.intake,
-        channelPartner: currentApp.channelPartner,
+        courseType: mapToOptionValue(currentApp.courseType || '', courseTypeOptions),
+        country: mapToOptionValue(currentApp.country || '', countryOptions),
+        intake: mapToOptionValue(currentApp.intake || '', intakeOptions),
+        channelPartner: mapToOptionValue(currentApp.channelPartner || '', channelPartnerOptions) || currentApp.channelPartner,
         googleDriveLink: currentApp.googleDriveLink,
-        caseStatus: currentApp.caseStatus || '',
+        caseStatus: mapToOptionValue(currentApp.caseStatus || '', caseStatusOptions),
       });
       setCurrentStatus(currentApp.appStatus || 'Open');
     }
@@ -253,7 +275,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                             </Button>
                           ) : !isEditing ? (
                             <>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { setTimeout(() => setIsAddAdmissionOpen(true), 160); }} title="Add Admission">
+                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); }} title="Add Admission">
                                 <Plus />
                                 <span className="hidden lg:inline">Add Admission</span>
                               </Button>
@@ -299,7 +321,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
                           {isEditing ? (
-                            <Select value={editData.caseStatus || 'Raw'} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
+                            <Select value={(editData.caseStatus as string) || ''} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
                               <SelectTrigger className="h-8 text-xs">
                                 <SelectValue placeholder="Please select" />
                               </SelectTrigger>
@@ -335,15 +357,48 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                         </div>
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Course Type</span></Label>
-                          <Input value={isEditing ? (editData.courseType || '') : (currentApp.courseType || '')} onChange={(e) => setEditData({ ...editData, courseType: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.courseType as string) || ''} onValueChange={(v) => setEditData({ ...editData, courseType: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.courseType || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Country</span></Label>
-                          <Input value={isEditing ? (editData.country || '') : (currentApp.country || '')} onChange={(e) => setEditData({ ...editData, country: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.country as string) || ''} onValueChange={(v) => setEditData({ ...editData, country: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.country || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
-                          <Input value={isEditing ? (editData.intake || '') : (currentApp.intake || '')} onChange={(e) => setEditData({ ...editData, intake: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.intake as string) || ''} onValueChange={(v) => setEditData({ ...editData, intake: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.intake || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -357,7 +412,18 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Channel Partner</span></Label>
-                          <Input value={isEditing ? (editData.channelPartner || '') : (currentApp.channelPartner || '')} onChange={(e) => setEditData({ ...editData, channelPartner: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.channelPartner as string) || ''} onValueChange={(v) => setEditData({ ...editData, channelPartner: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.channelPartner || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                         <div className="space-y-2 md:col-span-1">
                           <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>

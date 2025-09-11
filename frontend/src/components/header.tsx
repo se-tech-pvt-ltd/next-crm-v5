@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Bell, UserPlus, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
@@ -20,7 +20,20 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
+  const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
+  const [addAdmissionStudentId, setAddAdmissionStudentId] = useState<string | undefined>(undefined);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      setAddAdmissionAppId(d.applicationId);
+      setAddAdmissionStudentId(d.studentId);
+      setIsAddAdmissionModalOpen(true);
+    };
+    window.addEventListener('openAddAdmission', handler as EventListener);
+    return () => window.removeEventListener('openAddAdmission', handler as EventListener);
+  }, []);
 
   return (
     <>
@@ -125,9 +138,17 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
       />
-      <AddAdmissionModal 
+      <AddAdmissionModal
         open={isAddAdmissionModalOpen}
-        onOpenChange={setIsAddAdmissionModalOpen}
+        onOpenChange={(open) => {
+          setIsAddAdmissionModalOpen(open);
+          if (!open) {
+            setAddAdmissionAppId(undefined);
+            setAddAdmissionStudentId(undefined);
+          }
+        }}
+        applicationId={addAdmissionAppId}
+        studentId={addAdmissionStudentId}
       />
     </>
   );
