@@ -320,7 +320,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
                           {isEditing ? (
-                            <Select value={editData.caseStatus || 'Raw'} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
+                            <Select value={(editData.caseStatus as string) || ''} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
                               <SelectTrigger className="h-8 text-xs">
                                 <SelectValue placeholder="Please select" />
                               </SelectTrigger>
