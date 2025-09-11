@@ -61,7 +61,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
-    onSuccess: () => {
+    onSuccess: (application: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       if (studentId) {
         queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${studentId}`] });
@@ -71,7 +71,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         description: "Application has been created successfully.",
       });
       form.reset();
+      // Close modal then navigate to the student's profile
       onOpenChange(false);
+      const sid = application?.studentId || studentId;
+      if (sid) {
+        // Navigate to student page which opens the profile modal
+        setTimeout(() => setLocation(`/students/${sid}`), 120);
+      }
     },
     onError: (error) => {
       toast({
