@@ -267,7 +267,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                                   <Edit />
                                   <span className="hidden lg:inline">Edit</span>
                                 </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowConvertModal(true)} title="Convert to Student">
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); setShowConvertModal(true); }} title="Convert to Student">
                                   <UserPlus />
                                   <span className="hidden lg:inline">Convert</span>
                                 </Button>
