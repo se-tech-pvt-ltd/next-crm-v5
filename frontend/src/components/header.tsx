@@ -29,7 +29,13 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
       const d = e?.detail || {};
       setAddAdmissionAppId(d.applicationId);
       setAddAdmissionStudentId(d.studentId);
-      setIsAddAdmissionModalOpen(true);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setIsAddAdmissionModalOpen(true));
+      } catch {
+        setIsAddAdmissionModalOpen(true);
+      }
     };
     window.addEventListener('openAddAdmission', handler as EventListener);
     return () => window.removeEventListener('openAddAdmission', handler as EventListener);
