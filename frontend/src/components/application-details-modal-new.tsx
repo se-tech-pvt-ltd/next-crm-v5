@@ -53,7 +53,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       return;
     }
     setSelectedStudentId(sid);
-    setIsStudentProfileOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
   };
   useEffect(() => {
     setCurrentApp(application || null);
