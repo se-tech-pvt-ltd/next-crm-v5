@@ -86,6 +86,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
   const countryOptions = useMemo(() => makeOptions(['Country','country']), [makeOptions]);
   const intakeOptions = useMemo(() => makeOptions(['Intake','intake']), [makeOptions]);
+  const channelPartnerOptions = useMemo(() => makeOptions(['Channel Partner','ChannelPartners','channelPartner','channel_partners','Channel Partner(s)','ChannelPartner']), [makeOptions]);
 
   const mapToOptionValue = useCallback((raw: string | undefined, options: {label:string;value:string}[]) => {
     if (!raw) return '';
