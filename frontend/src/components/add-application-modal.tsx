@@ -106,7 +106,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
         <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between">
@@ -123,10 +123,10 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           </div>
         </DialogHeader>
 
-        <div className="flex h-[90vh]">
-          <div className="flex-1 overflow-y-auto p-6 pt-2">
             <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+                <div className="flex-1 overflow-y-auto p-6 pt-2">
+                  <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Linked Entities</CardTitle>
@@ -407,18 +407,18 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               </Card>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createApplicationMutation.isPending}>
-                {createApplicationMutation.isPending ? 'Saving...' : 'Save'}
-              </Button>
-            </div>
-          </form>
+                  </div>
+                </div>
+                <div className="border-t px-6 py-4 flex justify-end space-x-3">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createApplicationMutation.isPending}>
+                    {createApplicationMutation.isPending ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </form>
             </Form>
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
