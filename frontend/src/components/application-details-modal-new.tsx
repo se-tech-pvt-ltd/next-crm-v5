@@ -412,7 +412,18 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div className="space-y-2">
                           <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Channel Partner</span></Label>
-                          <Input value={isEditing ? (editData.channelPartner || '') : (currentApp.channelPartner || '')} onChange={(e) => setEditData({ ...editData, channelPartner: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                          {isEditing ? (
+                            <Select value={(editData.channelPartner as string) || ''} onValueChange={(v) => setEditData({ ...editData, channelPartner: v })}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Please select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={currentApp.channelPartner || ''} disabled className="h-8 text-xs transition-all" />
+                          )}
                         </div>
                         <div className="space-y-2 md:col-span-1">
                           <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>
