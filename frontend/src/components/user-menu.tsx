@@ -87,7 +87,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+            <DropdownMenuItem onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileOpen(true)); } catch { setIsProfileOpen(true); } }}>
               <User className="w-4 h-4 mr-2" />
               View Profile
             </DropdownMenuItem>
