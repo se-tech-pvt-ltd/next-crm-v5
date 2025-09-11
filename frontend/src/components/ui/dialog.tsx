@@ -19,7 +19,7 @@ const Dialog = (props: any) => {
     }
   })();
 
-  const idRef = React.useRef<string>(() => Math.random().toString(36).slice(2)) as React.MutableRefObject<string>;
+  const idRef = React.useRef<string>(Math.random().toString(36).slice(2));
 
   // Register when onOpenChange is provided so ModalManager can close it
   React.useEffect(() => {
