@@ -20,7 +20,20 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
+  const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
+  const [addAdmissionStudentId, setAddAdmissionStudentId] = useState<string | undefined>(undefined);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      setAddAdmissionAppId(d.applicationId);
+      setAddAdmissionStudentId(d.studentId);
+      setIsAddAdmissionModalOpen(true);
+    };
+    window.addEventListener('openAddAdmission', handler as EventListener);
+    return () => window.removeEventListener('openAddAdmission', handler as EventListener);
+  }, []);
 
   return (
     <>
