@@ -115,7 +115,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const openStudentProfile = (sid?: string) => {
     if (!sid) return;
     onOpenChange(false);
-    setTimeout(() => setLocation(`/students/${sid}`), 0);
+    setTimeout(() => {
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setLocation(`/students/${sid}`));
+      } catch {
+        setLocation(`/students/${sid}`);
+      }
+    }, 0);
   };
 
   return (
