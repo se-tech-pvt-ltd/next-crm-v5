@@ -472,6 +472,22 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         if (!o) setLocalProfileId(null);
       }}
       studentId={localProfileId}
+      onOpenAddApplication={(sid) => {
+        // Close profile modal and reopen this AddApplicationModal for the given student id
+        try {
+          setLocalProfileOpen(false);
+          // Ensure parent AddApplicationModal is reopened
+          setTimeout(() => {
+            try {
+              // set the form studentId and emit open
+              form.setValue('studentId', sid || '');
+            } catch {}
+            try { onOpenChange(true); } catch {}
+          }, 120);
+        } catch (e) {
+          console.error('failed to reopen add application from profile', e);
+        }
+      }}
     />
     </>
   );
