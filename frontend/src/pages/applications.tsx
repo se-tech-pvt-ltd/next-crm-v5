@@ -266,7 +266,7 @@ export default function Applications() {
                     <TableRow
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}
+                      onClick={() => { setSelectedApplication(application); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}
                     >
                       <TableCell className="font-medium p-2 text-xs">
                         {getStudentName(application.studentId)}
@@ -317,7 +317,7 @@ export default function Applications() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => { setSelectedApplication(application); setIsDetailsOpen(true); }}
+                              onClick={() => { setSelectedApplication(application); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}
                             >
                               View Details
                             </DropdownMenuItem>
