@@ -31,6 +31,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const queryClient = useQueryClient();
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
   const [, setLocation] = useLocation();
+  const [localProfileOpen, setLocalProfileOpen] = useState(false);
+  const [localProfileId, setLocalProfileId] = useState<string | null>(null);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
