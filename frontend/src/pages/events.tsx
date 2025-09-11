@@ -526,7 +526,7 @@ export default function EventsPage() {
           </h1>
           <div className="flex items-center gap-2">
             {!showList && (
-              <Button size="xs" variant="default" onClick={() => setIsAddEventOpen(true)} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
+              <Button size="xs" variant="default" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddEventOpen(true)); } catch { setIsAddEventOpen(true); } }} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
             )}
             {showList && selectedEvent && (
               <div className="ml-2 inline-flex items-center">
