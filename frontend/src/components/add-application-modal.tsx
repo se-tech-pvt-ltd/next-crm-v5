@@ -106,7 +106,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-0" style={{ touchAction: 'pan-y' }}>
+      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-4" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between">
