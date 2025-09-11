@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
+import { StudentProfileModal } from './student-profile-modal-new';
 
 interface AddApplicationModalProps {
   open: boolean;
@@ -31,6 +32,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const queryClient = useQueryClient();
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
   const [, setLocation] = useLocation();
+  const [localProfileOpen, setLocalProfileOpen] = useState(false);
+  const [localProfileId, setLocalProfileId] = useState<string | null>(null);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -72,21 +75,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         description: "Application has been created successfully.",
       });
       form.reset();
-      // Close modal then navigate to the student's profile
-      onOpenChange(false);
-      const sid = application?.studentId || studentId;
-      if (sid) {
-        // Navigate to student page which opens the profile modal
-        setTimeout(() => {
-          try {
-            const { useModalManager } = require('@/contexts/ModalManagerContext');
-            const { openModal } = useModalManager();
-            openModal(() => setLocation(`/students/${sid}`));
-          } catch {
-            setLocation(`/students/${sid}`);
-          }
-        }, 120);
-      }
+      // Close modal then open the student's profile modal
+    onOpenChange(false);
+    const sid = application?.studentId || studentId;
+    if (sid) {
+      // Use local helper to open the profile modal (falls back to global event/location if needed)
+      setTimeout(() => openStudentProfile(sid), 240);
+    }
     },
     onError: (error) => {
       toast({
@@ -118,16 +113,18 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     onOpenChange(false);
     setTimeout(() => {
       try {
-        const { useModalManager } = require('@/contexts/ModalManagerContext');
-        const { openModal } = useModalManager();
-        openModal(() => setLocation(`/students/${sid}`));
-      } catch {
-        setLocation(`/students/${sid}`);
+        // Open local StudentProfileModal to avoid relying on global routing/events
+        setLocalProfileId(sid);
+        setLocalProfileOpen(true);
+      } catch (e) {
+        // fallback to existing approach
+        try { window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } })); } catch {}
+        try { setLocation(`/students?studentId=${sid}`); } catch {}
       }
-    }, 0);
+    }, 240);
   };
 
-  return (
+  return (<>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-4" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
@@ -460,5 +457,30 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             </Form>
       </DialogContent>
     </Dialog>
+    <StudentProfileModal
+      open={localProfileOpen}
+      onOpenChange={(o) => {
+        setLocalProfileOpen(o);
+        if (!o) setLocalProfileId(null);
+      }}
+      studentId={localProfileId}
+      onOpenAddApplication={(sid) => {
+        // Close profile modal and reopen this AddApplicationModal for the given student id
+        try {
+          setLocalProfileOpen(false);
+          // Ensure parent AddApplicationModal is reopened
+          setTimeout(() => {
+            try {
+              // set the form studentId and emit open
+              form.setValue('studentId', sid || '');
+            } catch {}
+            try { onOpenChange(true); } catch {}
+          }, 120);
+        } catch (e) {
+          console.error('failed to reopen add application from profile', e);
+        }
+      }}
+    />
+    </>
   );
 }

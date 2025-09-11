@@ -54,12 +54,18 @@ export function ModalManagerProvider({ children }: { children: ReactNode }) {
 
   const openModal = async (openFn: () => void) => {
     console.log('[ModalManager] openModal requested, current active:', activeModal);
-    // Close current active modal first
-    if (activeModal) {
-      console.log('[ModalManager] openModal closing active modal:', activeModal);
-      closeModal(activeModal);
-      // wait for animations / unmount (match dialog animation duration)
-      await new Promise((r) => setTimeout(r, 160));
+    // Close all registered modals first to avoid overlapping dialogs
+    if (registryRef.current.size > 0) {
+      console.log('[ModalManager] openModal closing all registered modals:', Array.from(registryRef.current.keys()));
+      for (const [id, item] of Array.from(registryRef.current.entries())) {
+        try {
+          item.close(false);
+        } catch (e) {
+          console.error('[ModalManager] error closing modal', id, e);
+        }
+      }
+      // Give time for dialogs to animate out and unmount
+      await new Promise((r) => setTimeout(r, 220));
     }
     // Now run provided open function to open target modal
     try {

@@ -134,7 +134,7 @@ export default function AddApplication() {
         queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${created.studentId}`] });
       }
       toast({ title: 'Success', description: 'Application created.' });
-      const target = presetStudentId ? `/students/${presetStudentId}` : '/applications';
+      const target = presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications';
       setLocation(target);
     },
     onError: () => {
@@ -144,7 +144,7 @@ export default function AddApplication() {
 
   const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
 
-  const goBack = () => setLocation(presetStudentId ? `/students/${presetStudentId}` : '/applications');
+  const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
   return (
     <Layout

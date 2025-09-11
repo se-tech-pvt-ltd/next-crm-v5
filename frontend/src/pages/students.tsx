@@ -31,7 +31,7 @@ export default function Students() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -118,11 +118,30 @@ export default function Students() {
       const params = new URLSearchParams(window.location.search);
       const paramId = params.get('studentId');
       if (paramId) {
+        // Force selected id and reopen modal (close then open) to ensure it mounts cleanly
         setSelectedStudentId(paramId);
-        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+        setIsProfileModalOpen(false);
+        setTimeout(() => {
+          setIsProfileModalOpen(true);
+        }, 60);
       }
     }
-  }, []);
+
+    const handler = (e: any) => {
+      const id = e?.detail?.id || new URLSearchParams(window.location.search).get('studentId') || new URLSearchParams(window.location.search).get('id');
+      if (id) {
+        setSelectedStudentId(id);
+        // close any existing profile modal then reopen to ensure fresh mount
+        setIsProfileModalOpen(false);
+        setTimeout(() => {
+          setIsProfileModalOpen(true);
+        }, 60);
+      }
+    };
+
+    window.addEventListener('open-student-profile', handler);
+    return () => window.removeEventListener('open-student-profile', handler);
+  }, [location]);
 
   const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
@@ -380,7 +399,7 @@ export default function Students() {
 
       <AddApplicationModal
         open={isAddApplicationModalOpen}
-        onOpenChange={(open) => { setIsAddApplicationModalOpen(open); if (!open) setSelectedStudentId(null); }}
+        onOpenChange={(open) => { setIsAddApplicationModalOpen(open); if (!open && !isProfileModalOpen) setSelectedStudentId(null); }}
         studentId={selectedStudentId || undefined}
       />
     </Layout>

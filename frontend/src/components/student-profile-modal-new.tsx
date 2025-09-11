@@ -59,7 +59,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [, setLocation] = useLocation();
   
-  const { data: student, isLoading } = useQuery<Student>({
+  const { data: student, isLoading, isError } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
     enabled: !!studentId,
   });
@@ -69,6 +69,29 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     enabled: !!studentId,
   });
 
+  // If the studentId is provided but query returned no student (not found) or error, navigate back to students list
+  useEffect(() => {
+    if (studentId && !isLoading && (isError || !student)) {
+      try {
+        setLocation('/students');
+      } catch (e) {
+        console.error('redirect to /students failed', e);
+      }
+    }
+  }, [studentId, isLoading, isError, student, setLocation]);
+
+
+  // On mount, ensure any other registered modals are closed so this modal appears on top
+  useEffect(() => {
+    try {
+      const { useModalManager } = require('@/contexts/ModalManagerContext');
+      const { openModal } = useModalManager();
+      // openModal closes all registered modals before running provided fn
+      openModal(() => {});
+    } catch (e) {
+      // ignore if modal manager not available
+    }
+  }, []);
 
   // Get dropdown data for Students module
   const { data: dropdownData } = useQuery({

@@ -217,7 +217,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       onOpenChange(false);
       setFormData(initialFormData);
       if (onSuccess) onSuccess(student);
-      setLocation(`/students/${student.id}`);
+      setLocation(`/students?studentId=${student.id}`);
     },
     onError: (error: Error) => {
       toast({

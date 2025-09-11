@@ -12,9 +12,11 @@ createRoot(document.getElementById("root")!).render(
     {(() => {
       try {
         const { ModalManagerProvider } = require('./contexts/ModalManagerContext');
+        const { GlobalStudentProfileListener } = require('./components/global-student-profile-listener');
         return (
           <ModalManagerProvider>
             <App />
+            <GlobalStudentProfileListener />
           </ModalManagerProvider>
         );
       } catch {

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
@@ -22,6 +21,9 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
+import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
+import React from 'react';
+const useState = React.useState;
 import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
@@ -233,6 +235,9 @@ export default function Leads() {
     }
   };
 
+
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [convertLead, setConvertLead] = useState<Lead | null>(null);
 
   return (
     <Layout
@@ -589,7 +594,13 @@ export default function Leads() {
           setSelectedLead(updated);
           queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
         }}
+        onOpenConvert={(lead) => {
+          setConvertLead(lead);
+          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setShowConvertModal(true)); } catch { setShowConvertModal(true); }
+        }}
       />
+
+      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => { setShowConvertModal(open); if (!open) setConvertLead(null); }} lead={convertLead} />
     </Layout>
   );
 }

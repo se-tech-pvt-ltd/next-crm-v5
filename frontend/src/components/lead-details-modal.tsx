@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
 import { CollapsibleCard } from '@/components/collapsible-card';
-import { ConvertToStudentModal } from './convert-to-student-modal';
 import { CommandMultiSelect } from './command-multi-select';
 import { type Lead } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -26,14 +25,14 @@ interface LeadDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   lead: Lead | null;
   onLeadUpdate?: (updatedLead: Lead) => void;
+  onOpenConvert?: (lead: Lead | null) => void;
 }
 
-export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: LeadDetailsModalProps) {
+export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpenConvert }: LeadDetailsModalProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
-  const [showConvertModal, setShowConvertModal] = useState(false);
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
@@ -268,7 +267,20 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
                                   <Edit />
                                   <span className="hidden lg:inline">Edit</span>
                                 </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setShowConvertModal(true)); } catch { onOpenChange(false); setShowConvertModal(true); } }} title="Convert to Student">
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => {
+                                  try {
+                                    // close this modal first
+                                    try { onOpenChange(false); } catch {}
+                                    if (typeof onOpenConvert === 'function') {
+                                      onOpenConvert(lead);
+                                    } else {
+                                      setLocation(`/leads/${lead?.id}/convert`);
+                                    }
+                                  } catch (e) {
+                                    try { onOpenChange(false); } catch {}
+                                    setLocation(`/leads/${lead?.id}/convert`);
+                                  }
+                                }} title="Convert to Student">
                                   <UserPlus />
                                   <span className="hidden lg:inline">Convert</span>
                                 </Button>
@@ -406,8 +418,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
           </div>
         </DialogContent>
       </Dialog>
-
-      <ConvertToStudentModal open={showConvertModal} onOpenChange={setShowConvertModal} lead={lead} />
 
       <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
         <DialogContent className="max-w-md">
