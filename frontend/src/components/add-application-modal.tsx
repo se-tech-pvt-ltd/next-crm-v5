@@ -85,7 +85,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           } catch {
             setLocation(`/students?studentId=${sid}`);
           }
-        }, 120);
+        }, 240);
       }
     },
     onError: (error) => {
