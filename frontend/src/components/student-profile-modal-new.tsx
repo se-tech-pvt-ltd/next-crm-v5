@@ -59,7 +59,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [, setLocation] = useLocation();
   
-  const { data: student, isLoading } = useQuery<Student>({
+  const { data: student, isLoading, isError } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
     enabled: !!studentId,
   });
@@ -68,6 +68,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     queryKey: [`/api/applications/student/${studentId}`],
     enabled: !!studentId,
   });
+
+  // If the studentId is provided but query returned no student (not found) or error, navigate back to students list
+  useEffect(() => {
+    if (studentId && !isLoading && (isError || !student)) {
+      try {
+        setLocation('/students');
+      } catch (e) {
+        console.error('redirect to /students failed', e);
+      }
+    }
+  }, [studentId, isLoading, isError, student, setLocation]);
 
 
   // Get dropdown data for Students module
