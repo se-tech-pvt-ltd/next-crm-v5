@@ -81,7 +81,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           try {
             const { useModalManager } = require('@/contexts/ModalManagerContext');
             const { openModal } = useModalManager();
-            openModal(() => setLocation(`/students?studentId=${sid}`));
+            window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } }));
           } catch {
             setLocation(`/students?studentId=${sid}`);
           }
@@ -120,7 +120,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       try {
         const { useModalManager } = require('@/contexts/ModalManagerContext');
         const { openModal } = useModalManager();
-        openModal(() => setLocation(`/students?studentId=${sid}`));
+        window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } }));
       } catch {
         setLocation(`/students?studentId=${sid}`);
       }
