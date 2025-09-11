@@ -31,7 +31,7 @@ export default function Students() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
