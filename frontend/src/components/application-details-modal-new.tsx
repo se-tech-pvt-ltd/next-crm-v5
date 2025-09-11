@@ -119,7 +119,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         courseType: mapToOptionValue(currentApp.courseType || '', courseTypeOptions),
         country: mapToOptionValue(currentApp.country || '', countryOptions),
         intake: mapToOptionValue(currentApp.intake || '', intakeOptions),
-        channelPartner: currentApp.channelPartner,
+        channelPartner: mapToOptionValue(currentApp.channelPartner || '', channelPartnerOptions) || currentApp.channelPartner,
         googleDriveLink: currentApp.googleDriveLink,
         caseStatus: mapToOptionValue(currentApp.caseStatus || '', caseStatusOptions),
       });
