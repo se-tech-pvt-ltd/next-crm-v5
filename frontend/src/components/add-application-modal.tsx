@@ -410,11 +410,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    className="px-4 h-8 text-xs"
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createApplicationMutation.isPending}>
-                    {createApplicationMutation.isPending ? 'Saving...' : 'Save'}
+                  <Button
+                    type="submit"
+                    disabled={createApplicationMutation.isPending}
+                    className="px-4 h-8 text-xs bg-primary hover:bg-primary/90"
+                  >
+                    {createApplicationMutation.isPending ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving...</span>
+                      </div>
+                    ) : (
+                      <span>Save</span>
+                    )}
                   </Button>
                 </div>
               </form>
