@@ -409,7 +409,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
                   </div>
                 </div>
-                <div className="border-t px-6 py-4 flex justify-end space-x-3">
+                <div className="sticky bottom-0 bg-background border-t px-6 py-4 flex justify-end space-x-3 z-10">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
