@@ -261,7 +261,7 @@ export default function Admissions() {
                     <TableRow
                       key={admission.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => { setSelectedAdmission(admission); setIsDetailsOpen(true); }}
+                      onClick={() => { setSelectedAdmission(admission); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}
                     >
                       <TableCell className="font-medium p-2 text-xs">{getStudentName(admission.studentId)}</TableCell>
                       <TableCell className="p-2 text-xs">
@@ -314,7 +314,7 @@ export default function Admissions() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => { setSelectedAdmission(admission); setIsDetailsOpen(true); }}>
+                            <DropdownMenuItem onClick={() => { setSelectedAdmission(admission); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}>
                               View Details
                             </DropdownMenuItem>
                           </DropdownMenuContent>
