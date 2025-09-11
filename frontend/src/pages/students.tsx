@@ -119,14 +119,14 @@ export default function Students() {
       const paramId = params.get('studentId');
       if (paramId) {
         setSelectedStudentId(paramId);
-        setIsProfileModalOpen(true);
+        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
       }
     }
   }, []);
 
   const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
-    setIsProfileModalOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
   };
 
   const handleCreateApplication = (studentId: string) => {
