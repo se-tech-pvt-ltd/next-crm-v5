@@ -254,7 +254,7 @@ export default function EventsPage() {
       toast({ title: 'Select an Event to import into', variant: 'destructive' });
       return;
     }
-    setIsImportOpen(true);
+    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsImportOpen(true)); } catch { setIsImportOpen(true); }
     setImportStep(1);
     setImportFileName('');
     setImportErrors([]);
