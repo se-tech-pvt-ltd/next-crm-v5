@@ -122,6 +122,17 @@ export default function Students() {
         try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
       }
     }
+
+    const handler = (e: any) => {
+      const id = e?.detail?.id;
+      if (id) {
+        setSelectedStudentId(id);
+        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+      }
+    };
+
+    window.addEventListener('open-student-profile', handler);
+    return () => window.removeEventListener('open-student-profile', handler);
   }, [location]);
 
   const handleViewProfile = (studentId: string) => {
