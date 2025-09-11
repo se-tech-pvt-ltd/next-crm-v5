@@ -75,21 +75,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         description: "Application has been created successfully.",
       });
       form.reset();
-      // Close modal then navigate to the student's profile
-      onOpenChange(false);
-      const sid = application?.studentId || studentId;
-      if (sid) {
-        // Navigate to student page which opens the profile modal
-        setTimeout(() => {
-          try {
-            const { useModalManager } = require('@/contexts/ModalManagerContext');
-            const { openModal } = useModalManager();
-            window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } }));
-          } catch {
-            setLocation(`/students?studentId=${sid}`);
-          }
-        }, 240);
-      }
+      // Close modal then open the student's profile modal
+    onOpenChange(false);
+    const sid = application?.studentId || studentId;
+    if (sid) {
+      // Use local helper to open the profile modal (falls back to global event/location if needed)
+      setTimeout(() => openStudentProfile(sid), 240);
+    }
     },
     onError: (error) => {
       toast({
