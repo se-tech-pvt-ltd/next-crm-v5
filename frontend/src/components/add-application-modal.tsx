@@ -106,7 +106,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] h-[90vh] p-0 overflow-hidden grid grid-rows-[auto_1fr_auto]">
+      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-0" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between">
@@ -124,8 +124,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         </DialogHeader>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
-                <div className="flex-1 overflow-y-auto p-6 pt-2 pb-24">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="p-6 pt-2">
                   <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
@@ -409,7 +409,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
                   </div>
                 </div>
-                <div className="sticky bottom-0 bg-background border-t px-6 py-4 flex justify-end space-x-3 z-10">
+                <div className="flex justify-end space-x-3 pt-4">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
