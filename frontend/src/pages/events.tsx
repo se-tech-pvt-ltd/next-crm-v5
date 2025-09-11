@@ -628,7 +628,7 @@ export default function EventsPage() {
                           </TableHeader>
                           <TableBody>
                             {pageItems.map((r: any) => (
-                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); setIsViewRegOpen(true); }}>
+                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsViewRegOpen(true)); } catch { setIsViewRegOpen(true); } }}>
                                 <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.name}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
