@@ -22,7 +22,8 @@ import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
-import React, { useState } from 'react';
+import React from 'react';
+const useState = React.useState;
 import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
