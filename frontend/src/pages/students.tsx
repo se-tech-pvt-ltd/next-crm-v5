@@ -119,15 +119,19 @@ export default function Students() {
       const paramId = params.get('studentId');
       if (paramId) {
         setSelectedStudentId(paramId);
-        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+        setTimeout(() => {
+          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+        }, 0);
       }
     }
 
     const handler = (e: any) => {
-      const id = e?.detail?.id;
+      const id = e?.detail?.id || new URLSearchParams(window.location.search).get('studentId') || new URLSearchParams(window.location.search).get('id');
       if (id) {
         setSelectedStudentId(id);
-        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+        setTimeout(() => {
+          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+        }, 0);
       }
     };
 
