@@ -132,7 +132,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     }, 240);
   };
 
-  return (
+  return (<>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-4" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
@@ -465,5 +465,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             </Form>
       </DialogContent>
     </Dialog>
+    <StudentProfileModal
+      open={localProfileOpen}
+      onOpenChange={(o) => {
+        setLocalProfileOpen(o);
+        if (!o) setLocalProfileId(null);
+      }}
+      studentId={localProfileId}
+    />
+    </>
   );
 }
