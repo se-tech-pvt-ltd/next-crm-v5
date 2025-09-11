@@ -138,9 +138,17 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         open={isAddApplicationModalOpen}
         onOpenChange={setIsAddApplicationModalOpen}
       />
-      <AddAdmissionModal 
+      <AddAdmissionModal
         open={isAddAdmissionModalOpen}
-        onOpenChange={setIsAddAdmissionModalOpen}
+        onOpenChange={(open) => {
+          setIsAddAdmissionModalOpen(open);
+          if (!open) {
+            setAddAdmissionAppId(undefined);
+            setAddAdmissionStudentId(undefined);
+          }
+        }}
+        applicationId={addAdmissionAppId}
+        studentId={addAdmissionStudentId}
       />
     </>
   );
