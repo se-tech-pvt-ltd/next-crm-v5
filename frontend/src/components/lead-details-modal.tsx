@@ -28,7 +28,7 @@ interface LeadDetailsModalProps {
   onOpenConvert?: (lead: Lead | null) => void;
 }
 
-export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: LeadDetailsModalProps) {
+export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpenConvert }: LeadDetailsModalProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
