@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
 import { CollapsibleCard } from '@/components/collapsible-card';
-import { ConvertToStudentModal } from './convert-to-student-modal';
 import { CommandMultiSelect } from './command-multi-select';
 import { type Lead } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -34,8 +33,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
-  const [showConvertModal, setShowConvertModal] = useState(false);
-  const [convertLead, setConvertLead] = useState<Lead | null>(null);
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
@@ -408,8 +405,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate }: Lea
           </div>
         </DialogContent>
       </Dialog>
-
-      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => { setShowConvertModal(open); if (!open) setConvertLead(null); }} lead={convertLead || lead} />
 
       <Dialog open={showMarkAsLostModal} onOpenChange={setShowMarkAsLostModal}>
         <DialogContent className="max-w-md">
