@@ -76,7 +76,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       const sid = application?.studentId || studentId;
       if (sid) {
         // Navigate to student page which opens the profile modal
-        setTimeout(() => setLocation(`/students/${sid}`), 120);
+        setTimeout(() => {
+          try {
+            const { useModalManager } = require('@/contexts/ModalManagerContext');
+            const { openModal } = useModalManager();
+            openModal(() => setLocation(`/students/${sid}`));
+          } catch {
+            setLocation(`/students/${sid}`);
+          }
+        }, 120);
       }
     },
     onError: (error) => {
