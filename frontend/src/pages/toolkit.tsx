@@ -207,6 +207,7 @@ const ToolkitPage = () => {
   const [focusOnly, setFocusOnly] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selected, setSelected] = useState<Institution | null>(null);
+  const [groupSearch, setGroupSearch] = useState<string>('');
 
   const allInstitutions = useMemo(() => groupsData.flatMap(g => g.universities), []);
 
@@ -236,19 +237,41 @@ const ToolkitPage = () => {
 
   const focusInstitutions = useMemo(() => filtered.filter(i => i.focusUniversity), [filtered]);
 
+  const groupOptions = useMemo(() => {
+    const base = [{ value: 'all', label: 'All Groups' }, ...groupsData.map(g => ({ value: g.id, label: g.name }))];
+    if (!groupSearch.trim()) return base;
+    const q = groupSearch.toLowerCase();
+    return base.filter(o => o.label.toLowerCase().includes(q));
+  }, [groupSearch]);
+
   return (
     <Layout title="Toolkit" subtitle="Groups → Universities → Details">
       <div className="space-y-3">
         <Tabs value={groupId} onValueChange={setGroupId}>
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <TabsList>
-              <TabsTrigger value="all">All Groups</TabsTrigger>
-              {groupsData.map(g => (
-                <TabsTrigger key={g.id} value={g.id}>{g.name}</TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="relative w-full md:w-auto md:flex-1 md:min-w-0">
+              <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
+                <TabsList className="min-w-max hidden md:inline-flex">
+                  <TabsTrigger value="all">All Groups</TabsTrigger>
+                  {groupsData.map(g => (
+                    <TabsTrigger key={g.id} value={g.id}>{g.name}</TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+            </div>
 
-            <div className="hidden md:block text-xs text-muted-foreground">
+            <div className="w-full md:w-64">
+              <SearchableCombobox
+                value={groupId}
+                onValueChange={setGroupId}
+                placeholder="Select group..."
+                searchPlaceholder="Search groups..."
+                onSearch={setGroupSearch}
+                options={groupOptions}
+              />
+            </div>
+
+            <div className="hidden md:block text-xs text-muted-foreground md:ml-auto">
               {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
             </div>
           </div>
