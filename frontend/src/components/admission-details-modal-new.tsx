@@ -108,8 +108,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label>Student</Label>
-                      <div className="mt-1">
-                        <Button type="button" variant="link" className="p-0 h-6 text-xs" onClick={() => {
+                      <div className="mt-[-3px]">
+                        <Button type="button" variant="link" className="p-0 h-6 text-xs mt-[-2px]" onClick={() => {
                           const detail = { id: admission.studentId };
                           onOpenChange(false);
                           setTimeout(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail })), 160);
@@ -120,8 +120,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                     </div>
                     <div>
                       <Label>Application Code</Label>
-                      <div className="mt-1">
-                        <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono" onClick={() => {
+                      <div className="mt-[-2px]">
+                        <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono mt-[-1px]" onClick={() => {
                           const detail = { applicationId: admission.applicationId, application };
                           onOpenChange(false);
                           setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160);
