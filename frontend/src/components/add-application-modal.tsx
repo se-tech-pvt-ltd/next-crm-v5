@@ -20,6 +20,7 @@ import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { StudentProfileModal } from './student-profile-modal-new';
+import { ApplicationDetailsModal } from './application-details-modal-new';
 
 interface AddApplicationModalProps {
   open: boolean;
@@ -34,6 +35,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const [, setLocation] = useLocation();
   const [localProfileOpen, setLocalProfileOpen] = useState(false);
   const [localProfileId, setLocalProfileId] = useState<string | null>(null);
+  const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
+  const [currentApplicationObj, setCurrentApplicationObj] = useState<any | null>(null);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -66,22 +69,20 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
     onSuccess: (application: any) => {
+      const sid = application?.studentId || form.getValues('studentId') || studentId;
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-      if (studentId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${studentId}`] });
+      if (sid) {
+        queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${sid}`] });
       }
       toast({
         title: "Success",
         description: "Application has been created successfully.",
       });
       form.reset();
-      // Close modal then open the student's profile modal
-    onOpenChange(false);
-    const sid = application?.studentId || studentId;
-    if (sid) {
-      // Use local helper to open the profile modal (falls back to global event/location if needed)
-      setTimeout(() => openStudentProfile(sid), 240);
-    }
+      onOpenChange(false);
+      if (sid) {
+        setTimeout(() => openStudentProfile(sid), 240);
+      }
     },
     onError: (error) => {
       toast({
@@ -480,6 +481,16 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           console.error('failed to reopen add application from profile', e);
         }
       }}
+      onOpenApplication={(app) => {
+        setCurrentApplicationObj(app);
+        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); }
+      }}
+    />
+
+    <ApplicationDetailsModal
+      open={isAppDetailsOpen}
+      onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setCurrentApplicationObj(null); }}
+      application={currentApplicationObj}
     />
     </>
   );

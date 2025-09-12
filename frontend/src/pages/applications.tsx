@@ -15,6 +15,8 @@ import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
+import { AddApplicationModal } from '@/components/add-application-modal';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import * as DropdownsService from '@/services/dropdowns';
 import { useMemo } from 'react';
@@ -25,6 +27,10 @@ export default function Applications() {
   const [, setLocation] = useLocation();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [addApplicationStudentId, setAddApplicationStudentId] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -337,7 +343,43 @@ export default function Applications() {
         open={isDetailsOpen}
         onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedApplication(null); }}
         application={selectedApplication}
+        onOpenStudentProfile={(sid) => {
+          setSelectedStudentId(sid);
+          try {
+            const { useModalManager } = require('@/contexts/ModalManagerContext');
+            const { openModal } = useModalManager();
+            openModal(() => setIsProfileModalOpen(true));
+          } catch {
+            setIsProfileModalOpen(true);
+          }
+        }}
       />
-    </Layout>
+
+      <StudentProfileModal
+    open={isProfileModalOpen}
+    onOpenChange={(open) => { setIsProfileModalOpen(open); if (!open) setSelectedStudentId(null); }}
+    studentId={selectedStudentId}
+    onOpenAddApplication={(sid) => {
+      setAddApplicationStudentId(sid || undefined);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setIsAddApplicationModalOpen(true));
+      } catch {
+        setIsAddApplicationModalOpen(true);
+      }
+    }}
+    onOpenApplication={(app) => {
+      setSelectedApplication(app);
+      try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); }
+    }}
+  />
+
+  <AddApplicationModal
+    open={isAddApplicationModalOpen}
+    onOpenChange={(o) => { setIsAddApplicationModalOpen(o); if (!o) setAddApplicationStudentId(undefined); }}
+    studentId={addApplicationStudentId}
+  />
+</Layout>
   );
 }
