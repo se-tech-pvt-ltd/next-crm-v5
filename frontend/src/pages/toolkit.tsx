@@ -385,13 +385,15 @@ const ToolkitPage = () => {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[85vh]">
           {selected && (
             <>
               <DialogHeader>
                 <DialogTitle>{selected.name}</DialogTitle>
               </DialogHeader>
-              <div className="h-36 w-full bg-cover bg-center rounded" style={{ backgroundImage: `url(${selected.coverPhoto})` }} />
+              <div className="w-full rounded bg-muted/30 flex items-center justify-center">
+                <img src={selected.coverPhoto} alt={`${selected.name} cover`} className="max-h-56 w-full object-contain" />
+              </div>
               <div className="flex items-center gap-3 mt-3">
                 <img src={selected.logo} alt={`${selected.name} logo`} className="h-12 w-12 object-contain rounded bg-white p-1 border" />
                 <div className="flex flex-wrap gap-2">
