@@ -7,7 +7,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
+import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
+import { AdmissionDetailsModal } from './admission-details-modal-new';
+import { StudentProfileModal } from './student-profile-modal-new';
+import * as AdmissionsService from '@/services/admissions';
+import * as ApplicationsService from '@/services/applications';
+import type { Admission, Application } from '@/lib/types';
 
 interface HeaderProps {
   title: string;
@@ -22,6 +28,12 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
   const [addAdmissionStudentId, setAddAdmissionStudentId] = useState<string | undefined>(undefined);
+  const [isAdmissionDetailsOpen, setIsAdmissionDetailsOpen] = useState(false);
+  const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+  const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
 
   React.useEffect(() => {
@@ -39,6 +51,71 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
     };
     window.addEventListener('openAddAdmission', handler as EventListener);
     return () => window.removeEventListener('openAddAdmission', handler as EventListener);
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      const openWith = (adm: Admission) => {
+        setSelectedAdmission(adm);
+        try {
+          const { useModalManager } = require('@/contexts/ModalManagerContext');
+          const { openModal } = useModalManager();
+          openModal(() => setIsAdmissionDetailsOpen(true));
+        } catch {
+          setIsAdmissionDetailsOpen(true);
+        }
+      };
+      if (d.admission) openWith(d.admission as Admission);
+      else if (d.admissionId) {
+        AdmissionsService.getAdmission(d.admissionId as string).then((adm) => {
+          openWith(adm as Admission);
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener('openAdmissionDetails', handler as EventListener);
+    return () => window.removeEventListener('openAdmissionDetails', handler as EventListener);
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const id = e?.detail?.id as string | undefined;
+      if (!id) return;
+      setSelectedStudentId(id);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setIsStudentProfileOpen(true));
+      } catch {
+        setIsStudentProfileOpen(true);
+      }
+    };
+    window.addEventListener('open-student-profile', handler as EventListener);
+    return () => window.removeEventListener('open-student-profile', handler as EventListener);
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      const openWith = (app: Application) => {
+        setSelectedApplication(app);
+        try {
+          const { useModalManager } = require('@/contexts/ModalManagerContext');
+          const { openModal } = useModalManager();
+          openModal(() => setIsAppDetailsOpen(true));
+        } catch {
+          setIsAppDetailsOpen(true);
+        }
+      };
+      if (d.application) openWith(d.application as Application);
+      else if (d.applicationId) {
+        ApplicationsService.getApplication(d.applicationId as string).then((app) => {
+          openWith(app as Application);
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener('openApplicationDetails', handler as EventListener);
+    return () => window.removeEventListener('openApplicationDetails', handler as EventListener);
   }, []);
 
   return (
@@ -155,6 +232,25 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         }}
         applicationId={addAdmissionAppId}
         studentId={addAdmissionStudentId}
+      />
+
+      <AdmissionDetailsModal
+        open={isAdmissionDetailsOpen}
+        onOpenChange={(open) => { setIsAdmissionDetailsOpen(open); if (!open) setSelectedAdmission(null); }}
+        admission={selectedAdmission}
+      />
+
+      <ApplicationDetailsModal
+        open={isAppDetailsOpen}
+        onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        application={selectedApplication}
+        onOpenStudentProfile={(sid) => window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } }))}
+      />
+
+      <StudentProfileModal
+        open={isStudentProfileOpen}
+        onOpenChange={(open) => { setIsStudentProfileOpen(open); if (!open) setSelectedStudentId(null); }}
+        studentId={selectedStudentId}
       />
     </>
   );
