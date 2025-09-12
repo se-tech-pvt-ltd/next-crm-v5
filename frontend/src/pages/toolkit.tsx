@@ -271,7 +271,7 @@ const ToolkitPage = () => {
             {groupId !== 'all' && (
               <>
                 <Button size="sm" onClick={() => setAddUniOpen(true)}>Add University</Button>
-                <Button variant="secondary" size="sm" onClick={() => setEditGroupOpen(true)}>Edit Group</Button>
+                <Button variant="secondary" size="sm" onClick={() => setEditGroupOpen(true)}>Edit Toolkit</Button>
               </>
             )}
           </div>
