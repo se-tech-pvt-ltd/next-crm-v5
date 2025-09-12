@@ -355,7 +355,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               variant="outline"
                               size="xs"
                               className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                              onClick={() => {
+                                try {
+                                  const { useModalManager } = require('@/contexts/ModalManagerContext');
+                                  const { openModal } = useModalManager();
+                                  openModal(() => {
+                                    try { if (typeof onOpenAddApplication === 'function') onOpenAddApplication(student?.id); } catch {}
+                                  });
+                                } catch {
+                                  try { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } } catch {}
+                                }
+                              }}
                               title="Add Application"
                             >
                               <Plus />
