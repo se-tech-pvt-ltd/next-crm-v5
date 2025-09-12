@@ -316,8 +316,8 @@ export default function Admissions() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Badge className={getVisaStatusColor(admission.visaStatus || 'pending')}>
-                          {admission.visaStatus || 'pending'}
+                        <Badge className={getVisaStatusColor((admission.visaStatus || 'pending') as string)}>
+                          {getVisaStatusLabel(admission.visaStatus || 'pending')}
                         </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
