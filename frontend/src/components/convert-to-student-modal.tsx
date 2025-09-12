@@ -217,7 +217,13 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       onOpenChange(false);
       setFormData(initialFormData);
       if (onSuccess) onSuccess(student);
-      setLocation(`/students?studentId=${student.id}`);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: student.id } })));
+      } catch {
+        try { setLocation(`/students?studentId=${student.id}`); } catch {}
+      }
     },
     onError: (error: Error) => {
       toast({
