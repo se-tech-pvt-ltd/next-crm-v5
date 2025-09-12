@@ -138,7 +138,16 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
                           <Edit />
                           <span className="hidden lg:inline">Edit</span>
                         </Button>
-                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }} title="Add Application">
+                        <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => {
+                          try {
+                            const { useModalManager } = require('@/contexts/ModalManagerContext');
+                            const { openModal } = useModalManager();
+                            openModal(() => { try { if (typeof onOpenAddApplication === 'function') onOpenAddApplication(student?.id); } catch {} });
+                          } catch {
+                            onOpenChange(false);
+                            if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); }
+                          }
+                        }} title="Add Application">
                           <Plus />
                           <span className="hidden lg:inline">Add App</span>
                         </Button>
