@@ -134,11 +134,8 @@ export default function AddApplication() {
         queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${created.studentId}`] });
       }
       toast({ title: 'Success', description: 'Application created.' });
-      if (presetStudentId) {
-        try { const { openStudentProfile } = require('@/lib/utils'); openStudentProfile(presetStudentId, setLocation); } catch { try { setLocation(`/students?studentId=${presetStudentId}`); } catch {} }
-      } else {
-        setLocation('/applications');
-      }
+      const target = presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications';
+      setLocation(target);
     },
     onError: () => {
       toast({ title: 'Error', description: 'Failed to create application.', variant: 'destructive' });
@@ -147,13 +144,7 @@ export default function AddApplication() {
 
   const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
 
-  const goBack = () => {
-    if (presetStudentId) {
-      try { const { openStudentProfile } = require('@/lib/utils'); openStudentProfile(presetStudentId, setLocation); } catch { try { setLocation(`/students?studentId=${presetStudentId}`); } catch {} }
-    } else {
-      setLocation('/applications');
-    }
-  };
+  const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
   return (
     <Layout

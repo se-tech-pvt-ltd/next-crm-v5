@@ -255,16 +255,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                                 variant="outline"
                                 size="xs"
                                 className="rounded-full h-7 text-[11px] px-2 [&_svg]:size-3"
-                                onClick={() => {
-                                try {
-                                  const { useModalManager } = require('@/contexts/ModalManagerContext');
-                                  const { openModal } = useModalManager();
-                                  openModal(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: convertedStudent.id } })));
-                                } catch {
-                                  onOpenChange(false);
-                                  try { setLocation(`/students?studentId=${convertedStudent.id}`); } catch {}
-                                }
-                              } }
+                                onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
                                 title="View Student"
                               >
                                 <UserPlus />
