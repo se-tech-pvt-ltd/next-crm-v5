@@ -9,7 +9,8 @@ import {
   Settings,
   Menu,
   X,
-  Calendar
+  Calendar,
+  GraduationCap as ToolkitIcon
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
