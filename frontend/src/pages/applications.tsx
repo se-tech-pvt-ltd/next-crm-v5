@@ -355,10 +355,30 @@ export default function Applications() {
       />
 
       <StudentProfileModal
-        open={isProfileModalOpen}
-        onOpenChange={(open) => { setIsProfileModalOpen(open); if (!open) setSelectedStudentId(null); }}
-        studentId={selectedStudentId}
-      />
-    </Layout>
+    open={isProfileModalOpen}
+    onOpenChange={(open) => { setIsProfileModalOpen(open); if (!open) setSelectedStudentId(null); }}
+    studentId={selectedStudentId}
+    onOpenAddApplication={(sid) => {
+      setAddApplicationStudentId(sid || undefined);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setIsAddApplicationModalOpen(true));
+      } catch {
+        setIsAddApplicationModalOpen(true);
+      }
+    }}
+    onOpenApplication={(app) => {
+      setSelectedApplication(app);
+      try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); }
+    }}
+  />
+
+  <AddApplicationModal
+    open={isAddApplicationModalOpen}
+    onOpenChange={(o) => { setIsAddApplicationModalOpen(o); if (!o) setAddApplicationStudentId(undefined); }}
+    studentId={addApplicationStudentId}
+  />
+</Layout>
   );
 }
