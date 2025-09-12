@@ -28,6 +28,8 @@ export default function Applications() {
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [addApplicationStudentId, setAddApplicationStudentId] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
