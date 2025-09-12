@@ -9,7 +9,8 @@ import {
   Settings,
   Menu,
   X,
-  Calendar
+  Calendar,
+  Layers
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -84,6 +85,12 @@ export function Sidebar() {
       icon: Calendar,
       count: Array.isArray(eventsData) ? eventsData.length : 0,
       countColor: 'bg-blue-500'
+    },
+    {
+      path: '/toolkits',
+      label: 'Toolkits',
+      icon: Layers,
+      count: undefined
     },
     {
       path: '/leads',

@@ -21,6 +21,7 @@ import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Login from "@/pages/login";
+import ToolkitsPage from "@/pages/toolkits";
 
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
@@ -80,6 +81,7 @@ function Router() {
       <Route path="/admissions/:id" component={AdmissionDetails} />
       <Route path="/admissions" component={Admissions} />
       <Route path="/events" component={EventsPage} />
+      <Route path="/toolkits" component={ToolkitsPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={Settings} />
       {/* Fallback to 404 */}
