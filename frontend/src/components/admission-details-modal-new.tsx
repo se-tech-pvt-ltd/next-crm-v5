@@ -4,7 +4,7 @@ console.log('[modal] loaded: frontend/src/components/admission-details-modal-new
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTracker } from "./activity-tracker";
-import { Award, User, X, ExternalLink, Plane, Calendar } from "lucide-react";
+import { Award, X, Plane } from "lucide-react";
 import { Label } from '@/components/ui/label';
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,10 +16,9 @@ interface AdmissionDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   admission: Admission | null;
-  onOpenStudentProfile?: (studentId: string) => void;
 }
 
-export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
+export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
     const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
     const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
@@ -213,48 +212,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 </CardContent>
               </Card>
 
-              {student && (
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Student Information
-                      </CardTitle>
-                      {onOpenStudentProfile && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onOpenStudentProfile(student.id)}
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          View Profile
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Name</Label>
-                        <p className="text-xs font-medium">{student.name}</p>
-                      </div>
-                      <div>
-                        <Label>Email</Label>
-                        <p className="text-xs">{student.email}</p>
-                      </div>
-                      <div>
-                        <Label>Phone</Label>
-                        <p className="text-xs">{student.phone || 'Not provided'}</p>
-                      </div>
-                      <div>
-                        <Label>Status</Label>
-                        <Badge variant="outline"><span className="text-xs">{student.status}</span></Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           </div>
 
