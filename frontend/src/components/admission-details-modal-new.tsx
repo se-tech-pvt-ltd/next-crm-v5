@@ -111,7 +111,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <div className="mt-1">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs" onClick={() => {
                           const detail = { id: admission.studentId };
-                          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail }))); } catch { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail })), 160); }
+                          onOpenChange(false);
+                          setTimeout(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail })), 160);
                         }}>
                           {student ? student.name : admission.studentId}
                         </Button>
