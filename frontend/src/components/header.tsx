@@ -10,6 +10,7 @@ import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
 import { AdmissionDetailsModal } from './admission-details-modal-new';
+import { StudentProfileModal } from './student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import type { Admission, Application } from '@/lib/types';
