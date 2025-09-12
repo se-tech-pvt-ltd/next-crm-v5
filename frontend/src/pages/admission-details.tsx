@@ -134,7 +134,7 @@ export default function AdmissionDetails() {
                     <div className="space-y-0.5">
                       <div className="text-[11px] text-gray-600">Student</div>
                       {student ? (
-                        <Button variant="link" className="h-5 p-0 text-xs leading-5" onClick={() => setLocation(`/students?studentId=${student.id}`)}>
+                        <Button variant="link" className="h-5 p-0 text-xs leading-5" onClick={() => { try { const { openStudentProfile } = require('@/lib/utils'); openStudentProfile(student.id, setLocation); } catch { try { setLocation(`/students?studentId=${student.id}`); } catch {} } }}>
                           {student.name}
                         </Button>
                       ) : (
@@ -239,7 +239,7 @@ export default function AdmissionDetails() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm flex items-center"><UserIcon className="w-5 h-5 mr-2" />Student Information</CardTitle>
-                      <Button variant="outline" size="sm" onClick={() => setLocation(`/students?studentId=${student.id}`)}>
+                      <Button variant="outline" size="sm" onClick={() => { try { const { openStudentProfile } = require('@/lib/utils'); openStudentProfile(student.id, setLocation); } catch { try { setLocation(`/students?studentId=${student.id}`); } catch {} } }}>
                         <ExternalLink className="w-4 h-4 mr-2" /> View Profile
                       </Button>
                     </div>

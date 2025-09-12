@@ -49,8 +49,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   const openStudentProfile = (sid: string) => {
     if (typeof onOpenStudentProfile === 'function') {
-      onOpenStudentProfile(sid);
-      onOpenChange(false);
+      try { onOpenStudentProfile(sid); } catch {}
       return;
     }
     setSelectedStudentId(sid);
@@ -280,7 +279,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                             </Button>
                           ) : !isEditing ? (
                             <>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); }} title="Add Admission">
+                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } }))); } catch { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); } }} title="Add Admission">
                                 <Plus />
                                 <span className="hidden lg:inline">Add Admission</span>
                               </Button>
