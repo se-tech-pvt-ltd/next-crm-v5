@@ -123,7 +123,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <div className="mt-1">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono" onClick={() => {
                           const detail = { applicationId: admission.applicationId, application };
-                          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail }))); } catch { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160); }
+                          onOpenChange(false);
+                          setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160);
                         }}>
                           {application?.applicationCode || admission.applicationId}
                         </Button>
