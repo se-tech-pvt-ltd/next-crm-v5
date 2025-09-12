@@ -102,34 +102,34 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Program</label>
-                      <p className="text-lg font-semibold">{admission.program}</p>
+                      <Label>Program</Label>
+                      <p className="text-xs font-semibold">{admission.program}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Decision Date</label>
-                      <p>{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                      <Label>Decision Date</Label>
+                      <p className="text-xs">{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
-                      <p>{admission.tuitionFee || 'Not specified'}</p>
+                      <Label>Tuition Fee</Label>
+                      <p className="text-xs">{admission.tuitionFee || 'Not specified'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Scholarship Amount</label>
-                      <p>{admission.scholarshipAmount || 'No scholarship'}</p>
+                      <Label>Scholarship Amount</Label>
+                      <p className="text-xs">{admission.scholarshipAmount || 'No scholarship'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Start Date</label>
-                      <p>{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
+                      <Label>Start Date</Label>
+                      <p className="text-xs">{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">End Date</label>
-                      <p>{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
+                      <Label>End Date</Label>
+                      <p className="text-xs">{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
                     </div>
                   </div>
                   {admission.notes && (
                     <div className="mt-4">
-                      <label className="text-sm font-medium text-gray-600">Notes</label>
-                      <p className="mt-1 text-gray-800">{admission.notes}</p>
+                      <Label>Notes</Label>
+                      <p className="mt-1 text-xs text-gray-800">{admission.notes}</p>
                     </div>
                   )}
                 </CardContent>
@@ -145,24 +145,24 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Status</label>
+                      <Label>Visa Status</Label>
                       <div className="mt-1">
                         <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>
-                          {currentVisaStatus.replace('_', ' ').toUpperCase()}
+                          <span className="text-xs">{currentVisaStatus.replace('_', ' ').toUpperCase()}</span>
                         </Badge>
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Application Date</label>
-                      <p>{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
+                      <Label>Visa Application Date</Label>
+                      <p className="text-xs">{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Interview Date</label>
-                      <p>{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
+                      <Label>Visa Interview Date</Label>
+                      <p className="text-xs">{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Approval Date</label>
-                      <p>{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
+                      <Label>Visa Approval Date</Label>
+                      <p className="text-xs">{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -191,20 +191,20 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Name</label>
-                        <p className="font-medium">{student.name}</p>
+                        <Label>Name</Label>
+                        <p className="text-xs font-medium">{student.name}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Email</label>
-                        <p>{student.email}</p>
+                        <Label>Email</Label>
+                        <p className="text-xs">{student.email}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Phone</label>
-                        <p>{student.phone || 'Not provided'}</p>
+                        <Label>Phone</Label>
+                        <p className="text-xs">{student.phone || 'Not provided'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Status</label>
-                        <Badge variant="outline">{student.status}</Badge>
+                        <Label>Status</Label>
+                        <Badge variant="outline"><span className="text-xs">{student.status}</span></Badge>
                       </div>
                     </div>
                   </CardContent>
