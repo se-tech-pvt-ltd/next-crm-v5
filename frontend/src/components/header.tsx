@@ -32,6 +32,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
 
   React.useEffect(() => {
