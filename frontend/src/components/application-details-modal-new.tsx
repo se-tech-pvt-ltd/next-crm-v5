@@ -250,7 +250,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Application Details</DialogTitle>
 
-        <div className="grid grid-cols-[1fr_30rem] h-[90vh] min-h-0">
+        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
           <div className="flex flex-col min-h-0">
             <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
               <div className="px-4 py-2 flex items-center justify-between">
