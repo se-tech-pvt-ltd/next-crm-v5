@@ -48,7 +48,14 @@ export default function Login({ onLogin }: LoginProps) {
         branch: user.branchId,
       });
     } catch (err: any) {
-      setError(err?.message || 'Invalid email or password. Please check your credentials and try again.');
+      const isUnauthorized = err?.status === 401 || (typeof err?.message === 'string' && /status\s*401/i.test(err.message));
+      const message =
+        isUnauthorized
+          ? 'Invalid email or password. Please check your credentials and try again.'
+          : err?.status === 0
+            ? 'Network error. Please check your connection and try again.'
+            : (typeof err?.message === 'string' && err.message) || 'Something went wrong. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
