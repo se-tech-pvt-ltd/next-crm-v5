@@ -35,6 +35,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const [, setLocation] = useLocation();
   const [localProfileOpen, setLocalProfileOpen] = useState(false);
   const [localProfileId, setLocalProfileId] = useState<string | null>(null);
+  const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
+  const [currentApplicationObj, setCurrentApplicationObj] = useState<any | null>(null);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
