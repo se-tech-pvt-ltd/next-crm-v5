@@ -460,7 +460,7 @@ const ToolkitPage = () => {
       <Dialog open={addGroupOpen} onOpenChange={setAddGroupOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Group</DialogTitle>
+            <DialogTitle>Add Toolkit</DialogTitle>
           </DialogHeader>
           <GroupForm onCancel={() => setAddGroupOpen(false)} onSave={(data) => {
             const id = `grp-${Math.random().toString(36).slice(2,8)}`;
