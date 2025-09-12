@@ -20,6 +20,7 @@ import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { StudentProfileModal } from './student-profile-modal-new';
+import { ApplicationDetailsModal } from './application-details-modal-new';
 
 interface AddApplicationModalProps {
   open: boolean;
