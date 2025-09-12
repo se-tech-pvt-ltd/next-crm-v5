@@ -246,6 +246,12 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         application={selectedApplication}
         onOpenStudentProfile={(sid) => window.dispatchEvent(new CustomEvent('open-student-profile', { detail: { id: sid } }))}
       />
+
+      <StudentProfileModal
+        open={isStudentProfileOpen}
+        onOpenChange={(open) => { setIsStudentProfileOpen(open); if (!open) setSelectedStudentId(null); }}
+        studentId={selectedStudentId}
+      />
     </>
   );
 }
