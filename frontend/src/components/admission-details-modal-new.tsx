@@ -72,43 +72,60 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent hideClose className="max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Admission Details</DialogTitle>
-        
-        {/* Header with Fixed Position */}
-        <div className="absolute top-0 left-0 right-0 bg-white border-b p-3 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center">
-                <Award className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">{admission.program}</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="default"
-                className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
-                onClick={() => onOpenChange(false)}
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
-        <div className="flex h-[90vh]">
-          {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6 pt-16">
-            {/* Status bar under header (mirror student) */}
-            <div className="mb-3">
-              <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
+          {/* Left: Content */}
+          <div className="flex flex-col min-h-0">
+            {/* Sticky header inside scroll context */}
+            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+              <div className="px-3 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                    <Award className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-lg font-semibold truncate">{admission.program}</h1>
+                    <p className="text-xs text-gray-600 truncate">Admission Details</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="hidden md:block">
+                    <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
+                    <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
+                      <SelectTrigger className="h-8 text-xs w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="not_applied">Not Applied</SelectItem>
+                        <SelectItem value="applied">Applied</SelectItem>
+                        <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="on_hold">On Hold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="px-4 pb-3">
+                <div className="w-full bg-gray-100 rounded-md p-1.5">
+                  <div className="flex items-center justify-between relative">
+                    <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="space-y-6">
-              {/* Admission Information */}
+
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -152,7 +169,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 </CardContent>
               </Card>
 
-              {/* Visa Information */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -186,7 +202,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 </CardContent>
               </Card>
 
-              {/* Student Information */}
               {student && (
                 <Card>
                   <CardHeader>
@@ -196,8 +211,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                         Student Information
                       </CardTitle>
                       {onOpenStudentProfile && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => onOpenStudentProfile(student.id)}
                         >
@@ -232,13 +247,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
             </div>
           </div>
 
-          {/* Activity Sidebar (mirror student) */}
-          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 overflow-hidden border-l border-gray-200 pt-12">
-            <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
-              <Calendar className="w-5 h-5 mr-2" />
-              Activity Timeline
-            </h3>
-            <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Right: Timeline */}
+          <div className="border-l bg-white flex flex-col min-h-0">
+            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+              <h3 className="text-sm font-semibold">Activity Timeline</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto pt-1 min-h-0">
               <ActivityTracker
                 entityType="admission"
                 entityId={admission.id}
