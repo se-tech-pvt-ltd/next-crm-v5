@@ -42,6 +42,30 @@ export default function Admissions() {
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [admissionsDropdowns]);
 
+  const visaStatusOptions = useMemo(() => {
+    const dd: any = admissionsDropdowns as any;
+    let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
+    if (!Array.isArray(list)) list = [];
+    return list;
+  }, [admissionsDropdowns]);
+
+  const getVisaStatusLabel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const o of visaStatusOptions) {
+      const key = (o?.id ?? o?.key ?? o?.value);
+      if (key != null) {
+        const k = String(key);
+        map.set(k, String(o.value));
+        map.set(k.toLowerCase(), String(o.value));
+      }
+    }
+    return (val?: string | null) => {
+      if (!val) return '';
+      const v = String(val);
+      return map.get(v) || map.get(v.toLowerCase()) || v.replace(/[_-]/g, ' ');
+    };
+  }, [visaStatusOptions]);
+
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
   });
@@ -82,7 +106,8 @@ export default function Admissions() {
   };
 
   const getVisaStatusColor = (status: string) => {
-    switch (status) {
+    const s = (status || '').toLowerCase().replace(/_/g, '-');
+    switch (s) {
       case 'approved':
         return 'bg-green-100 text-green-800';
       case 'rejected':
@@ -90,6 +115,9 @@ export default function Admissions() {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'not-applied':
+      case 'on-hold':
+      case 'interview-scheduled':
+      case 'applied':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -292,8 +320,8 @@ export default function Admissions() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Badge className={getVisaStatusColor(admission.visaStatus || 'pending')}>
-                          {admission.visaStatus || 'pending'}
+                        <Badge className={getVisaStatusColor((admission.visaStatus || 'pending') as string)}>
+                          {getVisaStatusLabel(admission.visaStatus || 'pending')}
                         </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
