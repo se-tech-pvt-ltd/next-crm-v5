@@ -49,8 +49,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   const openStudentProfile = (sid: string) => {
     if (typeof onOpenStudentProfile === 'function') {
-      onOpenStudentProfile(sid);
-      onOpenChange(false);
+      try { onOpenStudentProfile(sid); } catch {}
       return;
     }
     setSelectedStudentId(sid);
