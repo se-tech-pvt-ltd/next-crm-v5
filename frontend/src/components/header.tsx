@@ -8,6 +8,9 @@ import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
 import { AddAdmissionModal } from './add-admission-modal';
+import { AdmissionDetailsModal } from './admission-details-modal-new';
+import * as AdmissionsService from '@/services/admissions';
+import type { Admission } from '@/lib/types';
 
 interface HeaderProps {
   title: string;
@@ -22,6 +25,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
   const [addAdmissionStudentId, setAddAdmissionStudentId] = useState<string | undefined>(undefined);
+  const [isAdmissionDetailsOpen, setIsAdmissionDetailsOpen] = useState(false);
+  const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
 
   React.useEffect(() => {
@@ -39,6 +44,30 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
     };
     window.addEventListener('openAddAdmission', handler as EventListener);
     return () => window.removeEventListener('openAddAdmission', handler as EventListener);
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      const openWith = (adm: Admission) => {
+        setSelectedAdmission(adm);
+        try {
+          const { useModalManager } = require('@/contexts/ModalManagerContext');
+          const { openModal } = useModalManager();
+          openModal(() => setIsAdmissionDetailsOpen(true));
+        } catch {
+          setIsAdmissionDetailsOpen(true);
+        }
+      };
+      if (d.admission) openWith(d.admission as Admission);
+      else if (d.admissionId) {
+        AdmissionsService.getAdmission(d.admissionId as string).then((adm) => {
+          openWith(adm as Admission);
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener('openAdmissionDetails', handler as EventListener);
+    return () => window.removeEventListener('openAdmissionDetails', handler as EventListener);
   }, []);
 
   return (
@@ -155,6 +184,12 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         }}
         applicationId={addAdmissionAppId}
         studentId={addAdmissionStudentId}
+      />
+
+      <AdmissionDetailsModal
+        open={isAdmissionDetailsOpen}
+        onOpenChange={(open) => { setIsAdmissionDetailsOpen(open); if (!open) setSelectedAdmission(null); }}
+        admission={selectedAdmission}
       />
     </>
   );
