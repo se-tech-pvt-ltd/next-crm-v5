@@ -476,7 +476,7 @@ const ToolkitPage = () => {
       <Dialog open={editGroupOpen} onOpenChange={setEditGroupOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Group</DialogTitle>
+            <DialogTitle>Edit Toolkit</DialogTitle>
           </DialogHeader>
           {currentGroup && (
             <GroupForm
