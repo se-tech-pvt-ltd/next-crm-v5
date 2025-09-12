@@ -79,6 +79,23 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   React.useEffect(() => {
     const handler = (e: any) => {
+      const id = e?.detail?.id as string | undefined;
+      if (!id) return;
+      setSelectedStudentId(id);
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setIsStudentProfileOpen(true));
+      } catch {
+        setIsStudentProfileOpen(true);
+      }
+    };
+    window.addEventListener('open-student-profile', handler as EventListener);
+    return () => window.removeEventListener('open-student-profile', handler as EventListener);
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
       const d = e?.detail || {};
       const openWith = (app: Application) => {
         setSelectedApplication(app);
