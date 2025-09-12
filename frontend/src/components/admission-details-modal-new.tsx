@@ -95,6 +95,44 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
+                    Linked Entities
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Student</Label>
+                      <div className="mt-1">
+                        <Button type="button" variant="link" className="p-0 h-6 text-xs" onClick={() => {
+                          const detail = { id: admission.studentId };
+                          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail }))); } catch { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail })), 160); }
+                        }}>
+                          {student ? student.name : admission.studentId}
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Application ID</Label>
+                      <div className="mt-1">
+                        <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono" onClick={() => {
+                          const detail = { applicationId: admission.applicationId };
+                          try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail }))); } catch { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160); }
+                        }}>
+                          {admission.applicationId}
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Admission ID</Label>
+                      <p className="text-xs font-mono mt-1">{admission.admissionId || admission.id}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
                     <Award className="w-5 h-5 mr-2" />
                     Admission Information
                   </CardTitle>
