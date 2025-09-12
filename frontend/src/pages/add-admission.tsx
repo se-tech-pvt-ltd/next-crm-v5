@@ -219,7 +219,7 @@ export default function AddAdmissionPage() {
                     <FormLabel>Student</FormLabel>
                     <div className="mt-1">
                       {linkedStudent ? (
-                        <Button variant="link" className="p-0 h-8" onClick={() => { try { const { openStudentProfile } = require('@/lib/utils'); openStudentProfile(linkedStudent.id, setLocation); } catch { try { setLocation(`/students?studentId=${linkedStudent.id}`); } catch {} } }}>
+                        <Button variant="link" className="p-0 h-8" onClick={() => setLocation(`/students?studentId=${linkedStudent.id}`)}>
                           {linkedStudent.name}
                         </Button>
                       ) : (
