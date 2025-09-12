@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -49,7 +50,7 @@ export type InstitutionGroup = {
   universities: Institution[];
 };
 
-const groupsData: InstitutionGroup[] = [
+const initialGroups: InstitutionGroup[] = [
   {
     id: 'uk-elite',
     name: 'UK Elite',
@@ -72,7 +73,7 @@ const groupsData: InstitutionGroup[] = [
           cluster: 'Russell Group / Golden Triangle',
           totalFee: '£24,000 - £38,000 per year (program dependent)',
           scholarship: 'Rhodes, Clarendon, departmental scholarships available',
-          initialDeposit: '£2,000 - £5,000 (program dependent)',
+          initialDeposit: '£2,000 - ��5,000 (program dependent)',
           moi: 'English',
           eltAcceptable: 'IELTS, TOEFL iBT, Cambridge C1 Advanced/C2 Proficiency',
           intake: ['Michaelmas (Oct)', 'Hilary (Jan)', 'Trinity (Apr/May)'],
@@ -200,6 +201,7 @@ const unique = (arr: string[]) => Array.from(new Set(arr)).sort();
 
 const ToolkitPage = () => {
   const [groupId, setGroupId] = useState<string>('all');
+  const [groups, setGroups] = useState<InstitutionGroup[]>(initialGroups);
   const [country, setCountry] = useState<string>('all');
   const [type, setType] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
@@ -207,14 +209,18 @@ const ToolkitPage = () => {
   const [search, setSearch] = useState<string>('');
   const [selected, setSelected] = useState<Institution | null>(null);
   const [groupSearch, setGroupSearch] = useState<string>('');
+  const [addGroupOpen, setAddGroupOpen] = useState(false);
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [addUniOpen, setAddUniOpen] = useState(false);
+  const [editUniOpen, setEditUniOpen] = useState<Institution | null>(null);
 
-  const allInstitutions = useMemo(() => groupsData.flatMap(g => g.universities), []);
+  const allInstitutions = useMemo(() => groups.flatMap(g => g.universities), [groups]);
 
   const countries = useMemo(() => unique(allInstitutions.map(i => i.country)), [allInstitutions]);
   const types = useMemo(() => unique(allInstitutions.map(i => i.type)), [allInstitutions]);
   const priorities = useMemo(() => unique(allInstitutions.map(i => i.priority)), [allInstitutions]);
 
-  const currentGroup = useMemo(() => groupsData.find(g => g.id === groupId), [groupId]);
+  const currentGroup = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
 
   const sourceList: Institution[] = useMemo(() => {
     if (groupId === 'all' || !currentGroup) return allInstitutions;
@@ -237,11 +243,11 @@ const ToolkitPage = () => {
   const focusInstitutions = useMemo(() => filtered.filter(i => i.focusUniversity), [filtered]);
 
   const groupOptions = useMemo(() => {
-    const base = [{ value: 'all', label: 'All Groups' }, ...groupsData.map(g => ({ value: g.id, label: g.name }))];
+    const base = [{ value: 'all', label: 'All Groups' }, ...groups.map(g => ({ value: g.id, label: g.name }))];
     if (!groupSearch.trim()) return base;
     const q = groupSearch.toLowerCase();
     return base.filter(o => o.label.toLowerCase().includes(q));
-  }, [groupSearch]);
+  }, [groupSearch, groups]);
 
   return (
     <Layout title="Toolkit" subtitle="Groups → Universities → Details">
@@ -257,8 +263,17 @@ const ToolkitPage = () => {
               options={groupOptions}
             />
           </div>
-          <div className="text-xs text-muted-foreground md:ml-auto">
-            {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="hidden md:block text-xs text-muted-foreground">
+              {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Group</Button>
+            {groupId !== 'all' && (
+              <>
+                <Button size="sm" onClick={() => setAddUniOpen(true)}>Add University</Button>
+                <Button variant="secondary" size="sm" onClick={() => setEditGroupOpen(true)}>Edit Group</Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -376,7 +391,10 @@ const ToolkitPage = () => {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
-                  <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
+                    <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -384,6 +402,7 @@ const ToolkitPage = () => {
         </div>
       </div>
 
+      {/* University Details Dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           {selected && (
@@ -436,6 +455,78 @@ const ToolkitPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Group Dialog */}
+      <Dialog open={addGroupOpen} onOpenChange={setAddGroupOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Group</DialogTitle>
+          </DialogHeader>
+          <GroupForm onCancel={() => setAddGroupOpen(false)} onSave={(data) => {
+            const id = `grp-${Math.random().toString(36).slice(2,8)}`;
+            const newGroup: InstitutionGroup = { id, name: data.name, description: data.description, coverPhoto: data.coverPhoto, logo: data.logo, universities: [] };
+            setGroups((prev) => [...prev, newGroup]);
+            setGroupId(id);
+            setAddGroupOpen(false);
+          }} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Group Dialog */}
+      <Dialog open={editGroupOpen} onOpenChange={setEditGroupOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Group</DialogTitle>
+          </DialogHeader>
+          {currentGroup && (
+            <GroupForm
+              initial={{ name: currentGroup.name, description: currentGroup.description || '', coverPhoto: currentGroup.coverPhoto || '', logo: currentGroup.logo || '' }}
+              onCancel={() => setEditGroupOpen(false)}
+              onSave={(data) => {
+                setGroups(prev => prev.map(g => g.id === currentGroup.id ? { ...g, ...data } : g));
+                setEditGroupOpen(false);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add University Dialog */}
+      <Dialog open={addUniOpen} onOpenChange={setAddUniOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add University</DialogTitle>
+          </DialogHeader>
+          {currentGroup && (
+            <UniversityForm
+              onCancel={() => setAddUniOpen(false)}
+              onSave={(u) => {
+                setGroups(prev => prev.map(g => g.id === currentGroup.id ? { ...g, universities: [...g.universities, u] } : g));
+                setAddUniOpen(false);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit University Dialog */}
+      <Dialog open={!!editUniOpen} onOpenChange={(o) => !o && setEditUniOpen(null)}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit University</DialogTitle>
+          </DialogHeader>
+          {currentGroup && editUniOpen && (
+            <UniversityForm
+              initial={editUniOpen}
+              onCancel={() => setEditUniOpen(null)}
+              onSave={(u) => {
+                setGroups(prev => prev.map(g => g.id === currentGroup.id ? { ...g, universities: g.universities.map(x => x.id === u.id ? u : x) } : g));
+                setEditUniOpen(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
@@ -446,5 +537,192 @@ const Field = ({ label, value }: { label: string; value: string }) => (
     <div className="mt-0.5 text-sm whitespace-pre-wrap">{value}</div>
   </div>
 );
+
+function GroupForm({ initial, onSave, onCancel }: { initial?: { name: string; description: string; coverPhoto: string; logo: string }; onSave: (data: { name: string; description: string; coverPhoto: string; logo: string }) => void; onCancel: () => void; }) {
+  const [name, setName] = useState(initial?.name || '');
+  const [description, setDescription] = useState(initial?.description || '');
+  const [coverPhoto, setCoverPhoto] = useState(initial?.coverPhoto || '');
+  const [logo, setLogo] = useState(initial?.logo || '');
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label>Name</Label>
+        <Input value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+      <div>
+        <Label>Description</Label>
+        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+      </div>
+      <div>
+        <Label>Cover Photo URL</Label>
+        <Input value={coverPhoto} onChange={(e) => setCoverPhoto(e.target.value)} />
+      </div>
+      <div>
+        <Label>Logo URL</Label>
+        <Input value={logo} onChange={(e) => setLogo(e.target.value)} />
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+        <Button onClick={() => onSave({ name, description, coverPhoto, logo })} disabled={!name.trim()}>Save</Button>
+      </div>
+    </div>
+  );
+}
+
+function UniversityForm({ initial, onSave, onCancel }: { initial?: Institution; onSave: (u: Institution) => void; onCancel: () => void; }) {
+  const [form, setForm] = useState<Institution>(initial ?? {
+    id: `uni-${Math.random().toString(36).slice(2,8)}`,
+    logo: '',
+    coverPhoto: '',
+    name: '',
+    type: 'Public',
+    location: '',
+    country: '',
+    website: '',
+    priority: 'Medium',
+    focusUniversity: false,
+    details: {
+      institutionDetails: '',
+      cluster: '',
+      totalFee: '',
+      scholarship: '',
+      initialDeposit: '',
+      moi: '',
+      eltAcceptable: '',
+      intake: [],
+      studyGap: '',
+      upcomingDeadlines: [],
+      benefits: [],
+      eligibilityRequirement: '',
+      eltRequirement: '',
+      applyNotes: '',
+    }
+  });
+
+  const set = (k: keyof Institution, v: any) => setForm(prev => ({ ...prev, [k]: v }));
+  const setD = (k: keyof Institution['details'], v: any) => setForm(prev => ({ ...prev, details: { ...prev.details, [k]: v } }));
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <Label>Name</Label>
+          <Input value={form.name} onChange={e => set('name', e.target.value)} />
+        </div>
+        <div>
+          <Label>Type</Label>
+          <Select value={form.type} onValueChange={(v) => set('type', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Public">Public</SelectItem>
+              <SelectItem value="Private">Private</SelectItem>
+              <SelectItem value="Community">Community</SelectItem>
+              <SelectItem value="Technical">Technical</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Location</Label>
+          <Input value={form.location} onChange={e => set('location', e.target.value)} />
+        </div>
+        <div>
+          <Label>Country</Label>
+          <Input value={form.country} onChange={e => set('country', e.target.value)} />
+        </div>
+        <div>
+          <Label>Website</Label>
+          <Input value={form.website} onChange={e => set('website', e.target.value)} />
+        </div>
+        <div>
+          <Label>Priority</Label>
+          <Select value={form.priority} onValueChange={(v) => set('priority', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="High">High</SelectItem>
+              <SelectItem value="Medium">Medium</SelectItem>
+              <SelectItem value="Low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-end gap-2">
+          <Checkbox id="focusU" checked={form.focusUniversity} onCheckedChange={(v) => set('focusUniversity', Boolean(v))} />
+          <Label htmlFor="focusU">Focus University</Label>
+        </div>
+        <div>
+          <Label>Logo URL</Label>
+          <Input value={form.logo} onChange={e => set('logo', e.target.value)} />
+        </div>
+        <div>
+          <Label>Cover Photo URL</Label>
+          <Input value={form.coverPhoto} onChange={e => set('coverPhoto', e.target.value)} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <Label>Institution Details</Label>
+          <Textarea value={form.details.institutionDetails} onChange={e => setD('institutionDetails', e.target.value)} />
+        </div>
+        <div>
+          <Label>Cluster</Label>
+          <Input value={form.details.cluster} onChange={e => setD('cluster', e.target.value)} />
+        </div>
+        <div>
+          <Label>Total Fee</Label>
+          <Input value={form.details.totalFee} onChange={e => setD('totalFee', e.target.value)} />
+        </div>
+        <div>
+          <Label>Scholarship</Label>
+          <Input value={form.details.scholarship} onChange={e => setD('scholarship', e.target.value)} />
+        </div>
+        <div>
+          <Label>Initial Deposit</Label>
+          <Input value={form.details.initialDeposit} onChange={e => setD('initialDeposit', e.target.value)} />
+        </div>
+        <div>
+          <Label>MOI</Label>
+          <Input value={form.details.moi} onChange={e => setD('moi', e.target.value)} />
+        </div>
+        <div>
+          <Label>ELT Acceptable</Label>
+          <Input value={form.details.eltAcceptable} onChange={e => setD('eltAcceptable', e.target.value)} />
+        </div>
+        <div>
+          <Label>Intake (comma separated)</Label>
+          <Input value={form.details.intake.join(', ')} onChange={e => setD('intake', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+        </div>
+        <div>
+          <Label>Study Gap</Label>
+          <Input value={form.details.studyGap} onChange={e => setD('studyGap', e.target.value)} />
+        </div>
+        <div>
+          <Label>Upcoming Deadlines (comma separated)</Label>
+          <Input value={form.details.upcomingDeadlines.join(', ')} onChange={e => setD('upcomingDeadlines', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+        </div>
+        <div>
+          <Label>Benefits (comma separated)</Label>
+          <Input value={form.details.benefits.join(', ')} onChange={e => setD('benefits', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+        </div>
+        <div>
+          <Label>Eligibility Requirement</Label>
+          <Textarea value={form.details.eligibilityRequirement} onChange={e => setD('eligibilityRequirement', e.target.value)} />
+        </div>
+        <div>
+          <Label>ELT Requirement</Label>
+          <Input value={form.details.eltRequirement} onChange={e => setD('eltRequirement', e.target.value)} />
+        </div>
+        <div>
+          <Label>Apply Notes</Label>
+          <Textarea value={form.details.applyNotes} onChange={e => setD('applyNotes', e.target.value)} />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+        <Button onClick={() => onSave(form)} disabled={!form.name.trim() || !form.country.trim() || !form.type.trim()}>Save</Button>
+      </div>
+    </div>
+  );
+}
 
 export default ToolkitPage;
