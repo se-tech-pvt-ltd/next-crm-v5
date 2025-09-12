@@ -66,22 +66,20 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
     onSuccess: (application: any) => {
+      const sid = application?.studentId || form.getValues('studentId') || studentId;
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-      if (studentId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${studentId}`] });
+      if (sid) {
+        queryClient.invalidateQueries({ queryKey: [`/api/applications/student/${sid}`] });
       }
       toast({
         title: "Success",
         description: "Application has been created successfully.",
       });
       form.reset();
-      // Close modal then open the student's profile modal
-    onOpenChange(false);
-    const sid = application?.studentId || studentId;
-    if (sid) {
-      // Use local helper to open the profile modal (falls back to global event/location if needed)
-      setTimeout(() => openStudentProfile(sid), 240);
-    }
+      onOpenChange(false);
+      if (sid) {
+        setTimeout(() => openStudentProfile(sid), 240);
+      }
     },
     onError: (error) => {
       toast({
