@@ -9,7 +9,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 
 export type Institution = {
@@ -247,158 +246,142 @@ const ToolkitPage = () => {
   return (
     <Layout title="Toolkit" subtitle="Groups → Universities → Details">
       <div className="space-y-3">
-        <Tabs value={groupId} onValueChange={setGroupId}>
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="relative w-full md:w-auto md:flex-1 md:min-w-0">
-              <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
-                <TabsList className="min-w-max hidden md:inline-flex">
-                  <TabsTrigger value="all">All Groups</TabsTrigger>
-                  {groupsData.map(g => (
-                    <TabsTrigger key={g.id} value={g.id}>{g.name}</TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-            </div>
-
-            <div className="w-full md:w-64">
-              <SearchableCombobox
-                value={groupId}
-                onValueChange={setGroupId}
-                placeholder="Select group..."
-                searchPlaceholder="Search groups..."
-                onSearch={setGroupSearch}
-                options={groupOptions}
-              />
-            </div>
-
-            <div className="hidden md:block text-xs text-muted-foreground md:ml-auto">
-              {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
-            </div>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="w-full md:w-64">
+            <SearchableCombobox
+              value={groupId}
+              onValueChange={setGroupId}
+              placeholder="Select group..."
+              searchPlaceholder="Search groups..."
+              onSearch={setGroupSearch}
+              options={groupOptions}
+            />
           </div>
+          <div className="text-xs text-muted-foreground md:ml-auto">
+            {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
+          </div>
+        </div>
 
-          <TabsContent value={groupId}>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-              <div className="col-span-1 md:col-span-2">
-                <Label htmlFor="search">Search</Label>
-                <Input id="search" placeholder="Search by name, location or country" value={search} onChange={(e) => setSearch(e.target.value)} />
-              </div>
-              <div>
-                <Label>Country</Label>
-                <Select value={country} onValueChange={setCountry}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {countries.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Type</Label>
-                <Select value={type} onValueChange={setType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {types.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Priority</Label>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {priorities.map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end space-x-2 mt-2 md:mt-0">
-                <Checkbox id="focusOnly" checked={focusOnly} onCheckedChange={(v) => setFocusOnly(Boolean(v))} />
-                <Label htmlFor="focusOnly">Focus University</Label>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+          <div className="col-span-1 md:col-span-2">
+            <Label htmlFor="search">Search</Label>
+            <Input id="search" placeholder="Search by name, location or country" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <div>
+            <Label>Country</Label>
+            <Select value={country} onValueChange={setCountry}>
+              <SelectTrigger>
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {countries.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger>
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {types.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Priority</Label>
+            <Select value={priority} onValueChange={setPriority}>
+              <SelectTrigger>
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {priorities.map((p) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end space-x-2 mt-2 md:mt-0">
+            <Checkbox id="focusOnly" checked={focusOnly} onCheckedChange={(v) => setFocusOnly(Boolean(v))} />
+            <Label htmlFor="focusOnly">Focus University</Label>
+          </div>
+        </div>
 
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">{filtered.length} results</div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="secondary">View Focus Universities ({focusInstitutions.length})</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
-                  </DialogHeader>
-                  <ScrollArea className="h-[60vh] pr-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {focusInstitutions.map((i) => (
-                        <Card key={i.id} className="overflow-hidden">
-                          <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-                          <CardHeader className="flex-row items-center space-y-0 space-x-3">
-                            <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
-                            <div className="flex-1">
-                              <CardTitle className="text-base">{i.name}</CardTitle>
-                              <div className="text-xs text-muted-foreground">{i.location}</div>
-                            </div>
-                            <Badge className="bg-emerald-600">Focus</Badge>
-                          </CardHeader>
-                          <CardContent className="space-y-1">
-                            <div className="flex flex-wrap gap-1">
-                              <Badge variant="outline">{i.country}</Badge>
-                              <Badge variant="secondary">{i.type}</Badge>
-                              <Badge variant="outline">Priority: {i.priority}</Badge>
-                            </div>
-                            <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </DialogContent>
-              </Dialog>
-            </div>
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">{filtered.length} results</div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="secondary">View Focus Universities ({focusInstitutions.length})</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="h-[60vh] pr-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {focusInstitutions.map((i) => (
+                    <Card key={i.id} className="overflow-hidden">
+                      <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+                      <CardHeader className="flex-row items-center space-y-0 space-x-3">
+                        <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                        <div className="flex-1">
+                          <CardTitle className="text-base">{i.name}</CardTitle>
+                          <div className="text-xs text-muted-foreground">{i.location}</div>
+                        </div>
+                        <Badge className="bg-emerald-600">Focus</Badge>
+                      </CardHeader>
+                      <CardContent className="space-y-1">
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="outline">{i.country}</Badge>
+                          <Badge variant="secondary">{i.type}</Badge>
+                          <Badge variant="outline">Priority: {i.priority}</Badge>
+                        </div>
+                        <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {filtered.map((i) => (
-                <Card key={i.id} className="overflow-hidden group">
-                  <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-                  <CardHeader className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
-                      <div className="min-w-0">
-                        <CardTitle className="text-base truncate">{i.name}</CardTitle>
-                        <div className="text-xs text-muted-foreground truncate">{i.location}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline">{i.country}</Badge>
-                      <Badge variant="secondary">{i.type}</Badge>
-                      <Badge variant="outline">Priority: {i.priority}</Badge>
-                      {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
-                      <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {filtered.map((i) => (
+            <Card key={i.id} className="overflow-hidden group">
+              <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+              <CardHeader className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                  <div className="min-w-0">
+                    <CardTitle className="text-base truncate">{i.name}</CardTitle>
+                    <div className="text-xs text-muted-foreground truncate">{i.location}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline">{i.country}</Badge>
+                  <Badge variant="secondary">{i.type}</Badge>
+                  <Badge variant="outline">Priority: {i.priority}</Badge>
+                  {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
+                  <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
