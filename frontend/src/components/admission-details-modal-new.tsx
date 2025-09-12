@@ -77,53 +77,20 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
         <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
           {/* Left: Content */}
           <div className="flex flex-col min-h-0">
-            {/* Sticky header inside scroll context */}
-            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-              <div className="px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-lg font-semibold truncate">{admission.program}</h1>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div>
-                    <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
-                    <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                      <SelectTrigger className="h-8 text-xs w-36">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not_applied">Not Applied</SelectItem>
-                        <SelectItem value="applied">Applied</SelectItem>
-                        <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="on_hold">On Hold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="px-4 pb-3">
-                <div className="w-full bg-gray-100 rounded-md p-1.5">
-                  <div className="flex items-center justify-between relative">
-                    <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
-                  </div>
-                </div>
+            <div className="relative">
+              <div className="absolute top-3 right-3 z-20">
+                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </div>
 
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+              <div className="px-2 pb-1">
+                <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+              </div>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
