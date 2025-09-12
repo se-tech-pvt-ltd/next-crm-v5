@@ -240,7 +240,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                 <Card className="w-full shadow-md border border-gray-200 bg-white">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-xs">Personal Information</CardTitle>
+                      <CardTitle>Personal Information</CardTitle>
                       <div className="flex items-center gap-2">
                         {convertedLoading ? (
                           <div className="flex items-center gap-2">
