@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 console.log('[modal] loaded: frontend/src/components/admission-details-modal-new.tsx');
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
 import { Award, User, X, ExternalLink, Plane, Calendar } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
