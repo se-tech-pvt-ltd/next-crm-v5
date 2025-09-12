@@ -250,7 +250,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Application Details</DialogTitle>
 
-        <div className="grid grid-cols-[1fr_30rem] h-[90vh] min-h-0">
+        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
           <div className="flex flex-col min-h-0">
             <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
               <div className="px-4 py-2 flex items-center justify-between">
@@ -265,13 +265,13 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
               <div className="flex gap-0 w-full">
                 <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
                   <Card className="w-full">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
+                        <CardTitle className="flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
                         <div className="flex items-center gap-3">
                           {admissionForApp ? (
                             <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setLocation(`/admissions/${admissionForApp.id}`)} title="View Admission">
@@ -348,7 +348,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
                   <Card className="w-full">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
+                      <CardTitle className="flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -411,7 +411,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
                   <Card className="w-full">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm flex items-center"><ExternalLink className="w-5 h-5 mr-2" />Operations</CardTitle>
+                      <CardTitle className="flex items-center"><ExternalLink className="w-5 h-5 mr-2" />Operations</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -456,7 +456,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
             </div>
           </div>
 
-          <div className="w-[30rem] flex-shrink-0 bg-white rounded-l-lg border-l p-3 flex flex-col min-h-0">
+          <div className="w-[360px] flex-shrink-0 bg-white border-l p-3 flex flex-col min-h-0">
             <div className="sticky top-0 z-10 px-1 pb-2 bg-white">
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />

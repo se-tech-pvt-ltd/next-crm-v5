@@ -3,9 +3,9 @@ import { Badge } from "@/components/ui/badge";
 console.log('[modal] loaded: frontend/src/components/admission-details-modal-new.tsx');
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
 import { Award, User, X, ExternalLink, Plane, Calendar } from "lucide-react";
+import { Label } from '@/components/ui/label';
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
@@ -72,43 +72,26 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent hideClose className="max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
         <DialogTitle className="sr-only">Admission Details</DialogTitle>
-        
-        {/* Header with Fixed Position */}
-        <div className="absolute top-0 left-0 right-0 bg-white border-b p-3 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center">
-                <Award className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">{admission.program}</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="default"
-                className="ml-2 p-0 h-auto w-auto bg-transparent hover:bg-transparent rounded-none text-gray-700"
-                onClick={() => onOpenChange(false)}
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
-        <div className="flex h-[90vh]">
-          {/* Main Content - Left Side */}
-          <div className="flex-1 overflow-y-auto p-6 pt-16">
-            {/* Status bar under header (mirror student) */}
-            <div className="mb-3">
-              <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
+          {/* Left: Content */}
+          <div className="flex flex-col min-h-0">
+            <div className="relative">
+              <div className="absolute top-3 right-3 z-20">
+                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            <div className="space-y-6">
-              {/* Admission Information */}
+
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+              <div className="px-2 pb-1">
+                <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+              </div>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -119,40 +102,39 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Program</label>
-                      <p className="text-lg font-semibold">{admission.program}</p>
+                      <Label>Program</Label>
+                      <p className="text-xs font-semibold">{admission.program}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Decision Date</label>
-                      <p>{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                      <Label>Decision Date</Label>
+                      <p className="text-xs">{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
-                      <p>{admission.tuitionFee || 'Not specified'}</p>
+                      <Label>Tuition Fee</Label>
+                      <p className="text-xs">{admission.tuitionFee || 'Not specified'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Scholarship Amount</label>
-                      <p>{admission.scholarshipAmount || 'No scholarship'}</p>
+                      <Label>Scholarship Amount</Label>
+                      <p className="text-xs">{admission.scholarshipAmount || 'No scholarship'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Start Date</label>
-                      <p>{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
+                      <Label>Start Date</Label>
+                      <p className="text-xs">{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">End Date</label>
-                      <p>{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
+                      <Label>End Date</Label>
+                      <p className="text-xs">{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
                     </div>
                   </div>
                   {admission.notes && (
                     <div className="mt-4">
-                      <label className="text-sm font-medium text-gray-600">Notes</label>
-                      <p className="mt-1 text-gray-800">{admission.notes}</p>
+                      <Label>Notes</Label>
+                      <p className="mt-1 text-xs text-gray-800">{admission.notes}</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Visa Information */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -163,30 +145,29 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Status</label>
+                      <Label>Visa Status</Label>
                       <div className="mt-1">
                         <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>
-                          {currentVisaStatus.replace('_', ' ').toUpperCase()}
+                          <span className="text-xs">{currentVisaStatus.replace('_', ' ').toUpperCase()}</span>
                         </Badge>
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Application Date</label>
-                      <p>{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
+                      <Label>Visa Application Date</Label>
+                      <p className="text-xs">{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Interview Date</label>
-                      <p>{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
+                      <Label>Visa Interview Date</Label>
+                      <p className="text-xs">{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Visa Approval Date</label>
-                      <p>{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
+                      <Label>Visa Approval Date</Label>
+                      <p className="text-xs">{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Student Information */}
               {student && (
                 <Card>
                   <CardHeader>
@@ -196,8 +177,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                         Student Information
                       </CardTitle>
                       {onOpenStudentProfile && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => onOpenStudentProfile(student.id)}
                         >
@@ -210,20 +191,20 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Name</label>
-                        <p className="font-medium">{student.name}</p>
+                        <Label>Name</Label>
+                        <p className="text-xs font-medium">{student.name}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Email</label>
-                        <p>{student.email}</p>
+                        <Label>Email</Label>
+                        <p className="text-xs">{student.email}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Phone</label>
-                        <p>{student.phone || 'Not provided'}</p>
+                        <Label>Phone</Label>
+                        <p className="text-xs">{student.phone || 'Not provided'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Status</label>
-                        <Badge variant="outline">{student.status}</Badge>
+                        <Label>Status</Label>
+                        <Badge variant="outline"><span className="text-xs">{student.status}</span></Badge>
                       </div>
                     </div>
                   </CardContent>
@@ -232,13 +213,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
             </div>
           </div>
 
-          {/* Activity Sidebar (mirror student) */}
-          <div className="basis-[35%] max-w-[35%] flex-shrink-0 bg-white rounded-lg p-3 flex flex-col h-full min-h-0 overflow-hidden border-l border-gray-200 pt-12">
-            <h3 className="text-sm font-semibold mb-2 flex items-center border-b border-gray-200 pb-2">
-              <Calendar className="w-5 h-5 mr-2" />
-              Activity Timeline
-            </h3>
-            <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Right: Timeline */}
+          <div className="border-l bg-white flex flex-col min-h-0">
+            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+              <h3 className="text-sm font-semibold">Activity Timeline</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto pt-1 min-h-0">
               <ActivityTracker
                 entityType="admission"
                 entityId={admission.id}
