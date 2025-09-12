@@ -385,7 +385,7 @@ const ToolkitPage = () => {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-3xl max-h-[85vh]">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           {selected && (
             <>
               <DialogHeader>
@@ -405,7 +405,7 @@ const ToolkitPage = () => {
                 </div>
               </div>
 
-              <ScrollArea className="max-h-[60vh] pr-2 mt-2">
+              <ScrollArea className="h-[60vh] pr-2 mt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                   <div className="space-y-2">
                     <Field label="Institution Details" value={selected.details.institutionDetails} />
