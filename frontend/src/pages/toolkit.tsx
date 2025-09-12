@@ -265,7 +265,7 @@ const ToolkitPage = () => {
           </div>
           <div className="flex items-center gap-2 ml-auto">
             <div className="hidden md:block text-xs text-muted-foreground">
-              {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
+              {groupId === 'all' ? 'Showing all universities from all toolkits' : currentGroup?.description}
             </div>
             <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Toolkit</Button>
             {groupId !== 'all' && (
