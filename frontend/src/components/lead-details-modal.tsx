@@ -339,7 +339,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   </CardContent>
                 </Card>
 
-                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="text-xs flex items-center space-x-2"><Target className="w-4 h-4 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
+                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="flex items-center space-x-2"><Target className="w-4 h-4 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
