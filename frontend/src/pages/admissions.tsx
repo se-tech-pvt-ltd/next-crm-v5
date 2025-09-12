@@ -42,6 +42,30 @@ export default function Admissions() {
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [admissionsDropdowns]);
 
+  const visaStatusOptions = useMemo(() => {
+    const dd: any = admissionsDropdowns as any;
+    let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
+    if (!Array.isArray(list)) list = [];
+    return list;
+  }, [admissionsDropdowns]);
+
+  const getVisaStatusLabel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const o of visaStatusOptions) {
+      const key = (o?.id ?? o?.key ?? o?.value);
+      if (key != null) {
+        const k = String(key);
+        map.set(k, String(o.value));
+        map.set(k.toLowerCase(), String(o.value));
+      }
+    }
+    return (val?: string | null) => {
+      if (!val) return '';
+      const v = String(val);
+      return map.get(v) || map.get(v.toLowerCase()) || v.replace(/[_-]/g, ' ');
+    };
+  }, [visaStatusOptions]);
+
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
   });
