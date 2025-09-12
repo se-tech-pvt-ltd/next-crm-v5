@@ -87,15 +87,14 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   </div>
                   <div className="min-w-0">
                     <h1 className="text-lg font-semibold truncate">{admission.program}</h1>
-                    <p className="text-xs text-gray-600 truncate">Admission Details</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="hidden md:block">
+                  <div>
                     <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
                     <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
-                      <SelectTrigger className="h-8 text-xs w-32">
+                      <SelectTrigger className="h-8 text-xs w-36">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
