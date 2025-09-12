@@ -106,7 +106,8 @@ export default function Admissions() {
   };
 
   const getVisaStatusColor = (status: string) => {
-    switch (status) {
+    const s = (status || '').toLowerCase().replace(/_/g, '-');
+    switch (s) {
       case 'approved':
         return 'bg-green-100 text-green-800';
       case 'rejected':
@@ -114,6 +115,9 @@ export default function Admissions() {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'not-applied':
+      case 'on-hold':
+      case 'interview-scheduled':
+      case 'applied':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
