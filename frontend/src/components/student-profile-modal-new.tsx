@@ -347,7 +347,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-xs">Student Information</CardTitle>
+                      <CardTitle>Student Information</CardTitle>
                       <div className="flex items-center space-x-2">
                         {!isEditing ? (
                           <>
@@ -439,7 +439,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   </CardContent>
                 </Card>
 
-                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="text-xs flex items-center space-x-2"><GraduationCap className="w-4 h-4 text-primary" /><span>Academic Information</span></CardTitle>}>
+                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="flex items-center space-x-2"><GraduationCap className="w-4 h-4 text-primary" /><span>Academic Information</span></CardTitle>}>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
@@ -530,7 +530,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   cardClassName="shadow-sm hover:shadow-md transition-shadow"
                   header={
                     <div className="flex items-center justify-between w-full">
-                      <CardTitle className="text-xs flex items-center space-x-2">
+                      <CardTitle className="flex items-center space-x-2">
                         <FileText className="w-4 h-4 text-primary" />
                         <span>Applications</span>
                         {Array.isArray(applications) && (
