@@ -73,7 +73,7 @@ const initialGroups: InstitutionGroup[] = [
           cluster: 'Russell Group / Golden Triangle',
           totalFee: '£24,000 - £38,000 per year (program dependent)',
           scholarship: 'Rhodes, Clarendon, departmental scholarships available',
-          initialDeposit: '£2,000 - ��5,000 (program dependent)',
+          initialDeposit: '£2,000 - £5,000 (program dependent)',
           moi: 'English',
           eltAcceptable: 'IELTS, TOEFL iBT, Cambridge C1 Advanced/C2 Proficiency',
           intake: ['Michaelmas (Oct)', 'Hilary (Jan)', 'Trinity (Apr/May)'],
@@ -267,7 +267,7 @@ const ToolkitPage = () => {
             <div className="hidden md:block text-xs text-muted-foreground">
               {groupId === 'all' ? 'Showing all universities' : currentGroup?.description}
             </div>
-            <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Group</Button>
+            <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Toolkit</Button>
             {groupId !== 'all' && (
               <>
                 <Button size="sm" onClick={() => setAddUniOpen(true)}>Add University</Button>
