@@ -147,7 +147,13 @@ export default function AddApplication() {
 
   const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
 
-  const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
+  const goBack = () => {
+    if (presetStudentId) {
+      try { const { openStudentProfile } = require('@/lib/utils'); openStudentProfile(presetStudentId, setLocation); } catch { try { setLocation(`/students?studentId=${presetStudentId}`); } catch {} }
+    } else {
+      setLocation('/applications');
+    }
+  };
 
   return (
     <Layout
