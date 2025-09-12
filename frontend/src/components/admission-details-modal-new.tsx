@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
+import * as ApplicationsService from "@/services/applications";
 import { useState } from "react";
 
 interface AdmissionDetailsModalProps {
@@ -50,6 +51,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   const { data: student } = useQuery({
     queryKey: [`/api/students/${admission?.studentId}`],
     enabled: !!admission?.studentId,
+  });
+
+  const { data: application } = useQuery({
+    queryKey: [`/api/applications/${admission?.applicationId}`],
+    queryFn: async () => ApplicationsService.getApplication(admission?.applicationId as string),
+    enabled: !!admission?.applicationId,
   });
 
   const updateVisaStatusMutation = useMutation({
@@ -112,13 +119,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       </div>
                     </div>
                     <div>
-                      <Label>Application ID</Label>
+                      <Label>Application Code</Label>
                       <div className="mt-1">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono" onClick={() => {
-                          const detail = { applicationId: admission.applicationId };
+                          const detail = { applicationId: admission.applicationId, application };
                           try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail }))); } catch { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160); }
                         }}>
-                          {admission.applicationId}
+                          {application?.applicationCode || admission.applicationId}
                         </Button>
                       </div>
                     </div>
