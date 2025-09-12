@@ -193,7 +193,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed max-w-4xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="no-not-allowed max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-4">
         <DialogTitle className="sr-only">Add Admission</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between">
@@ -210,7 +210,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           </div>
         </DialogHeader>
 
-        <div className="flex h-[90vh]">
+        <div className="flex h-full">
           <div className="flex-1 overflow-y-auto p-6 pt-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -404,9 +404,18 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                   </CardContent>
                 </Card>
 
-                <div className="flex justify-end space-x-2 p-2">
-                  <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                  <Button onClick={() => form.handleSubmit(onSubmit)()}>{createMutation.isPending ? 'Creating...' : 'Create Admission'}</Button>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-4 h-8 text-xs">Cancel</Button>
+                  <Button type="submit" disabled={createMutation.isPending} className="px-4 h-8 text-xs bg-primary hover:bg-primary/90">
+                    {createMutation.isPending ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving...</span>
+                      </div>
+                    ) : (
+                      <span>Save</span>
+                    )}
+                  </Button>
                 </div>
               </form>
             </Form>
