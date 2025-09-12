@@ -25,6 +25,8 @@ export default function Applications() {
   const [, setLocation] = useLocation();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
