@@ -126,6 +126,12 @@ export function Sidebar() {
       icon: Settings,
       count: undefined
     },
+    {
+      path: '/toolkit',
+      label: 'Toolkit',
+      icon: ToolkitIcon,
+      count: undefined
+    },
   ];
 
   const sidebarWidth = isExpanded ? 'w-48' : 'w-16';
