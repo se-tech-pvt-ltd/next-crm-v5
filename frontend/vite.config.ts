@@ -1,17 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-// Removed runtime error overlay plugin due to instability of overlay
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+
 export default defineConfig({
   plugins: [
     react(),
+    runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
-      process.env.REPL_ID !== undefined
+    process.env.REPL_ID !== undefined
       ? [
-        await import("@replit/vite-plugin-cartographer").then((m) =>
-          m.cartographer(),
-        ),
-      ]
+          await import("@replit/vite-plugin-cartographer").then((m) =>
+            m.cartographer(),
+          ),
+        ]
       : []),
   ],
   resolve: {
@@ -28,25 +30,25 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
-    hmr: { overlay: false },
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
+      "/api": {
+        target: "http://localhost:5000",
         changeOrigin: true,
       },
-      '/uploads': {
-        target: 'http://localhost:5000',
+      "/uploads": {
+        target: "http://localhost:5000",
         changeOrigin: true,
-      }
+      },
     },
     fs: {
       strict: true,
       deny: ["**/.*"],
     },
+    allowedHosts: ["sales.crm-setech.cloud"], // ✅ add here
   },
   preview: {
     host: "0.0.0.0",
     port: 4173,
-    allowedHosts: ["sales.crm-setech.cloud"],
+    allowedHosts: ["sales.crm-setech.cloud"], // optional (for `vite preview`)
   },
 });
