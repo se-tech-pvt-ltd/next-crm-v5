@@ -276,6 +276,7 @@ const priorityBadge = (p: UniversityType['priority']) => {
 export default function ToolkitsPage() {
   const [selectedToolkitId, setSelectedToolkitId] = useState<string>(HARD_CODED_TOOLKITS[0]?.id || '');
   const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -425,7 +426,7 @@ export default function ToolkitsPage() {
           </Card>
 
           {/* Universities table */}
-          <Card className="lg:col-span-5">
+          <Card className="lg:col-span-9">
             <CardHeader className="p-3 pb-1">
               <CardTitle className="text-sm flex items-center gap-2"><University className="h-4 w-4" />Universities</CardTitle>
             </CardHeader>
@@ -443,7 +444,7 @@ export default function ToolkitsPage() {
                 </TableHeader>
                 <TableBody>
                   {universities.map(u => (
-                    <TableRow key={u.id} className={`cursor-pointer hover:bg-gray-50 ${selectedUniversityId === u.id ? 'bg-blue-50' : ''}`} onClick={() => setSelectedUniversityId(u.id)}>
+                    <TableRow key={u.id} className={`cursor-pointer hover:bg-gray-50 ${selectedUniversityId === u.id ? 'bg-blue-50' : ''}`} onClick={() => { setSelectedUniversityId(u.id); setIsDetailsOpen(true); }}>
                       <TableCell className="p-2">
                         <div className="flex items-center gap-2">
                           <Avatar className="h-7 w-7">
@@ -465,7 +466,7 @@ export default function ToolkitsPage() {
           </Card>
 
           {/* University details */}
-          <Card className="lg:col-span-4">
+          <Card className="hidden">
             <CardHeader className="p-3 pb-1 flex items-center justify-between">
               <CardTitle className="text-sm">Details</CardTitle>
               {selectedUniversity?.website && (
@@ -520,6 +521,60 @@ export default function ToolkitsPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isDetailsOpen} onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedUniversityId(null); }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{selectedUniversity?.name || 'Institution Details'}</DialogTitle>
+          </DialogHeader>
+          {selectedUniversity ? (
+            <div>
+              {selectedUniversity.coverPhoto ? (
+                <img src={selectedUniversity.coverPhoto} alt={`${selectedUniversity.name} campus`} className="w-full h-40 object-cover rounded-md" />
+              ) : null}
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-10 w-10">
+                    {selectedUniversity.logo ? <AvatarImage src={selectedUniversity.logo} alt={`${selectedUniversity.name} logo`} /> : <AvatarFallback>{selectedUniversity.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</AvatarFallback>}
+                  </Avatar>
+                  <div>
+                    <div className="text-sm font-semibold inline-flex items-center gap-2">{selectedUniversity.name}{selectedUniversity.focus && <Star className="h-3.5 w-3.5 text-blue-600" />}</div>
+                    <div className="text-[11px] text-gray-600">{selectedUniversity.type} • {selectedUniversity.location} • {selectedUniversity.country}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <DetailRow label="Cluster" value={selectedUniversity.details.cluster} />
+                  <DetailRow label="Total Fee" value={selectedUniversity.details.totalFee} />
+                  <DetailRow label="Scholarship" value={selectedUniversity.details.scholarship} />
+                  <DetailRow label="Initial Deposit" value={selectedUniversity.details.initialDeposit} />
+                  <DetailRow label="MOI" value={selectedUniversity.details.moi} />
+                  <DetailRow label="ELT Acceptable" value={selectedUniversity.details.eltAcceptable} />
+                  <DetailRow label="Intake" value={selectedUniversity.details.intake} />
+                  <DetailRow label="Study Gap" value={selectedUniversity.details.studyGap} />
+                </div>
+
+                <div className="space-y-1 text-[11px]">
+                  <DetailBlock label="Upcoming Deadlines" value={selectedUniversity.details.upcomingDeadlines} />
+                  <DetailBlock label="Benefits" value={selectedUniversity.details.benefits} />
+                  <DetailBlock label="Eligibility Requirement" value={selectedUniversity.details.eligibility} />
+                  <DetailBlock label="ELT Requirement" value={selectedUniversity.details.eltRequirement} />
+                  <DetailBlock label="Apply Notes" value={selectedUniversity.details.applyNotes} />
+                </div>
+
+                {selectedUniversity.website && (
+                  <a href={selectedUniversity.website} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1">
+                    Visit Site <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-600">No university selected.</div>
+          )}
+        </DialogContent>
+      </Dialog>
+
     </Layout>
   );
 }
