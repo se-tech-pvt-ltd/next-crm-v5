@@ -481,6 +481,16 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           console.error('failed to reopen add application from profile', e);
         }
       }}
+      onOpenApplication={(app) => {
+        setCurrentApplicationObj(app);
+        try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); }
+      }}
+    />
+
+    <ApplicationDetailsModal
+      open={isAppDetailsOpen}
+      onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setCurrentApplicationObj(null); }}
+      application={currentApplicationObj}
     />
     </>
   );
