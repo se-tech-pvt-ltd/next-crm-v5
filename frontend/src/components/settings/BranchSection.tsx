@@ -63,32 +63,32 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               <div>
-                <Label>Branch Name</Label>
+                <Label>Branch Name<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} />
               </div>
 
               <div>
-                <Label>City</Label>
+                <Label>City<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.city} onChange={(e) => setForm((s) => ({ ...s, city: e.target.value }))} />
               </div>
 
               <div>
-                <Label>Country</Label>
+                <Label>Country<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.country} onChange={(e) => setForm((s) => ({ ...s, country: e.target.value }))} />
               </div>
 
               <div>
-                <Label>Address</Label>
+                <Label>Address<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.address} onChange={(e) => setForm((s) => ({ ...s, address: e.target.value }))} />
               </div>
 
               <div>
-                <Label>Official Phone</Label>
+                <Label>Official Phone<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.officialPhone} onChange={(e) => setForm((s) => ({ ...s, officialPhone: e.target.value }))} inputMode="tel" autoComplete="tel" />
               </div>
 
               <div>
-                <Label>Official Email</Label>
+                <Label>Official Email<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.officialEmail} onChange={(e) => setForm((s) => ({ ...s, officialEmail: e.target.value }))} type="email" autoComplete="off" />
               </div>
 
@@ -113,12 +113,12 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               </div>
 
               <div>
-                <Label>Code</Label>
+                <Label>Code<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.code} onChange={(e) => setForm((s) => ({ ...s, code: e.target.value }))} />
               </div>
 
               <div>
-                <Label>Status</Label>
+                <Label>Status<span className="text-destructive"> *</span></Label>
                 <Select value={form.status} onValueChange={(v) => setForm((s) => ({ ...s, status: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
