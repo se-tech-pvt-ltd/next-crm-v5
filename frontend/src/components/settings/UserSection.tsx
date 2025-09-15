@@ -14,11 +14,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
-    onSuccess: async () => { await refetch(); setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); toast({ title: 'User created', description: 'User added successfully', duration: 2500 }); }
+    onSuccess: async () => { await refetch(); setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); toast({ title: 'User created', description: 'User added successfully', duration: 2500 }); },
+    onError: (err: any) => {
+      const msg = err?.message || err?.data?.message || 'Failed to create user';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    }
   });
   const invite = useMutation({
     mutationFn: () => UsersService.inviteUser(form),
-    onSuccess: async () => { await refetch(); toast({ title: 'Invite sent', description: 'Invitation recorded', duration: 2500 }); }
+    onSuccess: async () => { await refetch(); toast({ title: 'Invite sent', description: 'Invitation recorded', duration: 2500 }); },
+    onError: (err: any) => {
+      const msg = err?.message || err?.data?.message || 'Failed to invite user';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    }
   });
 
   return (
@@ -39,29 +47,38 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         <div>
           <Label>Role</Label>
           <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="admin_staff">Admin Staff</SelectItem>
+              <SelectItem value="super_admin">Super Admin</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="regional_manager">Regional Manager</SelectItem>
               <SelectItem value="branch_manager">Branch Manager</SelectItem>
-              <SelectItem value="counselor">Counselor</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="counselor">Counsellor</SelectItem>
+              <SelectItem value="admission_officer">Admission Officer</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>Branch</Label>
+          <Label>Branch<span className="text-destructive"> *</span></Label>
           <Select value={form.branchId} onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (optional)" /></SelectTrigger>
+            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (required)" /></SelectTrigger>
             <SelectContent>
-              {branches.map((b: any) => (
-                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-              ))}
+              {branches.map((b: any) => {
+                const assignedTo = (users as any[]).find((u: any) => u.branchId === b.id);
+                return (
+                  <SelectItem key={b.id} value={b.id} disabled={!!assignedTo}>
+                    {b.name}{assignedTo ? ' — Assigned' : ''}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
       </div>
       <div className="flex gap-2">
-        <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.role}>Create user</Button>
-        <Button type="button" variant="outline" onClick={() => invite.mutate()} disabled={!form.email || !form.role}>Invite user</Button>
+        <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId}>Create user</Button>
+        <Button type="button" variant="outline" onClick={() => invite.mutate()} disabled={!form.email || !form.branchId}>Invite user</Button>
       </div>
       <Separator />
       <div>
@@ -81,7 +98,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <tr key={u.id} className="border-t">
                   <td className="py-1 pr-2">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</td>
                   <td className="py-1 pr-2">{u.email}</td>
-                  <td className="py-1 pr-2 capitalize">{u.role?.replace('_', ' ')}</td>
+                  <td className="py-1 pr-2">{(() => {
+                    const map: Record<string,string> = {
+                      super_admin: 'Super Admin',
+                      admin: 'Admin',
+                      regional_manager: 'Regional Manager',
+                      branch_manager: 'Branch Manager',
+                      processing: 'Processing',
+                      counselor: 'Counsellor',
+                      admission_officer: 'Admission Officer',
+                      admin_staff: 'Admin Staff',
+                    };
+                    return map[u.role] || (u.role || '').replace(/_/g, ' ');
+                  })()}</td>
                   <td className="py-1 pr-2">{u.branchId || '—'}</td>
                 </tr>
               ))}

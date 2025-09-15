@@ -16,16 +16,32 @@ export function generateUniqueFilename(originalName: string): string {
 }
 
 export function isValidRole(role: string): boolean {
-  return ['counselor', 'branch_manager', 'admin_staff'].includes(role);
+  return [
+    'super_admin',
+    'admin',
+    'regional_manager',
+    'branch_manager',
+    'processing',
+    'counselor',
+    'admission_officer',
+    // legacy/support
+    'admin_staff'
+  ].includes(role);
 }
 
 export function hasPermission(userRole: string, requiredRole: string): boolean {
   const roleHierarchy = {
-    'counselor': 1,
-    'branch_manager': 2,
-    'admin_staff': 3
+    counselor: 1,
+    processing: 2,
+    admission_officer: 3,
+    branch_manager: 4,
+    regional_manager: 5,
+    admin: 6,
+    super_admin: 7,
+    // legacy mapping
+    admin_staff: 6,
   } as const;
-  return (roleHierarchy as any)[userRole] >= (roleHierarchy as any)[requiredRole];
+  return ((roleHierarchy as any)[userRole] ?? 0) >= ((roleHierarchy as any)[requiredRole] ?? Infinity);
 }
 
 export function normalizeDate(value: unknown): string | undefined {

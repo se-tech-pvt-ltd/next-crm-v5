@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express';
-import type { Request, Response } from 'express';
 import { connection } from '../config/database.js';
 
 export class BranchController {
@@ -56,6 +55,46 @@ export class BranchController {
     } catch (e) {
       console.error('Failed to create branch', e);
       res.status(500).json({ message: 'Failed to create branch' });
+    }
+  }
+
+  static async update(req: Request, res: Response) {
+    try {
+      const { id } = req.params as any;
+      const { name, city, country, address, officialPhone, officialEmail, managerId } = req.body || {};
+
+      if (!id) {
+        return res.status(400).json({ message: 'id is required' });
+      }
+      if (!name || !city || !country || !address || !officialPhone || !officialEmail) {
+        return res.status(400).json({ message: 'name, city, country, address, officialPhone and officialEmail are required' });
+      }
+
+      const [result] = await connection.query<any>(
+        `UPDATE branches
+         SET branch_name = ?, city = ?, country = ?, address = ?, official_phone = ?, official_email = ?, branch_head_id = ?, updated_on = NOW()
+         WHERE id = ?`,
+        [name, city, country, address, officialPhone, officialEmail, managerId || null, id]
+      );
+
+      if ((result as any)?.affectedRows === 0) {
+        return res.status(404).json({ message: 'Branch not found' });
+      }
+
+      res.json({
+        id,
+        branchName: name,
+        city,
+        country,
+        address,
+        officialPhone,
+        officialEmail,
+        branchHeadId: managerId || null,
+        updatedOn: new Date(),
+      });
+    } catch (e) {
+      console.error('Failed to update branch', e);
+      res.status(500).json({ message: 'Failed to update branch' });
     }
   }
 }

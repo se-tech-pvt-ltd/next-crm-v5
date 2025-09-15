@@ -33,6 +33,11 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   });
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [filters, setFilters] = useState({ name: '', country: '', city: '' });
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '' });
 
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
@@ -48,12 +53,64 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected?.id) throw new Error('Missing branch id');
+      return BranchesService.updateBranch(String(selected.id), { ...editForm });
+    },
+    onSuccess: async () => {
+      setIsEditing(false);
+      await refetch();
+      toast({ title: 'Branch updated', duration: 2000 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to update branch';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+  });
+
+  const filteredBranches = (Array.isArray(branches) ? branches : []).filter((b: any) => {
+    const nameStr = String(b.branchName || b.name || '').toLowerCase();
+    const countryStr = String(b.country || '').toLowerCase();
+    const cityStr = String(b.city || '').toLowerCase();
+    const fName = filters.name.toLowerCase();
+    const fCountry = filters.country.toLowerCase();
+    const fCity = filters.city.toLowerCase();
+    return (
+      (!fName || nameStr.includes(fName)) &&
+      (!fCountry || countryStr.includes(fCountry)) &&
+      (!fCity || cityStr.includes(fCity))
+    );
+  });
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            placeholder="Search name"
+            className="h-8 w-40"
+            value={filters.name}
+            onChange={(e) => setFilters((s) => ({ ...s, name: e.target.value }))}
+          />
+          <Input
+            placeholder="Country"
+            className="h-8 w-32"
+            value={filters.country}
+            onChange={(e) => setFilters((s) => ({ ...s, country: e.target.value }))}
+          />
+          <Input
+            placeholder="City"
+            className="h-8 w-32"
+            value={filters.city}
+            onChange={(e) => setFilters((s) => ({ ...s, city: e.target.value }))}
+          />
+        </div>
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
-            <Button type="button">Add new branch</Button>
+            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title="Add Branch" type="button">
+              <Plus className="w-4 h-4" />
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -132,7 +189,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       <Separator />
 
       <div>
-        <div className="text-sm font-medium mb-2">Existing branches</div>
         {branches.length === 0 ? (
           <div className="border border-dashed rounded-md p-6 text-center">
             <div className="flex items-center justify-center mb-4">
@@ -160,22 +216,33 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead>Official Phone</TableHead>
                   <TableHead>Official Email</TableHead>
                   <TableHead>Head</TableHead>
-                  <TableHead className="whitespace-nowrap">Updated</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {branches.map((b: any) => {
+                {(filteredBranches as any[]).map((b: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
-                    <TableRow key={b.id}>
+                    <TableRow key={b.id} className="cursor-pointer hover:bg-muted/40" onClick={() => {
+                      setSelected(b);
+                      setEditForm({
+                        name: String(b.branchName || b.name || ''),
+                        city: String(b.city || ''),
+                        country: String(b.country || ''),
+                        address: String(b.address || ''),
+                        officialPhone: String(b.officialPhone || ''),
+                        officialEmail: String(b.officialEmail || ''),
+                        managerId: String(b.branchHeadId || b.managerId || ''),
+                      });
+                      setIsEditing(false);
+                      setDetailOpen(true);
+                    }}>
                       <TableCell className="font-medium">{b.branchName || b.name || '-'}</TableCell>
                       <TableCell>{b.country || '-'}</TableCell>
                       <TableCell>{b.city || '-'}</TableCell>
                       <TableCell>{b.officialPhone || '-'}</TableCell>
                       <TableCell className="max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                       <TableCell>{headName}</TableCell>
-                      <TableCell>{b.updatedOn ? new Date(b.updatedOn).toLocaleDateString() : '-'}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -184,6 +251,110 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
           </div>
         )}
       </div>
+
+      <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{selected?.branchName || selected?.name || 'Branch'}</span>
+              {!isEditing ? (
+                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
+              ) : null}
+            </DialogTitle>
+          </DialogHeader>
+
+          {!isEditing ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <div className="text-xs text-muted-foreground">Name</div>
+                <div className="font-medium">{selected?.branchName || selected?.name || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Country</div>
+                <div className="font-medium">{selected?.country || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">City</div>
+                <div className="font-medium">{selected?.city || '-'}</div>
+              </div>
+              <div className="sm:col-span-2">
+                <div className="text-xs text-muted-foreground">Address</div>
+                <div className="font-medium break-words">{selected?.address || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Official Phone</div>
+                <div className="font-medium">{selected?.officialPhone || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Official Email</div>
+                <div className="font-medium truncate" title={selected?.officialEmail || ''}>{selected?.officialEmail || '-'}</div>
+              </div>
+              <div className="sm:col-span-2">
+                <div className="text-xs text-muted-foreground">Branch Head</div>
+                <div className="font-medium">{(() => {
+                  const headUser = (users as any[]).find((u: any) => u.id === (selected?.branchHeadId || selected?.managerId));
+                  return headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+                })()}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div>
+                <Label>Name<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.name} onChange={(e) => setEditForm((s) => ({ ...s, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Country<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.country} onChange={(e) => setEditForm((s) => ({ ...s, country: e.target.value }))} />
+              </div>
+              <div>
+                <Label>City<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.city} onChange={(e) => setEditForm((s) => ({ ...s, city: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label>Address<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.address} onChange={(e) => setEditForm((s) => ({ ...s, address: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Official Phone<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.officialPhone} onChange={(e) => setEditForm((s) => ({ ...s, officialPhone: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Official Email<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" type="email" value={editForm.officialEmail} onChange={(e) => setEditForm((s) => ({ ...s, officialEmail: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label>Branch Head</Label>
+                <Select value={editForm.managerId} onValueChange={(v) => setEditForm((s) => ({ ...s, managerId: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
+                  <SelectContent>
+                    {users.length === 0 ? (
+                      <SelectItem value="" disabled>No users found</SelectItem>
+                    ) : (
+                      (users as any[])
+                        .filter((u: any) => ['branch_manager','regional_manager','admin','super_admin','admin_staff'].includes(u.role))
+                        .map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                          </SelectItem>
+                        ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-full flex gap-2">
+                <Button
+                  onClick={() => updateMutation.mutate()}
+                  disabled={!selected?.id || ![editForm.name, editForm.city, editForm.country, editForm.address, editForm.officialPhone, editForm.officialEmail].every(Boolean) || updateMutation.isPending}
+                >
+                  {updateMutation.isPending ? 'Saving...' : 'Save changes'}
+                </Button>
+                <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
