@@ -20,6 +20,7 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
+  const [, setLocation] = useLocation();
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
     const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
     const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
@@ -112,12 +113,10 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <div className="mt-[-3px]">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs mt-[-2px]" onClick={() => {
                           onOpenChange(false);
-                          try {
-                            const [, setLocation] = useLocation();
-                            setTimeout(() => setLocation(`/students/${admission.studentId}`), 160);
-                          } catch {
-                            setTimeout(() => { try { window.location.hash = `#/students/${admission.studentId}`; } catch {} }, 160);
-                          }
+                          setTimeout(() => {
+                            try { setLocation(`/students/${admission.studentId}`); }
+                            catch { try { window.location.hash = `#/students/${admission.studentId}`; } catch {} }
+                          }, 160);
                         }}>
                           {student ? student.name : admission.studentId}
                         </Button>
