@@ -103,7 +103,7 @@ const CategoryButton: React.FC<{
   </button>
 );
 
-export default function Settings() {
+const Settings: React.FC = () => {
   const { toast } = useToast();
 
   const [category, setCategory] = useState(
