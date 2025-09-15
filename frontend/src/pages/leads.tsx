@@ -76,6 +76,7 @@ export default function Leads() {
   };
   const [location, setLocation] = useLocation();
   const [matchLead, leadParams] = useRoute('/leads/:id');
+  const [matchEdit, editParams] = useRoute('/leads/:id/edit');
   const [matchConvert, convertParams] = useRoute('/leads/:id/student');
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
@@ -131,6 +132,13 @@ export default function Leads() {
     queryKey: ['/api/leads', convertParams?.id],
     queryFn: async () => LeadsService.getLead(convertParams?.id),
     enabled: Boolean(matchConvert && convertParams?.id),
+    staleTime: 0,
+  });
+
+  const { data: leadByIdForEdit } = useQuery({
+    queryKey: ['/api/leads', editParams?.id],
+    queryFn: async () => LeadsService.getLead(editParams?.id),
+    enabled: Boolean(matchEdit && editParams?.id),
     staleTime: 0,
   });
 
@@ -290,6 +298,18 @@ export default function Leads() {
       }
     }
   }, [matchConvert, convertParams, leads, leadByIdForConvert]);
+
+  React.useEffect(() => {
+    if (matchEdit) {
+      setLeadModalOpen(true);
+      const id = editParams?.id;
+      if (id) {
+        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+        if (found) setSelectedLead(found as any);
+        else if (leadByIdForEdit) setSelectedLead(leadByIdForEdit as any);
+      }
+    }
+  }, [matchEdit, editParams, leads, leadByIdForEdit]);
 
   return (
     <Layout
