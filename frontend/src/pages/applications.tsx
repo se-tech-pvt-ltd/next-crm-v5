@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import * as DropdownsService from '@/services/dropdowns';
-import { useMemo } from 'react';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
