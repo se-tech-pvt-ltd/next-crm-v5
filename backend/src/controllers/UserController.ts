@@ -12,30 +12,34 @@ export class UserController {
   static async createUser(req: Request, res: Response) {
     try {
       const { email, firstName, lastName, role, branchId, department } = req.body || {};
-      if (!email || !role) {
-        return res.status(400).json({ message: 'email and role are required' });
+      if (!email || !role || !branchId) {
+        return res.status(400).json({ message: 'email, role and branchId are required' });
       }
       const id = (await import('uuid')).v4();
       const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department } as any);
       res.status(201).json(created);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create user error:', error);
-      res.status(500).json({ message: 'Failed to create user' });
+      const msg = String(error?.message || 'Failed to create user');
+      const status = msg.includes('already assigned') ? 409 : (msg.includes('required') ? 400 : 500);
+      res.status(status).json({ message: msg });
     }
   }
 
   static async inviteUser(req: Request, res: Response) {
     try {
       const { email, firstName, lastName, role, branchId, department } = req.body || {};
-      if (!email || !role) {
-        return res.status(400).json({ message: 'email and role are required' });
+      if (!email || !role || !branchId) {
+        return res.status(400).json({ message: 'email, role and branchId are required' });
       }
       const id = (await import('uuid')).v4();
       const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department } as any);
       res.status(201).json({ ...created, invited: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Invite user error:', error);
-      res.status(500).json({ message: 'Failed to invite user' });
+      const msg = String(error?.message || 'Failed to invite user');
+      const status = msg.includes('already assigned') ? 409 : (msg.includes('required') ? 400 : 500);
+      res.status(status).json({ message: msg });
     }
   }
 
@@ -85,15 +89,17 @@ export class UserController {
     try {
       const userId = req.params.id;
       const updates = req.body;
-      
+
       const updatedUser = await UserService.updateUser(userId, updates);
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
       res.json(updatedUser);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update user error:", error);
-      res.status(500).json({ message: "Failed to update user" });
+      const msg = String(error?.message || 'Failed to update user');
+      const status = msg.includes('already assigned') ? 409 : (msg.includes('required') ? 400 : 500);
+      res.status(status).json({ message: msg });
     }
   }
 
