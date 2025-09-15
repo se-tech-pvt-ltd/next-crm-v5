@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { List, LayoutGrid } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export type Institution = {
   id: string;
@@ -280,16 +281,20 @@ const ToolkitPage = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden md:block text-xs text-muted-foreground mr-2">
-              {groupId === 'all' ? 'Showing all universities from all toolkits' : currentGroup?.description}
-            </div>
-            <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Toolkit</Button>
-            {groupId !== 'all' && (
-              <>
-                <Button size="sm" onClick={() => setAddUniOpen(true)}>Add University</Button>
-                <Button variant="secondary" size="sm" onClick={() => setEditGroupOpen(true)}>Edit Toolkit</Button>
-              </>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2" aria-label="Actions">Actions</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setAddGroupOpen(true)}>Add Toolkit</DropdownMenuItem>
+                {groupId !== 'all' && (
+                  <>
+                    <DropdownMenuItem onClick={() => setAddUniOpen(true)}>Add University</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEditGroupOpen(true)}>Edit Toolkit</DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
