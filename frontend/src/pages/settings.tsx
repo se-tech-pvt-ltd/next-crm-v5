@@ -279,6 +279,58 @@ const Settings: React.FC = () => {
 
         {/* Right: Content */}
         <div className="lg:col-span-3 space-y-3">
+          {category === "branches" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-4 h-4" /> Branches
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <BranchSection toast={toast} />
+              </CardContent>
+            </Card>
+          )}
+
+          {category === "users" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <UserSection toast={toast} />
+              </CardContent>
+            </Card>
+          )}
+
+          {category === "smtp" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="w-4 h-4" /> SMTP Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <SmtpSection toast={toast} />
+              </CardContent>
+            </Card>
+          )}
+
+          {category === "whatsapp" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4" /> WhatsApp
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <WhatsappSection toast={toast} />
+              </CardContent>
+            </Card>
+          )}
+
           {category === "appearance" && (
             <Card>
               <CardHeader>
@@ -403,7 +455,7 @@ const Settings: React.FC = () => {
                         <SelectItem value="en-GB">English (UK)</SelectItem>
                         <SelectItem value="fr-FR">Français (FR)</SelectItem>
                         <SelectItem value="de-DE">Deutsch (DE)</SelectItem>
-                        <SelectItem value="es-ES">Espa��ol (ES)</SelectItem>
+                        <SelectItem value="es-ES">Español (ES)</SelectItem>
                         <SelectItem value="hi-IN">हिन्दी (IN)</SelectItem>
                       </SelectContent>
                     </Select>
