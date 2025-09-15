@@ -287,44 +287,6 @@ const ToolkitPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-          <div className="col-span-1 md:col-span-2">
-            <Label htmlFor="search">Search</Label>
-            <Input id="search" placeholder="Search by name, location or country" value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-          <div>
-            <Label>Country</Label>
-            <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {countries.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Priority</Label>
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {priorities.map((p) => (
-                  <SelectItem key={p} value={p}>{p}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-end space-x-2 mt-2 md:mt-0">
-            <Checkbox id="focusOnly" checked={focusOnly} onCheckedChange={(v) => setFocusOnly(Boolean(v))} />
-            <Label htmlFor="focusOnly">Focus University</Label>
-          </div>
-        </div>
 
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">{filtered.length} results</div>
