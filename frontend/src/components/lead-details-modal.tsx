@@ -26,9 +26,10 @@ interface LeadDetailsModalProps {
   lead: Lead | null;
   onLeadUpdate?: (updatedLead: Lead) => void;
   onOpenConvert?: (lead: Lead | null) => void;
+  startInEdit?: boolean;
 }
 
-export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpenConvert }: LeadDetailsModalProps) {
+export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpenConvert, startInEdit }: LeadDetailsModalProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
@@ -48,6 +49,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       setCurrentStatus(lead.status);
     }
   }, [lead]);
+
+  useEffect(() => {
+    if (open && startInEdit) {
+      setIsEditing(true);
+    }
+  }, [open, startInEdit]);
 
   const parseFieldValue = (value: any): string[] => {
     if (!value) return [];
@@ -263,7 +270,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                               </Button>
                             ) : !isEditing ? (
                               <>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }} title="Edit">
                                   <Edit />
                                   <span className="hidden lg:inline">Edit</span>
                                 </Button>
@@ -274,11 +281,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                                     if (typeof onOpenConvert === 'function') {
                                       onOpenConvert(lead);
                                     } else {
-                                      setLocation(`/leads/${lead?.id}/convert`);
+                                      setLocation(`/leads/${lead?.id}/student`);
                                     }
                                   } catch (e) {
                                     try { onOpenChange(false); } catch {}
-                                    setLocation(`/leads/${lead?.id}/convert`);
+                                    setLocation(`/leads/${lead?.id}/student`);
                                   }
                                 }} title="Convert to Student">
                                   <UserPlus />
@@ -295,7 +302,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                                   <Save />
                                   <span className="hidden lg:inline">{updateLeadMutation.isPending ? 'Saving…' : 'Save'}</span>
                                 </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); }} title="Cancel" disabled={updateLeadMutation.isPending}>
+                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); try { setLocation(`/leads/${lead?.id}`); } catch {} }} title="Cancel" disabled={updateLeadMutation.isPending}>
                                   <X />
                                   <span className="hidden lg:inline">Cancel</span>
                                 </Button>

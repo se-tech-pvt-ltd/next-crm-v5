@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -74,7 +74,10 @@ export default function Leads() {
     const status = dropdownData.Status.find((item: any) => item.key === statusId);
     return status?.value || statusId;
   };
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [matchLead, leadParams] = useRoute('/leads/:id');
+  const [matchEdit, editParams] = useRoute('/leads/:id/edit');
+  const [matchConvert, convertParams] = useRoute('/leads/:id/student');
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -90,6 +93,7 @@ export default function Leads() {
   const queryClient = useQueryClient();
 
   const handleAddLeadClick = () => {
+    setLocation('/leads/new');
     setIsNavigating(true);
     setTimeout(() => {
       try {
@@ -115,6 +119,27 @@ export default function Leads() {
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+  });
+
+  const { data: leadById } = useQuery({
+    queryKey: ['/api/leads', leadParams?.id],
+    queryFn: async () => LeadsService.getLead(leadParams?.id),
+    enabled: Boolean(matchLead && leadParams?.id),
+    staleTime: 0,
+  });
+
+  const { data: leadByIdForConvert } = useQuery({
+    queryKey: ['/api/leads', convertParams?.id],
+    queryFn: async () => LeadsService.getLead(convertParams?.id),
+    enabled: Boolean(matchConvert && convertParams?.id),
+    staleTime: 0,
+  });
+
+  const { data: leadByIdForEdit } = useQuery({
+    queryKey: ['/api/leads', editParams?.id],
+    queryFn: async () => LeadsService.getLead(editParams?.id),
+    enabled: Boolean(matchEdit && editParams?.id),
+    staleTime: 0,
   });
 
   const { data: students } = useQuery({
@@ -238,6 +263,53 @@ export default function Leads() {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
+
+  React.useEffect(() => {
+    if (location === '/leads/new') {
+      setAddLeadOpen(true);
+    }
+  }, [location]);
+
+  React.useEffect(() => {
+    if (matchLead) {
+      setLeadModalOpen(true);
+      const id = leadParams?.id;
+      if (id) {
+        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+        if (found) setSelectedLead(found as any);
+        else if (leadById) setSelectedLead(leadById as any);
+      }
+    }
+  }, [matchLead, leadParams, leads, leadById]);
+
+  React.useEffect(() => {
+    if (matchConvert) {
+      setShowConvertModal(true);
+      const id = convertParams?.id;
+      if (id) {
+        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+        if (found) {
+          setSelectedLead(found as any);
+          setConvertLead(found as any);
+        } else if (leadByIdForConvert) {
+          setSelectedLead(leadByIdForConvert as any);
+          setConvertLead(leadByIdForConvert as any);
+        }
+      }
+    }
+  }, [matchConvert, convertParams, leads, leadByIdForConvert]);
+
+  React.useEffect(() => {
+    if (matchEdit) {
+      setLeadModalOpen(true);
+      const id = editParams?.id;
+      if (id) {
+        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+        if (found) setSelectedLead(found as any);
+        else if (leadByIdForEdit) setSelectedLead(leadByIdForEdit as any);
+      }
+    }
+  }, [matchEdit, editParams, leads, leadByIdForEdit]);
 
   return (
     <Layout
@@ -500,6 +572,7 @@ export default function Leads() {
                       key={lead.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => {
+                        setLocation(`/leads/${lead.id}`);
                         setSelectedLead(lead);
                         try {
                           const { useModalManager } = require('@/contexts/ModalManagerContext');
@@ -569,15 +642,24 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
-      <Dialog open={addLeadOpen} onOpenChange={setAddLeadOpen}>
+      <Dialog open={addLeadOpen} onOpenChange={(open) => {
+        setAddLeadOpen(open);
+        if (!open && location === '/leads/new') {
+          setLocation('/leads');
+        }
+      }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           <DialogHeader>
             <DialogTitle className="sr-only">Add New Lead</DialogTitle>
           </DialogHeader>
           <AddLeadForm
-            onCancel={() => setAddLeadOpen(false)}
+            onCancel={() => {
+              setAddLeadOpen(false);
+              if (location === '/leads/new') setLocation('/leads');
+            }}
             onSuccess={() => {
               setAddLeadOpen(false);
+              if (location === '/leads/new') setLocation('/leads');
               queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
             }}
           />
@@ -585,9 +667,17 @@ export default function Leads() {
       </Dialog>
       <LeadDetailsModal
         open={leadModalOpen}
+        startInEdit={Boolean(matchEdit)}
         onOpenChange={(open) => {
           setLeadModalOpen(open);
-          if (!open) setSelectedLead(null);
+          if (!open) {
+            if (matchEdit && editParams?.id) {
+              setLocation(`/leads/${editParams.id}`);
+            } else if (location === '/leads/new' || (matchLead && leadParams?.id)) {
+              setLocation('/leads');
+            }
+            setSelectedLead(null);
+          }
         }}
         lead={selectedLead}
         onLeadUpdate={(updated) => {
@@ -596,11 +686,18 @@ export default function Leads() {
         }}
         onOpenConvert={(lead) => {
           setConvertLead(lead);
+          setLocation(`/leads/${lead.id}/student`);
           try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setShowConvertModal(true)); } catch { setShowConvertModal(true); }
         }}
       />
 
-      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => { setShowConvertModal(open); if (!open) setConvertLead(null); }} lead={convertLead} />
+      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => {
+        setShowConvertModal(open);
+        if (!open) {
+          if (matchConvert && convertParams?.id) setLocation(`/leads/${convertParams.id}`);
+          setConvertLead(null);
+        }
+      }} lead={convertLead} />
     </Layout>
   );
 }
