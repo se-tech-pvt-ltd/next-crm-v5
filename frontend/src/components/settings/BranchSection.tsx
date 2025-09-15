@@ -53,6 +53,22 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected?.id) throw new Error('Missing branch id');
+      return BranchesService.updateBranch(String(selected.id), { ...editForm });
+    },
+    onSuccess: async () => {
+      setIsEditing(false);
+      await refetch();
+      toast({ title: 'Branch updated', duration: 2000 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to update branch';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+  });
+
   const filteredBranches = (Array.isArray(branches) ? branches : []).filter((b: any) => {
     const nameStr = String(b.branchName || b.name || '').toLowerCase();
     const countryStr = String(b.country || '').toLowerCase();
