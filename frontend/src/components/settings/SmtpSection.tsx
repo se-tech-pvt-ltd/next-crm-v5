@@ -28,7 +28,18 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
     }
   }, [data]);
 
-  const saveMut = useMutation({ mutationFn: () => setConfiguration('smtp', form), onSuccess: () => toast({ title: 'Saved', description: 'SMTP configuration saved', duration: 2500 }) });
+  const [editing, setEditing] = useState(false);
+  const originalRef = useRef<any>(null);
+
+  const saveMut = useMutation({
+    mutationFn: () => setConfiguration('smtp', form),
+    onSuccess: () => {
+      toast({ title: 'Saved', description: 'SMTP configuration saved', duration: 2500 });
+      setEditing(false);
+      // update original snapshot
+      originalRef.current = { ...form };
+    }
+  });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [testEmailInput, setTestEmailInput] = useState<string>('');
