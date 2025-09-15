@@ -23,6 +23,8 @@ export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
+  const [matchAd, adParams] = useRoute('/admissions/:id');
+  const [matchEdit, editParams] = useRoute('/admissions/:id/edit');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
 
