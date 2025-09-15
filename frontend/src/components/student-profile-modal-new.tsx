@@ -58,7 +58,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   
   const { data: student, isLoading, isError } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
