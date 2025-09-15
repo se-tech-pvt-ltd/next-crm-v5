@@ -71,6 +71,7 @@ function Router() {
       <Route path="/leads/:id/student" component={Leads} />
       <Route path="/leads/:id/convert" component={Leads} />
       <Route path="/students" component={Students} />
+      <Route path="/students/:id/edit" component={StudentDetails} />
       <Route path="/students/:id" component={StudentDetails} />
       <Route path="/applications/add" component={AddApplication} />
       <Route path="/applications/new" component={AddApplication} />
