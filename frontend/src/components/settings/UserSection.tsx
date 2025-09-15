@@ -14,11 +14,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
-    onSuccess: async () => { await refetch(); setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); toast({ title: 'User created', description: 'User added successfully', duration: 2500 }); }
+    onSuccess: async () => { await refetch(); setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); toast({ title: 'User created', description: 'User added successfully', duration: 2500 }); },
+    onError: (err: any) => {
+      const msg = err?.message || err?.data?.message || 'Failed to create user';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    }
   });
   const invite = useMutation({
     mutationFn: () => UsersService.inviteUser(form),
-    onSuccess: async () => { await refetch(); toast({ title: 'Invite sent', description: 'Invitation recorded', duration: 2500 }); }
+    onSuccess: async () => { await refetch(); toast({ title: 'Invite sent', description: 'Invitation recorded', duration: 2500 }); },
+    onError: (err: any) => {
+      const msg = err?.message || err?.data?.message || 'Failed to invite user';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    }
   });
 
   return (
@@ -52,20 +60,25 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
           </Select>
         </div>
         <div>
-          <Label>Branch</Label>
+          <Label>Branch<span className="text-destructive"> *</span></Label>
           <Select value={form.branchId} onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (optional)" /></SelectTrigger>
+            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (required)" /></SelectTrigger>
             <SelectContent>
-              {branches.map((b: any) => (
-                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-              ))}
+              {branches.map((b: any) => {
+                const assignedTo = (users as any[]).find((u: any) => u.branchId === b.id);
+                return (
+                  <SelectItem key={b.id} value={b.id} disabled={!!assignedTo}>
+                    {b.name}{assignedTo ? ' — Assigned' : ''}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
       </div>
       <div className="flex gap-2">
-        <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.role}>Create user</Button>
-        <Button type="button" variant="outline" onClick={() => invite.mutate()} disabled={!form.email || !form.role}>Invite user</Button>
+        <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId}>Create user</Button>
+        <Button type="button" variant="outline" onClick={() => invite.mutate()} disabled={!form.email || !form.branchId}>Invite user</Button>
       </div>
       <Separator />
       <div>
