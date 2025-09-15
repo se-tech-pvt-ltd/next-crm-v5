@@ -11,6 +11,11 @@ export class HttpError extends Error {
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+let unauthorizedHandler: (() => void) | null = null;
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
+}
+
 async function request<T>(method: HttpMethod, url: string, body?: unknown): Promise<T> {
   try {
     const res = await fetch(url, {
@@ -29,6 +34,9 @@ async function request<T>(method: HttpMethod, url: string, body?: unknown): Prom
     }
 
     if (!res.ok) {
+      if (res.status === 401 && typeof unauthorizedHandler === 'function') {
+        try { unauthorizedHandler(); } catch {}
+      }
       const message = (json && (json.message || json.error)) || `Request failed with status ${res.status}`;
       throw new HttpError(message, res.status, json);
     }
