@@ -735,6 +735,15 @@ function SmtpSection({ toast }: { toast: (v: any) => void }) {
     onSuccess: () => toast({ title: 'Saved', description: 'SMTP configuration saved', duration: 2500 })
   });
 
+  const isEmailValid = (s?: string) => !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  const testMut = useMutation({
+    mutationFn: async () => {
+      return await testSmtp(testEmail, form);
+    },
+    onSuccess: () => toast({ title: 'Test email sent', description: `Sent to ${testEmail}`, duration: 3000 }),
+    onError: (err: any) => toast({ title: 'Failed to send', description: err?.message || 'Unknown error', duration: 3500, variant: 'destructive' }),
+  });
+
   return (
     <div className="grid sm:grid-cols-2 gap-2">
       <div>
