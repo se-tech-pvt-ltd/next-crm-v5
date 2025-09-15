@@ -13,6 +13,11 @@ export class UserModel {
     return user;
   }
 
+  static async findByBranchId(branchId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.branchId, branchId));
+    return user;
+  }
+
   static async create(userData: InsertUser): Promise<User> {
     const result = await db.insert(users).values(userData);
 
