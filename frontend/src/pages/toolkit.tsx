@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
-import { List, LayoutGrid } from 'lucide-react';
+import { List, LayoutGrid, Star } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export type Institution = {
@@ -443,7 +445,7 @@ const ToolkitPage = () => {
                     <Field label="Intake" value={selected.details.intake.join(', ')} />
                     <Field label="Study Gap" value={selected.details.studyGap} />
                     <Field label="Upcoming Deadlines" value={selected.details.upcomingDeadlines.join(' • ')} />
-                    <Field label="Benefits" value={selected.details.benefits.join(' • ')} />
+                    <Field label="Benefits" value={selected.details.benefits.join(' ��� ')} />
                     <Field label="Eligibility requirement" value={selected.details.eligibilityRequirement} />
                     <Field label="ELT Requirement" value={selected.details.eltRequirement} />
                     <Field label="Apply Notes" value={selected.details.applyNotes} />
