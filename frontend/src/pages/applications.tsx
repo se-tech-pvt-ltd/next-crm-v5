@@ -376,6 +376,19 @@ export default function Applications() {
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        {!applicationsLoading && (effectivePagination?.total ?? 0) > pageSize && (
+          <div className="mt-4 pt-4 border-t">
+            <Pagination
+              currentPage={effectivePagination.page}
+              totalPages={effectivePagination.totalPages}
+              onPageChange={(p) => setCurrentPage(p)}
+              hasNextPage={Boolean(effectivePagination.hasNextPage)}
+              hasPrevPage={Boolean(effectivePagination.hasPrevPage)}
+            />
+          </div>
+        )}
       </div>
 
       <ApplicationDetailsModal
