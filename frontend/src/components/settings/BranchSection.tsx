@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -13,11 +14,22 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     queryFn: async () => BranchesService.listBranches(),
   });
 
-  const [form, setForm] = useState({ name: '', code: '', city: '', address: '', managerId: '', status: 'active' });
+  const [form, setForm] = useState({
+    name: '',
+    city: '',
+    country: '',
+    address: '',
+    officialPhone: '',
+    officialEmail: '',
+    branchHead: '',
+    code: '',
+    status: 'active',
+  });
+
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
     onSuccess: async () => {
-      setForm({ name: '', code: '', city: '', address: '', managerId: '', status: 'active' });
+      setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', branchHead: '', code: '', status: 'active' });
       await refetch();
       toast({ title: 'Branch created', description: 'New branch added', duration: 2500 });
     },
@@ -25,27 +37,47 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid sm:grid-cols-3 gap-2">
+      <div className="grid sm:grid-cols-2 gap-2">
         <div>
-          <Label>Name</Label>
+          <Label>Branch Name</Label>
           <Input className="mt-1" value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} />
         </div>
-        <div>
-          <Label>Code</Label>
-          <Input className="mt-1" value={form.code} onChange={(e) => setForm((s) => ({ ...s, code: e.target.value }))} />
-        </div>
+
         <div>
           <Label>City</Label>
           <Input className="mt-1" value={form.city} onChange={(e) => setForm((s) => ({ ...s, city: e.target.value }))} />
         </div>
+
+        <div>
+          <Label>Country</Label>
+          <Input className="mt-1" value={form.country} onChange={(e) => setForm((s) => ({ ...s, country: e.target.value }))} />
+        </div>
+
         <div>
           <Label>Address</Label>
           <Input className="mt-1" value={form.address} onChange={(e) => setForm((s) => ({ ...s, address: e.target.value }))} />
         </div>
+
         <div>
-          <Label>Manager ID</Label>
-          <Input className="mt-1" value={form.managerId} onChange={(e) => setForm((s) => ({ ...s, managerId: e.target.value }))} />
+          <Label>Official Phone</Label>
+          <Input className="mt-1" value={form.officialPhone} onChange={(e) => setForm((s) => ({ ...s, officialPhone: e.target.value }))} inputMode="tel" autoComplete="tel" />
         </div>
+
+        <div>
+          <Label>Official Email</Label>
+          <Input className="mt-1" value={form.officialEmail} onChange={(e) => setForm((s) => ({ ...s, officialEmail: e.target.value }))} type="email" autoComplete="off" />
+        </div>
+
+        <div>
+          <Label>Branch Head</Label>
+          <Input className="mt-1" value={form.branchHead} onChange={(e) => setForm((s) => ({ ...s, branchHead: e.target.value }))} />
+        </div>
+
+        <div>
+          <Label>Code</Label>
+          <Input className="mt-1" value={form.code} onChange={(e) => setForm((s) => ({ ...s, code: e.target.value }))} />
+        </div>
+
         <div>
           <Label>Status</Label>
           <Select value={form.status} onValueChange={(v) => setForm((s) => ({ ...s, status: v }))}>
@@ -59,7 +91,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       </div>
 
       <div>
-        <Button type="button" onClick={() => createMutation.mutate()} disabled={!form.name || !form.code}>
+        <Button type="button" onClick={() => createMutation.mutate()} disabled={!form.name}>
           Add branch
         </Button>
       </div>
@@ -72,7 +104,9 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
           {branches.map((b: any) => (
             <div key={b.id} className="border rounded-md p-2 text-sm">
               <div className="font-semibold">{b.name} <span className="text-muted-foreground">({b.code})</span></div>
-              <div className="text-xs text-muted-foreground">{b.city || ''} {b.address ? `• ${b.address}` : ''}</div>
+              <div className="text-xs text-muted-foreground">{[b.city, b.country].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
+              <div className="text-xs text-muted-foreground mt-1">Phone: {b.officialPhone || '-'} • Email: {b.officialEmail || '-'}</div>
+              <div className="text-xs text-muted-foreground mt-1">Head: {b.branchHead || '-'}</div>
             </div>
           ))}
           {branches.length === 0 && <div className="text-xs text-muted-foreground">No branches yet</div>}
