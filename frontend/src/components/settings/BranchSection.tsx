@@ -53,7 +53,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       <div className="flex items-center justify-end">
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
-            <Button size="icon" className="h-8 w-8 p-0 sm:hidden" title="Add Branch" type="button">
+            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary sm:hidden" title="Add Branch" type="button">
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
