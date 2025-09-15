@@ -99,7 +99,27 @@ export class ConfigurationController {
         text: 'This is a test email to verify your SMTP configuration is working.',
       });
 
-      res.json({ success: true, messageId: info?.messageId || '' });
+      // Log detailed info for debugging
+      try {
+        console.log('[SMTP TEST] sendMail info:', JSON.stringify({
+          messageId: info?.messageId,
+          envelope: (info as any)?.envelope,
+          accepted: (info as any)?.accepted,
+          rejected: (info as any)?.rejected,
+          pending: (info as any)?.pending,
+          response: (info as any)?.response,
+        }));
+      } catch {}
+
+      res.json({
+        success: true,
+        messageId: info?.messageId || '',
+        envelope: (info as any)?.envelope ?? null,
+        accepted: (info as any)?.accepted ?? null,
+        rejected: (info as any)?.rejected ?? null,
+        pending: (info as any)?.pending ?? null,
+        response: (info as any)?.response ?? null,
+      });
     } catch (e: any) {
       res.status(500).json({ message: e?.message || 'Failed to send test email' });
     }
