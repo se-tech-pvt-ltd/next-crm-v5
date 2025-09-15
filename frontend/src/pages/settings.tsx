@@ -33,7 +33,7 @@ export default function Settings() {
   return (
     <Layout title="Settings" subtitle="Admin & system settings" helpText="Quick access to system and admin tools">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
           {section('Users & Authentication', [
             { label: 'User Management', icon: Users },
             { label: 'Role Management', icon: Edit3 },
