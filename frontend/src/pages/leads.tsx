@@ -507,14 +507,7 @@ export default function Leads() {
                       key={lead.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => {
-                        setSelectedLead(lead);
-                        try {
-                          const { useModalManager } = require('@/contexts/ModalManagerContext');
-                          const { openModal } = useModalManager();
-                          openModal(() => setLeadModalOpen(true));
-                        } catch {
-                          setLeadModalOpen(true);
-                        }
+                        setLocation(`/leads/${lead.id}`);
                       }}
                     >
                       <TableCell className="font-medium p-2 text-xs">{lead.name}</TableCell>
