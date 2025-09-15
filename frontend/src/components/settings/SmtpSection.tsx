@@ -104,15 +104,15 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
         </div>
         <div>
           <Label>Username</Label>
-          <Input className="mt-1" value={form.user} onChange={(e) => setForm((s) => ({ ...s, user: e.target.value }))} />
+          <Input className="mt-1" value={form.user} onChange={(e) => setForm((s) => ({ ...s, user: e.target.value }))} readOnly={!editing} />
         </div>
         <div>
           <Label>Password</Label>
-          <Input className="mt-1" type="password" value={form.pass} onChange={(e) => setForm((s) => ({ ...s, pass: e.target.value }))} />
+          <Input className="mt-1" type="password" value={form.pass} onChange={(e) => setForm((s) => ({ ...s, pass: e.target.value }))} readOnly={!editing} autoComplete="new-password" />
         </div>
         <div>
           <Label>From email</Label>
-          <Input className="mt-1" type="email" value={form.fromEmail} onChange={(e) => setForm((s) => ({ ...s, fromEmail: e.target.value }))} />
+          <Input className="mt-1" type="email" value={form.fromEmail} onChange={(e) => setForm((s) => ({ ...s, fromEmail: e.target.value }))} readOnly={!editing} autoComplete="off" name="smtp-from-email" inputMode="email" spellCheck={false} />
         </div>
 
         <div className="col-span-full flex items-center gap-2">
