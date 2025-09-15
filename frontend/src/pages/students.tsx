@@ -37,10 +37,18 @@ export default function Students() {
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
   const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
 
-  const { data: students, isLoading } = useQuery<Student[]>({
-    queryKey: ['/api/students'],
-    queryFn: async () => StudentsService.getStudents(),
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(8); // 8 records per page
+
+  const { data: studentsResponse, isLoading } = useQuery({
+    queryKey: ['/api/students', { page: currentPage, limit: pageSize }],
+    queryFn: async () => StudentsService.getStudents({ page: currentPage, limit: pageSize }),
+    staleTime: 0,
+    refetchOnMount: true,
   });
+
+  const studentsArray: Student[] = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
+  const pagination = studentsResponse?.pagination || { page: 1, limit: pageSize, total: studentsArray.length, totalPages: 1, hasNextPage: false, hasPrevPage: false };
 
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
