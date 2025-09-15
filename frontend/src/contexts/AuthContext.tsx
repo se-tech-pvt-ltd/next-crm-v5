@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { http, setUnauthorizedHandler } from '@/services/http';
 
 export interface User {
   id: string;
@@ -22,23 +23,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider: Checking localStorage for user...');
-    // Check for existing session in localStorage
-    const savedUser = localStorage.getItem('auth_user');
-    if (savedUser) {
+    // Register global unauthorized handler (401) to logout
+    setUnauthorizedHandler(() => {
+      setUser(null);
+      localStorage.removeItem('auth_user');
+    });
+    return () => setUnauthorizedHandler(null);
+  }, []);
+
+  useEffect(() => {
+    // Restore from localStorage and validate session with backend
+    const init = async () => {
       try {
-        const parsedUser = JSON.parse(savedUser);
-        console.log('AuthProvider: Found saved user:', parsedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.log('AuthProvider: Error parsing saved user, removing from localStorage');
-        localStorage.removeItem('auth_user');
+        const savedUser = localStorage.getItem('auth_user');
+        if (savedUser) {
+          try {
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+          } catch {
+            localStorage.removeItem('auth_user');
+          }
+          try {
+            await http.get<{ id: string; role?: string }>('/api/auth/me');
+          } catch (e: any) {
+            // http client will invoke unauthorized handler on 401
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      console.log('AuthProvider: No saved user found in localStorage');
-    }
-    console.log('AuthProvider: Setting loading to false');
-    setIsLoading(false);
+    };
+    void init();
   }, []);
 
   const login = (userData: User) => {
