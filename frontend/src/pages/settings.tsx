@@ -14,6 +14,7 @@ import * as UsersService from "@/services/users";
 import { getConfiguration, setConfiguration, testSmtp } from "@/services/configurations";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sun,
   Moon,
