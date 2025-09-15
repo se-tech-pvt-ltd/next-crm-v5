@@ -360,7 +360,7 @@ export default function Admissions() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => { setSelectedAdmission(admission); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}>
+                            <DropdownMenuItem onClick={() => { setLocation(`/admissions/${admission.id}`); }}>
                               View Details
                             </DropdownMenuItem>
                           </DropdownMenuContent>
