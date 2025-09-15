@@ -548,4 +548,284 @@ const Settings: React.FC = () => {
   );
 }
 
+function BranchSection({ toast }: { toast: (v: any) => void }) {
+  const { data: branches = [], refetch } = useQuery({
+    queryKey: ["/api/configurations/branches"],
+    queryFn: async () => BranchesService.listBranches(),
+  });
+
+  const [form, setForm] = useState({ name: "", code: "", city: "", address: "", managerId: "", status: "active" });
+  const createMutation = useMutation({
+    mutationFn: () => BranchesService.createBranch({ ...form }),
+    onSuccess: async () => {
+      setForm({ name: "", code: "", city: "", address: "", managerId: "", status: "active" });
+      await refetch();
+      toast({ title: "Branch created", description: "New branch added", duration: 2500 });
+    },
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="grid sm:grid-cols-3 gap-2">
+        <div>
+          <Label>Name</Label>
+          <Input className="mt-1" value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Code</Label>
+          <Input className="mt-1" value={form.code} onChange={(e) => setForm((s) => ({ ...s, code: e.target.value }))} />
+        </div>
+        <div>
+          <Label>City</Label>
+          <Input className="mt-1" value={form.city} onChange={(e) => setForm((s) => ({ ...s, city: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Address</Label>
+          <Input className="mt-1" value={form.address} onChange={(e) => setForm((s) => ({ ...s, address: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Manager ID</Label>
+          <Input className="mt-1" value={form.managerId} onChange={(e) => setForm((s) => ({ ...s, managerId: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Status</Label>
+          <Select value={form.status} onValueChange={(v) => setForm((s) => ({ ...s, status: v }))}>
+            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Button type="button" onClick={() => createMutation.mutate()} disabled={!form.name || !form.code}>
+          Add branch
+        </Button>
+      </div>
+      <Separator />
+      <div>
+        <div className="text-sm font-medium mb-2">Existing branches</div>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {branches.map((b: any) => (
+            <div key={b.id} className="border rounded-md p-2 text-sm">
+              <div className="font-semibold">{b.name} <span className="text-muted-foreground">({b.code})</span></div>
+              <div className="text-xs text-muted-foreground">{b.city || ''} {b.address ? `• ${b.address}` : ''}</div>
+            </div>
+          ))}
+          {branches.length === 0 && <div className="text-xs text-muted-foreground">No branches yet</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserSection({ toast }: { toast: (v: any) => void }) {
+  const { data: users = [], refetch } = useQuery({ queryKey: ["/api/users"], queryFn: () => UsersService.getUsers() });
+  const { data: branches = [] } = useQuery({ queryKey: ["/api/configurations/branches"], queryFn: () => BranchesService.listBranches() });
+  const [form, setForm] = useState({ email: "", firstName: "", lastName: "", role: "counselor", branchId: "" });
+  const create = useMutation({
+    mutationFn: () => UsersService.createUser(form),
+    onSuccess: async () => { await refetch(); setForm({ email: "", firstName: "", lastName: "", role: "counselor", branchId: "" }); toast({ title: "User created", description: "User added successfully", duration: 2500 }); }
+  });
+  const invite = useMutation({
+    mutationFn: () => UsersService.inviteUser(form),
+    onSuccess: async () => { await refetch(); toast({ title: "Invite sent", description: "Invitation recorded", duration: 2500 }); }
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="grid sm:grid-cols-3 gap-2">
+        <div>
+          <Label>Email</Label>
+          <Input className="mt-1" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+        </div>
+        <div>
+          <Label>First name</Label>
+          <Input className="mt-1" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Last name</Label>
+          <Input className="mt-1" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Role</Label>
+          <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
+            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="admin_staff">Admin Staff</SelectItem>
+              <SelectItem value="branch_manager">Branch Manager</SelectItem>
+              <SelectItem value="counselor">Counselor</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Branch</Label>
+          <Select value={form.branchId} onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}>
+            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (optional)" /></SelectTrigger>
+            <SelectContent>
+              {branches.map((b: any) => (
+                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.role}>Create user</Button>
+        <Button type="button" variant="outline" onClick={() => invite.mutate()} disabled={!form.email || !form.role}>Invite user</Button>
+      </div>
+      <Separator />
+      <div>
+        <div className="text-sm font-medium mb-2">Existing users</div>
+        <div className="overflow-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs text-muted-foreground">
+                <th className="py-1 pr-2">Name</th>
+                <th className="py-1 pr-2">Email</th>
+                <th className="py-1 pr-2">Role</th>
+                <th className="py-1 pr-2">Branch</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u: any) => (
+                <tr key={u.id} className="border-t">
+                  <td className="py-1 pr-2">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</td>
+                  <td className="py-1 pr-2">{u.email}</td>
+                  <td className="py-1 pr-2 capitalize">{u.role?.replace('_', ' ')}</td>
+                  <td className="py-1 pr-2">{u.branchId || '—'}</td>
+                </tr>
+              ))}
+              {users.length === 0 && (
+                <tr><td className="text-xs text-muted-foreground py-2" colSpan={4}>No users found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SmtpSection({ toast }: { toast: (v: any) => void }) {
+  const { data } = useQuery({ queryKey: ["/api/configurations/smtp"], queryFn: () => getConfiguration<any>('smtp') });
+  const [form, setForm] = useState({ host: "", port: 587, secure: false, user: "", pass: "", fromEmail: "" });
+  useEffect(() => {
+    if (data) {
+      setForm({
+        host: data.host || "",
+        port: typeof data.port === 'number' ? data.port : parseInt(data.port || '587'),
+        secure: !!data.secure,
+        user: data.user || "",
+        pass: data.pass || "",
+        fromEmail: data.fromEmail || "",
+      });
+    }
+  }, [data]);
+  const saveMut = useMutation({
+    mutationFn: () => setConfiguration('smtp', form),
+    onSuccess: () => toast({ title: 'Saved', description: 'SMTP configuration saved', duration: 2500 })
+  });
+
+  return (
+    <div className="grid sm:grid-cols-2 gap-2">
+      <div>
+        <Label>Host</Label>
+        <Input className="mt-1" value={form.host} onChange={(e) => setForm((s) => ({ ...s, host: e.target.value }))} />
+      </div>
+      <div>
+        <Label>Port</Label>
+        <Input className="mt-1" type="number" value={form.port} onChange={(e) => setForm((s) => ({ ...s, port: Number(e.target.value) }))} />
+      </div>
+      <div className="flex items-center gap-2 mt-1">
+        <Switch checked={form.secure} onCheckedChange={(v) => setForm((s) => ({ ...s, secure: !!v }))} />
+        <Label>Use TLS/SSL</Label>
+      </div>
+      <div>
+        <Label>Username</Label>
+        <Input className="mt-1" value={form.user} onChange={(e) => setForm((s) => ({ ...s, user: e.target.value }))} />
+      </div>
+      <div>
+        <Label>Password</Label>
+        <Input className="mt-1" type="password" value={form.pass} onChange={(e) => setForm((s) => ({ ...s, pass: e.target.value }))} />
+      </div>
+      <div>
+        <Label>From email</Label>
+        <Input className="mt-1" type="email" value={form.fromEmail} onChange={(e) => setForm((s) => ({ ...s, fromEmail: e.target.value }))} />
+      </div>
+      <div className="col-span-full">
+        <Button type="button" onClick={() => saveMut.mutate()} disabled={!form.host || !form.port || !form.user || !form.fromEmail}>Save settings</Button>
+      </div>
+    </div>
+  );
+}
+
+function WhatsappSection({ toast }: { toast: (v: any) => void }) {
+  const { data } = useQuery({ queryKey: ["/api/configurations/whatsapp"], queryFn: () => getConfiguration<any>('whatsapp') });
+  const [provider, setProvider] = useState<'meta' | 'twilio'>("meta");
+  const [meta, setMeta] = useState({ token: "", phoneNumber: "" });
+  const [twilio, setTwilio] = useState({ accountSid: "", authToken: "", phoneNumber: "" });
+  useEffect(() => {
+    if (data) {
+      if (data.provider === 'twilio') {
+        setProvider('twilio');
+        setTwilio({ accountSid: data.accountSid || '', authToken: data.authToken || '', phoneNumber: data.phoneNumber || '' });
+      } else {
+        setProvider('meta');
+        setMeta({ token: data.token || '', phoneNumber: data.phoneNumber || '' });
+      }
+    }
+  }, [data]);
+  const saveMut = useMutation({
+    mutationFn: () => setConfiguration('whatsapp', provider === 'twilio' ? { provider, ...twilio } : { provider, ...meta }),
+    onSuccess: () => toast({ title: 'Saved', description: 'WhatsApp configuration saved', duration: 2500 })
+  });
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label>Provider</Label>
+        <Select value={provider} onValueChange={(v) => setProvider(v as any)}>
+          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="meta">Meta Cloud API</SelectItem>
+            <SelectItem value="twilio">Twilio</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {provider === 'meta' ? (
+        <div className="grid sm:grid-cols-2 gap-2">
+          <div>
+            <Label>Access token</Label>
+            <Input className="mt-1" value={meta.token} onChange={(e) => setMeta((s) => ({ ...s, token: e.target.value }))} />
+          </div>
+          <div>
+            <Label>Phone number</Label>
+            <Input className="mt-1" value={meta.phoneNumber} onChange={(e) => setMeta((s) => ({ ...s, phoneNumber: e.target.value }))} />
+          </div>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-2">
+          <div>
+            <Label>Account SID</Label>
+            <Input className="mt-1" value={twilio.accountSid} onChange={(e) => setTwilio((s) => ({ ...s, accountSid: e.target.value }))} />
+          </div>
+          <div>
+            <Label>Auth token</Label>
+            <Input className="mt-1" value={twilio.authToken} onChange={(e) => setTwilio((s) => ({ ...s, authToken: e.target.value }))} />
+          </div>
+          <div>
+            <Label>Phone number</Label>
+            <Input className="mt-1" value={twilio.phoneNumber} onChange={(e) => setTwilio((s) => ({ ...s, phoneNumber: e.target.value }))} />
+          </div>
+        </div>
+      )}
+      <div>
+        <Button type="button" onClick={() => saveMut.mutate()}>Save settings</Button>
+      </div>
+    </div>
+  );
+}
+
 export default Settings;
