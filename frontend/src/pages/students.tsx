@@ -48,7 +48,8 @@ export default function Students() {
   });
 
   const studentsArray: Student[] = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
-  const pagination = studentsResponse?.pagination || { page: 1, limit: pageSize, total: studentsArray.length, totalPages: 1, hasNextPage: false, hasPrevPage: false };
+  const rawPagination = studentsResponse && !Array.isArray(studentsResponse) ? studentsResponse.pagination : undefined;
+  const pagination = rawPagination || { page: currentPage, limit: pageSize, total: studentsArray.length, totalPages: Math.max(1, Math.ceil(studentsArray.length / pageSize)), hasNextPage: currentPage * pageSize < (studentsArray.length || 0), hasPrevPage: currentPage > 1 };
 
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
