@@ -274,11 +274,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                                     if (typeof onOpenConvert === 'function') {
                                       onOpenConvert(lead);
                                     } else {
-                                      setLocation(`/leads/${lead?.id}/convert`);
+                                      setLocation(`/leads/${lead?.id}/student`);
                                     }
                                   } catch (e) {
                                     try { onOpenChange(false); } catch {}
-                                    setLocation(`/leads/${lead?.id}/convert`);
+                                    setLocation(`/leads/${lead?.id}/student`);
                                   }
                                 }} title="Convert to Student">
                                   <UserPlus />
