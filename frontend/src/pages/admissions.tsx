@@ -377,7 +377,14 @@ export default function Admissions() {
 
       <AdmissionDetailsModal
         open={isDetailsOpen}
-        onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedAdmission(null); }}
+        onOpenChange={(open) => {
+          setIsDetailsOpen(open);
+          if (!open) {
+            if (matchEdit && editParams?.id) setLocation(`/admissions/${editParams.id}`);
+            else setLocation('/admissions');
+            setSelectedAdmission(null);
+          }
+        }}
         admission={selectedAdmission}
       />
     </Layout>
