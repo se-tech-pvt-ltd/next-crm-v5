@@ -15,10 +15,10 @@ import { getConfiguration, setConfiguration, testSmtp } from "@/services/configu
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
-import BranchSection from "@/components/settings/BranchSection";
-import UserSection from "@/components/settings/UserSection";
-import SmtpSection from "@/components/settings/SmtpSection";
-import WhatsappSection from "@/components/settings/WhatsappSection";
+import BranchSectionComp from "@/components/settings/BranchSection";
+import UserSectionComp from "@/components/settings/UserSection";
+import SmtpSectionComp from "@/components/settings/SmtpSection";
+import WhatsappSectionComp from "@/components/settings/WhatsappSection";
 import {
   Sun,
   Moon,
@@ -292,7 +292,7 @@ const Settings: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <BranchSection toast={toast} />
+                <BranchSectionComp toast={toast} />
               </CardContent>
             </Card>
           )}
@@ -305,7 +305,7 @@ const Settings: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <UserSection toast={toast} />
+                <UserSectionComp toast={toast} />
               </CardContent>
             </Card>
           )}
@@ -318,7 +318,7 @@ const Settings: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <SmtpSection toast={toast} />
+                <SmtpSectionComp toast={toast} />
               </CardContent>
             </Card>
           )}
@@ -331,7 +331,7 @@ const Settings: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <WhatsappSection toast={toast} />
+                <WhatsappSectionComp toast={toast} />
               </CardContent>
             </Card>
           )}
@@ -461,7 +461,7 @@ const Settings: React.FC = () => {
                         <SelectItem value="fr-FR">Français (FR)</SelectItem>
                         <SelectItem value="de-DE">Deutsch (DE)</SelectItem>
                         <SelectItem value="es-ES">Español (ES)</SelectItem>
-                        <SelectItem value="hi-IN">हिन्दी (IN)</SelectItem>
+                        <SelectItem value="hi-IN">हिन्���ी (IN)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
