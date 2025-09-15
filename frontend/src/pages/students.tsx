@@ -101,12 +101,6 @@ export default function Students() {
     },
   });
 
-  const getStatusLabel = (raw?: string) => {
-    const list: any[] = (studentDropdowns as any)?.Status || [];
-    const s = raw || '';
-    const match = list.find((o: any) => o.id === s || o.key === s || o.value?.toLowerCase() === s.toLowerCase());
-    return (match?.value || s || '').toString();
-  };
 
 
   // Get unique countries for filter dropdown
