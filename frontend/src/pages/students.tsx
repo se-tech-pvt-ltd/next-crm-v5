@@ -391,13 +391,7 @@ export default function Students() {
         application={selectedApplicationForDetails}
         onOpenStudentProfile={(sid) => {
           setSelectedStudentId(sid);
-          try {
-            const { useModalManager } = require('@/contexts/ModalManagerContext');
-            const { openModal } = useModalManager();
-            openModal(() => setIsProfileModalOpen(true));
-          } catch {
-            setIsProfileModalOpen(true);
-          }
+          setLocation(`/students/${sid}`);
         }}
       />
 
