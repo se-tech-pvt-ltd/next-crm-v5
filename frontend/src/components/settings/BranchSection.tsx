@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import * as BranchesService from '@/services/branches';
+import { Database, Plus } from 'lucide-react';
 
 export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const { data: branches = [], refetch } = useQuery({
