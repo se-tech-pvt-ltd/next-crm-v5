@@ -41,8 +41,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium">Existing branches</div>
+      <div className="flex items-center justify-end">
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
             <Button type="button">Add new branch</Button>
