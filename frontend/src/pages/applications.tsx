@@ -140,7 +140,7 @@ export default function Applications() {
     const id = (matchEdit ? editParams?.id : appParams?.id) || null;
     if (matchApp || matchEdit) {
       if (id) {
-        const found = (applications || []).find(a => a.id === id) as Application | undefined;
+        const found = (applicationsArray || []).find(a => a.id === id) as Application | undefined;
         if (found) setSelectedApplication(found);
         else {
           ApplicationsService.getApplication(id).then((app) => setSelectedApplication(app as any)).catch(() => {});
@@ -148,7 +148,7 @@ export default function Applications() {
       }
       setIsDetailsOpen(true);
     }
-  }, [matchApp, matchEdit, appParams?.id, editParams?.id, applications]);
+  }, [matchApp, matchEdit, appParams?.id, editParams?.id, applicationsArray]);
 
   return (
     <Layout 
