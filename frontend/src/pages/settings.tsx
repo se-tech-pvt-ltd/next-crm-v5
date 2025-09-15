@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import * as BranchesService from "@/services/branches";
 import * as UsersService from "@/services/users";
-import { getConfiguration, setConfiguration } from "@/services/configurations";
+import { getConfiguration, setConfiguration, testSmtp } from "@/services/configurations";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import {
