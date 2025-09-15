@@ -41,47 +41,47 @@ export default function Settings() {
             { label: 'Role Management', icon: Edit3 },
             { label: 'Password Management', icon: Edit3 },
             { label: 'OAuth Clients & Tokens', icon: Edit3 },
-          ])}
+          ], 'bg-blue-500', 'text-blue-600')}
 
           {section('System', [
             { label: 'System Settings', icon: SettingsIcon },
             { label: 'Languages', icon: Globe },
             { label: 'Scheduler', icon: Calendar },
-          ])}
+          ], 'bg-indigo-500', 'text-indigo-600')}
 
           {section('Module Settings', [
             { label: 'Module Builder', icon: Wrench },
             { label: 'Configure Modules', icon: FileText },
             { label: 'Connectors', icon: Wrench },
-          ])}
+          ], 'bg-purple-500', 'text-purple-600')}
 
           {section('Email', [
             { label: 'Email Settings', icon: Mail },
             { label: 'Inbound Email', icon: Mail },
             { label: 'Outbound Email', icon: Mail },
-          ])}
+          ], 'bg-emerald-500', 'text-emerald-600')}
 
           {section('Admin Tools', [
             { label: 'Repair', icon: SettingsIcon },
             { label: 'Backups', icon: Database },
             { label: 'Import / Export', icon: FileText },
-          ])}
+          ], 'bg-orange-500', 'text-orange-600')}
 
           {section('Developer Tools', [
             { label: 'Studio', icon: Wrench },
             { label: 'Module Builder', icon: Wrench },
             { label: 'Dropdown Editor', icon: FileText },
-          ])}
+          ], 'bg-pink-500', 'text-pink-600')}
 
           {section('Google Suite', [
             { label: 'Google Calendar Settings', icon: Calendar },
             { label: 'Google Maps Settings', icon: Globe },
-          ])}
+          ], 'bg-cyan-500', 'text-cyan-600')}
 
           {section('Email', [
             { label: 'Campaign Email Settings', icon: Mail },
             { label: 'Email Queue', icon: Mail },
-          ])}
+          ], 'bg-teal-500', 'text-teal-600')}
         </div>
       </div>
     </Layout>
