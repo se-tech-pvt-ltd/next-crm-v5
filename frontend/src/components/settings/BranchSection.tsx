@@ -36,7 +36,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid sm:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
         <div>
           <Label>Branch Name</Label>
           <Input className="mt-1" value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} />
@@ -99,7 +99,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
       <div>
         <div className="text-sm font-medium mb-2">Existing branches</div>
-        <div className="grid sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           {branches.map((b: any) => (
             <div key={b.id} className="border rounded-md p-2 text-sm">
               <div className="font-semibold">{b.name} <span className="text-muted-foreground">({b.code})</span></div>
