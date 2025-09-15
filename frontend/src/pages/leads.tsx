@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -75,6 +75,7 @@ export default function Leads() {
     return status?.value || statusId;
   };
   const [location, setLocation] = useLocation();
+  const [matchLead, leadParams] = useRoute('/leads/:id');
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -116,6 +117,13 @@ export default function Leads() {
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+  });
+
+  const { data: leadById } = useQuery({
+    queryKey: ['/api/leads', leadParams?.id],
+    queryFn: async () => LeadsService.getLead(leadParams?.id),
+    enabled: Boolean(matchLead && leadParams?.id),
+    staleTime: 0,
   });
 
   const { data: students } = useQuery({
@@ -245,6 +253,18 @@ export default function Leads() {
       setAddLeadOpen(true);
     }
   }, [location]);
+
+  React.useEffect(() => {
+    if (matchLead) {
+      setLeadModalOpen(true);
+      const id = leadParams?.id;
+      if (id) {
+        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+        if (found) setSelectedLead(found as any);
+        else if (leadById) setSelectedLead(leadById as any);
+      }
+    }
+  }, [matchLead, leadParams, leads, leadById]);
 
   return (
     <Layout
@@ -507,6 +527,7 @@ export default function Leads() {
                       key={lead.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => {
+                        setLocation(`/leads/${lead.id}`);
                         setSelectedLead(lead);
                         try {
                           const { useModalManager } = require('@/contexts/ModalManagerContext');
@@ -603,7 +624,12 @@ export default function Leads() {
         open={leadModalOpen}
         onOpenChange={(open) => {
           setLeadModalOpen(open);
-          if (!open) setSelectedLead(null);
+          if (!open) {
+            if (location === '/leads/new' || (matchLead && leadParams?.id)) {
+              setLocation('/leads');
+            }
+            setSelectedLead(null);
+          }
         }}
         lead={selectedLead}
         onLeadUpdate={(updated) => {
