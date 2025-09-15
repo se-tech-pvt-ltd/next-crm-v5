@@ -101,22 +101,6 @@ export default function Students() {
     return (match?.value || s || '').toString();
   };
 
-  // Apply filters across the full students array
-  const filteredAll = studentsArray?.filter(student => {
-    const label = getStatusLabel(student.status).toLowerCase();
-    const statusMatch = statusFilter === 'all' || label === statusFilter;
-    const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
-    return statusMatch && countryMatch;
-  }) || [];
-
-  // Detect if server returned pagination metadata
-  const serverPaginated = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
-
-  // If server paginated, studentsArray already contains only current page items; otherwise perform client-side slicing
-  const pagedStudents = serverPaginated ? filteredAll : (filteredAll || []).slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  // For rendering and counts use pagedStudents
-  const filteredStudents = pagedStudents;
 
   // Get unique countries for filter dropdown
   const uniqueCountries = studentsArray ?
