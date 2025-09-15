@@ -125,7 +125,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               </div>
 
               <div className="col-span-full flex gap-2">
-                <Button onClick={() => createMutation.mutate()} disabled={!form.name}>Save</Button>
+                <Button onClick={() => createMutation.mutate()} disabled={!form.name || !form.managerId}>Save</Button>
                 <Button variant="outline" onClick={() => { setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', code: '', status: 'active' }); setModalOpen(false); }}>Cancel</Button>
               </div>
             </div>
