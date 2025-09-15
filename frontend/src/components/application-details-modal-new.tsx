@@ -310,7 +310,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                                channelPartner: currentApp.channelPartner,
                                googleDriveLink: currentApp.googleDriveLink,
                                caseStatus: currentApp.caseStatus || 'Raw',
-                             }); }}>
+                             }); try { setLocation(`/applications/${currentApp?.id}`); } catch {} }}>
                                 <X className="w-4 h-4 mr-1" /> Cancel
                               </Button>
                             </div>
