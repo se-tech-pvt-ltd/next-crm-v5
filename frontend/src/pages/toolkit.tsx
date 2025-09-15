@@ -381,37 +381,59 @@ const ToolkitPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {filtered.map((i) => (
-            <Card key={i.id} className="overflow-hidden group">
-              <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-              <CardHeader className="space-y-2">
-                <div className="flex items-center gap-3">
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filtered.map((i) => (
+              <Card key={i.id} className="overflow-hidden group">
+                <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                    <div className="min-w-0">
+                      <CardTitle className="text-base truncate">{i.name}</CardTitle>
+                      <div className="text-xs text-muted-foreground truncate">{i.location}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline">{i.country}</Badge>
+                    <Badge variant="secondary">{i.type}</Badge>
+                    <Badge variant="outline">Priority: {i.priority}</Badge>
+                    {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
+                      <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map((i) => (
+              <div key={i.id} className="flex items-center justify-between p-3 bg-white border rounded">
+                <div className="flex items-center gap-3 min-w-0">
                   <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
                   <div className="min-w-0">
-                    <CardTitle className="text-base truncate">{i.name}</CardTitle>
-                    <div className="text-xs text-muted-foreground truncate">{i.location}</div>
+                    <div className="text-sm font-medium truncate">{i.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">{i.location} • {i.country} • {i.type}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline">{i.country}</Badge>
-                  <Badge variant="secondary">{i.type}</Badge>
+                <div className="flex items-center gap-2">
                   <Badge variant="outline">Priority: {i.priority}</Badge>
-                  {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
+                  {i.focusUniversity && <Badge className="bg-emerald-600 mr-2">Focus</Badge>}
+                  <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
+                  <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
-                    <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* University Details Dialog */}
