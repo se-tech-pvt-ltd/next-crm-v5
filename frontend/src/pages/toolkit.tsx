@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
+import { List, LayoutGrid } from 'lucide-react';
 
 export type Institution = {
   id: string;
