@@ -49,13 +49,32 @@ export default function Students() {
 
   const studentsArray: Student[] = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
   const rawPagination = studentsResponse && !Array.isArray(studentsResponse) ? studentsResponse.pagination : undefined;
-  const pagination = rawPagination || { page: currentPage, limit: pageSize, total: studentsArray.length, totalPages: Math.max(1, Math.ceil(studentsArray.length / pageSize)), hasNextPage: currentPage * pageSize < (studentsArray.length || 0), hasPrevPage: currentPage > 1 };
 
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
+
+  // Apply filters across the full students array
+  const filteredAll = studentsArray?.filter(student => {
+    const label = getStatusLabel(student.status).toLowerCase();
+    const statusMatch = statusFilter === 'all' || label === statusFilter;
+    const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
+    return statusMatch && countryMatch;
+  }) || [];
+
+  // Detect if server returned pagination metadata
+  const serverPaginated = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
+
+  // Effective pagination: if server provides it, use that; otherwise compute based on filteredAll
+  const effectivePagination = serverPaginated ? rawPagination : { page: currentPage, limit: pageSize, total: filteredAll.length, totalPages: Math.max(1, Math.ceil(filteredAll.length / pageSize)), hasNextPage: currentPage * pageSize < (filteredAll.length || 0), hasPrevPage: currentPage > 1 };
+
+  // If server paginated, studentsArray already contains only current page items; otherwise perform client-side slicing
+  const pagedStudents = serverPaginated ? filteredAll : (filteredAll || []).slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // For rendering and counts use pagedStudents
+  const filteredStudents = pagedStudents;
 
   const updateStudentMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => StudentsService.updateStudent(id, data),
