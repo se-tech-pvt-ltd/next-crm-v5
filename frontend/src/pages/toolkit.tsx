@@ -97,8 +97,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'u-toronto',
-        logo: 'https://upload.wikimedia.org/wikipedia/en/0/0c/University_of_Toronto_coat_of_arms.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1473172707857-f9e276582ab6?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=Toronto',
+        coverPhoto: 'https://picsum.photos/seed/toronto/1200/400',
         name: 'University of Toronto',
         type: 'Public',
         location: 'Toronto, Ontario',
