@@ -216,6 +216,18 @@ const ToolkitPage = () => {
   const [editUniOpen, setEditUniOpen] = useState<Institution | null>(null);
   const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
 
+  // Persist view mode in localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('toolkit_view_mode');
+      if (saved === 'grid' || saved === 'list') setViewMode(saved as 'grid'|'list');
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem('toolkit_view_mode', viewMode); } catch {}
+  }, [viewMode]);
+
   const allInstitutions = useMemo(() => groups.flatMap(g => g.universities), [groups]);
 
   const countries = useMemo(() => unique(allInstitutions.map(i => i.country)), [allInstitutions]);
