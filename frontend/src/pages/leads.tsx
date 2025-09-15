@@ -647,10 +647,13 @@ export default function Leads() {
       </Dialog>
       <LeadDetailsModal
         open={leadModalOpen}
+        startInEdit={Boolean(matchEdit)}
         onOpenChange={(open) => {
           setLeadModalOpen(open);
           if (!open) {
-            if (location === '/leads/new' || (matchLead && leadParams?.id)) {
+            if (matchEdit && editParams?.id) {
+              setLocation(`/leads/${editParams.id}`);
+            } else if (location === '/leads/new' || (matchLead && leadParams?.id)) {
               setLocation('/leads');
             }
             setSelectedLead(null);
