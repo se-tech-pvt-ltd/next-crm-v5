@@ -463,3 +463,5 @@ const Settings: React.FC = () => {
     </Layout>
   );
 }
+
+export default Settings;
