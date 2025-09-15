@@ -126,9 +126,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <Label>Application Code</Label>
                       <div className="mt-[-2px]">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono mt-[-1px]" onClick={() => {
-                          const detail = { applicationId: admission.applicationId, application };
                           onOpenChange(false);
-                          setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160);
+                          setTimeout(() => {
+                            try { setLocation(`/applications/${admission.applicationId}`); }
+                            catch { try { window.location.hash = `#/applications/${admission.applicationId}`; } catch {} }
+                          }, 160);
                         }}>
                           {application?.applicationCode || admission.applicationId}
                         </Button>
