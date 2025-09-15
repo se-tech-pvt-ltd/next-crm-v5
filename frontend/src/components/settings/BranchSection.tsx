@@ -28,7 +28,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     address: '',
     officialPhone: '',
     officialEmail: '',
-    branchHead: '',
+    managerId: '',
     code: '',
     status: 'active',
   });
