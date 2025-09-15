@@ -240,6 +240,12 @@ export default function Leads() {
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
 
+  React.useEffect(() => {
+    if (location === '/leads/new') {
+      setAddLeadOpen(true);
+    }
+  }, [location]);
+
   return (
     <Layout
       title="Leads"
@@ -570,11 +576,6 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
-      {React.useEffect(() => {
-        if (location === '/leads/new') {
-          setAddLeadOpen(true);
-        }
-      }, [location])}
       <Dialog open={addLeadOpen} onOpenChange={(open) => {
         setAddLeadOpen(open);
         if (!open && location === '/leads/new') {
