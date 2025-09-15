@@ -18,7 +18,7 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -32,6 +32,8 @@ export default function Students() {
   const queryClient = useQueryClient();
 
   const [location, setLocation] = useLocation();
+  const [matchStudent, studentParams] = useRoute('/students/:id');
+  const [matchEdit, editParams] = useRoute('/students/:id/edit');
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -118,24 +120,14 @@ export default function Students() {
       const params = new URLSearchParams(window.location.search);
       const paramId = params.get('studentId');
       if (paramId) {
-        // Force selected id and reopen modal (close then open) to ensure it mounts cleanly
-        setSelectedStudentId(paramId);
-        setIsProfileModalOpen(false);
-        setTimeout(() => {
-          setIsProfileModalOpen(true);
-        }, 60);
+        setLocation(`/students/${paramId}`);
       }
     }
 
     const handler = (e: any) => {
       const id = e?.detail?.id || new URLSearchParams(window.location.search).get('studentId') || new URLSearchParams(window.location.search).get('id');
       if (id) {
-        setSelectedStudentId(id);
-        // close any existing profile modal then reopen to ensure fresh mount
-        setIsProfileModalOpen(false);
-        setTimeout(() => {
-          setIsProfileModalOpen(true);
-        }, 60);
+        setLocation(`/students/${id}`);
       }
     };
 
@@ -145,8 +137,17 @@ export default function Students() {
 
   const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+    setLocation(`/students/${studentId}`);
   };
+
+  // Open profile when route matches
+  useEffect(() => {
+    if (matchStudent || matchEdit) {
+      const id = (matchEdit ? editParams?.id : studentParams?.id) || null;
+      if (id) setSelectedStudentId(id);
+      setIsProfileModalOpen(true);
+    }
+  }, [matchStudent, matchEdit, studentParams?.id, editParams?.id]);
 
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
@@ -384,10 +385,12 @@ export default function Students() {
 
       <StudentProfileModal
         open={isProfileModalOpen}
+        startInEdit={Boolean(matchEdit)}
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            setLocation('/students');
+            if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
+            else setLocation('/students');
           }
         }}
         studentId={selectedStudentId}
@@ -401,13 +404,7 @@ export default function Students() {
         application={selectedApplicationForDetails}
         onOpenStudentProfile={(sid) => {
           setSelectedStudentId(sid);
-          try {
-            const { useModalManager } = require('@/contexts/ModalManagerContext');
-            const { openModal } = useModalManager();
-            openModal(() => setIsProfileModalOpen(true));
-          } catch {
-            setIsProfileModalOpen(true);
-          }
+          setLocation(`/students/${sid}`);
         }}
       />
 

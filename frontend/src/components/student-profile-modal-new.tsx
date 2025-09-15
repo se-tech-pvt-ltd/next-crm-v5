@@ -47,9 +47,10 @@ interface StudentProfileModalProps {
   studentId: string | null;
   onOpenApplication?: (app: Application) => void;
   onOpenAddApplication?: (studentId?: string | null) => void;
+  startInEdit?: boolean;
 }
 
-export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication, onOpenAddApplication }: StudentProfileModalProps) {
+export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication, onOpenAddApplication, startInEdit }: StudentProfileModalProps) {
   const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
@@ -131,6 +132,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     }
   }, [student]);
 
+  useEffect(() => {
+    if (open && startInEdit) {
+      setIsEditing(true);
+    }
+  }, [open, startInEdit, studentId]);
+
   // Build status sequence from dropdown API (ordered by sequence)
   const statusSequence = useMemo<string[]>(() => {
     const list: any[] = (dropdownData as any)?.Status || [];
@@ -190,6 +197,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       });
       queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
       setIsEditing(false);
+      try { setLocation(`/students/${student?.id}`); } catch {}
     },
     onError: (error: Error) => {
       toast({
@@ -361,7 +369,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               <Plus />
                               <span className="hidden lg:inline">Add Application</span>
                             </Button>
-                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} disabled={isLoading} title="Edit">
+                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }} disabled={isLoading} title="Edit">
                               <Edit />
                               <span className="hidden lg:inline">Edit</span>
                             </Button>
@@ -372,7 +380,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               <Save className="w-4 h-4 mr-1" />
                               Save Changes
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(student); }}>
+                            <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }}>
                               <X className="w-4 h-4 mr-1" />
                               Cancel
                             </Button>

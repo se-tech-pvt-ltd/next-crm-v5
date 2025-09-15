@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { Application, Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +25,8 @@ export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
+  const [matchApp, appParams] = useRoute('/applications/:id');
+  const [matchEdit, editParams] = useRoute('/applications/:id/edit');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -110,6 +112,21 @@ export default function Applications() {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
   };
+
+  // Open details modal when route matches and ensure selected application is set
+  useEffect(() => {
+    const id = (matchEdit ? editParams?.id : appParams?.id) || null;
+    if (matchApp || matchEdit) {
+      if (id) {
+        const found = (applications || []).find(a => a.id === id) as Application | undefined;
+        if (found) setSelectedApplication(found);
+        else {
+          ApplicationsService.getApplication(id).then((app) => setSelectedApplication(app as any)).catch(() => {});
+        }
+      }
+      setIsDetailsOpen(true);
+    }
+  }, [matchApp, matchEdit, appParams?.id, editParams?.id, applications]);
 
   return (
     <Layout 
@@ -272,7 +289,7 @@ export default function Applications() {
                     <TableRow
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => { setSelectedApplication(application); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}
+                      onClick={() => { setLocation(`/applications/${application.id}`); }}
                     >
                       <TableCell className="font-medium p-2 text-xs">
                         {getStudentName(application.studentId)}
@@ -323,7 +340,7 @@ export default function Applications() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => { setSelectedApplication(application); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}
+                              onClick={() => { setLocation(`/applications/${application.id}`); }}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -341,7 +358,15 @@ export default function Applications() {
 
       <ApplicationDetailsModal
         open={isDetailsOpen}
-        onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        startInEdit={Boolean(matchEdit)}
+        onOpenChange={(open) => {
+          setIsDetailsOpen(open);
+          if (!open) {
+            if (matchEdit && editParams?.id) setLocation(`/applications/${editParams.id}`);
+            else setLocation('/applications');
+            setSelectedApplication(null);
+          }
+        }}
         application={selectedApplication}
         onOpenStudentProfile={(sid) => {
           setSelectedStudentId(sid);

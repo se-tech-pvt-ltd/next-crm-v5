@@ -36,9 +36,10 @@ interface ApplicationDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   application: Application | null;
   onOpenStudentProfile?: (studentId: string) => void;
+  startInEdit?: boolean;
 }
 
-export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
+export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile, startInEdit }: ApplicationDetailsModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -63,6 +64,12 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   useEffect(() => {
     setCurrentApp(application || null);
   }, [application]);
+
+  useEffect(() => {
+    if (open && startInEdit) {
+      setIsEditing(true);
+    }
+  }, [open, startInEdit]);
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -167,6 +174,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       setIsEditing(false);
       setCurrentStatus(updated.appStatus || 'Open');
       toast({ title: 'Application updated' });
+      try { setLocation(`/applications/${updated.id}`); } catch {}
     },
     onError: (e: any) => toast({ title: 'Error', description: e.message || 'Failed to update application', variant: 'destructive' })
   });
@@ -284,7 +292,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                                 <Plus />
                                 <span className="hidden lg:inline">Add Admission</span>
                               </Button>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
+                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { setIsEditing(true); try { setLocation(`/applications/${currentApp?.id}/edit`); } catch {} }} title="Edit">
                                 <Edit />
                                 <span className="hidden lg:inline">Edit</span>
                               </Button>
@@ -303,7 +311,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                                channelPartner: currentApp.channelPartner,
                                googleDriveLink: currentApp.googleDriveLink,
                                caseStatus: currentApp.caseStatus || 'Raw',
-                             }); }}>
+                             }); try { setLocation(`/applications/${currentApp?.id}`); } catch {} }}>
                                 <X className="w-4 h-4 mr-1" /> Cancel
                               </Button>
                             </div>
