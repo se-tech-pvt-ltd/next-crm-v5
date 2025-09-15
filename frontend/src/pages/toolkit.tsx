@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
+import { List, LayoutGrid, Star } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export type Institution = {
   id: string;
@@ -59,8 +61,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'u-oxford',
-        logo: 'https://upload.wikimedia.org/wikipedia/en/f/ff/Oxford_University_Coat_Of_Arms.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1471623432079-b009d30b6729?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=Oxford',
+        coverPhoto: 'https://picsum.photos/seed/oxford/1200/400',
         name: 'University of Oxford',
         type: 'Public',
         location: 'Oxford, England',
@@ -95,8 +97,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'u-toronto',
-        logo: 'https://upload.wikimedia.org/wikipedia/en/0/0c/University_of_Toronto_coat_of_arms.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1473172707857-f9e276582ab6?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=Toronto',
+        coverPhoto: 'https://picsum.photos/seed/toronto/1200/400',
         name: 'University of Toronto',
         type: 'Public',
         location: 'Toronto, Ontario',
@@ -131,8 +133,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'deakin',
-        logo: 'https://upload.wikimedia.org/wikipedia/en/0/03/Deakin_University_logo.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1510070009289-b5bc34383727?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=Deakin',
+        coverPhoto: 'https://picsum.photos/seed/deakin/1200/400',
         name: 'Deakin University',
         type: 'Public',
         location: 'Victoria',
@@ -167,8 +169,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'tum',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/8/80/Logo_of_the_Technical_University_of_Munich.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1568719387561-d3a925632768?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=TUM',
+        coverPhoto: 'https://picsum.photos/seed/tum/1200/400',
         name: 'Technical University of Munich',
         type: 'Public',
         location: 'Munich, Bavaria',
@@ -203,7 +205,6 @@ const ToolkitPage = () => {
   const [groupId, setGroupId] = useState<string>('all');
   const [groups, setGroups] = useState<InstitutionGroup[]>(initialGroups);
   const [country, setCountry] = useState<string>('all');
-  const [type, setType] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
   const [focusOnly, setFocusOnly] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
@@ -213,11 +214,22 @@ const ToolkitPage = () => {
   const [editGroupOpen, setEditGroupOpen] = useState(false);
   const [addUniOpen, setAddUniOpen] = useState(false);
   const [editUniOpen, setEditUniOpen] = useState<Institution | null>(null);
+  const [viewMode, setViewMode] = useState<'grid'|'list'>(() => {
+    try {
+      const saved = localStorage.getItem('toolkit_view_mode');
+      if (saved === 'grid' || saved === 'list') return saved as 'grid'|'list';
+    } catch {}
+    return 'grid';
+  });
+
+  // Persist selection to localStorage
+  useEffect(() => {
+    try { localStorage.setItem('toolkit_view_mode', viewMode); } catch {}
+  }, [viewMode]);
 
   const allInstitutions = useMemo(() => groups.flatMap(g => g.universities), [groups]);
 
   const countries = useMemo(() => unique(allInstitutions.map(i => i.country)), [allInstitutions]);
-  const types = useMemo(() => unique(allInstitutions.map(i => i.type)), [allInstitutions]);
   const priorities = useMemo(() => unique(allInstitutions.map(i => i.priority)), [allInstitutions]);
 
   const currentGroup = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -230,7 +242,6 @@ const ToolkitPage = () => {
   const filtered = useMemo(() => {
     return sourceList.filter(i =>
       (country === 'all' || i.country === country) &&
-      (type === 'all' || i.type === type) &&
       (priority === 'all' || i.priority === priority) &&
       (!focusOnly || i.focusUniversity) &&
       (search.trim() === '' ||
@@ -238,7 +249,7 @@ const ToolkitPage = () => {
         i.location.toLowerCase().includes(search.toLowerCase()) ||
         i.country.toLowerCase().includes(search.toLowerCase()))
     );
-  }, [sourceList, country, type, priority, focusOnly, search]);
+  }, [sourceList, country, priority, focusOnly, search]);
 
   const focusInstitutions = useMemo(() => filtered.filter(i => i.focusUniversity), [filtered]);
 
@@ -252,154 +263,158 @@ const ToolkitPage = () => {
   return (
     <Layout title="Toolkit" subtitle="Groups → Universities → Details">
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="w-full md:w-64">
-            <SearchableCombobox
-              value={groupId}
-              onValueChange={setGroupId}
-              placeholder="Select toolkit..."
-              searchPlaceholder="Search toolkits..."
-              onSearch={setGroupSearch}
-              options={groupOptions}
-            />
-          </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="hidden md:block text-xs text-muted-foreground">
-              {groupId === 'all' ? 'Showing all universities from all toolkits' : currentGroup?.description}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex w-full gap-3">
+            <div className="w-full sm:w-64">
+              <SearchableCombobox
+                value={groupId}
+                onValueChange={setGroupId}
+                placeholder="Select toolkit..."
+                searchPlaceholder="Search toolkits..."
+                onSearch={setGroupSearch}
+                options={groupOptions}
+              />
             </div>
-            <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Toolkit</Button>
-            {groupId !== 'all' && (
-              <>
-                <Button size="sm" onClick={() => setAddUniOpen(true)}>Add University</Button>
-                <Button variant="secondary" size="sm" onClick={() => setEditGroupOpen(true)}>Edit Toolkit</Button>
-              </>
-            )}
+            <div className="flex-1">
+              <Input id="search" placeholder="Search by name, location or country" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2" aria-label="Actions">Actions</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setAddGroupOpen(true)}>Add Toolkit</DropdownMenuItem>
+                {groupId !== 'all' && (
+                  <>
+                    <DropdownMenuItem onClick={() => setAddUniOpen(true)}>Add University</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEditGroupOpen(true)}>Edit Toolkit</DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-          <div className="col-span-1 md:col-span-2">
-            <Label htmlFor="search">Search</Label>
-            <Input id="search" placeholder="Search by name, location or country" value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-          <div>
-            <Label>Country</Label>
-            <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {countries.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {types.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Priority</Label>
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {priorities.map((p) => (
-                  <SelectItem key={p} value={p}>{p}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-end space-x-2 mt-2 md:mt-0">
-            <Checkbox id="focusOnly" checked={focusOnly} onCheckedChange={(v) => setFocusOnly(Boolean(v))} />
-            <Label htmlFor="focusOnly">Focus University</Label>
-          </div>
-        </div>
 
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">{filtered.length} results</div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="secondary">View Focus Universities ({focusInstitutions.length})</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
-              </DialogHeader>
-              <ScrollArea className="h-[60vh] pr-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {focusInstitutions.map((i) => (
-                    <Card key={i.id} className="overflow-hidden">
-                      <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-                      <CardHeader className="flex-row items-center space-y-0 space-x-3">
-                        <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
-                        <div className="flex-1">
-                          <CardTitle className="text-base">{i.name}</CardTitle>
-                          <div className="text-xs text-muted-foreground">{i.location}</div>
-                        </div>
-                        <Badge className="bg-emerald-600">Focus</Badge>
-                      </CardHeader>
-                      <CardContent className="space-y-1">
-                        <div className="flex flex-wrap gap-1">
-                          <Badge variant="outline">{i.country}</Badge>
-                          <Badge variant="secondary">{i.type}</Badge>
-                          <Badge variant="outline">Priority: {i.priority}</Badge>
-                        </div>
-                        <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center space-x-1 bg-gray-100 rounded p-1">
+              {viewMode === 'grid' ? (
+                <Button size="icon" variant="ghost" onClick={() => setViewMode('list')} aria-label="Switch to list view">
+                  <List className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button size="icon" variant="ghost" onClick={() => setViewMode('grid')} aria-label="Switch to grid view">
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox id="focusOnlyToggle" checked={focusOnly} onCheckedChange={(v) => setFocusOnly(Boolean(v))} />
+                <Label htmlFor="focusOnlyToggle" className="text-xs">Focus Only</Label>
+              </div>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant={focusOnly ? 'secondary' : 'ghost'} className="flex items-center gap-2" aria-label="View Focus Universities">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span className="hidden sm:inline">Focus Universities</span>
+                    <Badge className="ml-2">{focusInstitutions.length}</Badge>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="h-[60vh] pr-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {focusInstitutions.map((i) => (
+                        <Card key={i.id} className="overflow-hidden">
+                          <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+                          <CardHeader className="flex-row items-center space-y-0 space-x-3">
+                            <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                            <div className="flex-1">
+                              <CardTitle className="text-base">{i.name}</CardTitle>
+                              <div className="text-xs text-muted-foreground">{i.location}</div>
+                            </div>
+                            <Badge className="bg-emerald-600">Focus</Badge>
+                          </CardHeader>
+                          <CardContent className="space-y-1">
+                            <div className="flex flex-wrap gap-1">
+                              <Badge variant="outline">{i.country}</Badge>
+                              <Badge variant="secondary">{i.type}</Badge>
+                              <Badge variant="outline">Priority: {i.priority}</Badge>
+                            </div>
+                            <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {filtered.map((i) => (
-            <Card key={i.id} className="overflow-hidden group">
-              <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-              <CardHeader className="space-y-2">
-                <div className="flex items-center gap-3">
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filtered.map((i) => (
+              <Card key={i.id} className="overflow-hidden group">
+                <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                    <div className="min-w-0">
+                      <CardTitle className="text-base truncate">{i.name}</CardTitle>
+                      <div className="text-xs text-muted-foreground truncate">{i.location}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline">{i.country}</Badge>
+                    <Badge variant="secondary">{i.type}</Badge>
+                    <Badge variant="outline">Priority: {i.priority}</Badge>
+                    {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
+                      <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map((i) => (
+              <div key={i.id} className="flex items-center justify-between p-3 bg-white border rounded">
+                <div className="flex items-center gap-3 min-w-0">
                   <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
                   <div className="min-w-0">
-                    <CardTitle className="text-base truncate">{i.name}</CardTitle>
-                    <div className="text-xs text-muted-foreground truncate">{i.location}</div>
+                    <div className="text-sm font-medium truncate">{i.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">{i.location} • {i.country} • {i.type}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline">{i.country}</Badge>
-                  <Badge variant="secondary">{i.type}</Badge>
+                <div className="flex items-center gap-2">
                   <Badge variant="outline">Priority: {i.priority}</Badge>
-                  {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
+                  {i.focusUniversity && <Badge className="bg-emerald-600 mr-2">Focus</Badge>}
+                  <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
+                  <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
-                    <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* University Details Dialog */}

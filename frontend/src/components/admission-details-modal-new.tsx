@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTracker } from "./activity-tracker";
 import { Award, X, Plane } from "lucide-react";
 import { Label } from '@/components/ui/label';
-import { Admission, Student } from "@/lib/types";
+import { Admission } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
 import { useState } from "react";
+import { useLocation } from 'wouter';
 
 interface AdmissionDetailsModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
+  const [, setLocation] = useLocation();
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
     const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
     const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
@@ -110,9 +112,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <Label>Student</Label>
                       <div className="mt-[-3px]">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs mt-[-2px]" onClick={() => {
-                          const detail = { id: admission.studentId };
                           onOpenChange(false);
-                          setTimeout(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail })), 160);
+                          setTimeout(() => {
+                            try { setLocation(`/students/${admission.studentId}`); }
+                            catch { try { window.location.hash = `#/students/${admission.studentId}`; } catch {} }
+                          }, 160);
                         }}>
                           {student ? student.name : admission.studentId}
                         </Button>
@@ -122,9 +126,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <Label>Application Code</Label>
                       <div className="mt-[-2px]">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono mt-[-1px]" onClick={() => {
-                          const detail = { applicationId: admission.applicationId, application };
                           onOpenChange(false);
-                          setTimeout(() => window.dispatchEvent(new CustomEvent('openApplicationDetails', { detail })), 160);
+                          setTimeout(() => {
+                            try { setLocation(`/applications/${admission.applicationId}`); }
+                            catch { try { window.location.hash = `#/applications/${admission.applicationId}`; } catch {} }
+                          }, 160);
                         }}>
                           {application?.applicationCode || admission.applicationId}
                         </Button>
