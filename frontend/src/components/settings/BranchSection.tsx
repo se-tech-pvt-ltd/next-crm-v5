@@ -332,7 +332,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       <SelectItem value="" disabled>No users found</SelectItem>
                     ) : (
                       (users as any[])
-                        .filter((u: any) => u.role === 'branch_manager' || u.role === 'admin_staff')
+                        .filter((u: any) => ['branch_manager','regional_manager','admin','super_admin','admin_staff'].includes(u.role))
                         .map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
                             {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
