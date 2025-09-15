@@ -206,9 +206,7 @@ export default function Settings() {
         <div className="lg:col-span-3 lg:order-1 space-y-3">
           {category === 'branches' && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Database className="w-4 h-4" /></CardTitle>
-              </CardHeader>
+              <CardHeader />
               <CardContent className="space-y-4"><BranchSectionComp toast={toast} /></CardContent>
             </Card>
           )}
