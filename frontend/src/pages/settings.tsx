@@ -8,8 +8,8 @@ import { Users, Settings as SettingsIcon, Mail, Wrench, Database, Calendar, File
 export default function Settings() {
   const section = (title: string, items: { label: string; icon?: any; badge?: string }[]) => (
     <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
+      <CardHeader className="p-2 space-y-1">
+        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-1 text-sm">
