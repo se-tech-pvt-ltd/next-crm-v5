@@ -62,4 +62,46 @@ export class ConfigurationController {
       res.status(500).json({ message: 'Failed to create branch' });
     }
   }
+
+  // SMTP: send test email using saved configuration or provided override
+  static async testSmtp(req: Request, res: Response) {
+    try {
+      const { toEmail, config } = (req.body || {}) as { toEmail?: string; config?: any };
+      const email = (toEmail || '').trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ message: 'Valid toEmail is required' });
+      }
+
+      const cfg = config && typeof config === 'object' ? config : await ConfigurationService.getConfig('smtp');
+      if (!cfg || !cfg.host || !cfg.port || !cfg.user || !cfg.pass || !cfg.fromEmail) {
+        return res.status(400).json({ message: 'Incomplete SMTP configuration. Please provide host, port, user, pass, and fromEmail.' });
+      }
+
+      const nodemailer = await import('nodemailer');
+      const transporter = nodemailer.createTransport({
+        host: cfg.host,
+        port: Number(cfg.port),
+        secure: !!cfg.secure,
+        auth: { user: cfg.user, pass: cfg.pass },
+      });
+
+      // Verify the transporter connectivity first (optional but helpful)
+      try {
+        await transporter.verify();
+      } catch (verifyErr: any) {
+        return res.status(400).json({ message: `SMTP verification failed: ${verifyErr?.message || 'Unknown error'}` });
+      }
+
+      const info = await transporter.sendMail({
+        from: cfg.fromEmail,
+        to: email,
+        subject: 'Test email from Education Management System',
+        text: 'This is a test email to verify your SMTP configuration is working.',
+      });
+
+      res.json({ success: true, messageId: info?.messageId || '' });
+    } catch (e: any) {
+      res.status(500).json({ message: e?.message || 'Failed to send test email' });
+    }
+  }
 }
