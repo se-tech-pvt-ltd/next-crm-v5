@@ -334,41 +334,51 @@ const ToolkitPage = () => {
 
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">{filtered.length} results</div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="secondary">View Focus Universities ({focusInstitutions.length})</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
-              </DialogHeader>
-              <ScrollArea className="h-[60vh] pr-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {focusInstitutions.map((i) => (
-                    <Card key={i.id} className="overflow-hidden">
-                      <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-                      <CardHeader className="flex-row items-center space-y-0 space-x-3">
-                        <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
-                        <div className="flex-1">
-                          <CardTitle className="text-base">{i.name}</CardTitle>
-                          <div className="text-xs text-muted-foreground">{i.location}</div>
-                        </div>
-                        <Badge className="bg-emerald-600">Focus</Badge>
-                      </CardHeader>
-                      <CardContent className="space-y-1">
-                        <div className="flex flex-wrap gap-1">
-                          <Badge variant="outline">{i.country}</Badge>
-                          <Badge variant="secondary">{i.type}</Badge>
-                          <Badge variant="outline">Priority: {i.priority}</Badge>
-                        </div>
-                        <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center space-x-1 bg-gray-100 rounded p-1">
+              <Button size="icon" variant={viewMode === 'grid' ? 'primary' : 'ghost'} onClick={() => setViewMode('grid')} aria-label="Grid view">
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button size="icon" variant={viewMode === 'list' ? 'primary' : 'ghost'} onClick={() => setViewMode('list')} aria-label="List view">
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary">View Focus Universities ({focusInstitutions.length})</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
+                </DialogHeader>
+                <ScrollArea className="h-[60vh] pr-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {focusInstitutions.map((i) => (
+                      <Card key={i.id} className="overflow-hidden">
+                        <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+                        <CardHeader className="flex-row items-center space-y-0 space-x-3">
+                          <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                          <div className="flex-1">
+                            <CardTitle className="text-base">{i.name}</CardTitle>
+                            <div className="text-xs text-muted-foreground">{i.location}</div>
+                          </div>
+                          <Badge className="bg-emerald-600">Focus</Badge>
+                        </CardHeader>
+                        <CardContent className="space-y-1">
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant="outline">{i.country}</Badge>
+                            <Badge variant="secondary">{i.type}</Badge>
+                            <Badge variant="outline">Priority: {i.priority}</Badge>
+                          </div>
+                          <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
