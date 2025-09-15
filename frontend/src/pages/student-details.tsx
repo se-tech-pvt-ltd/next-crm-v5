@@ -1,4 +1,3 @@
-import { useRoute, useLocation } from 'wouter';
 import { useLocation, useRoute } from 'wouter';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 
