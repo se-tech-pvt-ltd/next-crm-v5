@@ -34,6 +34,7 @@ export default function Students() {
   const [location, setLocation] = useLocation();
   const [matchStudent, studentParams] = useRoute('/students/:id');
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
+  const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
