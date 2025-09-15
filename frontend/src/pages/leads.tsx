@@ -628,7 +628,7 @@ export default function Leads() {
             )}
 
             {/* Pagination */}
-            {!isLoading && filteredLeads.length > 0 && (
+            {!isLoading && pagination.total > pageSize && (
               <div className="mt-4 pt-4 border-t">
                 <Pagination
                   currentPage={pagination.page}
