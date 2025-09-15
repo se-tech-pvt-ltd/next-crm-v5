@@ -38,7 +38,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
     onSuccess: async () => {
-      setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', branchHead: '', code: '', status: 'active' });
+      setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', code: '', status: 'active' });
       setModalOpen(false);
       await refetch();
       toast({ title: 'Branch created', description: 'New branch added', duration: 2500 });
