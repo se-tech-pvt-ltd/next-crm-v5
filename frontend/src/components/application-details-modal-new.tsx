@@ -49,6 +49,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   const openStudentProfile = (sid: string) => {
+    try { setLocation(`/students/${sid}`); } catch {}
     if (typeof onOpenStudentProfile === 'function') {
       onOpenStudentProfile(sid);
       onOpenChange(false);
