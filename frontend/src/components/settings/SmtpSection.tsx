@@ -116,7 +116,14 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
         </div>
 
         <div className="col-span-full flex items-center gap-2">
-          <Button type="button" onClick={() => saveMut.mutate()} disabled={!form.host || !form.port || !form.user || !form.fromEmail}>Save settings</Button>
+          {!editing ? (
+            <Button type="button" onClick={() => setEditing(true)}>Edit</Button>
+          ) : (
+            <>
+              <Button type="button" onClick={() => saveMut.mutate()} disabled={saveMut.isLoading || !form.host || !form.port || !form.user || !form.fromEmail}>Save</Button>
+              <Button type="button" variant="outline" onClick={() => { setForm(originalRef.current || { host: '', port: 587, secure: false, user: '', pass: '', fromEmail: '' }); setEditing(false); }}>Cancel</Button>
+            </>
+          )}
 
           <Dialog open={modalOpen} onOpenChange={setModalOpen}>
             <DialogTrigger asChild>
