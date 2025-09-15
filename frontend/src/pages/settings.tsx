@@ -770,8 +770,15 @@ function SmtpSection({ toast }: { toast: (v: any) => void }) {
         <Label>From email</Label>
         <Input className="mt-1" type="email" value={form.fromEmail} onChange={(e) => setForm((s) => ({ ...s, fromEmail: e.target.value }))} />
       </div>
-      <div className="col-span-full">
+      <div>
+        <Label>Send test to</Label>
+        <Input className="mt-1" type="email" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} placeholder="name@example.com" />
+      </div>
+      <div className="col-span-full flex items-center gap-2">
         <Button type="button" onClick={() => saveMut.mutate()} disabled={!form.host || !form.port || !form.user || !form.fromEmail}>Save settings</Button>
+        <Button type="button" variant="outline" onClick={() => testMut.mutate()} disabled={!isEmailValid(testEmail) || !form.host || !form.port || !form.user || !form.fromEmail || testMut.isPending}>
+          {testMut.isPending ? 'Sending…' : 'Send test email'}
+        </Button>
       </div>
     </div>
   );
