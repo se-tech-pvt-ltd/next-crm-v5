@@ -315,41 +315,52 @@ const ToolkitPage = () => {
                 </Button>
               )}
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="secondary">View Focus Universities ({focusInstitutions.length})</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="h-[60vh] pr-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {focusInstitutions.map((i) => (
-                      <Card key={i.id} className="overflow-hidden">
-                        <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-                        <CardHeader className="flex-row items-center space-y-0 space-x-3">
-                          <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
-                          <div className="flex-1">
-                            <CardTitle className="text-base">{i.name}</CardTitle>
-                            <div className="text-xs text-muted-foreground">{i.location}</div>
-                          </div>
-                          <Badge className="bg-emerald-600">Focus</Badge>
-                        </CardHeader>
-                        <CardContent className="space-y-1">
-                          <div className="flex flex-wrap gap-1">
-                            <Badge variant="outline">{i.country}</Badge>
-                            <Badge variant="secondary">{i.type}</Badge>
-                            <Badge variant="outline">Priority: {i.priority}</Badge>
-                          </div>
-                          <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox id="focusOnlyToggle" checked={focusOnly} onCheckedChange={(v) => setFocusOnly(Boolean(v))} />
+                <Label htmlFor="focusOnlyToggle" className="text-xs">Focus Only</Label>
+              </div>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant={focusOnly ? 'secondary' : 'ghost'} className="flex items-center gap-2" aria-label="View Focus Universities">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span className="hidden sm:inline">Focus Universities</span>
+                    <Badge className="ml-2">{focusInstitutions.length}</Badge>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Focus Universities {groupId !== 'all' && currentGroup ? `— ${currentGroup.name}` : ''}</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="h-[60vh] pr-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {focusInstitutions.map((i) => (
+                        <Card key={i.id} className="overflow-hidden">
+                          <div className="h-24 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+                          <CardHeader className="flex-row items-center space-y-0 space-x-3">
+                            <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                            <div className="flex-1">
+                              <CardTitle className="text-base">{i.name}</CardTitle>
+                              <div className="text-xs text-muted-foreground">{i.location}</div>
+                            </div>
+                            <Badge className="bg-emerald-600">Focus</Badge>
+                          </CardHeader>
+                          <CardContent className="space-y-1">
+                            <div className="flex flex-wrap gap-1">
+                              <Badge variant="outline">{i.country}</Badge>
+                              <Badge variant="secondary">{i.type}</Badge>
+                              <Badge variant="outline">Priority: {i.priority}</Badge>
+                            </div>
+                            <Button className="mt-2" size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
 
@@ -445,7 +456,7 @@ const ToolkitPage = () => {
                     <Field label="Intake" value={selected.details.intake.join(', ')} />
                     <Field label="Study Gap" value={selected.details.studyGap} />
                     <Field label="Upcoming Deadlines" value={selected.details.upcomingDeadlines.join(' • ')} />
-                    <Field label="Benefits" value={selected.details.benefits.join(' ��� ')} />
+                    <Field label="Benefits" value={selected.details.benefits.join(' • ')} />
                     <Field label="Eligibility requirement" value={selected.details.eligibilityRequirement} />
                     <Field label="ELT Requirement" value={selected.details.eltRequirement} />
                     <Field label="Apply Notes" value={selected.details.applyNotes} />
