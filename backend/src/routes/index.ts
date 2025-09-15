@@ -13,6 +13,7 @@ import uploadRoutes from "./uploadRoutes.js";
 import { dropdownRoutes } from "./dropdownRoutes.js";
 import eventRoutes from "./eventRoutes.js";
 import eventRegistrationRoutes from "./eventRegistrationRoutes.js";
+import branchRoutes from './branchRoutes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create uploads directory if it doesn't exist and serve uploaded files statically
@@ -32,6 +33,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/events', eventRoutes);
   app.use('/api/event-registrations', eventRegistrationRoutes);
   app.use('/api/configurations', (await import('./configurationRoutes.js')).default);
+
+  // Branches
+  app.use('/api/branches', branchRoutes);
 
   // Search routes
   app.use('/api/search', leadRoutes); // This includes search functionality
