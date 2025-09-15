@@ -221,7 +221,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : (pagination?.total || studentsArray.length) || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (effectivePagination?.total || studentsArray.length) || 0}
               </div>
             </CardContent>
           </Card>
