@@ -204,7 +204,6 @@ const ToolkitPage = () => {
   const [groupId, setGroupId] = useState<string>('all');
   const [groups, setGroups] = useState<InstitutionGroup[]>(initialGroups);
   const [country, setCountry] = useState<string>('all');
-  const [type, setType] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
   const [focusOnly, setFocusOnly] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
@@ -230,7 +229,6 @@ const ToolkitPage = () => {
   const allInstitutions = useMemo(() => groups.flatMap(g => g.universities), [groups]);
 
   const countries = useMemo(() => unique(allInstitutions.map(i => i.country)), [allInstitutions]);
-  const types = useMemo(() => unique(allInstitutions.map(i => i.type)), [allInstitutions]);
   const priorities = useMemo(() => unique(allInstitutions.map(i => i.priority)), [allInstitutions]);
 
   const currentGroup = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -243,7 +241,6 @@ const ToolkitPage = () => {
   const filtered = useMemo(() => {
     return sourceList.filter(i =>
       (country === 'all' || i.country === country) &&
-      (type === 'all' || i.type === type) &&
       (priority === 'all' || i.priority === priority) &&
       (!focusOnly || i.focusUniversity) &&
       (search.trim() === '' ||
@@ -251,7 +248,7 @@ const ToolkitPage = () => {
         i.location.toLowerCase().includes(search.toLowerCase()) ||
         i.country.toLowerCase().includes(search.toLowerCase()))
     );
-  }, [sourceList, country, type, priority, focusOnly, search]);
+  }, [sourceList, country, priority, focusOnly, search]);
 
   const focusInstitutions = useMemo(() => filtered.filter(i => i.focusUniversity), [filtered]);
 
@@ -305,20 +302,6 @@ const ToolkitPage = () => {
                 <SelectItem value="all">All</SelectItem>
                 {countries.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {types.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
