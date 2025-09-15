@@ -214,6 +214,7 @@ const ToolkitPage = () => {
   const [editGroupOpen, setEditGroupOpen] = useState(false);
   const [addUniOpen, setAddUniOpen] = useState(false);
   const [editUniOpen, setEditUniOpen] = useState<Institution | null>(null);
+  const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
 
   const allInstitutions = useMemo(() => groups.flatMap(g => g.universities), [groups]);
 
