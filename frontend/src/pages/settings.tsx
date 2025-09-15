@@ -191,7 +191,7 @@ export default function Settings() {
   return (
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Configure appearance, notifications, language, and local data">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-        <div className="lg:col-span-1 lg:order-2 space-y-2">
+        <div className="lg:col-span-1 lg:order-2 space-y-2 lg:overflow-y-auto lg:max-h-[calc(100vh-140px)] lg:sticky lg:top-2 pr-1">
           <CategoryButton active={category === 'branches'} title="Branch management" description="Create and list branches" icon={<Database className="w-4 h-4" />} onClick={() => setCategory('branches')} />
           <CategoryButton active={category === 'users'} title="User management" description="Create and invite users" icon={<ShieldCheck className="w-4 h-4" />} onClick={() => setCategory('users')} />
           <CategoryButton active={category === 'smtp'} title="Email (SMTP)" description="Outgoing mail settings" icon={<Bell className="w-4 h-4" />} onClick={() => setCategory('smtp')} />
