@@ -598,7 +598,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
       <ApplicationDetailsModal
         open={isAppDetailsOpen}
-        onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        onOpenChange={(open) => {
+          setIsAppDetailsOpen(open);
+          if (!open) {
+            setSelectedApplication(null);
+            try {
+              if (location && location.startsWith('/applications/')) {
+                setLocation(`/students/${student?.id}`);
+              }
+            } catch (e) {}
+          }
+        }}
         application={selectedApplication}
       />
 
