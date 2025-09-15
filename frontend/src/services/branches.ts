@@ -11,9 +11,9 @@ export interface Branch {
 }
 
 export async function listBranches(): Promise<Branch[]> {
-  return http.get<Branch[]>("/api/configurations/branches/list/all");
+  return http.get<Branch[]>('/api/branches');
 }
 
 export async function createBranch(input: Omit<Branch, 'id'>): Promise<Branch> {
-  return http.post<Branch>("/api/configurations/branches", input);
+  return http.post<Branch>('/api/branches', input);
 }
