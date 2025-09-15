@@ -1,8 +1,9 @@
 import { http, HttpError } from './http';
 import type { Lead, Student } from '@/lib/types';
 
-export async function getLeads() {
-  return http.get<Lead[]>('/api/leads');
+export async function getLeads(params?: { page?: number; limit?: number }) {
+  const query = params?.page ? `?page=${params.page}&limit=${params?.limit ?? ''}` : '';
+  return http.get<{ data?: Lead[]; pagination?: any } | Lead[]>(`/api/leads${query}`);
 }
 
 export async function getLead(id: string | undefined) {
