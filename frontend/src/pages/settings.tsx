@@ -48,9 +48,9 @@ export default function Settings() {
           ])}
 
           {section('Module Settings', [
-            { label: 'Module Builder', icon: Tool },
+            { label: 'Module Builder', icon: Wrench },
             { label: 'Configure Modules', icon: FileText },
-            { label: 'Connectors', icon: Tool },
+            { label: 'Connectors', icon: Wrench },
           ])}
 
           {section('Email', [
@@ -66,8 +66,8 @@ export default function Settings() {
           ])}
 
           {section('Developer Tools', [
-            { label: 'Studio', icon: Tool },
-            { label: 'Module Builder', icon: Tool },
+            { label: 'Studio', icon: Wrench },
+            { label: 'Module Builder', icon: Wrench },
             { label: 'Dropdown Editor', icon: FileText },
           ])}
 
