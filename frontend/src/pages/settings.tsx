@@ -726,6 +726,10 @@ function SmtpSection({ toast }: { toast: (v: any) => void }) {
       });
     }
   }, [data]);
+  useEffect(() => {
+    const candidate = (user?.email && String(user.email)) || (data?.fromEmail && String(data.fromEmail)) || '';
+    setTestEmail((prev) => prev || candidate);
+  }, [data, user]);
   const saveMut = useMutation({
     mutationFn: () => setConfiguration('smtp', form),
     onSuccess: () => toast({ title: 'Saved', description: 'SMTP configuration saved', duration: 2500 })
