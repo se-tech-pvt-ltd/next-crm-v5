@@ -81,7 +81,7 @@ export default function Students() {
     return (match?.value || s || '').toString();
   };
 
-  const filteredStudents = students?.filter(student => {
+  const filteredStudents = studentsArray?.filter(student => {
     const label = getStatusLabel(student.status).toLowerCase();
     const statusMatch = statusFilter === 'all' || label === statusFilter;
     const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
@@ -89,8 +89,8 @@ export default function Students() {
   }) || [];
 
   // Get unique countries for filter dropdown
-  const uniqueCountries = students ?
-    students.reduce((countries: string[], student) => {
+  const uniqueCountries = studentsArray ?
+    studentsArray.reduce((countries: string[], student) => {
       if (student.targetCountry && !countries.includes(student.targetCountry)) {
         countries.push(student.targetCountry);
       }
