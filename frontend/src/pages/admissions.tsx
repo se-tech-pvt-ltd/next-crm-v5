@@ -45,6 +45,21 @@ export default function Admissions() {
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [admissionsDropdowns]);
 
+  // Open details modal when route matches and ensure selected admission is set
+  useEffect(() => {
+    const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    if (matchAd || matchEdit) {
+      if (id) {
+        const found = (admissions || []).find(a => a.id === id) as Admission | undefined;
+        if (found) setSelectedAdmission(found);
+        else {
+          AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+        }
+      }
+      setIsDetailsOpen(true);
+    }
+  }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
+
   const visaStatusOptions = useMemo(() => {
     const dd: any = admissionsDropdowns as any;
     let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
