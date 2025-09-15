@@ -33,6 +33,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   });
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [filters, setFilters] = useState({ name: '', country: '', city: '' });
 
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
@@ -48,9 +49,43 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
+  const filteredBranches = (Array.isArray(branches) ? branches : []).filter((b: any) => {
+    const nameStr = String(b.branchName || b.name || '').toLowerCase();
+    const countryStr = String(b.country || '').toLowerCase();
+    const cityStr = String(b.city || '').toLowerCase();
+    const fName = filters.name.toLowerCase();
+    const fCountry = filters.country.toLowerCase();
+    const fCity = filters.city.toLowerCase();
+    return (
+      (!fName || nameStr.includes(fName)) &&
+      (!fCountry || countryStr.includes(fCountry)) &&
+      (!fCity || cityStr.includes(fCity))
+    );
+  });
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            placeholder="Search name"
+            className="h-8 w-40"
+            value={filters.name}
+            onChange={(e) => setFilters((s) => ({ ...s, name: e.target.value }))}
+          />
+          <Input
+            placeholder="Country"
+            className="h-8 w-32"
+            value={filters.country}
+            onChange={(e) => setFilters((s) => ({ ...s, country: e.target.value }))}
+          />
+          <Input
+            placeholder="City"
+            className="h-8 w-32"
+            value={filters.city}
+            onChange={(e) => setFilters((s) => ({ ...s, city: e.target.value }))}
+          />
+        </div>
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
             <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title="Add Branch" type="button">
@@ -164,7 +199,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {branches.map((b: any) => {
+                {(filteredBranches as any[]).map((b: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
