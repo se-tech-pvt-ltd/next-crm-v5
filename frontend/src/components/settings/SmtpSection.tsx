@@ -59,6 +59,11 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
       const res = await testSmtp(testEmailInput, form);
       appendLog('SMTP verification and send complete.');
       if (res && res.messageId) appendLog(`MessageId: ${res.messageId}`);
+      if (res && (res as any).envelope) appendLog(`Envelope: ${JSON.stringify((res as any).envelope)}`);
+      if (res && (res as any).accepted) appendLog(`Accepted: ${JSON.stringify((res as any).accepted)}`);
+      if (res && (res as any).rejected) appendLog(`Rejected: ${JSON.stringify((res as any).rejected)}`);
+      if (res && (res as any).pending) appendLog(`Pending: ${JSON.stringify((res as any).pending)}`);
+      if (res && (res as any).response) appendLog(`Response: ${String((res as any).response)}`);
       if (res && (res as any).message) appendLog(String((res as any).message));
       appendLog('Test succeeded');
     } catch (err: any) {
