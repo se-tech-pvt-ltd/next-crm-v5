@@ -76,6 +76,7 @@ export default function Leads() {
   };
   const [location, setLocation] = useLocation();
   const [matchLead, leadParams] = useRoute('/leads/:id');
+  const [matchConvert, convertParams] = useRoute('/leads/:id/student');
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -123,6 +124,13 @@ export default function Leads() {
     queryKey: ['/api/leads', leadParams?.id],
     queryFn: async () => LeadsService.getLead(leadParams?.id),
     enabled: Boolean(matchLead && leadParams?.id),
+    staleTime: 0,
+  });
+
+  const { data: leadByIdForConvert } = useQuery({
+    queryKey: ['/api/leads', convertParams?.id],
+    queryFn: async () => LeadsService.getLead(convertParams?.id),
+    enabled: Boolean(matchConvert && convertParams?.id),
     staleTime: 0,
   });
 
@@ -265,6 +273,23 @@ export default function Leads() {
       }
     }
   }, [matchLead, leadParams, leads, leadById]);
+
+  React.useEffect(() => {
+    if (matchConvert) {
+      setShowConvertModal(true);
+      const id = convertParams?.id;
+      if (id) {
+        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+        if (found) {
+          setSelectedLead(found as any);
+          setConvertLead(found as any);
+        } else if (leadByIdForConvert) {
+          setSelectedLead(leadByIdForConvert as any);
+          setConvertLead(leadByIdForConvert as any);
+        }
+      }
+    }
+  }, [matchConvert, convertParams, leads, leadByIdForConvert]);
 
   return (
     <Layout
@@ -638,11 +663,18 @@ export default function Leads() {
         }}
         onOpenConvert={(lead) => {
           setConvertLead(lead);
+          setLocation(`/leads/${lead.id}/student`);
           try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setShowConvertModal(true)); } catch { setShowConvertModal(true); }
         }}
       />
 
-      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => { setShowConvertModal(open); if (!open) setConvertLead(null); }} lead={convertLead} />
+      <ConvertToStudentModal open={showConvertModal} onOpenChange={(open) => {
+        setShowConvertModal(open);
+        if (!open) {
+          if (matchConvert && convertParams?.id) setLocation(`/leads/${convertParams.id}`);
+          setConvertLead(null);
+        }
+      }} lead={convertLead} />
     </Layout>
   );
 }
