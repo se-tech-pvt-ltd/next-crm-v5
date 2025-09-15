@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import { Database, Plus } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const { data: branches = [], refetch } = useQuery({
@@ -149,15 +150,39 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {branches.map((b: any) => (
-              <div key={b.id} className="border rounded-md p-2 text-sm">
-                <div className="font-semibold">{b.branchName || b.name}</div>
-                <div className="text-xs text-muted-foreground">{[b.country, b.city].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
-                <div className="text-xs text-muted-foreground mt-1">Phone: {b.officialPhone || '-'} • Email: {b.officialEmail || '-'}</div>
-                <div className="text-xs text-muted-foreground mt-1">Head: {(() => { const u = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId)); return u ? `${(u.firstName || '')} ${(u.lastName || '')}`.trim() || (u.email || '-') : '-'; })()}</div>
-              </div>
-            ))}
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Country</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>Official Phone</TableHead>
+                  <TableHead>Official Email</TableHead>
+                  <TableHead>Head</TableHead>
+                  <TableHead className="whitespace-nowrap">Updated</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {branches.map((b: any) => {
+                  const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
+                  const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
+                  return (
+                    <TableRow key={b.id}>
+                      <TableCell className="font-medium">{b.branchName || b.name || '-'}</TableCell>
+                      <TableCell>{b.country || '-'}</TableCell>
+                      <TableCell>{b.city || '-'}</TableCell>
+                      <TableCell className="max-w-[320px] truncate" title={b.address || ''}>{b.address || '-'}</TableCell>
+                      <TableCell>{b.officialPhone || '-'}</TableCell>
+                      <TableCell className="max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
+                      <TableCell>{headName}</TableCell>
+                      <TableCell>{b.updatedOn ? new Date(b.updatedOn).toLocaleDateString() : '-'}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
