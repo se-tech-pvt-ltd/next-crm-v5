@@ -7,6 +7,9 @@ const configurationRoutes = Router();
 configurationRoutes.get('/:name', ConfigurationController.getByName);
 configurationRoutes.put('/:name', ConfigurationController.setByName);
 
+// SMTP test endpoint
+configurationRoutes.post('/smtp/test', ConfigurationController.testSmtp);
+
 // Branch management endpoints
 configurationRoutes.get('/branches/list/all', ConfigurationController.listBranches);
 configurationRoutes.post('/branches', ConfigurationController.createBranch);
