@@ -137,7 +137,7 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
               <div className="grid gap-2">
                 <div>
                   <Label>Recipient email</Label>
-                  <Input className="mt-1" type="email" value={testEmailInput} onChange={(e) => setTestEmailInput(e.target.value)} placeholder={user?.email || 'name@example.com'} />
+                  <Input className="mt-1" type="email" value={testEmailInput} onChange={(e) => setTestEmailInput(e.target.value)} placeholder="name@example.com" autoComplete="off" name="smtp-test-recipient" />
                 </div>
 
                 <div className="flex gap-2">
