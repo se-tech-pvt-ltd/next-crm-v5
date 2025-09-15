@@ -174,6 +174,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       setIsEditing(false);
       setCurrentStatus(updated.appStatus || 'Open');
       toast({ title: 'Application updated' });
+      try { setLocation(`/applications/${updated.id}`); } catch {}
     },
     onError: (e: any) => toast({ title: 'Error', description: e.message || 'Failed to update application', variant: 'destructive' })
   });
