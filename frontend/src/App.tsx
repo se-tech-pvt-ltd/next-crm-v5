@@ -67,7 +67,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/leads" component={Leads} />
       <Route path="/leads/add" component={AddLead} />
-      <Route path="/leads/new" component={AddLead} />
+      <Route path="/leads/new" component={Leads} />
       <Route path="/leads/:id" component={LeadDetails} />
       <Route path="/leads/:id/convert" component={ConvertLeadToStudent} />
       <Route path="/students" component={Students} />
