@@ -1,8 +1,9 @@
 import { http } from './http';
 import type { Student } from '@/lib/types';
 
-export async function getStudents() {
-  return http.get<Student[]>('/api/students');
+export async function getStudents(params?: { page?: number; limit?: number }) {
+  const query = params?.page ? `?page=${params.page}&limit=${params?.limit ?? ''}` : '';
+  return http.get<{ data?: Student[]; pagination?: any } | Student[]>(`/api/students${query}`);
 }
 
 export async function getStudent(id: string | undefined) {

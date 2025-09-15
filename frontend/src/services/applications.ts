@@ -3,7 +3,7 @@ import type { Application } from '@/lib/types';
 
 export async function getApplications(params?: { page?: number; limit?: number }) {
   const query = params?.page ? `?page=${params.page}&limit=${params?.limit ?? ''}` : '';
-  return http.get<{ data?: Application[] } | Application[]>(`/api/applications${query}`);
+  return http.get<{ data?: Application[]; pagination?: any } | Application[]>(`/api/applications${query}`);
 }
 
 export async function getApplication(id: string | undefined) {

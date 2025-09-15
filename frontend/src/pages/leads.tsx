@@ -87,7 +87,7 @@ export default function Leads() {
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // 10 records per page
+  const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Removed no activity filter since we don't have activities API configured
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -628,7 +628,7 @@ export default function Leads() {
             )}
 
             {/* Pagination */}
-            {!isLoading && filteredLeads.length > 0 && (
+            {!isLoading && pagination.total > pageSize && (
               <div className="mt-4 pt-4 border-t">
                 <Pagination
                   currentPage={pagination.page}

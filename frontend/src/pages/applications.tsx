@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpTooltip } from '@/components/help-tooltip';
@@ -19,12 +20,11 @@ import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import * as DropdownsService from '@/services/dropdowns';
-import { useMemo } from 'react';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [matchApp, appParams] = useRoute('/applications/:id');
   const [matchEdit, editParams] = useRoute('/applications/:id/edit');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -36,9 +36,18 @@ export default function Applications() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
-    queryKey: ['/api/applications'],
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(8);
+
+  const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
+    queryKey: ['/api/applications', { page: currentPage, limit: pageSize, statusFilter, universityFilter }],
+    queryFn: async () => ApplicationsService.getApplications({ page: currentPage, limit: pageSize }),
   });
+
+  // Normalize response (support both array and server-paginated responses)
+  const applicationsArray: Application[] = Array.isArray(applicationsResponse) ? (applicationsResponse as Application[]) : (applicationsResponse?.data || []);
+  const rawPagination = applicationsResponse && !Array.isArray(applicationsResponse) ? (applicationsResponse as any).pagination : undefined;
+  const serverPaginated = Boolean(rawPagination);
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -75,15 +84,29 @@ export default function Applications() {
     },
   });
 
-  const filteredApplications = applications?.filter(app => {
+  // Apply client-side filters to the full applications array
+  const filteredAll = (applicationsArray || []).filter(app => {
     const statusMatch = statusFilter === 'all' || app.appStatus === statusFilter;
     const universityMatch = universityFilter === 'all' || app.university === universityFilter;
     return statusMatch && universityMatch;
   }) || [];
 
+  // If backend provides pagination, assume applicationsArray is already the page to display.
+  // Otherwise, compute pagination on the client and slice the filtered results for display.
+  const effectivePagination = serverPaginated ? rawPagination : {
+    page: currentPage,
+    limit: pageSize,
+    total: filteredAll.length,
+    totalPages: Math.max(1, Math.ceil(filteredAll.length / pageSize)),
+    hasNextPage: currentPage * pageSize < filteredAll.length,
+    hasPrevPage: currentPage > 1
+  };
+
+  const displayApplications = serverPaginated ? applicationsArray : filteredAll.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   // Get unique universities for filter dropdown
-  const uniqueUniversities = applications ? 
-    applications.reduce((universities: string[], app) => {
+  const uniqueUniversities = applicationsArray ?
+    applicationsArray.reduce((universities: string[], app) => {
       if (app.university && !universities.includes(app.university)) {
         universities.push(app.university);
       }
@@ -118,7 +141,7 @@ export default function Applications() {
     const id = (matchEdit ? editParams?.id : appParams?.id) || null;
     if (matchApp || matchEdit) {
       if (id) {
-        const found = (applications || []).find(a => a.id === id) as Application | undefined;
+        const found = (applicationsArray || []).find(a => a.id === id) as Application | undefined;
         if (found) setSelectedApplication(found);
         else {
           ApplicationsService.getApplication(id).then((app) => setSelectedApplication(app as any)).catch(() => {});
@@ -126,7 +149,7 @@ export default function Applications() {
       }
       setIsDetailsOpen(true);
     }
-  }, [matchApp, matchEdit, appParams?.id, editParams?.id, applications]);
+  }, [matchApp, matchEdit, appParams?.id, editParams?.id, applicationsArray]);
 
   return (
     <Layout 
@@ -147,7 +170,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.length || 0}
               </div>
             </CardContent>
           </Card>
@@ -161,7 +184,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-blue-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Open').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Open').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -175,7 +198,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-yellow-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Needs Attention').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Needs Attention').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -189,7 +212,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Closed').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Closed').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -259,7 +282,7 @@ export default function Applications() {
                   </div>
                 ))}
               </div>
-            ) : filteredApplications.length === 0 ? (
+            ) : filteredAll.length === 0 ? (
               <EmptyState
                 icon={<GraduationCap className="h-12 w-12" />}
                 title="No applications found"
@@ -285,7 +308,7 @@ export default function Applications() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredApplications.map((application) => (
+                  {displayApplications.map((application) => (
                     <TableRow
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
@@ -354,6 +377,19 @@ export default function Applications() {
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        {!applicationsLoading && (effectivePagination?.total ?? 0) > pageSize && (
+          <div className="mt-4 pt-4 border-t">
+            <Pagination
+              currentPage={effectivePagination.page}
+              totalPages={effectivePagination.totalPages}
+              onPageChange={(p) => setCurrentPage(p)}
+              hasNextPage={Boolean(effectivePagination.hasNextPage)}
+              hasPrevPage={Boolean(effectivePagination.hasPrevPage)}
+            />
+          </div>
+        )}
       </div>
 
       <ApplicationDetailsModal
@@ -362,13 +398,27 @@ export default function Applications() {
         onOpenChange={(open) => {
           setIsDetailsOpen(open);
           if (!open) {
-            if (matchEdit && editParams?.id) setLocation(`/applications/${editParams.id}`);
-            else setLocation('/applications');
+            if (matchEdit && editParams?.id) {
+              setLocation(`/applications/${editParams.id}`);
+            } else {
+              // If user navigated to student details (or other route) while modal was open, don't override that navigation
+              try {
+                const path = typeof window !== 'undefined' ? window.location.pathname : location;
+                if (!path || !path.startsWith('/students/')) {
+                  setLocation('/applications');
+                }
+              } catch {
+                if (!location || !location.startsWith('/students/')) {
+                  setLocation('/applications');
+                }
+              }
+            }
             setSelectedApplication(null);
           }
         }}
         application={selectedApplication}
         onOpenStudentProfile={(sid) => {
+          try { setLocation(`/students/${sid}`); } catch {}
           setSelectedStudentId(sid);
           try {
             const { useModalManager } = require('@/contexts/ModalManagerContext');

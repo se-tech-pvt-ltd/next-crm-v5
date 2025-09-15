@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Pagination } from '@/components/ui/pagination';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentDetailsModal } from '@/components/student-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
@@ -34,17 +35,53 @@ export default function Students() {
   const [location, setLocation] = useLocation();
   const [matchStudent, studentParams] = useRoute('/students/:id');
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
+  const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
 
-  const { data: students, isLoading } = useQuery<Student[]>({
-    queryKey: ['/api/students'],
-    queryFn: async () => StudentsService.getStudents(),
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(8); // 8 records per page
+
+  const { data: studentsResponse, isLoading } = useQuery({
+    queryKey: ['/api/students', { page: currentPage, limit: pageSize }],
+    queryFn: async () => StudentsService.getStudents({ page: currentPage, limit: pageSize }),
+    staleTime: 0,
+    refetchOnMount: true,
   });
+
+  const studentsArray: Student[] = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
+  const rawPagination = studentsResponse && !Array.isArray(studentsResponse) ? studentsResponse.pagination : undefined;
 
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
+
+  function getStatusLabel(raw?: string) {
+    const list: any[] = (studentDropdowns as any)?.Status || [];
+    const s = raw || '';
+    const match = list.find((o: any) => o.id === s || o.key === s || (o.value && String(o.value).toLowerCase() === String(s).toLowerCase()));
+    return (match?.value || s || '').toString();
+  }
+
+  // Apply filters across the full students array
+  const filteredAll = studentsArray?.filter(student => {
+    const label = getStatusLabel(student.status).toLowerCase();
+    const statusMatch = statusFilter === 'all' || label === statusFilter;
+    const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
+    return statusMatch && countryMatch;
+  }) || [];
+
+  // Detect if server returned pagination metadata
+  const serverPaginated = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
+
+  // Effective pagination: if server provides it, use that; otherwise compute based on filteredAll
+  const effectivePagination = serverPaginated ? rawPagination : { page: currentPage, limit: pageSize, total: filteredAll.length, totalPages: Math.max(1, Math.ceil(filteredAll.length / pageSize)), hasNextPage: currentPage * pageSize < (filteredAll.length || 0), hasPrevPage: currentPage > 1 };
+
+  // If server paginated, studentsArray already contains only current page items; otherwise perform client-side slicing
+  const pagedStudents = serverPaginated ? filteredAll : (filteredAll || []).slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // For rendering and counts use pagedStudents
+  const filteredStudents = pagedStudents;
 
   const updateStudentMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Student> }) => StudentsService.updateStudent(id, data),
@@ -64,23 +101,11 @@ export default function Students() {
     },
   });
 
-  const getStatusLabel = (raw?: string) => {
-    const list: any[] = (studentDropdowns as any)?.Status || [];
-    const s = raw || '';
-    const match = list.find((o: any) => o.id === s || o.key === s || o.value?.toLowerCase() === s.toLowerCase());
-    return (match?.value || s || '').toString();
-  };
 
-  const filteredStudents = students?.filter(student => {
-    const label = getStatusLabel(student.status).toLowerCase();
-    const statusMatch = statusFilter === 'all' || label === statusFilter;
-    const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
-    return statusMatch && countryMatch;
-  }) || [];
 
   // Get unique countries for filter dropdown
-  const uniqueCountries = students ?
-    students.reduce((countries: string[], student) => {
+  const uniqueCountries = studentsArray ?
+    studentsArray.reduce((countries: string[], student) => {
       if (student.targetCountry && !countries.includes(student.targetCountry)) {
         countries.push(student.targetCountry);
       }
@@ -149,8 +174,18 @@ export default function Students() {
     }
   }, [matchStudent, matchEdit, studentParams?.id, editParams?.id]);
 
+  // Open Add Application modal when route matches /students/:id/application
+  useEffect(() => {
+    if (matchCreateApp) {
+      const id = createAppParams?.id || studentParams?.id || null;
+      if (id) setSelectedStudentId(id);
+      setIsAddApplicationModalOpen(true);
+    }
+  }, [matchCreateApp, createAppParams?.id, studentParams?.id]);
+
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
+    try { setLocation(`/students/${studentId}/application`); } catch {}
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); }
   };
 
@@ -171,7 +206,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (effectivePagination?.total || studentsArray.length) || 0}
               </div>
             </CardContent>
           </Card>
@@ -185,7 +220,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'active').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'active').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -199,7 +234,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-blue-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'applied').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'applied').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -213,7 +248,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-purple-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'admitted').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'admitted').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -378,6 +413,20 @@ export default function Students() {
                 </TableBody>
               </Table>
             )}
+
+            {/* Pagination */}
+            {!isLoading && effectivePagination.total > pageSize && (
+              <div className="mt-4 pt-4 border-t">
+                <Pagination
+                  currentPage={effectivePagination.page}
+                  totalPages={effectivePagination.totalPages}
+                  onPageChange={setCurrentPage}
+                  hasNextPage={effectivePagination.hasNextPage}
+                  hasPrevPage={effectivePagination.hasPrevPage}
+                />
+              </div>
+            )}
+
           </CardContent>
         </Card>
 
@@ -389,7 +438,10 @@ export default function Students() {
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
+            // if current URL already contains a students deep-link (e.g. /students/:id/application or /students/:id/edit), preserve it
+            if (location && location.startsWith('/students/') && location !== '/students') {
+              // keep existing location
+            } else if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
             else setLocation('/students');
           }
         }}
@@ -410,7 +462,21 @@ export default function Students() {
 
       <AddApplicationModal
         open={isAddApplicationModalOpen}
-        onOpenChange={(open) => { setIsAddApplicationModalOpen(open); if (!open && !isProfileModalOpen) setSelectedStudentId(null); }}
+        onOpenChange={(open) => {
+          setIsAddApplicationModalOpen(open);
+          if (!open) {
+            // if we arrived via deep link, return to student profile route
+            if (matchCreateApp && createAppParams?.id) {
+              setLocation(`/students/${createAppParams.id}`);
+            } else if (matchStudent && studentParams?.id) {
+              setLocation(`/students/${studentParams.id}`);
+            } else if (!isProfileModalOpen) {
+              setSelectedStudentId(null);
+              setLocation('/students');
+            }
+            if (!isProfileModalOpen) setSelectedStudentId(null);
+          }
+        }}
         studentId={selectedStudentId || undefined}
       />
     </Layout>

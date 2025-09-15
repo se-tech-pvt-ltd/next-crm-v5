@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -14,14 +14,17 @@ import { Admission, Student } from '@/lib/types';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import * as DropdownsService from '@/services/dropdowns';
+import * as AdmissionsService from '@/services/admissions';
 import { useMemo } from 'react';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
+  const [matchAd, adParams] = useRoute('/admissions/:id');
+  const [matchEdit, editParams] = useRoute('/admissions/:id/edit');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
 
@@ -41,6 +44,21 @@ export default function Admissions() {
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [admissionsDropdowns]);
+
+  // Open details modal when route matches and ensure selected admission is set
+  useEffect(() => {
+    const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    if (matchAd || matchEdit) {
+      if (id) {
+        const found = (admissions || []).find(a => a.id === id) as Admission | undefined;
+        if (found) setSelectedAdmission(found);
+        else {
+          AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+        }
+      }
+      setIsDetailsOpen(true);
+    }
+  }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
 
   const visaStatusOptions = useMemo(() => {
     const dd: any = admissionsDropdowns as any;
@@ -289,7 +307,7 @@ export default function Admissions() {
                     <TableRow
                       key={admission.id}
                       className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => { setSelectedAdmission(admission); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}
+                      onClick={() => { setLocation(`/admissions/${admission.id}`); }}
                     >
                       <TableCell className="font-medium p-2 text-xs">{getStudentName(admission.studentId)}</TableCell>
                       <TableCell className="p-2 text-xs">
@@ -342,7 +360,7 @@ export default function Admissions() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => { setSelectedAdmission(admission); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsDetailsOpen(true)); } catch { setIsDetailsOpen(true); } }}>
+                            <DropdownMenuItem onClick={() => { setLocation(`/admissions/${admission.id}`); }}>
                               View Details
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -359,7 +377,14 @@ export default function Admissions() {
 
       <AdmissionDetailsModal
         open={isDetailsOpen}
-        onOpenChange={(open) => { setIsDetailsOpen(open); if (!open) setSelectedAdmission(null); }}
+        onOpenChange={(open) => {
+          setIsDetailsOpen(open);
+          if (!open) {
+            if (matchEdit && editParams?.id) setLocation(`/admissions/${editParams.id}`);
+            else setLocation('/admissions');
+            setSelectedAdmission(null);
+          }
+        }}
         admission={selectedAdmission}
       />
     </Layout>

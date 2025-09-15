@@ -58,7 +58,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const [editData, setEditData] = useState<Partial<Student>>({});
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   
   const { data: student, isLoading, isError } = useQuery<Student>({
     queryKey: [`/api/students/${studentId}`],
@@ -363,7 +363,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               variant="outline"
                               size="xs"
                               className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                              onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
                               title="Add Application"
                             >
                               <Plus />
@@ -560,7 +560,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                         <button
                           key={app.id}
                           type="button"
-                          onClick={() => { if (typeof onOpenApplication === 'function') { onOpenApplication(app); onOpenChange(false); } else { setSelectedApplication(app); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); } onOpenChange(false); } }}
+                          onClick={() => { try { setLocation(`/applications/${app.id}`); } catch {} if (typeof onOpenApplication === 'function') { onOpenApplication(app); onOpenChange(false); } else { setSelectedApplication(app); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); } onOpenChange(false); } }}
                           className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
                           <div className="min-w-0">
@@ -598,7 +598,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
       <ApplicationDetailsModal
         open={isAppDetailsOpen}
-        onOpenChange={(open) => { setIsAppDetailsOpen(open); if (!open) setSelectedApplication(null); }}
+        onOpenChange={(open) => {
+          setIsAppDetailsOpen(open);
+          if (!open) {
+            setSelectedApplication(null);
+            try {
+              if (location && location.startsWith('/applications/')) {
+                setLocation(`/students/${student?.id}`);
+              }
+            } catch (e) {}
+          }
+        }}
         application={selectedApplication}
       />
 
