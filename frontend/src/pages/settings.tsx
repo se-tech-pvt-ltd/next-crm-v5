@@ -9,7 +9,7 @@ export default function Settings() {
   const section = (title: string, items: { label: string; icon?: any; badge?: string }[]) => (
     <Card>
       <CardHeader className="p-2 space-y-1">
-        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+        <CardTitle className="text-base sm:text-lg font-semibold">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-0 text-sm">
