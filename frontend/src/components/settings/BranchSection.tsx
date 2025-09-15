@@ -223,7 +223,20 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
-                    <TableRow key={b.id}>
+                    <TableRow key={b.id} className="cursor-pointer hover:bg-muted/40" onClick={() => {
+                      setSelected(b);
+                      setEditForm({
+                        name: String(b.branchName || b.name || ''),
+                        city: String(b.city || ''),
+                        country: String(b.country || ''),
+                        address: String(b.address || ''),
+                        officialPhone: String(b.officialPhone || ''),
+                        officialEmail: String(b.officialEmail || ''),
+                        managerId: String(b.branchHeadId || b.managerId || ''),
+                      });
+                      setIsEditing(false);
+                      setDetailOpen(true);
+                    }}>
                       <TableCell className="font-medium">{b.branchName || b.name || '-'}</TableCell>
                       <TableCell>{b.country || '-'}</TableCell>
                       <TableCell>{b.city || '-'}</TableCell>
