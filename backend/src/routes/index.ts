@@ -31,6 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/dropdowns', dropdownRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/event-registrations', eventRegistrationRoutes);
+  app.use('/api/configurations', (await import('./configurationRoutes.js')).default);
 
   // Search routes
   app.use('/api/search', leadRoutes); // This includes search functionality
