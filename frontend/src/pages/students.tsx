@@ -398,6 +398,20 @@ export default function Students() {
                 </TableBody>
               </Table>
             )}
+
+            {/* Pagination */}
+            {!isLoading && pagination.total > pageSize && (
+              <div className="mt-4 pt-4 border-t">
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                  hasNextPage={pagination.hasNextPage}
+                  hasPrevPage={pagination.hasPrevPage}
+                />
+              </div>
+            )}
+
           </CardContent>
         </Card>
 
