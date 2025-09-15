@@ -35,9 +35,18 @@ export default function Applications() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
-    queryKey: ['/api/applications'],
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(8);
+
+  const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
+    queryKey: ['/api/applications', { page: currentPage, limit: pageSize, statusFilter, universityFilter }],
+    queryFn: async () => ApplicationsService.getApplications({ page: currentPage, limit: pageSize }),
   });
+
+  // Normalize response (support both array and server-paginated responses)
+  const applicationsArray: Application[] = Array.isArray(applicationsResponse) ? (applicationsResponse as Application[]) : (applicationsResponse?.data || []);
+  const rawPagination = applicationsResponse && !Array.isArray(applicationsResponse) ? (applicationsResponse as any).pagination : undefined;
+  const serverPaginated = Boolean(rawPagination);
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -74,15 +83,29 @@ export default function Applications() {
     },
   });
 
-  const filteredApplications = applications?.filter(app => {
+  // Apply client-side filters to the full applications array
+  const filteredAll = (applicationsArray || []).filter(app => {
     const statusMatch = statusFilter === 'all' || app.appStatus === statusFilter;
     const universityMatch = universityFilter === 'all' || app.university === universityFilter;
     return statusMatch && universityMatch;
   }) || [];
 
+  // If backend provides pagination, assume applicationsArray is already the page to display.
+  // Otherwise, compute pagination on the client and slice the filtered results for display.
+  const effectivePagination = serverPaginated ? rawPagination : {
+    page: currentPage,
+    limit: pageSize,
+    total: filteredAll.length,
+    totalPages: Math.max(1, Math.ceil(filteredAll.length / pageSize)),
+    hasNextPage: currentPage * pageSize < filteredAll.length,
+    hasPrevPage: currentPage > 1
+  };
+
+  const displayApplications = serverPaginated ? applicationsArray : filteredAll.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   // Get unique universities for filter dropdown
-  const uniqueUniversities = applications ? 
-    applications.reduce((universities: string[], app) => {
+  const uniqueUniversities = applicationsArray ?
+    applicationsArray.reduce((universities: string[], app) => {
       if (app.university && !universities.includes(app.university)) {
         universities.push(app.university);
       }
@@ -258,7 +281,7 @@ export default function Applications() {
                   </div>
                 ))}
               </div>
-            ) : filteredApplications.length === 0 ? (
+            ) : filteredAll.length === 0 ? (
               <EmptyState
                 icon={<GraduationCap className="h-12 w-12" />}
                 title="No applications found"
@@ -284,7 +307,7 @@ export default function Applications() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredApplications.map((application) => (
+                  {displayApplications.map((application) => (
                     <TableRow
                       key={application.id}
                       className="cursor-pointer hover:bg-gray-50"
