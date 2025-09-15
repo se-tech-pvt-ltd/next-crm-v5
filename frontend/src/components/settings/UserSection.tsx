@@ -39,11 +39,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         <div>
           <Label>Role</Label>
           <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="admin_staff">Admin Staff</SelectItem>
+              <SelectItem value="super_admin">Super Admin</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="regional_manager">Regional Manager</SelectItem>
               <SelectItem value="branch_manager">Branch Manager</SelectItem>
-              <SelectItem value="counselor">Counselor</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="counselor">Counsellor</SelectItem>
+              <SelectItem value="admission_officer">Admission Officer</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -81,7 +85,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <tr key={u.id} className="border-t">
                   <td className="py-1 pr-2">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</td>
                   <td className="py-1 pr-2">{u.email}</td>
-                  <td className="py-1 pr-2 capitalize">{u.role?.replace('_', ' ')}</td>
+                  <td className="py-1 pr-2">{(() => {
+                    const map: Record<string,string> = {
+                      super_admin: 'Super Admin',
+                      admin: 'Admin',
+                      regional_manager: 'Regional Manager',
+                      branch_manager: 'Branch Manager',
+                      processing: 'Processing',
+                      counselor: 'Counsellor',
+                      admission_officer: 'Admission Officer',
+                      admin_staff: 'Admin Staff',
+                    };
+                    return map[u.role] || (u.role || '').replace(/_/g, ' ');
+                  })()}</td>
                   <td className="py-1 pr-2">{u.branchId || '—'}</td>
                 </tr>
               ))}
