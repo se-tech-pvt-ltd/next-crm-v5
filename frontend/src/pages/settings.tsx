@@ -213,6 +213,34 @@ const Settings: React.FC = () => {
         {/* Left: Categories */}
         <div className="lg:col-span-1 space-y-2">
           <CategoryButton
+            active={category === "branches"}
+            title="Branch management"
+            description="Create and list branches"
+            icon={<Database className="w-4 h-4" />}
+            onClick={() => setCategory("branches")}
+          />
+          <CategoryButton
+            active={category === "users"}
+            title="User management"
+            description="Create and invite users"
+            icon={<ShieldCheck className="w-4 h-4" />}
+            onClick={() => setCategory("users")}
+          />
+          <CategoryButton
+            active={category === "smtp"}
+            title="Email (SMTP)"
+            description="Outgoing mail settings"
+            icon={<Bell className="w-4 h-4" />}
+            onClick={() => setCategory("smtp")}
+          />
+          <CategoryButton
+            active={category === "whatsapp"}
+            title="WhatsApp"
+            description="Provider configuration"
+            icon={<SlidersHorizontal className="w-4 h-4" />}
+            onClick={() => setCategory("whatsapp")}
+          />
+          <CategoryButton
             active={category === "appearance"}
             title="Appearance"
             description="Theme and density"
@@ -375,7 +403,7 @@ const Settings: React.FC = () => {
                         <SelectItem value="en-GB">English (UK)</SelectItem>
                         <SelectItem value="fr-FR">Français (FR)</SelectItem>
                         <SelectItem value="de-DE">Deutsch (DE)</SelectItem>
-                        <SelectItem value="es-ES">Español (ES)</SelectItem>
+                        <SelectItem value="es-ES">Espa��ol (ES)</SelectItem>
                         <SelectItem value="hi-IN">हिन्दी (IN)</SelectItem>
                       </SelectContent>
                     </Select>
