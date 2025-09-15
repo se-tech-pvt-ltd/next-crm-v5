@@ -50,7 +50,7 @@ interface DropdownConfig {
 
 export default function Settings() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('fields');
+  const [activeTab, setActiveTab] = useState('users');
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState('counselor');
   const [newUserBranch, setNewUserBranch] = useState('');
