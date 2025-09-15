@@ -112,12 +112,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
         </Dialog>
       </div>
 
-      <div>
-        <Button type="button" onClick={() => createMutation.mutate()} disabled={!form.name}>
-          Add branch
-        </Button>
-      </div>
-
       <Separator />
 
       <div>
