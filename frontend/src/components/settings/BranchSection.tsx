@@ -157,7 +157,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead>Name</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>City</TableHead>
-                  <TableHead>Address</TableHead>
                   <TableHead>Official Phone</TableHead>
                   <TableHead>Official Email</TableHead>
                   <TableHead>Head</TableHead>
@@ -173,7 +172,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       <TableCell className="font-medium">{b.branchName || b.name || '-'}</TableCell>
                       <TableCell>{b.country || '-'}</TableCell>
                       <TableCell>{b.city || '-'}</TableCell>
-                      <TableCell className="max-w-[320px] truncate" title={b.address || ''}>{b.address || '-'}</TableCell>
                       <TableCell>{b.officialPhone || '-'}</TableCell>
                       <TableCell className="max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                       <TableCell>{headName}</TableCell>
