@@ -8,7 +8,6 @@ import Dashboard from "@/pages/dashboard";
 import Leads from "@/pages/leads";
 import AddLead from "@/pages/add-lead";
 import Students from "@/pages/students";
-import ConvertLeadToStudent from "@/pages/convert-to-student";
 import Applications from "@/pages/applications";
 import AddApplication from "@/pages/add-application";
 import ApplicationDetails from "@/pages/application-details";
@@ -68,7 +67,8 @@ function Router() {
       <Route path="/leads/add" component={AddLead} />
       <Route path="/leads/new" component={Leads} />
       <Route path="/leads/:id" component={Leads} />
-      <Route path="/leads/:id/convert" component={ConvertLeadToStudent} />
+      <Route path="/leads/:id/student" component={Leads} />
+      <Route path="/leads/:id/convert" component={Leads} />
       <Route path="/students" component={Students} />
       <Route path="/students/:id" component={StudentDetails} />
       <Route path="/applications/add" component={AddApplication} />
