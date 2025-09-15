@@ -53,14 +53,8 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       <div className="flex items-center justify-end">
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
-            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary sm:hidden" title="Add Branch" type="button">
+            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title="Add Branch" type="button">
               <Plus className="w-4 h-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogTrigger asChild>
-            <Button className="h-8 hidden sm:inline-flex" type="button">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="text-sm">Add Branch</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
@@ -140,7 +134,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       <Separator />
 
       <div>
-        <div className="text-sm font-medium mb-2">Existing branches</div>
         {branches.length === 0 ? (
           <div className="border border-dashed rounded-md p-6 text-center">
             <div className="flex items-center justify-center mb-4">
@@ -168,7 +161,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead>Official Phone</TableHead>
                   <TableHead>Official Email</TableHead>
                   <TableHead>Head</TableHead>
-                  <TableHead className="whitespace-nowrap">Updated</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -183,7 +175,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       <TableCell>{b.officialPhone || '-'}</TableCell>
                       <TableCell className="max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                       <TableCell>{headName}</TableCell>
-                      <TableCell>{b.updatedOn ? new Date(b.updatedOn).toLocaleDateString() : '-'}</TableCell>
                     </TableRow>
                   );
                 })}
