@@ -91,27 +91,27 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
       <div className="grid sm:grid-cols-2 gap-2">
         <div>
           <Label>Host</Label>
-          <Input className="mt-1" value={form.host} onChange={(e) => setForm((s) => ({ ...s, host: e.target.value }))} />
+          <Input className="mt-1" value={form.host} onChange={(e) => setForm((s) => ({ ...s, host: e.target.value }))} disabled={!editing} />
         </div>
         <div>
           <Label>Port</Label>
-          <Input className="mt-1" type="number" value={form.port} onChange={(e) => setForm((s) => ({ ...s, port: Number(e.target.value) }))} />
+          <Input className="mt-1" type="number" value={form.port} onChange={(e) => setForm((s) => ({ ...s, port: Number(e.target.value) }))} disabled={!editing} />
         </div>
         <div className="flex items-center gap-2 mt-1">
-          <Switch checked={form.secure} onCheckedChange={(v) => setForm((s) => ({ ...s, secure: !!v }))} />
+          <Switch checked={form.secure} onCheckedChange={(v) => setForm((s) => ({ ...s, secure: !!v }))} disabled={!editing} />
           <Label>Use TLS/SSL</Label>
         </div>
         <div>
           <Label>Username</Label>
-          <Input className="mt-1" value={form.user} onChange={(e) => setForm((s) => ({ ...s, user: e.target.value }))} readOnly={!editing} />
+          <Input className="mt-1" value={form.user} onChange={(e) => setForm((s) => ({ ...s, user: e.target.value }))} disabled={!editing} />
         </div>
         <div>
           <Label>Password</Label>
-          <Input className="mt-1" type="password" value={form.pass} onChange={(e) => setForm((s) => ({ ...s, pass: e.target.value }))} readOnly={!editing} autoComplete="new-password" />
+          <Input className="mt-1" type="password" value={form.pass} onChange={(e) => setForm((s) => ({ ...s, pass: e.target.value }))} disabled={!editing} autoComplete="new-password" />
         </div>
         <div>
           <Label>From email</Label>
-          <Input className="mt-1" type="email" value={form.fromEmail} onChange={(e) => setForm((s) => ({ ...s, fromEmail: e.target.value }))} readOnly={!editing} autoComplete="off" name="smtp-from-email" inputMode="email" spellCheck={false} />
+          <Input className="mt-1" type="email" value={form.fromEmail} onChange={(e) => setForm((s) => ({ ...s, fromEmail: e.target.value }))} disabled={!editing} autoComplete="off" name="smtp-from-email" inputMode="email" spellCheck={false} />
         </div>
 
         <div className="col-span-full flex items-center gap-2">
