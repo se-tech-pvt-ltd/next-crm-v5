@@ -13,15 +13,18 @@ export default function Settings() {
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
-          {items.map((it) => (
-            <li key={it.label}>
-              <Button variant="ghost" className="w-full justify-start">
-                {it.icon ? <it.icon className="w-4 h-4 mr-2" /> : null}
-                <span className="flex-1 text-left">{it.label}</span>
-                {it.badge ? <Badge variant="outline">{it.badge}</Badge> : null}
-              </Button>
-            </li>
-          ))}
+          {items.map((it) => {
+            const Icon = it.icon as any;
+            return (
+              <li key={it.label}>
+                <Button variant="ghost" className="w-full justify-start">
+                  {Icon ? <Icon className="w-4 h-4 mr-2" /> : null}
+                  <span className="flex-1 text-left">{it.label}</span>
+                  {it.badge ? <Badge variant="outline">{it.badge}</Badge> : null}
+                </Button>
+              </li>
+            );
+          })}
         </ul>
       </CardContent>
     </Card>
