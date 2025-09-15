@@ -132,6 +132,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     }
   }, [student]);
 
+  useEffect(() => {
+    if (open && startInEdit) {
+      setIsEditing(true);
+    }
+  }, [open, startInEdit, studentId]);
+
   // Build status sequence from dropdown API (ordered by sequence)
   const statusSequence = useMemo<string[]>(() => {
     const list: any[] = (dropdownData as any)?.Status || [];
