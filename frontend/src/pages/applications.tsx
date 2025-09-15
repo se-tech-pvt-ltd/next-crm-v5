@@ -365,8 +365,15 @@ export default function Applications() {
               setLocation(`/applications/${editParams.id}`);
             } else {
               // If user navigated to student details (or other route) while modal was open, don't override that navigation
-              if (!location || !location.startsWith('/students/')) {
-                setLocation('/applications');
+              try {
+                const path = typeof window !== 'undefined' ? window.location.pathname : location;
+                if (!path || !path.startsWith('/students/')) {
+                  setLocation('/applications');
+                }
+              } catch {
+                if (!location || !location.startsWith('/students/')) {
+                  setLocation('/applications');
+                }
               }
             }
             setSelectedApplication(null);
