@@ -421,7 +421,21 @@ export default function Students() {
 
       <AddApplicationModal
         open={isAddApplicationModalOpen}
-        onOpenChange={(open) => { setIsAddApplicationModalOpen(open); if (!open && !isProfileModalOpen) setSelectedStudentId(null); }}
+        onOpenChange={(open) => {
+          setIsAddApplicationModalOpen(open);
+          if (!open) {
+            // if we arrived via deep link, return to student profile route
+            if (matchCreateApp && createAppParams?.id) {
+              setLocation(`/students/${createAppParams.id}`);
+            } else if (matchStudent && studentParams?.id) {
+              setLocation(`/students/${studentParams.id}`);
+            } else if (!isProfileModalOpen) {
+              setSelectedStudentId(null);
+              setLocation('/students');
+            }
+            if (!isProfileModalOpen) setSelectedStudentId(null);
+          }
+        }}
         studentId={selectedStudentId || undefined}
       />
     </Layout>
