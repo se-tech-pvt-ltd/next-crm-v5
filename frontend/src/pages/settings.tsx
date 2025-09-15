@@ -203,7 +203,7 @@ export default function Settings() {
           <CategoryButton active={category === 'shortcuts'} title="Quick actions" description="Save or reset" icon={<SlidersHorizontal className="w-4 h-4" />} onClick={() => setCategory('shortcuts')} />
         </div>
 
-        <div className="lg:col-span-3 space-y-3">
+        <div className="lg:col-span-3 lg:order-1 space-y-3">
           {category === 'branches' && (
             <Card>
               <CardHeader>
