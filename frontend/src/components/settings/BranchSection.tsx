@@ -34,6 +34,10 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [filters, setFilters] = useState({ name: '', country: '', city: '' });
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '' });
 
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
