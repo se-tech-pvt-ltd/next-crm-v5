@@ -23,7 +23,7 @@ import * as DropdownsService from '@/services/dropdowns';
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [matchApp, appParams] = useRoute('/applications/:id');
   const [matchEdit, editParams] = useRoute('/applications/:id/edit');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
