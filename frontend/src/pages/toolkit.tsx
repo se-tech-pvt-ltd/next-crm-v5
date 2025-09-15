@@ -348,12 +348,15 @@ const ToolkitPage = () => {
           <div className="text-sm text-muted-foreground">{filtered.length} results</div>
           <div className="flex items-center gap-2">
             <div className="flex items-center space-x-1 bg-gray-100 rounded p-1">
-              <Button size="icon" variant={viewMode === 'grid' ? 'primary' : 'ghost'} onClick={() => setViewMode('grid')} aria-label="Grid view">
-                <LayoutGrid className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant={viewMode === 'list' ? 'primary' : 'ghost'} onClick={() => setViewMode('list')} aria-label="List view">
-                <List className="w-4 h-4" />
-              </Button>
+              {viewMode === 'grid' ? (
+                <Button size="icon" variant="ghost" onClick={() => setViewMode('list')} aria-label="Switch to list view">
+                  <List className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button size="icon" variant="ghost" onClick={() => setViewMode('grid')} aria-label="Switch to grid view">
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+              )}
             </div>
             <Dialog>
               <DialogTrigger asChild>
