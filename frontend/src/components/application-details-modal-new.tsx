@@ -65,6 +65,12 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     setCurrentApp(application || null);
   }, [application]);
 
+  useEffect(() => {
+    if (open && startInEdit) {
+      setIsEditing(true);
+    }
+  }, [open, startInEdit]);
+
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
     queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
