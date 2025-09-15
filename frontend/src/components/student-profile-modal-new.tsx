@@ -197,6 +197,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       });
       queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
       setIsEditing(false);
+      try { setLocation(`/students/${student?.id}`); } catch {}
     },
     onError: (error: Error) => {
       toast({
@@ -368,7 +369,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               <Plus />
                               <span className="hidden lg:inline">Add Application</span>
                             </Button>
-                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} disabled={isLoading} title="Edit">
+                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }} disabled={isLoading} title="Edit">
                               <Edit />
                               <span className="hidden lg:inline">Edit</span>
                             </Button>
@@ -379,7 +380,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               <Save className="w-4 h-4 mr-1" />
                               Save Changes
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(student); }}>
+                            <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }}>
                               <X className="w-4 h-4 mr-1" />
                               Cancel
                             </Button>
