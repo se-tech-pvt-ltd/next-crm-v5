@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTracker } from "./activity-tracker";
 import { Award, X, Plane } from "lucide-react";
 import { Label } from '@/components/ui/label';
-import { Admission, Student } from "@/lib/types";
+import { Admission } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
