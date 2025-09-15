@@ -29,8 +29,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     officialPhone: '',
     officialEmail: '',
     managerId: '',
-    code: '',
-    status: 'active',
   });
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,7 +36,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
     onSuccess: async () => {
-      setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', code: '', status: 'active' });
+      setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '' });
       setModalOpen(false);
       await refetch();
       toast({ title: 'Branch created', description: 'New branch added', duration: 2500 });
@@ -113,29 +111,17 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               </div>
 
               <div>
-                <Label>Code<span className="text-destructive"> *</span></Label>
-                <Input className="mt-1" value={form.code} onChange={(e) => setForm((s) => ({ ...s, code: e.target.value }))} />
               </div>
 
-              <div>
-                <Label>Status<span className="text-destructive"> *</span></Label>
-                <Select value={form.status} onValueChange={(v) => setForm((s) => ({ ...s, status: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               <div className="col-span-full flex gap-2">
                 <Button
                   onClick={() => createMutation.mutate()}
-                  disabled={![form.name, form.city, form.country, form.address, form.officialPhone, form.officialEmail, form.code, form.status].every(Boolean)}
+                  disabled={![form.name, form.city, form.country, form.address, form.officialPhone, form.officialEmail].every(Boolean)}
                 >
                   Save
                 </Button>
-                <Button variant="outline" onClick={() => { setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', code: '', status: 'active' }); setModalOpen(false); }}>Cancel</Button>
+                <Button variant="outline" onClick={() => { setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '' }); setModalOpen(false); }}>Cancel</Button>
               </div>
             </div>
           </DialogContent>
@@ -166,10 +152,10 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             {branches.map((b: any) => (
               <div key={b.id} className="border rounded-md p-2 text-sm">
-                <div className="font-semibold">{b.branchName || b.name} <span className="text-muted-foreground">({b.code || b.branchCode || '-'})</span></div>
+                <div className="font-semibold">{b.branchName || b.name}</div>
                 <div className="text-xs text-muted-foreground">{[b.city, b.country].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
                 <div className="text-xs text-muted-foreground mt-1">Phone: {b.officialPhone || '-'} • Email: {b.officialEmail || '-'}</div>
-                <div className="text-xs text-muted-foreground mt-1">Head: {b.branchHead || '-'}</div>
+                <div className="text-xs text-muted-foreground mt-1">Head: {(() => { const u = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId)); return u ? `${(u.firstName || '')} ${(u.lastName || '')}`.trim() || (u.email || '-') : '-'; })()}</div>
               </div>
             ))}
           </div>
