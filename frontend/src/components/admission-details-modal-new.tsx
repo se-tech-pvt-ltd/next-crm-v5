@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
 import { useState } from "react";
+import { useLocation } from 'wouter';
 
 interface AdmissionDetailsModalProps {
   open: boolean;
