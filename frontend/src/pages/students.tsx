@@ -161,6 +161,7 @@ export default function Students() {
 
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
+    try { setLocation(`/students/${studentId}/application`); } catch {}
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); }
   };
 
