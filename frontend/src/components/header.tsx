@@ -120,18 +120,18 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-0.5" role="banner">
-        <div className="flex items-center justify-between min-w-0 gap-2">
-          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-0" role="banner">
+        <div className="flex items-center justify-between min-w-0 gap-1">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h2 className="text-xs sm:text-sm font-medium text-gray-900 truncate">{title}</h2>
+              <h2 className="text-sm sm:text-base font-medium text-gray-900 truncate">{title}</h2>
               {subtitle && (
-                <p className="text-xs text-gray-500 line-clamp-1">{subtitle}</p>
+                <p className="text-xs text-gray-500 line-clamp-1 hidden sm:block">{subtitle}</p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-3 flex-shrink-0">
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
             {/* Search */}
             {showSearch && (
               <div className="relative hidden sm:block" role="search" aria-label="Global search">
@@ -141,11 +141,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                     id="global-search"
                     type="text"
                     placeholder="Search students, leads..."
-                    className="w-48 lg:w-64"
+                    className="w-36 lg:w-48"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     aria-controls={searchQuery && searchResults.length > 0 ? 'search-results' : undefined}
-                    leftIcon={<Search size={16} aria-hidden="true" />}
+                    leftIcon={<Search size={14} aria-hidden="true" />}
                   />
                 </div>
 
