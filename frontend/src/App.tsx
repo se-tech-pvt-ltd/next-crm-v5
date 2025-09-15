@@ -66,6 +66,7 @@ function Router() {
       <Route path="/leads" component={Leads} />
       <Route path="/leads/add" component={AddLead} />
       <Route path="/leads/new" component={Leads} />
+      <Route path="/leads/:id/edit" component={Leads} />
       <Route path="/leads/:id" component={Leads} />
       <Route path="/leads/:id/student" component={Leads} />
       <Route path="/leads/:id/convert" component={Leads} />
