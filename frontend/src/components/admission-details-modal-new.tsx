@@ -111,9 +111,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       <Label>Student</Label>
                       <div className="mt-[-3px]">
                         <Button type="button" variant="link" className="p-0 h-6 text-xs mt-[-2px]" onClick={() => {
-                          const detail = { id: admission.studentId };
                           onOpenChange(false);
-                          setTimeout(() => window.dispatchEvent(new CustomEvent('open-student-profile', { detail })), 160);
+                          try {
+                            const [, setLocation] = useLocation();
+                            setTimeout(() => setLocation(`/students/${admission.studentId}`), 160);
+                          } catch {
+                            setTimeout(() => { try { window.location.hash = `#/students/${admission.studentId}`; } catch {} }, 160);
+                          }
                         }}>
                           {student ? student.name : admission.studentId}
                         </Button>
