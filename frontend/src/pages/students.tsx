@@ -18,7 +18,7 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -32,6 +32,8 @@ export default function Students() {
   const queryClient = useQueryClient();
 
   const [location, setLocation] = useLocation();
+  const [matchStudent, studentParams] = useRoute('/students/:id');
+  const [matchEdit, editParams] = useRoute('/students/:id/edit');
 
   const { data: students, isLoading } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -137,6 +139,15 @@ export default function Students() {
     setSelectedStudentId(studentId);
     setLocation(`/students/${studentId}`);
   };
+
+  // Open profile when route matches
+  useEffect(() => {
+    if (matchStudent || matchEdit) {
+      const id = (matchEdit ? editParams?.id : studentParams?.id) || null;
+      if (id) setSelectedStudentId(id);
+      setIsProfileModalOpen(true);
+    }
+  }, [matchStudent, matchEdit, studentParams?.id, editParams?.id]);
 
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
@@ -374,10 +385,12 @@ export default function Students() {
 
       <StudentProfileModal
         open={isProfileModalOpen}
+        startInEdit={Boolean(matchEdit)}
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            setLocation('/students');
+            if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
+            else setLocation('/students');
           }
         }}
         studentId={selectedStudentId}
