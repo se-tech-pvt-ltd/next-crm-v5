@@ -15,6 +15,10 @@ import { getConfiguration, setConfiguration, testSmtp } from "@/services/configu
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
+import BranchSection from "@/components/settings/BranchSection";
+import UserSection from "@/components/settings/UserSection";
+import SmtpSection from "@/components/settings/SmtpSection";
+import WhatsappSection from "@/components/settings/WhatsappSection";
 import {
   Sun,
   Moon,
