@@ -251,6 +251,110 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
           </div>
         )}
       </div>
+
+      <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{selected?.branchName || selected?.name || 'Branch'}</span>
+              {!isEditing ? (
+                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
+              ) : null}
+            </DialogTitle>
+          </DialogHeader>
+
+          {!isEditing ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <div className="text-xs text-muted-foreground">Name</div>
+                <div className="font-medium">{selected?.branchName || selected?.name || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Country</div>
+                <div className="font-medium">{selected?.country || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">City</div>
+                <div className="font-medium">{selected?.city || '-'}</div>
+              </div>
+              <div className="sm:col-span-2">
+                <div className="text-xs text-muted-foreground">Address</div>
+                <div className="font-medium break-words">{selected?.address || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Official Phone</div>
+                <div className="font-medium">{selected?.officialPhone || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Official Email</div>
+                <div className="font-medium truncate" title={selected?.officialEmail || ''}>{selected?.officialEmail || '-'}</div>
+              </div>
+              <div className="sm:col-span-2">
+                <div className="text-xs text-muted-foreground">Branch Head</div>
+                <div className="font-medium">{(() => {
+                  const headUser = (users as any[]).find((u: any) => u.id === (selected?.branchHeadId || selected?.managerId));
+                  return headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+                })()}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div>
+                <Label>Name<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.name} onChange={(e) => setEditForm((s) => ({ ...s, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Country<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.country} onChange={(e) => setEditForm((s) => ({ ...s, country: e.target.value }))} />
+              </div>
+              <div>
+                <Label>City<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.city} onChange={(e) => setEditForm((s) => ({ ...s, city: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label>Address<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.address} onChange={(e) => setEditForm((s) => ({ ...s, address: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Official Phone<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={editForm.officialPhone} onChange={(e) => setEditForm((s) => ({ ...s, officialPhone: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Official Email<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" type="email" value={editForm.officialEmail} onChange={(e) => setEditForm((s) => ({ ...s, officialEmail: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label>Branch Head</Label>
+                <Select value={editForm.managerId} onValueChange={(v) => setEditForm((s) => ({ ...s, managerId: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
+                  <SelectContent>
+                    {users.length === 0 ? (
+                      <SelectItem value="" disabled>No users found</SelectItem>
+                    ) : (
+                      (users as any[])
+                        .filter((u: any) => u.role === 'branch_manager' || u.role === 'admin_staff')
+                        .map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                          </SelectItem>
+                        ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-full flex gap-2">
+                <Button
+                  onClick={() => updateMutation.mutate()}
+                  disabled={!selected?.id || ![editForm.name, editForm.city, editForm.country, editForm.address, editForm.officialPhone, editForm.officialEmail].every(Boolean) || updateMutation.isPending}
+                >
+                  {updateMutation.isPending ? 'Saving...' : 'Save changes'}
+                </Button>
+                <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
