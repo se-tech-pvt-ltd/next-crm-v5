@@ -61,8 +61,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'u-oxford',
-        logo: 'https://upload.wikimedia.org/wikipedia/en/f/ff/Oxford_University_Coat_Of_Arms.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1471623432079-b009d30b6729?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=Oxford',
+        coverPhoto: 'https://picsum.photos/seed/oxford/1200/400',
         name: 'University of Oxford',
         type: 'Public',
         location: 'Oxford, England',
