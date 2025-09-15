@@ -712,6 +712,8 @@ function UserSection({ toast }: { toast: (v: any) => void }) {
 function SmtpSection({ toast }: { toast: (v: any) => void }) {
   const { data } = useQuery({ queryKey: ["/api/configurations/smtp"], queryFn: () => getConfiguration<any>('smtp') });
   const [form, setForm] = useState({ host: "", port: 587, secure: false, user: "", pass: "", fromEmail: "" });
+  const { user } = useAuth();
+  const [testEmail, setTestEmail] = useState<string>("");
   useEffect(() => {
     if (data) {
       setForm({
