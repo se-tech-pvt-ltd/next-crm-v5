@@ -262,19 +262,25 @@ const ToolkitPage = () => {
   return (
     <Layout title="Toolkit" subtitle="Groups → Universities → Details">
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="w-full md:w-64">
-            <SearchableCombobox
-              value={groupId}
-              onValueChange={setGroupId}
-              placeholder="Select toolkit..."
-              searchPlaceholder="Search toolkits..."
-              onSearch={setGroupSearch}
-              options={groupOptions}
-            />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex w-full gap-3">
+            <div className="w-full sm:w-64">
+              <SearchableCombobox
+                value={groupId}
+                onValueChange={setGroupId}
+                placeholder="Select toolkit..."
+                searchPlaceholder="Search toolkits..."
+                onSearch={setGroupSearch}
+                options={groupOptions}
+              />
+            </div>
+            <div className="flex-1">
+              <Input id="search" placeholder="Search by name, location or country" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
           </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="hidden md:block text-xs text-muted-foreground">
+
+          <div className="flex items-center gap-2">
+            <div className="hidden md:block text-xs text-muted-foreground mr-2">
               {groupId === 'all' ? 'Showing all universities from all toolkits' : currentGroup?.description}
             </div>
             <Button variant="outline" size="sm" onClick={() => setAddGroupOpen(true)}>Add Toolkit</Button>
