@@ -111,7 +111,7 @@ const Settings: React.FC = () => {
   const { toast } = useToast();
 
   const [category, setCategory] = useState(
-    () => (localStorage.getItem("settings_category") as string) || "appearance"
+    () => (localStorage.getItem("settings_category") as string) || "branches"
   );
 
   // Appearance
