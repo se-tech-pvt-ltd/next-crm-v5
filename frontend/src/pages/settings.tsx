@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Settings as SettingsIcon, Mail, Wrench, Database, Calendar, FileText, Globe, Edit3 } from 'lucide-react';
 
 export default function Settings() {
-  const section = (title: string, items: { label: string; icon?: any; badge?: string }[]) => (
+  const section = (title: string, items: { label: string; icon?: any; badge?: string }[], colorClass = 'bg-gray-100', iconColor = 'text-gray-600') => (
     <Card>
+      {/* accent bar */}
+      <div className={`${colorClass} h-1 rounded-t-lg`} />
       <CardHeader className="p-2 space-y-1">
         <CardTitle className="text-base sm:text-lg font-semibold">{title}</CardTitle>
       </CardHeader>
@@ -18,7 +20,7 @@ export default function Settings() {
             return (
               <li key={it.label}>
                 <Button variant="ghost" className="w-full justify-start py-0 px-2 text-sm">
-                  {Icon ? <Icon className="w-4 h-4 mr-2" /> : null}
+                  {Icon ? <Icon className={`w-4 h-4 mr-2 ${iconColor}`} /> : null}
                   <span className="flex-1 text-left">{it.label}</span>
                   {it.badge ? <Badge variant="outline" className="text-xs">{it.badge}</Badge> : null}
                 </Button>
