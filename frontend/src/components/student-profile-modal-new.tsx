@@ -363,7 +363,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               variant="outline"
                               size="xs"
                               className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                              onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
                               title="Add Application"
                             >
                               <Plus />
