@@ -169,7 +169,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.length || 0}
               </div>
             </CardContent>
           </Card>
@@ -183,7 +183,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-blue-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Open').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Open').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -197,7 +197,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-yellow-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Needs Attention').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Needs Attention').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -211,7 +211,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applications?.filter(a => a.appStatus === 'Closed').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Closed').length || 0}
               </div>
             </CardContent>
           </Card>
