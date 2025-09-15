@@ -3,17 +3,25 @@ import { StudentProfileModal } from '@/components/student-profile-modal-new';
 
 export default function StudentDetails() {
   const [match, params] = useRoute('/students/:id');
+  const [matchEdit, editParams] = useRoute('/students/:id/edit');
   const [, setLocation] = useLocation();
 
-  if (!match) return null;
+  const id = (matchEdit ? editParams?.id : params?.id) || null;
+  const matched = match || matchEdit;
+
+  if (!matched) return null;
 
   return (
     <StudentProfileModal
       open={true}
       onOpenChange={(open) => {
-        if (!open) setLocation('/students');
+        if (!open) {
+          if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
+          else setLocation('/students');
+        }
       }}
-      studentId={params?.id || null}
+      studentId={id}
+      startInEdit={Boolean(matchEdit)}
     />
   );
 }
