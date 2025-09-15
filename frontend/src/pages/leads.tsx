@@ -74,7 +74,7 @@ export default function Leads() {
     const status = dropdownData.Status.find((item: any) => item.key === statusId);
     return status?.value || statusId;
   };
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -90,6 +90,7 @@ export default function Leads() {
   const queryClient = useQueryClient();
 
   const handleAddLeadClick = () => {
+    setLocation('/leads/new');
     setIsNavigating(true);
     setTimeout(() => {
       try {
@@ -569,15 +570,29 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
-      <Dialog open={addLeadOpen} onOpenChange={setAddLeadOpen}>
+      {React.useEffect(() => {
+        if (location === '/leads/new') {
+          setAddLeadOpen(true);
+        }
+      }, [location])}
+      <Dialog open={addLeadOpen} onOpenChange={(open) => {
+        setAddLeadOpen(open);
+        if (!open && location === '/leads/new') {
+          setLocation('/leads');
+        }
+      }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           <DialogHeader>
             <DialogTitle className="sr-only">Add New Lead</DialogTitle>
           </DialogHeader>
           <AddLeadForm
-            onCancel={() => setAddLeadOpen(false)}
+            onCancel={() => {
+              setAddLeadOpen(false);
+              if (location === '/leads/new') setLocation('/leads');
+            }}
             onSuccess={() => {
               setAddLeadOpen(false);
+              if (location === '/leads/new') setLocation('/leads');
               queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
             }}
           />
