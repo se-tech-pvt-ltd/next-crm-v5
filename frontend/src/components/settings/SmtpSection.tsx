@@ -17,14 +17,16 @@ export default function SmtpSection({ toast }: { toast: (v: any) => void }) {
 
   useEffect(() => {
     if (data) {
-      setForm({
+      const next = {
         host: data.host || '',
         port: typeof data.port === 'number' ? data.port : parseInt(data.port || '587'),
         secure: !!data.secure,
         user: data.user || '',
         pass: data.pass || '',
         fromEmail: data.fromEmail || '',
-      });
+      };
+      setForm(next);
+      originalRef.current = { ...next };
     }
   }, [data]);
 
