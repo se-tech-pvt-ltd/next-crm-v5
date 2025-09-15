@@ -12,12 +12,12 @@ export default function Settings() {
         <CardTitle className="text-sm font-semibold">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-1 text-sm">
+        <ul className="space-y-0.5 text-sm">
           {items.map((it) => {
             const Icon = it.icon as any;
             return (
               <li key={it.label}>
-                <Button variant="ghost" className="w-full justify-start py-1 px-2 text-sm">
+                <Button variant="ghost" className="w-full justify-start py-0.5 px-2 text-sm">
                   {Icon ? <Icon className="w-4 h-4 mr-2" /> : null}
                   <span className="flex-1 text-left">{it.label}</span>
                   {it.badge ? <Badge variant="outline" className="text-xs">{it.badge}</Badge> : null}
