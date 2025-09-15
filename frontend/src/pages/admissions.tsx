@@ -14,7 +14,7 @@ import { Admission, Student } from '@/lib/types';
 import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import * as DropdownsService from '@/services/dropdowns';
 import { useMemo } from 'react';
 
