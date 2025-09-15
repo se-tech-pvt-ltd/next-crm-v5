@@ -169,8 +169,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'tum',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/8/80/Logo_of_the_Technical_University_of_Munich.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1568719387561-d3a925632768?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=TUM',
+        coverPhoto: 'https://picsum.photos/seed/tum/1200/400',
         name: 'Technical University of Munich',
         type: 'Public',
         location: 'Munich, Bavaria',
