@@ -56,12 +56,12 @@ export default function Students() {
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
 
-  const getStatusLabel = (raw?: string) => {
+  function getStatusLabel(raw?: string) {
     const list: any[] = (studentDropdowns as any)?.Status || [];
     const s = raw || '';
     const match = list.find((o: any) => o.id === s || o.key === s || (o.value && String(o.value).toLowerCase() === String(s).toLowerCase()));
     return (match?.value || s || '').toString();
-  };
+  }
 
   // Apply filters across the full students array
   const filteredAll = studentsArray?.filter(student => {
