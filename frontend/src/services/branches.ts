@@ -5,14 +5,14 @@ import { http } from './http';
 export interface Branch {
   id: string;
   name: string;
-  code: string;
+  code?: string;
   city: string;
   country: string;
   address: string;
   officialPhone: string;
   officialEmail: string;
   managerId?: string | null;
-  status: string;
+  status?: string;
 }
 
 export type CreateBranchInput = Omit<Branch, 'id'>;

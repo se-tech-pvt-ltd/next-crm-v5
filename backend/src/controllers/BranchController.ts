@@ -7,7 +7,6 @@ export class BranchController {
     try {
       const [rows] = await connection.query<any[]>(
         `SELECT id,
-                branch_code as branchCode,
                 branch_name as branchName,
                 city,
                 country,
@@ -15,7 +14,6 @@ export class BranchController {
                 official_phone as officialPhone,
                 official_email as officialEmail,
                 branch_head_id as branchHeadId,
-                status,
                 created_on as createdOn,
                 updated_on as updatedOn
          FROM branches
@@ -29,23 +27,22 @@ export class BranchController {
 
   static async create(req: Request, res: Response) {
     try {
-      const { name, city, country, address, officialPhone, officialEmail, managerId, code, status } = req.body || {};
+      const { name, city, country, address, officialPhone, officialEmail, managerId } = req.body || {};
 
-      if (!name || !city || !country || !address || !officialPhone || !officialEmail || !code || !status) {
-        return res.status(400).json({ message: 'name, city, country, address, officialPhone, officialEmail, code and status are required' });
+      if (!name || !city || !country || !address || !officialPhone || !officialEmail) {
+        return res.status(400).json({ message: 'name, city, country, address, officialPhone and officialEmail are required' });
       }
 
       const id = (await import('uuid')).v4();
 
       await connection.query(
-        `INSERT INTO branches (id, branch_code, branch_name, city, country, address, official_phone, official_email, branch_head_id, status, created_on, updated_on)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-        [id, code, name, city, country, address, officialPhone, officialEmail, managerId || null, status]
+        `INSERT INTO branches (id, branch_name, city, country, address, official_phone, official_email, branch_head_id, created_on, updated_on)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [id, name, city, country, address, officialPhone, officialEmail, managerId || null]
       );
 
       res.status(201).json({
         id,
-        branchCode: code,
         branchName: name,
         city,
         country,
@@ -53,7 +50,6 @@ export class BranchController {
         officialPhone,
         officialEmail,
         branchHeadId: managerId || null,
-        status,
         createdOn: new Date(),
         updatedOn: new Date(),
       });
