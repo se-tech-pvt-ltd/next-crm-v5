@@ -135,7 +135,7 @@ export default function Students() {
 
   const handleViewProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsProfileModalOpen(true)); } catch { setIsProfileModalOpen(true); }
+    setLocation(`/students/${studentId}`);
   };
 
   const handleCreateApplication = (studentId: string) => {
