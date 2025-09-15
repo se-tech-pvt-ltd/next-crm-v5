@@ -43,6 +43,10 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       await refetch();
       toast({ title: 'Branch created', description: 'New branch added', duration: 2500 });
     },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to create branch';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
   });
 
   return (
@@ -125,7 +129,12 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               </div>
 
               <div className="col-span-full flex gap-2">
-                <Button onClick={() => createMutation.mutate()} disabled={!form.name}>Save</Button>
+                <Button
+                  onClick={() => createMutation.mutate()}
+                  disabled={![form.name, form.city, form.country, form.address, form.officialPhone, form.officialEmail, form.code, form.status].every(Boolean)}
+                >
+                  Save
+                </Button>
                 <Button variant="outline" onClick={() => { setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', code: '', status: 'active' }); setModalOpen(false); }}>Cancel</Button>
               </div>
             </div>
