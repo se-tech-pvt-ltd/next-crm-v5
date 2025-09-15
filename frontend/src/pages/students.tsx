@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Pagination } from '@/components/ui/pagination';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentDetailsModal } from '@/components/student-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
