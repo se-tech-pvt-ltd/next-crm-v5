@@ -279,7 +279,7 @@ export default function ApplicationDetails() {
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><span>Student</span></Label>
                       {student ? (
-                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students?studentId=${student.id}`)}>
+                        <Button variant="link" className="h-8 p-0 text-xs" onClick={() => setLocation(`/students/${student.id}`)}>
                           {student.name}
                         </Button>
                       ) : (
