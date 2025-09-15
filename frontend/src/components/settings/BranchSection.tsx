@@ -90,7 +90,22 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
               <div>
                 <Label>Branch Head</Label>
-                <Input className="mt-1" value={form.branchHead} onChange={(e) => setForm((s) => ({ ...s, branchHead: e.target.value }))} />
+                <Select value={form.managerId} onValueChange={(v) => setForm((s) => ({ ...s, managerId: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
+                  <SelectContent>
+                    {users.length === 0 ? (
+                      <SelectItem value="" disabled>No users found</SelectItem>
+                    ) : (
+                      users
+                        .filter((u: any) => u.role === 'branch_manager' || u.role === 'admin_staff')
+                        .map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                          </SelectItem>
+                        ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
