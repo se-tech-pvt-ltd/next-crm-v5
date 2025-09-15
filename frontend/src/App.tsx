@@ -7,7 +7,6 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Leads from "@/pages/leads";
 import AddLead from "@/pages/add-lead";
-import LeadDetails from "@/pages/lead-details";
 import Students from "@/pages/students";
 import ConvertLeadToStudent from "@/pages/convert-to-student";
 import Applications from "@/pages/applications";
@@ -68,7 +67,7 @@ function Router() {
       <Route path="/leads" component={Leads} />
       <Route path="/leads/add" component={AddLead} />
       <Route path="/leads/new" component={Leads} />
-      <Route path="/leads/:id" component={LeadDetails} />
+      <Route path="/leads/:id" component={Leads} />
       <Route path="/leads/:id/convert" component={ConvertLeadToStudent} />
       <Route path="/students" component={Students} />
       <Route path="/students/:id" component={StudentDetails} />
