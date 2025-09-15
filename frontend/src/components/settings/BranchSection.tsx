@@ -16,6 +16,11 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     queryFn: async () => BranchesService.listBranches(),
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+  });
+
   const [form, setForm] = useState({
     name: '',
     city: '',
