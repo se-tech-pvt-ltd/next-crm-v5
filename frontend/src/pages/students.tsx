@@ -205,7 +205,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : students?.filter(s => s.status === 'active').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'active').length || 0}
               </div>
             </CardContent>
           </Card>
