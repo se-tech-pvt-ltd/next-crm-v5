@@ -36,9 +36,10 @@ interface ApplicationDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   application: Application | null;
   onOpenStudentProfile?: (studentId: string) => void;
+  startInEdit?: boolean;
 }
 
-export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile }: ApplicationDetailsModalProps) {
+export function ApplicationDetailsModal({ open, onOpenChange, application, onOpenStudentProfile, startInEdit }: ApplicationDetailsModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
