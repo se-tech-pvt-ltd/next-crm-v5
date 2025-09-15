@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Settings as SettingsIcon, Mail, Tool, Database, Calendar, FileText, Globe, Edit3 } from 'lucide-react';
+import { Users, Settings as SettingsIcon, Mail, Wrench, Database, Calendar, FileText, Globe, Edit3 } from 'lucide-react';
 
 export default function Settings() {
   const section = (title: string, items: { label: string; icon?: any; badge?: string }[]) => (
