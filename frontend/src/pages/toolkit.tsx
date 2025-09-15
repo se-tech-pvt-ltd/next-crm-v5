@@ -214,16 +214,15 @@ const ToolkitPage = () => {
   const [editGroupOpen, setEditGroupOpen] = useState(false);
   const [addUniOpen, setAddUniOpen] = useState(false);
   const [editUniOpen, setEditUniOpen] = useState<Institution | null>(null);
-  const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
-
-  // Persist view mode in localStorage
-  useEffect(() => {
+  const [viewMode, setViewMode] = useState<'grid'|'list'>(() => {
     try {
       const saved = localStorage.getItem('toolkit_view_mode');
-      if (saved === 'grid' || saved === 'list') setViewMode(saved as 'grid'|'list');
+      if (saved === 'grid' || saved === 'list') return saved as 'grid'|'list';
     } catch {}
-  }, []);
+    return 'grid';
+  });
 
+  // Persist selection to localStorage
   useEffect(() => {
     try { localStorage.setItem('toolkit_view_mode', viewMode); } catch {}
   }, [viewMode]);
