@@ -66,13 +66,13 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               </div>
 
               <div>
-                <Label>City<span className="text-destructive"> *</span></Label>
-                <Input className="mt-1" value={form.city} onChange={(e) => setForm((s) => ({ ...s, city: e.target.value }))} />
+                <Label>Country<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={form.country} onChange={(e) => setForm((s) => ({ ...s, country: e.target.value }))} />
               </div>
 
               <div>
-                <Label>Country<span className="text-destructive"> *</span></Label>
-                <Input className="mt-1" value={form.country} onChange={(e) => setForm((s) => ({ ...s, country: e.target.value }))} />
+                <Label>City<span className="text-destructive"> *</span></Label>
+                <Input className="mt-1" value={form.city} onChange={(e) => setForm((s) => ({ ...s, city: e.target.value }))} />
               </div>
 
               <div>
@@ -153,7 +153,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
             {branches.map((b: any) => (
               <div key={b.id} className="border rounded-md p-2 text-sm">
                 <div className="font-semibold">{b.branchName || b.name}</div>
-                <div className="text-xs text-muted-foreground">{[b.city, b.country].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
+                <div className="text-xs text-muted-foreground">{[b.country, b.city].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
                 <div className="text-xs text-muted-foreground mt-1">Phone: {b.officialPhone || '-'} • Email: {b.officialEmail || '-'}</div>
                 <div className="text-xs text-muted-foreground mt-1">Head: {(() => { const u = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId)); return u ? `${(u.firstName || '')} ${(u.lastName || '')}`.trim() || (u.email || '-') : '-'; })()}</div>
               </div>
