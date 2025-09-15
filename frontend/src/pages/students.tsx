@@ -430,14 +430,14 @@ export default function Students() {
             )}
 
             {/* Pagination */}
-            {!isLoading && pagination.total > pageSize && (
+            {!isLoading && effectivePagination.total > pageSize && (
               <div className="mt-4 pt-4 border-t">
                 <Pagination
-                  currentPage={pagination.page}
-                  totalPages={pagination.totalPages}
+                  currentPage={effectivePagination.page}
+                  totalPages={effectivePagination.totalPages}
                   onPageChange={setCurrentPage}
-                  hasNextPage={pagination.hasNextPage}
-                  hasPrevPage={pagination.hasPrevPage}
+                  hasNextPage={effectivePagination.hasNextPage}
+                  hasPrevPage={effectivePagination.hasPrevPage}
                 />
               </div>
             )}
