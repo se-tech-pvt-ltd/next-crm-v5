@@ -291,7 +291,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                                 <Plus />
                                 <span className="hidden lg:inline">Add Admission</span>
                               </Button>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => setIsEditing(true)} title="Edit">
+                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { setIsEditing(true); try { setLocation(`/applications/${currentApp?.id}/edit`); } catch {} }} title="Edit">
                                 <Edit />
                                 <span className="hidden lg:inline">Edit</span>
                               </Button>
