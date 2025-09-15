@@ -150,6 +150,15 @@ export default function Students() {
     }
   }, [matchStudent, matchEdit, studentParams?.id, editParams?.id]);
 
+  // Open Add Application modal when route matches /students/:id/application
+  useEffect(() => {
+    if (matchCreateApp) {
+      const id = createAppParams?.id || studentParams?.id || null;
+      if (id) setSelectedStudentId(id);
+      setIsAddApplicationModalOpen(true);
+    }
+  }, [matchCreateApp, createAppParams?.id, studentParams?.id]);
+
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); }
