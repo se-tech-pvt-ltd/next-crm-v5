@@ -124,7 +124,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         <div className="flex items-center justify-between min-w-0 gap-1">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h2 className="text-xs font-medium text-gray-900 truncate">{title}</h2>
+              <h2 className="text-sm sm:text-base font-medium text-gray-900 truncate">{title}</h2>
               {subtitle && (
                 <p className="text-xs text-gray-500 line-clamp-1 hidden sm:block">{subtitle}</p>
               )}
