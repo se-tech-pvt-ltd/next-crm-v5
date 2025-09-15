@@ -133,8 +133,8 @@ const initialGroups: InstitutionGroup[] = [
     universities: [
       {
         id: 'deakin',
-        logo: 'https://upload.wikimedia.org/wikipedia/en/0/03/Deakin_University_logo.svg',
-        coverPhoto: 'https://images.unsplash.com/photo-1510070009289-b5bc34383727?q=80&w=1600&auto=format&fit=crop',
+        logo: 'https://placehold.co/80x80/ffffff/000000?text=Deakin',
+        coverPhoto: 'https://picsum.photos/seed/deakin/1200/400',
         name: 'Deakin University',
         type: 'Public',
         location: 'Victoria',
