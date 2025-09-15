@@ -117,17 +117,34 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
       <div>
         <div className="text-sm font-medium mb-2">Existing branches</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          {branches.map((b: any) => (
-            <div key={b.id} className="border rounded-md p-2 text-sm">
-              <div className="font-semibold">{b.name} <span className="text-muted-foreground">({b.code})</span></div>
-              <div className="text-xs text-muted-foreground">{[b.city, b.country].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
-              <div className="text-xs text-muted-foreground mt-1">Phone: {b.officialPhone || '-'} • Email: {b.officialEmail || '-'}</div>
-              <div className="text-xs text-muted-foreground mt-1">Head: {b.branchHead || '-'}</div>
+        {branches.length === 0 ? (
+          <div className="border border-dashed rounded-md p-6 text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Database className="w-10 h-10 text-muted-foreground" />
             </div>
-          ))}
-          {branches.length === 0 && <div className="text-xs text-muted-foreground">No branches yet</div>}
-        </div>
+            <div className="text-lg font-semibold">No branches yet</div>
+            <div className="text-sm text-muted-foreground mt-2">You don't have any branches created. Create a branch to manage locations and assign branch managers.</div>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Button onClick={() => setModalOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" /> Add your first branch
+              </Button>
+              <Button variant="outline" onClick={async () => { await refetch(); }}>
+                Refresh
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+            {branches.map((b: any) => (
+              <div key={b.id} className="border rounded-md p-2 text-sm">
+                <div className="font-semibold">{b.branchName || b.name} <span className="text-muted-foreground">({b.code || b.branchCode || '-'})</span></div>
+                <div className="text-xs text-muted-foreground">{[b.city, b.country].filter(Boolean).join(', ')} {b.address ? `• ${b.address}` : ''}</div>
+                <div className="text-xs text-muted-foreground mt-1">Phone: {b.officialPhone || '-'} • Email: {b.officialEmail || '-'}</div>
+                <div className="text-xs text-muted-foreground mt-1">Head: {b.branchHead || '-'}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
