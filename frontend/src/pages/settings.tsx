@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from '@/components/help-tooltip';
-import { Plus, X, Save, Settings as SettingsIcon, Users, Edit3, Building, Upload, Image } from 'lucide-react';
+import { Plus, X, Save, Users, Edit3, Upload } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
 
 interface DropdownOption {
