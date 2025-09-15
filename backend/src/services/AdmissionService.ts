@@ -79,7 +79,8 @@ export class AdmissionService {
       .where(and(gte(admissions.createdAt, dayStart), lt(admissions.createdAt, nextDay)));
 
     const seq = String((Number(cnt) || 0) + 1).padStart(3, '0');
-    const admissionCode = `ADM-${dd}${mm}${yy}-${seq}`;
+    // New format: YY-MM-DD-XXX (e.g. 24-09-15-001)
+    const admissionCode = `${yy}-${mm}-${dd}-${seq}`;
 
     const admission = await AdmissionModel.create({
       ...admissionData,
