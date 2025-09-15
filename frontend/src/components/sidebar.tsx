@@ -80,6 +80,12 @@ export function Sidebar() {
       count: undefined
     },
     {
+      path: '/toolkit',
+      label: 'Toolkit',
+      icon: ToolkitIcon,
+      count: undefined
+    },
+    {
       path: '/events',
       label: 'Events',
       icon: Calendar,
@@ -124,12 +130,6 @@ export function Sidebar() {
       path: '/settings',
       label: 'Settings',
       icon: Settings,
-      count: undefined
-    },
-    {
-      path: '/toolkit',
-      label: 'Toolkit',
-      icon: ToolkitIcon,
       count: undefined
     },
   ];
