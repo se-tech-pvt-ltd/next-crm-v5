@@ -74,7 +74,8 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
+    enabled: open,
   });
 
   const caseStatusOptions = useMemo(() => {
@@ -116,6 +117,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const { data: admissions } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
     queryFn: async () => AdmissionsService.getAdmissions() as any,
+    enabled: open,
   });
   const admissionForApp = useMemo(() => (admissions || []).find((a) => a.applicationId === currentApp?.id), [admissions, currentApp?.id]);
 
