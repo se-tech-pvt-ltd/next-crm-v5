@@ -40,7 +40,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
-    enabled: !studentId,
+    enabled: open && !studentId,
   });
 
   const { data: presetStudent } = useQuery<Student>({
