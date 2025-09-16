@@ -144,6 +144,37 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
+  const updateBranchHeadMutation = useMutation({
+    mutationFn: async ({ branchId, userId }: { branchId: string; userId: string }) => {
+      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
+      if (!b) throw new Error('Branch not found');
+      return BranchesService.updateBranch(String(b.id), {
+        name: String(b.branchName || b.name || ''),
+        city: String(b.city || ''),
+        country: String(b.country || ''),
+        address: String(b.address || ''),
+        officialPhone: String(b.officialPhone || ''),
+        officialEmail: String(b.officialEmail || ''),
+        managerId: userId,
+        regionId: String(b.regionId || ''),
+      });
+    },
+    onMutate: async (vars) => {
+      setUpdatingBranchId(vars.branchId);
+    },
+    onSuccess: async () => {
+      await Promise.all([refetch(), refetchBranches()]);
+      toast({ title: 'Branch head updated', duration: 1500 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to update branch head';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+    onSettled: () => {
+      setUpdatingBranchId(null);
+    }
+  });
+
   const eligibleHeads = useMemo(() => {
     const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
     const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
