@@ -28,6 +28,13 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  // Detail & edit dialog state
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [branchEditSearch, setBranchEditSearch] = useState('');
+
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
@@ -39,6 +46,23 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     onError: (err: any) => {
       const msg = err?.message || err?.data?.message || 'Failed to create user';
       toast({ title: 'Error', description: msg, variant: 'destructive' });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected?.id) throw new Error('User ID missing');
+      const body: any = { ...editForm };
+      return UsersService.updateUser(String(selected.id), body);
+    },
+    onSuccess: async () => {
+      setIsEditing(false);
+      await refetch();
+      toast({ title: 'User updated', duration: 2000 });
+    },
+    onError: (err: any) => {
+      const msg = err?.message || err?.data?.message || 'Failed to update user';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
     }
   });
 
@@ -252,7 +276,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </TableHeader>
               <TableBody>
                 {(pageItems as any[]).map((u: any) => (
-                  <TableRow key={u.id}>
+                  <TableRow key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
+                    setSelected(u);
+                    setEditForm({
+                      firstName: String(u.firstName || ''),
+                      lastName: String(u.lastName || ''),
+                      role: String(u.role || 'counselor'),
+                      branchId: String(u.branchId || ''),
+                    });
+                    setIsEditing(false);
+                    setDetailOpen(true);
+                  }}>
                     <TableCell className="p-2 text-xs">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
@@ -276,6 +310,102 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
           </div>
         )}
       </div>
+
+      <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{[selected?.firstName, selected?.lastName].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
+              {!isEditing ? (
+                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
+              ) : null}
+            </DialogTitle>
+          </DialogHeader>
+
+          {!isEditing ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <div className="text-xs text-muted-foreground">Name</div>
+                <div className="font-medium">{[selected?.firstName, selected?.lastName].filter(Boolean).join(' ') || '—'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Email</div>
+                <div className="font-medium break-words">{selected?.email || '—'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Role</div>
+                <div className="font-medium">{selected ? roleLabel(selected.role) : '—'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Branch</div>
+                <div className="font-medium">{selected?.branchId || '—'}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div>
+                <Label>First name</Label>
+                <Input className="mt-1" value={editForm.firstName} onChange={(e) => setEditForm((s) => ({ ...s, firstName: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Last name</Label>
+                <Input className="mt-1" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Role<span className="text-destructive"> *</span></Label>
+                <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="regional_manager">Regional Manager</SelectItem>
+                    <SelectItem value="branch_manager">Branch Manager</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="counselor">Counsellor</SelectItem>
+                    <SelectItem value="admission_officer">Admission Officer</SelectItem>
+                    <SelectItem value="admin_staff">Admin Staff</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label>Branch<span className="text-destructive"> *</span></Label>
+                {(() => {
+                  const trimmed = branchEditSearch.trim();
+                  const { data: searched = [], isFetching } = (function(){
+                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                    return useQuery({
+                      queryKey: ['/api/branches', 'search', trimmed, 'edit'],
+                      queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
+                      enabled: trimmed.length > 0,
+                      staleTime: 10_000,
+                    });
+                  })();
+                  const list = trimmed ? searched : initialBranches;
+                  const options = (Array.isArray(list) ? list : [])
+                    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+                  return (
+                    <SearchableCombobox
+                      value={editForm.branchId}
+                      onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
+                      placeholder="Select branch (required)"
+                      searchPlaceholder="Search branches..."
+                      onSearch={setBranchEditSearch}
+                      options={options}
+                      loading={Boolean((branchEditSearch.trim().length > 0) && isFetching)}
+                    />
+                  );
+                })()}
+              </div>
+              <div className="col-span-full flex gap-2">
+                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || !editForm.branchId || updateMutation.isPending}>
+                  {updateMutation.isPending ? 'Saving...' : 'Save changes'}
+                </Button>
+                <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
