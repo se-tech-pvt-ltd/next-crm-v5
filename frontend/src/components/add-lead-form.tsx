@@ -258,6 +258,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     }
   }, []);
 
+  const handleBranchSearch = useCallback((query: string) => {
+    setBranchSearchQuery(query);
+  }, []);
+
   const form = useForm<AddLeadFormData>({
     resolver: zodResolver(addLeadFormSchema),
     defaultValues: {
