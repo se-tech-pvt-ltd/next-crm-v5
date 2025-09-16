@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export function formatFieldName(fieldName: string): string {
   return fieldName
     .replace(/([A-Z])/g, ' $1')
