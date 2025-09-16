@@ -62,20 +62,29 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         </div>
         <div>
           <Label>Branch<span className="text-destructive"> *</span></Label>
-          <Select value={form.branchId} onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (required)" /></SelectTrigger>
-            <SelectContent>
-              {branches.map((b: any) => {
-                const assignedTo = (users as any[]).find((u: any) => u.branchId === b.id);
-                const displayName = b.branchName || b.name || b.id;
-                return (
-                  <SelectItem key={b.id} value={b.id} disabled={!!assignedTo}>
-                    {displayName}{assignedTo ? ' — Assigned' : ''}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          {(() => {
+            const [branchSearch, setBranchSearch] = useState('');
+            const assignedIds = new Set((users as any[]).map((u: any) => u.branchId).filter(Boolean));
+            const branchOptions = useMemo(() => {
+              const all = (Array.isArray(branches) ? branches : []).filter((b: any) => !assignedIds.has(b.id)).map((b: any) => ({
+                value: String(b.id),
+                label: String(b.branchName || b.name || b.id),
+              }));
+              if (!branchSearch.trim()) return all;
+              const q = branchSearch.toLowerCase();
+              return all.filter((o) => o.label.toLowerCase().includes(q));
+            }, [branches, users, branchSearch]);
+            return (
+              <SearchableCombobox
+                value={form.branchId}
+                onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                placeholder="Select branch (required)"
+                searchPlaceholder="Search branches..."
+                onSearch={setBranchSearch}
+                options={branchOptions}
+              />
+            );
+          })()}
         </div>
       </div>
       <div className="flex gap-2">
