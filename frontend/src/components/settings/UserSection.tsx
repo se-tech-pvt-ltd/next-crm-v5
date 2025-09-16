@@ -66,9 +66,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             <SelectContent>
               {branches.map((b: any) => {
                 const assignedTo = (users as any[]).find((u: any) => u.branchId === b.id);
+                const displayName = b.branchName || b.name || b.id;
                 return (
                   <SelectItem key={b.id} value={b.id} disabled={!!assignedTo}>
-                    {b.name}{assignedTo ? ' — Assigned' : ''}
+                    {displayName}{assignedTo ? ' — Assigned' : ''}
                   </SelectItem>
                 );
               })}
