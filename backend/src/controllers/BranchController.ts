@@ -4,19 +4,35 @@ import { connection } from '../config/database.js';
 export class BranchController {
   static async list(req: Request, res: Response) {
     try {
-      const [rows] = await connection.query<any[]>(
-        `SELECT id,
-                branch_name as branchName,
-                city,
-                country,
-                address,
-                official_phone as officialPhone,
-                official_email as officialEmail,
-                branch_head_id as branchHeadId,
-                created_on as createdOn,
-                updated_on as updatedOn
+      const q = (req.query.q as string | undefined)?.trim();
+      const limitParam = Number.parseInt(String(req.query.limit || ''), 10);
+      const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 200) : undefined;
+
+      const params: any[] = [];
+      let whereClause = '';
+      if (q && q.length > 0) {
+        whereClause = `WHERE branch_name LIKE ? OR city LIKE ? OR country LIKE ?`;
+        const like = `%${q}%`;
+        params.push(like, like, like);
+      }
+
+      const sql = `SELECT id,
+              branch_name as branchName,
+              city,
+              country,
+              address,
+              official_phone as officialPhone,
+              official_email as officialEmail,
+              branch_head_id as branchHeadId,
+              created_on as createdOn,
+              updated_on as updatedOn
          FROM branches
-         ORDER BY branch_name`);
+         ${whereClause}
+         ORDER BY branch_name${limit ? ' LIMIT ?' : ''}`;
+
+      if (limit) params.push(limit);
+
+      const [rows] = await connection.query<any[]>(sql, params);
       res.json(rows);
     } catch (e) {
       console.error('Failed to list branches', e);
