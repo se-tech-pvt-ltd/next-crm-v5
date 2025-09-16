@@ -19,7 +19,28 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30000 });
 
-  // Branch search hooks (top-level to preserve hook order)
+  // Branch search hooks will be initialized after state declarations to ensure state variables are defined before use
+  // (moved later in the file)
+
+  // Add user dialog state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+
+  // Filters and pagination
+  const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
+  const [branchSearch, setBranchSearch] = useState('');
+  const [branchFilterSearch, setBranchFilterSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  // Detail & edit dialog state
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [branchEditSearch, setBranchEditSearch] = useState('');
+
+  // Branch search hooks (top-level to preserve hook order) — defined after state variables
   const branchFilterTrim = branchFilterSearch.trim();
   const { data: branchFilterSearched = [], isFetching: branchFilterIsFetching } = useQuery({
     queryKey: ['/api/branches', 'search', branchFilterTrim, 'filter'],
@@ -49,24 +70,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   });
   const branchEditList = branchEditTrim ? branchEditSearched : initialBranches;
   const branchEditOptions = (Array.isArray(branchEditList) ? branchEditList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-
-  // Add user dialog state
-  const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
-
-  // Filters and pagination
-  const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
-  const [branchSearch, setBranchSearch] = useState('');
-  const [branchFilterSearch, setBranchFilterSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-
-  // Detail & edit dialog state
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selected, setSelected] = useState<any | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '' });
-  const [branchEditSearch, setBranchEditSearch] = useState('');
 
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
