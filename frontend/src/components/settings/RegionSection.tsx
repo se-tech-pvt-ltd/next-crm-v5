@@ -43,6 +43,8 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
   const [inlineForm, setInlineForm] = useState<{ name: string; headId: string }>({ name: '', headId: '' });
+  const [branchHeadDraft, setBranchHeadDraft] = useState<Record<string, string>>({});
+  const [updatingBranchId, setUpdatingBranchId] = useState<string | null>(null);
   const [sort, setSort] = useState<{ by: 'name' | 'head' | 'branches'; dir: 'asc' | 'desc' }>({ by: 'name', dir: 'asc' });
 
   const toggleExpand = (id: string) => {
