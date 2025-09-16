@@ -11,7 +11,7 @@ import * as UsersService from '@/services/users';
 
 export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
-  const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches', { limit: 3 }], queryFn: () => BranchesService.listBranches({ limit: 3 }) });
+  const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30000 });
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
   const [branchSearch, setBranchSearch] = useState('');
   const create = useMutation({
@@ -64,7 +64,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         <div>
           <Label>Branch<span className="text-destructive"> *</span></Label>
           {(() => {
-            const assignedIds = new Set((users as any[]).map((u: any) => u.branchId).filter(Boolean));
             const trimmed = branchSearch.trim();
             const { data: searched = [], isFetching } = (function(){
               // use a simple hook-in-function pattern to keep code localized
@@ -78,7 +77,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             })();
             const list = trimmed ? searched : initialBranches;
             const all = (Array.isArray(list) ? list : [])
-              .filter((b: any) => !assignedIds.has(b.id))
               .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
             const branchOptions = all;
             return (

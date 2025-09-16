@@ -36,12 +36,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
-    enabled: !studentId
+    enabled: open && !studentId
   });
 
   const { data: applications } = useQuery<Application[]>({
     queryKey: ['/api/applications'],
-    enabled: !applicationId
+    enabled: open && !applicationId
   });
 
   const { data: linkedApp } = useQuery<Application | null>({
@@ -160,7 +160,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     queryFn: async () => {
       const res = await (await fetch('/api/dropdowns/module/Admissions')).json();
       return res;
-    }
+    },
+    enabled: open,
   });
 
   const statusOptions = getOptions('Status', admissionDropdowns);

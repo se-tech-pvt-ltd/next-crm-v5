@@ -48,23 +48,34 @@ export function Sidebar() {
     };
   }, [hoverTimeout]);
 
+  const isLeadsRoute = location.startsWith('/leads');
+  const isStudentsRoute = location.startsWith('/students');
+  const isApplicationsRoute = location.startsWith('/applications');
+  const isAdmissionsRoute = location.startsWith('/admissions');
+  const isEventsRoute = location.startsWith('/events');
+
   const { data: leadsData } = useQuery({
     queryKey: ['/api/leads'],
+    enabled: isLeadsRoute,
   });
 
   const { data: studentsData } = useQuery({
     queryKey: ['/api/students'],
+    enabled: isStudentsRoute,
   });
 
   const { data: applicationsData } = useQuery({
     queryKey: ['/api/applications'],
+    enabled: isApplicationsRoute,
   });
 
   const { data: admissionsData } = useQuery({
     queryKey: ['/api/admissions'],
+    enabled: isAdmissionsRoute,
   });
   const { data: eventsData } = useQuery({
     queryKey: ['/api/events'],
+    enabled: isEventsRoute,
   });
 
   const newLeadsCount = Array.isArray(leadsData) ? leadsData.filter((lead: any) => lead.status === 'new')?.length || 0 : 0;

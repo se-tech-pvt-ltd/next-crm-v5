@@ -10,6 +10,7 @@ import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import { Database, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination } from '@/components/ui/pagination';
 
 export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const { data: branches = [], refetch } = useQuery({
@@ -34,6 +35,8 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [filters, setFilters] = useState({ name: '', country: '', city: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -82,6 +85,18 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
       (!fCity || cityStr.includes(fCity))
     );
   });
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.name, filters.country, filters.city]);
+
+  const total = filteredBranches.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const hasPrevPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+  const pageItems = filteredBranches.slice(start, end);
 
   return (
     <div className="space-y-4">
@@ -207,23 +222,23 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
           </div>
         ) : (
           <div className="overflow-auto">
-            <Table>
+            <Table className="text-xs">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Country</TableHead>
-                  <TableHead>City</TableHead>
-                  <TableHead>Official Phone</TableHead>
-                  <TableHead>Official Email</TableHead>
-                  <TableHead>Head</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Country</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Official Phone</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Official Email</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Head</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(filteredBranches as any[]).map((b: any) => {
+                {(pageItems as any[]).map((b: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
-                    <TableRow key={b.id} className="cursor-pointer hover:bg-muted/40" onClick={() => {
+                    <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                       setSelected(b);
                       setEditForm({
                         name: String(b.branchName || b.name || ''),
@@ -237,17 +252,29 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       setIsEditing(false);
                       setDetailOpen(true);
                     }}>
-                      <TableCell className="font-medium">{b.branchName || b.name || '-'}</TableCell>
-                      <TableCell>{b.country || '-'}</TableCell>
-                      <TableCell>{b.city || '-'}</TableCell>
-                      <TableCell>{b.officialPhone || '-'}</TableCell>
-                      <TableCell className="max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
-                      <TableCell>{headName}</TableCell>
+                      <TableCell className="font-medium p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{headName}</TableCell>
                     </TableRow>
                   );
                 })}
               </TableBody>
             </Table>
+
+            {total > pageSize && (
+              <div className="mt-4 pt-4 border-t">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  hasNextPage={hasNextPage}
+                  hasPrevPage={hasPrevPage}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
