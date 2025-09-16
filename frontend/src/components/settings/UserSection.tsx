@@ -295,7 +295,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <TableCell className="p-2 text-xs">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
-                    <TableCell className="p-2 text-xs">{u.branchId || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{u.branchName || u.branchId || '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
