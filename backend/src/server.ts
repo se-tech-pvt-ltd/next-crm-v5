@@ -1,6 +1,6 @@
 import express from "express";
 import helmet from "helmet";
-import cors from "cors";
+import cors, { type CorsOptions } from "cors";
 import { registerRoutes } from "./routes/index.js";
 import { requestLogger, log } from "./middlewares/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -53,7 +53,7 @@ app.use(
 );
 
 // CORS configuration (restricted origins and methods, allow credentials for auth cookies)
-const corsOptions: cors.CorsOptions = {
+const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true); // Allow same-origin or non-browser requests
     if (allowedOrigins.has(origin)) return callback(null, true);
