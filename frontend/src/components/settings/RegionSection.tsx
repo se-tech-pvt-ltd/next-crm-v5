@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Separator } from '@/components/ui/separator';
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import * as RegionsService from '@/services/regions';
@@ -38,7 +39,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const [pendingAssign, setPendingAssign] = useState<Record<string, string>>({});
+  const [pendingAssign, setPendingAssign] = useState<Record<string, string[]>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
   const [inlineForm, setInlineForm] = useState<{ name: string; headId: string }>({ name: '', headId: '' });
@@ -111,27 +112,32 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
-  const assignBranchMutation = useMutation({
-    mutationFn: async ({ branchId, regionId }: { branchId: string; regionId: string }) => {
-      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
-      if (!b) throw new Error('Branch not found');
-      return BranchesService.updateBranch(String(b.id), {
-        name: String(b.branchName || b.name || ''),
-        city: String(b.city || ''),
-        country: String(b.country || ''),
-        address: String(b.address || ''),
-        officialPhone: String(b.officialPhone || ''),
-        officialEmail: String(b.officialEmail || ''),
-        managerId: b.branchHeadId || b.managerId || null,
-        regionId,
-      });
+  const bulkAssignMutation = useMutation({
+    mutationFn: async ({ branchIds, regionId }: { branchIds: string[]; regionId: string }) => {
+      const selectedBranches = (branches as any[]).filter((x: any) => branchIds.includes(String(x.id)));
+      if (selectedBranches.length !== branchIds.length) throw new Error('Some branches not found');
+      return Promise.all(
+        selectedBranches.map((b: any) =>
+          BranchesService.updateBranch(String(b.id), {
+            name: String(b.branchName || b.name || ''),
+            city: String(b.city || ''),
+            country: String(b.country || ''),
+            address: String(b.address || ''),
+            officialPhone: String(b.officialPhone || ''),
+            officialEmail: String(b.officialEmail || ''),
+            managerId: b.branchHeadId || b.managerId || null,
+            regionId,
+          })
+        )
+      );
     },
-    onSuccess: async () => {
+    onSuccess: async (_res, vars) => {
       await Promise.all([refetch(), refetchBranches()]);
-      toast({ title: 'Branch added to region', duration: 2000 });
+      setPendingAssign((s) => ({ ...s, [String(vars.regionId)]: [] }));
+      toast({ title: 'Branches added to region', duration: 2000 });
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || 'Failed to add branch to region';
+      const msg = err?.response?.data?.message || err?.message || 'Failed to add branches to region';
       toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
     },
   });
@@ -468,31 +474,29 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                   <div className="flex items-center gap-2 p-2 rounded border bg-background/80">
                                     <div className="text-xs font-medium">Add branch to this region</div>
                                     <div className="flex-1" />
-                                    <Select value={pendingAssign[String(r.id)] || ''} onValueChange={(v) => setPendingAssign((s) => ({ ...s, [String(r.id)]: v }))}>
-                                      <SelectTrigger className="h-7 w-64 text-xs"><SelectValue placeholder="Select unassigned branch" /></SelectTrigger>
-                                      <SelectContent>
-                                        {(() => {
-                                          const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
-                                          return unassigned.length === 0 ? (
-                                        <SelectItem value="__none__" disabled>No unassigned branches</SelectItem>
-                                      ) : (
-                                        unassigned.map((b: any) => (
-                                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || '-'}{b.city ? `, ${b.city}` : ''}</SelectItem>
-                                        ))
+                                    {(() => {
+                                      const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
+                                      const options = unassigned.map((b: any) => ({ value: String(b.id), label: `${b.branchName || b.name || '-' }${b.city ? `, ${b.city}` : ''}` }));
+                                      return (
+                                        <MultiSelect
+                                          value={pendingAssign[String(r.id)] || []}
+                                          onValueChange={(vals) => setPendingAssign((s) => ({ ...s, [String(r.id)]: vals }))}
+                                          options={options}
+                                          placeholder={unassigned.length === 0 ? 'No unassigned branches' : 'Select branches'}
+                                          className="h-7 min-h-7 w-64 text-xs"
+                                        />
                                       );
-                                        })()}
-                                      </SelectContent>
-                                    </Select>
+                                    })()}
                                     <Button
                                       size="sm"
                                       onClick={() => {
-                                        const bid = pendingAssign[String(r.id)];
-                                        if (!bid) return;
-                                        assignBranchMutation.mutate({ branchId: bid, regionId: String(r.id) });
+                                        const bids = pendingAssign[String(r.id)] || [];
+                                        if (bids.length === 0) return;
+                                        bulkAssignMutation.mutate({ branchIds: bids, regionId: String(r.id) });
                                       }}
-                                      disabled={!pendingAssign[String(r.id)] || assignBranchMutation.isPending}
+                                      disabled={!pendingAssign[String(r.id)] || (pendingAssign[String(r.id)]?.length || 0) === 0 || bulkAssignMutation.isPending}
                                     >
-                                      {assignBranchMutation.isPending ? 'Adding...' : 'Add'}
+                                      {bulkAssignMutation.isPending ? 'Adding...' : `Add${(pendingAssign[String(r.id)]?.length || 0) > 0 ? ` ${pendingAssign[String(r.id)].length}` : ''}`}
                                     </Button>
                                   </div>
 
