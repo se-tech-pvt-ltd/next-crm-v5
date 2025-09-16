@@ -9,7 +9,7 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerT
 import * as RegionsService from '@/services/regions';
 import * as UsersService from '@/services/users';
 import * as BranchesService from '@/services/branches';
-import { Globe2, Plus, ChevronRight, ChevronDown, ChevronUp, ChevronDown as SortDown, ChevronUp as SortUp, MoreHorizontal } from 'lucide-react';
+import { Globe2, Plus, ChevronRight, ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
