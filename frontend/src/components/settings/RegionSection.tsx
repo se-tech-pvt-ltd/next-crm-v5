@@ -453,7 +453,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                     <Button size="icon" variant="ghost" className="h-7 w-7"><MoreHorizontal className="w-4 h-4" /></Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="text-xs">
-                                    <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Inline edit</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Edit</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => toggleExpand(String(r.id))}>{isOpen ? 'Collapse' : 'Expand'} branches</DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -568,7 +568,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                             <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="text-xs">
-                            <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Inline edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Edit</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
