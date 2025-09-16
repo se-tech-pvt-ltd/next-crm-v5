@@ -104,13 +104,13 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     setCurrentPage(1);
   }, [filters.query, filters.role, filters.branchId]);
 
-  const total = filteredUsers.length;
+  const total = sortedUsers.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const hasPrevPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
-  const pageItems = filteredUsers.slice(start, end);
+  const pageItems = sortedUsers.slice(start, end);
 
   return (
     <div className="space-y-4">
