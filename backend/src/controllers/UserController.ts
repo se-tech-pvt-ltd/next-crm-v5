@@ -1,5 +1,7 @@
 import type { Request, Response } from "express";
 import { UserService } from "../services/UserService.js";
+import { EmailService } from "../services/EmailService.js";
+import { generateNumericPassword } from "../utils/helpers.js";
 
 export class UserController {
   private static getCurrentUser() {
@@ -16,7 +18,26 @@ export class UserController {
         return res.status(400).json({ message: 'email, role and branchId are required' });
       }
       const id = (await import('uuid')).v4();
-      const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department } as any);
+      const password = generateNumericPassword(10);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role, branchId, department } as any, password);
+
+      // Send invite/notification email using template "new registration"
+      try {
+        await EmailService.sendTemplatedEmail({
+          to: email,
+          templateName: 'new registration',
+          subject: 'Your account has been created',
+          variables: {
+            first_name: String(firstName || ''),
+            last_name: String(lastName || ''),
+            email: String(email),
+            password: String(password),
+          },
+        });
+      } catch (mailErr: any) {
+        console.error('Email send error:', mailErr?.message || mailErr);
+      }
+
       res.status(201).json(created);
     } catch (error: any) {
       console.error('Create user error:', error);
