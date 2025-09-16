@@ -11,7 +11,7 @@ import * as UsersService from '@/services/users';
 
 export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
-  const { data: branches = [] } = useQuery({ queryKey: ['/api/configurations/branches'], queryFn: () => BranchesService.listBranches() });
+  const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches', { limit: 3 }], queryFn: () => BranchesService.listBranches({ limit: 3 }) });
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
   const [branchSearch, setBranchSearch] = useState('');
   const create = useMutation({
@@ -65,11 +65,22 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
           <Label>Branch<span className="text-destructive"> *</span></Label>
           {(() => {
             const assignedIds = new Set((users as any[]).map((u: any) => u.branchId).filter(Boolean));
-            const all = (Array.isArray(branches) ? branches : [])
+            const trimmed = branchSearch.trim();
+            const { data: searched = [], isFetching } = (function(){
+              // use a simple hook-in-function pattern to keep code localized
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              return useQuery({
+                queryKey: ['/api/branches', 'search', trimmed],
+                queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
+                enabled: trimmed.length > 0,
+                staleTime: 10_000,
+              });
+            })();
+            const list = trimmed ? searched : initialBranches;
+            const all = (Array.isArray(list) ? list : [])
               .filter((b: any) => !assignedIds.has(b.id))
               .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-            const q = branchSearch.toLowerCase();
-            const branchOptions = branchSearch.trim() ? all.filter((o) => o.label.toLowerCase().includes(q)) : all.slice(0, 3);
+            const branchOptions = all;
             return (
               <SearchableCombobox
                 value={form.branchId}
@@ -78,6 +89,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 searchPlaceholder="Search branches..."
                 onSearch={setBranchSearch}
                 options={branchOptions}
+                loading={Boolean((branchSearch.trim().length > 0) && isFetching)}
               />
             );
           })()}
