@@ -85,7 +85,8 @@ export class UserModel {
     let query = db
       .select()
       .from(users)
-      .where(whereCondition);
+      .where(whereCondition)
+      .orderBy(desc(users.createdAt));
 
     // Apply limit if provided
     if (limit) {
