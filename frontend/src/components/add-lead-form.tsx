@@ -70,6 +70,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const queryClient = useQueryClient();
 
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
+  const [branchSearchQuery, setBranchSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
 
   const [emailDuplicateStatus, setEmailDuplicateStatus] = useState<{
