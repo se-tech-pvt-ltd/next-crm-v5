@@ -94,10 +94,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             value={filters.query}
             onChange={(e) => setFilters((s) => ({ ...s, query: e.target.value }))}
           />
-          <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v }))}>
+          <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All roles</SelectItem>
+              <SelectItem value="__all__">All roles</SelectItem>
               <SelectItem value="super_admin">Super Admin</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="regional_manager">Regional Manager</SelectItem>
