@@ -246,17 +246,22 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={editForm.headId} onValueChange={(v) => setEditForm((s) => ({ ...s, headId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region head" /></SelectTrigger>
                   <SelectContent>
-                    {users.length === 0 ? (
-                      <SelectItem value="" disabled>No users found</SelectItem>
-                    ) : (
-                      (users as any[])
+                    {(() => {
+                      const regionHeadIdsOther = new Set((regions as any[]).filter((r: any) => String(r.id) !== String(selected?.id)).map((r: any) => r.regionHeadId).filter(Boolean));
+                      const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
+                      const available = (users as any[])
                         .filter((u: any) => ['regional_manager','admin','super_admin','admin_staff'].includes(u.role))
-                        .map((u: any) => (
+                        .filter((u: any) => !branchHeadIds.has(u.id) && (!regionHeadIdsOther.has(u.id) || String(u.id) === String(selected?.regionHeadId)));
+                      return available.length === 0 ? (
+                        <SelectItem value="" disabled>No eligible users</SelectItem>
+                      ) : (
+                        available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
                             {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
                           </SelectItem>
                         ))
-                    )}
+                      );
+                    })()}
                   </SelectContent>
                 </Select>
               </div>
