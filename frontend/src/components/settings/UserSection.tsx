@@ -86,12 +86,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Users filtering
   const filteredUsers = (Array.isArray(users) ? users : []).filter((u: any) => {
     const q = filters.query.trim().toLowerCase();
+    const first = (u.firstName ?? u.first_name) ?? '';
+    const last = (u.lastName ?? u.last_name) ?? '';
     const matchesQuery = !q ||
-      String(u.firstName || '').toLowerCase().includes(q) ||
-      String(u.lastName || '').toLowerCase().includes(q) ||
+      String(first).toLowerCase().includes(q) ||
+      String(last).toLowerCase().includes(q) ||
       String(u.email || '').toLowerCase().includes(q);
     const matchesRole = !filters.role || String(u.role || '') === filters.role;
-    const matchesBranch = !filters.branchId || String(u.branchId || '') === filters.branchId;
+    const matchesBranch = !filters.branchId || String((u.branchId ?? u.branch_id) || '') === filters.branchId;
     return matchesQuery && matchesRole && matchesBranch;
   });
   const sortedUsers = [...filteredUsers].sort((a: any, b: any) => {
@@ -284,18 +286,18 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableRow key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                     setSelected(u);
                     setEditForm({
-                      firstName: String(u.firstName || ''),
-                      lastName: String(u.lastName || ''),
+                      firstName: String((u.firstName ?? u.first_name) || ''),
+                      lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
-                      branchId: String(u.branchId || ''),
+                      branchId: String((u.branchId ?? u.branch_id) || ''),
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
                   }}>
-                    <TableCell className="p-2 text-xs">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{[(u.firstName ?? u.first_name), (u.lastName ?? u.last_name)].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
-                    <TableCell className="p-2 text-xs">{u.branchName || u.branchId || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{u.branchName || u.branchId || u.branch_id || '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -320,7 +322,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>{[selected?.firstName, selected?.lastName].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
+              <span>{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
               {!isEditing ? (
                 <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
               ) : null}
@@ -331,7 +333,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="text-xs text-muted-foreground">Name</div>
-                <div className="font-medium">{[selected?.firstName, selected?.lastName].filter(Boolean).join(' ') || '—'}</div>
+                <div className="font-medium">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || '—'}</div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Email</div>
@@ -343,7 +345,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Branch</div>
-                <div className="font-medium">{selected?.branchId || '—'}</div>
+                <div className="font-medium">{selected?.branchName || selected?.branchId || selected?.branch_id || '—'}</div>
               </div>
             </div>
           ) : (
