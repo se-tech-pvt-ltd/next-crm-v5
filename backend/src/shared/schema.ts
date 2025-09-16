@@ -40,6 +40,7 @@ export const leads = mysqlTable("leads", {
   notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
   eventRegId: varchar("event_reg_id", { length: 255 }),
+  branchId: varchar("branch_id", { length: 255 }),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
@@ -64,6 +65,7 @@ export const students = mysqlTable("students", {
   status: text("status").notNull().default("active"),
   notes: text("notes"),
   counselorId: varchar("counselor_id", { length: 255 }),
+  branchId: varchar("branch_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   address: varchar("address", { length: 255 }),
@@ -87,6 +89,7 @@ export const applications = mysqlTable("applications", {
   intake: text("intake"),
   googleDriveLink: text("google_drive_link"),
   notes: text("notes"),
+  branchId: varchar("branch_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -106,6 +109,7 @@ export const admissions = mysqlTable("admissions", {
   depositDeadline: timestamp("deposit_deadline"),
   visaStatus: text("visa_status").default("pending"),
   admissionId: varchar("admission_id", { length: 255 }),
+  branchId: varchar("branch_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -118,6 +122,7 @@ export const events = mysqlTable("events", {
   date: date("date").notNull(),
   venue: varchar("venue", { length: 255 }).notNull(),
   time: varchar("time", { length: 50 }).notNull(),
+  branchId: varchar("branch_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
