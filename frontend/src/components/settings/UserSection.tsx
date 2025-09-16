@@ -279,6 +279,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Active</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Reg Email Sent</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Profile Complete</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -298,6 +301,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
                     <TableCell className="p-2 text-xs">{u.branchName || u.branchId || u.branch_id || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="p-2 text-xs">{(u.isRegistrationEmailSent ?? u.is_registration_email_sent) ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="p-2 text-xs">{(u.isProfileComplete ?? u.is_profile_complete) ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
