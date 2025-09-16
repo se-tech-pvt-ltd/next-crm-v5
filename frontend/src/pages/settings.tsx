@@ -6,9 +6,10 @@ import { useToast } from '@/hooks/use-toast';
 import BranchSectionComp from '@/components/settings/BranchSection';
 import UserSectionComp from '@/components/settings/UserSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
-import { Database, ShieldCheck, Mail } from 'lucide-react';
+import RegionSectionComp from '@/components/settings/RegionSection';
+import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
 
-const ALLOWED = ['branches', 'users', 'smtp'] as const;
+const ALLOWED = ['regions', 'branches', 'users', 'smtp'] as const;
 type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
@@ -33,6 +34,9 @@ export default function Settings() {
           <Button type="button" variant={category === 'branches' ? 'default' : 'outline'} onClick={() => setCategory('branches')} className="gap-2">
             <Database className="w-4 h-4" /> Branch management
           </Button>
+          <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className="gap-2">
+            <Globe2 className="w-4 h-4" /> Region management
+          </Button>
           <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
             <Mail className="w-4 h-4" /> Email (SMTP)
           </Button>
@@ -45,6 +49,15 @@ export default function Settings() {
               <CardTitle className="flex items-center gap-2"><Database className="w-4 h-4" /> Branches</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4"><BranchSectionComp toast={toast} /></CardContent>
+          </Card>
+        )}
+
+        {category === 'regions' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Globe2 className="w-4 h-4" /> Regions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4"><RegionSectionComp toast={toast} /></CardContent>
           </Card>
         )}
 
