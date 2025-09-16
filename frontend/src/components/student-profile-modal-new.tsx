@@ -97,12 +97,14 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   // Get dropdown data for Students module
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students')
+    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
+    enabled: open,
   });
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
+    enabled: open,
   });
 
   // Helpers to resolve dropdown-backed labels (case-insensitive field keys)
