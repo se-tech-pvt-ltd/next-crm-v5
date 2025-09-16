@@ -25,8 +25,12 @@ export type CreateBranchInput = {
   managerId?: string | null;
 };
 
-export async function listBranches(): Promise<Branch[]> {
-  return http.get<Branch[]>('/api/branches');
+export async function listBranches(params?: { q?: string; limit?: number }): Promise<Branch[]> {
+  const qs = new URLSearchParams();
+  if (params?.q) qs.set('q', params.q);
+  if (params?.limit != null) qs.set('limit', String(params.limit));
+  const url = qs.toString() ? `/api/branches?${qs.toString()}` : '/api/branches';
+  return http.get<Branch[]>(url);
 }
 
 export async function createBranch(input: CreateBranchInput): Promise<Branch> {
