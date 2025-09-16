@@ -1,70 +1,53 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import * as RegionsService from '@/services/regions';
 import * as UsersService from '@/services/users';
 import * as BranchesService from '@/services/branches';
-import { Globe2, Plus, ChevronRight, ChevronDown } from 'lucide-react';
+import { Globe2, Plus, ChevronRight, ChevronDown, ChevronUp, ChevronDown as SortDown, ChevronUp as SortUp, MoreHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RegionSection({ toast }: { toast: (v: any) => void }) {
-  const { data: regions = [], refetch } = useQuery({
+  const { data: regions = [], isLoading: regionsLoading, refetch } = useQuery({
     queryKey: ['/api/regions'],
     queryFn: async () => RegionsService.listRegions(),
   });
 
-  const { data: users = [] } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
   });
 
-  const { data: branches = [], refetch: refetchBranches } = useQuery({
+  const { data: branches = [], isLoading: branchesLoading, refetch: refetchBranches } = useQuery({
     queryKey: ['/api/branches?limit=1000'],
     queryFn: async () => BranchesService.listBranches({ limit: 1000 }),
   });
 
   const [form, setForm] = useState({ name: '', headId: '' });
-  const [modalOpen, setModalOpen] = useState(false);
-  const [filters, setFilters] = useState({ name: '' });
+  const [addOpen, setAddOpen] = useState(false);
+  const [filters, setFilters] = useState({ name: '', headId: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', headId: '' });
   const [pendingAssign, setPendingAssign] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [inlineEditId, setInlineEditId] = useState<string | null>(null);
+  const [inlineForm, setInlineForm] = useState<{ name: string; headId: string }>({ name: '', headId: '' });
+  const [sort, setSort] = useState<{ by: 'name' | 'head' | 'branches'; dir: 'asc' | 'desc' }>({ by: 'name', dir: 'asc' });
 
-  const assignBranchMutation = useMutation({
-    mutationFn: async ({ branchId, regionId }: { branchId: string; regionId: string }) => {
-      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
-      if (!b) throw new Error('Branch not found');
-      return BranchesService.updateBranch(String(b.id), {
-        name: String(b.branchName || b.name || ''),
-        city: String(b.city || ''),
-        country: String(b.country || ''),
-        address: String(b.address || ''),
-        officialPhone: String(b.officialPhone || ''),
-        officialEmail: String(b.officialEmail || ''),
-        managerId: b.branchHeadId || b.managerId || null,
-        regionId,
-      });
-    },
-    onSuccess: async () => {
-      await Promise.all([refetch(), refetchBranches()]);
-      toast({ title: 'Branch added to region', duration: 2000 });
-    },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || 'Failed to add branch to region';
-      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
-    },
-  });
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -74,11 +57,38 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     });
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const allPageSelected = useMemo(() => {
+    if (!regions || regions.length === 0) return false;
+    const pageIds = pageItems.map((r: any) => String(r.id));
+    return pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIds]);
+
+  const selectAllOnPage = () => {
+    const pageIds = pageItems.map((r: any) => String(r.id));
+    const every = pageIds.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (every) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
   const createMutation = useMutation({
     mutationFn: () => RegionsService.createRegion({ ...form }),
     onSuccess: async () => {
       setForm({ name: '', headId: '' });
-      setModalOpen(false);
+      setAddOpen(false);
       await refetch();
       toast({ title: 'Region created', description: 'New region added', duration: 2500 });
     },
@@ -104,240 +114,520 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
-  const filteredItems = (Array.isArray(regions) ? regions : []).filter((r: any) => {
-    const nameStr = String(r.regionName || '').toLowerCase();
-    const fName = filters.name.toLowerCase();
-    return !fName || nameStr.includes(fName);
+  const inlineUpdateMutation = useMutation({
+    mutationFn: async ({ id, name, headId }: { id: string; name: string; headId: string }) => {
+      return RegionsService.updateRegion(id, { name, headId: headId || undefined });
+    },
+    onSuccess: async () => {
+      setInlineEditId(null);
+      await refetch();
+      toast({ title: 'Saved', duration: 1500 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to save changes';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
   });
 
-  React.useEffect(() => { setCurrentPage(1); }, [filters.name]);
+  const bulkHeadMutation = useMutation({
+    mutationFn: async ({ headId }: { headId: string | null }) => {
+      const updates = Array.from(selectedIds).map((id) =>
+        RegionsService.updateRegion(id, { name: String((regions as any[]).find((r: any) => String(r.id) === id)?.regionName || ''), headId: headId || undefined })
+      );
+      return Promise.all(updates);
+    },
+    onSuccess: async () => {
+      await refetch();
+      toast({ title: 'Bulk update applied', duration: 2000 });
+      setSelectedIds(new Set());
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to apply bulk action';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+  });
 
-  const total = filteredItems.length;
+  const assignBranchMutation = useMutation({
+    mutationFn: async ({ branchId, regionId }: { branchId: string; regionId: string }) => {
+      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
+      if (!b) throw new Error('Branch not found');
+      return BranchesService.updateBranch(String(b.id), {
+        name: String(b.branchName || b.name || ''),
+        city: String(b.city || ''),
+        country: String(b.country || ''),
+        address: String(b.address || ''),
+        officialPhone: String(b.officialPhone || ''),
+        officialEmail: String(b.officialEmail || ''),
+        managerId: b.branchHeadId || b.managerId || null,
+        regionId,
+      });
+    },
+    onSuccess: async () => {
+      await Promise.all([refetch(), refetchBranches()]);
+      toast({ title: 'Branch added to region', duration: 2000 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to add branch to region';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+  });
+
+  const eligibleHeads = useMemo(() => {
+    const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
+    const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
+    return (users as any[])
+      .filter((u: any) => ['regional_manager', 'admin', 'super_admin', 'admin_staff'].includes(u.role))
+      .filter((u: any) => !regionHeadIds.has(u.id) && !branchHeadIds.has(u.id));
+  }, [regions, branches, users]);
+
+  const headOptionsForEdit = (currentHeadId: string | undefined) => {
+    const regionHeadIdsOther = new Set((regions as any[])
+      .filter((r: any) => String(r.regionHeadId || '') !== String(currentHeadId || ''))
+      .map((r: any) => r.regionHeadId)
+      .filter(Boolean));
+    const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
+    return (users as any[])
+      .filter((u: any) => ['regional_manager', 'admin', 'super_admin', 'admin_staff'].includes(u.role))
+      .filter((u: any) => !branchHeadIds.has(u.id) && (!regionHeadIdsOther.has(u.id) || String(u.id) === String(currentHeadId || '')));
+  };
+
+  const filtered = useMemo(() => {
+    const nameQ = filters.name.toLowerCase();
+    const headId = filters.headId;
+    let items = (Array.isArray(regions) ? regions : []).filter((r: any) => {
+      const nameStr = String(r.regionName || '').toLowerCase();
+      const matchName = !nameQ || nameStr.includes(nameQ);
+      const matchHead = !headId || String(r.regionHeadId || '') === String(headId);
+      return matchName && matchHead;
+    });
+
+    items = items.map((r: any) => ({
+      ...r,
+      _branchCount: (branches as any[]).filter((b: any) => String((b as any).regionId || '') === String(r.id)).length,
+      _headName: (() => {
+        const headUser = (users as any[]).find((u: any) => u.id === r.regionHeadId);
+        return headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+      })(),
+    }));
+
+    items.sort((a: any, b: any) => {
+      const dir = sort.dir === 'asc' ? 1 : -1;
+      if (sort.by === 'name') return a.regionName.localeCompare(b.regionName) * dir;
+      if (sort.by === 'head') return String(a._headName).localeCompare(String(b._headName)) * dir;
+      return (a._branchCount - b._branchCount) * dir;
+    });
+
+    return items;
+  }, [regions, branches, users, filters, sort]);
+
+  React.useEffect(() => { setCurrentPage(1); }, [filters.name, filters.headId]);
+
+  const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const hasPrevPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
-  const pageItems = filteredItems.slice(start, end);
+  const pageItems = filtered.slice(start, end);
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+  const SortButton: React.FC<{ active: boolean; dir: 'asc' | 'desc' }> = ({ active, dir }) => (
+    <span className="inline-flex items-center ml-1 text-muted-foreground">
+      {active ? (dir === 'asc' ? <SortUp className="w-3 h-3" /> : <SortDown className="w-3 h-3" />) : null}
+    </span>
+  );
+
+  const toolbar = (
+    <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Input
             placeholder="Search name"
-            className="h-8 w-40"
+            className="h-8 w-44"
             value={filters.name}
             onChange={(e) => setFilters((s) => ({ ...s, name: e.target.value }))}
           />
+          <Select value={filters.headId} onValueChange={(v) => setFilters((s) => ({ ...s, headId: v }))}>
+            <SelectTrigger className="h-8 w-52 text-xs"><SelectValue placeholder="Filter by head" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All heads</SelectItem>
+              {(users as any[]).map((u: any) => (
+                <SelectItem key={u.id} value={String(u.id)}>
+                  {(`${u.firstName || ''} ${u.lastName || ''}`.trim()) || u.email || '-'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogTrigger asChild>
-            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title="Add Region" type="button">
-              <Plus className="w-4 h-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Add Region</DialogTitle>
-            </DialogHeader>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <Drawer open={addOpen} onOpenChange={setAddOpen}>
+          <DrawerTrigger asChild>
+            <Button size="sm" className="h-8" title="Add Region" type="button">
+              <Plus className="w-4 h-4 mr-2" /> Add Region
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Add Region</DrawerTitle>
+            </DrawerHeader>
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="sm:col-span-2">
                 <Label>Region Name<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} />
               </div>
-
               <div className="sm:col-span-2">
                 <Label>Region Head</Label>
                 <Select value={form.headId} onValueChange={(v) => setForm((s) => ({ ...s, headId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region head" /></SelectTrigger>
                   <SelectContent>
-                    {(() => {
-                      const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
-                      const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
-                      const available = (users as any[])
-                        .filter((u: any) => ['regional_manager','admin','super_admin','admin_staff'].includes(u.role))
-                        .filter((u: any) => !regionHeadIds.has(u.id) && !branchHeadIds.has(u.id));
-                      return available.length === 0 ? (
-                        <SelectItem value="" disabled>No eligible users</SelectItem>
-                      ) : (
-                        available.map((u: any) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
-                          </SelectItem>
-                        ))
-                      );
-                    })()}
+                    {eligibleHeads.length === 0 ? (
+                      <SelectItem value="" disabled>No eligible users</SelectItem>
+                    ) : (
+                      eligibleHeads.map((u: any) => (
+                        <SelectItem key={u.id} value={String(u.id)}>
+                          {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="col-span-full flex gap-2">
-                <Button onClick={() => createMutation.mutate()} disabled={!form.name}>Save</Button>
-                <Button variant="outline" onClick={() => { setForm({ name: '', headId: '' }); setModalOpen(false); }}>Cancel</Button>
-              </div>
             </div>
-          </DialogContent>
-        </Dialog>
+            <DrawerFooter>
+              <div className="flex gap-2">
+                <Button onClick={() => createMutation.mutate()} disabled={!form.name || createMutation.isPending}>
+                  {createMutation.isPending ? 'Saving...' : 'Save'}
+                </Button>
+                <DrawerClose asChild>
+                  <Button variant="outline" onClick={() => setForm({ name: '', headId: '' })}>Cancel</Button>
+                </DrawerClose>
+              </div>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </div>
 
+      {selectedIds.size > 0 ? (
+        <div className="mt-2 rounded-md border bg-muted/40 px-2 py-2 flex items-center gap-2 text-xs">
+          <div className="font-medium">{selectedIds.size} selected</div>
+          <div className="flex items-center gap-2">
+            <Select onValueChange={(v) => bulkHeadMutation.mutate({ headId: v })}>
+              <SelectTrigger className="h-7 w-56 text-xs"><SelectValue placeholder="Assign head to selected" /></SelectTrigger>
+              <SelectContent>
+                {eligibleHeads.map((u: any) => (
+                  <SelectItem key={u.id} value={String(u.id)}>
+                    {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button size="sm" variant="outline" onClick={() => bulkHeadMutation.mutate({ headId: null })} disabled={bulkHeadMutation.isPending}>
+              Clear head
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>Cancel</Button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const loadingState = (
+    <div className="space-y-3">
+      <Skeleton className="h-8 w-full" />
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="grid grid-cols-12 gap-2">
+            <Skeleton className="col-span-1 h-6" />
+            <Skeleton className="col-span-5 h-6" />
+            <Skeleton className="col-span-3 h-6" />
+            <Skeleton className="col-span-3 h-6" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      {toolbar}
       <Separator />
 
-      <div>
-        {regions.length === 0 ? (
-          <div className="border border-dashed rounded-md p-6 text-center">
-            <div className="flex items-center justify-center mb-4">
-              <Globe2 className="w-10 h-10 text-muted-foreground" />
+      {(regionsLoading || usersLoading || branchesLoading) ? (
+        loadingState
+      ) : (
+        <div>
+          {filtered.length === 0 ? (
+            <div className="border border-dashed rounded-md p-6 text-center">
+              <div className="flex items-center justify-center mb-4">
+                <Globe2 className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <div className="text-lg font-semibold">No regions found</div>
+              <div className="text-sm text-muted-foreground mt-2">Create regions like Pakistan, India, UAE. Assign region heads and organize branches under them.</div>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <Button onClick={() => setAddOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" /> Add your first region
+                </Button>
+                <Button variant="outline" onClick={async () => { await refetch(); }}>Refresh</Button>
+              </div>
             </div>
-            <div className="text-lg font-semibold">No regions yet</div>
-            <div className="text-sm text-muted-foreground mt-2">Create regions like Pakistan, India, China. Assign region heads and organize branches under them.</div>
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <Button onClick={() => setModalOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" /> Add your first region
-              </Button>
-              <Button variant="outline" onClick={async () => { await refetch(); }}>Refresh</Button>
-            </div>
-          </div>
-        ) : (
-          <div className="overflow-auto">
-            <Table className="text-xs">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="h-8 px-2 w-6"></TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Head</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Branches</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(pageItems as any[]).map((r: any) => {
-                  const headUser = (users as any[]).find((u: any) => u.id === r.regionHeadId);
-                  const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
-                  const regionBranches = (branches as any[]).filter((b: any) => String((b as any).regionId || '') === String(r.id));
-                  const branchCount = regionBranches.length;
-                  const isOpen = expanded.has(String(r.id));
-                  return (
-                    <React.Fragment key={r.id}>
-                      <TableRow className="hover:bg-gray-50">
-                        <TableCell className="p-1 align-top">
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            className="h-6 w-6"
-                            aria-label={isOpen ? 'Collapse' : 'Expand'}
-                            aria-expanded={isOpen}
-                            onClick={(e) => { e.stopPropagation(); toggleExpand(String(r.id)); }}
-                          >
-                            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                          </Button>
-                        </TableCell>
-                        <TableCell className="font-medium p-2 text-xs cursor-pointer" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>{r.regionName}</TableCell>
-                        <TableCell className="p-2 text-xs cursor-pointer" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>{headName}</TableCell>
-                        <TableCell className="p-2 text-xs cursor-pointer" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>{branchCount}</TableCell>
-                      </TableRow>
-                      {isOpen ? (
-                        <TableRow>
-                          <TableCell colSpan={4} className="p-0 bg-muted/20">
-                            <div className="p-2 space-y-2">
-                              <div className="flex items-center gap-2 p-2 rounded border bg-background/80">
-                                <div className="text-xs font-medium">Add branch to this region</div>
-                                <div className="flex-1" />
-                                <Select value={pendingAssign[String(r.id)] || ''} onValueChange={(v) => setPendingAssign((s) => ({ ...s, [String(r.id)]: v }))}>
-                                  <SelectTrigger className="h-7 w-64 text-xs"><SelectValue placeholder="Select unassigned branch" /></SelectTrigger>
+          ) : (
+            <div className="overflow-auto">
+              {/* Desktop table */}
+              <div className="hidden sm:block">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="h-8 px-2 w-8">
+                        <Checkbox checked={allPageSelected} onCheckedChange={selectAllOnPage} />
+                      </TableHead>
+                      <TableHead className="h-8 px-2 text-[11px] cursor-pointer select-none" onClick={() => setSort((s) => ({ by: 'name', dir: s.by === 'name' && s.dir === 'asc' ? 'desc' : 'asc' }))}>
+                        <div className="inline-flex items-center">Name <SortButton active={sort.by === 'name'} dir={sort.dir} /></div>
+                      </TableHead>
+                      <TableHead className="h-8 px-2 text-[11px] cursor-pointer select-none" onClick={() => setSort((s) => ({ by: 'head', dir: s.by === 'head' && s.dir === 'asc' ? 'desc' : 'asc' }))}>
+                        <div className="inline-flex items-center">Head <SortButton active={sort.by === 'head'} dir={sort.dir} /></div>
+                      </TableHead>
+                      <TableHead className="h-8 px-2 text-[11px] cursor-pointer select-none" onClick={() => setSort((s) => ({ by: 'branches', dir: s.by === 'branches' && s.dir === 'asc' ? 'desc' : 'asc' }))}>
+                        <div className="inline-flex items-center">Branches <SortButton active={sort.by === 'branches'} dir={sort.dir} /></div>
+                      </TableHead>
+                      <TableHead className="h-8 px-2 text-[11px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(pageItems as any[]).map((r: any) => {
+                      const headUser = (users as any[]).find((u: any) => u.id === r.regionHeadId);
+                      const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+                      const regionBranches = (branches as any[]).filter((b: any) => String((b as any).regionId || '') === String(r.id));
+                      const branchCount = regionBranches.length;
+                      const isOpen = expanded.has(String(r.id));
+                      const idStr = String(r.id);
+
+                      return (
+                        <React.Fragment key={r.id}>
+                          <TableRow className="hover:bg-muted/30">
+                            <TableCell className="p-2 align-top">
+                              <Checkbox checked={selectedIds.has(idStr)} onCheckedChange={() => toggleSelect(idStr)} />
+                            </TableCell>
+
+                            {/* Name cell */}
+                            <TableCell className="font-medium p-2 text-xs align-middle">
+                              {inlineEditId === idStr ? (
+                                <Input
+                                  autoFocus
+                                  value={inlineForm.name}
+                                  onChange={(e) => setInlineForm((s) => ({ ...s, name: e.target.value }))}
+                                  className="h-7"
+                                />
+                              ) : (
+                                <button className="text-left w-full" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>
+                                  {r.regionName}
+                                </button>
+                              )}
+                            </TableCell>
+
+                            {/* Head cell */}
+                            <TableCell className="p-2 text-xs align-middle">
+                              {inlineEditId === idStr ? (
+                                <Select value={inlineForm.headId} onValueChange={(v) => setInlineForm((s) => ({ ...s, headId: v }))}>
+                                  <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Select head" /></SelectTrigger>
                                   <SelectContent>
-                                    {(() => {
-                                      const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
-                                      return unassigned.length === 0 ? (
-                                        <SelectItem value="" disabled>No unassigned branches</SelectItem>
-                                      ) : (
-                                        unassigned.map((b: any) => (
-                                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || '-'}{b.city ? `, ${b.city}` : ''}</SelectItem>
-                                        ))
-                                      );
-                                    })()}
+                                    {headOptionsForEdit(r.regionHeadId).map((u: any) => (
+                                      <SelectItem key={u.id} value={String(u.id)}>
+                                        {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                                      </SelectItem>
+                                    ))}
                                   </SelectContent>
                                 </Select>
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const bid = pendingAssign[String(r.id)];
-                                    if (!bid) return;
-                                    assignBranchMutation.mutate({ branchId: bid, regionId: String(r.id) });
-                                  }}
-                                  disabled={!pendingAssign[String(r.id)] || assignBranchMutation.isPending}
-                                >
-                                  {assignBranchMutation.isPending ? 'Adding...' : 'Add'}
-                                </Button>
-                              </div>
-
-                              {branchCount === 0 ? (
-                                <div className="text-xs text-muted-foreground px-2 py-1">No branches in this region.</div>
                               ) : (
-                                <Table className="text-xs">
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead className="h-7 px-2 text-[11px]">Branch</TableHead>
-                                      <TableHead className="h-7 px-2 text-[11px]">City</TableHead>
-                                      <TableHead className="h-7 px-2 text-[11px]">Country</TableHead>
-                                      <TableHead className="h-7 px-2 text-[11px]">Head</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {regionBranches.map((b: any) => {
-                                      const head = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
-                                      const headLabel = head ? ((`${head.firstName || ''} ${head.lastName || ''}`.trim()) || head.email || '-') : '-';
-                                      return (
-                                        <TableRow key={b.id}>
-                                          <TableCell className="p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
-                                          <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
-                                          <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
-                                          <TableCell className="p-2 text-xs">{headLabel}</TableCell>
-                                        </TableRow>
-                                      );
-                                    })}
-                                  </TableBody>
-                                </Table>
+                                <span>{headName}</span>
                               )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ) : null}
-                    </React.Fragment>
+                            </TableCell>
+
+                            {/* Branches */}
+                            <TableCell className="p-2 text-xs align-middle">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2"
+                                aria-label={isOpen ? 'Collapse' : 'Expand'}
+                                aria-expanded={isOpen}
+                                onClick={(e) => { e.stopPropagation(); toggleExpand(String(r.id)); }}
+                              >
+                                {branchCount}
+                                {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                              </Button>
+                            </TableCell>
+
+                            {/* Actions */}
+                            <TableCell className="p-2 text-xs text-right align-middle">
+                              {inlineEditId === idStr ? (
+                                <div className="inline-flex gap-2">
+                                  <Button size="sm" className="h-7" disabled={!inlineForm.name || inlineUpdateMutation.isPending} onClick={() => inlineUpdateMutation.mutate({ id: idStr, name: inlineForm.name, headId: inlineForm.headId })}>
+                                    {inlineUpdateMutation.isPending ? 'Saving...' : 'Save'}
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="h-7" onClick={() => setInlineEditId(null)}>Cancel</Button>
+                                </div>
+                              ) : (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button size="icon" variant="ghost" className="h-7 w-7"><MoreHorizontal className="w-4 h-4" /></Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="text-xs">
+                                    <DropdownMenuItem onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>View / Edit</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Inline edit</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => toggleExpand(String(r.id))}>{isOpen ? 'Collapse' : 'Expand'} branches</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                            </TableCell>
+                          </TableRow>
+
+                          {isOpen ? (
+                            <TableRow>
+                              <TableCell colSpan={5} className="p-0 bg-muted/20">
+                                <div className="p-2 space-y-2">
+                                  <div className="flex items-center gap-2 p-2 rounded border bg-background/80">
+                                    <div className="text-xs font-medium">Add branch to this region</div>
+                                    <div className="flex-1" />
+                                    <Select value={pendingAssign[String(r.id)] || ''} onValueChange={(v) => setPendingAssign((s) => ({ ...s, [String(r.id)]: v }))}>
+                                      <SelectTrigger className="h-7 w-64 text-xs"><SelectValue placeholder="Select unassigned branch" /></SelectTrigger>
+                                      <SelectContent>
+                                        {(() => {
+                                          const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
+                                          return unassigned.length === 0 ? (
+                                            <SelectItem value="" disabled>No unassigned branches</SelectItem>
+                                          ) : (
+                                            unassigned.map((b: any) => (
+                                              <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || '-'}{b.city ? `, ${b.city}` : ''}</SelectItem>
+                                            ))
+                                          );
+                                        })()}
+                                      </SelectContent>
+                                    </Select>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        const bid = pendingAssign[String(r.id)];
+                                        if (!bid) return;
+                                        assignBranchMutation.mutate({ branchId: bid, regionId: String(r.id) });
+                                      }}
+                                      disabled={!pendingAssign[String(r.id)] || assignBranchMutation.isPending}
+                                    >
+                                      {assignBranchMutation.isPending ? 'Adding...' : 'Add'}
+                                    </Button>
+                                  </div>
+
+                                  {branchCount === 0 ? (
+                                    <div className="text-xs text-muted-foreground px-2 py-1">No branches in this region.</div>
+                                  ) : (
+                                    <Table className="text-xs">
+                                      <TableHeader>
+                                        <TableRow>
+                                          <TableHead className="h-7 px-2 text-[11px]">Branch</TableHead>
+                                          <TableHead className="h-7 px-2 text-[11px]">City</TableHead>
+                                          <TableHead className="h-7 px-2 text-[11px]">Country</TableHead>
+                                          <TableHead className="h-7 px-2 text-[11px]">Head</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {regionBranches.map((b: any) => {
+                                          const head = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
+                                          const headLabel = head ? ((`${head.firstName || ''} ${head.lastName || ''}`.trim()) || head.email || '-') : '-';
+                                          return (
+                                            <TableRow key={b.id}>
+                                              <TableCell className="p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                                              <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
+                                              <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
+                                              <TableCell className="p-2 text-xs">{headLabel}</TableCell>
+                                            </TableRow>
+                                          );
+                                        })}
+                                      </TableBody>
+                                    </Table>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ) : null}
+                        </React.Fragment>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+
+                {total > pageSize && (
+                  <div className="mt-4 pt-4 border-t">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      hasNextPage={hasNextPage}
+                      hasPrevPage={hasPrevPage}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile cards */}
+              <div className="sm:hidden space-y-2">
+                {(pageItems as any[]).map((r: any) => {
+                  const headUser = (users as any[]).find((u: any) => u.id === r.regionHeadId);
+                  const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+                  const regionBranches = (branches as any[]).filter((b: any) => String((b as any).regionId || '') === String(r.id));
+                  const idStr = String(r.id);
+                  return (
+                    <div key={r.id} className="rounded-md border p-3 bg-card text-card-foreground">
+                      <div className="flex items-start gap-2">
+                        <Checkbox checked={selectedIds.has(idStr)} onCheckedChange={() => toggleSelect(idStr)} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold truncate">{r.regionName}</div>
+                          <div className="text-xs text-muted-foreground truncate">Head: {headName}</div>
+                          <div className="text-xs text-muted-foreground">Branches: {regionBranches.length}</div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="text-xs">
+                            <DropdownMenuItem onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>View / Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Inline edit</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
                   );
                 })}
-              </TableBody>
-            </Table>
 
-            {total > pageSize && (
-              <div className="mt-4 pt-4 border-t">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  hasNextPage={hasNextPage}
-                  hasPrevPage={hasPrevPage}
-                />
+                {total > pageSize && (
+                  <div className="mt-4 pt-2 border-t">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      hasNextPage={hasNextPage}
+                      hasPrevPage={hasPrevPage}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
 
-      <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
+      {/* Detail/Edit Drawer */}
+      <Drawer open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="flex items-center justify-between">
               <span>{selected?.regionName || 'Region'}</span>
               {!isEditing ? (
                 <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
               ) : null}
-            </DialogTitle>
-          </DialogHeader>
+            </DrawerTitle>
+          </DrawerHeader>
 
           {!isEditing ? (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-3 p-4">
               <div>
                 <div className="text-xs text-muted-foreground">Name</div>
                 <div className="font-medium">{selected?.regionName || '-'}</div>
@@ -351,7 +641,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-2 p-4">
               <div>
                 <Label>Name<span className="text-destructive"> *</span></Label>
                 <Input className="mt-1" value={editForm.name} onChange={(e) => setEditForm((s) => ({ ...s, name: e.target.value }))} />
@@ -361,22 +651,15 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={editForm.headId} onValueChange={(v) => setEditForm((s) => ({ ...s, headId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region head" /></SelectTrigger>
                   <SelectContent>
-                    {(() => {
-                      const regionHeadIdsOther = new Set((regions as any[]).filter((r: any) => String(r.id) !== String(selected?.id)).map((r: any) => r.regionHeadId).filter(Boolean));
-                      const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
-                      const available = (users as any[])
-                        .filter((u: any) => ['regional_manager','admin','super_admin','admin_staff'].includes(u.role))
-                        .filter((u: any) => !branchHeadIds.has(u.id) && (!regionHeadIdsOther.has(u.id) || String(u.id) === String(selected?.regionHeadId)));
-                      return available.length === 0 ? (
-                        <SelectItem value="" disabled>No eligible users</SelectItem>
-                      ) : (
-                        available.map((u: any) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
-                          </SelectItem>
-                        ))
-                      );
-                    })()}
+                    {headOptionsForEdit(selected?.regionHeadId).length === 0 ? (
+                      <SelectItem value="" disabled>No eligible users</SelectItem>
+                    ) : (
+                      headOptionsForEdit(selected?.regionHeadId).map((u: any) => (
+                        <SelectItem key={u.id} value={String(u.id)}>
+                          {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -388,8 +671,14 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Close</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
