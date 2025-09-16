@@ -15,6 +15,8 @@ export const users = mysqlTable("users", {
   phoneNumber: varchar("phone_number", { length: 20 }),
   dateOfBirth: date("date_of_birth"),
   passwordHash: varchar("password_hash", { length: 255 }), // hashed password for authentication
+  isActive: boolean("is_active").notNull().default(true),
+  isProfileComplete: boolean("is_profile_complete").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
