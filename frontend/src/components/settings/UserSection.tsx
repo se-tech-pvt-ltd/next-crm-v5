@@ -69,7 +69,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               .filter((b: any) => !assignedIds.has(b.id))
               .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
             const q = branchSearch.toLowerCase();
-            const branchOptions = branchSearch.trim() ? all.filter((o) => o.label.toLowerCase().includes(q)) : all;
+            const branchOptions = branchSearch.trim() ? all.filter((o) => o.label.toLowerCase().includes(q)) : all.slice(0, 3);
             return (
               <SearchableCombobox
                 value={form.branchId}
