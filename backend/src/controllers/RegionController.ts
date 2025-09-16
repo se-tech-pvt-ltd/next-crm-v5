@@ -41,6 +41,24 @@ export class RegionController {
         return res.status(400).json({ message: 'name is required' });
       }
       const id = (await import('uuid')).v4();
+
+      if (headId) {
+        const [rHeadRows] = await connection.query<any[]>(
+          `SELECT id FROM regions WHERE region_head_id = ? LIMIT 1`,
+          [headId]
+        );
+        if (Array.isArray(rHeadRows) && rHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of another region' });
+        }
+        const [bHeadRows] = await connection.query<any[]>(
+          `SELECT id FROM branches WHERE branch_head_id = ? LIMIT 1`,
+          [headId]
+        );
+        if (Array.isArray(bHeadRows) && bHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of a branch' });
+        }
+      }
+
       await connection.query(
         `INSERT INTO regions (id, region_name, region_head_id, created_on, updated_on) VALUES (?, ?, ?, NOW(), NOW())`,
         [id, name, headId || null]
@@ -58,6 +76,23 @@ export class RegionController {
       const { name, headId } = req.body || {};
       if (!id) return res.status(400).json({ message: 'id is required' });
       if (!name) return res.status(400).json({ message: 'name is required' });
+
+      if (headId) {
+        const [rHeadRows] = await connection.query<any[]>(
+          `SELECT id FROM regions WHERE region_head_id = ? AND id <> ? LIMIT 1`,
+          [headId, id]
+        );
+        if (Array.isArray(rHeadRows) && rHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of another region' });
+        }
+        const [bHeadRows] = await connection.query<any[]>(
+          `SELECT id FROM branches WHERE branch_head_id = ? LIMIT 1`,
+          [headId]
+        );
+        if (Array.isArray(bHeadRows) && bHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of a branch' });
+        }
+      }
 
       const [result] = await connection.query<any>(
         `UPDATE regions SET region_name = ?, region_head_id = ?, updated_on = NOW() WHERE id = ?`,

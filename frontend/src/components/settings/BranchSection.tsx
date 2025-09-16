@@ -175,17 +175,22 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={form.managerId} onValueChange={(v) => setForm((s) => ({ ...s, managerId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
                   <SelectContent>
-                    {users.length === 0 ? (
-                      <SelectItem value="" disabled>No users found</SelectItem>
-                    ) : (
-                      users
+                    {(() => {
+                      const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
+                      const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
+                      const available = (users as any[])
                         .filter((u: any) => u.role === 'branch_manager' || u.role === 'admin_staff')
-                        .map((u: any) => (
+                        .filter((u: any) => !regionHeadIds.has(u.id) && !branchHeadIds.has(u.id));
+                      return available.length === 0 ? (
+                        <SelectItem value="" disabled>No eligible users</SelectItem>
+                      ) : (
+                        available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
                             {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
                           </SelectItem>
                         ))
-                    )}
+                      );
+                    })()}
                   </SelectContent>
                 </Select>
               </div>
@@ -381,17 +386,22 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={editForm.managerId} onValueChange={(v) => setEditForm((s) => ({ ...s, managerId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
                   <SelectContent>
-                    {users.length === 0 ? (
-                      <SelectItem value="" disabled>No users found</SelectItem>
-                    ) : (
-                      (users as any[])
+                    {(() => {
+                      const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
+                      const branchHeadIdsOther = new Set((branches as any[]).filter((b: any) => String(b.id) !== String(selected?.id)).map((b: any) => b.branchHeadId).filter(Boolean));
+                      const available = (users as any[])
                         .filter((u: any) => ['branch_manager','regional_manager','admin','super_admin','admin_staff'].includes(u.role))
-                        .map((u: any) => (
+                        .filter((u: any) => !regionHeadIds.has(u.id) && (!branchHeadIdsOther.has(u.id) || String(u.id) === String(selected?.branchHeadId || selected?.managerId)));
+                      return available.length === 0 ? (
+                        <SelectItem value="" disabled>No eligible users</SelectItem>
+                      ) : (
+                        available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
                             {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
                           </SelectItem>
                         ))
-                    )}
+                      );
+                    })()}
                   </SelectContent>
                 </Select>
               </div>

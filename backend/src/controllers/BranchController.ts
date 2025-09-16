@@ -53,6 +53,23 @@ export class BranchController {
 
       const id = (await import('uuid')).v4();
 
+      if (managerId) {
+        const [bHeadRows] = await connection.query<any[]>(
+          `SELECT id, branch_name FROM branches WHERE branch_head_id = ? LIMIT 1`,
+          [managerId]
+        );
+        if (Array.isArray(bHeadRows) && bHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of another branch' });
+        }
+        const [rHeadRows] = await connection.query<any[]>(
+          `SELECT id, region_name FROM regions WHERE region_head_id = ? LIMIT 1`,
+          [managerId]
+        );
+        if (Array.isArray(rHeadRows) && rHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of a region' });
+        }
+      }
+
       await connection.query(
         `INSERT INTO branches (id, branch_name, branch_region, city, country, address, official_phone, official_email, branch_head_id, created_on, updated_on)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
@@ -88,6 +105,23 @@ export class BranchController {
       }
       if (!name || !city || !country || !address || !officialPhone || !officialEmail) {
         return res.status(400).json({ message: 'name, city, country, address, officialPhone and officialEmail are required' });
+      }
+
+      if (managerId) {
+        const [bHeadRows] = await connection.query<any[]>(
+          `SELECT id FROM branches WHERE branch_head_id = ? AND id <> ? LIMIT 1`,
+          [managerId, id]
+        );
+        if (Array.isArray(bHeadRows) && bHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of another branch' });
+        }
+        const [rHeadRows] = await connection.query<any[]>(
+          `SELECT id FROM regions WHERE region_head_id = ? LIMIT 1`,
+          [managerId]
+        );
+        if (Array.isArray(rHeadRows) && rHeadRows.length > 0) {
+          return res.status(400).json({ message: 'User is already head of a region' });
+        }
       }
 
       const [result] = await connection.query<any>(
