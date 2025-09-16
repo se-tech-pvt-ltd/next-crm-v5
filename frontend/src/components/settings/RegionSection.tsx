@@ -66,23 +66,6 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     });
   };
 
-  const allPageSelected = useMemo(() => {
-    if (!regions || regions.length === 0) return false;
-    const pageIds = pageItems.map((r: any) => String(r.id));
-    return pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIds]);
-
-  const selectAllOnPage = () => {
-    const pageIds = pageItems.map((r: any) => String(r.id));
-    const every = pageIds.every((id) => selectedIds.has(id));
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (every) pageIds.forEach((id) => next.delete(id));
-      else pageIds.forEach((id) => next.add(id));
-      return next;
-    });
-  };
 
   const createMutation = useMutation({
     mutationFn: () => RegionsService.createRegion({ ...form }),
@@ -229,6 +212,23 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
   const pageItems = filtered.slice(start, end);
+
+  const allPageSelected = useMemo(() => {
+    if (!regions || regions.length === 0) return false;
+    const pageIds = pageItems.map((r: any) => String(r.id));
+    return pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  }, [regions, pageItems, selectedIds]);
+
+  const selectAllOnPage = () => {
+    const pageIds = pageItems.map((r: any) => String(r.id));
+    const every = pageIds.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (every) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
 
   const SortButton: React.FC<{ active: boolean; dir: 'asc' | 'desc' }> = ({ active, dir }) => (
     <span className="inline-flex items-center ml-1 text-muted-foreground">
