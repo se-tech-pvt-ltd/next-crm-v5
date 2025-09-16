@@ -359,7 +359,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div>
                   <div className="text-xs text-muted-foreground">User ID</div>
-                  <div className="font-medium break-words">{selected?.id || '—'}</div>
+                  <div className="font-medium break-words">{selected?.email || '—'}</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">First name</div>
@@ -378,20 +378,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <div className="font-medium">{selected ? roleLabel(selected.role) : '—'}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Department</div>
-                  <div className="font-medium">{selected?.department || '—'}</div>
-                </div>
-                <div>
                   <div className="text-xs text-muted-foreground">Branch</div>
                   <div className="font-medium">{selected?.branchName || selected?.branchId || selected?.branch_id || '—'}</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Phone number</div>
                   <div className="font-medium">{selected?.phoneNumber || selected?.phone_number || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Date of birth</div>
-                  <div className="font-medium">{selected?.dateOfBirth || selected?.date_of_birth ? new Date(String(selected?.dateOfBirth || selected?.date_of_birth)).toLocaleDateString() : '—'}</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Registration email</div>
