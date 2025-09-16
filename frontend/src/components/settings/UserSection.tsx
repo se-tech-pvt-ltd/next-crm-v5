@@ -19,6 +19,37 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30000 });
 
+  // Branch search hooks (top-level to preserve hook order)
+  const branchFilterTrim = branchFilterSearch.trim();
+  const { data: branchFilterSearched = [], isFetching: branchFilterIsFetching } = useQuery({
+    queryKey: ['/api/branches', 'search', branchFilterTrim, 'filter'],
+    queryFn: () => BranchesService.listBranches({ q: branchFilterTrim, limit: 50 }),
+    enabled: branchFilterTrim.length > 0,
+    staleTime: 10_000,
+  });
+  const branchFilterList = branchFilterTrim ? branchFilterSearched : initialBranches;
+  const branchFilterOptions = (Array.isArray(branchFilterList) ? branchFilterList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
+  const branchAddTrim = branchSearch.trim();
+  const { data: branchAddSearched = [], isFetching: branchAddIsFetching } = useQuery({
+    queryKey: ['/api/branches', 'search', branchAddTrim, 'add'],
+    queryFn: () => BranchesService.listBranches({ q: branchAddTrim, limit: 50 }),
+    enabled: branchAddTrim.length > 0,
+    staleTime: 10_000,
+  });
+  const branchAddList = branchAddTrim ? branchAddSearched : initialBranches;
+  const branchAddOptions = (Array.isArray(branchAddList) ? branchAddList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
+  const branchEditTrim = branchEditSearch.trim();
+  const { data: branchEditSearched = [], isFetching: branchEditIsFetching } = useQuery({
+    queryKey: ['/api/branches', 'search', branchEditTrim, 'edit'],
+    queryFn: () => BranchesService.listBranches({ q: branchEditTrim, limit: 50 }),
+    enabled: branchEditTrim.length > 0,
+    staleTime: 10_000,
+  });
+  const branchEditList = branchEditTrim ? branchEditSearched : initialBranches;
+  const branchEditOptions = (Array.isArray(branchEditList) ? branchEditList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
@@ -141,34 +172,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <SelectItem value="admin_staff">Admin Staff</SelectItem>
             </SelectContent>
           </Select>
-          {(() => {
-            const trimmed = branchFilterSearch.trim();
-            const { data: searched = [], isFetching } = (function(){
-              // eslint-disable-next-line react-hooks/rules-of-hooks
-              return useQuery({
-                queryKey: ['/api/branches', 'search', trimmed],
-                queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
-                enabled: trimmed.length > 0,
-                staleTime: 10_000,
-              });
-            })();
-            const list = trimmed ? searched : branchList;
-            const options = (Array.isArray(list) ? list : [])
-              .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-            return (
-              <div className="w-56">
-                <SearchableCombobox
-                  value={filters.branchId}
-                  onValueChange={(v) => setFilters((s) => ({ ...s, branchId: v }))}
-                  placeholder="Filter by branch"
-                  searchPlaceholder="Search branches..."
-                  onSearch={setBranchFilterSearch}
-                  options={[{ value: '', label: 'All branches' }, ...options]}
-                  loading={Boolean((branchFilterSearch.trim().length > 0) && isFetching)}
-                />
-              </div>
-            );
-          })()}
+          <div className="w-56">
+            <SearchableCombobox
+              value={filters.branchId}
+              onValueChange={(v) => setFilters((s) => ({ ...s, branchId: v }))}
+              placeholder="Filter by branch"
+              searchPlaceholder="Search branches..."
+              onSearch={setBranchFilterSearch}
+              options={[{ value: '', label: 'All branches' }, ...branchFilterOptions]}
+              loading={Boolean(branchFilterTrim.length > 0 && branchFilterIsFetching)}
+            />
+          </div>
         </div>
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -213,32 +227,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div>
                 <Label>Branch<span className="text-destructive"> *</span></Label>
-                {(() => {
-                  const trimmed = branchSearch.trim();
-                  const { data: searched = [], isFetching } = (function(){
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    return useQuery({
-                      queryKey: ['/api/branches', 'search', trimmed],
-                      queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
-                      enabled: trimmed.length > 0,
-                      staleTime: 10_000,
-                    });
-                  })();
-                  const list = trimmed ? searched : initialBranches;
-                  const branchOptions = (Array.isArray(list) ? list : [])
-                    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-                  return (
-                    <SearchableCombobox
-                      value={form.branchId}
-                      onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                      placeholder="Select branch (required)"
-                      searchPlaceholder="Search branches..."
-                      onSearch={setBranchSearch}
-                      options={branchOptions}
-                      loading={Boolean((branchSearch.trim().length > 0) && isFetching)}
-                    />
-                  );
-                })()}
+                <SearchableCombobox
+                  value={form.branchId}
+                  onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                  placeholder="Select branch (required)"
+                  searchPlaceholder="Search branches..."
+                  onSearch={setBranchSearch}
+                  options={branchAddOptions}
+                  loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                />
               </div>
               <div className="col-span-full flex gap-2 mt-2">
                 <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
@@ -447,32 +444,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div className="sm:col-span-2 md:col-span-3">
                 <Label>Branch<span className="text-destructive"> *</span></Label>
-                {(() => {
-                  const trimmed = branchEditSearch.trim();
-                  const { data: searched = [], isFetching } = (function(){
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    return useQuery({
-                      queryKey: ['/api/branches', 'search', trimmed, 'edit'],
-                      queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
-                      enabled: trimmed.length > 0,
-                      staleTime: 10_000,
-                    });
-                  })();
-                  const list = trimmed ? searched : initialBranches;
-                  const options = (Array.isArray(list) ? list : [])
-                    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-                  return (
-                    <SearchableCombobox
-                      value={editForm.branchId}
-                      onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
-                      placeholder="Select branch (required)"
-                      searchPlaceholder="Search branches..."
-                      onSearch={setBranchEditSearch}
-                      options={options}
-                      loading={Boolean((branchEditSearch.trim().length > 0) && isFetching)}
-                    />
-                  );
-                })()}
+                <SearchableCombobox
+                  value={editForm.branchId}
+                  onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
+                  placeholder="Select branch (required)"
+                  searchPlaceholder="Search branches..."
+                  onSearch={setBranchEditSearch}
+                  options={branchEditOptions}
+                  loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
+                />
               </div>
               <div className="col-span-full flex gap-2">
                 <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || !editForm.branchId || updateMutation.isPending}>
