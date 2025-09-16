@@ -71,7 +71,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     return matchesQuery && matchesRole && matchesBranch;
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [filters.query, filters.role, filters.branchId]);
 
