@@ -105,6 +105,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     queryKey: ['/api/users'],
   });
 
+  const { data: branchesList = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: () => BranchesService.listBranches(),
+    staleTime: 30000,
+  });
+
   const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkEmailDuplicate = useCallback(
     (email: string) => {
