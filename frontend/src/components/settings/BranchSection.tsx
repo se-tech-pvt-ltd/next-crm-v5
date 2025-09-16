@@ -201,7 +201,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
                   <SelectContent>
                     {regions.length === 0 ? (
-                      <SelectItem value="" disabled>No regions found</SelectItem>
+                      <SelectItem value="__no_regions__" disabled>No regions found</SelectItem>
                     ) : (
                       (regions as any[]).map((r: any) => (
                         <SelectItem key={r.id} value={r.id}>{r.regionName}</SelectItem>
@@ -411,7 +411,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
                   <SelectContent>
                     {regions.length === 0 ? (
-                      <SelectItem value="" disabled>No regions found</SelectItem>
+                      <SelectItem value="__no_regions__" disabled>No regions found</SelectItem>
                     ) : (
                       (regions as any[]).map((r: any) => (
                         <SelectItem key={r.id} value={r.id}>{r.regionName}</SelectItem>
