@@ -37,6 +37,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Branches
   app.use('/api/branches', branchRoutes);
 
+  // Regions
+  app.use('/api/regions', (await import('./regionRoutes.js')).default);
+
   // Search routes
   app.use('/api/search', leadRoutes); // This includes search functionality
   app.use('/api/search', studentRoutes); // This includes search functionality

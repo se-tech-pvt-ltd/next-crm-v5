@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
 import { Database, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
@@ -23,6 +24,11 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     queryFn: async () => UsersService.getUsers(),
   });
 
+  const { data: regions = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: async () => RegionsService.listRegions(),
+  });
+
   const [form, setForm] = useState({
     name: '',
     city: '',
@@ -31,6 +37,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
     officialPhone: '',
     officialEmail: '',
     managerId: '',
+    regionId: '',
   });
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -40,7 +47,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '' });
+  const [editForm, setEditForm] = useState({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', regionId: '' });
 
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
@@ -168,22 +175,40 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={form.managerId} onValueChange={(v) => setForm((s) => ({ ...s, managerId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
                   <SelectContent>
-                    {users.length === 0 ? (
-                      <SelectItem value="" disabled>No users found</SelectItem>
-                    ) : (
-                      users
+                    {(() => {
+                      const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
+                      const branchHeadIds = new Set((branches as any[]).map((b: any) => b.branchHeadId).filter(Boolean));
+                      const available = (users as any[])
                         .filter((u: any) => u.role === 'branch_manager' || u.role === 'admin_staff')
-                        .map((u: any) => (
+                        .filter((u: any) => !regionHeadIds.has(u.id) && !branchHeadIds.has(u.id));
+                      return available.length === 0 ? (
+                        <SelectItem value="" disabled>No eligible users</SelectItem>
+                      ) : (
+                        available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
                             {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
                           </SelectItem>
                         ))
-                    )}
+                      );
+                    })()}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
+                <Label>Region</Label>
+                <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
+                  <SelectContent>
+                    {regions.length === 0 ? (
+                      <SelectItem value="" disabled>No regions found</SelectItem>
+                    ) : (
+                      (regions as any[]).map((r: any) => (
+                        <SelectItem key={r.id} value={r.id}>{r.regionName}</SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
 
@@ -194,7 +219,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 >
                   Save
                 </Button>
-                <Button variant="outline" onClick={() => { setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '' }); setModalOpen(false); }}>Cancel</Button>
+                <Button variant="outline" onClick={() => { setForm({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', regionId: '' }); setModalOpen(false); }}>Cancel</Button>
               </div>
             </div>
           </DialogContent>
@@ -226,6 +251,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Region</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Country</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Official Phone</TableHead>
@@ -248,11 +274,16 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         officialPhone: String(b.officialPhone || ''),
                         officialEmail: String(b.officialEmail || ''),
                         managerId: String(b.branchHeadId || b.managerId || ''),
+                        regionId: String((b as any).regionId || ''),
                       });
                       setIsEditing(false);
                       setDetailOpen(true);
                     }}>
                       <TableCell className="font-medium p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                      <TableCell className="p-2 text-xs">{(() => {
+                        const r = (regions as any[]).find((x: any) => x.id === (b as any).regionId);
+                        return r?.regionName || '-';
+                      })()}</TableCell>
                       <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
                       <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
@@ -355,16 +386,36 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={editForm.managerId} onValueChange={(v) => setEditForm((s) => ({ ...s, managerId: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch head" /></SelectTrigger>
                   <SelectContent>
-                    {users.length === 0 ? (
-                      <SelectItem value="" disabled>No users found</SelectItem>
-                    ) : (
-                      (users as any[])
+                    {(() => {
+                      const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
+                      const branchHeadIdsOther = new Set((branches as any[]).filter((b: any) => String(b.id) !== String(selected?.id)).map((b: any) => b.branchHeadId).filter(Boolean));
+                      const available = (users as any[])
                         .filter((u: any) => ['branch_manager','regional_manager','admin','super_admin','admin_staff'].includes(u.role))
-                        .map((u: any) => (
+                        .filter((u: any) => !regionHeadIds.has(u.id) && (!branchHeadIdsOther.has(u.id) || String(u.id) === String(selected?.branchHeadId || selected?.managerId)));
+                      return available.length === 0 ? (
+                        <SelectItem value="" disabled>No eligible users</SelectItem>
+                      ) : (
+                        available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
                             {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
                           </SelectItem>
                         ))
+                      );
+                    })()}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label>Region</Label>
+                <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
+                  <SelectContent>
+                    {regions.length === 0 ? (
+                      <SelectItem value="" disabled>No regions found</SelectItem>
+                    ) : (
+                      (regions as any[]).map((r: any) => (
+                        <SelectItem key={r.id} value={r.id}>{r.regionName}</SelectItem>
+                      ))
                     )}
                   </SelectContent>
                 </Select>

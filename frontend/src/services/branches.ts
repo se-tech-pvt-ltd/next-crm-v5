@@ -12,6 +12,7 @@ export interface Branch {
   officialEmail: string;
   managerId?: string | null;
   branchHeadId?: string | null;
+  regionId?: string | null;
   status?: string;
 }
 
@@ -23,6 +24,7 @@ export type CreateBranchInput = {
   officialPhone: string;
   officialEmail: string;
   managerId?: string | null;
+  regionId?: string | null;
 };
 
 export async function listBranches(params?: { q?: string; limit?: number }): Promise<Branch[]> {
