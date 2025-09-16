@@ -141,6 +141,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
   passwordHash: true, // Password is handled separately for security
+}).extend({
+  isActive: z.boolean().optional(),
+  isProfileComplete: z.boolean().optional(),
 });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
