@@ -38,10 +38,6 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selected, setSelected] = useState<any | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', headId: '' });
   const [pendingAssign, setPendingAssign] = useState<Record<string, string>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
@@ -81,21 +77,6 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      if (!selected?.id) throw new Error('Missing region id');
-      return RegionsService.updateRegion(String(selected.id), { ...editForm });
-    },
-    onSuccess: async () => {
-      setIsEditing(false);
-      await refetch();
-      toast({ title: 'Region updated', duration: 2000 });
-    },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || 'Failed to update region';
-      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
-    },
-  });
 
   const inlineUpdateMutation = useMutation({
     mutationFn: async ({ id, name, headId }: { id: string; name: string; headId: string }) => {
@@ -417,7 +398,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                   className="h-7"
                                 />
                               ) : (
-                                <button className="text-left w-full" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>
+                                <button className="text-left w-full" onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>
                                   {r.regionName}
                                 </button>
                               )}
@@ -472,7 +453,6 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                     <Button size="icon" variant="ghost" className="h-7 w-7"><MoreHorizontal className="w-4 h-4" /></Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="text-xs">
-                                    <DropdownMenuItem onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>View / Edit</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Inline edit</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => toggleExpand(String(r.id))}>{isOpen ? 'Collapse' : 'Expand'} branches</DropdownMenuItem>
                                   </DropdownMenuContent>
@@ -588,7 +568,6 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                             <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="text-xs">
-                            <DropdownMenuItem onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>View / Edit</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => { setInlineEditId(idStr); setInlineForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); }}>Inline edit</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -614,71 +593,6 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
         </div>
       )}
 
-      {/* Detail/Edit Drawer */}
-      <Drawer open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="flex items-center justify-between">
-              <span>{selected?.regionName || 'Region'}</span>
-              {!isEditing ? (
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
-              ) : null}
-            </DrawerTitle>
-          </DrawerHeader>
-
-          {!isEditing ? (
-            <div className="grid grid-cols-1 gap-3 p-4">
-              <div>
-                <div className="text-xs text-muted-foreground">Name</div>
-                <div className="font-medium">{selected?.regionName || '-'}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Region Head</div>
-                <div className="font-medium">{(() => {
-                  const headUser = (users as any[]).find((u: any) => u.id === selected?.regionHeadId);
-                  return headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
-                })()}</div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-2 p-4">
-              <div>
-                <Label>Name<span className="text-destructive"> *</span></Label>
-                <Input className="mt-1" value={editForm.name} onChange={(e) => setEditForm((s) => ({ ...s, name: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Region Head</Label>
-                <Select value={editForm.headId} onValueChange={(v) => setEditForm((s) => ({ ...s, headId: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select region head" /></SelectTrigger>
-                  <SelectContent>
-                    {headOptionsForEdit(selected?.regionHeadId).length === 0 ? (
-                      <SelectItem value="__no_eligible__" disabled>No eligible users</SelectItem>
-                    ) : (
-                      headOptionsForEdit(selected?.regionHeadId).map((u: any) => (
-                        <SelectItem key={u.id} value={String(u.id)}>
-                          {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-full flex gap-2">
-                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.name || updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save changes'}
-                </Button>
-                <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
-              </div>
-            </div>
-          )}
-
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="outline">Close</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 }
