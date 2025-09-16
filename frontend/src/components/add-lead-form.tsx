@@ -19,6 +19,7 @@ import { insertLeadSchema } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
+import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import {
   User,
@@ -51,6 +52,7 @@ const addLeadFormSchema = z.object({
   studyPlan: z.string().optional(),
   elt: z.string().optional(),
   counselorId: z.string().optional(),
+  branchId: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -68,6 +70,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const queryClient = useQueryClient();
 
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
+  const [branchSearchQuery, setBranchSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
 
   const [emailDuplicateStatus, setEmailDuplicateStatus] = useState<{
@@ -100,6 +103,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
     queryKey: ['/api/users'],
+  });
+
+  const { data: branchesList = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: () => BranchesService.listBranches(),
+    staleTime: 30000,
   });
 
   const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -224,6 +233,21 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         }))
     : [];
 
+  const branchOptions = (Array.isArray(branchesList) ? branchesList : [])
+    .filter((b: any) => {
+      const q = branchSearchQuery.trim().toLowerCase();
+      if (!q) return true;
+      const name = String(b.branchName || b.name || '').toLowerCase();
+      const city = String(b.city || '').toLowerCase();
+      const country = String(b.country || '').toLowerCase();
+      return name.includes(q) || city.includes(q) || country.includes(q);
+    })
+    .map((b: any) => ({
+      label: String(b.branchName || b.name || 'Unknown'),
+      value: String(b.id),
+      subtitle: [b.city, b.country].filter(Boolean).join(', ') || undefined,
+    }));
+
   const handleCounselorSearch = useCallback((query: string) => {
     setCounselorSearchQuery(query);
     if (query.length > 0) {
@@ -232,6 +256,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     } else {
       setSearchingCounselors(false);
     }
+  }, []);
+
+  const handleBranchSearch = useCallback((query: string) => {
+    setBranchSearchQuery(query);
   }, []);
 
   const form = useForm<AddLeadFormData>({
@@ -249,6 +277,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       studyPlan: '',
       elt: '',
       counselorId: '',
+      branchId: '',
       notes: '',
     },
   });
@@ -439,9 +468,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormControl>
                       <Input placeholder="Enter full name" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                     </FormControl>
-                    <div className="h-6">
-                      <FormMessage />
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )} />
 
@@ -510,9 +537,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormControl>
                       <Input placeholder="Enter city" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                     </FormControl>
-                    <div className="h-6">
-                      <FormMessage />
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )} />
               </div>
@@ -575,6 +600,29 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || counselorsLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found matching your search.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="branchId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Branch</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onSearch={handleBranchSearch}
+                        options={branchOptions}
+                        loading={false}
+                        placeholder="Select branch"
+                        searchPlaceholder="Search branches..."
+                        emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -36,6 +36,7 @@ export interface Lead {
   timeline: string | null;
   notes: string | null;
   counselorId: string | null;
+  branchId?: string | null;
   createdBy?: string | null;
   updatedBy?: string | null;
   createdAt: Date;
@@ -154,6 +155,7 @@ export const insertLeadSchema = z.object({
   timeline: z.string().optional(),
   notes: z.string().optional(),
   counselorId: z.string().optional(),
+  branchId: z.string().optional(),
 });
 
 export const insertStudentSchema = z.object({
