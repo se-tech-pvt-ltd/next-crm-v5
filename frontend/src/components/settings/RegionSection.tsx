@@ -152,6 +152,18 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
       .filter((u: any) => !regionHeadIds.has(u.id) && !branchHeadIds.has(u.id));
   }, [regions, branches, users]);
 
+  const branchHeadOptionsForEdit = (branch: any) => {
+    const currentHeadId = branch.branchHeadId || branch.managerId || null;
+    const regionHeadIds = new Set((regions as any[]).map((r: any) => r.regionHeadId).filter(Boolean));
+    const branchHeadIdsOther = new Set((branches as any[])
+      .filter((b: any) => String(b.id) !== String(branch.id))
+      .map((b: any) => b.branchHeadId)
+      .filter(Boolean));
+    return (users as any[])
+      .filter((u: any) => ['branch_manager','regional_manager','admin','super_admin','admin_staff'].includes(u.role))
+      .filter((u: any) => !regionHeadIds.has(u.id) && (!branchHeadIdsOther.has(u.id) || String(u.id) === String(currentHeadId || '')));
+  };
+
   const headOptionsForEdit = (currentHeadId: string | undefined) => {
     const regionHeadIdsOther = new Set((regions as any[])
       .filter((r: any) => String(r.regionHeadId || '') !== String(currentHeadId || ''))
