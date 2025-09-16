@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import * as RegionsService from '@/services/regions';
 import * as UsersService from '@/services/users';
 import * as BranchesService from '@/services/branches';
-import { Globe2, Plus } from 'lucide-react';
+import { Globe2, Plus, ChevronRight, ChevronDown } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 
