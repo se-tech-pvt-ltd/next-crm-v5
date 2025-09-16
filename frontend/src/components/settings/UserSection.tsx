@@ -13,6 +13,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const { data: branches = [] } = useQuery({ queryKey: ['/api/configurations/branches'], queryFn: () => BranchesService.listBranches() });
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [branchSearch, setBranchSearch] = useState('');
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => { await refetch(); setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); toast({ title: 'User created', description: 'User added successfully', duration: 2500 }); },
@@ -63,17 +64,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         <div>
           <Label>Branch<span className="text-destructive"> *</span></Label>
           {(() => {
-            const [branchSearch, setBranchSearch] = useState('');
             const assignedIds = new Set((users as any[]).map((u: any) => u.branchId).filter(Boolean));
-            const branchOptions = useMemo(() => {
-              const all = (Array.isArray(branches) ? branches : []).filter((b: any) => !assignedIds.has(b.id)).map((b: any) => ({
-                value: String(b.id),
-                label: String(b.branchName || b.name || b.id),
-              }));
-              if (!branchSearch.trim()) return all;
-              const q = branchSearch.toLowerCase();
-              return all.filter((o) => o.label.toLowerCase().includes(q));
-            }, [branches, users, branchSearch]);
+            const all = (Array.isArray(branches) ? branches : [])
+              .filter((b: any) => !assignedIds.has(b.id))
+              .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+            const q = branchSearch.toLowerCase();
+            const branchOptions = branchSearch.trim() ? all.filter((o) => o.label.toLowerCase().includes(q)) : all;
             return (
               <SearchableCombobox
                 value={form.branchId}
