@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Database, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
@@ -16,6 +18,9 @@ import { Pagination } from '@/components/ui/pagination';
 export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30000 });
+
+  // Branch search hooks will be initialized after state declarations to ensure state variables are defined before use
+  // (moved later in the file)
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
@@ -34,6 +39,37 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
+
+  // Branch search hooks (top-level to preserve hook order) — defined after state variables
+  const branchFilterTrim = branchFilterSearch.trim();
+  const { data: branchFilterSearched = [], isFetching: branchFilterIsFetching } = useQuery({
+    queryKey: ['/api/branches', 'search', branchFilterTrim, 'filter'],
+    queryFn: () => BranchesService.listBranches({ q: branchFilterTrim, limit: 50 }),
+    enabled: branchFilterTrim.length > 0,
+    staleTime: 10_000,
+  });
+  const branchFilterList = branchFilterTrim ? branchFilterSearched : initialBranches;
+  const branchFilterOptions = (Array.isArray(branchFilterList) ? branchFilterList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
+  const branchAddTrim = branchSearch.trim();
+  const { data: branchAddSearched = [], isFetching: branchAddIsFetching } = useQuery({
+    queryKey: ['/api/branches', 'search', branchAddTrim, 'add'],
+    queryFn: () => BranchesService.listBranches({ q: branchAddTrim, limit: 50 }),
+    enabled: branchAddTrim.length > 0,
+    staleTime: 10_000,
+  });
+  const branchAddList = branchAddTrim ? branchAddSearched : initialBranches;
+  const branchAddOptions = (Array.isArray(branchAddList) ? branchAddList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
+  const branchEditTrim = branchEditSearch.trim();
+  const { data: branchEditSearched = [], isFetching: branchEditIsFetching } = useQuery({
+    queryKey: ['/api/branches', 'search', branchEditTrim, 'edit'],
+    queryFn: () => BranchesService.listBranches({ q: branchEditTrim, limit: 50 }),
+    enabled: branchEditTrim.length > 0,
+    staleTime: 10_000,
+  });
+  const branchEditList = branchEditTrim ? branchEditSearched : initialBranches;
+  const branchEditOptions = (Array.isArray(branchEditList) ? branchEditList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
 
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
@@ -86,12 +122,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Users filtering
   const filteredUsers = (Array.isArray(users) ? users : []).filter((u: any) => {
     const q = filters.query.trim().toLowerCase();
+    const first = (u.firstName ?? u.first_name) ?? '';
+    const last = (u.lastName ?? u.last_name) ?? '';
     const matchesQuery = !q ||
-      String(u.firstName || '').toLowerCase().includes(q) ||
-      String(u.lastName || '').toLowerCase().includes(q) ||
+      String(first).toLowerCase().includes(q) ||
+      String(last).toLowerCase().includes(q) ||
       String(u.email || '').toLowerCase().includes(q);
     const matchesRole = !filters.role || String(u.role || '') === filters.role;
-    const matchesBranch = !filters.branchId || String(u.branchId || '') === filters.branchId;
+    const matchesBranch = !filters.branchId || String((u.branchId ?? u.branch_id) || '') === filters.branchId;
     return matchesQuery && matchesRole && matchesBranch;
   });
   const sortedUsers = [...filteredUsers].sort((a: any, b: any) => {
@@ -137,34 +175,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <SelectItem value="admin_staff">Admin Staff</SelectItem>
             </SelectContent>
           </Select>
-          {(() => {
-            const trimmed = branchFilterSearch.trim();
-            const { data: searched = [], isFetching } = (function(){
-              // eslint-disable-next-line react-hooks/rules-of-hooks
-              return useQuery({
-                queryKey: ['/api/branches', 'search', trimmed],
-                queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
-                enabled: trimmed.length > 0,
-                staleTime: 10_000,
-              });
-            })();
-            const list = trimmed ? searched : branchList;
-            const options = (Array.isArray(list) ? list : [])
-              .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-            return (
-              <div className="w-56">
-                <SearchableCombobox
-                  value={filters.branchId}
-                  onValueChange={(v) => setFilters((s) => ({ ...s, branchId: v }))}
-                  placeholder="Filter by branch"
-                  searchPlaceholder="Search branches..."
-                  onSearch={setBranchFilterSearch}
-                  options={[{ value: '', label: 'All branches' }, ...options]}
-                  loading={Boolean((branchFilterSearch.trim().length > 0) && isFetching)}
-                />
-              </div>
-            );
-          })()}
+          <div className="w-56">
+            <SearchableCombobox
+              value={filters.branchId}
+              onValueChange={(v) => setFilters((s) => ({ ...s, branchId: v }))}
+              placeholder="Filter by branch"
+              searchPlaceholder="Search branches..."
+              onSearch={setBranchFilterSearch}
+              options={[{ value: '', label: 'All branches' }, ...branchFilterOptions]}
+              loading={Boolean(branchFilterTrim.length > 0 && branchFilterIsFetching)}
+            />
+          </div>
         </div>
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -209,32 +230,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div>
                 <Label>Branch<span className="text-destructive"> *</span></Label>
-                {(() => {
-                  const trimmed = branchSearch.trim();
-                  const { data: searched = [], isFetching } = (function(){
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    return useQuery({
-                      queryKey: ['/api/branches', 'search', trimmed],
-                      queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
-                      enabled: trimmed.length > 0,
-                      staleTime: 10_000,
-                    });
-                  })();
-                  const list = trimmed ? searched : initialBranches;
-                  const branchOptions = (Array.isArray(list) ? list : [])
-                    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-                  return (
-                    <SearchableCombobox
-                      value={form.branchId}
-                      onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                      placeholder="Select branch (required)"
-                      searchPlaceholder="Search branches..."
-                      onSearch={setBranchSearch}
-                      options={branchOptions}
-                      loading={Boolean((branchSearch.trim().length > 0) && isFetching)}
-                    />
-                  );
-                })()}
+                <SearchableCombobox
+                  value={form.branchId}
+                  onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                  placeholder="Select branch (required)"
+                  searchPlaceholder="Search branches..."
+                  onSearch={setBranchSearch}
+                  options={branchAddOptions}
+                  loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                />
               </div>
               <div className="col-span-full flex gap-2 mt-2">
                 <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
@@ -277,6 +281,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Active</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -284,18 +289,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableRow key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                     setSelected(u);
                     setEditForm({
-                      firstName: String(u.firstName || ''),
-                      lastName: String(u.lastName || ''),
+                      firstName: String((u.firstName ?? u.first_name) || ''),
+                      lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
-                      branchId: String(u.branchId || ''),
+                      branchId: String((u.branchId ?? u.branch_id) || ''),
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
                   }}>
-                    <TableCell className="p-2 text-xs">{[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{[(u.firstName ?? u.first_name), (u.lastName ?? u.last_name)].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
-                    <TableCell className="p-2 text-xs">{u.branchName || u.branchId || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{u.branchName || u.branchId || u.branch_id || '—'}</TableCell>
+                    <TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -317,10 +323,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       </div>
 
       <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>{[selected?.firstName, selected?.lastName].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
+              <span>{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
               {!isEditing ? (
                 <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
               ) : null}
@@ -328,22 +334,72 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
           </DialogHeader>
 
           {!isEditing ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <div className="text-xs text-muted-foreground">Name</div>
-                <div className="font-medium">{[selected?.firstName, selected?.lastName].filter(Boolean).join(' ') || '—'}</div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={String(selected?.profileImageUrl ?? selected?.profile_image_url ?? '')} alt="profile" />
+                  <AvatarFallback>{String((((selected?.firstName ?? selected?.first_name) || ' ')[0] || '') + (((selected?.lastName ?? selected?.last_name) || ' ')[0] || '')).trim().toUpperCase() || (selected?.email || 'U')[0]}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="text-base font-semibold truncate">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge>{selected ? roleLabel(selected.role) : '—'}</Badge>
+                    {selected?.branchName ? <Badge variant="secondary">{String(selected.branchName)}</Badge> : null}
+                    {(selected?.branchId ?? selected?.branch_id) && !selected?.branchName ? <Badge variant="secondary">{String(selected?.branchId ?? selected?.branch_id)}</Badge> : null}
+                    <Badge variant={(selected?.isActive ?? selected?.is_active) ? 'default' : 'destructive'}>{(selected?.isActive ?? selected?.is_active) ? 'Active' : 'Inactive'}</Badge>
+                    <Badge variant={(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'default' : 'outline'}>Reg Email {(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not Sent'}</Badge>
+                    <Badge variant={(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'default' : 'outline'}>Profile {(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Complete' : 'Incomplete'}</Badge>
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Email</div>
-                <div className="font-medium break-words">{selected?.email || '—'}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Role</div>
-                <div className="font-medium">{selected ? roleLabel(selected.role) : '—'}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Branch</div>
-                <div className="font-medium">{selected?.branchId || '—'}</div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">User ID</div>
+                  <div className="font-medium break-words">{selected?.email || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">First name</div>
+                  <div className="font-medium">{(selected?.firstName ?? selected?.first_name) || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Last name</div>
+                  <div className="font-medium">{(selected?.lastName ?? selected?.last_name) || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Role</div>
+                  <div className="font-medium">{selected ? roleLabel(selected.role) : '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Branch</div>
+                  <div className="font-medium">{selected?.branchName || selected?.branchId || selected?.branch_id || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Phone number</div>
+                  <div className="font-medium">{selected?.phoneNumber || selected?.phone_number || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Registration email</div>
+                  <div className="font-medium">{(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not sent'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Profile complete</div>
+                  <div className="font-medium">{(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Yes' : 'No'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Active</div>
+                  <div className="font-medium">{(selected?.isActive ?? selected?.is_active) ? 'Yes' : 'No'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Created at</div>
+                  <div className="font-medium">{selected?.createdAt || selected?.created_at ? new Date(String(selected?.createdAt || selected?.created_at)).toLocaleString() : '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Updated at</div>
+                  <div className="font-medium">{selected?.updatedAt || selected?.updated_at ? new Date(String(selected?.updatedAt || selected?.updated_at)).toLocaleString() : '—'}</div>
+                </div>
               </div>
             </div>
           ) : (
@@ -374,32 +430,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div className="sm:col-span-2 md:col-span-3">
                 <Label>Branch<span className="text-destructive"> *</span></Label>
-                {(() => {
-                  const trimmed = branchEditSearch.trim();
-                  const { data: searched = [], isFetching } = (function(){
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    return useQuery({
-                      queryKey: ['/api/branches', 'search', trimmed, 'edit'],
-                      queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
-                      enabled: trimmed.length > 0,
-                      staleTime: 10_000,
-                    });
-                  })();
-                  const list = trimmed ? searched : initialBranches;
-                  const options = (Array.isArray(list) ? list : [])
-                    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
-                  return (
-                    <SearchableCombobox
-                      value={editForm.branchId}
-                      onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
-                      placeholder="Select branch (required)"
-                      searchPlaceholder="Search branches..."
-                      onSearch={setBranchEditSearch}
-                      options={options}
-                      loading={Boolean((branchEditSearch.trim().length > 0) && isFetching)}
-                    />
-                  );
-                })()}
+                <SearchableCombobox
+                  value={editForm.branchId}
+                  onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
+                  placeholder="Select branch (required)"
+                  searchPlaceholder="Search branches..."
+                  onSearch={setBranchEditSearch}
+                  options={branchEditOptions}
+                  loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
+                />
               </div>
               <div className="col-span-full flex gap-2">
                 <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || !editForm.branchId || updateMutation.isPending}>

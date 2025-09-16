@@ -15,8 +15,9 @@ export const users = mysqlTable("users", {
   phoneNumber: varchar("phone_number", { length: 20 }),
   dateOfBirth: date("date_of_birth"),
   passwordHash: varchar("password_hash", { length: 255 }), // hashed password for authentication
-  isActive: boolean("is_active").notNull().default(true),
-  isProfileComplete: boolean("is_profile_complete").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(false),
+  isRegistrationEmailSent: boolean("is_registration_email_sent").notNull().default(false),
+  isProfileComplete: boolean("is_profile_complete").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -148,6 +149,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   passwordHash: true, // Password is handled separately for security
 }).extend({
   isActive: z.boolean().optional(),
+  isRegistrationEmailSent: z.boolean().optional(),
   isProfileComplete: z.boolean().optional(),
 });
 
