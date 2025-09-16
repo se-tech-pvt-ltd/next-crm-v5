@@ -38,6 +38,15 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', headId: '' });
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const createMutation = useMutation({
     mutationFn: () => RegionsService.createRegion({ ...form }),
@@ -169,6 +178,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
             <Table className="text-xs">
               <TableHeader>
                 <TableRow>
+                  <TableHead className="h-8 px-2 w-6"></TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Head</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Branches</TableHead>
@@ -178,18 +188,66 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                 {(pageItems as any[]).map((r: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === r.regionHeadId);
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
-                  const branchCount = (branches as any[]).filter((b: any) => String((b as any).regionId || '') === String(r.id)).length;
+                  const regionBranches = (branches as any[]).filter((b: any) => String((b as any).regionId || '') === String(r.id));
+                  const branchCount = regionBranches.length;
+                  const isOpen = expanded.has(String(r.id));
                   return (
-                    <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
-                      setSelected(r);
-                      setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') });
-                      setIsEditing(false);
-                      setDetailOpen(true);
-                    }}>
-                      <TableCell className="font-medium p-2 text-xs">{r.regionName}</TableCell>
-                      <TableCell className="p-2 text-xs">{headName}</TableCell>
-                      <TableCell className="p-2 text-xs">{branchCount}</TableCell>
-                    </TableRow>
+                    <React.Fragment key={r.id}>
+                      <TableRow className="hover:bg-gray-50">
+                        <TableCell className="p-1 align-top">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            aria-label={isOpen ? 'Collapse' : 'Expand'}
+                            aria-expanded={isOpen}
+                            onClick={(e) => { e.stopPropagation(); toggleExpand(String(r.id)); }}
+                          >
+                            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          </Button>
+                        </TableCell>
+                        <TableCell className="font-medium p-2 text-xs cursor-pointer" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>{r.regionName}</TableCell>
+                        <TableCell className="p-2 text-xs cursor-pointer" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>{headName}</TableCell>
+                        <TableCell className="p-2 text-xs cursor-pointer" onClick={() => { setSelected(r); setEditForm({ name: String(r.regionName || ''), headId: String(r.regionHeadId || '') }); setIsEditing(false); setDetailOpen(true); }}>{branchCount}</TableCell>
+                      </TableRow>
+                      {isOpen ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="p-0 bg-muted/20">
+                            <div className="p-2">
+                              {branchCount === 0 ? (
+                                <div className="text-xs text-muted-foreground px-2 py-1">No branches in this region.</div>
+                              ) : (
+                                <Table className="text-xs">
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="h-7 px-2 text-[11px]">Branch</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">City</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">Country</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">Head</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {regionBranches.map((b: any) => {
+                                      const head = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
+                                      const headLabel = head ? ((`${head.firstName || ''} ${head.lastName || ''}`.trim()) || head.email || '-') : '-';
+                                      return (
+                                        <TableRow key={b.id}>
+                                          <TableCell className="p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                                          <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
+                                          <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
+                                          <TableCell className="p-2 text-xs">{headLabel}</TableCell>
+                                        </TableRow>
+                                      );
+                                    })}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : null}
+                    </React.Fragment>
                   );
                 })}
               </TableBody>
