@@ -4,14 +4,16 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { Separator } from '@/components/ui/separator';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 
 export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
-  const { data: branches = [] } = useQuery({ queryKey: ['/api/configurations/branches'], queryFn: () => BranchesService.listBranches() });
+  const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches', { limit: 3 }], queryFn: () => BranchesService.listBranches({ limit: 3 }) });
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [branchSearch, setBranchSearch] = useState('');
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => { await refetch(); setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); toast({ title: 'User created', description: 'User added successfully', duration: 2500 }); },
@@ -61,19 +63,36 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
         </div>
         <div>
           <Label>Branch<span className="text-destructive"> *</span></Label>
-          <Select value={form.branchId} onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue placeholder="Select branch (required)" /></SelectTrigger>
-            <SelectContent>
-              {branches.map((b: any) => {
-                const assignedTo = (users as any[]).find((u: any) => u.branchId === b.id);
-                return (
-                  <SelectItem key={b.id} value={b.id} disabled={!!assignedTo}>
-                    {b.name}{assignedTo ? ' — Assigned' : ''}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          {(() => {
+            const assignedIds = new Set((users as any[]).map((u: any) => u.branchId).filter(Boolean));
+            const trimmed = branchSearch.trim();
+            const { data: searched = [], isFetching } = (function(){
+              // use a simple hook-in-function pattern to keep code localized
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              return useQuery({
+                queryKey: ['/api/branches', 'search', trimmed],
+                queryFn: () => BranchesService.listBranches({ q: trimmed, limit: 50 }),
+                enabled: trimmed.length > 0,
+                staleTime: 10_000,
+              });
+            })();
+            const list = trimmed ? searched : initialBranches;
+            const all = (Array.isArray(list) ? list : [])
+              .filter((b: any) => !assignedIds.has(b.id))
+              .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+            const branchOptions = all;
+            return (
+              <SearchableCombobox
+                value={form.branchId}
+                onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                placeholder="Select branch (required)"
+                searchPlaceholder="Search branches..."
+                onSearch={setBranchSearch}
+                options={branchOptions}
+                loading={Boolean((branchSearch.trim().length > 0) && isFetching)}
+              />
+            );
+          })()}
         </div>
       </div>
       <div className="flex gap-2">

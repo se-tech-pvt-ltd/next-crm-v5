@@ -25,8 +25,8 @@ export class AuthController {
       const isProd = process.env.NODE_ENV === 'production';
       res.cookie('access_token', token, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: isProd,
+        sameSite: 'none',
+        secure: true,
         maxAge: 15 * 60 * 1000,
         path: '/',
       });
