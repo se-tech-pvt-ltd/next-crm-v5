@@ -108,10 +108,12 @@ export function MultiSelect({
                     className="text-xs"
                   >
                     {option.label}
-                    <button
-                      className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
+                        if (e.key === "Enter" || e.key === " ") {
                           handleRemove(option.value);
                         }
                       }}
@@ -122,7 +124,7 @@ export function MultiSelect({
                       onClick={(e) => handleRemove(option.value, e)}
                     >
                       <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                    </button>
+                    </span>
                   </Badge>
                 ))}
                 {selectedOptions.length > maxDisplayItems && (
@@ -133,12 +135,15 @@ export function MultiSelect({
               </div>
             )}
             {selectedOptions.length > 0 && (
-              <button
-                className="ml-2 h-4 w-4 shrink-0 hover:text-destructive"
+              <span
+                role="button"
+                tabIndex={0}
+                className="ml-2 h-4 w-4 shrink-0 hover:text-destructive cursor-pointer"
                 onClick={handleClearAll}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClearAll(e as any) }}
               >
                 <X className="h-4 w-4" />
-              </button>
+              </span>
             )}
           </div>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
