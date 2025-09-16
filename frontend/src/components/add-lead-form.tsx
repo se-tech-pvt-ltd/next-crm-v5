@@ -251,6 +251,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       studyPlan: '',
       elt: '',
       counselorId: '',
+      branchId: '',
       notes: '',
     },
   });
