@@ -342,7 +342,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 </Avatar>
                 <div className="min-w-0">
                   <div className="text-base font-semibold truncate">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</div>
-                  <div className="text-xs text-muted-foreground break-words">{selected?.email || '—'}</div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Badge>{selected ? roleLabel(selected.role) : '—'}</Badge>
                     {selected?.branchName ? <Badge variant="secondary">{String(selected.branchName)}</Badge> : null}
@@ -368,10 +367,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <div>
                   <div className="text-xs text-muted-foreground">Last name</div>
                   <div className="font-medium">{(selected?.lastName ?? selected?.last_name) || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Email</div>
-                  <div className="font-medium break-words">{selected?.email || '—'}</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Role</div>
@@ -404,10 +399,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <div>
                   <div className="text-xs text-muted-foreground">Updated at</div>
                   <div className="font-medium">{selected?.updatedAt || selected?.updated_at ? new Date(String(selected?.updatedAt || selected?.updated_at)).toLocaleString() : '—'}</div>
-                </div>
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <div className="text-xs text-muted-foreground">Password hash</div>
-                  <div className="font-medium">•••• (hidden)</div>
                 </div>
               </div>
             </div>
