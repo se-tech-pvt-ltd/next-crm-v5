@@ -233,6 +233,21 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         }))
     : [];
 
+  const branchOptions = (Array.isArray(branchesList) ? branchesList : [])
+    .filter((b: any) => {
+      const q = branchSearchQuery.trim().toLowerCase();
+      if (!q) return true;
+      const name = String(b.branchName || b.name || '').toLowerCase();
+      const city = String(b.city || '').toLowerCase();
+      const country = String(b.country || '').toLowerCase();
+      return name.includes(q) || city.includes(q) || country.includes(q);
+    })
+    .map((b: any) => ({
+      label: String(b.branchName || b.name || 'Unknown'),
+      value: String(b.id),
+      subtitle: [b.city, b.country].filter(Boolean).join(', ') || undefined,
+    }));
+
   const handleCounselorSearch = useCallback((query: string) => {
     setCounselorSearchQuery(query);
     if (query.length > 0) {
