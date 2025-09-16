@@ -23,29 +23,30 @@ const allowedOrigins = new Set<string>([
 
 app.use(
   helmet({
-    // Content Security Policy
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        defaultSrc: ["'self'"],
-        baseUri: ["'self'"],
-        objectSrc: ["'none'"],
-        imgSrc: ["'self'", "data:"],
-        scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'none'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", ...Array.from(allowedOrigins)],
-      },
-    },
+    // Content Security Policy: strict in prod, relaxed in dev to work in preview iframes/proxies
+    contentSecurityPolicy: isProd
+      ? {
+          useDefaults: true,
+          directives: {
+            defaultSrc: ["'self'"],
+            baseUri: ["'self'"],
+            objectSrc: ["'none'"],
+            imgSrc: ["'self'", "data:"],
+            scriptSrc: ["'self'"],
+            scriptSrcAttr: ["'none'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            connectSrc: ["'self'", ...Array.from(allowedOrigins)],
+          },
+        }
+      : false,
     // Prevent MIME type sniffing
     noSniff: true,
-    // Clickjacking protection
-    frameguard: { action: "deny" },
+    // Clickjacking protection (disable in dev to allow preview iframe)
+    frameguard: isProd ? { action: "deny" } : false,
     // HSTS only in production
     hsts: isProd
       ? { maxAge: 15552000, includeSubDomains: true, preload: false }
       : false,
-    // Some apps embed cross-origin resources (uploads, etc.). Keep strict but compatible defaults.
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     crossOriginResourcePolicy: { policy: "same-site" },
     crossOriginEmbedderPolicy: false,
@@ -55,7 +56,8 @@ app.use(
 // CORS configuration (restricted origins and methods, allow credentials for auth cookies)
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // Allow same-origin or non-browser requests
+    if (!origin) return callback(null, true);
+    if (!isProd) return callback(null, true);
     if (allowedOrigins.has(origin)) return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },
