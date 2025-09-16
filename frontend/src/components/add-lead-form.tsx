@@ -539,9 +539,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormControl>
                       <Input placeholder="Enter city" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                     </FormControl>
-                    <div className="h-6">
-                      <FormMessage />
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )} />
               </div>
