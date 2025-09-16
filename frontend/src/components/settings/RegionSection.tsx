@@ -24,7 +24,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     queryFn: async () => UsersService.getUsers(),
   });
 
-  const { data: branches = [] } = useQuery({
+  const { data: branches = [], refetch: refetchBranches } = useQuery({
     queryKey: ['/api/branches?limit=1000'],
     queryFn: async () => BranchesService.listBranches({ limit: 1000 }),
   });
@@ -38,6 +38,32 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', headId: '' });
+  const [pendingAssign, setPendingAssign] = useState<Record<string, string>>({});
+
+  const assignBranchMutation = useMutation({
+    mutationFn: async ({ branchId, regionId }: { branchId: string; regionId: string }) => {
+      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
+      if (!b) throw new Error('Branch not found');
+      return BranchesService.updateBranch(String(b.id), {
+        name: String(b.branchName || b.name || ''),
+        city: String(b.city || ''),
+        country: String(b.country || ''),
+        address: String(b.address || ''),
+        officialPhone: String(b.officialPhone || ''),
+        officialEmail: String(b.officialEmail || ''),
+        managerId: b.branchHeadId || b.managerId || null,
+        regionId,
+      });
+    },
+    onSuccess: async () => {
+      await Promise.all([refetch(), refetchBranches()]);
+      toast({ title: 'Branch added to region', duration: 2000 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to add branch to region';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+  });
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
@@ -214,7 +240,38 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                       {isOpen ? (
                         <TableRow>
                           <TableCell colSpan={4} className="p-0 bg-muted/20">
-                            <div className="p-2">
+                            <div className="p-2 space-y-2">
+                              <div className="flex items-center gap-2 p-2 rounded border bg-background/80">
+                                <div className="text-xs font-medium">Add branch to this region</div>
+                                <div className="flex-1" />
+                                <Select value={pendingAssign[String(r.id)] || ''} onValueChange={(v) => setPendingAssign((s) => ({ ...s, [String(r.id)]: v }))}>
+                                  <SelectTrigger className="h-7 w-64 text-xs"><SelectValue placeholder="Select unassigned branch" /></SelectTrigger>
+                                  <SelectContent>
+                                    {(() => {
+                                      const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
+                                      return unassigned.length === 0 ? (
+                                        <SelectItem value="" disabled>No unassigned branches</SelectItem>
+                                      ) : (
+                                        unassigned.map((b: any) => (
+                                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || '-'}{b.city ? `, ${b.city}` : ''}</SelectItem>
+                                        ))
+                                      );
+                                    })()}
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    const bid = pendingAssign[String(r.id)];
+                                    if (!bid) return;
+                                    assignBranchMutation.mutate({ branchId: bid, regionId: String(r.id) });
+                                  }}
+                                  disabled={!pendingAssign[String(r.id)] || assignBranchMutation.isPending}
+                                >
+                                  {assignBranchMutation.isPending ? 'Adding...' : 'Add'}
+                                </Button>
+                              </div>
+
                               {branchCount === 0 ? (
                                 <div className="text-xs text-muted-foreground px-2 py-1">No branches in this region.</div>
                               ) : (
