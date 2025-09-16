@@ -559,14 +559,36 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                       </TableHeader>
                                       <TableBody>
                                         {regionBranches.map((b: any) => {
-                                          const head = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
-                                          const headLabel = head ? ((`${head.firstName || ''} ${head.lastName || ''}`.trim()) || head.email || '-') : '-';
+                                          const currentHeadId = String(b.branchHeadId || b.managerId || '');
+                                          const options = branchHeadOptionsForEdit(b);
                                           return (
                                             <TableRow key={b.id}>
                                               <TableCell className="p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
                                               <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
                                               <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
-                                              <TableCell className="p-2 text-xs">{headLabel}</TableCell>
+                                              <TableCell className="p-2 text-xs">
+                                                {options.length === 0 ? (
+                                                  <span className="text-muted-foreground">No eligible users</span>
+                                                ) : (
+                                                  <Select
+                                                    value={branchHeadDraft[String(b.id)] ?? currentHeadId}
+                                                    onValueChange={(v) => {
+                                                      setBranchHeadDraft((s) => ({ ...s, [String(b.id)]: v }));
+                                                      updateBranchHeadMutation.mutate({ branchId: String(b.id), userId: v });
+                                                    }}
+                                                    disabled={updatingBranchId === String(b.id)}
+                                                  >
+                                                    <SelectTrigger className="h-7 text-xs w-48"><SelectValue placeholder="Select head" /></SelectTrigger>
+                                                    <SelectContent>
+                                                      {options.map((u: any) => (
+                                                        <SelectItem key={u.id} value={String(u.id)}>
+                                                          {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                                                        </SelectItem>
+                                                      ))}
+                                                    </SelectContent>
+                                                  </Select>
+                                                )}
+                                              </TableCell>
                                             </TableRow>
                                           );
                                         })}
