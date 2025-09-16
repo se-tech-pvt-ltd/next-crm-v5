@@ -50,17 +50,19 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
   // Get existing leads and students to prevent duplicates
   const { data: existingLeads } = useQuery({
     queryKey: ['/api/leads'],
+    enabled: open,
   });
 
   const { data: existingStudents } = useQuery({
     queryKey: ['/api/students'],
+    enabled: open,
   });
 
   // Get counselors with search functionality
   const { data: counselors, isLoading: counselorsLoading } = useQuery({
     queryKey: ['/api/users', { search: counselorSearchQuery }],
     queryFn: async () => UsersService.getUsers(),
-    enabled: true,
+    enabled: open,
   });
 
   // Handle counselor search
