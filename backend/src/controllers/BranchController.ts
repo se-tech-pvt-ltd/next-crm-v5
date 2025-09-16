@@ -16,6 +16,7 @@ export class BranchController {
         params.push(like, like, like);
       }
 
+      const limitClause = limit ? ` LIMIT ${limit}` : '';
       const sql = `SELECT id,
               branch_name as branchName,
               city,
@@ -28,9 +29,7 @@ export class BranchController {
               updated_on as updatedOn
          FROM branches
          ${whereClause}
-         ORDER BY branch_name${limit ? ' LIMIT ?' : ''}`;
-
-      if (limit) params.push(limit);
+         ORDER BY branch_name${limitClause}`;
 
       const [rows] = await connection.query<any[]>(sql, params);
       res.json(rows);
