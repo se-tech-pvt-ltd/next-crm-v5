@@ -246,10 +246,10 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
             value={filters.name}
             onChange={(e) => setFilters((s) => ({ ...s, name: e.target.value }))}
           />
-          <Select value={filters.headId} onValueChange={(v) => setFilters((s) => ({ ...s, headId: v }))}>
+          <Select value={filters.headId || '__all__'} onValueChange={(v) => setFilters((s) => ({ ...s, headId: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-52 text-xs"><SelectValue placeholder="Filter by head" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All heads</SelectItem>
+              <SelectItem value="__all__">All heads</SelectItem>
               {(users as any[]).map((u: any) => (
                 <SelectItem key={u.id} value={String(u.id)}>
                   {(`${u.firstName || ''} ${u.lastName || ''}`.trim()) || u.email || '-'}
@@ -280,7 +280,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region head" /></SelectTrigger>
                   <SelectContent>
                     {eligibleHeads.length === 0 ? (
-                      <SelectItem value="" disabled>No eligible users</SelectItem>
+                      <SelectItem value="__no_eligible__" disabled>No eligible users</SelectItem>
                     ) : (
                       eligibleHeads.map((u: any) => (
                         <SelectItem key={u.id} value={String(u.id)}>
@@ -494,12 +494,12 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                         {(() => {
                                           const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
                                           return unassigned.length === 0 ? (
-                                            <SelectItem value="" disabled>No unassigned branches</SelectItem>
-                                          ) : (
-                                            unassigned.map((b: any) => (
-                                              <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || '-'}{b.city ? `, ${b.city}` : ''}</SelectItem>
-                                            ))
-                                          );
+                                        <SelectItem value="__none__" disabled>No unassigned branches</SelectItem>
+                                      ) : (
+                                        unassigned.map((b: any) => (
+                                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || '-'}{b.city ? `, ${b.city}` : ''}</SelectItem>
+                                        ))
+                                      );
                                         })()}
                                       </SelectContent>
                                     </Select>
@@ -652,7 +652,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select region head" /></SelectTrigger>
                   <SelectContent>
                     {headOptionsForEdit(selected?.regionHeadId).length === 0 ? (
-                      <SelectItem value="" disabled>No eligible users</SelectItem>
+                      <SelectItem value="__no_eligible__" disabled>No eligible users</SelectItem>
                     ) : (
                       headOptionsForEdit(selected?.regionHeadId).map((u: any) => (
                         <SelectItem key={u.id} value={String(u.id)}>
