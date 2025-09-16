@@ -1,5 +1,6 @@
 import { UserModel } from "../models/User.js";
 import { type User, type InsertUser } from "../shared/schema.js";
+import { AuthService } from "./AuthService.js";
 
 export class UserService {
   static async getUser(id: string): Promise<User | undefined> {
