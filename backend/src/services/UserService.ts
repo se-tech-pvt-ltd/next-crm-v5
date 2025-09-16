@@ -32,7 +32,13 @@ export class UserService {
         throw new Error('branch already assigned to another user');
       }
     }
-    return await UserModel.create(userData);
+    const data: InsertUser = {
+      ...userData,
+      isActive: false,
+      isRegistrationEmailSent: false,
+      isProfileComplete: false,
+    } as InsertUser;
+    return await UserModel.create(data);
   }
 
   static async createUserWithPassword(userData: InsertUser, password: string): Promise<User> {
@@ -46,6 +52,8 @@ export class UserService {
     }
     const data: InsertUser = {
       ...userData,
+      isActive: false,
+      isRegistrationEmailSent: false,
       isProfileComplete: false,
     } as InsertUser;
     const user = await AuthService.createUserWithPassword(data, password);
