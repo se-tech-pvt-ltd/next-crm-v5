@@ -1,6 +1,7 @@
 import { eq, or, like, and, inArray } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { users, type User, type InsertUser } from "../shared/schema.js";
+import { eq, like, or, inArray, and, desc } from "drizzle-orm";
 
 export class UserModel {
   static async findById(id: string): Promise<User | undefined> {
@@ -60,7 +61,7 @@ export class UserModel {
   }
 
   static async findAll(): Promise<User[]> {
-    return await db.select().from(users);
+    return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
