@@ -1,5 +1,6 @@
 import { UserModel } from "../models/User.js";
 import { type User, type InsertUser } from "../shared/schema.js";
+import { AuthService } from "./AuthService.js";
 
 export class UserService {
   static async getUser(id: string): Promise<User | undefined> {
@@ -32,6 +33,23 @@ export class UserService {
       }
     }
     return await UserModel.create(userData);
+  }
+
+  static async createUserWithPassword(userData: InsertUser, password: string): Promise<User> {
+    if (!userData.email) throw new Error('email is required');
+    if (!userData.branchId) throw new Error('branchId is required');
+    if (userData.branchId) {
+      const existing = await UserModel.findByBranchId(userData.branchId);
+      if (existing) {
+        throw new Error('branch already assigned to another user');
+      }
+    }
+    const data: InsertUser = {
+      ...userData,
+      isProfileComplete: false,
+    } as InsertUser;
+    const user = await AuthService.createUserWithPassword(data, password);
+    return user;
   }
 
   static async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {

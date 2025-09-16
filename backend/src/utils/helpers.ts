@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export function formatFieldName(fieldName: string): string {
   return fieldName
     .replace(/([A-Z])/g, ' $1')
@@ -42,6 +44,18 @@ export function hasPermission(userRole: string, requiredRole: string): boolean {
     admin_staff: 6,
   } as const;
   return ((roleHierarchy as any)[userRole] ?? 0) >= ((roleHierarchy as any)[requiredRole] ?? Infinity);
+}
+
+export function generateNumericPassword(length = 10): string {
+  const crypto = require('crypto');
+  const digits = '0123456789';
+  let out = '';
+  while (out.length < length) {
+    const buf = crypto.randomBytes(1);
+    const idx = buf[0] % digits.length;
+    out += digits[idx];
+  }
+  return out;
 }
 
 export function normalizeDate(value: unknown): string | undefined {
