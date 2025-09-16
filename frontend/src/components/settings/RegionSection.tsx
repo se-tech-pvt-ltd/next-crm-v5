@@ -232,7 +232,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
 
   const SortButton: React.FC<{ active: boolean; dir: 'asc' | 'desc' }> = ({ active, dir }) => (
     <span className="inline-flex items-center ml-1 text-muted-foreground">
-      {active ? (dir === 'asc' ? <SortUp className="w-3 h-3" /> : <SortDown className="w-3 h-3" />) : null}
+      {active ? (dir === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : null}
     </span>
   );
 
