@@ -1,7 +1,7 @@
 import { eq, or, like, and, inArray } from "drizzle-orm";
-import { db } from "../config/database.js";
+import { db, connection } from "../config/database.js";
 import { users, type User, type InsertUser } from "../shared/schema.js";
-import { eq, like, or, inArray, and, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export class UserModel {
   static async findById(id: string): Promise<User | undefined> {
@@ -61,39 +61,28 @@ export class UserModel {
   }
 
   static async findAll(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    const [rows] = await connection.query<any[]>(
+      'SELECT u.*, b.branch_name AS branchName FROM users u LEFT JOIN branches b ON u.branch_id = b.id ORDER BY u.created_at DESC'
+    );
+    return (rows as any[]);
   }
 
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
-    const searchPattern = `%${searchQuery}%`;
-
-    // Build the search condition
-    const searchCondition = or(
-      like(users.firstName, searchPattern),
-      like(users.lastName, searchPattern),
-      like(users.email, searchPattern)
-    );
-
-    // Build the role condition if provided
-    const roleCondition = roles && roles.length > 0 ? inArray(users.role, roles) : undefined;
-
-    // Combine conditions
-    const whereCondition = roleCondition
-      ? and(searchCondition, roleCondition)
-      : searchCondition;
-
-    let query = db
-      .select()
-      .from(users)
-      .where(whereCondition)
-      .orderBy(desc(users.createdAt));
-
-    // Apply limit if provided
-    if (limit) {
-      query = query.limit(limit);
+    const params: any[] = [];
+    let sql = 'SELECT u.*, b.branch_name AS branchName FROM users u LEFT JOIN branches b ON u.branch_id = b.id WHERE (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)';
+    const q = `%${searchQuery}%`;
+    params.push(q, q, q);
+    if (roles && roles.length > 0) {
+      sql += ` AND u.role IN (${roles.map(() => '?').join(',')})`;
+      params.push(...roles);
     }
-
-    return await query;
+    sql += ' ORDER BY u.created_at DESC';
+    if (limit && Number.isFinite(limit)) {
+      sql += ' LIMIT ?';
+      params.push(limit);
+    }
+    const [rows] = await connection.query<any[]>(sql, params);
+    return (rows as any[]);
   }
 
   static async delete(id: string): Promise<boolean> {
