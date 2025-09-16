@@ -94,6 +94,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     const matchesBranch = !filters.branchId || String(u.branchId || '') === filters.branchId;
     return matchesQuery && matchesRole && matchesBranch;
   });
+  const sortedUsers = [...filteredUsers].sort((a: any, b: any) => {
+    const aDate = new Date(a.createdAt || a.created_at || a.created_on || 0).getTime();
+    const bDate = new Date(b.createdAt || b.created_at || b.created_on || 0).getTime();
+    return bDate - aDate;
+  });
 
   useEffect(() => {
     setCurrentPage(1);
