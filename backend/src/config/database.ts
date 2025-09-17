@@ -8,10 +8,3 @@ export const connection = mysql.createPool(
 );
 
 export const db = drizzle(connection, { schema, mode: "default" });
-
-// Best-effort migration to add new column for attachment-based profile images
-try {
-  await connection.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_id varchar(50) NULL");
-} catch (e) {
-  console.warn('[db] Could not ensure profile_image_id column exists:', (e as any)?.message || e);
-}
