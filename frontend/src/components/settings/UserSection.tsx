@@ -274,7 +274,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
               <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
                 <DialogTitle className="text-2xl text-primary flex items-center gap-2"><UserPlus className="w-5 h-5" /> Add User</DialogTitle>
-                <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department with the required region/branch as applicable.</div>
               </DialogHeader>
 
               <div className="px-6 pb-6">
@@ -385,21 +384,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         </div>
 
                         {(() => {
-                          const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-                          const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                          const role = String(form.role);
 
-                          if (deptName === 'Administration') {
-                            return null;
-                          }
-
-                          if (deptName === 'Operations') {
+                          if (role === 'regional_manager') {
                             return (
                               <div className="sm:col-span-2">
                                 <Label>Region<span className="text-destructive"> *</span></Label>
                                 <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
                                   <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                   <SelectContent>
-                                    {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => (
                                       <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
                                     ))}
                                   </SelectContent>
@@ -408,7 +402,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                             );
                           }
 
-                          if (String(form.role) === 'branch_manager') {
+                          if (role === 'branch_manager' || role === 'counsellor' || role === 'admission_officer') {
                             return (
                               <>
                                 <div>
@@ -432,7 +426,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                       searchPlaceholder="Search branches..."
                                       onSearch={setBranchSearch}
                                       className="border-input/60 hover:border-primary focus-visible:ring-primary/50"
-                                      options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                                      options={(branchAddList || []).filter((b: any) => {
+                                        if (role === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
+                                        if (form.regionId && String(b.regionId ?? b.region_id) !== String(form.regionId)) return false;
+                                        return true;
+                                      }).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
                                       loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
                                     />
                                   </div>
