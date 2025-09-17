@@ -33,9 +33,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Roles for add dialog
   const { data: rolesForDept = [] } = useQuery({ queryKey: ['/api/user-roles', form.department], queryFn: () => UserRolesService.listRoles(form.department || undefined), enabled: Boolean(form.department), staleTime: 60_000 });
 
-  // Roles for edit dialog
-  const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
-
   // Filters and pagination
   const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
   const [branchSearch, setBranchSearch] = useState('');
