@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { upload, uploadProfilePicture } from '../middlewares/upload.js';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { AttachmentModel } from '../models/Attachment.js';
 
 const router = Router();
 
@@ -16,10 +18,15 @@ router.post('/file', upload.single('file'), (req, res) => {
 
     // Return file URL that can be accessed via static files
     const fileUrl = `/uploads/${req.file.filename}`;
-    
+
+    // Create attachment record
+    const id = uuidv4();
+    try { await AttachmentModel.create({ id, path: fileUrl }); } catch (e) { console.error('Failed to persist attachment:', e); }
+
     res.json({
       success: true,
       fileUrl,
+      attachmentId: id,
       originalName: req.file.originalname,
       filename: req.file.filename,
       size: req.file.size
@@ -45,10 +52,15 @@ router.post('/profile-picture', uploadProfilePicture.single('profilePicture'), (
 
     // Return file URL that can be accessed via static files
     const fileUrl = `/uploads/${req.file.filename}`;
-    
+
+    // Create attachment record
+    const id = uuidv4();
+    try { await AttachmentModel.create({ id, path: fileUrl }); } catch (e) { console.error('Failed to persist attachment:', e); }
+
     res.json({
       success: true,
       fileUrl,
+      attachmentId: id,
       originalName: req.file.originalname,
       filename: req.file.filename,
       size: req.file.size
