@@ -54,7 +54,7 @@ export class UserController {
         return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
-      const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department } as any);
+      const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department, profileImageUrl } as any);
       res.status(201).json({ ...created, invited: true });
     } catch (error: any) {
       console.error('Invite user error:', error);
