@@ -303,7 +303,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex justify-center sm:justify-start">
                           <div
-                            className="relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden w-[200px] h-[200px] cursor-pointer group"
+                            className="relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden w-[200px] h-[134px] cursor-pointer group"
                             onClick={() => fileInputRef.current?.click()}
                             role="button"
                             aria-label="Upload profile image"
@@ -313,7 +313,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                             {form.profileImageUrl ? (
                               <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
                             ) : (
-                              <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">Click to upload</div>
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">Click to upload</div>
                             )}
                             <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
                           </div>
