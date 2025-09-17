@@ -674,7 +674,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           placeholder="Select branch (required)"
                           searchPlaceholder="Search branches..."
                           onSearch={setBranchEditSearch}
-                          options={(branchEditList || []).filter((b: any) => (!editForm.regionId || String(b.regionId ?? b.region_id) === String(editForm.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                          options={(branchEditList || []).filter((b: any) => {
+                            if (nRole === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
+                            if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
+                            return true;
+                          }).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
                           loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
                         />
                       </div>
