@@ -77,7 +77,7 @@ export class UserService {
     return await UserModel.delete(id);
   }
 
-  static async updateUserProfileImage(userId: string, profileImageUrl: string): Promise<User | undefined> {
-    return await UserModel.update(userId, { profileImageUrl });
+  static async updateUserProfileImage(userId: string, profileImageId: string): Promise<User | undefined> {
+    return await UserModel.update(userId, { profileImageId } as any);
   }
 }

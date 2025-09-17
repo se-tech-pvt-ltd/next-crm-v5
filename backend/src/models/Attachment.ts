@@ -8,4 +8,9 @@ export class AttachmentModel {
     const [row] = await db.select().from(attachments).where(eq(attachments.id, data.id));
     return row as any;
   }
+
+  static async findById(id: string) {
+    const [row] = await db.select().from(attachments).where(eq(attachments.id, id));
+    return row as any;
+  }
 }

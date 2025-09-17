@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import { upload, uploadProfilePicture } from '../middlewares/upload.js';
-import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentModel } from '../models/Attachment.js';
 
 const router = Router();
 
 // Upload general file (for passport, documents, etc.)
-router.post('/file', upload.single('file'), (req, res) => {
+router.post('/file', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 
@@ -41,7 +40,7 @@ router.post('/file', upload.single('file'), (req, res) => {
 });
 
 // Upload profile picture (existing)
-router.post('/profile-picture', uploadProfilePicture.single('profilePicture'), (req, res) => {
+router.post('/profile-picture', uploadProfilePicture.single('profilePicture'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 

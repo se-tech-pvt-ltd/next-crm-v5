@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 
+import { randomBytes } from 'node:crypto';
+
 export function formatFieldName(fieldName: string): string {
   return fieldName
     .replace(/([A-Z])/g, ' $1')
@@ -47,11 +49,10 @@ export function hasPermission(userRole: string, requiredRole: string): boolean {
 }
 
 export function generateNumericPassword(length = 10): string {
-  const crypto = require('crypto');
   const digits = '0123456789';
   let out = '';
   while (out.length < length) {
-    const buf = crypto.randomBytes(1);
+    const buf = randomBytes(1);
     const idx = buf[0] % digits.length;
     out += digits[idx];
   }
