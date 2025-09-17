@@ -589,7 +589,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                                   >
                                                     <SelectTrigger className="h-7 text-xs w-48">
                                                       {(() => {
-                                                        const sel = String(branchHeadDraft[String(b.id)] ?? currentHeadId || '');
+                                                        const sel = String((branchHeadDraft[String(b.id)] ?? currentHeadId) || '');
                                                         const u = (users as any[]).find((x: any) => String(x.id) === sel);
                                                         const label = u ? ([u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || '-') : 'Select head';
                                                         return <span className="truncate text-left w-full">{label}</span>;
