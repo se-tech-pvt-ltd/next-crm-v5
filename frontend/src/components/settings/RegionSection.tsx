@@ -45,6 +45,8 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [inlineForm, setInlineForm] = useState<{ name: string; headId: string }>({ name: '', headId: '' });
   const [branchHeadDraft, setBranchHeadDraft] = useState<Record<string, string>>({});
   const [updatingBranchId, setUpdatingBranchId] = useState<string | null>(null);
+  const [removingBranchId, setRemovingBranchId] = useState<string | null>(null);
+  const [fadeOutBranchId, setFadeOutBranchId] = useState<string | null>(null);
   const [sort, setSort] = useState<{ by: 'name' | 'head' | 'branches'; dir: 'asc' | 'desc' }>({ by: 'name', dir: 'asc' });
 
   const toggleExpand = (id: string) => {
@@ -172,6 +174,39 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
     onSettled: () => {
       setUpdatingBranchId(null);
+    }
+  });
+
+  const removeBranchFromRegion = useMutation({
+    mutationFn: async ({ branchId }: { branchId: string }) => {
+      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
+      if (!b) throw new Error('Branch not found');
+      return BranchesService.updateBranch(String(b.id), {
+        name: String(b.branchName || b.name || ''),
+        city: String(b.city || ''),
+        country: String(b.country || ''),
+        address: String(b.address || ''),
+        officialPhone: String(b.officialPhone || ''),
+        officialEmail: String(b.officialEmail || ''),
+        managerId: b.branchHeadId || b.managerId || null,
+        regionId: null,
+      });
+    },
+    onMutate: async ({ branchId }) => {
+      setRemovingBranchId(branchId);
+      setTimeout(() => setFadeOutBranchId(branchId), 250);
+    },
+    onSuccess: async () => {
+      await Promise.all([refetch(), refetchBranches()]);
+      toast({ title: 'Branch removed from region', duration: 1500 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to remove branch';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+    onSettled: () => {
+      setRemovingBranchId(null);
+      setFadeOutBranchId(null);
     }
   });
 
@@ -516,33 +551,42 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                             <TableRow>
                               <TableCell colSpan={5} className="p-0 bg-muted/20">
                                 <div className="p-2 space-y-2">
-                                  <div className="flex items-center gap-2 p-2 rounded border bg-background/80">
-                                    <div className="text-xs font-medium">Add branch to this region</div>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-md border bg-gradient-to-r from-muted/40 via-background to-background">
+                                    <div className="flex items-center gap-2 min-w-[220px]">
+                                      <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">+</div>
+                                      <div>
+                                        <div className="text-xs font-semibold">Add branch to this region</div>
+                                        <div className="text-[11px] text-muted-foreground">Select one or more unassigned branches</div>
+                                      </div>
+                                    </div>
                                     <div className="flex-1" />
                                     {(() => {
                                       const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
                                       const options = unassigned.map((b: any) => ({ value: String(b.id), label: `${b.branchName || b.name || '-' }${b.city ? `, ${b.city}` : ''}` }));
+                                      const selected = pendingAssign[String(r.id)] || [];
                                       return (
-                                        <MultiSelect
-                                          value={pendingAssign[String(r.id)] || []}
-                                          onValueChange={(vals) => setPendingAssign((s) => ({ ...s, [String(r.id)]: vals }))}
-                                          options={options}
-                                          placeholder={unassigned.length === 0 ? 'No unassigned branches' : 'Select branches'}
-                                          className="h-7 min-h-7 w-64 text-xs"
-                                        />
+                                        <div className="flex items-center gap-2">
+                                          <MultiSelect
+                                            value={selected}
+                                            onValueChange={(vals) => setPendingAssign((s) => ({ ...s, [String(r.id)]: vals }))}
+                                            options={options}
+                                            placeholder={unassigned.length === 0 ? 'No unassigned branches' : 'Choose branches...'}
+                                            className="h-8 min-h-8 w-[320px] text-xs"
+                                          />
+                                          <Button
+                                            size="sm"
+                                            className="h-8"
+                                            onClick={() => {
+                                              if (selected.length === 0) return;
+                                              bulkAssignMutation.mutate({ branchIds: selected, regionId: String(r.id) });
+                                            }}
+                                            disabled={selected.length === 0 || bulkAssignMutation.isPending}
+                                          >
+                                            {bulkAssignMutation.isPending ? 'Adding…' : `Add${selected.length > 0 ? ` ${selected.length}` : ''}`}
+                                          </Button>
+                                        </div>
                                       );
                                     })()}
-                                    <Button
-                                      size="sm"
-                                      onClick={() => {
-                                        const bids = pendingAssign[String(r.id)] || [];
-                                        if (bids.length === 0) return;
-                                        bulkAssignMutation.mutate({ branchIds: bids, regionId: String(r.id) });
-                                      }}
-                                      disabled={!pendingAssign[String(r.id)] || (pendingAssign[String(r.id)]?.length || 0) === 0 || bulkAssignMutation.isPending}
-                                    >
-                                      {bulkAssignMutation.isPending ? 'Adding...' : `Add${(pendingAssign[String(r.id)]?.length || 0) > 0 ? ` ${pendingAssign[String(r.id)].length}` : ''}`}
-                                    </Button>
                                   </div>
 
                                   {branchCount === 0 ? (
@@ -562,8 +606,24 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                           const currentHeadId = String(b.branchHeadId || b.managerId || '');
                                           const options = branchHeadOptionsForEdit(b);
                                           return (
-                                            <TableRow key={b.id}>
-                                              <TableCell className="p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                                            <TableRow key={b.id} className={(removingBranchId === String(b.id) ? 'line-through text-muted-foreground' : '') + ' ' + (fadeOutBranchId === String(b.id) ? 'opacity-0 transition-opacity duration-500' : '')}>
+                                              <TableCell className="p-2 text-xs">
+                                                <div className="flex items-center gap-1">
+                                                  <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="destructive"
+                                                    className="h-6 w-6 -ml-1"
+                                                    title="Remove from region"
+                                                    aria-label="Remove from region"
+                                                    onClick={() => removeBranchFromRegion.mutate({ branchId: String(b.id) })}
+                                                    disabled={removingBranchId === String(b.id) || removeBranchFromRegion.isPending}
+                                                  >
+                                                    —
+                                                  </Button>
+                                                  <span>{b.branchName || b.name || '-'}</span>
+                                                </div>
+                                              </TableCell>
                                               <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
                                               <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
                                               <TableCell className="p-2 text-xs">
@@ -578,7 +638,14 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                                     }}
                                                     disabled={updatingBranchId === String(b.id)}
                                                   >
-                                                    <SelectTrigger className="h-7 text-xs w-48"><SelectValue placeholder="Select head" /></SelectTrigger>
+                                                    <SelectTrigger className="h-7 text-xs w-48">
+                                                      {(() => {
+                                                        const sel = String((branchHeadDraft[String(b.id)] ?? currentHeadId) || '');
+                                                        const u = (users as any[]).find((x: any) => String(x.id) === sel);
+                                                        const label = u ? ([u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || '-') : 'Select head';
+                                                        return <span className="truncate text-left w-full">{label}</span>;
+                                                      })()}
+                                                    </SelectTrigger>
                                                     <SelectContent>
                                                       {options.map((u: any) => (
                                                         <SelectItem key={u.id} value={String(u.id)}>
