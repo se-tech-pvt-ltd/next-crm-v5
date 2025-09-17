@@ -26,7 +26,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
+  const [form, setForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load departments from backend
@@ -96,7 +96,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
+      setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -318,10 +318,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <div className="md:col-span-2 space-y-6">
                     <div>
                       <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
-                      <div className="mt-2 grid sm:grid-cols-3 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                      <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Email<span className="text-destructive"> *</span></Label>
                           <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Phone number</Label>
+                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="tel" value={form.phoneNumber} onChange={(e) => setForm((s) => ({ ...s, phoneNumber: e.target.value }))} />
                         </div>
                         <div className="flex flex-col">
                           <Label>First name</Label>
@@ -337,7 +341,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                     <div>
                       <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
-                      <div className="mt-2 grid sm:grid-cols-3 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                      <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Department</Label>
                           <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
@@ -372,7 +376,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                           if (deptName === 'Operations') {
                             return (
-                              <div className="sm:col-span-3">
+                              <div className="sm:col-span-2">
                                 <Label>Region<span className="text-destructive"> *</span></Label>
                                 <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
                                   <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
@@ -400,7 +404,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                     </SelectContent>
                                   </Select>
                                 </div>
-                                <div className="sm:col-span-3">
+                                <div>
                                   <Label>Branch<span className="text-destructive"> *</span></Label>
                                   <div className="mt-2">
                                     <SearchableCombobox
@@ -435,7 +439,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       })()}>
                         {create.isPending ? 'Creating...' : 'Save'}
                       </Button>
-                      <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                      <Button type="button" variant="outline" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
                         Cancel
                       </Button>
                     </div>
