@@ -37,6 +37,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Regions list
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
 
+  // helper for selected department name
+  const selectedDeptObj = departments.find((d: any) => String(d.id) === String(form.department));
+  const selectedDeptName = String(selectedDeptObj?.departmentName ?? selectedDeptObj?.department_name ?? '').trim();
+
   // Filters and pagination
 
   // Filters and pagination
