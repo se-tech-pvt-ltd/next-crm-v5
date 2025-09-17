@@ -28,8 +28,13 @@ export class UserService {
     // role is required in new schema
     if (!userData.role && !userData.roleId) throw new Error('role is required');
 
+    const email = String(userData.email).trim().toLowerCase();
+    const existing = await UserModel.findByEmail(email);
+    if (existing) throw new Error('email already exists');
+
     const data: any = {
       ...userData,
+      email,
       roleId: userData.roleId || userData.role,
       departmentId: userData.departmentId || userData.department || null,
       isActive: false,
@@ -43,8 +48,13 @@ export class UserService {
     if (!userData.email) throw new Error('email is required');
     if (!userData.role && !userData.roleId) throw new Error('role is required');
 
+    const email = String(userData.email).trim().toLowerCase();
+    const existing = await UserModel.findByEmail(email);
+    if (existing) throw new Error('email already exists');
+
     const data: any = {
       ...userData,
+      email,
       roleId: userData.roleId || userData.role,
       departmentId: userData.departmentId || userData.department || null,
       isActive: false,
