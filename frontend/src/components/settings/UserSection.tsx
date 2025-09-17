@@ -212,65 +212,78 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add User</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="max-w-2xl p-0">
+            <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
+              <DialogHeader className="px-6 pt-6">
+                <DialogTitle className="text-lg">Add User</DialogTitle>
+                <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department and branch.</div>
+              </DialogHeader>
 
-            <div className="grid sm:grid-cols-3 gap-2">
-              <div>
-                <Label>Email<span className="text-destructive"> *</span></Label>
-                <Input className="mt-1" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
-              </div>
-              <div>
-                <Label>First name</Label>
-                <Input className="mt-1" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Last name</Label>
-                <Input className="mt-1" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Department</Label>
-                <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Administration">Administration</SelectItem>
-                    <SelectItem value="Operations">Operations</SelectItem>
-                    <SelectItem value="Partnerships">Partnerships</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Role<span className="text-destructive"> *</span></Label>
-                <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
-                  <SelectContent>
-                    {(departmentRoleMap[form.department] || []).map((r) => (
-                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Branch<span className="text-destructive"> *</span></Label>
-                <SearchableCombobox
-                  value={form.branchId}
-                  onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                  placeholder="Select branch (required)"
-                  searchPlaceholder="Search branches..."
-                  onSearch={setBranchSearch}
-                  options={branchAddOptions}
-                  loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
-                />
-              </div>
-              <div className="col-span-full flex gap-2 mt-2">
-                <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
-                  {create.isPending ? 'Creating...' : 'Save'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
-                  Cancel
-                </Button>
+              <div className="px-6 pb-6">
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="flex flex-col">
+                    <Label>Email<span className="text-destructive"> *</span></Label>
+                    <Input className="mt-2" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>First name</Label>
+                    <Input className="mt-2" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Last name</Label>
+                    <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Department</Label>
+                    <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
+                      <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Administration">Administration</SelectItem>
+                        <SelectItem value="Operations">Operations</SelectItem>
+                        <SelectItem value="Partnerships">Partnerships</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Role<span className="text-destructive"> *</span></Label>
+                    <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
+                      <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select role" /></SelectTrigger>
+                      <SelectContent>
+                        {(departmentRoleMap[form.department] || []).map((r) => (
+                          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <Label>Branch<span className="text-destructive"> *</span></Label>
+                    <div className="mt-2">
+                      <SearchableCombobox
+                        value={form.branchId}
+                        onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                        placeholder="Select branch (required)"
+                        searchPlaceholder="Search branches..."
+                        onSearch={setBranchSearch}
+                        options={branchAddOptions}
+                        loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
+                    {create.isPending ? 'Creating...' : 'Save'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>
