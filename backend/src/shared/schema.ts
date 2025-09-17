@@ -9,15 +9,14 @@ export const users = mysqlTable("users", {
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
   profileImageUrl: varchar("profile_image_url", { length: 500 }),
-  role: text("role").notNull().default("counselor"), // counselor, branch_manager, admin_staff
-  branchId: varchar("branch_id", { length: 255 }), // for counselors and branch managers
-  department: varchar("department", { length: 255 }),
+  roleId: text("role_id").notNull(), // references user_roles.role_name or id
+  departmentId: varchar("department_id", { length: 255 }),
   phoneNumber: varchar("phone_number", { length: 20 }),
   dateOfBirth: date("date_of_birth"),
   passwordHash: varchar("password_hash", { length: 255 }), // hashed password for authentication
-  isActive: boolean("is_active").notNull().default(false),
-  isRegistrationEmailSent: boolean("is_registration_email_sent").notNull().default(false),
-  isProfileComplete: boolean("is_profile_complete").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  isRegistrationEmailSent: boolean("is_registration_email_sent").notNull().default(true),
+  isProfileComplete: boolean("is_profile_complete").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
