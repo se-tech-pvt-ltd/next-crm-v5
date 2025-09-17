@@ -1,5 +1,6 @@
 import { ActivityModel } from "../models/Activity.js";
 import { UserModel } from "../models/User.js";
+import { AttachmentModel } from "../models/Attachment.js";
 import { type Activity, type InsertActivity } from "../shared/schema.js";
 
 export class ActivityService {
@@ -19,7 +20,12 @@ export class ActivityService {
       const user = await UserModel.findById(userId);
       if (user) {
         userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || "User";
-        userProfileImage = user.profileImageUrl;
+        if ((user as any).profileImageId) {
+          try {
+            const att = await AttachmentModel.findById(String((user as any).profileImageId));
+            userProfileImage = att?.path || null;
+          } catch {}
+        }
       }
     }
     
