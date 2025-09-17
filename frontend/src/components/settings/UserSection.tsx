@@ -25,7 +25,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' });
 
   // Load departments from backend
   const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
@@ -411,7 +411,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <div className="min-w-0">
                   <div className="text-base font-semibold truncate">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge>{selected ? roleLabel(selected.role) : '—'}</Badge>
+                    <Badge>{selected ? roleLabel(selected.role) : '���'}</Badge>
                     {selected?.branchName ? <Badge variant="secondary">{String(selected.branchName)}</Badge> : null}
                     {(selected?.branchId ?? selected?.branch_id) && !selected?.branchName ? <Badge variant="secondary">{String(selected?.branchId ?? selected?.branch_id)}</Badge> : null}
                     <Badge variant={(selected?.isActive ?? selected?.is_active) ? 'default' : 'destructive'}>{(selected?.isActive ?? selected?.is_active) ? 'Active' : 'Inactive'}</Badge>
