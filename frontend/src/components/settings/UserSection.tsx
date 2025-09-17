@@ -100,7 +100,18 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
     onError: (err: any) => {
-      const msg = err?.message || err?.data?.message || 'Failed to create user';
+      const status = Number(err?.status || err?.response?.status || 0);
+      const raw = String(err?.data?.message || err?.message || '').toLowerCase();
+      let msg = 'Failed to create user';
+      if (status === 409 || /already exists|duplicate/.test(raw)) {
+        msg = 'A user with this email already exists';
+      } else if (status === 400) {
+        msg = (err?.data?.message || 'Please check the form and try again');
+      } else if (status >= 500) {
+        msg = 'Server error. Please try again later';
+      } else if (err?.data?.message) {
+        msg = String(err.data.message);
+      }
       toast({ title: 'Error', description: msg, variant: 'destructive' });
     }
   });
