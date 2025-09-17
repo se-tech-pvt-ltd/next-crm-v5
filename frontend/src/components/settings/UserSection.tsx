@@ -103,6 +103,23 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     }
   });
 
+  // Client-side check to prevent creating a user with an email that already exists
+  const handleCreate = () => {
+    const emailTrim = String(form.email || '').trim().toLowerCase();
+    if (!emailTrim) {
+      toast({ title: 'Error', description: 'Email is required', variant: 'destructive' });
+      return;
+    }
+
+    const exists = Array.isArray(users) && users.some((u: any) => String(u.email || '').trim().toLowerCase() === emailTrim);
+    if (exists) {
+      toast({ title: 'Error', description: 'A user with this email already exists', variant: 'destructive' });
+      return;
+    }
+
+    create.mutate();
+  };
+
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!selected?.id) throw new Error('User ID missing');
@@ -277,9 +294,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 </div>
 
                 <div className="mt-6 flex items-center justify-end gap-3">
-                  <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
-                    {create.isPending ? 'Creating...' : 'Save'}
-                  </Button>
+                  <Button type="button" onClick={() => handleCreate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
+                  {create.isPending ? 'Creating...' : 'Save'}
+                </Button>
                   <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
                     Cancel
                   </Button>
