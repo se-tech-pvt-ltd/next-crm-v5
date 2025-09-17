@@ -13,7 +13,7 @@ import * as RegionsService from '@/services/regions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Database, Plus } from 'lucide-react';
+import { Database, Plus, UserPlus, Image as ImageIcon, IdCard, Building2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 
@@ -270,17 +270,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl p-0 sm:rounded-xl">
+          <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10">
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
-              <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
-                <DialogTitle className="text-xl">Add User</DialogTitle>
+              <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
+                <DialogTitle className="text-2xl text-primary flex items-center gap-2"><UserPlus className="w-5 h-5" /> Add User</DialogTitle>
                 <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department with the required region/branch as applicable.</div>
               </DialogHeader>
 
               <div className="px-6 pb-6">
                 <div className="mt-2 grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1">
-                    <div className="text-sm font-medium">Profile image</div>
+                  <div className="md:col-span-1 rounded-xl border p-4 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent shadow-sm">
+                    <div className="text-sm font-semibold text-primary flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Profile image</div>
                     <div
                       className="mt-2 relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden aspect-square max-h-72 cursor-pointer group"
                       onClick={() => fileInputRef.current?.click()}
@@ -317,32 +317,31 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                   <div className="md:col-span-2 space-y-6">
                     <div>
-                      <div className="text-sm font-medium">User information</div>
-                      <div className="mt-2 grid sm:grid-cols-3 gap-4">
+                      <div className="text-sm font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
+                      <div className="mt-2 grid sm:grid-cols-3 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Email<span className="text-destructive"> *</span></Label>
-                          <Input className="mt-2" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
                         </div>
                         <div className="flex flex-col">
                           <Label>First name</Label>
-                          <Input className="mt-2" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
                         </div>
                         <div className="flex flex-col">
                           <Label>Last name</Label>
-                          <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
                         </div>
                       </div>
                     </div>
 
-                    <Separator />
 
                     <div>
-                      <div className="text-sm font-medium">Department &amp; Assignment</div>
-                      <div className="mt-2 grid sm:grid-cols-3 gap-4">
+                      <div className="text-sm font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                      <div className="mt-2 grid sm:grid-cols-3 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Department</Label>
                           <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
-                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
                             <SelectContent>
                               {departments.map((d: any) => (
                                 <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
@@ -354,7 +353,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         <div className="flex flex-col">
                           <Label>Role<span className="text-destructive"> *</span></Label>
                           <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
-                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
                             <SelectContent>
                               {(rolesForDept || []).map((r: any) => (
                                 <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
@@ -376,7 +375,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                               <div className="sm:col-span-3">
                                 <Label>Region<span className="text-destructive"> *</span></Label>
                                 <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
-                                  <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                  <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                   <SelectContent>
                                     {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
                                       <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
@@ -393,7 +392,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                 <div>
                                   <Label>Region<span className="text-destructive"> *</span></Label>
                                   <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
-                                    <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                    <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                     <SelectContent>
                                       {(Array.isArray(regions) ? regions : []).map((r: any) => (
                                         <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
@@ -410,6 +409,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                       placeholder="Select branch (required)"
                                       searchPlaceholder="Search branches..."
                                       onSearch={setBranchSearch}
+                                      className="border-input/60 hover:border-primary focus-visible:ring-primary/50"
                                       options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
                                       loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
                                     />
@@ -424,7 +424,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       </div>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t flex items-center justify-end gap-3">
+                    <div className="mt-6 pt-4 border-t flex items-center justify-end gap-3 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-b-xl -mx-4 px-4">
                       <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
                         const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
                         const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
