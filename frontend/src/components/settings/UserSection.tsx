@@ -247,7 +247,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                   <div className="flex flex-col">
                     <Label>Department</Label>
-                    <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
+                    <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
                       <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
                       <SelectContent>
                         {departments.map((d: any) => (
