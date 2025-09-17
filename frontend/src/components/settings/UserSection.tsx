@@ -278,44 +278,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </DialogHeader>
 
               <div className="px-6 pb-6">
-                <div className="mt-2 grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1 rounded-xl border p-4 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent shadow-sm">
-                    <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Profile image</div>
-                    <div
-                      className="mt-2 relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden h-40 w-40 mx-auto cursor-pointer group"
-                      onClick={() => fileInputRef.current?.click()}
-                      role="button"
-                      aria-label="Upload profile image"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
-                    >
-                      {form.profileImageUrl ? (
-                        <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">Click to upload</div>
-                      )}
-                      <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const { uploadProfilePicture } = await import('@/services/uploads');
-                          const res = await uploadProfilePicture(file);
-                          setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
-                        } catch (err: any) {
-                          toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
-                        }
-                      }}
-                    />
-                  </div>
+                <div className="mt-2 space-y-6">
 
-                  <div className="md:col-span-2 space-y-6">
+                  <div className="space-y-6">
                     <div>
                       <div className="flex items-center justify-between">
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
@@ -335,22 +300,58 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           </Button>
                         </div>
                       </div>
-                      <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
-                        <div className="flex flex-col">
-                          <Label>Email<span className="text-destructive"> *</span></Label>
-                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                        <div className="flex justify-center sm:justify-start">
+                          <div
+                            className="relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden w-[200px] h-[200px] cursor-pointer group"
+                            onClick={() => fileInputRef.current?.click()}
+                            role="button"
+                            aria-label="Upload profile image"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+                          >
+                            {form.profileImageUrl ? (
+                              <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">Click to upload</div>
+                            )}
+                            <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
+                          </div>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const { uploadProfilePicture } = await import('@/services/uploads');
+                                const res = await uploadProfilePicture(file);
+                                setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
+                              } catch (err: any) {
+                                toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
+                              }
+                            }}
+                          />
                         </div>
-                        <div className="flex flex-col">
-                          <Label>Phone number</Label>
-                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="tel" value={form.phoneNumber} onChange={(e) => setForm((s) => ({ ...s, phoneNumber: e.target.value }))} />
-                        </div>
-                        <div className="flex flex-col">
-                          <Label>First name</Label>
-                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
-                        </div>
-                        <div className="flex flex-col">
-                          <Label>Last name</Label>
-                          <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="flex flex-col">
+                            <Label>Email<span className="text-destructive"> *</span></Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Phone number</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="tel" value={form.phoneNumber} onChange={(e) => setForm((s) => ({ ...s, phoneNumber: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>First name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Last name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                          </div>
                         </div>
                       </div>
                     </div>
