@@ -50,7 +50,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Roles for edit dialog (depends on editForm, so must be declared after it)
   const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
 
-  // Branch search hooks (top-level to preserve hook order) — defined after state variables
+  // Branch search hooks (top-level to preserve hook order) ��� defined after state variables
   const branchFilterTrim = branchFilterSearch.trim();
   const { data: branchFilterSearched = [], isFetching: branchFilterIsFetching } = useQuery({
     queryKey: ['/api/branches', 'search', branchFilterTrim, 'filter'],
@@ -461,7 +461,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div>
                 <Label>Department</Label>
-                <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
+                <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: '' }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
                   <SelectContent>
                     {departments.map((d: any) => (
