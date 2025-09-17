@@ -45,6 +45,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [inlineForm, setInlineForm] = useState<{ name: string; headId: string }>({ name: '', headId: '' });
   const [branchHeadDraft, setBranchHeadDraft] = useState<Record<string, string>>({});
   const [updatingBranchId, setUpdatingBranchId] = useState<string | null>(null);
+  const [removingBranchId, setRemovingBranchId] = useState<string | null>(null);
   const [sort, setSort] = useState<{ by: 'name' | 'head' | 'branches'; dir: 'asc' | 'desc' }>({ by: 'name', dir: 'asc' });
 
   const toggleExpand = (id: string) => {
@@ -172,6 +173,37 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
     onSettled: () => {
       setUpdatingBranchId(null);
+    }
+  });
+
+  const removeBranchFromRegion = useMutation({
+    mutationFn: async ({ branchId }: { branchId: string }) => {
+      const b: any = (branches as any[]).find((x: any) => String(x.id) === String(branchId));
+      if (!b) throw new Error('Branch not found');
+      return BranchesService.updateBranch(String(b.id), {
+        name: String(b.branchName || b.name || ''),
+        city: String(b.city || ''),
+        country: String(b.country || ''),
+        address: String(b.address || ''),
+        officialPhone: String(b.officialPhone || ''),
+        officialEmail: String(b.officialEmail || ''),
+        managerId: b.branchHeadId || b.managerId || null,
+        regionId: null,
+      });
+    },
+    onMutate: async ({ branchId }) => {
+      setRemovingBranchId(branchId);
+    },
+    onSuccess: async () => {
+      await Promise.all([refetch(), refetchBranches()]);
+      toast({ title: 'Branch removed from region', duration: 1500 });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to remove branch';
+      toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
+    },
+    onSettled: () => {
+      setRemovingBranchId(null);
     }
   });
 
@@ -572,7 +604,22 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                           const options = branchHeadOptionsForEdit(b);
                                           return (
                                             <TableRow key={b.id}>
-                                              <TableCell className="p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                                              <TableCell className="p-2 text-xs">
+                                                <div className="flex items-center gap-1">
+                                                  <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-6 w-6 -ml-1"
+                                                    title="Remove from region"
+                                                    onClick={() => removeBranchFromRegion.mutate({ branchId: String(b.id) })}
+                                                    disabled={removingBranchId === String(b.id) || removeBranchFromRegion.isPending}
+                                                  >
+                                                    —
+                                                  </Button>
+                                                  <span>{b.branchName || b.name || '-'}</span>
+                                                </div>
+                                              </TableCell>
                                               <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
                                               <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
                                               <TableCell className="p-2 text-xs">
