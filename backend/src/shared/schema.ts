@@ -17,6 +17,7 @@ export const users = mysqlTable("users", {
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
   profileImageId: varchar("profile_image_id", { length: 50 }),
+  profileImageUrl: varchar("profile_image_url", { length: 500 }),
   roleId: text("role_id").notNull(), // references user_roles.role_name or id
   departmentId: varchar("department_id", { length: 255 }),
   phoneNumber: varchar("phone_number", { length: 20 }),
