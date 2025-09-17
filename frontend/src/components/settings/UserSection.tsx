@@ -47,6 +47,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
 
+  // Roles for edit dialog (depends on editForm, so must be declared after it)
+  const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
+
   // Branch search hooks (top-level to preserve hook order) — defined after state variables
   const branchFilterTrim = branchFilterSearch.trim();
   const { data: branchFilterSearched = [], isFetching: branchFilterIsFetching } = useQuery({
