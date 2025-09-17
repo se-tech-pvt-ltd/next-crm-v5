@@ -13,7 +13,7 @@ import * as RegionsService from '@/services/regions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Database, Plus, UserPlus, Image as ImageIcon, IdCard, Building2 } from 'lucide-react';
+import { Database, Plus, UserPlus, Image as ImageIcon, IdCard, Building2, Save, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 
@@ -282,7 +282,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <div className="md:col-span-1 rounded-xl border p-4 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent shadow-sm">
                     <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Profile image</div>
                     <div
-                      className="mt-2 relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden aspect-square max-h-72 cursor-pointer group"
+                      className="mt-2 relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden h-40 w-40 mx-auto cursor-pointer group"
                       onClick={() => fileInputRef.current?.click()}
                       role="button"
                       aria-label="Upload profile image"
@@ -317,7 +317,24 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                   <div className="md:col-span-2 space-y-6">
                     <div>
-                      <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
+                        <div className="flex items-center gap-2">
+                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
+                            const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                            const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                            if (deptName === 'Administration') return false;
+                            if (deptName === 'Operations') return !form.regionId || !form.role;
+                            if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
+                            return false;
+                          })()}>
+                            {create.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
+                          </Button>
+                          <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                       <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Email<span className="text-destructive"> *</span></Label>
@@ -356,7 +373,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                         <div className="flex flex-col">
                           <Label>Role<span className="text-destructive"> *</span></Label>
-                          <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
+                          <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
                             <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
                             <SelectContent>
                               {(rolesForDept || []).map((r: any) => (
@@ -428,21 +445,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       </div>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t flex items-center justify-end gap-3 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-b-xl -mx-4 px-4">
-                      <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
-                        const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-                        const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-                        if (deptName === 'Administration') return false;
-                        if (deptName === 'Operations') return !form.regionId || !form.role;
-                        if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
-                        return false;
-                      })()}>
-                        {create.isPending ? 'Creating...' : 'Save'}
-                      </Button>
-                      <Button type="button" variant="outline" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
-                        Cancel
-                      </Button>
-                    </div>
                   </div>
                 </div>
               </div>
