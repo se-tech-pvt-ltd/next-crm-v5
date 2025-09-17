@@ -15,8 +15,8 @@ type AllowedCategory = typeof ALLOWED[number];
 export default function Settings() {
   const { toast } = useToast();
   const [category, setCategory] = useState<AllowedCategory>(() => {
-    const saved = (localStorage.getItem('settings_category') as AllowedCategory | null) || 'users';
-    return (ALLOWED as readonly string[]).includes(saved) ? (saved as AllowedCategory) : 'users';
+    const saved = (localStorage.getItem('settings_category') as AllowedCategory | null) || 'regions';
+    return (ALLOWED as readonly string[]).includes(saved) ? (saved as AllowedCategory) : 'regions';
   });
 
   useEffect(() => {
