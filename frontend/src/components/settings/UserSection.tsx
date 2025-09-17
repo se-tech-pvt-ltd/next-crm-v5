@@ -121,12 +121,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   useEffect(() => {
     const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
     const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-    if (deptName === 'Operations') {
-      // enforce regional manager role for Operations
-      setForm((s) => ({ ...s, role: 'regional_manager' }));
-    }
     if (deptName === 'Administration') {
-      // clear region/branch for Administration
+      // Clear region/branch when Administration is selected
       setForm((s) => ({ ...s, branchId: '', regionId: '' }));
     }
   }, [form.department, departments]);
@@ -145,16 +141,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       return;
     }
 
-    // Additional validation based on department/role rules
-    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-    if (deptName === 'Administration') {
-      // OK, nothing extra required
-    } else if (deptName === 'Operations') {
-      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Operations', variant: 'destructive' }); return; }
-    } else if (String(form.role) === 'branch_manager') {
-      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Branch Manager', variant: 'destructive' }); return; }
-      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required for Branch Manager', variant: 'destructive' }); return; }
+    // Additional validation based on role rules
+    const nRole = normalizeRole(form.role);
+    if (nRole === 'regional_manager') {
+      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Regional Manager', variant: 'destructive' }); return; }
+    }
+    if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
+      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for this role', variant: 'destructive' }); return; }
+      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required for this role', variant: 'destructive' }); return; }
     }
 
     create.mutate();
@@ -189,6 +183,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       admin_staff: 'Admin Staff',
     };
     return map[r] || (r || '').replace(/_/g, ' ');
+  };
+
+  const normalizeRole = (r: string) => {
+    const raw = String(r || '').trim().toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+    if (raw === 'counsellor') return 'counselor';
+    return raw;
   };
 
 
@@ -285,11 +285,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
                         <div className="flex items-center gap-2">
                           <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
-                            const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-                            const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-                            if (deptName === 'Administration') return false;
-                            if (deptName === 'Operations') return !form.regionId || !form.role;
-                            if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
+                            const nRole = normalizeRole(form.role);
+                            if (nRole === 'regional_manager') return !form.regionId;
+                            if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
                             return false;
                           })()}>
                             {create.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
@@ -374,7 +372,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         <div className="flex flex-col">
                           <Label>Role<span className="text-destructive"> *</span></Label>
                           <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
-                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
                             <SelectContent>
                               {(rolesForDept || []).map((r: any) => (
                                 <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
@@ -384,9 +382,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         </div>
 
                         {(() => {
-                          const role = String(form.role);
+                          const nRole = normalizeRole(form.role);
 
-                          if (role === 'regional_manager') {
+                          if (nRole === 'regional_manager') {
                             return (
                               <div className="sm:col-span-2">
                                 <Label>Region<span className="text-destructive"> *</span></Label>
@@ -402,7 +400,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                             );
                           }
 
-                          if (role === 'branch_manager' || role === 'counsellor' || role === 'admission_officer') {
+                          if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
                             return (
                               <>
                                 <div>
@@ -427,7 +425,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                       onSearch={setBranchSearch}
                                       className="border-input/60 hover:border-primary focus-visible:ring-primary/50"
                                       options={(branchAddList || []).filter((b: any) => {
-                                        if (role === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
+                                        if (nRole === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
                                         if (form.regionId && String(b.regionId ?? b.region_id) !== String(form.regionId)) return false;
                                         return true;
                                       }).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
@@ -627,7 +625,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <div>
                 <Label>Role<span className="text-destructive"> *</span></Label>
                 <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder={editForm.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
                   <SelectContent>
                     {(rolesForEditDept || []).map((r: any) => (
                       <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
@@ -636,21 +634,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 </Select>
               </div>
               {(() => {
-                const deptObj = departments.find((d: any) => String(d.id) === String(editForm.department));
-                const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                const nRole = normalizeRole(editForm.role);
 
-                if (deptName === 'Administration') {
-                  return null;
-                }
-
-                if (deptName === 'Operations') {
+                if (nRole === 'regional_manager') {
                   return (
                     <div className="sm:col-span-2 md:col-span-3">
                       <Label>Region<span className="text-destructive"> *</span></Label>
                       <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
                         <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
                         <SelectContent>
-                          {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                          {(Array.isArray(regions) ? regions : []).map((r: any) => (
                             <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
                           ))}
                         </SelectContent>
@@ -659,7 +652,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   );
                 }
 
-                if (String(editForm.role) === 'branch_manager') {
+                if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
                   return (
                     <>
                       <div>
@@ -681,7 +674,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           placeholder="Select branch (required)"
                           searchPlaceholder="Search branches..."
                           onSearch={setBranchEditSearch}
-                          options={(branchEditList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!editForm.regionId || String(b.regionId ?? b.region_id) === String(editForm.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                          options={(branchEditList || []).filter((b: any) => (!editForm.regionId || String(b.regionId ?? b.region_id) === String(editForm.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
                           loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
                         />
                       </div>
@@ -693,11 +686,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               })()}
               <div className="col-span-full flex gap-2">
                 <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || (function(){
-                  const deptObj = departments.find((d: any) => String(d.id) === String(editForm.department));
-                  const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-                  if (deptName === 'Administration') return false;
-                  if (deptName === 'Operations') return !editForm.regionId || !editForm.role;
-                  if (String(editForm.role) === 'branch_manager') return !editForm.regionId || !editForm.branchId || !editForm.role;
+                  const nRole = normalizeRole(editForm.role);
+                  if (nRole === 'regional_manager') return !editForm.regionId;
+                  if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
                   return false;
                 })() || updateMutation.isPending}>
                   {updateMutation.isPending ? 'Saving...' : 'Save changes'}
