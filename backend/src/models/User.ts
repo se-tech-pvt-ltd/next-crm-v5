@@ -15,8 +15,12 @@ export class UserModel {
   }
 
   static async findByBranchId(branchId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.branchId, branchId));
-    return user;
+    // Find the first user linked to the branch via branch_emps
+    const [row] = await connection.query<any[]>(
+      'SELECT u.* FROM users u JOIN branch_emps be ON be.user_id = u.id WHERE be.branch_id = ? LIMIT 1',
+      [branchId]
+    );
+    return (row && row.length > 0) ? (row[0] as any) : undefined;
   }
 
   static async create(userData: InsertUser): Promise<User> {
