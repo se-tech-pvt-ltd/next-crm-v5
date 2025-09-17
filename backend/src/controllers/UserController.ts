@@ -42,7 +42,7 @@ export class UserController {
     } catch (error: any) {
       console.error('Create user error:', error);
       const msg = String(error?.message || 'Failed to create user');
-      const status = (msg.includes('already assigned') || msg.includes('already exists')) ? 409 : (msg.includes('required') ? 400 : 500);
+      const status = (msg.includes('already assigned') || msg.includes('already exists') || msg.toLowerCase().includes('duplicate entry')) ? 409 : (msg.includes('required') ? 400 : 500);
       res.status(status).json({ message: msg });
     }
   }
@@ -59,7 +59,7 @@ export class UserController {
     } catch (error: any) {
       console.error('Invite user error:', error);
       const msg = String(error?.message || 'Failed to invite user');
-      const status = (msg.includes('already assigned') || msg.includes('already exists')) ? 409 : (msg.includes('required') ? 400 : 500);
+      const status = (msg.includes('already assigned') || msg.includes('already exists') || msg.toLowerCase().includes('duplicate entry')) ? 409 : (msg.includes('required') ? 400 : 500);
       res.status(status).json({ message: msg });
     }
   }
