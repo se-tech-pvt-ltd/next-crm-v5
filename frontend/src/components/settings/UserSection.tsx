@@ -474,7 +474,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <div>
                 <Label>Role<span className="text-destructive"> *</span></Label>
                 <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder={editForm.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
                   <SelectContent>
                     {(rolesForEditDept || []).map((r: any) => (
                       <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
