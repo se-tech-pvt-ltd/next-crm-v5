@@ -299,7 +299,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                   <div className="flex flex-col">
                     <Label>Role<span className="text-destructive"> *</span></Label>
-                    <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
+                    <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
                       <SelectTrigger className="mt-2 h-10"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
                       <SelectContent>
                         {(rolesForDept || []).map((r: any) => (
