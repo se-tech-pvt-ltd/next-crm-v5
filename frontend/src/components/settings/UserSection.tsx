@@ -280,7 +280,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <div className="px-6 pb-6">
                 <div className="mt-2 grid md:grid-cols-3 gap-6">
                   <div className="md:col-span-1 rounded-xl border p-4 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent shadow-sm">
-                    <div className="text-sm font-semibold text-primary flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Profile image</div>
+                    <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Profile image</div>
                     <div
                       className="mt-2 relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden aspect-square max-h-72 cursor-pointer group"
                       onClick={() => fileInputRef.current?.click()}
@@ -317,7 +317,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                   <div className="md:col-span-2 space-y-6">
                     <div>
-                      <div className="text-sm font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
+                      <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
                       <div className="mt-2 grid sm:grid-cols-3 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Email<span className="text-destructive"> *</span></Label>
@@ -336,7 +336,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
 
                     <div>
-                      <div className="text-sm font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                      <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
                       <div className="mt-2 grid sm:grid-cols-3 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Department</Label>
