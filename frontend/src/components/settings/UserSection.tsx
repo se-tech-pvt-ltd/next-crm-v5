@@ -276,24 +276,95 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     </Select>
                   </div>
 
-                  <div className="sm:col-span-3">
-                    <Label>Branch<span className="text-destructive"> *</span></Label>
-                    <div className="mt-2">
-                      <SearchableCombobox
-                        value={form.branchId}
-                        onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                        placeholder="Select branch (required)"
-                        searchPlaceholder="Search branches..."
-                        onSearch={setBranchSearch}
-                        options={branchAddOptions}
-                        loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
-                      />
-                    </div>
-                  </div>
+                {(() => {
+                    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+
+                    // Administration: no branch/region
+                    if (deptName === 'Administration') {
+                      return null;
+                    }
+
+                    // Operations: enforce Regional Manager role and show region select (regions without region head)
+                    if (deptName === 'Operations') {
+                      return (
+                        <div className="sm:col-span-3">
+                          <Label>Region<span className="text-destructive"> *</span></Label>
+                          <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
+                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                            <SelectContent>
+                              {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                                <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    }
+
+                    // Role-specific: Branch Manager needs region then branch (branches without branch head)
+                    if (String(form.role) === 'branch_manager') {
+                      return (
+                        <>
+                          <div>
+                            <Label>Region<span className="text-destructive"> *</span></Label>
+                            <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
+                              <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                              <SelectContent>
+                                {(Array.isArray(regions) ? regions : []).map((r: any) => (
+                                  <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="sm:col-span-3">
+                            <Label>Branch<span className="text-destructive"> *</span></Label>
+                            <div className="mt-2">
+                              <SearchableCombobox
+                                value={form.branchId}
+                                onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                                placeholder="Select branch (required)"
+                                searchPlaceholder="Search branches..."
+                                onSearch={setBranchSearch}
+                                options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                                loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      );
+                    }
+
+                    // Default: show branch selector but only branches without branch head
+                    return (
+                      <div className="sm:col-span-3">
+                        <Label>Branch<span className="text-destructive"> *</span></Label>
+                        <div className="mt-2">
+                          <SearchableCombobox
+                            value={form.branchId}
+                            onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                            placeholder="Select branch (required)"
+                            searchPlaceholder="Search branches..."
+                            onSearch={setBranchSearch}
+                            options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id)).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                            loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="mt-6 flex items-center justify-end gap-3">
-                  <Button type="button" onClick={() => handleCreate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
+                  <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
+                    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                    if (deptName === 'Administration') return false; // branch not required
+                    if (deptName === 'Operations') return !form.regionId || !form.role; // need region and role
+                    if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
+                    // for other roles, require branch
+                    return !form.branchId || !form.role;
+                  })()}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
                   <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
