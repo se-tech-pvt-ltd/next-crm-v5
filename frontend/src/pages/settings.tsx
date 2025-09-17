@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import BranchSectionComp from '@/components/settings/BranchSection';
 import UserSectionComp from '@/components/settings/UserSection';
+import BranchEmpSectionComp from '@/components/settings/BranchEmpSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
 import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
@@ -37,6 +38,9 @@ export default function Settings() {
           <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className="gap-2">
             <ShieldCheck className="w-4 h-4" /> User management
           </Button>
+          <Button type="button" variant={category === 'branch-emps' ? 'default' : 'outline'} onClick={() => setCategory('branch-emps')} className="gap-2">
+            <Database className="w-4 h-4" /> Branch Emp mappings
+          </Button>
           <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
             <Mail className="w-4 h-4" /> Email (SMTP)
           </Button>
@@ -67,6 +71,15 @@ export default function Settings() {
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Users</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4"><UserSectionComp toast={toast} /></CardContent>
+          </Card>
+        )}
+
+        {category === 'branch-emps' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Database className="w-4 h-4" /> Branch Employee mappings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4"><BranchEmpSectionComp toast={toast} /></CardContent>
           </Card>
         )}
 
