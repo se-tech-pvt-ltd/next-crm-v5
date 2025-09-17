@@ -266,24 +266,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </DialogHeader>
 
               <div className="px-6 pb-6">
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="flex flex-col">
-                    <Label>Email<span className="text-destructive"> *</span></Label>
-                    <Input className="mt-2" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <Label>First name</Label>
-                    <Input className="mt-2" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <Label>Last name</Label>
-                    <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <Label>Photo</Label>
+                <div className="space-y-6">
+                  {/* Profile image */}
+                  <div>
+                    <div className="text-sm font-medium">Profile image</div>
                     <div className="mt-2 flex items-center gap-3">
                       <div className="h-16 w-16 rounded overflow-hidden bg-muted flex items-center justify-center border">
                         {form.profileImageUrl ? (
@@ -310,92 +296,117 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     </div>
                   </div>
 
-                  <div className="flex flex-col">
-                    <Label>Department</Label>
-                    <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
-                      <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
-                      <SelectContent>
-                        {departments.map((d: any) => (
-                          <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <Separator />
+
+                  {/* User information */}
+                  <div>
+                    <div className="text-sm font-medium">User information</div>
+                    <div className="mt-2 grid sm:grid-cols-3 gap-4">
+                      <div className="flex flex-col">
+                        <Label>Email<span className="text-destructive"> *</span></Label>
+                        <Input className="mt-2" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                      </div>
+                      <div className="flex flex-col">
+                        <Label>First name</Label>
+                        <Input className="mt-2" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                      </div>
+                      <div className="flex flex-col">
+                        <Label>Last name</Label>
+                        <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col">
-                    <Label>Role<span className="text-destructive"> *</span></Label>
-                    <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
-                      <SelectTrigger className="mt-2 h-10"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
-                      <SelectContent>
-                        {(rolesForDept || []).map((r: any) => (
-                      <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
-                    ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Separator />
 
-                {(() => {
-                    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-                    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                  {/* Department & Assignment */}
+                  <div>
+                    <div className="text-sm font-medium">Department &amp; Assignment</div>
+                    <div className="mt-2 grid sm:grid-cols-3 gap-4">
+                      <div className="flex flex-col">
+                        <Label>Department</Label>
+                        <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
+                          <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
+                          <SelectContent>
+                            {departments.map((d: any) => (
+                              <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    // Administration: no branch/region
-                    if (deptName === 'Administration') {
-                      return null;
-                    }
+                      <div className="flex flex-col">
+                        <Label>Role<span className="text-destructive"> *</span></Label>
+                        <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
+                          <SelectTrigger className="mt-2 h-10"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
+                          <SelectContent>
+                            {(rolesForDept || []).map((r: any) => (
+                              <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    // Operations: enforce Regional Manager role and show region select (regions without region head)
-                    if (deptName === 'Operations') {
-                      return (
-                        <div className="sm:col-span-3">
-                          <Label>Region<span className="text-destructive"> *</span></Label>
-                          <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
-                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
-                            <SelectContent>
-                              {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
-                                <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      );
-                    }
+                      {(() => {
+                        const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                        const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
 
-                    // Role-specific: Branch Manager needs region then branch (branches without branch head)
-                    if (String(form.role) === 'branch_manager') {
-                      return (
-                        <>
-                          <div>
-                            <Label>Region<span className="text-destructive"> *</span></Label>
-                            <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
-                              <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
-                              <SelectContent>
-                                {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                                  <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="sm:col-span-3">
-                            <Label>Branch<span className="text-destructive"> *</span></Label>
-                            <div className="mt-2">
-                              <SearchableCombobox
-                                value={form.branchId}
-                                onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                                placeholder="Select branch (required)"
-                                searchPlaceholder="Search branches..."
-                                onSearch={setBranchSearch}
-                                options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
-                                loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
-                              />
+                        if (deptName === 'Administration') {
+                          return null;
+                        }
+
+                        if (deptName === 'Operations') {
+                          return (
+                            <div className="sm:col-span-3">
+                              <Label>Region<span className="text-destructive"> *</span></Label>
+                              <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
+                                <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                <SelectContent>
+                                  {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                                    <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
-                          </div>
-                        </>
-                      );
-                    }
+                          );
+                        }
 
-                    // Default: no branch selector shown unless Branch Manager
-                    return null;
-                  })()}
+                        if (String(form.role) === 'branch_manager') {
+                          return (
+                            <>
+                              <div>
+                                <Label>Region<span className="text-destructive"> *</span></Label>
+                                <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
+                                  <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                  <SelectContent>
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => (
+                                      <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="sm:col-span-3">
+                                <Label>Branch<span className="text-destructive"> *</span></Label>
+                                <div className="mt-2">
+                                  <SearchableCombobox
+                                    value={form.branchId}
+                                    onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                                    placeholder="Select branch (required)"
+                                    searchPlaceholder="Search branches..."
+                                    onSearch={setBranchSearch}
+                                    options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                                    loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          );
+                        }
+
+                        return null;
+                      })()}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-6 flex items-center justify-end gap-3">
