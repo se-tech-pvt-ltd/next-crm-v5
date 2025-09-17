@@ -26,7 +26,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '' });
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
 
   // Load departments from backend
   const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
@@ -95,7 +95,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '' });
+      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -298,7 +298,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           try {
                             const { uploadProfilePicture } = await import('@/services/uploads');
                             const res = await uploadProfilePicture(file);
-                            setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || '') }));
+                            setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
                           } catch (err: any) {
                             toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
                           }
@@ -431,7 +431,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   })()}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
-                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
                     Cancel
                   </Button>
                 </div>
