@@ -44,7 +44,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', branchId: '', department: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
 
   // Roles for edit dialog (depends on editForm, so must be declared after it)
@@ -411,7 +411,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <div className="min-w-0">
                   <div className="text-base font-semibold truncate">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge>{selected ? roleLabel(selected.role) : '���'}</Badge>
+                    <Badge>{selected ? roleLabel(selected.role) : '—'}</Badge>
                     {selected?.branchName ? <Badge variant="secondary">{String(selected.branchName)}</Badge> : null}
                     {(selected?.branchId ?? selected?.branch_id) && !selected?.branchName ? <Badge variant="secondary">{String(selected?.branchId ?? selected?.branch_id)}</Badge> : null}
                     <Badge variant={(selected?.isActive ?? selected?.is_active) ? 'default' : 'destructive'}>{(selected?.isActive ?? selected?.is_active) ? 'Active' : 'Inactive'}</Badge>
