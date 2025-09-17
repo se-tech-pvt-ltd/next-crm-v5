@@ -516,33 +516,42 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                             <TableRow>
                               <TableCell colSpan={5} className="p-0 bg-muted/20">
                                 <div className="p-2 space-y-2">
-                                  <div className="flex items-center gap-2 p-2 rounded border bg-background/80">
-                                    <div className="text-xs font-medium">Add branch to this region</div>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-md border bg-gradient-to-r from-muted/40 via-background to-background">
+                                    <div className="flex items-center gap-2 min-w-[220px]">
+                                      <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">+</div>
+                                      <div>
+                                        <div className="text-xs font-semibold">Add branch to this region</div>
+                                        <div className="text-[11px] text-muted-foreground">Select one or more unassigned branches</div>
+                                      </div>
+                                    </div>
                                     <div className="flex-1" />
                                     {(() => {
                                       const unassigned = (branches as any[]).filter((b: any) => !b.regionId);
                                       const options = unassigned.map((b: any) => ({ value: String(b.id), label: `${b.branchName || b.name || '-' }${b.city ? `, ${b.city}` : ''}` }));
+                                      const selected = pendingAssign[String(r.id)] || [];
                                       return (
-                                        <MultiSelect
-                                          value={pendingAssign[String(r.id)] || []}
-                                          onValueChange={(vals) => setPendingAssign((s) => ({ ...s, [String(r.id)]: vals }))}
-                                          options={options}
-                                          placeholder={unassigned.length === 0 ? 'No unassigned branches' : 'Select branches'}
-                                          className="h-7 min-h-7 w-64 text-xs"
-                                        />
+                                        <div className="flex items-center gap-2">
+                                          <MultiSelect
+                                            value={selected}
+                                            onValueChange={(vals) => setPendingAssign((s) => ({ ...s, [String(r.id)]: vals }))}
+                                            options={options}
+                                            placeholder={unassigned.length === 0 ? 'No unassigned branches' : 'Choose branches...'}
+                                            className="h-8 min-h-8 w-[320px] text-xs"
+                                          />
+                                          <Button
+                                            size="sm"
+                                            className="h-8"
+                                            onClick={() => {
+                                              if (selected.length === 0) return;
+                                              bulkAssignMutation.mutate({ branchIds: selected, regionId: String(r.id) });
+                                            }}
+                                            disabled={selected.length === 0 || bulkAssignMutation.isPending}
+                                          >
+                                            {bulkAssignMutation.isPending ? 'Adding…' : `Add${selected.length > 0 ? ` ${selected.length}` : ''}`}
+                                          </Button>
+                                        </div>
                                       );
                                     })()}
-                                    <Button
-                                      size="sm"
-                                      onClick={() => {
-                                        const bids = pendingAssign[String(r.id)] || [];
-                                        if (bids.length === 0) return;
-                                        bulkAssignMutation.mutate({ branchIds: bids, regionId: String(r.id) });
-                                      }}
-                                      disabled={!pendingAssign[String(r.id)] || (pendingAssign[String(r.id)]?.length || 0) === 0 || bulkAssignMutation.isPending}
-                                    >
-                                      {bulkAssignMutation.isPending ? 'Adding...' : `Add${(pendingAssign[String(r.id)]?.length || 0) > 0 ? ` ${pendingAssign[String(r.id)].length}` : ''}`}
-                                    </Button>
                                   </div>
 
                                   {branchCount === 0 ? (
