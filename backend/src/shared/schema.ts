@@ -307,19 +307,19 @@ export type Admission = typeof admissions.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 
-// User link table: maps regions to branches
-export const userLink = mysqlTable("user_link", {
+// Branch employees table (renamed from user_link)
+export const branchEmps = mysqlTable("branch_emps", {
   id: varchar("id", { length: 50 }).primaryKey().notNull(),
-  regionId: varchar("region_id", { length: 50 }).notNull(),
   branchId: varchar("branch_id", { length: 50 }).notNull(),
+  userId: varchar("user_id", { length: 50 }).notNull(),
   createdOn: timestamp("created_on").defaultNow().notNull(),
   updatedOn: timestamp("updated_on").defaultNow().notNull(),
 });
 
-export const insertUserLinkSchema = createInsertSchema(userLink).omit({
+export const insertBranchEmpSchema = createInsertSchema(branchEmps).omit({
   createdOn: true,
   updatedOn: true,
 }).partial({ id: true });
 
-export type UserLink = typeof userLink.$inferSelect;
-export type InsertUserLink = z.infer<typeof insertUserLinkSchema>;
+export type BranchEmp = typeof branchEmps.$inferSelect;
+export type InsertBranchEmp = z.infer<typeof insertBranchEmpSchema>;
