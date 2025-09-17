@@ -24,7 +24,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
 
   // Filters and pagination
   const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
@@ -75,7 +75,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+      setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -213,18 +213,13 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <Input className="mt-1" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
               </div>
               <div>
-                <Label>Role<span className="text-destructive"> *</span></Label>
-                <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
+                <Label>Department</Label>
+                <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="regional_manager">Regional Manager</SelectItem>
-                    <SelectItem value="branch_manager">Branch Manager</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="counselor">Counsellor</SelectItem>
-                    <SelectItem value="admission_officer">Admission Officer</SelectItem>
-                    <SelectItem value="admin_staff">Admin Staff</SelectItem>
+                    <SelectItem value="Administration">Administration</SelectItem>
+                    <SelectItem value="Operations">Operations</SelectItem>
+                    <SelectItem value="Partnerships">Partnerships</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -241,10 +236,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 />
               </div>
               <div className="col-span-full flex gap-2 mt-2">
-                <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
+                <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || create.isPending}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
                   Cancel
                 </Button>
               </div>
