@@ -101,6 +101,20 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     }
   });
 
+  // Auto-adjustments based on selected department
+  useEffect(() => {
+    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+    if (deptName === 'Operations') {
+      // enforce regional manager role for Operations
+      setForm((s) => ({ ...s, role: 'regional_manager' }));
+    }
+    if (deptName === 'Administration') {
+      // clear region/branch for Administration
+      setForm((s) => ({ ...s, branchId: '', regionId: '' }));
+    }
+  }, [form.department, departments]);
+
   // Client-side check to prevent creating a user with an email that already exists
   const handleCreate = () => {
     const emailTrim = String(form.email || '').trim().toLowerCase();
@@ -113,6 +127,21 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     if (exists) {
       toast({ title: 'Error', description: 'A user with this email already exists', variant: 'destructive' });
       return;
+    }
+
+    // Additional validation based on department/role rules
+    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+    if (deptName === 'Administration') {
+      // OK, no branch required
+    } else if (deptName === 'Operations') {
+      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Operations', variant: 'destructive' }); return; }
+    } else if (String(form.role) === 'branch_manager') {
+      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Branch Manager', variant: 'destructive' }); return; }
+      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required for Branch Manager', variant: 'destructive' }); return; }
+    } else {
+      // general case: branch required
+      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required', variant: 'destructive' }); return; }
     }
 
     create.mutate();
