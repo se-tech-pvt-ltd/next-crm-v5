@@ -270,10 +270,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl p-0">
+          <DialogContent className="max-w-4xl p-0 sm:rounded-xl">
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
-              <DialogHeader className="px-6 pt-6">
-                <DialogTitle className="text-lg">Add User</DialogTitle>
+              <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+                <DialogTitle className="text-xl">Add User</DialogTitle>
                 <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department with the required region/branch as applicable.</div>
               </DialogHeader>
 
@@ -282,7 +282,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <div className="md:col-span-1">
                     <div className="text-sm font-medium">Profile image</div>
                     <div
-                      className="mt-2 relative rounded-md border bg-muted/50 overflow-hidden aspect-square max-h-72 cursor-pointer group"
+                      className="mt-2 relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden aspect-square max-h-72 cursor-pointer group"
                       onClick={() => fileInputRef.current?.click()}
                       role="button"
                       aria-label="Upload profile image"
@@ -424,7 +424,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       </div>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-end gap-3">
+                    <div className="mt-6 pt-4 border-t flex items-center justify-end gap-3">
                       <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
                         const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
                         const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
