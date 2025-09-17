@@ -13,7 +13,7 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, branchId, department } = req.body || {};
+      const { email, firstName, lastName, role, branchId, department, profileImageUrl } = req.body || {};
       if (!email || !role) {
         return res.status(400).json({ message: 'email and role are required' });
       }
@@ -49,7 +49,7 @@ export class UserController {
 
   static async inviteUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, branchId, department } = req.body || {};
+      const { email, firstName, lastName, role, branchId, department, profileImageUrl } = req.body || {};
       if (!email || !role) {
         return res.status(400).json({ message: 'email and role are required' });
       }
