@@ -12,7 +12,6 @@ export const users = mysqlTable("users", {
   roleId: text("role_id").notNull(), // references user_roles.role_name or id
   departmentId: varchar("department_id", { length: 255 }),
   phoneNumber: varchar("phone_number", { length: 20 }),
-  dateOfBirth: date("date_of_birth"),
   passwordHash: varchar("password_hash", { length: 255 }), // hashed password for authentication
   isActive: boolean("is_active").notNull().default(true),
   isRegistrationEmailSent: boolean("is_registration_email_sent").notNull().default(true),
