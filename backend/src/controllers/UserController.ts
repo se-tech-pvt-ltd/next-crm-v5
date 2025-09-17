@@ -14,8 +14,8 @@ export class UserController {
   static async createUser(req: Request, res: Response) {
     try {
       const { email, firstName, lastName, role, branchId, department } = req.body || {};
-      if (!email || !role || !branchId) {
-        return res.status(400).json({ message: 'email, role and branchId are required' });
+      if (!email || !role) {
+        return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
@@ -50,8 +50,8 @@ export class UserController {
   static async inviteUser(req: Request, res: Response) {
     try {
       const { email, firstName, lastName, role, branchId, department } = req.body || {};
-      if (!email || !role || !branchId) {
-        return res.status(400).json({ message: 'email, role and branchId are required' });
+      if (!email || !role) {
+        return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
       const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department } as any);
