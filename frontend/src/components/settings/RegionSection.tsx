@@ -46,6 +46,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
   const [branchHeadDraft, setBranchHeadDraft] = useState<Record<string, string>>({});
   const [updatingBranchId, setUpdatingBranchId] = useState<string | null>(null);
   const [removingBranchId, setRemovingBranchId] = useState<string | null>(null);
+  const [fadeOutBranchId, setFadeOutBranchId] = useState<string | null>(null);
   const [sort, setSort] = useState<{ by: 'name' | 'head' | 'branches'; dir: 'asc' | 'desc' }>({ by: 'name', dir: 'asc' });
 
   const toggleExpand = (id: string) => {
@@ -193,6 +194,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
     onMutate: async ({ branchId }) => {
       setRemovingBranchId(branchId);
+      setTimeout(() => setFadeOutBranchId(branchId), 250);
     },
     onSuccess: async () => {
       await Promise.all([refetch(), refetchBranches()]);
@@ -204,6 +206,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
     },
     onSettled: () => {
       setRemovingBranchId(null);
+      setFadeOutBranchId(null);
     }
   });
 
@@ -603,15 +606,16 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
                                           const currentHeadId = String(b.branchHeadId || b.managerId || '');
                                           const options = branchHeadOptionsForEdit(b);
                                           return (
-                                            <TableRow key={b.id}>
+                                            <TableRow key={b.id} className={(removingBranchId === String(b.id) ? 'line-through text-muted-foreground' : '') + ' ' + (fadeOutBranchId === String(b.id) ? 'opacity-0 transition-opacity duration-500' : '')}>
                                               <TableCell className="p-2 text-xs">
                                                 <div className="flex items-center gap-1">
                                                   <Button
                                                     type="button"
                                                     size="icon"
-                                                    variant="ghost"
+                                                    variant="destructive"
                                                     className="h-6 w-6 -ml-1"
                                                     title="Remove from region"
+                                                    aria-label="Remove from region"
                                                     onClick={() => removeBranchFromRegion.mutate({ branchId: String(b.id) })}
                                                     disabled={removingBranchId === String(b.id) || removeBranchFromRegion.isPending}
                                                   >
