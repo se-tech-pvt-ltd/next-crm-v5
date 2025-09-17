@@ -50,7 +50,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', branchId: '', department: '' });
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
 
   // Roles for edit dialog (depends on editForm, so must be declared after it)
