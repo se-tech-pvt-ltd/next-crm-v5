@@ -8,6 +8,7 @@ import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { Separator } from '@/components/ui/separator';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
+import * as UserRolesService from '@/services/userRoles';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -26,23 +27,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
 
-  const departmentRoleMap: Record<string, { value: string; label: string }[]> = {
-    Administration: [
-      { value: 'super_admin', label: 'Super Admin' },
-      { value: 'admin', label: 'Admin' },
-      { value: 'processing', label: 'Processing Unit' },
-    ],
-    Operations: [
-      { value: 'regional_manager', label: 'Regional Manager' },
-      { value: 'branch_manager', label: 'Branch Manager' },
-      { value: 'counselor', label: 'Counsellor' },
-      { value: 'admission_officer', label: 'Admission Officer' },
-    ],
-    Partnerships: [
-      { value: 'partner', label: 'Partner' },
-      { value: 'partner_subuser', label: 'Partner Sub-user' },
-    ],
-  };
+  // Load departments from backend
+  const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
+
+  // Roles for add dialog
+  const { data: rolesForDept = [] } = useQuery({ queryKey: ['/api/user-roles', form.department], queryFn: () => UserRolesService.listRoles(form.department || undefined), enabled: Boolean(form.department), staleTime: 60_000 });
+
+  // Roles for edit dialog
+  const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
 
   // Filters and pagination
   const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
@@ -258,9 +250,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
                       <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Administration">Administration</SelectItem>
-                        <SelectItem value="Operations">Operations</SelectItem>
-                        <SelectItem value="Partnerships">Partnerships</SelectItem>
+                        {departments.map((d: any) => (
+                          <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -270,9 +262,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
                       <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select role" /></SelectTrigger>
                       <SelectContent>
-                        {(departmentRoleMap[form.department] || []).map((r) => (
-                          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                        ))}
+                        {(rolesForDept || []).map((r: any) => (
+                      <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                    ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -472,9 +464,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Administration">Administration</SelectItem>
-                    <SelectItem value="Operations">Operations</SelectItem>
-                    <SelectItem value="Partnerships">Partnerships</SelectItem>
+                    {departments.map((d: any) => (
+                      <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -483,8 +475,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
                   <SelectContent>
-                    {(departmentRoleMap[editForm.department] || []).map((r) => (
-                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                    {(rolesForEditDept || []).map((r: any) => (
+                      <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
