@@ -13,7 +13,7 @@ import * as RegionsService from '@/services/regions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Database, Plus } from 'lucide-react';
+import { Database, Plus, UserPlus, Image as ImageIcon, IdCard, Building2, Save, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 
@@ -26,7 +26,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
+  const [form, setForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load departments from backend
@@ -96,7 +96,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
+      setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -270,79 +270,99 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl p-0">
+          <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10">
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
-              <DialogHeader className="px-6 pt-6">
-                <DialogTitle className="text-lg">Add User</DialogTitle>
-                <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department with the required region/branch as applicable.</div>
+              <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
+                <DialogTitle className="text-2xl text-primary flex items-center gap-2"><UserPlus className="w-5 h-5" /> Add User</DialogTitle>
               </DialogHeader>
 
               <div className="px-6 pb-6">
-                <div className="mt-2 grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1">
-                    <div className="text-sm font-medium">Profile image</div>
-                    <div
-                      className="mt-2 relative rounded-md border bg-muted/50 overflow-hidden aspect-square max-h-72 cursor-pointer group"
-                      onClick={() => fileInputRef.current?.click()}
-                      role="button"
-                      aria-label="Upload profile image"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
-                    >
-                      {form.profileImageUrl ? (
-                        <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">Click to upload</div>
-                      )}
-                      <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const { uploadProfilePicture } = await import('@/services/uploads');
-                          const res = await uploadProfilePicture(file);
-                          setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
-                        } catch (err: any) {
-                          toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
-                        }
-                      }}
-                    />
-                  </div>
+                <div className="mt-2 space-y-6">
 
-                  <div className="md:col-span-2 space-y-6">
+                  <div className="space-y-6">
                     <div>
-                      <div className="text-sm font-medium">User information</div>
-                      <div className="mt-2 grid sm:grid-cols-3 gap-4">
-                        <div className="flex flex-col">
-                          <Label>Email<span className="text-destructive"> *</span></Label>
-                          <Input className="mt-2" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                      <div className="flex items-center justify-between">
+                        <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
+                        <div className="flex items-center gap-2">
+                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
+                            const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                            const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                            if (deptName === 'Administration') return false;
+                            if (deptName === 'Operations') return !form.regionId || !form.role;
+                            if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
+                            return false;
+                          })()}>
+                            {create.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
+                          </Button>
+                          <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                            <X className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <div className="flex flex-col">
-                          <Label>First name</Label>
-                          <Input className="mt-2" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                      </div>
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                        <div className="flex justify-center sm:justify-start">
+                          <div
+                            className="relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden w-[200px] h-[134px] cursor-pointer group"
+                            onClick={() => fileInputRef.current?.click()}
+                            role="button"
+                            aria-label="Upload profile image"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+                          >
+                            {form.profileImageUrl ? (
+                              <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">Click to upload</div>
+                            )}
+                            <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
+                          </div>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const { uploadProfilePicture } = await import('@/services/uploads');
+                                const res = await uploadProfilePicture(file);
+                                setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
+                              } catch (err: any) {
+                                toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
+                              }
+                            }}
+                          />
                         </div>
-                        <div className="flex flex-col">
-                          <Label>Last name</Label>
-                          <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="flex flex-col">
+                            <Label>Email<span className="text-destructive"> *</span></Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Phone number</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="tel" value={form.phoneNumber} onChange={(e) => setForm((s) => ({ ...s, phoneNumber: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>First name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Last name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <Separator />
 
                     <div>
-                      <div className="text-sm font-medium">Department &amp; Assignment</div>
-                      <div className="mt-2 grid sm:grid-cols-3 gap-4">
+                      <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                      <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Department</Label>
                           <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
-                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
                             <SelectContent>
                               {departments.map((d: any) => (
                                 <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
@@ -353,8 +373,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                         <div className="flex flex-col">
                           <Label>Role<span className="text-destructive"> *</span></Label>
-                          <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
-                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
+                          <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
                             <SelectContent>
                               {(rolesForDept || []).map((r: any) => (
                                 <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
@@ -364,21 +384,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         </div>
 
                         {(() => {
-                          const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-                          const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                          const role = String(form.role);
 
-                          if (deptName === 'Administration') {
-                            return null;
-                          }
-
-                          if (deptName === 'Operations') {
+                          if (role === 'regional_manager') {
                             return (
-                              <div className="sm:col-span-3">
+                              <div className="sm:col-span-2">
                                 <Label>Region<span className="text-destructive"> *</span></Label>
                                 <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
-                                  <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                  <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                   <SelectContent>
-                                    {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => (
                                       <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
                                     ))}
                                   </SelectContent>
@@ -387,13 +402,13 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                             );
                           }
 
-                          if (String(form.role) === 'branch_manager') {
+                          if (role === 'branch_manager' || role === 'counsellor' || role === 'admission_officer') {
                             return (
                               <>
                                 <div>
                                   <Label>Region<span className="text-destructive"> *</span></Label>
                                   <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
-                                    <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                    <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                     <SelectContent>
                                       {(Array.isArray(regions) ? regions : []).map((r: any) => (
                                         <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
@@ -401,7 +416,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                     </SelectContent>
                                   </Select>
                                 </div>
-                                <div className="sm:col-span-3">
+                                <div>
                                   <Label>Branch<span className="text-destructive"> *</span></Label>
                                   <div className="mt-2">
                                     <SearchableCombobox
@@ -410,7 +425,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                       placeholder="Select branch (required)"
                                       searchPlaceholder="Search branches..."
                                       onSearch={setBranchSearch}
-                                      options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                                      className="border-input/60 hover:border-primary focus-visible:ring-primary/50"
+                                      options={(branchAddList || []).filter((b: any) => {
+                                        if (role === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
+                                        if (form.regionId && String(b.regionId ?? b.region_id) !== String(form.regionId)) return false;
+                                        return true;
+                                      }).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
                                       loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
                                     />
                                   </div>
@@ -424,21 +444,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       </div>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-end gap-3">
-                      <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
-                        const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
-                        const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-                        if (deptName === 'Administration') return false;
-                        if (deptName === 'Operations') return !form.regionId || !form.role;
-                        if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
-                        return false;
-                      })()}>
-                        {create.isPending ? 'Creating...' : 'Save'}
-                      </Button>
-                      <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
-                        Cancel
-                      </Button>
-                    </div>
                   </div>
                 </div>
               </div>
