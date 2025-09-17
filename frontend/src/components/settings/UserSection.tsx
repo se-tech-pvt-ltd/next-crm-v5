@@ -34,6 +34,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Roles for add dialog
   const { data: rolesForDept = [] } = useQuery({ queryKey: ['/api/user-roles', form.department], queryFn: () => UserRolesService.listRoles(form.department || undefined), enabled: Boolean(form.department), staleTime: 60_000 });
 
+  // Regions list
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
+
+  // Filters and pagination
+
   // Filters and pagination
   const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
   const [branchSearch, setBranchSearch] = useState('');
