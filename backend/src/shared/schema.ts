@@ -184,7 +184,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
   isActive: z.boolean().optional(),
   isRegistrationEmailSent: z.boolean().optional(),
   isProfileComplete: z.boolean().optional(),
-});
+  roleId: z.string().optional(),
+  departmentId: z.string().optional(),
+}).partial({ id: true });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
   createdAt: true,
