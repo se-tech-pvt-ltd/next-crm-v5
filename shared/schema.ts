@@ -8,7 +8,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 255 }).unique(),
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
-  profileImageUrl: varchar("profile_image_url", { length: 500 }),
+  profileImageId: varchar("profile_image_id", { length: 50 }),
   role: text("role").notNull().default("counselor"), // counselor, branch_manager, admin_staff
   branchId: varchar("branch_id", { length: 255 }), // for counselors and branch managers
   department: varchar("department", { length: 255 }),
