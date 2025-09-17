@@ -23,28 +23,35 @@ export class UserService {
     return await UserModel.findCounselors();
   }
 
-  static async createUser(userData: InsertUser): Promise<User> {
+  static async createUser(userData: any): Promise<User> {
     if (!userData.email) throw new Error('email is required');
-    if (!userData.branchId) throw new Error('branchId is required');
-    const data: InsertUser = {
+    // role is required in new schema
+    if (!userData.role && !userData.roleId) throw new Error('role is required');
+
+    const data: any = {
       ...userData,
+      roleId: userData.roleId || userData.role,
+      departmentId: userData.departmentId || userData.department || null,
       isActive: false,
       isRegistrationEmailSent: false,
       isProfileComplete: false,
-    } as InsertUser;
-    return await UserModel.create(data);
+    } as any;
+    return await UserModel.create(data as any);
   }
 
-  static async createUserWithPassword(userData: InsertUser, password: string): Promise<User> {
+  static async createUserWithPassword(userData: any, password: string): Promise<User> {
     if (!userData.email) throw new Error('email is required');
-    if (!userData.branchId) throw new Error('branchId is required');
-    const data: InsertUser = {
+    if (!userData.role && !userData.roleId) throw new Error('role is required');
+
+    const data: any = {
       ...userData,
+      roleId: userData.roleId || userData.role,
+      departmentId: userData.departmentId || userData.department || null,
       isActive: false,
       isRegistrationEmailSent: false,
       isProfileComplete: false,
-    } as InsertUser;
-    const user = await AuthService.createUserWithPassword(data, password);
+    } as any;
+    const user = await AuthService.createUserWithPassword(data as any, password);
     return user;
   }
 

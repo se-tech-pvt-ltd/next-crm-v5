@@ -9,18 +9,50 @@ export const users = mysqlTable("users", {
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
   profileImageUrl: varchar("profile_image_url", { length: 500 }),
-  role: text("role").notNull().default("counselor"), // counselor, branch_manager, admin_staff
-  branchId: varchar("branch_id", { length: 255 }), // for counselors and branch managers
-  department: varchar("department", { length: 255 }),
+  roleId: text("role_id").notNull(), // references user_roles.role_name or id
+  departmentId: varchar("department_id", { length: 255 }),
   phoneNumber: varchar("phone_number", { length: 20 }),
-  dateOfBirth: date("date_of_birth"),
   passwordHash: varchar("password_hash", { length: 255 }), // hashed password for authentication
-  isActive: boolean("is_active").notNull().default(false),
-  isRegistrationEmailSent: boolean("is_registration_email_sent").notNull().default(false),
-  isProfileComplete: boolean("is_profile_complete").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  isRegistrationEmailSent: boolean("is_registration_email_sent").notNull().default(true),
+  isProfileComplete: boolean("is_profile_complete").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// User departments table
+export const userDepartments = mysqlTable("user_departments", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  departmentName: varchar("department_name", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+// User roles table
+export const userRoles = mysqlTable("user_roles", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  roleName: varchar("role_name", { length: 255 }).notNull(),
+  departmentId: varchar("department_id", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+// Insert schemas for departments and roles
+export const insertUserDepartmentSchema = createInsertSchema(userDepartments).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+// Types
+export type UserDepartment = typeof userDepartments.$inferSelect;
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserDepartment = z.infer<typeof insertUserDepartmentSchema>;
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
 
 export const leads = mysqlTable("leads", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
@@ -151,7 +183,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
   isActive: z.boolean().optional(),
   isRegistrationEmailSent: z.boolean().optional(),
   isProfileComplete: z.boolean().optional(),
-});
+  roleId: z.string().optional(),
+  departmentId: z.string().optional(),
+}).partial({ id: true });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
   createdAt: true,
@@ -272,3 +306,20 @@ export type Application = typeof applications.$inferSelect;
 export type Admission = typeof admissions.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
+
+// Branch employees table (renamed from user_link)
+export const branchEmps = mysqlTable("branch_emps", {
+  id: varchar("id", { length: 50 }).primaryKey().notNull(),
+  branchId: varchar("branch_id", { length: 50 }).notNull(),
+  userId: varchar("user_id", { length: 50 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+export const insertBranchEmpSchema = createInsertSchema(branchEmps).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+export type BranchEmp = typeof branchEmps.$inferSelect;
+export type InsertBranchEmp = z.infer<typeof insertBranchEmpSchema>;

@@ -37,6 +37,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Branches
   app.use('/api/branches', branchRoutes);
 
+  // Branch employees (mappings)
+  app.use('/api/branch-emps', (await import('./branchEmpRoutes.js')).default);
+
+  // User departments and roles
+  app.use('/api/user-departments', (await import('./userDepartmentRoutes.js')).default);
+  app.use('/api/user-roles', (await import('./userRoleRoutes.js')).default);
+
   // Regions
   app.use('/api/regions', (await import('./regionRoutes.js')).default);
 

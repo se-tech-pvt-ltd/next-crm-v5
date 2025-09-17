@@ -8,6 +8,8 @@ import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { Separator } from '@/components/ui/separator';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
+import * as UserRolesService from '@/services/userRoles';
+import * as RegionsService from '@/services/regions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +26,22 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
+
+  // Load departments from backend
+  const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
+
+  // Roles for add dialog
+  const { data: rolesForDept = [] } = useQuery({ queryKey: ['/api/user-roles', form.department], queryFn: () => UserRolesService.listRoles(form.department || undefined), enabled: Boolean(form.department), staleTime: 60_000 });
+
+  // Regions list
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
+
+  // helper for selected department name
+  const selectedDeptObj = departments.find((d: any) => String(d.id) === String(form.department));
+  const selectedDeptName = String(selectedDeptObj?.departmentName ?? selectedDeptObj?.department_name ?? '').trim();
+
+  // Filters and pagination
 
   // Filters and pagination
   const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
@@ -37,8 +54,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
+
+  // Roles for edit dialog (depends on editForm, so must be declared after it)
+  const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
 
   // Branch search hooks (top-level to preserve hook order) — defined after state variables
   const branchFilterTrim = branchFilterSearch.trim();
@@ -75,7 +95,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' });
+      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -84,6 +104,52 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       toast({ title: 'Error', description: msg, variant: 'destructive' });
     }
   });
+
+  // Auto-adjustments based on selected department
+  useEffect(() => {
+    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+    if (deptName === 'Operations') {
+      // enforce regional manager role for Operations
+      setForm((s) => ({ ...s, role: 'regional_manager' }));
+    }
+    if (deptName === 'Administration') {
+      // clear region/branch for Administration
+      setForm((s) => ({ ...s, branchId: '', regionId: '' }));
+    }
+  }, [form.department, departments]);
+
+  // Client-side check to prevent creating a user with an email that already exists
+  const handleCreate = () => {
+    const emailTrim = String(form.email || '').trim().toLowerCase();
+    if (!emailTrim) {
+      toast({ title: 'Error', description: 'Email is required', variant: 'destructive' });
+      return;
+    }
+
+    const exists = Array.isArray(users) && users.some((u: any) => String(u.email || '').trim().toLowerCase() === emailTrim);
+    if (exists) {
+      toast({ title: 'Error', description: 'A user with this email already exists', variant: 'destructive' });
+      return;
+    }
+
+    // Additional validation based on department/role rules
+    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+    if (deptName === 'Administration') {
+      // OK, no branch required
+    } else if (deptName === 'Operations') {
+      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Operations', variant: 'destructive' }); return; }
+    } else if (String(form.role) === 'branch_manager') {
+      if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Branch Manager', variant: 'destructive' }); return; }
+      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required for Branch Manager', variant: 'destructive' }); return; }
+    } else {
+      // general case: branch required
+      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required', variant: 'destructive' }); return; }
+    }
+
+    create.mutate();
+  };
 
   const updateMutation = useMutation({
     mutationFn: async () => {
@@ -115,6 +181,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     };
     return map[r] || (r || '').replace(/_/g, ' ');
   };
+
 
   // Derived lists for branch selects (add-dialog and filter)
   const branchList = Array.isArray(initialBranches) ? initialBranches : [];
@@ -194,59 +261,149 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add User</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="max-w-2xl p-0">
+            <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
+              <DialogHeader className="px-6 pt-6">
+                <DialogTitle className="text-lg">Add User</DialogTitle>
+                <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department and branch.</div>
+              </DialogHeader>
 
-            <div className="grid sm:grid-cols-3 gap-2">
-              <div>
-                <Label>Email<span className="text-destructive"> *</span></Label>
-                <Input className="mt-1" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
-              </div>
-              <div>
-                <Label>First name</Label>
-                <Input className="mt-1" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Last name</Label>
-                <Input className="mt-1" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Role<span className="text-destructive"> *</span></Label>
-                <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="regional_manager">Regional Manager</SelectItem>
-                    <SelectItem value="branch_manager">Branch Manager</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="counselor">Counsellor</SelectItem>
-                    <SelectItem value="admission_officer">Admission Officer</SelectItem>
-                    <SelectItem value="admin_staff">Admin Staff</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Branch<span className="text-destructive"> *</span></Label>
-                <SearchableCombobox
-                  value={form.branchId}
-                  onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                  placeholder="Select branch (required)"
-                  searchPlaceholder="Search branches..."
-                  onSearch={setBranchSearch}
-                  options={branchAddOptions}
-                  loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
-                />
-              </div>
-              <div className="col-span-full flex gap-2 mt-2">
-                <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
+              <div className="px-6 pb-6">
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="flex flex-col">
+                    <Label>Email<span className="text-destructive"> *</span></Label>
+                    <Input className="mt-2" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>First name</Label>
+                    <Input className="mt-2" value={form.firstName} onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Last name</Label>
+                    <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Department</Label>
+                    <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
+                      <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select department" /></SelectTrigger>
+                      <SelectContent>
+                        {departments.map((d: any) => (
+                          <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Role<span className="text-destructive"> *</span></Label>
+                    <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))} disabled={selectedDeptName === 'Operations'}>
+                      <SelectTrigger className="mt-2 h-10"><SelectValue placeholder={form.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
+                      <SelectContent>
+                        {(rolesForDept || []).map((r: any) => (
+                      <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                    ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                {(() => {
+                    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+
+                    // Administration: no branch/region
+                    if (deptName === 'Administration') {
+                      return null;
+                    }
+
+                    // Operations: enforce Regional Manager role and show region select (regions without region head)
+                    if (deptName === 'Operations') {
+                      return (
+                        <div className="sm:col-span-3">
+                          <Label>Region<span className="text-destructive"> *</span></Label>
+                          <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
+                            <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                            <SelectContent>
+                              {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                                <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    }
+
+                    // Role-specific: Branch Manager needs region then branch (branches without branch head)
+                    if (String(form.role) === 'branch_manager') {
+                      return (
+                        <>
+                          <div>
+                            <Label>Region<span className="text-destructive"> *</span></Label>
+                            <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
+                              <SelectTrigger className="mt-2 h-10"><SelectValue placeholder="Select region" /></SelectTrigger>
+                              <SelectContent>
+                                {(Array.isArray(regions) ? regions : []).map((r: any) => (
+                                  <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="sm:col-span-3">
+                            <Label>Branch<span className="text-destructive"> *</span></Label>
+                            <div className="mt-2">
+                              <SearchableCombobox
+                                value={form.branchId}
+                                onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                                placeholder="Select branch (required)"
+                                searchPlaceholder="Search branches..."
+                                onSearch={setBranchSearch}
+                                options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!form.regionId || String(b.regionId ?? b.region_id) === String(form.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                                loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      );
+                    }
+
+                    // Default: show branch selector but only branches without branch head
+                    return (
+                      <div className="sm:col-span-3">
+                        <Label>Branch<span className="text-destructive"> *</span></Label>
+                        <div className="mt-2">
+                          <SearchableCombobox
+                            value={form.branchId}
+                            onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
+                            placeholder="Select branch (required)"
+                            searchPlaceholder="Search branches..."
+                            onSearch={setBranchSearch}
+                            options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id)).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                            loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
+                    const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
+                    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                    if (deptName === 'Administration') return false; // branch not required
+                    if (deptName === 'Operations') return !form.regionId || !form.role; // need region and role
+                    if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
+                    // for other roles, require branch
+                    return !form.branchId || !form.role;
+                  })()}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '' }); setModalOpen(false); }} disabled={create.isPending}>
-                  Cancel
-                </Button>
+                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>
@@ -293,6 +450,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
                       branchId: String((u.branchId ?? u.branch_id) || ''),
+                      department: String(u.department || ''),
+                      regionId: String((u.regionId ?? u.region_id) || ''),
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
@@ -413,18 +572,24 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <Input className="mt-1" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
               </div>
               <div>
+                <Label>Department</Label>
+                <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: '' }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d: any) => (
+                      <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Role<span className="text-destructive"> *</span></Label>
                 <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder={editForm.department ? 'PLEASE SELECT' : 'PLEASE SELECT ROLE'} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="regional_manager">Regional Manager</SelectItem>
-                    <SelectItem value="branch_manager">Branch Manager</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="counselor">Counsellor</SelectItem>
-                    <SelectItem value="admission_officer">Admission Officer</SelectItem>
-                    <SelectItem value="admin_staff">Admin Staff</SelectItem>
+                    {(rolesForEditDept || []).map((r: any) => (
+                      <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
