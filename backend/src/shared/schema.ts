@@ -22,6 +22,40 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User departments table
+export const userDepartments = mysqlTable("user_departments", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  departmentName: varchar("department_name", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+// User roles table
+export const userRoles = mysqlTable("user_roles", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  roleName: varchar("role_name", { length: 255 }).notNull(),
+  departmentId: varchar("department_id", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+// Insert schemas for departments and roles
+export const insertUserDepartmentSchema = createInsertSchema(userDepartments).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+// Types
+export type UserDepartment = typeof userDepartments.$inferSelect;
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserDepartment = z.infer<typeof insertUserDepartmentSchema>;
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+
 export const leads = mysqlTable("leads", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
   name: text("name").notNull(),
