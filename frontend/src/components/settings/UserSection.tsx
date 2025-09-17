@@ -26,6 +26,24 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
 
+  const departmentRoleMap: Record<string, { value: string; label: string }[]> = {
+    Administration: [
+      { value: 'super_admin', label: 'Super Admin' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'processing', label: 'Processing Unit' },
+    ],
+    Operations: [
+      { value: 'regional_manager', label: 'Regional Manager' },
+      { value: 'branch_manager', label: 'Branch Manager' },
+      { value: 'counselor', label: 'Counsellor' },
+      { value: 'admission_officer', label: 'Admission Officer' },
+    ],
+    Partnerships: [
+      { value: 'partner', label: 'Partner' },
+      { value: 'partner_subuser', label: 'Partner Sub-user' },
+    ],
+  };
+
   // Filters and pagination
   const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
   const [branchSearch, setBranchSearch] = useState('');
@@ -37,7 +55,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '' });
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
 
   // Branch search hooks (top-level to preserve hook order) — defined after state variables
@@ -214,12 +232,23 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div>
                 <Label>Department</Label>
-                <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v }))}>
+                <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Administration">Administration</SelectItem>
                     <SelectItem value="Operations">Operations</SelectItem>
                     <SelectItem value="Partnerships">Partnerships</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Role<span className="text-destructive"> *</span></Label>
+                <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
+                  <SelectContent>
+                    {(departmentRoleMap[form.department] || []).map((r) => (
+                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -236,7 +265,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 />
               </div>
               <div className="col-span-full flex gap-2 mt-2">
-                <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || create.isPending}>
+                <Button type="button" onClick={() => create.mutate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
@@ -288,6 +317,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
                       branchId: String((u.branchId ?? u.branch_id) || ''),
+                      department: String(u.department || ''),
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
@@ -408,18 +438,24 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 <Input className="mt-1" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
               </div>
               <div>
+                <Label>Department</Label>
+                <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: (departmentRoleMap[v] && departmentRoleMap[v][0]?.value) || '' }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Administration">Administration</SelectItem>
+                    <SelectItem value="Operations">Operations</SelectItem>
+                    <SelectItem value="Partnerships">Partnerships</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Role<span className="text-destructive"> *</span></Label>
                 <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="regional_manager">Regional Manager</SelectItem>
-                    <SelectItem value="branch_manager">Branch Manager</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="counselor">Counsellor</SelectItem>
-                    <SelectItem value="admission_officer">Admission Officer</SelectItem>
-                    <SelectItem value="admin_staff">Admin Staff</SelectItem>
+                    {(departmentRoleMap[editForm.department] || []).map((r) => (
+                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
