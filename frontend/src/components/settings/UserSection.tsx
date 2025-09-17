@@ -95,7 +95,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' });
+      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -137,15 +137,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
     const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
     if (deptName === 'Administration') {
-      // OK, no branch required
+      // OK, nothing extra required
     } else if (deptName === 'Operations') {
       if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Operations', variant: 'destructive' }); return; }
     } else if (String(form.role) === 'branch_manager') {
       if (!form.regionId) { toast({ title: 'Error', description: 'Region is required for Branch Manager', variant: 'destructive' }); return; }
       if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required for Branch Manager', variant: 'destructive' }); return; }
-    } else {
-      // general case: branch required
-      if (!form.branchId) { toast({ title: 'Error', description: 'Branch is required', variant: 'destructive' }); return; }
     }
 
     create.mutate();
@@ -265,7 +262,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
               <DialogHeader className="px-6 pt-6">
                 <DialogTitle className="text-lg">Add User</DialogTitle>
-                <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department and branch.</div>
+                <div className="mt-1 text-sm text-muted-foreground">Create a new user and assign them to a department with the required region/branch as applicable.</div>
               </DialogHeader>
 
               <div className="px-6 pb-6">
@@ -368,23 +365,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       );
                     }
 
-                    // Default: show branch selector but only branches without branch head
-                    return (
-                      <div className="sm:col-span-3">
-                        <Label>Branch<span className="text-destructive"> *</span></Label>
-                        <div className="mt-2">
-                          <SearchableCombobox
-                            value={form.branchId}
-                            onValueChange={(v) => setForm((s) => ({ ...s, branchId: v }))}
-                            placeholder="Select branch (required)"
-                            searchPlaceholder="Search branches..."
-                            onSearch={setBranchSearch}
-                            options={(branchAddList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id)).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
-                            loading={Boolean(branchAddTrim.length > 0 && branchAddIsFetching)}
-                          />
-                        </div>
-                      </div>
-                    );
+                    // Default: no branch selector shown unless Branch Manager
+                    return null;
                   })()}
                 </div>
 
@@ -392,11 +374,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <Button type="button" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
                     const deptObj = departments.find((d: any) => String(d.id) === String(form.department));
                     const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
-                    if (deptName === 'Administration') return false; // branch not required
+                    if (deptName === 'Administration') return false; // no extra requirement
                     if (deptName === 'Operations') return !form.regionId || !form.role; // need region and role
-                    if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role;
-                    // for other roles, require branch
-                    return !form.branchId || !form.role;
+                    if (String(form.role) === 'branch_manager') return !form.regionId || !form.branchId || !form.role; // need region and branch
+                    return false; // others: no branch required
                   })()}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
@@ -593,20 +574,71 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="sm:col-span-2 md:col-span-3">
-                <Label>Branch<span className="text-destructive"> *</span></Label>
-                <SearchableCombobox
-                  value={editForm.branchId}
-                  onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
-                  placeholder="Select branch (required)"
-                  searchPlaceholder="Search branches..."
-                  onSearch={setBranchEditSearch}
-                  options={branchEditOptions}
-                  loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
-                />
-              </div>
+              {(() => {
+                const deptObj = departments.find((d: any) => String(d.id) === String(editForm.department));
+                const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+
+                if (deptName === 'Administration') {
+                  return null;
+                }
+
+                if (deptName === 'Operations') {
+                  return (
+                    <div className="sm:col-span-2 md:col-span-3">
+                      <Label>Region<span className="text-destructive"> *</span></Label>
+                      <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
+                        <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
+                        <SelectContent>
+                          {(Array.isArray(regions) ? regions : []).filter((r: any) => !(r.regionHeadId ?? r.region_head_id)).map((r: any) => (
+                            <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                }
+
+                if (String(editForm.role) === 'branch_manager') {
+                  return (
+                    <>
+                      <div>
+                        <Label>Region<span className="text-destructive"> *</span></Label>
+                        <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
+                          <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
+                          <SelectContent>
+                            {(Array.isArray(regions) ? regions : []).map((r: any) => (
+                              <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="sm:col-span-2 md:col-span-3">
+                        <Label>Branch<span className="text-destructive"> *</span></Label>
+                        <SearchableCombobox
+                          value={editForm.branchId}
+                          onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
+                          placeholder="Select branch (required)"
+                          searchPlaceholder="Search branches..."
+                          onSearch={setBranchEditSearch}
+                          options={(branchEditList || []).filter((b: any) => !(b.branchHeadId ?? b.branch_head_id) && (!editForm.regionId || String(b.regionId ?? b.region_id) === String(editForm.regionId))).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                          loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
+                        />
+                      </div>
+                    </>
+                  );
+                }
+
+                return null;
+              })()}
               <div className="col-span-full flex gap-2">
-                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || !editForm.branchId || updateMutation.isPending}>
+                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || (function(){
+                  const deptObj = departments.find((d: any) => String(d.id) === String(editForm.department));
+                  const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+                  if (deptName === 'Administration') return false;
+                  if (deptName === 'Operations') return !editForm.regionId || !editForm.role;
+                  if (String(editForm.role) === 'branch_manager') return !editForm.regionId || !editForm.branchId || !editForm.role;
+                  return false;
+                })() || updateMutation.isPending}>
                   {updateMutation.isPending ? 'Saving...' : 'Save changes'}
                 </Button>
                 <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
