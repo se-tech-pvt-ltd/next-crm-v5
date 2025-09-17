@@ -1,7 +1,8 @@
 import { http } from './http';
 
 export async function getUsers() {
-  return http.get<any[]>('/api/users');
+  const res = await http.get<any[]>('/api/users');
+  return (Array.isArray(res) ? res : []).filter((u: any) => String(u.role) !== 'system_admin');
 }
 
 export async function updateUser(id: string | null, data: any) {
