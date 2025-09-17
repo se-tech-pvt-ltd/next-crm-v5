@@ -85,7 +85,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' });
+      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -310,7 +310,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <Button type="button" onClick={() => handleCreate()} disabled={!form.email || !form.branchId || !form.role || create.isPending}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
-                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: 'counselor', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
                     Cancel
                   </Button>
                 </div>
