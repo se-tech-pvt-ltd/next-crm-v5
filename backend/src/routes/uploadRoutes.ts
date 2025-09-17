@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { upload, uploadProfilePicture } from '../middlewares/upload.js';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { AttachmentModel } from '../models/Attachment.js';
 
 const router = Router();
 

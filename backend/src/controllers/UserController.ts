@@ -19,7 +19,7 @@ export class UserController {
       }
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
-      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role, branchId, department } as any, password);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role, branchId, department, profileImageUrl } as any, password);
 
       // Send invite/notification email using template "new registration"
       try {

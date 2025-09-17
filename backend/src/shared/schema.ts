@@ -2,6 +2,14 @@ import { mysqlTable, text, int, timestamp, boolean, varchar, date } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Attachments table (for uploaded files/images)
+export const attachments = mysqlTable("attachments", {
+  id: varchar("id", { length: 50 }).primaryKey().notNull(),
+  path: varchar("path", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
 // Users table for role-based access control
 export const users = mysqlTable("users", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),

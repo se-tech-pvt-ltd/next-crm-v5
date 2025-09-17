@@ -26,7 +26,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '' });
 
   // Load departments from backend
   const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
@@ -95,7 +95,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
+      setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -280,6 +280,34 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <div className="flex flex-col">
                     <Label>Last name</Label>
                     <Input className="mt-2" value={form.lastName} onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Label>Photo</Label>
+                    <div className="mt-2 flex items-center gap-3">
+                      <div className="h-16 w-16 rounded overflow-hidden bg-muted flex items-center justify-center border">
+                        {form.profileImageUrl ? (
+                          <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No photo</span>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const { uploadProfilePicture } = await import('@/services/uploads');
+                            const res = await uploadProfilePicture(file);
+                            setForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || '') }));
+                          } catch (err: any) {
+                            toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
 
                   <div className="flex flex-col">
