@@ -9,7 +9,7 @@ import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
 import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
 
-const ALLOWED = ['regions', 'branches', 'users', 'smtp'] as const;
+const ALLOWED = ['regions', 'branches', 'users', 'branch-emps', 'smtp'] as const;
 type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
