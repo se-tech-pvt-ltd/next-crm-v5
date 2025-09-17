@@ -418,6 +418,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       role: String(u.role || 'counselor'),
                       branchId: String((u.branchId ?? u.branch_id) || ''),
                       department: String(u.department || ''),
+                      regionId: String((u.regionId ?? u.region_id) || ''),
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
