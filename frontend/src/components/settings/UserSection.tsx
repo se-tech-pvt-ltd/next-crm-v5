@@ -367,7 +367,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   })()}>
                   {create.isPending ? 'Creating...' : 'Save'}
                 </Button>
-                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                  <Button type="button" variant="outline" onClick={() => { setForm({ email: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' }); setModalOpen(false); }} disabled={create.isPending}>
                     Cancel
                   </Button>
                 </div>
