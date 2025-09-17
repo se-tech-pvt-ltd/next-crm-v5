@@ -13,13 +13,13 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, branchId, department, profileImageUrl } = req.body || {};
+      const { email, firstName, lastName, role, branchId, department, profileImageId } = req.body || {};
       if (!email || !role) {
         return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
-      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role, branchId, department, profileImageUrl } as any, password);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role, branchId, department, profileImageId } as any, password);
 
       // Send invite/notification email using template "new registration"
       try {
@@ -49,12 +49,12 @@ export class UserController {
 
   static async inviteUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, branchId, department, profileImageUrl } = req.body || {};
+      const { email, firstName, lastName, role, branchId, department, profileImageId } = req.body || {};
       if (!email || !role) {
         return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
-      const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department, profileImageUrl } as any);
+      const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department, profileImageId } as any);
       res.status(201).json({ ...created, invited: true });
     } catch (error: any) {
       console.error('Invite user error:', error);
@@ -127,9 +127,9 @@ export class UserController {
   static async updateProfileImage(req: Request, res: Response) {
     try {
       const currentUser = UserController.getCurrentUser();
-      const { profileImageUrl } = req.body;
+      const { profileImageId } = req.body;
       
-      const updatedUser = await UserService.updateUserProfileImage(currentUser.id, profileImageUrl);
+      const updatedUser = await UserService.updateUserProfileImage(currentUser.id, profileImageId);
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
