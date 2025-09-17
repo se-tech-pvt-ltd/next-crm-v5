@@ -28,14 +28,14 @@ export default function Settings() {
       <div className="space-y-3">
         {/* Top bar tabs */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className="gap-2">
-            <ShieldCheck className="w-4 h-4" /> User management
+          <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className="gap-2">
+            <Globe2 className="w-4 h-4" /> Region manager
           </Button>
           <Button type="button" variant={category === 'branches' ? 'default' : 'outline'} onClick={() => setCategory('branches')} className="gap-2">
             <Database className="w-4 h-4" /> Branch management
           </Button>
-          <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className="gap-2">
-            <Globe2 className="w-4 h-4" /> Region management
+          <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className="gap-2">
+            <ShieldCheck className="w-4 h-4" /> User management
           </Button>
           <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
             <Mail className="w-4 h-4" /> Email (SMTP)
