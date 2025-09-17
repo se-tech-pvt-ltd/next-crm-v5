@@ -143,26 +143,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     return map[r] || (r || '').replace(/_/g, ' ');
   };
 
-  // When roles for selected department are loaded, pick a default role if none selected
-  useEffect(() => {
-    if (form.department && (!form.role || form.role === '')) {
-      if (rolesForDept && rolesForDept.length > 0) {
-        const first = rolesForDept[0];
-        const val = String(first.roleName ?? first.role_name ?? first.id);
-        setForm((s) => ({ ...s, role: val }));
-      }
-    }
-  }, [form.department, rolesForDept]);
-
-  useEffect(() => {
-    if (editForm.department && (!editForm.role || editForm.role === '')) {
-      if (rolesForEditDept && rolesForEditDept.length > 0) {
-        const first = rolesForEditDept[0];
-        const val = String(first.roleName ?? first.role_name ?? first.id);
-        setEditForm((s) => ({ ...s, role: val }));
-      }
-    }
-  }, [editForm.department, rolesForEditDept]);
 
   // Derived lists for branch selects (add-dialog and filter)
   const branchList = Array.isArray(initialBranches) ? initialBranches : [];
