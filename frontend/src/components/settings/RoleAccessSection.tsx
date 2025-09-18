@@ -14,7 +14,9 @@ import { v4 as uuidv4 } from 'uuid';
 export default function RoleAccessSection({ toast }: { toast: (v: any) => void }) {
   const { data: accessList = [], refetch } = useQuery({ queryKey: ['/api/user-access'], queryFn: () => UserAccessService.listUserAccess() });
   const { data: roles = [] } = useQuery({ queryKey: ['/api/user-roles'], queryFn: () => UserRolesService.listRoles(), staleTime: 60_000 });
+  const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
 
+  const [activeDept, setActiveDept] = useState<string | 'all'>('all');
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -44,10 +46,21 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
     setFormOpen(true);
   }
 
+  const filteredRoles = (roles as any[]).filter((r: any) => activeDept === 'all' ? true : String(r.departmentId) === String(activeDept));
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">Role access control</div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        <button onClick={() => setActiveDept('all')} className={`px-3 py-2 rounded-t-md ${activeDept === 'all' ? 'shadow-md bg-white border' : 'bg-transparent'}`}>All</button>
+        {(departments as any[]).map((d: any) => (
+          <button key={d.id} onClick={() => setActiveDept(String(d.id))} className={`px-3 py-2 rounded-t-md ${String(activeDept) === String(d.id) ? 'shadow-md bg-white border' : 'bg-transparent'}`}>
+            {d.departmentName || d.id}
+          </button>
+        ))}
       </div>
 
       <div className="overflow-auto">
@@ -60,10 +73,10 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(roles as any[]).map((r: any) => (
+            {filteredRoles.map((r: any) => (
               <TableRow key={r.id} className="hover:bg-gray-50">
                 <TableCell className="p-2 text-xs">{r.roleName}</TableCell>
-                <TableCell className="p-2 text-xs">{r.departmentId || '-'}</TableCell>
+                <TableCell className="p-2 text-xs">{((departments as any[]).find((x: any) => String(x.id) === String(r.departmentId))?.departmentName) || r.departmentId || '-'}</TableCell>
                 <TableCell className="p-2 text-xs text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button>
