@@ -59,7 +59,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
           const deptRoles = (roles as any[]).filter((r: any) => String(r.departmentId) === String(d.id));
           return (
             <div key={d.id} className="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-              <div className="px-4 py-3">
+              <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
                 <div className="text-sm font-medium">{d.departmentName || d.id}</div>
               </div>
               <div className="border-t">
@@ -88,7 +88,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
 
         {/* Unassigned roles panel */}
         <div key="unassigned" className="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-          <div className="px-4 py-3">
+          <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
             <div className="text-sm font-medium">Unassigned</div>
           </div>
           <div className="border-t">
