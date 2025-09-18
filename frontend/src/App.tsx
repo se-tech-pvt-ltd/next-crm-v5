@@ -103,6 +103,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Toaster />
           <Router />
+          <UserProfileWizard />
         </QueryClientProvider>
       </AuthProvider>
     );
