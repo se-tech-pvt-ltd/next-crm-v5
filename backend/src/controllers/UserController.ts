@@ -17,6 +17,8 @@ export class UserController {
       if (!email || (!role && !roleId)) {
         return res.status(400).json({ message: 'email and role are required' });
       }
+      console.log("Body hai yai");
+      console.log(req.body);
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
       const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role: role || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any, password);
