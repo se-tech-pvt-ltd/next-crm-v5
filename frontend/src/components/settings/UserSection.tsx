@@ -232,14 +232,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Input
+            type="search"
+            inputMode="search"
+            enterKeyHint="search"
+            autoCapitalize="none"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            id="users-search-field"
+            name="users-search-field"
             placeholder="Search name or email"
             className="h-8 w-56"
             value={filters.query}
             onChange={(e) => setFilters((s) => ({ ...s, query: e.target.value }))}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            name="users-search"
           />
           <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Role" /></SelectTrigger>
