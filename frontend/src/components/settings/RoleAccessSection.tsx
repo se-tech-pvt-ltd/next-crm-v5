@@ -76,7 +76,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                     ) : deptRoles.map((r: any) => (
                       <TableRow key={r.id} className="hover:bg-gray-50/40">
                         <TableCell className="py-1 px-3 text-sm font-medium">{r.roleName}</TableCell>
-                        <TableCell className="p-2 text-xs text-right"><Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
+                        <TableCell className="py-1 px-3 text-sm text-right"><Button size="sm" variant="ghost" className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md hover:shadow-md" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -105,7 +105,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                 ) : ((roles as any[]).filter((r: any) => !r.departmentId)).map((r: any) => (
                   <TableRow key={r.id} className="hover:bg-gray-50/40">
                     <TableCell className="py-1 px-3 text-sm font-medium">{r.roleName}</TableCell>
-                    <TableCell className="p-2 text-xs text-right"><Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
+                    <TableCell className="py-1 px-3 text-sm text-right"><Button size="sm" variant="ghost" className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md hover:shadow-md" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
