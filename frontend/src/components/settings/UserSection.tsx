@@ -163,7 +163,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!selected?.id) throw new Error('User ID missing');
-      const body: any = { ...editForm };
+      const body: any = { ...editForm, departmentId: editForm.department || undefined };
       return UsersService.updateUser(String(selected.id), body);
     },
     onSuccess: async () => {
