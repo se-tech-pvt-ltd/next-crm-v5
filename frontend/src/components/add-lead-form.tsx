@@ -463,7 +463,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       const roleName = normalizeRole((user as any)?.role);
       let resolvedRegionId = '' as string;
 
-      if (roleName === 'regional_manager') {
+      const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+      if (userRegionId) {
+        resolvedRegionId = userRegionId;
+      } else if (roleName === 'regional_manager') {
         const r = (Array.isArray(regionsList) ? regionsList : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
         resolvedRegionId = String(r?.id || '');
       } else if (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer') {
