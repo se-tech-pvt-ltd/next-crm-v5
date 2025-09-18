@@ -86,32 +86,6 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
           );
         })}
 
-        {/* Unassigned roles panel */}
-        <div key="unassigned" className="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-          <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
-            <div className="text-lg font-semibold">Unassigned</div>
-          </div>
-          <div className="border-t">
-            <Table className="text-xs">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600">Role</TableHead>
-                  <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {((roles as any[]).filter((r: any) => !r.departmentId)).length === 0 ? (
-                  <TableRow><TableCell colSpan={2} className="py-2 px-3 text-sm text-muted-foreground">No roles</TableCell></TableRow>
-                ) : ((roles as any[]).filter((r: any) => !r.departmentId)).map((r: any) => (
-                  <TableRow key={r.id} className="hover:bg-gray-50/40">
-                    <TableCell className="py-1 px-3 text-sm font-medium">{r.roleName}</TableCell>
-                    <TableCell className="py-1 px-3 text-sm text-right"><Button size="sm" variant="ghost" className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md hover:shadow-md" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
       </div>
 
       <Dialog open={roleModalOpen} onOpenChange={(o) => { setRoleModalOpen(o); if (!o) { setSelectedRole(null); setFormOpen(false); setEditingId(null); } }}>
