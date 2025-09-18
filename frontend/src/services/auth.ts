@@ -15,3 +15,11 @@ export interface UserSession {
 export async function login(data: LoginRequest): Promise<UserSession> {
   return http.post<UserSession>('/api/auth/login', data);
 }
+
+export async function logout() {
+  try {
+    await http.post('/api/auth/logout');
+  } catch (err) {
+    // ignore
+  }
+}
