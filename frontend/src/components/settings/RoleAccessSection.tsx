@@ -50,11 +50,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="text-lg font-semibold">Role access control</div>
-      </div>
-
-      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
         {(departments as any[]).map((d: any) => {
           const deptRoles = (roles as any[]).filter((r: any) => String(r.departmentId) === String(d.id));
           return (
