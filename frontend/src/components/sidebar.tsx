@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import * as UserAccessService from '@/services/userAccess';
 
 export function Sidebar() {
   const [location] = useLocation();
