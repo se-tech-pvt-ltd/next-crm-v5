@@ -84,30 +84,9 @@ export function Sidebar() {
   const applicationsCount = Array.isArray(applicationsData) ? applicationsData.length : 0;
   const acceptedAdmissionsCount = Array.isArray(admissionsData) ? admissionsData.filter((admission: any) => admission.decision === 'accepted')?.length || 0 : 0;
 
-  const { user } = useAuth();
+  const { user, accessByRole, isAccessLoading } = useAuth() as any;
 
   const roleId = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
-  const accessCacheKey = roleId ? `user_access_cache_${roleId}` : '';
-  let cachedAccess: any[] = [];
-  try {
-    if (accessCacheKey) {
-      const raw = localStorage.getItem(accessCacheKey);
-      if (raw) cachedAccess = JSON.parse(raw);
-    }
-  } catch {}
-
-  const { data: accessByRole = [], isLoading: accessLoading } = useQuery({
-    queryKey: ['/api/user-access', roleId],
-    enabled: Boolean(roleId),
-    initialData: cachedAccess,
-    queryFn: async () => {
-      const all = await UserAccessService.listUserAccess();
-      const filtered = (Array.isArray(all) ? all : []).filter((a: any) => String(a.roleId ?? a.role_id) === roleId);
-      try { if (accessCacheKey) localStorage.setItem(accessCacheKey, JSON.stringify(filtered)); } catch {}
-      return filtered;
-    },
-    staleTime: 5 * 60_000,
-  });
 
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
@@ -253,7 +232,7 @@ export function Sidebar() {
 
       {/* Navigation Menu */}
       <nav id="primary-nav" aria-label="Primary" className="flex-1 p-2 space-y-1">
-        {((!roleId) || cachedAccess.length > 0 || !accessLoading) && navItems.map((item) => {
+        {((!roleId) || !isAccessLoading) && navItems.map((item) => {
           const isActive = location === item.path;
 
           const handleNavClick = () => {
