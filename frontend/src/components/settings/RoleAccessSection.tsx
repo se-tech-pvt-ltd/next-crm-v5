@@ -159,7 +159,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                 <TableRow>
                   <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600">Module</TableHead>
                   <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600">View Level</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Create</TableHead>
+                  <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600">Create</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Edit</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Created</TableHead>
                   <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600 text-right">Actions</TableHead>
