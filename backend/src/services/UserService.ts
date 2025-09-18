@@ -31,10 +31,18 @@ export class UserService {
     const existing = await UserModel.findByEmail(email);
     if (existing) throw new Error('email already exists');
 
+    let roleId = String(userData.roleId);
+    const { UserRoleModel } = await import('../models/UserRole.js');
+    const roleById = await UserRoleModel.findById(roleId);
+    if (!roleById) {
+      const roleByName = await UserRoleModel.findByRoleName(roleId);
+      if (roleByName?.id) roleId = String(roleByName.id);
+    }
+
     const data: any = {
       ...userData,
       email,
-      roleId: userData.roleId,
+      roleId,
       departmentId: userData.departmentId || userData.department || null,
       isActive: false,
       isRegistrationEmailSent: false,
@@ -51,10 +59,18 @@ export class UserService {
     const existing = await UserModel.findByEmail(email);
     if (existing) throw new Error('email already exists');
 
+    let roleId = String(userData.roleId);
+    const { UserRoleModel } = await import('../models/UserRole.js');
+    const roleById = await UserRoleModel.findById(roleId);
+    if (!roleById) {
+      const roleByName = await UserRoleModel.findByRoleName(roleId);
+      if (roleByName?.id) roleId = String(roleByName.id);
+    }
+
     const data: any = {
       ...userData,
       email,
-      roleId: userData.roleId,
+      roleId,
       departmentId: userData.departmentId || userData.department || null,
       isActive: false,
       isRegistrationEmailSent: false,
