@@ -18,6 +18,7 @@ import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { queryClient } from '@/lib/queryClient';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function EventsPage() {
