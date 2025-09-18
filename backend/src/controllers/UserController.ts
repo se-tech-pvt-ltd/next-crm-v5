@@ -13,15 +13,13 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, roleId, branchId, department, profileImageId, regionId } = req.body || {};
-      if (!email || (!role && !roleId)) {
-        return res.status(400).json({ message: 'email and role are required' });
+      const { email, firstName, lastName, roleId, branchId, department, profileImageId, regionId } = req.body || {};
+      if (!email || !roleId) {
+        return res.status(400).json({ message: 'email and roleId are required' });
       }
-      console.log("Body hai yai");
-      console.log(req.body);
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
-      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role: roleId || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any, password);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, roleId, branchId, department, profileImageId } as any, password);
 
       try {
         // If regional manager is set, update the region head mapping
@@ -71,12 +69,12 @@ export class UserController {
 
   static async inviteUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, roleId, branchId, department, profileImageId, regionId } = req.body || {};
-      if (!email || (!role && !roleId)) {
-        return res.status(400).json({ message: 'email and role are required' });
+      const { email, firstName, lastName, roleId, branchId, department, profileImageId, regionId } = req.body || {};
+      if (!email || !roleId) {
+        return res.status(400).json({ message: 'email and roleId are required' });
       }
       const id = (await import('uuid')).v4();
-      const created = await UserService.createUser({ id, email, firstName, lastName, role: role || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any);
+      const created = await UserService.createUser({ id, email, firstName, lastName, roleId, branchId, department, profileImageId } as any);
 
       try {
         const { connection } = await import('../config/database.js');
@@ -149,7 +147,8 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       const userId = req.params.id;
-      const updates = req.body;
+      const updates = { ...req.body } as any;
+      if ('role' in updates) delete updates.role;
 
       const updatedUser = await UserService.updateUser(userId, updates);
 
