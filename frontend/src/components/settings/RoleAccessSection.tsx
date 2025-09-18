@@ -51,7 +51,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="text-sm font-medium">Role access control</div>
+        <div className="text-base font-semibold">Role access control</div>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -60,7 +60,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
           return (
             <div key={d.id} className="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
               <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
-                <div className="text-sm font-medium">{d.departmentName || d.id}</div>
+                <div className="text-base font-semibold">{d.departmentName || d.id}</div>
               </div>
               <div className="border-t">
                 <Table className="text-xs">
@@ -89,7 +89,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
         {/* Unassigned roles panel */}
         <div key="unassigned" className="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
           <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
-            <div className="text-sm font-medium">Unassigned</div>
+            <div className="text-base font-semibold">Unassigned</div>
           </div>
           <div className="border-t">
             <Table className="text-xs">
