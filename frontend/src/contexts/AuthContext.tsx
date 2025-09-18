@@ -76,7 +76,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const { logout: apiLogout } = await import('@/services/auth');
+      await apiLogout();
+    } catch {}
     setUser(null);
     localStorage.removeItem('auth_user');
   };
