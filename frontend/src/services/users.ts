@@ -5,9 +5,19 @@ export async function getUsers() {
   return (Array.isArray(res) ? res : []).filter((u: any) => String(u.role) !== 'system_admin');
 }
 
+export async function getUser(id: string) {
+  if (!id) throw new Error('User ID is required');
+  return http.get<any>(`/api/users/${id}`);
+}
+
 export async function updateUser(id: string | null, data: any) {
   if (!id) throw new Error('User ID is required');
   return http.put<any>(`/api/users/${id}`, data);
+}
+
+export async function changePassword(id: string | null, currentPassword: string | undefined, newPassword: string) {
+  if (!id) throw new Error('User ID is required');
+  return http.put<any>(`/api/users/${id}/password`, { currentPassword, newPassword });
 }
 
 export async function createUser(data: any) {
