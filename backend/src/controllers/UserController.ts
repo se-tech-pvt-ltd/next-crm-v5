@@ -21,7 +21,7 @@ export class UserController {
       console.log(req.body);
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
-      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role: role || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any, password);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role: roleId || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any, password);
 
       try {
         // If regional manager is set, update the region head mapping
@@ -37,6 +37,8 @@ export class UserController {
         if (resolvedRoleName === 'regional_manager' && regionId) {
           await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [id, String(regionId)]);
         }
+
+        
       } catch (sideErr) {
         console.error('Post-create side effects error:', sideErr);
       }
