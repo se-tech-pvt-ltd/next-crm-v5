@@ -55,8 +55,12 @@ const addLeadFormSchema = z.object({
   studyLevel: z.string().optional(),
   studyPlan: z.string().optional(),
   elt: z.string().optional(),
-  counselorId: z.string().optional(),
+  regionId: z.string().optional(),
   branchId: z.string().optional(),
+  counsellorId: z.string().optional(),
+  admissionOfficerId: z.string().optional(),
+  // legacy: keep for compatibility
+  counselorId: z.string().optional(),
   notes: z.string().optional(),
 });
 
