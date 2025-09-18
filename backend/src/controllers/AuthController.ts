@@ -63,4 +63,21 @@ export class AuthController {
       res.status(401).json({ message: 'Unauthorized' });
     }
   }
+
+  static async logout(req: Request, res: Response) {
+    try {
+      // Clear the access_token cookie by setting it to empty and expiring it
+      res.cookie('access_token', '', {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+        expires: new Date(0),
+        path: '/',
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: 'Failed to logout' });
+    }
+  }
 }

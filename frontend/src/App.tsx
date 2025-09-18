@@ -19,6 +19,7 @@ import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import ToolkitPage from "@/pages/toolkit";
 import Login from "@/pages/login";
+import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
@@ -102,6 +103,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Toaster />
           <Router />
+          <UserProfileWizard />
         </QueryClientProvider>
       </AuthProvider>
     );

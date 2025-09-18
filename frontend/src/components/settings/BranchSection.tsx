@@ -198,7 +198,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       ) : (
                         available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
-                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                            {([u.firstName ?? u.first_name, u.lastName ?? u.last_name].filter(Boolean).join(' ') || u.email) + (u.email ? ` - ${u.email}` : '')}
                           </SelectItem>
                         ))
                       );
@@ -266,17 +266,20 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead className="h-8 px-2 text-[11px]">Region</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Country</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Official Phone</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Official Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Head</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px] text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(pageItems as any[]).map((b: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
-                  const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
+                  const headName = headUser ? (([headUser.firstName ?? headUser.first_name, headUser.lastName ?? headUser.last_name].filter(Boolean).join(' ')) || headUser.email || '-') : '-';
+                  const idStr = String(b.id);
+                  const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
+                  const isOpen = expanded.has(idStr);
                   return (
-                    <>
+                    <React.Fragment key={String(b.id)}>
                       <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                         setSelected(b);
                         setEditForm({
@@ -294,16 +297,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       }}>
                         <TableCell className="font-medium p-2 text-xs">
                           <div className="flex items-center gap-2">
-                            {(() => {
-                              const idStr = String(b.id);
-                              const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
-                              const isOpen = expanded.has(idStr);
-                              return count > 0 ? (
-                                <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[11px]" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
-                                  {count} {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
-                                </Button>
-                              ) : null;
-                            })()}
                             <span>{b.branchName || b.name || '-'}</span>
                           </div>
                         </TableCell>
@@ -313,9 +306,23 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         })()}</TableCell>
                         <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
                         <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
-                        <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
                         <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                         <TableCell className="p-2 text-xs">{headName}</TableCell>
+                        <TableCell className="p-2 text-xs text-right">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 flex items-center justify-end gap-2 text-muted-foreground"
+                            aria-label={isOpen ? 'Collapse' : 'Expand'}
+                            aria-expanded={isOpen}
+                            onClick={(e) => { e.stopPropagation(); if (count > 0) toggleExpand(idStr); }}
+                            disabled={count === 0}
+                          >
+                            <span className="text-xs">{count}</span>
+                            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </Button>
+                        </TableCell>
                       </TableRow>
                       {(() => {
                         const idStr = String(b.id);
@@ -338,7 +345,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                                   <TableBody>
                                     {mappings.map((m: any) => {
                                       const u: any = (users as any[]).find((x: any) => String(x.id) === String(m.userId ?? m.user_id));
-                                      const name = u ? (`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '-') : '-';
+                                      const name = u ? (([u.firstName ?? u.first_name, u.lastName ?? u.last_name].filter(Boolean).join(' ')) || u.email || '-') : '-';
                                       const email = u?.email || '';
                                       const role = u ? (String(u.role || '').replace(/_/g, ' ')) : '';
                                       return (
@@ -356,7 +363,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                           </TableRow>
                         );
                       })()}
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </TableBody>
@@ -418,7 +425,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 <div className="text-xs text-muted-foreground">Branch Head</div>
                 <div className="font-medium">{(() => {
                   const headUser = (users as any[]).find((u: any) => u.id === (selected?.branchHeadId || selected?.managerId));
-                  return headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+                  return headUser ? (([headUser.firstName ?? headUser.first_name, headUser.lastName ?? headUser.last_name].filter(Boolean).join(' ')) || headUser.email || '-') : '-';
                 })()}</div>
               </div>
             </div>
@@ -464,7 +471,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       ) : (
                         available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
-                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                            {([u.firstName ?? u.first_name, u.lastName ?? u.last_name].filter(Boolean).join(' ') || u.email) + (u.email ? ` - ${u.email}` : '')}
                           </SelectItem>
                         ))
                       );

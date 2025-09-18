@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   isLoading: boolean;
+  refreshUser?: () => Promise<any | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,11 +44,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch {
             localStorage.removeItem('auth_user');
           }
-          try {
-            await http.get<{ id: string; role?: string }>('/api/auth/me');
-          } catch (e: any) {
-            // http client will invoke unauthorized handler on 401
+        }
+
+        // Validate session and fetch authoritative user id from backend
+        try {
+          const me = await http.get<{ id: string; role?: string }>('/api/auth/me');
+          if (me?.id) {
+            try {
+              const UsersService = await import('@/services/users');
+              const full = await UsersService.getUser(String(me.id));
+              if (full) {
+                setUser(full as any);
+                localStorage.setItem('auth_user', JSON.stringify(full));
+              }
+            } catch (err) {
+              // ignore
+            }
           }
+        } catch (e: any) {
+          // http client will invoke unauthorized handler on 401
         }
       } finally {
         setIsLoading(false);
@@ -57,13 +72,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (userData: User) => {
+    // Set minimal session immediately
     setUser(userData);
     localStorage.setItem('auth_user', JSON.stringify(userData));
+
+    // Fetch full user profile in background and merge
+    (async () => {
+      try {
+        const UsersService = await import('@/services/users');
+        let full: any = null;
+        if (userData?.id) {
+          full = await UsersService.getUser(String(userData.id)).catch(() => null);
+        } else {
+          // fallback to /api/auth/me to obtain id
+          try {
+            const me = await http.get<{ id: string }>('/api/auth/me').catch(() => null);
+            if (me?.id) full = await UsersService.getUser(String(me.id)).catch(() => null);
+          } catch {}
+        }
+        const merged = { ...userData, ...(full || {}) } as User & any;
+        setUser(merged);
+        localStorage.setItem('auth_user', JSON.stringify(merged));
+      } catch (err) {
+        // ignore
+      }
+    })();
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const { logout: apiLogout } = await import('@/services/auth');
+      await apiLogout();
+    } catch {}
     setUser(null);
     localStorage.removeItem('auth_user');
+  };
+
+  const refreshUser = async () => {
+    try {
+      if (!user?.id) return null;
+      const UsersService = await import('@/services/users');
+      const full = await UsersService.getUser(String(user.id));
+      const merged = { ...(user as any), ...(full || {}) };
+      setUser(merged);
+      localStorage.setItem('auth_user', JSON.stringify(merged));
+      return merged;
+    } catch (err) {
+      return null;
+    }
   };
 
   const value = {
@@ -72,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     isLoading,
+    refreshUser,
   };
 
   return (
