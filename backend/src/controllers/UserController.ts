@@ -13,7 +13,7 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, roleId, branchId, department, profileImageId, regionId } = req.body || {};
+      const { email, firstName, lastName, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
       if (!email || !roleId) {
         return res.status(400).json({ message: 'email and roleId are required' });
       }
@@ -35,8 +35,9 @@ export class UserController {
         if (resolvedRoleName === 'regional_manager' && regionId) {
           await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [id, String(regionId)]);
         }
-
-        
+        if (resolvedRoleName === 'branch_manager' && branchId) {
+          await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [id, String(branchId)]);
+        }
       } catch (sideErr) {
         console.error('Post-create side effects error:', sideErr);
       }
@@ -69,7 +70,7 @@ export class UserController {
 
   static async inviteUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, roleId, branchId, department, profileImageId, regionId } = req.body || {};
+      const { email, firstName, lastName, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
       if (!email || !roleId) {
         return res.status(400).json({ message: 'email and roleId are required' });
       }
@@ -88,6 +89,9 @@ export class UserController {
         }
         if (resolvedRoleName === 'regional_manager' && regionId) {
           await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [id, String(regionId)]);
+        }
+        if (resolvedRoleName === 'branch_manager' && branchId) {
+          await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [id, String(branchId)]);
         }
       } catch (sideErr) {
         console.error('Post-invite side effects error:', sideErr);
@@ -165,6 +169,9 @@ export class UserController {
         }
         if (resolvedRoleName === 'regional_manager' && updates.regionId) {
           await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [userId, String(updates.regionId)]);
+        }
+        if (resolvedRoleName === 'branch_manager' && updates.branchId) {
+          await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [userId, String(updates.branchId)]);
         }
       } catch (sideErr) {
         console.error('Post-update side effects error:', sideErr);

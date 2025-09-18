@@ -127,11 +127,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     }
   }, [form.department, departments]);
 
-  // Client-side check to prevent creating a user with an email that already exists
+  // Client-side check to prevent creating a user with an invalid/duplicate email
   const handleCreate = () => {
     const emailTrim = String(form.email || '').trim().toLowerCase();
     if (!emailTrim) {
       toast({ title: 'Error', description: 'Email is required', variant: 'destructive' });
+      return;
+    }
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(emailTrim);
+    if (!emailOk) {
+      toast({ title: 'Error', description: 'Please enter a valid email address', variant: 'destructive' });
       return;
     }
 
@@ -232,14 +237,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Input
+            type="search"
+            inputMode="search"
+            enterKeyHint="search"
+            autoCapitalize="none"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            id="users-search-field"
+            name="users-search-field"
             placeholder="Search name or email"
             className="h-8 w-56"
             value={filters.query}
             onChange={(e) => setFilters((s) => ({ ...s, query: e.target.value }))}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            name="users-search"
           />
           <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Role" /></SelectTrigger>
@@ -288,7 +298,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <div className="flex items-center justify-between">
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
                         <div className="flex items-center gap-2">
-                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.roleId || (function(){
+                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(form.email).trim()) || !form.roleId || (function(){
                             const nRole = normalizeRole(form.role);
                             if (nRole === 'regional_manager') return !form.regionId;
                             if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
@@ -339,7 +349,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="flex flex-col">
                             <Label>Email<span className="text-destructive"> *</span></Label>
-                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" required aria-invalid={Boolean(form.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(form.email).trim())} value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
                           </div>
                           <div className="flex flex-col">
                             <Label>Phone number</Label>
@@ -399,9 +409,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                 <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
                                   <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                   <SelectContent>
-                                    {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                                      <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                                    ))}
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => {
+                                      const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
+                                      const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                                      const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
+                                      const hasHead = Boolean(r.regionHeadId);
+                                      return (
+                                        <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHead}>
+                                          {label}{hasHead ? ` — Head: ${headName || 'assigned'}` : ''}
+                                        </SelectItem>
+                                      );
+                                    })}
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -656,9 +674,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
                         <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
                         <SelectContent>
-                          {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                            <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                          ))}
+                          {(Array.isArray(regions) ? regions : []).map((r: any) => {
+                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
+                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                            const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
+                            const hasHeadOther = Boolean(r.regionHeadId) && String(r.regionHeadId) !== String(selected?.id || '');
+                            return (
+                              <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHeadOther}>
+                                {label}{hasHeadOther ? ` — Head: ${headName || 'assigned'}` : ''}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </div>
@@ -688,10 +714,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           searchPlaceholder="Search branches..."
                           onSearch={setBranchEditSearch}
                           options={(branchEditList || []).filter((b: any) => {
-                            if (nRole === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
                             if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
                             return true;
-                          }).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                          }).map((b: any) => {
+                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(b.branchHeadId ?? b.branch_head_id));
+                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                            const hasHeadOther = Boolean(b.branchHeadId ?? b.branch_head_id) && String(b.branchHeadId ?? b.branch_head_id) !== String(selected?.id || '');
+                            return ({
+                              value: String(b.id),
+                              label: String(b.branchName || b.name || b.id),
+                              disabled: nRole === 'branch_manager' ? hasHeadOther : false,
+                              hint: hasHeadOther ? `Head: ${headName || 'assigned'}` : undefined,
+                            });
+                          })}
                           loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
                         />
                       </div>
