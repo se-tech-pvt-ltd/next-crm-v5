@@ -70,7 +70,7 @@ export class UserModel {
 
   static async findAll(): Promise<User[]> {
     const [rows] = await connection.query<any[]>(
-      'SELECT u.*, COALESCE(ur.role_name, u.role_id) AS role, be.branch_id as branchId, b.branch_name AS branchName FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id WHERE COALESCE(ur.role_name, u.role_id) <> ? ORDER BY u.created_at DESC',
+      'SELECT u.*, COALESCE(ur.role_name, u.role_id) AS role, COALESCE(be.branch_id, hb.id) as branchId, COALESCE(b.branch_name, hb.branch_name) AS branchName, a.path AS profileImageUrl FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN attachments a ON a.id = u.profile_image_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id LEFT JOIN branches hb ON hb.branch_head_id = u.id WHERE COALESCE(ur.role_name, u.role_id) <> ? ORDER BY u.created_at DESC',
       ['system_admin']
     );
     return (rows as any[]);
@@ -78,7 +78,7 @@ export class UserModel {
 
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
     const params: any[] = [];
-    let sql = 'SELECT u.*, COALESCE(ur.role_name, u.role_id) AS role, be.branch_id as branchId, b.branch_name AS branchName FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id WHERE (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)';
+    let sql = 'SELECT u.*, COALESCE(ur.role_name, u.role_id) AS role, COALESCE(be.branch_id, hb.id) as branchId, COALESCE(b.branch_name, hb.branch_name) AS branchName, a.path AS profileImageUrl FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN attachments a ON a.id = u.profile_image_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id LEFT JOIN branches hb ON hb.branch_head_id = u.id WHERE (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)';
     const q = `%${searchQuery}%`;
     params.push(q, q, q);
     // Always exclude system_admin

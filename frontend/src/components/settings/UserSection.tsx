@@ -503,7 +503,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Active</TableHead>
                 </TableRow>
               </TableHeader>
@@ -526,7 +525,6 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <TableCell className="p-2 text-xs">{[(u.firstName ?? u.first_name), (u.lastName ?? u.last_name)].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
-                    <TableCell className="p-2 text-xs">{u.branchName || u.branchId || u.branch_id || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
