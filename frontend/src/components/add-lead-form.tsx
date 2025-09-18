@@ -455,6 +455,42 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     }
   }, [initialData, dropdownData]);
 
+  // Auto-select region based on logged-in user's role and assignments
+  useEffect(() => {
+    try {
+      const currentRegion = String(form.getValues('regionId') || '');
+      if (currentRegion) return;
+      const roleName = normalizeRole((user as any)?.role);
+      let resolvedRegionId = '' as string;
+
+      if (roleName === 'regional_manager') {
+        const r = (Array.isArray(regionsList) ? regionsList : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+        resolvedRegionId = String(r?.id || '');
+      } else if (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer') {
+        const branches = Array.isArray(branchesList) ? branchesList : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '' as string;
+        const headBranch = branches.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          const b = branches.find((bb: any) => String(bb.id) === String(userBranchId));
+          resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+        }
+      }
+
+      if (resolvedRegionId) {
+        form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
+        form.setValue('branchId', '');
+        form.setValue('counsellorId', '');
+        form.setValue('admissionOfficerId', '');
+      }
+    } catch {}
+  }, [user, regionsList, branchesList, branchEmps]);
+
   const onSubmit = (data: AddLeadFormData) => {
     if (emailDuplicateStatus.isDuplicate) {
       toast({
