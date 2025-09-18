@@ -15,6 +15,8 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
   refreshUser?: () => Promise<any | null>;
+  accessByRole: any[];
+  isAccessLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +24,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [accessByRole, setAccessByRole] = useState<any[]>([]);
+  const [isAccessLoading, setIsAccessLoading] = useState(true);
 
   useEffect(() => {
     // Register global unauthorized handler (401) to logout
@@ -57,15 +61,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(full as any);
                 localStorage.setItem('auth_user', JSON.stringify(full));
               }
-            } catch (err) {
-              // ignore
-            }
+            } catch {}
           }
-        } catch (e: any) {
-          // http client will invoke unauthorized handler on 401
+        } catch {}
+
+        // After user is determined, fetch role access
+        const uid = (savedUser ? (JSON.parse(savedUser)?.id) : undefined) || (await (async () => {
+          try { const me = await http.get<{ id: string }>('/api/auth/me'); return me?.id; } catch { return undefined; }
+        })());
+        if (uid) {
+          try {
+            const UsersService = await import('@/services/users');
+            const fullUser = await UsersService.getUser(String(uid)).catch(() => null);
+            const roleId = String((fullUser as any)?.roleId ?? (fullUser as any)?.role_id ?? '');
+            const cacheKey = roleId ? `user_access_cache_${roleId}` : '';
+            let cached: any[] = [];
+            try { if (cacheKey) { const raw = localStorage.getItem(cacheKey); if (raw) cached = JSON.parse(raw); } } catch {}
+            if (cached.length > 0) setAccessByRole(cached);
+            setIsAccessLoading(true);
+            const UserAccessService = await import('@/services/userAccess');
+            const all = await UserAccessService.listUserAccess();
+            const filtered = (Array.isArray(all) ? all : []).filter((a: any) => String(a.roleId ?? a.role_id) === roleId);
+            setAccessByRole(filtered);
+            try { if (cacheKey) localStorage.setItem(cacheKey, JSON.stringify(filtered)); } catch {}
+          } catch {}
         }
       } finally {
         setIsLoading(false);
+        setIsAccessLoading(false);
       }
     };
     void init();
@@ -76,15 +99,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
     localStorage.setItem('auth_user', JSON.stringify(userData));
 
-    // Fetch full user profile in background and merge
+    // Fetch full user profile and role access before UI depends on it
     (async () => {
       try {
+        setIsAccessLoading(true);
         const UsersService = await import('@/services/users');
         let full: any = null;
         if (userData?.id) {
           full = await UsersService.getUser(String(userData.id)).catch(() => null);
         } else {
-          // fallback to /api/auth/me to obtain id
           try {
             const me = await http.get<{ id: string }>('/api/auth/me').catch(() => null);
             if (me?.id) full = await UsersService.getUser(String(me.id)).catch(() => null);
@@ -93,8 +116,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const merged = { ...userData, ...(full || {}) } as User & any;
         setUser(merged);
         localStorage.setItem('auth_user', JSON.stringify(merged));
-      } catch (err) {
-        // ignore
+
+        const roleId = String((merged as any)?.roleId ?? (merged as any)?.role_id ?? '');
+        const UserAccessService = await import('@/services/userAccess');
+        const all = await UserAccessService.listUserAccess();
+        const filtered = (Array.isArray(all) ? all : []).filter((a: any) => String(a.roleId ?? a.role_id) === roleId);
+        setAccessByRole(filtered);
+        try { if (roleId) localStorage.setItem(`user_access_cache_${roleId}`, JSON.stringify(filtered)); } catch {}
+      } catch {}
+      finally {
+        setIsAccessLoading(false);
       }
     })();
   };
@@ -129,6 +160,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     isLoading,
     refreshUser,
+    accessByRole,
+    isAccessLoading,
   };
 
   return (
