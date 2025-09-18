@@ -80,7 +80,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const UsersService = await import('@/services/users');
-        const full = await UsersService.getUser(String(userData.id));
+        let full: any = null;
+        if (userData?.id) {
+          full = await UsersService.getUser(String(userData.id)).catch(() => null);
+        } else {
+          // fallback to /api/auth/me to obtain id
+          try {
+            const me = await http.get<{ id: string }>('/api/auth/me').catch(() => null);
+            if (me?.id) full = await UsersService.getUser(String(me.id)).catch(() => null);
+          } catch {}
+        }
         const merged = { ...userData, ...(full || {}) } as User & any;
         setUser(merged);
         localStorage.setItem('auth_user', JSON.stringify(merged));
