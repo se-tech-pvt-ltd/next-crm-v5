@@ -133,6 +133,29 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     staleTime: 30000,
   });
 
+  const form = useForm<AddLeadFormData>({
+    resolver: zodResolver(addLeadFormSchema),
+    defaultValues: {
+      type: '',
+      status: '',
+      name: '',
+      phone: '',
+      email: '',
+      city: '',
+      source: '',
+      country: [],
+      studyLevel: '',
+      studyPlan: '',
+      elt: '',
+      regionId: '',
+      branchId: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+      counselorId: '',
+      notes: '',
+    },
+  });
+
   const selectedRegionId = (form?.watch?.('regionId') || '') as string;
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
 
