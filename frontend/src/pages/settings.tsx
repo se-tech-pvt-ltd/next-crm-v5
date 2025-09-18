@@ -70,14 +70,6 @@ export default function Settings() {
           </Card>
         )}
 
-        {category === 'branch-emps' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Database className="w-4 h-4" /> Branch Employees</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4"><BranchEmpSectionComp toast={toast} /></CardContent>
-          </Card>
-        )}
 
         {category === 'smtp' && (
           <Card>
