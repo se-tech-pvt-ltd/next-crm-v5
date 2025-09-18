@@ -425,7 +425,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                 <div className="text-xs text-muted-foreground">Branch Head</div>
                 <div className="font-medium">{(() => {
                   const headUser = (users as any[]).find((u: any) => u.id === (selected?.branchHeadId || selected?.managerId));
-                  return headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '-';
+                  return headUser ? (([headUser.firstName ?? headUser.first_name, headUser.lastName ?? headUser.last_name].filter(Boolean).join(' ')) || headUser.email || '-') : '-';
                 })()}</div>
               </div>
             </div>
