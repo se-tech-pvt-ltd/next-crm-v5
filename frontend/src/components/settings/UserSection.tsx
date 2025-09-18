@@ -127,11 +127,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     }
   }, [form.department, departments]);
 
-  // Client-side check to prevent creating a user with an email that already exists
+  // Client-side check to prevent creating a user with an invalid/duplicate email
   const handleCreate = () => {
     const emailTrim = String(form.email || '').trim().toLowerCase();
     if (!emailTrim) {
       toast({ title: 'Error', description: 'Email is required', variant: 'destructive' });
+      return;
+    }
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(emailTrim);
+    if (!emailOk) {
+      toast({ title: 'Error', description: 'Please enter a valid email address', variant: 'destructive' });
       return;
     }
 
@@ -293,7 +298,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <div className="flex items-center justify-between">
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
                         <div className="flex items-center gap-2">
-                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.roleId || (function(){
+                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(form.email).trim()) || !form.roleId || (function(){
                             const nRole = normalizeRole(form.role);
                             if (nRole === 'regional_manager') return !form.regionId;
                             if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
@@ -344,7 +349,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="flex flex-col">
                             <Label>Email<span className="text-destructive"> *</span></Label>
-                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" required aria-invalid={Boolean(form.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(form.email).trim())} value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
                           </div>
                           <div className="flex flex-col">
                             <Label>Phone number</Label>
