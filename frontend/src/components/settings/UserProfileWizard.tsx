@@ -30,6 +30,7 @@ export default function UserProfileWizard() {
       setLastName(user.lastName ?? user.last_name ?? '');
       setPhoneNumber(user.phoneNumber ?? user.phone_number ?? '');
       setProfileImageUrl(user.profileImageUrl ?? user.profile_image_url ?? '');
+      setProfileImageId(user.profileImageId ?? user.profile_image_id ?? '');
     }
   }, [user]);
 
