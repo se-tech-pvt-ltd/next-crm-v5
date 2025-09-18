@@ -282,6 +282,41 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       subtitle: [b.city, b.country].filter(Boolean).join(', ') || undefined,
     }));
 
+  const counselorOptions = Array.isArray(usersList)
+    ? usersList
+        .filter((u: any) => normalizeRole(u.role) === 'counselor')
+        .filter((u: any) => {
+          if (!selectedBranchId) return true;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+        .filter((u: any) =>
+          counselorSearchQuery === '' ||
+          String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
+          String(u.email || '').toLowerCase().includes(counselorSearchQuery.toLowerCase())
+        )
+        .map((u: any) => ({
+          label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
+          value: String(u.id),
+          subtitle: u.email,
+        }))
+    : [];
+
+  const admissionOfficerOptions = Array.isArray(usersList)
+    ? usersList
+        .filter((u: any) => normalizeRole(u.role) === 'admission_officer')
+        .filter((u: any) => {
+          if (!selectedBranchId) return true;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+        .map((u: any) => ({
+          label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
+          value: String(u.id),
+          subtitle: u.email,
+        }))
+    : [];
+
   const handleCounselorSearch = useCallback((query: string) => {
     setCounselorSearchQuery(query);
     if (query.length > 0) {
