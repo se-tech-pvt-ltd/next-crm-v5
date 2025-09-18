@@ -57,13 +57,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (userData: User) => {
+    // Set minimal session immediately
     setUser(userData);
     localStorage.setItem('auth_user', JSON.stringify(userData));
+
+    // Fetch full user profile in background and merge
+    (async () => {
+      try {
+        const UsersService = await import('@/services/users');
+        const full = await UsersService.getUser(String(userData.id));
+        const merged = { ...userData, ...(full || {}) } as User & any;
+        setUser(merged);
+        localStorage.setItem('auth_user', JSON.stringify(merged));
+      } catch (err) {
+        // ignore
+      }
+    })();
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('auth_user');
+  };
+
+  const refreshUser = async () => {
+    try {
+      if (!user?.id) return null;
+      const UsersService = await import('@/services/users');
+      const full = await UsersService.getUser(String(user.id));
+      const merged = { ...(user as any), ...(full || {}) };
+      setUser(merged);
+      localStorage.setItem('auth_user', JSON.stringify(merged));
+      return merged;
+    } catch (err) {
+      return null;
+    }
   };
 
   const value = {
