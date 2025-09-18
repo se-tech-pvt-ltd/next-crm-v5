@@ -61,12 +61,16 @@ export class UserModel {
   }
 
   static async findCounselors(): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.roleId, 'counselor'));
+    const [rows] = await connection.query<any[]>(
+      'SELECT u.*, ur.role_name AS role FROM users u JOIN user_roles ur ON ur.id = u.role_id WHERE ur.role_name = ?'
+      , ['counselor']
+    );
+    return (rows as any[]);
   }
 
   static async findAll(): Promise<User[]> {
     const [rows] = await connection.query<any[]>(
-      'SELECT u.*, be.branch_id as branchId, b.branch_name AS branchName FROM users u LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id WHERE u.role_id <> ? ORDER BY u.created_at DESC',
+      'SELECT u.*, ur.role_name AS role, be.branch_id as branchId, b.branch_name AS branchName FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id WHERE ur.role_name <> ? ORDER BY u.created_at DESC',
       ['system_admin']
     );
     return (rows as any[]);
@@ -74,14 +78,14 @@ export class UserModel {
 
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
     const params: any[] = [];
-    let sql = 'SELECT u.*, be.branch_id as branchId, b.branch_name AS branchName FROM users u LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id WHERE (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)' ;
+    let sql = 'SELECT u.*, ur.role_name AS role, be.branch_id as branchId, b.branch_name AS branchName FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id WHERE (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)';
     const q = `%${searchQuery}%`;
     params.push(q, q, q);
     // Always exclude system_admin
-    sql += ' AND u.role_id <> ?';
+    sql += ' AND ur.role_name <> ?';
     params.push('system_admin');
     if (roles && roles.length > 0) {
-      sql += ` AND u.role_id IN (${roles.map(() => '?').join(',')})`;
+      sql += ` AND ur.role_name IN (${roles.map(() => '?').join(',')})`;
       params.push(...roles);
     }
     sql += ' ORDER BY u.created_at DESC';
