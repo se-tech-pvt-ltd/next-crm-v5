@@ -26,7 +26,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   // Add user dialog state
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
+  const [form, setForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load departments from backend
@@ -55,7 +55,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '' });
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
 
   // Roles for edit dialog (depends on editForm, so must be declared after it)
@@ -96,7 +96,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     mutationFn: () => UsersService.createUser(form),
     onSuccess: async () => {
       await refetch();
-      setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
+      setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
     },
@@ -236,6 +236,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             className="h-8 w-56"
             value={filters.query}
             onChange={(e) => setFilters((s) => ({ ...s, query: e.target.value }))}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            name="users-search"
           />
           <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Role" /></SelectTrigger>
@@ -284,7 +288,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <div className="flex items-center justify-between">
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
                         <div className="flex items-center gap-2">
-                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
+                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.roleId || (function(){
                             const nRole = normalizeRole(form.role);
                             if (nRole === 'regional_manager') return !form.regionId;
                             if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
@@ -292,7 +296,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           })()}>
                             {create.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
                           </Button>
-                          <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
+                          <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
@@ -359,7 +363,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex flex-col">
                           <Label>Department</Label>
-                          <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '' }))}>
+                          <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '', roleId: '' }))}>
                             <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
                             <SelectContent>
                               {departments.map((d: any) => (
@@ -371,11 +375,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
                         <div className="flex flex-col">
                           <Label>Role<span className="text-destructive"> *</span></Label>
-                          <Select value={form.role} onValueChange={(v) => setForm((s) => ({ ...s, role: v }))}>
+                          <Select value={form.roleId} onValueChange={(v) => {
+                            const r = (rolesForDept as any[]).find((rr: any) => String(rr.id) === String(v));
+                            const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
+                            setForm((s) => ({ ...s, roleId: v, role: roleName }));
+                          }}>
                             <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
                             <SelectContent>
                               {(rolesForDept || []).map((r: any) => (
-                                <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                                <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -489,6 +497,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       firstName: String((u.firstName ?? u.first_name) || ''),
                       lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
+                      roleId: String((u.roleId ?? u.role_id) || ''),
                       branchId: String((u.branchId ?? u.branch_id) || ''),
                       department: String(u.department || ''),
                       regionId: String((u.regionId ?? u.region_id) || ''),
@@ -624,11 +633,15 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
               <div>
                 <Label>Role<span className="text-destructive"> *</span></Label>
-                <Select value={editForm.role} onValueChange={(v) => setEditForm((s) => ({ ...s, role: v }))}>
+                <Select value={editForm.roleId} onValueChange={(v) => {
+                  const r = (rolesForEditDept as any[]).find((rr: any) => String(rr.id) === String(v));
+                  const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
+                  setEditForm((s) => ({ ...s, roleId: v, role: roleName }));
+                }}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
                   <SelectContent>
                     {(rolesForEditDept || []).map((r: any) => (
-                      <SelectItem key={String(r.id ?? r.role_name ?? r.roleName)} value={String(r.roleName ?? r.role_name ?? r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                      <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -689,7 +702,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 return null;
               })()}
               <div className="col-span-full flex gap-2">
-                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || (function(){
+                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.roleId || (function(){
                   const nRole = normalizeRole(editForm.role);
                   if (nRole === 'regional_manager') return !editForm.regionId;
                   if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;

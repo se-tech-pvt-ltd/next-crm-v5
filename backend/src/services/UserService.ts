@@ -25,17 +25,24 @@ export class UserService {
 
   static async createUser(userData: any): Promise<User> {
     if (!userData.email) throw new Error('email is required');
-    // role is required in new schema
-    if (!userData.role && !userData.roleId) throw new Error('role is required');
+    if (!userData.roleId) throw new Error('roleId is required');
 
     const email = String(userData.email).trim().toLowerCase();
     const existing = await UserModel.findByEmail(email);
     if (existing) throw new Error('email already exists');
 
+    let roleId = String(userData.roleId);
+    const { UserRoleModel } = await import('../models/UserRole.js');
+    const roleById = await UserRoleModel.findById(roleId);
+    if (!roleById) {
+      const roleByName = await UserRoleModel.findByRoleName(roleId);
+      if (roleByName?.id) roleId = String(roleByName.id);
+    }
+
     const data: any = {
       ...userData,
       email,
-      roleId: userData.roleId || userData.role,
+      roleId,
       departmentId: userData.departmentId || userData.department || null,
       isActive: false,
       isRegistrationEmailSent: false,
@@ -46,16 +53,24 @@ export class UserService {
 
   static async createUserWithPassword(userData: any, password: string): Promise<User> {
     if (!userData.email) throw new Error('email is required');
-    if (!userData.role && !userData.roleId) throw new Error('role is required');
+    if (!userData.roleId) throw new Error('roleId is required');
 
     const email = String(userData.email).trim().toLowerCase();
     const existing = await UserModel.findByEmail(email);
     if (existing) throw new Error('email already exists');
 
+    let roleId = String(userData.roleId);
+    const { UserRoleModel } = await import('../models/UserRole.js');
+    const roleById = await UserRoleModel.findById(roleId);
+    if (!roleById) {
+      const roleByName = await UserRoleModel.findByRoleName(roleId);
+      if (roleByName?.id) roleId = String(roleByName.id);
+    }
+
     const data: any = {
       ...userData,
       email,
-      roleId: userData.roleId || userData.role,
+      roleId,
       departmentId: userData.departmentId || userData.department || null,
       isActive: false,
       isRegistrationEmailSent: false,

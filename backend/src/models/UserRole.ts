@@ -16,4 +16,9 @@ export class UserRoleModel {
     const [row] = await db.select().from(userRoles).where(eq(userRoles.id, id));
     return row;
   }
+
+  static async findByRoleName(name: string): Promise<any | undefined> {
+    const [row] = await db.select().from(userRoles).where(eq(userRoles.roleName, name));
+    return row;
+  }
 }
