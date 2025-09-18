@@ -54,11 +54,11 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
         <div className="text-sm font-medium">Role access control</div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-4">
         {(departments as any[]).map((d: any) => {
           const deptRoles = (roles as any[]).filter((r: any) => String(r.departmentId) === String(d.id));
           return (
-            <div key={d.id} className="bg-white rounded shadow-sm overflow-hidden">
+            <div key={d.id} className="w-full bg-white rounded shadow-sm overflow-hidden">
               <div className="px-4 py-3">
                 <div className="text-sm font-medium">{d.departmentName || d.id}</div>
               </div>
@@ -87,7 +87,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
         })}
 
         {/* Unassigned roles panel */}
-        <div key="unassigned" className="bg-white rounded shadow-sm overflow-hidden">
+        <div key="unassigned" className="w-full bg-white rounded shadow-sm overflow-hidden">
           <div className="px-4 py-3">
             <div className="text-sm font-medium">Unassigned</div>
           </div>
