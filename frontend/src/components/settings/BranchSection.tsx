@@ -276,7 +276,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
-                    <>
+                    <React.Fragment key={String(b.id)}>
                       <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                         setSelected(b);
                         setEditForm({
@@ -356,7 +356,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                           </TableRow>
                         );
                       })()}
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </TableBody>
