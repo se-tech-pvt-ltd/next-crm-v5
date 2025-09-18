@@ -276,46 +276,79 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
-                    <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
-                      setSelected(b);
-                      setEditForm({
-                        name: String(b.branchName || b.name || ''),
-                        city: String(b.city || ''),
-                        country: String(b.country || ''),
-                        address: String(b.address || ''),
-                        officialPhone: String(b.officialPhone || ''),
-                        officialEmail: String(b.officialEmail || ''),
-                        managerId: String(b.branchHeadId || b.managerId || ''),
-                        regionId: String((b as any).regionId || ''),
-                      });
-                      setIsEditing(false);
-                      setDetailOpen(true);
-                    }}>
-                      <TableCell className="font-medium p-2 text-xs">
-                        <div className="flex items-center gap-2">
-                          {(() => {
-                            const idStr = String(b.id);
-                            const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
-                            const isOpen = expanded.has(idStr);
-                            return count > 0 ? (
-                              <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[11px]" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
-                                {count} {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
-                              </Button>
-                            ) : null;
-                          })()}
-                          <span>{b.branchName || b.name || '-'}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">{(() => {
-                        const r = (regions as any[]).find((x: any) => x.id === (b as any).regionId);
-                        return r?.regionName || '-';
-                      })()}</TableCell>
-                      <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{headName}</TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
+                        setSelected(b);
+                        setEditForm({
+                          name: String(b.branchName || b.name || ''),
+                          city: String(b.city || ''),
+                          country: String(b.country || ''),
+                          address: String(b.address || ''),
+                          officialPhone: String(b.officialPhone || ''),
+                          officialEmail: String(b.officialEmail || ''),
+                          managerId: String(b.branchHeadId || b.managerId || ''),
+                          regionId: String((b as any).regionId || ''),
+                        });
+                        setIsEditing(false);
+                        setDetailOpen(true);
+                      }}>
+                        <TableCell className="font-medium p-2 text-xs">
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const idStr = String(b.id);
+                              const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
+                              const isOpen = expanded.has(idStr);
+                              return count > 0 ? (
+                                <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[11px]" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
+                                  {count} {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                                </Button>
+                              ) : null;
+                            })()}
+                            <span>{b.branchName || b.name || '-'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-2 text-xs">{(() => {
+                          const r = (regions as any[]).find((x: any) => x.id === (b as any).regionId);
+                          return r?.regionName || '-';
+                        })()}</TableCell>
+                        <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{headName}</TableCell>
+                      </TableRow>
+                      {(() => {
+                        const idStr = String(b.id);
+                        const isOpen = expanded.has(idStr);
+                        if (!isOpen) return null;
+                        const mappings = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr);
+                        if (mappings.length === 0) return null;
+                        return (
+                          <TableRow key={`${b.id}-sub`} className="bg-muted/30">
+                            <TableCell colSpan={7} className="p-0">
+                              <div className="px-4 py-2 text-[11px]">
+                                <div className="font-semibold mb-1">Employees</div>
+                                <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                  {mappings.map((m: any) => {
+                                    const u: any = (users as any[]).find((x: any) => String(x.id) === String(m.userId ?? m.user_id));
+                                    const name = u ? (`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '-') : '-';
+                                    const email = u?.email || '';
+                                    const role = u ? (String(u.role || '').replace(/_/g, ' ')) : '';
+                                    return (
+                                      <li key={String(m.id)} className="rounded border p-2 bg-background">
+                                        <div className="font-medium truncate">{name}</div>
+                                        <div className="text-muted-foreground truncate">{email}</div>
+                                        {role ? <div className="text-muted-foreground truncate">{role}</div> : null}
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })()}
+                    </>
                   );
                 })}
               </TableBody>
