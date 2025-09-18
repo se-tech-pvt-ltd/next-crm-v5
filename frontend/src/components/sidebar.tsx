@@ -95,14 +95,15 @@ export function Sidebar() {
   });
 
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
 
   const isModuleVisible = useMemo(() => {
     const roleId = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
     const byRole = Array.isArray(accessList) ? accessList.filter((a: any) => String(a.roleId ?? a.role_id) === roleId) : [];
     return (label: string) => {
-      const mod = normalize(label);
-      const entries = byRole.filter((a: any) => normalize(a.moduleName ?? a.module_name) === mod);
-      if (entries.length === 0) return true; // no rule -> visible
+      const mod = singularize(normalize(label));
+      const entries = byRole.filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === mod);
+      if (entries.length === 0) return true; // no specific rule -> visible
       const allNone = entries.every((e: any) => normalize(e.viewLevel ?? e.view_level) === 'none');
       return !allNone;
     };
