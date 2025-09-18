@@ -254,7 +254,7 @@ export function Sidebar() {
 
       {/* Navigation Menu */}
       <nav id="primary-nav" aria-label="Primary" className="flex-1 p-2 space-y-1">
-        {navItems.map((item) => {
+        {((!roleId) || cachedAccess.length > 0 || !accessLoading) && navItems.map((item) => {
           const isActive = location === item.path;
 
           const handleNavClick = () => {
