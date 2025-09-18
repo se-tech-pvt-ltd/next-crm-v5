@@ -25,7 +25,23 @@ export default function UserProfileWizard() {
   useEffect(() => {
     const shouldOpen = Boolean(user && !((user.isProfileComplete ?? user.is_profile_complete)));
     setOpen(shouldOpen);
-    if (user) {
+    // If user minimal exists, attempt to fetch fresh profile when wizard should open
+    if (shouldOpen && user?.id) {
+      (async () => {
+        try {
+          const UsersService = await import('@/services/users');
+          const full = await UsersService.getUser(String(user.id)).catch(() => null);
+          const src = full || user;
+          setFirstName(src.firstName ?? src.first_name ?? '');
+          setLastName(src.lastName ?? src.last_name ?? '');
+          setPhoneNumber(src.phoneNumber ?? src.phone_number ?? '');
+          setProfileImageUrl(src.profileImageUrl ?? src.profile_image_url ?? '');
+          setProfileImageId(src.profileImageId ?? src.profile_image_id ?? '');
+        } catch (err) {
+          // ignore
+        }
+      })();
+    } else if (user) {
       setFirstName(user.firstName ?? user.first_name ?? '');
       setLastName(user.lastName ?? user.last_name ?? '');
       setPhoneNumber(user.phoneNumber ?? user.phone_number ?? '');
