@@ -44,11 +44,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch {
             localStorage.removeItem('auth_user');
           }
-          try {
-            await http.get<{ id: string; role?: string }>('/api/auth/me');
-          } catch (e: any) {
-            // http client will invoke unauthorized handler on 401
+        }
+
+        // Validate session and fetch authoritative user id from backend
+        try {
+          const me = await http.get<{ id: string; role?: string }>('/api/auth/me');
+          if (me?.id) {
+            try {
+              const UsersService = await import('@/services/users');
+              const full = await UsersService.getUser(String(me.id));
+              if (full) {
+                setUser(full as any);
+                localStorage.setItem('auth_user', JSON.stringify(full));
+              }
+            } catch (err) {
+              // ignore
+            }
           }
+        } catch (e: any) {
+          // http client will invoke unauthorized handler on 401
         }
       } finally {
         setIsLoading(false);
