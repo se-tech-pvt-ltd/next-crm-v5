@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import * as RegService from '@/services/event-registrations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -252,19 +252,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     [existingLeads, existingStudents]
   );
 
-  const counselorOptions = counselors 
-    ? counselors
-        .filter((user: any) => 
-          counselorSearchQuery === '' || 
-          user.name?.toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
-          user.email?.toLowerCase().includes(counselorSearchQuery.toLowerCase())
-        )
-        .map((user: any) => ({
-          label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-          value: user.id,
-          subtitle: user.email !== user.name ? user.email : undefined
-        }))
-    : [];
 
   const branchOptions = (Array.isArray(branchesList) ? branchesList : [])
     .filter((b: any) => !selectedRegionId || String(b.regionId ?? b.region_id ?? '') === String(selectedRegionId))
