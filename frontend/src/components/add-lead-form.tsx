@@ -134,6 +134,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     staleTime: 30000,
   });
 
+  const selectedRegionId = (form?.watch?.('regionId') || '') as string;
+  const selectedBranchId = (form?.watch?.('branchId') || '') as string;
+
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+
+  const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
+    label: String(r.regionName || r.name || 'Unknown'),
+    value: String(r.id),
+  }));
+
   const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkEmailDuplicate = useCallback(
     (email: string) => {
