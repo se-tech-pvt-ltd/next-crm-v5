@@ -128,6 +128,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     }
   }, [form.department, departments]);
 
+  useEffect(() => {
+    const deptObj = departments.find((d: any) => String(d.id) === String(editForm.department));
+    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+    if (deptName === 'Administration') {
+      setEditForm((s) => ({ ...s, branchId: '', regionId: '' }));
+    }
+  }, [editForm.department, departments]);
+
   // Client-side check to prevent creating a user with an invalid/duplicate email
   const handleCreate = () => {
     const emailTrim = String(form.email || '').trim().toLowerCase();
