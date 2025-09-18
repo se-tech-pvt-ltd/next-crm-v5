@@ -280,7 +280,7 @@ export class UserController {
   static async changePassword(req: Request, res: Response) {
     try {
       const userId = req.params.id;
-      const { currentPassword, newPassword } = req.body || {};
+      const { newPassword } = req.body || {};
       if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
         return res.status(400).json({ message: 'New password must be at least 6 characters' });
       }
@@ -288,13 +288,7 @@ export class UserController {
       const user = await UserService.getUser(userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
 
-      // If user has a passwordHash, verify currentPassword
-      if (user.passwordHash) {
-        const bcrypt = await import('bcryptjs');
-        const ok = await bcrypt.compare(String(currentPassword || ''), String(user.passwordHash || ''));
-        if (!ok) return res.status(401).json({ message: 'Current password is incorrect' });
-      }
-
+      // Allow password reset without current password for profile completion flow
       const ok = await (await import('../services/AuthService.js')).AuthService.updateUserPassword(userId, newPassword);
       if (!ok) return res.status(500).json({ message: 'Failed to update password' });
       res.json({ success: true });
