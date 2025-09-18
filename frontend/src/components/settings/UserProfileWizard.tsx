@@ -51,17 +51,28 @@ export default function UserProfileWizard() {
     setLoading(true);
     try {
       const UsersService = await import('@/services/users');
-      // If user provided a new password, change it first
-      if (newPassword) {
-        try {
-          await UsersService.changePassword(String(user.id), currentPassword || undefined, newPassword);
-          toast({ title: 'Password changed' });
-        } catch (err: any) {
-          const msg = err?.data?.message || err?.message || 'Failed to change password';
-          toast({ title: 'Error', description: String(msg), variant: 'destructive' });
-          setLoading(false);
-          return;
-        }
+
+      // Password is mandatory
+      if (!newPassword || String(newPassword).length < 6) {
+        toast({ title: 'Error', description: 'New password is required and must be at least 6 characters', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+      if (!String(currentPassword || '').trim()) {
+        toast({ title: 'Error', description: 'Current password is required', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+
+      // Change password first
+      try {
+        await UsersService.changePassword(String(user.id), currentPassword || undefined, newPassword);
+        toast({ title: 'Password changed' });
+      } catch (err: any) {
+        const msg = err?.data?.message || err?.message || 'Failed to change password';
+        toast({ title: 'Error', description: String(msg), variant: 'destructive' });
+        setLoading(false);
+        return;
       }
 
       const payload: any = {
