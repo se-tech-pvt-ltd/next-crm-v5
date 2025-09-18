@@ -493,6 +493,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       payload.eventRegId = (initialData as any).eventRegId;
     }
 
+    if (!payload.counselorId && payload.admissionOfficerId) {
+      payload.counselorId = payload.admissionOfficerId;
+    }
+
     createLeadMutation.mutate(payload);
   };
 
