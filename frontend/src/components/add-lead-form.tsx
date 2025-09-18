@@ -610,57 +610,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
-                <Target className="w-5 h-5 text-primary" />
-                <span>Lead Details</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <FormField control={form.control} name="type" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Lead Type</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select type" searchPlaceholder="Search types..." options={dropdownData?.Type?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No types found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="status" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Target className="w-4 h-4" />
-                      <span>Lead Status *</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select lead status" searchPlaceholder="Search statuses..." options={dropdownData?.Status?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No statuses found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="source" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Globe className="w-4 h-4" />
-                      <span>Lead Source</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select source" searchPlaceholder="Search sources..." options={dropdownData?.Source?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No sources found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic Interests</span>
               </CardTitle>
