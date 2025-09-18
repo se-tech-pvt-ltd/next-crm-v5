@@ -85,15 +85,15 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
       </div>
 
       <Dialog open={roleModalOpen} onOpenChange={(o) => { setRoleModalOpen(o); if (!o) { setSelectedRole(null); setFormOpen(false); setEditingId(null); } }}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Access: {selectedRole?.roleName || ''}</span>
+        <DialogContent className="max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
+          <DialogHeader className="p-0">
+            <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md flex items-center justify-between">
+              <div className="text-lg font-semibold">Access: {selectedRole?.roleName || ''}</div>
               <div className="flex items-center gap-2">
-                <Button size="sm" onClick={openAddForRole}>+ Add</Button>
+                <Button size="sm" className="bg-indigo-50 text-indigo-700 hover:shadow-md" onClick={openAddForRole}>+ Add</Button>
                 <Button size="sm" variant="outline" onClick={() => { setRoleModalOpen(false); }}>Close</Button>
               </div>
-            </DialogTitle>
+            </div>
           </DialogHeader>
 
           {formOpen ? (
