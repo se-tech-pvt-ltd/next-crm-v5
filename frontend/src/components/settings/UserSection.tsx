@@ -512,6 +512,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableRow key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                     setSelected(u);
                     setEditForm({
+                      email: String(u.email || ''),
+                      phoneNumber: String(u.phoneNumber ?? u.phone_number ?? ''),
                       firstName: String((u.firstName ?? u.first_name) || ''),
                       lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
@@ -519,6 +521,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       branchId: String((u.branchId ?? u.branch_id) || ''),
                       department: String(u.department || ''),
                       regionId: String((u.regionId ?? u.region_id) || ''),
+                      profileImageUrl: String(u.profileImageUrl ?? u.profile_image_url ?? ''),
+                      profileImageId: '',
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
