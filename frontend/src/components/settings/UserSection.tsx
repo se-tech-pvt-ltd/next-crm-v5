@@ -55,8 +55,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '' });
+  const [editForm, setEditForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   // Roles for edit dialog (depends on editForm, so must be declared after it)
   const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
