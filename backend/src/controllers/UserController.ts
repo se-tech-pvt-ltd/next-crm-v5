@@ -39,7 +39,7 @@ export class UserController {
           await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [id, String(branchId)]);
         }
         // For counselor or admission_officer, create branch_emps mapping
-        if ((resolvedRoleName === 'counselor' || resolvedRoleName === 'admission_officer') && branchId) {
+        if ((resolvedRoleName === 'counsellor' || resolvedRoleName === 'admission_officer') && branchId) {
           const beId = (await import('uuid')).v4();
           const [existing] = await connection.query<any[]>('SELECT id FROM branch_emps WHERE user_id = ? AND branch_id = ? LIMIT 1', [id, String(branchId)]);
           const exists = Array.isArray(existing) && existing.length > 0;
