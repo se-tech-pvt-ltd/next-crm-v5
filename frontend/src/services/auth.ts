@@ -13,7 +13,9 @@ export interface UserSession {
 }
 
 export async function login(data: LoginRequest): Promise<UserSession> {
-  return http.post<UserSession>('/api/auth/login', data);
+  const res = await http.post<any>('/api/auth/login', data);
+  // API returns { user, token, expiresIn } — return user object for callers
+  return res?.user || res;
 }
 
 export async function logout() {
