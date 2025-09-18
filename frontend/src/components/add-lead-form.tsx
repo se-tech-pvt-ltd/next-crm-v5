@@ -345,8 +345,11 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       studyLevel: '',
       studyPlan: '',
       elt: '',
-      counselorId: '',
+      regionId: '',
       branchId: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+      counselorId: '',
       notes: '',
     },
   });
