@@ -55,8 +55,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '' });
+  const [editForm, setEditForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   // Roles for edit dialog (depends on editForm, so must be declared after it)
   const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
@@ -127,6 +128,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     }
   }, [form.department, departments]);
 
+  useEffect(() => {
+    const deptObj = departments.find((d: any) => String(d.id) === String(editForm.department));
+    const deptName = String(deptObj?.departmentName ?? deptObj?.department_name ?? '').trim();
+    if (deptName === 'Administration') {
+      setEditForm((s) => ({ ...s, branchId: '', regionId: '' }));
+    }
+  }, [editForm.department, departments]);
+
   // Client-side check to prevent creating a user with an invalid/duplicate email
   const handleCreate = () => {
     const emailTrim = String(form.email || '').trim().toLowerCase();
@@ -162,7 +171,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!selected?.id) throw new Error('User ID missing');
-      const body: any = { ...editForm };
+      const body: any = { ...editForm, departmentId: editForm.department || undefined };
       return UsersService.updateUser(String(selected.id), body);
     },
     onSuccess: async () => {
@@ -284,7 +293,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10">
+          <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
               <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
                 <DialogTitle className="text-2xl text-primary flex items-center gap-2"><UserPlus className="w-5 h-5" /> Add User</DialogTitle>
@@ -510,14 +519,31 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 {(pageItems as any[]).map((u: any) => (
                   <TableRow key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                     setSelected(u);
+                    const branchId = String((u.branchId ?? u.branch_id) || '');
+                    const deptId = String((u.departmentId ?? u.department_id) || '');
+                    const roleName = String(u.role || 'counselor');
+                    const nRole = normalizeRole(roleName);
+                    let resolvedRegionId = '' as string;
+                    if (nRole === 'regional_manager') {
+                      const region = (Array.isArray(regions) ? regions : []).find((r: any) => String(r.regionHeadId) === String(u.id));
+                      resolvedRegionId = String(region?.id || '');
+                    } else if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
+                      const branches = Array.isArray(initialBranches) ? initialBranches : [];
+                      const b = branches.find((bb: any) => String(bb.id) === branchId);
+                      resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+                    }
                     setEditForm({
+                      email: String(u.email || ''),
+                      phoneNumber: String(u.phoneNumber ?? u.phone_number ?? ''),
                       firstName: String((u.firstName ?? u.first_name) || ''),
                       lastName: String((u.lastName ?? u.last_name) || ''),
-                      role: String(u.role || 'counselor'),
+                      role: roleName,
                       roleId: String((u.roleId ?? u.role_id) || ''),
-                      branchId: String((u.branchId ?? u.branch_id) || ''),
-                      department: String(u.department || ''),
-                      regionId: String((u.regionId ?? u.region_id) || ''),
+                      branchId,
+                      department: deptId,
+                      regionId: resolvedRegionId,
+                      profileImageUrl: String(u.profileImageUrl ?? u.profile_image_url ?? ''),
+                      profileImageId: '',
                     });
                     setIsEditing(false);
                     setDetailOpen(true);
@@ -547,203 +573,309 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       </div>
 
       <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
-              {!isEditing ? (
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
-              ) : null}
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
+
+          <DialogHeader className="sr-only"><DialogTitle>{isEditing ? 'Edit User' : 'User Details'}</DialogTitle></DialogHeader>
 
           {!isEditing ? (
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={String(selected?.profileImageUrl ?? selected?.profile_image_url ?? '')} alt="profile" />
-                  <AvatarFallback>{String((((selected?.firstName ?? selected?.first_name) || ' ')[0] || '') + (((selected?.lastName ?? selected?.last_name) || ' ')[0] || '')).trim().toUpperCase() || (selected?.email || 'U')[0]}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="text-base font-semibold truncate">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge>{selected ? roleLabel(selected.role) : '—'}</Badge>
-                    {selected?.branchName ? <Badge variant="secondary">{String(selected.branchName)}</Badge> : null}
-                    {(selected?.branchId ?? selected?.branch_id) && !selected?.branchName ? <Badge variant="secondary">{String(selected?.branchId ?? selected?.branch_id)}</Badge> : null}
-                    <Badge variant={(selected?.isActive ?? selected?.is_active) ? 'default' : 'destructive'}>{(selected?.isActive ?? selected?.is_active) ? 'Active' : 'Inactive'}</Badge>
-                    <Badge variant={(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'default' : 'outline'}>Reg Email {(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not Sent'}</Badge>
-                    <Badge variant={(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'default' : 'outline'}>Profile {(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Complete' : 'Incomplete'}</Badge>
-                  </div>
+            <div className="rounded-lg bg-card text-card-foreground overflow-hidden">
+              <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
+                <div className="text-2xl text-primary flex items-center justify-between">
+                  <span className="flex items-center gap-2"><IdCard className="w-5 h-5" /> User Details</span>
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
                 </div>
               </div>
 
-              <Separator />
+              <div className="px-6 pb-6">
+                <div className="mt-2 space-y-6">
+                  <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                      <div className="flex justify-center sm:justify-start">
+                        <div className="relative rounded-xl border bg-muted/40 overflow-hidden w-[200px] h-[134px]">
+                          {String(selected?.profileImageUrl ?? selected?.profile_image_url) ? (
+                            <img src={String(selected?.profileImageUrl ?? selected?.profile_image_url)} alt="profile" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">No image</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex flex-col">
+                          <Label>Email</Label>
+                          <div className="mt-2 text-sm font-medium break-words">{selected?.email || '—'}</div>
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Phone number</Label>
+                          <div className="mt-2 text-sm font-medium">{selected?.phoneNumber || selected?.phone_number || '—'}</div>
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>First name</Label>
+                          <div className="mt-2 text-sm font-medium">{(selected?.firstName ?? selected?.first_name) || '—'}</div>
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Last name</Label>
+                          <div className="mt-2 text-sm font-medium">{(selected?.lastName ?? selected?.last_name) || '—'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground">User ID</div>
-                  <div className="font-medium break-words">{selected?.email || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">First name</div>
-                  <div className="font-medium">{(selected?.firstName ?? selected?.first_name) || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Last name</div>
-                  <div className="font-medium">{(selected?.lastName ?? selected?.last_name) || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Role</div>
-                  <div className="font-medium">{selected ? roleLabel(selected.role) : '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Branch</div>
-                  <div className="font-medium">{selected?.branchName || selected?.branchId || selected?.branch_id || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Phone number</div>
-                  <div className="font-medium">{selected?.phoneNumber || selected?.phone_number || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Registration email</div>
-                  <div className="font-medium">{(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not sent'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Profile complete</div>
-                  <div className="font-medium">{(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Yes' : 'No'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Active</div>
-                  <div className="font-medium">{(selected?.isActive ?? selected?.is_active) ? 'Yes' : 'No'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Created at</div>
-                  <div className="font-medium">{selected?.createdAt || selected?.created_at ? new Date(String(selected?.createdAt || selected?.created_at)).toLocaleString() : '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Updated at</div>
-                  <div className="font-medium">{selected?.updatedAt || selected?.updated_at ? new Date(String(selected?.updatedAt || selected?.updated_at)).toLocaleString() : '—'}</div>
+                  <div>
+                    <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                    <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                      <div className="flex flex-col">
+                        <Label>Department</Label>
+                        <div className="mt-2 text-sm font-medium">{(() => {
+                          const deptId = String(selected?.departmentId ?? selected?.department_id ?? selected?.department ?? '');
+                          const d = departments.find((dd: any) => String(dd.id) === deptId);
+                          return d ? String(d.departmentName ?? d.department_name ?? d.id) : '—';
+                        })()}</div>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label>Role</Label>
+                        <div className="mt-2 text-sm font-medium">{selected ? roleLabel(String(selected.role || '')) : '—'}</div>
+                      </div>
+
+                      <div className="flex flex-col sm:col-span-2">
+                        <Label>Region</Label>
+                        <div className="mt-2 text-sm font-medium">{(() => {
+                          const nRole = normalizeRole(String(selected?.role || ''));
+                          if (nRole === 'regional_manager') {
+                            const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId) === String(selected?.id));
+                            return r ? String(r.name ?? r.regionName ?? r.region_name ?? r.id) : '—';
+                          }
+                          const bId = String((selected?.branchId ?? selected?.branch_id) || '');
+                          const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
+                          if (!b) return '—';
+                          const reg = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.id) === String(b.regionId ?? b.region_id));
+                          return reg ? String(reg.name ?? reg.regionName ?? reg.region_name ?? reg.id) : '—';
+                        })()}</div>
+                      </div>
+
+                      <div className="flex flex-col sm:col-span-2">
+                        <Label>Branch</Label>
+                        <div className="mt-2 text-sm font-medium">{String(selected?.branchName || selected?.branchId || selected?.branch_id || '—')}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Registration email</div>
+                      <div className="font-medium">{(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not sent'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Profile complete</div>
+                      <div className="font-medium">{(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Yes' : 'No'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Active</div>
+                      <div className="font-medium">{(selected?.isActive ?? selected?.is_active) ? 'Yes' : 'No'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Created at</div>
+                      <div className="font-medium">{selected?.createdAt || selected?.created_at ? new Date(String(selected?.createdAt || selected?.created_at)).toLocaleString() : '—'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Updated at</div>
+                      <div className="font-medium">{selected?.updatedAt || selected?.updated_at ? new Date(String(selected?.updatedAt || selected?.updated_at)).toLocaleString() : '—'}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              <div>
-                <Label>First name</Label>
-                <Input className="mt-1" value={editForm.firstName} onChange={(e) => setEditForm((s) => ({ ...s, firstName: e.target.value }))} />
+            <div className="rounded-lg bg-card text-card-foreground overflow-hidden">
+              <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
+                <div className="text-2xl text-primary flex items-center justify-between">
+                  <span className="flex items-center gap-2"><IdCard className="w-5 h-5" /> Edit User</span>
+                  <div className="flex items-center gap-2">
+                    <Button size="icon" aria-label="Save user" title="Save" onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !editForm.roleId || (function(){
+                      const nRole = normalizeRole(editForm.role);
+                      if (nRole === 'regional_manager') return !editForm.regionId;
+                      if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
+                      return false;
+                    })()}>
+                      {updateMutation.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
+                    </Button>
+                    <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label>Last name</Label>
-                <Input className="mt-1" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Department</Label>
-                <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: '' }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d: any) => (
-                      <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Role<span className="text-destructive"> *</span></Label>
-                <Select value={editForm.roleId} onValueChange={(v) => {
-                  const r = (rolesForEditDept as any[]).find((rr: any) => String(rr.id) === String(v));
-                  const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
-                  setEditForm((s) => ({ ...s, roleId: v, role: roleName }));
-                }}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
-                  <SelectContent>
-                    {(rolesForEditDept || []).map((r: any) => (
-                      <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {(() => {
-                const nRole = normalizeRole(editForm.role);
 
-                if (nRole === 'regional_manager') {
-                  return (
-                    <div className="sm:col-span-2 md:col-span-3">
-                      <Label>Region<span className="text-destructive"> *</span></Label>
-                      <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
-                        <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
-                        <SelectContent>
-                          {(Array.isArray(regions) ? regions : []).map((r: any) => {
-                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
-                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
-                            const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
-                            const hasHeadOther = Boolean(r.regionHeadId) && String(r.regionHeadId) !== String(selected?.id || '');
-                            return (
-                              <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHeadOther}>
-                                {label}{hasHeadOther ? ` — Head: ${headName || 'assigned'}` : ''}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+              <div className="px-6 pb-6">
+                <div className="mt-2 space-y-6">
+                  <div className="space-y-6">
+                    <div>
+                      <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                        <div className="flex justify-center sm:justify-start">
+                          <div
+                            className="relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden w-[200px] h-[134px] cursor-pointer group"
+                            onClick={() => editFileInputRef.current?.click()}
+                            role="button"
+                            aria-label="Upload profile image"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); editFileInputRef.current?.click(); } }}
+                          >
+                            {editForm.profileImageUrl ? (
+                              <img src={editForm.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">Click to upload</div>
+                            )}
+                            <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
+                          </div>
+                          <input
+                            ref={editFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const { uploadProfilePicture } = await import('@/services/uploads');
+                                const res = await uploadProfilePicture(file);
+                                setEditForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
+                              } catch (err: any) {
+                                toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="flex flex-col">
+                            <Label>Email</Label>
+                            <Input className="mt-2" type="email" value={editForm.email} disabled />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Phone number</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="tel" value={editForm.phoneNumber} onChange={(e) => setEditForm((s) => ({ ...s, phoneNumber: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>First name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={editForm.firstName} onChange={(e) => setEditForm((s) => ({ ...s, firstName: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Last name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  );
-                }
 
-                if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
-                  return (
-                    <>
-                      <div>
-                        <Label>Region<span className="text-destructive"> *</span></Label>
-                        <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
-                          <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
-                          <SelectContent>
-                            {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                              <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="sm:col-span-2 md:col-span-3">
-                        <Label>Branch<span className="text-destructive"> *</span></Label>
-                        <SearchableCombobox
-                          value={editForm.branchId}
-                          onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
-                          placeholder="Select branch (required)"
-                          searchPlaceholder="Search branches..."
-                          onSearch={setBranchEditSearch}
-                          options={(branchEditList || []).filter((b: any) => {
-                            if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
-                            return true;
-                          }).map((b: any) => {
-                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(b.branchHeadId ?? b.branch_head_id));
-                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
-                            const hasHeadOther = Boolean(b.branchHeadId ?? b.branch_head_id) && String(b.branchHeadId ?? b.branch_head_id) !== String(selected?.id || '');
-                            return ({
-                              value: String(b.id),
-                              label: String(b.branchName || b.name || b.id),
-                              disabled: nRole === 'branch_manager' ? hasHeadOther : false,
-                              hint: hasHeadOther ? `Head: ${headName || 'assigned'}` : undefined,
-                            });
-                          })}
-                          loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
-                        />
-                      </div>
-                    </>
-                  );
-                }
+                    <div>
+                      <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                      <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                        <div className="flex flex-col">
+                          <Label>Department</Label>
+                          <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: '', roleId: '' }))}>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
+                            <SelectContent>
+                              {departments.map((d: any) => (
+                                <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                return null;
-              })()}
-              <div className="col-span-full flex gap-2">
-                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.roleId || (function(){
-                  const nRole = normalizeRole(editForm.role);
-                  if (nRole === 'regional_manager') return !editForm.regionId;
-                  if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
-                  return false;
-                })() || updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save changes'}
-                </Button>
-                <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
+                        <div className="flex flex-col">
+                          <Label>Role<span className="text-destructive"> *</span></Label>
+                          <Select value={editForm.roleId} onValueChange={(v) => {
+                            const r = (rolesForEditDept as any[]).find((rr: any) => String(rr.id) === String(v));
+                            const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
+                            setEditForm((s) => ({ ...s, roleId: v, role: roleName }));
+                          }}>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
+                            <SelectContent>
+                              {(rolesForEditDept || []).map((r: any) => (
+                                <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {(() => {
+                          const nRole = normalizeRole(editForm.role);
+
+                          if (nRole === 'regional_manager') {
+                            return (
+                              <div className="sm:col-span-2">
+                                <Label>Region<span className="text-destructive"> *</span></Label>
+                                <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
+                                  <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                  <SelectContent>
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => {
+                                      const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
+                                      const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                                      const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
+                                      const hasHeadOther = Boolean(r.regionHeadId) && String(r.regionHeadId) !== String(selected?.id || '');
+                                      return (
+                                        <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHeadOther}>
+                                          {label}{hasHeadOther ? ` — Head: ${headName || 'assigned'}` : ''}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            );
+                          }
+
+                          if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
+                            return (
+                              <>
+                                <div>
+                                  <Label>Region<span className="text-destructive"> *</span></Label>
+                                  <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
+                                    <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                    <SelectContent>
+                                      {(Array.isArray(regions) ? regions : []).map((r: any) => (
+                                        <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label>Branch<span className="text-destructive"> *</span></Label>
+                                  <div className="mt-2">
+                                    <SearchableCombobox
+                                      value={editForm.branchId}
+                                      onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
+                                      placeholder="Select branch (required)"
+                                      searchPlaceholder="Search branches..."
+                                      onSearch={setBranchEditSearch}
+                                      className="border-input/60 hover:border-primary focus-visible:ring-primary/50"
+                                      options={(branchEditList || []).filter((b: any) => {
+                                        if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
+                                        return true;
+                                      }).map((b: any) => {
+                                        const headUser = (users as any[]).find((u: any) => String(u.id) === String(b.branchHeadId ?? b.branch_head_id));
+                                        const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                                        const hasHeadOther = Boolean(b.branchHeadId ?? b.branch_head_id) && String(b.branchHeadId ?? b.branch_head_id) !== String(selected?.id || '');
+                                        return ({
+                                          value: String(b.id),
+                                          label: String(b.branchName || b.name || b.id),
+                                          disabled: nRole === 'branch_manager' ? hasHeadOther : false,
+                                          hint: hasHeadOther ? `Head: ${headName || 'assigned'}` : undefined,
+                                        });
+                                      })}
+                                      loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
+
+                          return null;
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
