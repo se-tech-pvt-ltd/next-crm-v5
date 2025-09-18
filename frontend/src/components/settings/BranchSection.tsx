@@ -274,7 +274,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
               <TableBody>
                 {(pageItems as any[]).map((b: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
-                  const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
+                  const headName = headUser ? (([headUser.firstName ?? headUser.first_name, headUser.lastName ?? headUser.last_name].filter(Boolean).join(' ')) || headUser.email || '-') : '-';
                   const idStr = String(b.id);
                   const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
                   const isOpen = expanded.has(idStr);
