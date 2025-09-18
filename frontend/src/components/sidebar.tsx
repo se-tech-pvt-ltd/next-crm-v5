@@ -97,7 +97,7 @@ export function Sidebar() {
     }
   } catch {}
 
-  const { data: accessByRole = [] } = useQuery({
+  const { data: accessByRole = [], isLoading: accessLoading } = useQuery({
     queryKey: ['/api/user-access', roleId],
     enabled: Boolean(roleId),
     initialData: cachedAccess,
