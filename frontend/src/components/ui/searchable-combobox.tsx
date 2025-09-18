@@ -18,6 +18,8 @@ interface SearchableComboboxProps {
     label: string;
     email?: string;
     role?: string;
+    disabled?: boolean;
+    hint?: string;
   }>;
   loading?: boolean;
   className?: string;
@@ -184,10 +186,12 @@ export function SearchableCombobox({
               <div
                 key={option.value}
                 className={cn(
-                  "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
+                  "relative flex select-none items-center rounded-sm px-2 py-2 text-sm",
+                  option.disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-accent hover:text-accent-foreground",
                   value === option.value && "bg-accent text-accent-foreground"
                 )}
-                onClick={() => handleSelect(option.value)}
+                onClick={() => { if (!option.disabled) handleSelect(option.value); }}
+                aria-disabled={option.disabled || undefined}
               >
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
@@ -197,6 +201,9 @@ export function SearchableCombobox({
                     <div className="truncate font-medium">{option.label}</div>
                     {option.email && (
                       <div className="truncate text-xs text-muted-foreground">{option.email}</div>
+                    )}
+                    {option.hint && (
+                      <div className="truncate text-[11px] text-muted-foreground">{option.hint}</div>
                     )}
                     {option.role && (
                       <Badge variant="secondary" className="mt-1 text-xs">
