@@ -575,6 +575,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
         <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
 
+          <DialogHeader className="sr-only"><DialogTitle>{isEditing ? 'Edit User' : 'User Details'}</DialogTitle></DialogHeader>
+
           {!isEditing ? (
             <div className="rounded-lg bg-card text-card-foreground overflow-hidden">
               <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
