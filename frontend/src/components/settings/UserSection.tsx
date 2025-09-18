@@ -714,10 +714,19 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                           searchPlaceholder="Search branches..."
                           onSearch={setBranchEditSearch}
                           options={(branchEditList || []).filter((b: any) => {
-                            if (nRole === 'branch_manager' && (b.branchHeadId ?? b.branch_head_id)) return false;
                             if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
                             return true;
-                          }).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }))}
+                          }).map((b: any) => {
+                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(b.branchHeadId ?? b.branch_head_id));
+                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                            const hasHeadOther = Boolean(b.branchHeadId ?? b.branch_head_id) && String(b.branchHeadId ?? b.branch_head_id) !== String(selected?.id || '');
+                            return ({
+                              value: String(b.id),
+                              label: String(b.branchName || b.name || b.id),
+                              disabled: nRole === 'branch_manager' ? hasHeadOther : false,
+                              hint: hasHeadOther ? `Head: ${headName || 'assigned'}` : undefined,
+                            });
+                          })}
                           loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
                         />
                       </div>
