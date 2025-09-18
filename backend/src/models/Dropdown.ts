@@ -21,7 +21,9 @@ export class DropdownModel {
   }
 
   static async create(dropdownData: InsertDropdown): Promise<Dropdown> {
-    const [dropdown] = await db.insert(dropdowns).values(dropdownData).returning();
+    await db.insert(dropdowns).values(dropdownData);
+    const [dropdown] = await db.select().from(dropdowns).where(eq(dropdowns.id, dropdownData.id));
+    if (!dropdown) throw new Error("Failed to create dropdown - record not found after insert");
     return dropdown;
   }
 
@@ -31,6 +33,7 @@ export class DropdownModel {
 
   static async delete(id: string): Promise<boolean> {
     const result = await db.delete(dropdowns).where(eq(dropdowns.id, id));
-    return (result.rowCount || 0) > 0;
+    const affected = (result as any)?.affectedRows ?? (result as any)?.rowCount ?? 0;
+    return affected > 0;
   }
 }

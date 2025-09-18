@@ -38,6 +38,15 @@ export class UserController {
         if (resolvedRoleName === 'branch_manager' && branchId) {
           await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [id, String(branchId)]);
         }
+        // For counselor or admission_officer, create branch_emps mapping
+        if ((resolvedRoleName === 'counselor' || resolvedRoleName === 'admission_officer') && branchId) {
+          const beId = (await import('uuid')).v4();
+          const [existing] = await connection.query<any[]>('SELECT id FROM branch_emps WHERE user_id = ? AND branch_id = ? LIMIT 1', [id, String(branchId)]);
+          const exists = Array.isArray(existing) && existing.length > 0;
+          if (!exists) {
+            await connection.query('INSERT INTO branch_emps (id, branch_id, user_id) VALUES (?, ?, ?)', [beId, String(branchId), id]);
+          }
+        }
       } catch (sideErr) {
         console.error('Post-create side effects error:', sideErr);
       }
@@ -92,6 +101,15 @@ export class UserController {
         }
         if (resolvedRoleName === 'branch_manager' && branchId) {
           await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [id, String(branchId)]);
+        }
+        // For counselor or admission_officer, create branch_emps mapping
+        if ((resolvedRoleName === 'counselor' || resolvedRoleName === 'admission_officer') && branchId) {
+          const beId = (await import('uuid')).v4();
+          const [existing] = await connection.query<any[]>('SELECT id FROM branch_emps WHERE user_id = ? AND branch_id = ? LIMIT 1', [id, String(branchId)]);
+          const exists = Array.isArray(existing) && existing.length > 0;
+          if (!exists) {
+            await connection.query('INSERT INTO branch_emps (id, branch_id, user_id) VALUES (?, ?, ?)', [beId, String(branchId), id]);
+          }
         }
       } catch (sideErr) {
         console.error('Post-invite side effects error:', sideErr);
@@ -172,6 +190,15 @@ export class UserController {
         }
         if (resolvedRoleName === 'branch_manager' && updates.branchId) {
           await connection.query('UPDATE branches SET branch_head_id = ? WHERE id = ?', [userId, String(updates.branchId)]);
+        }
+        // For counselor or admission_officer, create branch_emps mapping when branch provided
+        if ((resolvedRoleName === 'counselor' || resolvedRoleName === 'admission_officer') && updates.branchId) {
+          const beId = (await import('uuid')).v4();
+          const [existing] = await connection.query<any[]>('SELECT id FROM branch_emps WHERE user_id = ? AND branch_id = ? LIMIT 1', [userId, String(updates.branchId)]);
+          const exists = Array.isArray(existing) && existing.length > 0;
+          if (!exists) {
+            await connection.query('INSERT INTO branch_emps (id, branch_id, user_id) VALUES (?, ?, ?)', [beId, String(updates.branchId), userId]);
+          }
         }
       } catch (sideErr) {
         console.error('Post-update side effects error:', sideErr);

@@ -1,7 +1,6 @@
-import { eq, or, like, and, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db, connection } from "../config/database.js";
 import { users, type User, type InsertUser } from "../shared/schema.js";
-import { eq, desc } from "drizzle-orm";
 
 export class UserModel {
   static async findById(id: string): Promise<User | undefined> {
@@ -37,26 +36,25 @@ export class UserModel {
   }
 
   static async update(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    const [user] = await db
+    await db
       .update(users)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
+      .where(eq(users.id, id));
+    return await UserModel.findById(id);
   }
 
   static async upsert(userData: InsertUser): Promise<User> {
-    const [user] = await db
+    await db
       .insert(users)
       .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
+      .onDuplicateKeyUpdate({
         set: {
           ...userData,
           updatedAt: new Date(),
         },
-      })
-      .returning();
+      });
+    const user = await UserModel.findById(userData.id);
+    if (!user) throw new Error("Failed to upsert user");
     return user;
   }
 
@@ -99,6 +97,7 @@ export class UserModel {
 
   static async delete(id: string): Promise<boolean> {
     const result = await db.delete(users).where(eq(users.id, id));
-    return (result.rowCount || 0) > 0;
+    const affected = (result as any)?.affectedRows ?? (result as any)?.rowCount ?? 0;
+    return affected > 0;
   }
 }
