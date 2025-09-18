@@ -13,13 +13,31 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, branchId, department, profileImageId } = req.body || {};
-      if (!email || !role) {
+      const { email, firstName, lastName, role, roleId, branchId, department, profileImageId, regionId } = req.body || {};
+      if (!email || (!role && !roleId)) {
         return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
       const password = generateNumericPassword(10);
-      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role, branchId, department, profileImageId } as any, password);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, role: role || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any, password);
+
+      try {
+        // If regional manager is set, update the region head mapping
+        const { connection } = await import('../config/database.js');
+        const { UserRoleModel } = await import('../models/UserRole.js');
+        let resolvedRoleName: string | undefined;
+        if (roleId) {
+          const roleRow: any = await UserRoleModel.findById(String(roleId));
+          resolvedRoleName = String(roleRow?.roleName || roleRow?.role_name || '').toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+        } else if (role) {
+          resolvedRoleName = String(role).toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+        }
+        if (resolvedRoleName === 'regional_manager' && regionId) {
+          await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [id, String(regionId)]);
+        }
+      } catch (sideErr) {
+        console.error('Post-create side effects error:', sideErr);
+      }
 
       // Send invite/notification email using template "new registration"
       try {
@@ -49,12 +67,30 @@ export class UserController {
 
   static async inviteUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, role, branchId, department, profileImageId } = req.body || {};
-      if (!email || !role) {
+      const { email, firstName, lastName, role, roleId, branchId, department, profileImageId, regionId } = req.body || {};
+      if (!email || (!role && !roleId)) {
         return res.status(400).json({ message: 'email and role are required' });
       }
       const id = (await import('uuid')).v4();
-      const created = await UserService.createUser({ id, email, firstName, lastName, role, branchId, department, profileImageId } as any);
+      const created = await UserService.createUser({ id, email, firstName, lastName, role: role || undefined, roleId: roleId || undefined, branchId, department, profileImageId } as any);
+
+      try {
+        const { connection } = await import('../config/database.js');
+        const { UserRoleModel } = await import('../models/UserRole.js');
+        let resolvedRoleName: string | undefined;
+        if (roleId) {
+          const roleRow: any = await UserRoleModel.findById(String(roleId));
+          resolvedRoleName = String(roleRow?.roleName || roleRow?.role_name || '').toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+        } else if (role) {
+          resolvedRoleName = String(role).toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+        }
+        if (resolvedRoleName === 'regional_manager' && regionId) {
+          await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [id, String(regionId)]);
+        }
+      } catch (sideErr) {
+        console.error('Post-invite side effects error:', sideErr);
+      }
+
       res.status(201).json({ ...created, invited: true });
     } catch (error: any) {
       console.error('Invite user error:', error);
@@ -112,6 +148,25 @@ export class UserController {
       const updates = req.body;
 
       const updatedUser = await UserService.updateUser(userId, updates);
+
+      try {
+        const { connection } = await import('../config/database.js');
+        const { UserRoleModel } = await import('../models/UserRole.js');
+        const roleId = updates.roleId || updates.role;
+        let resolvedRoleName: string | undefined;
+        if (roleId) {
+          const roleRow: any = await UserRoleModel.findById(String(roleId));
+          resolvedRoleName = String(roleRow?.roleName || roleRow?.role_name || '').toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+        } else if (typeof updates.role === 'string') {
+          resolvedRoleName = String(updates.role).toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+        }
+        if (resolvedRoleName === 'regional_manager' && updates.regionId) {
+          await connection.query('UPDATE regions SET region_head_id = ? WHERE id = ?', [userId, String(updates.regionId)]);
+        }
+      } catch (sideErr) {
+        console.error('Post-update side effects error:', sideErr);
+      }
+
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
