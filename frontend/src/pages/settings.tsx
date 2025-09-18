@@ -37,9 +37,6 @@ export default function Settings() {
           <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className="gap-2">
             <ShieldCheck className="w-4 h-4" /> User management
           </Button>
-          <Button type="button" variant={category === 'branch-emps' ? 'default' : 'outline'} onClick={() => setCategory('branch-emps')} className="gap-2">
-            <Database className="w-4 h-4" /> Branch Employees
-          </Button>
           <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
             <Mail className="w-4 h-4" /> Email (SMTP)
           </Button>
