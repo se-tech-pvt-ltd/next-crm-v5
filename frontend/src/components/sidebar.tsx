@@ -1,11 +1,11 @@
 import { Link, useLocation } from 'wouter';
-import { useState, useEffect, useRef } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  GraduationCap, 
-  Trophy, 
-  BarChart3, 
+import { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  Trophy,
+  BarChart3,
   Settings,
   Menu,
   X,
@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -83,6 +84,23 @@ export function Sidebar() {
   const applicationsCount = Array.isArray(applicationsData) ? applicationsData.length : 0;
   const acceptedAdmissionsCount = Array.isArray(admissionsData) ? admissionsData.filter((admission: any) => admission.decision === 'accepted')?.length || 0 : 0;
 
+  const { user, accessByRole, isAccessLoading } = useAuth() as any;
+
+  const roleId = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
+
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+
+  const isModuleVisible = useMemo(() => {
+    return (label: string) => {
+      const mod = singularize(normalize(label));
+      const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === mod);
+      if (entries.length === 0) return true; // no specific rule -> visible
+      const allNone = entries.every((e: any) => normalize(e.viewLevel ?? e.view_level) === 'none');
+      return !allNone;
+    };
+  }, [accessByRole]);
+
   const navItems = [
     {
       path: '/',
@@ -143,7 +161,7 @@ export function Sidebar() {
       icon: Settings,
       count: undefined
     },
-  ];
+  ].filter(item => isModuleVisible(item.label));
 
   const sidebarWidth = isExpanded ? 'w-48' : 'w-16';
 
@@ -214,7 +232,7 @@ export function Sidebar() {
 
       {/* Navigation Menu */}
       <nav id="primary-nav" aria-label="Primary" className="flex-1 p-2 space-y-1">
-        {navItems.map((item) => {
+        {((!roleId) || !isAccessLoading) && navItems.map((item) => {
           const isActive = location === item.path;
 
           const handleNavClick = () => {

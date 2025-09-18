@@ -23,30 +23,63 @@ export default function UserProfileWizard() {
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    const shouldOpen = Boolean(user && !((user.isProfileComplete ?? user.is_profile_complete)));
-    setOpen(shouldOpen);
-    // If user minimal exists, attempt to fetch fresh profile when wizard should open
-    if (shouldOpen && user?.id) {
+    if (!user) {
+      setOpen(false);
+      return;
+    }
+
+    const normalizeFlag = (val: any): boolean | undefined => {
+      if (val === true || val === 1 || val === '1') return true;
+      if (val === false || val === 0 || val === '0') return false;
+      return undefined;
+    };
+
+    const raw = (user.isProfileComplete ?? user.is_profile_complete);
+    const flag = normalizeFlag(raw);
+
+    const prefill = (src: any) => {
+      setFirstName(src.firstName ?? src.first_name ?? '');
+      setLastName(src.lastName ?? src.last_name ?? '');
+      setPhoneNumber(src.phoneNumber ?? src.phone_number ?? '');
+      setProfileImageUrl(src.profileImageUrl ?? src.profile_image_url ?? '');
+      setProfileImageId(src.profileImageId ?? src.profile_image_id ?? '');
+    };
+
+    if (flag === false) {
+      setOpen(true);
+      prefill(user);
+      if (user.id) {
+        (async () => {
+          try {
+            const UsersService = await import('@/services/users');
+            const full = await UsersService.getUser(String(user.id)).catch(() => null);
+            if (full) prefill(full);
+          } catch {}
+        })();
+      }
+      return;
+    }
+
+    if (flag === true) {
+      setOpen(false);
+      prefill(user);
+      return;
+    }
+
+    // Flag unknown: fetch full user before deciding (prevents flash)
+    setOpen(false);
+    prefill(user);
+    if (user.id) {
       (async () => {
         try {
           const UsersService = await import('@/services/users');
           const full = await UsersService.getUser(String(user.id)).catch(() => null);
           const src = full || user;
-          setFirstName(src.firstName ?? src.first_name ?? '');
-          setLastName(src.lastName ?? src.last_name ?? '');
-          setPhoneNumber(src.phoneNumber ?? src.phone_number ?? '');
-          setProfileImageUrl(src.profileImageUrl ?? src.profile_image_url ?? '');
-          setProfileImageId(src.profileImageId ?? src.profile_image_id ?? '');
-        } catch (err) {
-          // ignore
-        }
+          prefill(src);
+          const resolved = normalizeFlag(src.isProfileComplete ?? src.is_profile_complete);
+          setOpen(resolved === false);
+        } catch {}
       })();
-    } else if (user) {
-      setFirstName(user.firstName ?? user.first_name ?? '');
-      setLastName(user.lastName ?? user.last_name ?? '');
-      setPhoneNumber(user.phoneNumber ?? user.phone_number ?? '');
-      setProfileImageUrl(user.profileImageUrl ?? user.profile_image_url ?? '');
-      setProfileImageId(user.profileImageId ?? user.profile_image_id ?? '');
     }
   }, [user]);
 
