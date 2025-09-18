@@ -25,15 +25,15 @@ import UserProfileWizard from '@/components/settings/UserProfileWizard';
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
   const [, setLocation] = useLocation();
-  const authOnce = useRef(false);
+  const prevAuth = useRef(isAuthenticated);
 
   console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
 
   useEffect(() => {
-    if (!authOnce.current && isAuthenticated) {
-      authOnce.current = true;
+    if (!prevAuth.current && isAuthenticated) {
       setLocation('/');
     }
+    prevAuth.current = isAuthenticated;
   }, [isAuthenticated, setLocation]);
 
   if (isLoading) {
