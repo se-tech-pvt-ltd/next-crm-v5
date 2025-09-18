@@ -53,6 +53,7 @@ export class UserController {
 
       // Send invite/notification email using template "new registration"
       try {
+        console.log("Sending email")
         await EmailService.sendTemplatedEmail({
           to: email,
           templateName: 'new registration',

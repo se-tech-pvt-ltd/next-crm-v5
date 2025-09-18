@@ -53,6 +53,7 @@ export class EmailService {
       html,
       text: html.replace(/<[^>]+>/g, '')
     });
+    console.log(`Email sent to ${to}: ${info}`);
     return info;
   }
 }
