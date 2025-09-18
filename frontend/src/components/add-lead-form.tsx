@@ -267,6 +267,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     : [];
 
   const branchOptions = (Array.isArray(branchesList) ? branchesList : [])
+    .filter((b: any) => !selectedRegionId || String(b.regionId ?? b.region_id ?? '') === String(selectedRegionId))
     .filter((b: any) => {
       const q = branchSearchQuery.trim().toLowerCase();
       if (!q) return true;
