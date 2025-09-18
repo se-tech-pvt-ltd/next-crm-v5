@@ -552,7 +552,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       </div>
 
       <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className={isEditing ? "max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10" : "max-w-3xl"}>
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
