@@ -133,6 +133,8 @@ export default function UserProfileWizard() {
       if (profileImageId) payload.profileImageId = profileImageId;
       // Mark profile complete
       payload.isProfileComplete = true;
+      // Activate user
+      payload.is_active = 1;
 
       await UsersService.updateUser(String(user.id), payload);
 
