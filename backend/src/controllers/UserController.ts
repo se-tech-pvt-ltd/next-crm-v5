@@ -279,6 +279,7 @@ export class UserController {
 
   static async changePassword(req: Request, res: Response) {
     try {
+      console.log('ChangePassword request headers:', { cookie: req.headers.cookie, authHeader: req.headers.authorization });
       const userId = req.params.id;
       const { newPassword } = req.body || {};
       if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
