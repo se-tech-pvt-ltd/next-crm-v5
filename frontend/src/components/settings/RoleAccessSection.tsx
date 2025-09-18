@@ -66,7 +66,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                 <Table className="text-xs">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
+                      <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600">Role</TableHead>
                       <TableHead className="h-8 px-2 text-[11px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -95,7 +95,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
             <Table className="text-xs">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
+                  <TableHead className="h-9 px-3 text-[12px] uppercase tracking-wide text-gray-600">Role</TableHead>
                   <TableHead className="h-8 px-2 text-[11px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
