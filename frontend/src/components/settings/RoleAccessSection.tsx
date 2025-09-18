@@ -74,7 +74,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                     {deptRoles.length === 0 ? (
                       <TableRow><TableCell colSpan={2} className="p-3 text-xs text-muted-foreground">No roles</TableCell></TableRow>
                     ) : deptRoles.map((r: any) => (
-                      <TableRow key={r.id} className="hover:bg-gray-50">
+                      <TableRow key={r.id} className="hover:bg-gray-50/40">
                         <TableCell className="p-2 text-xs">{r.roleName}</TableCell>
                         <TableCell className="p-2 text-xs text-right"><Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
                       </TableRow>
@@ -103,7 +103,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                 {((roles as any[]).filter((r: any) => !r.departmentId)).length === 0 ? (
                   <TableRow><TableCell colSpan={2} className="p-3 text-xs text-muted-foreground">No roles</TableCell></TableRow>
                 ) : ((roles as any[]).filter((r: any) => !r.departmentId)).map((r: any) => (
-                  <TableRow key={r.id} className="hover:bg-gray-50">
+                  <TableRow key={r.id} className="hover:bg-gray-50/40">
                     <TableCell className="p-2 text-xs">{r.roleName}</TableCell>
                     <TableCell className="p-2 text-xs text-right"><Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
                   </TableRow>
@@ -167,7 +167,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
               </TableHeader>
               <TableBody>
                 {((accessList as any[]).filter((a: any) => String(a.roleId) === String(selectedRole?.id))).map((a: any) => (
-                  <TableRow key={a.id} className="hover:bg-gray-50">
+                  <TableRow key={a.id} className="hover:bg-gray-50/40">
                     <TableCell className="p-2 text-xs">{a.moduleName}</TableCell>
                     <TableCell className="p-2 text-xs">{a.viewLevel}</TableCell>
                     <TableCell className="p-2 text-xs">{a.canCreate ? 'Yes' : 'No'}</TableCell>
