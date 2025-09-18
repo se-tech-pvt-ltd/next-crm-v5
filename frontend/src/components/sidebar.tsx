@@ -87,27 +87,41 @@ export function Sidebar() {
 
   const { user } = useAuth();
 
-  const { data: accessList = [] } = useQuery({
-    queryKey: ['/api/user-access'],
-    queryFn: () => UserAccessService.listUserAccess(),
-    staleTime: 60_000,
-    enabled: true,
+  const roleId = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
+  const accessCacheKey = roleId ? `user_access_cache_${roleId}` : '';
+  let cachedAccess: any[] = [];
+  try {
+    if (accessCacheKey) {
+      const raw = localStorage.getItem(accessCacheKey);
+      if (raw) cachedAccess = JSON.parse(raw);
+    }
+  } catch {}
+
+  const { data: accessByRole = [] } = useQuery({
+    queryKey: ['/api/user-access', roleId],
+    enabled: Boolean(roleId),
+    initialData: cachedAccess,
+    queryFn: async () => {
+      const all = await UserAccessService.listUserAccess();
+      const filtered = (Array.isArray(all) ? all : []).filter((a: any) => String(a.roleId ?? a.role_id) === roleId);
+      try { if (accessCacheKey) localStorage.setItem(accessCacheKey, JSON.stringify(filtered)); } catch {}
+      return filtered;
+    },
+    staleTime: 5 * 60_000,
   });
 
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
 
   const isModuleVisible = useMemo(() => {
-    const roleId = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
-    const byRole = Array.isArray(accessList) ? accessList.filter((a: any) => String(a.roleId ?? a.role_id) === roleId) : [];
     return (label: string) => {
       const mod = singularize(normalize(label));
-      const entries = byRole.filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === mod);
+      const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === mod);
       if (entries.length === 0) return true; // no specific rule -> visible
       const allNone = entries.every((e: any) => normalize(e.viewLevel ?? e.view_level) === 'none');
       return !allNone;
     };
-  }, [accessList, user]);
+  }, [accessByRole]);
 
   const navItems = [
     {
