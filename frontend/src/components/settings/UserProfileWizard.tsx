@@ -155,22 +155,23 @@ export default function UserProfileWizard() {
               </div>
 
               <div className="border-t pt-4">
-                <div className="text-lg font-semibold mb-2">Change password (required)</div>
+                <div className="text-lg font-semibold mb-2">Set password (required)</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Current password</Label>
-                    <Input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" className="mt-2" />
-                  </div>
                   <div>
                     <Label>New password</Label>
                     <Input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" className="mt-2" />
                     <div className="text-xs text-muted-foreground mt-1">Password must be at least 6 characters</div>
                   </div>
+                  <div>
+                    <Label>Confirm password</Label>
+                    <Input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" className="mt-2" />
+                    <div className="text-xs text-muted-foreground mt-1">Re-enter the password to confirm</div>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-end gap-2">
-                <Button onClick={handleSave} disabled={loading || !(newPassword && newPassword.length >= 6 && String(currentPassword || '').trim().length > 0)}>
+                <Button onClick={handleSave} disabled={loading || !(newPassword && newPassword.length >= 6 && confirmPassword === newPassword)}>
                   {loading ? 'Saving...' : 'Save and continue'}
                 </Button>
               </div>
