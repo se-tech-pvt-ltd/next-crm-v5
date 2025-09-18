@@ -632,123 +632,196 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              <div>
-                <Label>First name</Label>
-                <Input className="mt-1" value={editForm.firstName} onChange={(e) => setEditForm((s) => ({ ...s, firstName: e.target.value }))} />
+            <div className="rounded-lg bg-card text-card-foreground overflow-hidden">
+              <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
+                <div className="text-2xl text-primary flex items-center justify-between">
+                  <span className="flex items-center gap-2"><IdCard className="w-5 h-5" /> Edit User</span>
+                  <div className="flex items-center gap-2">
+                    <Button size="icon" aria-label="Save user" title="Save" onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !editForm.roleId || (function(){
+                      const nRole = normalizeRole(editForm.role);
+                      if (nRole === 'regional_manager') return !editForm.regionId;
+                      if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
+                      return false;
+                    })()}>
+                      {updateMutation.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
+                    </Button>
+                    <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label>Last name</Label>
-                <Input className="mt-1" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Department</Label>
-                <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: '' }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select department" /></SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d: any) => (
-                      <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Role<span className="text-destructive"> *</span></Label>
-                <Select value={editForm.roleId} onValueChange={(v) => {
-                  const r = (rolesForEditDept as any[]).find((rr: any) => String(rr.id) === String(v));
-                  const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
-                  setEditForm((s) => ({ ...s, roleId: v, role: roleName }));
-                }}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
-                  <SelectContent>
-                    {(rolesForEditDept || []).map((r: any) => (
-                      <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {(() => {
-                const nRole = normalizeRole(editForm.role);
 
-                if (nRole === 'regional_manager') {
-                  return (
-                    <div className="sm:col-span-2 md:col-span-3">
-                      <Label>Region<span className="text-destructive"> *</span></Label>
-                      <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
-                        <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
-                        <SelectContent>
-                          {(Array.isArray(regions) ? regions : []).map((r: any) => {
-                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
-                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
-                            const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
-                            const hasHeadOther = Boolean(r.regionHeadId) && String(r.regionHeadId) !== String(selected?.id || '');
-                            return (
-                              <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHeadOther}>
-                                {label}{hasHeadOther ? ` — Head: ${headName || 'assigned'}` : ''}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+              <div className="px-6 pb-6">
+                <div className="mt-2 space-y-6">
+                  <div className="space-y-6">
+                    <div>
+                      <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                        <div className="flex justify-center sm:justify-start">
+                          <div
+                            className="relative rounded-xl border border-dashed bg-muted/40 hover:ring-2 ring-primary/50 transition-shadow overflow-hidden w-[200px] h-[134px] cursor-pointer group"
+                            onClick={() => editFileInputRef.current?.click()}
+                            role="button"
+                            aria-label="Upload profile image"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); editFileInputRef.current?.click(); } }}
+                          >
+                            {editForm.profileImageUrl ? (
+                              <img src={editForm.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">Click to upload</div>
+                            )}
+                            <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/30 text-white text-xs">Click to upload</div>
+                          </div>
+                          <input
+                            ref={editFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const { uploadProfilePicture } = await import('@/services/uploads');
+                                const res = await uploadProfilePicture(file);
+                                setEditForm((s) => ({ ...s, profileImageUrl: String(res.fileUrl || ''), profileImageId: String(res.attachmentId || '') }));
+                              } catch (err: any) {
+                                toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="flex flex-col">
+                            <Label>Email</Label>
+                            <Input className="mt-2" type="email" value={editForm.email} disabled />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Phone number</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="tel" value={editForm.phoneNumber} onChange={(e) => setEditForm((s) => ({ ...s, phoneNumber: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>First name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={editForm.firstName} onChange={(e) => setEditForm((s) => ({ ...s, firstName: e.target.value }))} />
+                          </div>
+                          <div className="flex flex-col">
+                            <Label>Last name</Label>
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" value={editForm.lastName} onChange={(e) => setEditForm((s) => ({ ...s, lastName: e.target.value }))} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  );
-                }
 
-                if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
-                  return (
-                    <>
-                      <div>
-                        <Label>Region<span className="text-destructive"> *</span></Label>
-                        <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
-                          <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
-                          <SelectContent>
-                            {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                              <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="sm:col-span-2 md:col-span-3">
-                        <Label>Branch<span className="text-destructive"> *</span></Label>
-                        <SearchableCombobox
-                          value={editForm.branchId}
-                          onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
-                          placeholder="Select branch (required)"
-                          searchPlaceholder="Search branches..."
-                          onSearch={setBranchEditSearch}
-                          options={(branchEditList || []).filter((b: any) => {
-                            if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
-                            return true;
-                          }).map((b: any) => {
-                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(b.branchHeadId ?? b.branch_head_id));
-                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
-                            const hasHeadOther = Boolean(b.branchHeadId ?? b.branch_head_id) && String(b.branchHeadId ?? b.branch_head_id) !== String(selected?.id || '');
-                            return ({
-                              value: String(b.id),
-                              label: String(b.branchName || b.name || b.id),
-                              disabled: nRole === 'branch_manager' ? hasHeadOther : false,
-                              hint: hasHeadOther ? `Head: ${headName || 'assigned'}` : undefined,
-                            });
-                          })}
-                          loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
-                        />
-                      </div>
-                    </>
-                  );
-                }
+                    <div>
+                      <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                      <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                        <div className="flex flex-col">
+                          <Label>Department</Label>
+                          <Select value={editForm.department} onValueChange={(v) => setEditForm((s) => ({ ...s, department: v, role: '', roleId: '' }))}>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
+                            <SelectContent>
+                              {departments.map((d: any) => (
+                                <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                return null;
-              })()}
-              <div className="col-span-full flex gap-2">
-                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.roleId || (function(){
-                  const nRole = normalizeRole(editForm.role);
-                  if (nRole === 'regional_manager') return !editForm.regionId;
-                  if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
-                  return false;
-                })() || updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save changes'}
-                </Button>
-                <Button variant="outline" onClick={() => { setIsEditing(false); }} disabled={updateMutation.isPending}>Cancel</Button>
+                        <div className="flex flex-col">
+                          <Label>Role<span className="text-destructive"> *</span></Label>
+                          <Select value={editForm.roleId} onValueChange={(v) => {
+                            const r = (rolesForEditDept as any[]).find((rr: any) => String(rr.id) === String(v));
+                            const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
+                            setEditForm((s) => ({ ...s, roleId: v, role: roleName }));
+                          }}>
+                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
+                            <SelectContent>
+                              {(rolesForEditDept || []).map((r: any) => (
+                                <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {(() => {
+                          const nRole = normalizeRole(editForm.role);
+
+                          if (nRole === 'regional_manager') {
+                            return (
+                              <div className="sm:col-span-2">
+                                <Label>Region<span className="text-destructive"> *</span></Label>
+                                <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
+                                  <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                  <SelectContent>
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => {
+                                      const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
+                                      const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                                      const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
+                                      const hasHeadOther = Boolean(r.regionHeadId) && String(r.regionHeadId) !== String(selected?.id || '');
+                                      return (
+                                        <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHeadOther}>
+                                          {label}{hasHeadOther ? ` — Head: ${headName || 'assigned'}` : ''}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            );
+                          }
+
+                          if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
+                            return (
+                              <>
+                                <div>
+                                  <Label>Region<span className="text-destructive"> *</span></Label>
+                                  <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v, branchId: '' }))}>
+                                    <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
+                                    <SelectContent>
+                                      {(Array.isArray(regions) ? regions : []).map((r: any) => (
+                                        <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label>Branch<span className="text-destructive"> *</span></Label>
+                                  <div className="mt-2">
+                                    <SearchableCombobox
+                                      value={editForm.branchId}
+                                      onValueChange={(v) => setEditForm((s) => ({ ...s, branchId: v }))}
+                                      placeholder="Select branch (required)"
+                                      searchPlaceholder="Search branches..."
+                                      onSearch={setBranchEditSearch}
+                                      className="border-input/60 hover:border-primary focus-visible:ring-primary/50"
+                                      options={(branchEditList || []).filter((b: any) => {
+                                        if (editForm.regionId && String(b.regionId ?? b.region_id) !== String(editForm.regionId)) return false;
+                                        return true;
+                                      }).map((b: any) => {
+                                        const headUser = (users as any[]).find((u: any) => String(u.id) === String(b.branchHeadId ?? b.branch_head_id));
+                                        const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                                        const hasHeadOther = Boolean(b.branchHeadId ?? b.branch_head_id) && String(b.branchHeadId ?? b.branch_head_id) !== String(selected?.id || '');
+                                        return ({
+                                          value: String(b.id),
+                                          label: String(b.branchName || b.name || b.id),
+                                          disabled: nRole === 'branch_manager' ? hasHeadOther : false,
+                                          hint: hasHeadOther ? `Head: ${headName || 'assigned'}` : undefined,
+                                        });
+                                      })}
+                                      loading={Boolean(branchEditTrim.length > 0 && branchEditIsFetching)}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
+
+                          return null;
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
