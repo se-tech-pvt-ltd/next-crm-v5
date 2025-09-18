@@ -236,6 +236,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
             className="h-8 w-56"
             value={filters.query}
             onChange={(e) => setFilters((s) => ({ ...s, query: e.target.value }))}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            name="users-search"
           />
           <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Role" /></SelectTrigger>
