@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import BranchSectionComp from '@/components/settings/BranchSection';
 import UserSectionComp from '@/components/settings/UserSection';
-import BranchEmpSectionComp from '@/components/settings/BranchEmpSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
 import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
