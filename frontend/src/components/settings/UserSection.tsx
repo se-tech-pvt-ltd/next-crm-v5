@@ -399,9 +399,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                                 <Select value={form.regionId} onValueChange={(v) => setForm((s) => ({ ...s, regionId: v }))}>
                                   <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select region" /></SelectTrigger>
                                   <SelectContent>
-                                    {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                                      <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                                    ))}
+                                    {(Array.isArray(regions) ? regions : []).map((r: any) => {
+                                      const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
+                                      const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                                      const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
+                                      const hasHead = Boolean(r.regionHeadId);
+                                      return (
+                                        <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHead}>
+                                          {label}{hasHead ? ` — Head: ${headName || 'assigned'}` : ''}
+                                        </SelectItem>
+                                      );
+                                    })}
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -656,9 +664,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <Select value={editForm.regionId} onValueChange={(v) => setEditForm((s) => ({ ...s, regionId: v }))}>
                         <SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger>
                         <SelectContent>
-                          {(Array.isArray(regions) ? regions : []).map((r: any) => (
-                            <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.name ?? r.regionName ?? r.region_name ?? r.name)}</SelectItem>
-                          ))}
+                          {(Array.isArray(regions) ? regions : []).map((r: any) => {
+                            const headUser = (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId));
+                            const headName = headUser ? ((`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim()) || headUser.email || '-') : '';
+                            const label = String(r.name ?? r.regionName ?? r.region_name ?? r.name);
+                            const hasHeadOther = Boolean(r.regionHeadId) && String(r.regionHeadId) !== String(selected?.id || '');
+                            return (
+                              <SelectItem key={String(r.id)} value={String(r.id)} disabled={hasHeadOther}>
+                                {label}{hasHeadOther ? ` — Head: ${headName || 'assigned'}` : ''}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </div>
