@@ -23,8 +23,17 @@ import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
   const { isAuthenticated, isLoading, login } = useAuth();
+  const [, setLocation] = useLocation();
+  const authOnce = React.useRef(false);
 
   console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
+
+  React.useEffect(() => {
+    if (!authOnce.current && isAuthenticated) {
+      authOnce.current = true;
+      setLocation('/');
+    }
+  }, [isAuthenticated, setLocation]);
 
   if (isLoading) {
     console.log('Router: Showing loading screen');
