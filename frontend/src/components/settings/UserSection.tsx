@@ -573,84 +573,113 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       </div>
 
       <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) { setSelected(null); setIsEditing(false); } }}>
-        <DialogContent className={isEditing ? "max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10" : "max-w-3xl"}>
-          {!isEditing && (
-            <DialogHeader>
-              <DialogTitle className="flex items-center justify-between">
-                <span>{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</span>
-                {!isEditing ? (
-                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
-                ) : null}
-              </DialogTitle>
-            </DialogHeader>
-          )}
+        <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10">
 
           {!isEditing ? (
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={String(selected?.profileImageUrl ?? selected?.profile_image_url ?? '')} alt="profile" />
-                  <AvatarFallback>{String((((selected?.firstName ?? selected?.first_name) || ' ')[0] || '') + (((selected?.lastName ?? selected?.last_name) || ' ')[0] || '')).trim().toUpperCase() || (selected?.email || 'U')[0]}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="text-base font-semibold truncate">{[(selected?.firstName ?? selected?.first_name), (selected?.lastName ?? selected?.last_name)].filter(Boolean).join(' ') || selected?.email || 'User'}</div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge>{selected ? roleLabel(selected.role) : '—'}</Badge>
-                    {selected?.branchName ? <Badge variant="secondary">{String(selected.branchName)}</Badge> : null}
-                    {(selected?.branchId ?? selected?.branch_id) && !selected?.branchName ? <Badge variant="secondary">{String(selected?.branchId ?? selected?.branch_id)}</Badge> : null}
-                    <Badge variant={(selected?.isActive ?? selected?.is_active) ? 'default' : 'destructive'}>{(selected?.isActive ?? selected?.is_active) ? 'Active' : 'Inactive'}</Badge>
-                    <Badge variant={(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'default' : 'outline'}>Reg Email {(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not Sent'}</Badge>
-                    <Badge variant={(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'default' : 'outline'}>Profile {(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Complete' : 'Incomplete'}</Badge>
-                  </div>
+            <div className="rounded-lg bg-card text-card-foreground overflow-hidden">
+              <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
+                <div className="text-2xl text-primary flex items-center justify-between">
+                  <span className="flex items-center gap-2"><IdCard className="w-5 h-5" /> User Details</span>
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
                 </div>
               </div>
 
-              <Separator />
+              <div className="px-6 pb-6">
+                <div className="mt-2 space-y-6">
+                  <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                      <div className="flex justify-center sm:justify-start">
+                        <div className="relative rounded-xl border bg-muted/40 overflow-hidden w-[200px] h-[134px]">
+                          {String(selected?.profileImageUrl ?? selected?.profile_image_url) ? (
+                            <img src={String(selected?.profileImageUrl ?? selected?.profile_image_url)} alt="profile" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">No image</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex flex-col">
+                          <Label>Email</Label>
+                          <div className="mt-2 text-sm font-medium break-words">{selected?.email || '—'}</div>
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Phone number</Label>
+                          <div className="mt-2 text-sm font-medium">{selected?.phoneNumber || selected?.phone_number || '—'}</div>
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>First name</Label>
+                          <div className="mt-2 text-sm font-medium">{(selected?.firstName ?? selected?.first_name) || '—'}</div>
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Last name</Label>
+                          <div className="mt-2 text-sm font-medium">{(selected?.lastName ?? selected?.last_name) || '—'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground">User ID</div>
-                  <div className="font-medium break-words">{selected?.email || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">First name</div>
-                  <div className="font-medium">{(selected?.firstName ?? selected?.first_name) || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Last name</div>
-                  <div className="font-medium">{(selected?.lastName ?? selected?.last_name) || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Role</div>
-                  <div className="font-medium">{selected ? roleLabel(selected.role) : '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Branch</div>
-                  <div className="font-medium">{selected?.branchName || selected?.branchId || selected?.branch_id || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Phone number</div>
-                  <div className="font-medium">{selected?.phoneNumber || selected?.phone_number || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Registration email</div>
-                  <div className="font-medium">{(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not sent'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Profile complete</div>
-                  <div className="font-medium">{(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Yes' : 'No'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Active</div>
-                  <div className="font-medium">{(selected?.isActive ?? selected?.is_active) ? 'Yes' : 'No'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Created at</div>
-                  <div className="font-medium">{selected?.createdAt || selected?.created_at ? new Date(String(selected?.createdAt || selected?.created_at)).toLocaleString() : '—'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Updated at</div>
-                  <div className="font-medium">{selected?.updatedAt || selected?.updated_at ? new Date(String(selected?.updatedAt || selected?.updated_at)).toLocaleString() : '—'}</div>
+                  <div>
+                    <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><Building2 className="w-4 h-4" /> Department &amp; Assignment</div>
+                    <div className="mt-2 grid sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
+                      <div className="flex flex-col">
+                        <Label>Department</Label>
+                        <div className="mt-2 text-sm font-medium">{(() => {
+                          const deptId = String(selected?.departmentId ?? selected?.department_id ?? selected?.department ?? '');
+                          const d = departments.find((dd: any) => String(dd.id) === deptId);
+                          return d ? String(d.departmentName ?? d.department_name ?? d.id) : '—';
+                        })()}</div>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label>Role</Label>
+                        <div className="mt-2 text-sm font-medium">{selected ? roleLabel(String(selected.role || '')) : '—'}</div>
+                      </div>
+
+                      <div className="flex flex-col sm:col-span-2">
+                        <Label>Region</Label>
+                        <div className="mt-2 text-sm font-medium">{(() => {
+                          const nRole = normalizeRole(String(selected?.role || ''));
+                          if (nRole === 'regional_manager') {
+                            const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId) === String(selected?.id));
+                            return r ? String(r.name ?? r.regionName ?? r.region_name ?? r.id) : '—';
+                          }
+                          const bId = String((selected?.branchId ?? selected?.branch_id) || '');
+                          const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
+                          if (!b) return '—';
+                          const reg = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.id) === String(b.regionId ?? b.region_id));
+                          return reg ? String(reg.name ?? reg.regionName ?? reg.region_name ?? reg.id) : '—';
+                        })()}</div>
+                      </div>
+
+                      <div className="flex flex-col sm:col-span-2">
+                        <Label>Branch</Label>
+                        <div className="mt-2 text-sm font-medium">{String(selected?.branchName || selected?.branchId || selected?.branch_id || '—')}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Registration email</div>
+                      <div className="font-medium">{(selected?.isRegistrationEmailSent ?? selected?.is_registration_email_sent) ? 'Sent' : 'Not sent'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Profile complete</div>
+                      <div className="font-medium">{(selected?.isProfileComplete ?? selected?.is_profile_complete) ? 'Yes' : 'No'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Active</div>
+                      <div className="font-medium">{(selected?.isActive ?? selected?.is_active) ? 'Yes' : 'No'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Created at</div>
+                      <div className="font-medium">{selected?.createdAt || selected?.created_at ? new Date(String(selected?.createdAt || selected?.created_at)).toLocaleString() : '—'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Updated at</div>
+                      <div className="font-medium">{selected?.updatedAt || selected?.updated_at ? new Date(String(selected?.updatedAt || selected?.updated_at)).toLocaleString() : '—'}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
