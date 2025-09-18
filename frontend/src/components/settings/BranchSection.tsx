@@ -50,6 +50,17 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', regionId: '' });
 
+  // Branch employees and expand/collapse state
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpService.listBranchEmps(), staleTime: 30000 });
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
     onSuccess: async () => {
