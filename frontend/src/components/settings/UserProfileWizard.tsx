@@ -18,8 +18,8 @@ export default function UserProfileWizard() {
   const [profileImageUrl, setProfileImageUrl] = useState('');
   const [profileImageId, setProfileImageId] = useState('');
 
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
