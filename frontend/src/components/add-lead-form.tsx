@@ -20,6 +20,10 @@ import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import * as BranchesService from '@/services/branches';
+import * as RegionsService from '@/services/regions';
+import * as BranchEmpsService from '@/services/branchEmps';
+import * as UsersService from '@/services/users';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import {
   User,
@@ -51,8 +55,12 @@ const addLeadFormSchema = z.object({
   studyLevel: z.string().optional(),
   studyPlan: z.string().optional(),
   elt: z.string().optional(),
-  counselorId: z.string().optional(),
+  regionId: z.string().optional(),
   branchId: z.string().optional(),
+  counsellorId: z.string().optional(),
+  admissionOfficerId: z.string().optional(),
+  // legacy: keep for compatibility
+  counselorId: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -101,8 +109,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     queryFn: async () => StudentsService.getStudents()
   });
 
-  const { data: counselors, isLoading: counselorsLoading } = useQuery({
+  const { user } = useAuth();
+
+  const { data: usersList, isLoading: usersLoading } = useQuery({
     queryKey: ['/api/users'],
+    queryFn: () => UsersService.getUsers(),
+  });
+
+  const { data: regionsList = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: () => RegionsService.listRegions(),
+    staleTime: 60000,
+  });
+
+  const { data: branchEmps = [] } = useQuery({
+    queryKey: ['/api/branch-emps'],
+    queryFn: () => BranchEmpsService.listBranchEmps(),
+    staleTime: 60000,
   });
 
   const { data: branchesList = [] } = useQuery({
@@ -110,6 +133,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     queryFn: () => BranchesService.listBranches(),
     staleTime: 30000,
   });
+
+  const selectedRegionId = (form?.watch?.('regionId') || '') as string;
+  const selectedBranchId = (form?.watch?.('branchId') || '') as string;
+
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+
+  const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
+    label: String(r.regionName || r.name || 'Unknown'),
+    value: String(r.id),
+  }));
 
   const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkEmailDuplicate = useCallback(
@@ -234,6 +267,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     : [];
 
   const branchOptions = (Array.isArray(branchesList) ? branchesList : [])
+    .filter((b: any) => !selectedRegionId || String(b.regionId ?? b.region_id ?? '') === String(selectedRegionId))
     .filter((b: any) => {
       const q = branchSearchQuery.trim().toLowerCase();
       if (!q) return true;
@@ -247,6 +281,41 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       value: String(b.id),
       subtitle: [b.city, b.country].filter(Boolean).join(', ') || undefined,
     }));
+
+  const counselorOptions = Array.isArray(usersList)
+    ? usersList
+        .filter((u: any) => normalizeRole(u.role) === 'counselor')
+        .filter((u: any) => {
+          if (!selectedBranchId) return true;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+        .filter((u: any) =>
+          counselorSearchQuery === '' ||
+          String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
+          String(u.email || '').toLowerCase().includes(counselorSearchQuery.toLowerCase())
+        )
+        .map((u: any) => ({
+          label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
+          value: String(u.id),
+          subtitle: u.email,
+        }))
+    : [];
+
+  const admissionOfficerOptions = Array.isArray(usersList)
+    ? usersList
+        .filter((u: any) => normalizeRole(u.role) === 'admission_officer')
+        .filter((u: any) => {
+          if (!selectedBranchId) return true;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+        .map((u: any) => ({
+          label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
+          value: String(u.id),
+          subtitle: u.email,
+        }))
+    : [];
 
   const handleCounselorSearch = useCallback((query: string) => {
     setCounselorSearchQuery(query);
@@ -276,8 +345,11 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       studyLevel: '',
       studyPlan: '',
       elt: '',
-      counselorId: '',
+      regionId: '',
       branchId: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+      counselorId: '',
       notes: '',
     },
   });
@@ -421,6 +493,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       payload.eventRegId = (initialData as any).eventRegId;
     }
 
+    if (!payload.counselorId && payload.admissionOfficerId) {
+      payload.counselorId = payload.admissionOfficerId;
+    }
+
     createLeadMutation.mutate(payload);
   };
 
@@ -450,6 +526,70 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Users className="w-5 h-5 text-primary" />
+                <span>Record Access</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <FormField control={form.control} name="regionId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Region</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="branchId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Branch</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="counsellorId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Counsellor</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="admissionOfficerId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Admission Officer</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
@@ -587,42 +727,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select source" searchPlaceholder="Search sources..." options={dropdownData?.Source?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No sources found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="counselorId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <User className="w-4 h-4" />
-                      <span>Admission Officer</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || counselorsLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found matching your search.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="branchId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Branch</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        onSearch={handleBranchSearch}
-                        options={branchOptions}
-                        loading={false}
-                        placeholder="Select branch"
-                        searchPlaceholder="Search branches..."
-                        emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'}
-                        className="transition-all focus:ring-2 focus:ring-primary/20"
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -512,33 +512,52 @@ export default function EventsPage() {
   return (
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-sm font-semibold flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            <span>Events</span>
-            {showList && selectedEvent && (
-              <span className="ml-2 inline-flex items-center gap-3">
-                <span className="inline-flex items-center bg-primary-50 text-primary-700 rounded-md px-2 py-0.5 text-xs font-semibold border border-primary-200 shadow-sm">
-                  {selectedEvent.name}
-                </span>
-                <span className="text-[11px] text-gray-500">on {formatEventDate(selectedEvent.date)}{selectedEvent.time ? ` at ${formatEventTime(selectedEvent.time)}` : ''}</span>
-              </span>
-            )}
-          </h1>
-          <div className="flex items-center gap-2">
-            {!showList && (
-              <Button size="xs" variant="default" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddEventOpen(true)); } catch { setIsAddEventOpen(true); } }} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Event</Button>
-            )}
-            {showList && selectedEvent && (
-              <div className="ml-2 inline-flex items-center">
-                <span className="text-[11px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 inline-flex items-center">
-                  <Clock className="w-3.5 h-3.5 text-indigo-600 mr-1" />
-                  <span>{countdown}</span>
-                </span>
-              </div>
-            )}
+
+        {!showList && (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2">
+            <Card>
+              <CardHeader className="pb-1 p-2">
+                <CardTitle className="text-xs font-medium flex items-center gap-2">
+                  <Calendar className="w-3 h-3 text-gray-500" />
+                  Total Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                <div className="text-base font-semibold">
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : (Array.isArray(events) ? events.length : 0)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-1 p-2">
+                <CardTitle className="text-xs font-medium flex items-center gap-2">
+                  <Calendar className="w-3 h-3 text-red-500" />
+                  Past Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                <div className="text-base font-semibold text-red-600">
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : ((Array.isArray(events) ? events : []).filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() < Date.now() : false; }).length)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-1 p-2">
+                <CardTitle className="text-xs font-medium flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-green-500" />
+                  Upcoming Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                <div className="text-base font-semibold text-green-600">
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : ((Array.isArray(events) ? events : []).filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() >= Date.now() : false; }).length)}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        )}
 
         {!showList && (
           (Array.isArray(events) && events.length === 0) ? (
@@ -546,6 +565,12 @@ export default function EventsPage() {
               icon={<Calendar className="h-10 w-10" />}
               title="No events found"
               description="There are no events at the moment."
+              action={
+                <Button className="h-8" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddEventOpen(true)); } catch { setIsAddEventOpen(true); } }}>
+                  <Plus className="w-3 h-3 mr-1" />
+                  Add Event
+                </Button>
+              }
             />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -592,6 +617,12 @@ export default function EventsPage() {
                   <CardTitle className="text-sm flex items-center">Event Registrations</CardTitle>
                 </div>
                 <div className="flex items-center gap-2">
+                  {showList && selectedEvent && (
+                    <span className="hidden sm:inline-flex items-center text-[11px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                      <Clock className="w-3.5 h-3.5 text-indigo-600 mr-1" />
+                      <span>{countdown}</span>
+                    </span>
+                  )}
                   {filterEventId && filterEventId !== 'all' && (
                     <>
                       <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
