@@ -198,7 +198,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       ) : (
                         available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
-                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                            {([u.firstName ?? u.first_name, u.lastName ?? u.last_name].filter(Boolean).join(' ') || u.email) + (u.email ? ` - ${u.email}` : '')}
                           </SelectItem>
                         ))
                       );
@@ -471,7 +471,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       ) : (
                         available.map((u: any) => (
                           <SelectItem key={u.id} value={u.id}>
-                            {(u.firstName || '') + ' ' + (u.lastName || '')} {u.email ? `- ${u.email}` : ''}
+                            {([u.firstName ?? u.first_name, u.lastName ?? u.last_name].filter(Boolean).join(' ') || u.email) + (u.email ? ` - ${u.email}` : '')}
                           </SelectItem>
                         ))
                       );
