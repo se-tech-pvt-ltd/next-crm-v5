@@ -58,6 +58,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const [editForm, setEditForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const [branchEditSearch, setBranchEditSearch] = useState('');
   const editFileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImageError, setSelectedImageError] = useState(false);
 
   // Roles for edit dialog (depends on editForm, so must be declared after it)
   const { data: rolesForEditDept = [] } = useQuery({ queryKey: ['/api/user-roles', editForm.department], queryFn: () => UserRolesService.listRoles(editForm.department || undefined), enabled: Boolean(editForm.department), staleTime: 60_000 });
@@ -135,6 +136,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       setEditForm((s) => ({ ...s, branchId: '', regionId: '' }));
     }
   }, [editForm.department, departments]);
+
+  useEffect(() => {
+    // reset image error when changing selection or reopening dialog
+    setSelectedImageError(false);
+  }, [selected?.id, detailOpen]);
 
   // Client-side check to prevent creating a user with an invalid/duplicate email
   const handleCreate = () => {
@@ -331,7 +337,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
                           >
                             {form.profileImageUrl ? (
-                              <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                              <img src={form.profileImageUrl} alt="preview" className="h-full w-full object-cover" onError={() => setForm((s) => ({ ...s, profileImageUrl: '' }))} />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">Click to upload</div>
                             )}
@@ -592,11 +598,20 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                       <div className="flex justify-center sm:justify-start">
                         <div className="relative rounded-xl border bg-muted/40 overflow-hidden w-[200px] h-[134px]">
-                          {String(selected?.profileImageUrl ?? selected?.profile_image_url) ? (
-                            <img src={String(selected?.profileImageUrl ?? selected?.profile_image_url)} alt="profile" className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">No image</div>
-                          )}
+                          {(() => {
+                            const src = String(selected?.profileImageUrl ?? selected?.profile_image_url ?? '');
+                            if (!src || selectedImageError) {
+                              return <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">No image</div>;
+                            }
+                            return (
+                              <img
+                                src={src}
+                                alt="profile"
+                                className="h-full w-full object-cover"
+                                onError={() => setSelectedImageError(true)}
+                              />
+                            );
+                          })()}
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -721,7 +736,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); editFileInputRef.current?.click(); } }}
                           >
                             {editForm.profileImageUrl ? (
-                              <img src={editForm.profileImageUrl} alt="preview" className="h-full w-full object-cover" />
+                              <img src={editForm.profileImageUrl} alt="preview" className="h-full w-full object-cover" onError={() => setEditForm((s) => ({ ...s, profileImageUrl: '' }))} />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm -mb-1 pb-[3px]">Click to upload</div>
                             )}
