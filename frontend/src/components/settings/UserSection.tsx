@@ -519,16 +519,29 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 {(pageItems as any[]).map((u: any) => (
                   <TableRow key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                     setSelected(u);
+                    const branchId = String((u.branchId ?? u.branch_id) || '');
+                    const deptId = String((u.departmentId ?? u.department_id) || '');
+                    const roleName = String(u.role || 'counselor');
+                    const nRole = normalizeRole(roleName);
+                    let resolvedRegionId = '' as string;
+                    if (nRole === 'regional_manager') {
+                      const region = (Array.isArray(regions) ? regions : []).find((r: any) => String(r.regionHeadId) === String(u.id));
+                      resolvedRegionId = String(region?.id || '');
+                    } else if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') {
+                      const branches = Array.isArray(initialBranches) ? initialBranches : [];
+                      const b = branches.find((bb: any) => String(bb.id) === branchId);
+                      resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+                    }
                     setEditForm({
                       email: String(u.email || ''),
                       phoneNumber: String(u.phoneNumber ?? u.phone_number ?? ''),
                       firstName: String((u.firstName ?? u.first_name) || ''),
                       lastName: String((u.lastName ?? u.last_name) || ''),
-                      role: String(u.role || 'counselor'),
+                      role: roleName,
                       roleId: String((u.roleId ?? u.role_id) || ''),
-                      branchId: String((u.branchId ?? u.branch_id) || ''),
-                      department: String(u.department || ''),
-                      regionId: String((u.regionId ?? u.region_id) || ''),
+                      branchId,
+                      department: deptId,
+                      regionId: resolvedRegionId,
                       profileImageUrl: String(u.profileImageUrl ?? u.profile_image_url ?? ''),
                       profileImageId: '',
                     });
