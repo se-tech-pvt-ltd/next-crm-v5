@@ -23,7 +23,7 @@ import Login from "@/pages/login";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
-  const { isAuthenticated, isLoading, login } = useAuth();
+  const { isAuthenticated, isLoading, login, isAccessLoading } = useAuth() as any;
   const [, setLocation] = useLocation();
   const prevAuth = useRef(isAuthenticated);
 
@@ -36,7 +36,7 @@ function Router() {
     prevAuth.current = isAuthenticated;
   }, [isAuthenticated, setLocation]);
 
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && isAccessLoading)) {
     console.log('Router: Showing loading screen');
     return (
       <div className="min-h-screen flex items-center justify-center">
