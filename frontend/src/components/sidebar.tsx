@@ -85,6 +85,29 @@ export function Sidebar() {
   const applicationsCount = Array.isArray(applicationsData) ? applicationsData.length : 0;
   const acceptedAdmissionsCount = Array.isArray(admissionsData) ? admissionsData.filter((admission: any) => admission.decision === 'accepted')?.length || 0 : 0;
 
+  const { user } = useAuth();
+
+  const { data: accessList = [] } = useQuery({
+    queryKey: ['/api/user-access'],
+    queryFn: () => UserAccessService.listUserAccess(),
+    staleTime: 60_000,
+    enabled: true,
+  });
+
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  const isModuleVisible = useMemo(() => {
+    const roleId = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
+    const byRole = Array.isArray(accessList) ? accessList.filter((a: any) => String(a.roleId ?? a.role_id) === roleId) : [];
+    return (label: string) => {
+      const mod = normalize(label);
+      const entries = byRole.filter((a: any) => normalize(a.moduleName ?? a.module_name) === mod);
+      if (entries.length === 0) return true; // no rule -> visible
+      const allNone = entries.every((e: any) => normalize(e.viewLevel ?? e.view_level) === 'none');
+      return !allNone;
+    };
+  }, [accessList, user]);
+
   const navItems = [
     {
       path: '/',
@@ -145,7 +168,7 @@ export function Sidebar() {
       icon: Settings,
       count: undefined
     },
-  ];
+  ].filter(item => isModuleVisible(item.label));
 
   const sidebarWidth = isExpanded ? 'w-48' : 'w-16';
 
