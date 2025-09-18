@@ -317,29 +317,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     setBranchSearchQuery(query);
   }, []);
 
-  const form = useForm<AddLeadFormData>({
-    resolver: zodResolver(addLeadFormSchema),
-    defaultValues: {
-      type: '',
-      status: '',
-      name: '',
-      phone: '',
-      email: '',
-      city: '',
-      source: '',
-      country: [],
-      studyLevel: '',
-      studyPlan: '',
-      elt: '',
-      regionId: '',
-      branchId: '',
-      counsellorId: '',
-      admissionOfficerId: '',
-      counselorId: '',
-      notes: '',
-    },
-  });
-
   const createLeadMutation = useMutation({
     mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
     onSuccess: async () => {
