@@ -109,8 +109,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     queryFn: async () => StudentsService.getStudents()
   });
 
-  const { data: counselors, isLoading: counselorsLoading } = useQuery({
+  const { user } = useAuth();
+
+  const { data: usersList, isLoading: usersLoading } = useQuery({
     queryKey: ['/api/users'],
+    queryFn: () => UsersService.getUsers(),
+  });
+
+  const { data: regionsList = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: () => RegionsService.listRegions(),
+    staleTime: 60000,
+  });
+
+  const { data: branchEmps = [] } = useQuery({
+    queryKey: ['/api/branch-emps'],
+    queryFn: () => BranchEmpsService.listBranchEmps(),
+    staleTime: 60000,
   });
 
   const { data: branchesList = [] } = useQuery({
