@@ -291,7 +291,21 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       setIsEditing(false);
                       setDetailOpen(true);
                     }}>
-                      <TableCell className="font-medium p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
+                      <TableCell className="font-medium p-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const idStr = String(b.id);
+                            const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
+                            const isOpen = expanded.has(idStr);
+                            return count > 0 ? (
+                              <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[11px]" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
+                                {count} {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                              </Button>
+                            ) : null;
+                          })()}
+                          <span>{b.branchName || b.name || '-'}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="p-2 text-xs">{(() => {
                         const r = (regions as any[]).find((x: any) => x.id === (b as any).regionId);
                         return r?.regionName || '-';
