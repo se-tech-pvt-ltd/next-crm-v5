@@ -170,7 +170,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                   <TableRow key={a.id} className="hover:bg-gray-50/40">
                     <TableCell className="py-1 px-3 text-sm">{a.moduleName}</TableCell>
                     <TableCell className="py-1 px-3 text-sm">{a.viewLevel}</TableCell>
-                    <TableCell className="p-2 text-xs">{a.canCreate ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="py-1 px-3 text-sm">{a.canCreate ? 'Yes' : 'No'}</TableCell>
                     <TableCell className="p-2 text-xs">{a.canEdit ? 'Yes' : 'No'}</TableCell>
                     <TableCell className="p-2 text-xs">{a.createdOn ? new Date(a.createdOn).toLocaleString() : ''}</TableCell>
                     <TableCell className="p-2 text-xs text-right">
