@@ -541,6 +541,52 @@ export default function EventsPage() {
         </div>
 
         {!showList && (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2">
+            <Card>
+              <CardHeader className="pb-1 p-2">
+                <CardTitle className="text-xs font-medium flex items-center gap-2">
+                  <Calendar className="w-3 h-3 text-gray-500" />
+                  Total Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                <div className="text-base font-semibold">
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : (Array.isArray(events) ? events.length : 0)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-1 p-2">
+                <CardTitle className="text-xs font-medium flex items-center gap-2">
+                  <Calendar className="w-3 h-3 text-red-500" />
+                  Past Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                <div className="text-base font-semibold text-red-600">
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : ((Array.isArray(events) ? events : []).filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() < Date.now() : false; }).length)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-1 p-2">
+                <CardTitle className="text-xs font-medium flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-green-500" />
+                  Upcoming Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                <div className="text-base font-semibold text-green-600">
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : ((Array.isArray(events) ? events : []).filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() >= Date.now() : false; }).length)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {!showList && (
           (Array.isArray(events) && events.length === 0) ? (
             <EmptyState
               icon={<Calendar className="h-10 w-10" />}
