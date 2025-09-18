@@ -72,7 +72,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
                   </TableHeader>
                   <TableBody>
                     {deptRoles.length === 0 ? (
-                      <TableRow><TableCell colSpan={2} className="p-3 text-xs text-muted-foreground">No roles</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={2} className="py-2 px-3 text-sm text-muted-foreground">No roles</TableCell></TableRow>
                     ) : deptRoles.map((r: any) => (
                       <TableRow key={r.id} className="hover:bg-gray-50/40">
                         <TableCell className="py-1 px-3 text-sm font-medium">{r.roleName}</TableCell>
@@ -101,7 +101,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
               </TableHeader>
               <TableBody>
                 {((roles as any[]).filter((r: any) => !r.departmentId)).length === 0 ? (
-                  <TableRow><TableCell colSpan={2} className="p-3 text-xs text-muted-foreground">No roles</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={2} className="py-2 px-3 text-sm text-muted-foreground">No roles</TableCell></TableRow>
                 ) : ((roles as any[]).filter((r: any) => !r.departmentId)).map((r: any) => (
                   <TableRow key={r.id} className="hover:bg-gray-50/40">
                     <TableCell className="py-1 px-3 text-sm font-medium">{r.roleName}</TableCell>
