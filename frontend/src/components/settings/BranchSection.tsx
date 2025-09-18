@@ -326,23 +326,31 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         return (
                           <TableRow key={`${b.id}-sub`} className="bg-muted/30">
                             <TableCell colSpan={7} className="p-0">
-                              <div className="px-4 py-2 text-[11px]">
-                                <div className="font-semibold mb-1">Employees</div>
-                                <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-                                  {mappings.map((m: any) => {
-                                    const u: any = (users as any[]).find((x: any) => String(x.id) === String(m.userId ?? m.user_id));
-                                    const name = u ? (`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '-') : '-';
-                                    const email = u?.email || '';
-                                    const role = u ? (String(u.role || '').replace(/_/g, ' ')) : '';
-                                    return (
-                                      <li key={String(m.id)} className="rounded border p-2 bg-background">
-                                        <div className="font-medium truncate">{name}</div>
-                                        <div className="text-muted-foreground truncate">{email}</div>
-                                        {role ? <div className="text-muted-foreground truncate">{role}</div> : null}
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
+                              <div className="px-2 py-2 text-[11px]">
+                                <Table className="text-xs">
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="h-7 px-2 text-[11px]">Employee</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">Email</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">Role</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {mappings.map((m: any) => {
+                                      const u: any = (users as any[]).find((x: any) => String(x.id) === String(m.userId ?? m.user_id));
+                                      const name = u ? (`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '-') : '-';
+                                      const email = u?.email || '';
+                                      const role = u ? (String(u.role || '').replace(/_/g, ' ')) : '';
+                                      return (
+                                        <TableRow key={String(m.id)}>
+                                          <TableCell className="p-2 text-xs truncate">{name}</TableCell>
+                                          <TableCell className="p-2 text-xs truncate">{email || '—'}</TableCell>
+                                          <TableCell className="p-2 text-xs truncate">{role || '—'}</TableCell>
+                                        </TableRow>
+                                      );
+                                    })}
+                                  </TableBody>
+                                </Table>
                               </div>
                             </TableCell>
                           </TableRow>
