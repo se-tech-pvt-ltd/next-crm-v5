@@ -103,7 +103,7 @@ export default function EventsPage() {
     );
   };
 
-  const { data: events, refetch: refetchEvents } = useQuery({
+  const { data: events, isLoading: eventsLoading, refetch: refetchEvents } = useQuery({
     queryKey: ['/api/events'],
     queryFn: EventsService.getEvents,
   });
