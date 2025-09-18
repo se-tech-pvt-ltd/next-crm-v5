@@ -309,12 +309,19 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                         <TableCell className="p-2 text-xs">{headName}</TableCell>
                         <TableCell className="p-2 text-xs text-right">
-                          {count > 0 ? (
-                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2 flex items-center justify-end gap-2" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
-                              <span className="text-xs text-muted-foreground">{count}</span>
-                              {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                            </Button>
-                          ) : null}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 flex items-center justify-end gap-2 text-muted-foreground"
+                            aria-label={isOpen ? 'Collapse' : 'Expand'}
+                            aria-expanded={isOpen}
+                            onClick={(e) => { e.stopPropagation(); if (count > 0) toggleExpand(idStr); }}
+                            disabled={count === 0}
+                          >
+                            <span className="text-xs">{count}</span>
+                            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </Button>
                         </TableCell>
                       </TableRow>
                       {(() => {
