@@ -54,38 +54,64 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
         <div className="text-sm font-medium">Role access control</div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        <button onClick={() => setActiveDept('all')} className={`px-3 py-2 rounded-t-md ${activeDept === 'all' ? 'shadow-md bg-white border' : 'bg-transparent'}`}>All</button>
-        {(departments as any[]).map((d: any) => (
-          <button key={d.id} onClick={() => setActiveDept(String(d.id))} className={`px-3 py-2 rounded-t-md ${String(activeDept) === String(d.id) ? 'shadow-md bg-white border' : 'bg-transparent'}`}>
-            {d.departmentName || d.id}
-          </button>
-        ))}
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {(departments as any[]).map((d: any) => {
+          const deptRoles = (roles as any[]).filter((r: any) => String(r.departmentId) === String(d.id));
+          return (
+            <div key={d.id} className="bg-white rounded shadow-sm overflow-hidden">
+              <div className="px-4 py-3">
+                <div className="text-sm font-medium">{d.departmentName || d.id}</div>
+              </div>
+              <div className="border-t">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
+                      <TableHead className="h-8 px-2 text-[11px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {deptRoles.length === 0 ? (
+                      <TableRow><TableCell colSpan={2} className="p-3 text-xs text-muted-foreground">No roles</TableCell></TableRow>
+                    ) : deptRoles.map((r: any) => (
+                      <TableRow key={r.id} className="hover:bg-gray-50">
+                        <TableCell className="p-2 text-xs">{r.roleName}</TableCell>
+                        <TableCell className="p-2 text-xs text-right"><Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          );
+        })}
 
-      <div className="overflow-auto">
-        <Table className="text-xs">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
-              <TableHead className="h-8 px-2 text-[11px]">Department</TableHead>
-              <TableHead className="h-8 px-2 text-[11px] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRoles.map((r: any) => (
-              <TableRow key={r.id} className="hover:bg-gray-50">
-                <TableCell className="p-2 text-xs">{r.roleName}</TableCell>
-                <TableCell className="p-2 text-xs">{((departments as any[]).find((x: any) => String(x.id) === String(r.departmentId))?.departmentName) || r.departmentId || '-'}</TableCell>
-                <TableCell className="p-2 text-xs text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {/* Unassigned roles panel */}
+        <div key="unassigned" className="bg-white rounded shadow-sm overflow-hidden">
+          <div className="px-4 py-3">
+            <div className="text-sm font-medium">Unassigned</div>
+          </div>
+          <div className="border-t">
+            <Table className="text-xs">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px] text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {((roles as any[]).filter((r: any) => !r.departmentId)).length === 0 ? (
+                  <TableRow><TableCell colSpan={2} className="p-3 text-xs text-muted-foreground">No roles</TableCell></TableRow>
+                ) : ((roles as any[]).filter((r: any) => !r.departmentId)).map((r: any) => (
+                  <TableRow key={r.id} className="hover:bg-gray-50">
+                    <TableCell className="p-2 text-xs">{r.roleName}</TableCell>
+                    <TableCell className="p-2 text-xs text-right"><Button size="sm" variant="ghost" onClick={() => openRoleModal(r)}>View access</Button></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
 
       <Dialog open={roleModalOpen} onOpenChange={(o) => { setRoleModalOpen(o); if (!o) { setSelectedRole(null); setFormOpen(false); setEditingId(null); } }}>
