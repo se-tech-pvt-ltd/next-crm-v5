@@ -731,42 +731,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormMessage />
                   </FormItem>
                 )} />
-
-                <FormField control={form.control} name="counselorId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <User className="w-4 h-4" />
-                      <span>Admission Officer</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || counselorsLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found matching your search.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="branchId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Branch</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        onSearch={handleBranchSearch}
-                        options={branchOptions}
-                        loading={false}
-                        placeholder="Select branch"
-                        searchPlaceholder="Search branches..."
-                        emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'}
-                        className="transition-all focus:ring-2 focus:ring-primary/20"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
               </div>
             </CardContent>
           </Card>
