@@ -45,6 +45,26 @@ export const userRoles = mysqlTable("user_roles", {
   updatedOn: timestamp("updated_on").defaultNow().notNull(),
 });
 
+// Role access controls table
+export const userAccess = mysqlTable("user_access", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  moduleName: varchar("module_name", { length: 255 }).notNull(),
+  roleId: varchar("role_id", { length: 100 }).notNull(),
+  viewLevel: varchar("view_level", { length: 255 }).notNull(),
+  canCreate: boolean("can_create").notNull().default(false),
+  canEdit: boolean("can_edit").notNull().default(false),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+export const insertUserAccessSchema = createInsertSchema(userAccess).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+export type UserAccess = typeof userAccess.$inferSelect;
+export type InsertUserAccess = z.infer<typeof insertUserAccessSchema>;
+
 // Insert schemas for departments and roles
 export const insertUserDepartmentSchema = createInsertSchema(userDepartments).omit({
   createdOn: true,

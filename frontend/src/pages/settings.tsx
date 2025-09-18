@@ -9,7 +9,7 @@ import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
 import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
 
-const ALLOWED = ['regions', 'branches', 'users', 'smtp'] as const;
+const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
 type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
@@ -36,6 +36,9 @@ export default function Settings() {
           </Button>
           <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className="gap-2">
             <ShieldCheck className="w-4 h-4" /> User management
+          </Button>
+          <Button type="button" variant={category === 'role-access' ? 'default' : 'outline'} onClick={() => setCategory('role-access')} className="gap-2">
+            <ShieldCheck className="w-4 h-4" /> Role access
           </Button>
           <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
             <Mail className="w-4 h-4" /> Email (SMTP)
@@ -67,6 +70,15 @@ export default function Settings() {
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Users</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4"><UserSectionComp toast={toast} /></CardContent>
+          </Card>
+        )}
+
+        {category === 'role-access' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Role access</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4"><RoleAccessSectionComp toast={toast} /></CardContent>
           </Card>
         )}
 
