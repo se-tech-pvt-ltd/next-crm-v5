@@ -180,9 +180,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       const body: any = { ...editForm, departmentId: editForm.department || undefined };
       return UsersService.updateUser(String(selected.id), body);
     },
-    onSuccess: async () => {
+    onSuccess: async (updated: any) => {
       setIsEditing(false);
-      await refetch();
+      const res = await refetch();
+      const freshList = (res as any)?.data || users;
+      const fresh = (Array.isArray(freshList) ? freshList : []).find((u: any) => String(u.id) === String(updated?.id || selected?.id));
+      setSelected(fresh || { ...selected, ...updated });
       toast({ title: 'User updated', duration: 2000 });
     },
     onError: (err: any) => {
