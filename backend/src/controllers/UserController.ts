@@ -172,6 +172,9 @@ export class UserController {
       const userId = req.params.id;
       const updates = { ...req.body } as any;
       if ('role' in updates) delete updates.role;
+      if (typeof updates.email === 'string') {
+        updates.email = String(updates.email).trim().toLowerCase();
+      }
 
       const updatedUser = await UserService.updateUser(userId, updates);
 
@@ -212,7 +215,8 @@ export class UserController {
     } catch (error: any) {
       console.error("Update user error:", error);
       const msg = String(error?.message || 'Failed to update user');
-      const status = msg.includes('already assigned') ? 409 : (msg.includes('required') ? 400 : 500);
+      const low = msg.toLowerCase();
+      const status = (msg.includes('already assigned') || low.includes('already exists') || low.includes('duplicate entry')) ? 409 : (msg.includes('required') ? 400 : 500);
       res.status(status).json({ message: msg });
     }
   }
