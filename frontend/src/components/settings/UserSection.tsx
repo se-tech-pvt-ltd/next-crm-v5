@@ -288,7 +288,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       <div className="flex items-center justify-between">
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
                         <div className="flex items-center gap-2">
-                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.role || (function(){
+                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !form.roleId || (function(){
                             const nRole = normalizeRole(form.role);
                             if (nRole === 'regional_manager') return !form.regionId;
                             if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
@@ -702,7 +702,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                 return null;
               })()}
               <div className="col-span-full flex gap-2">
-                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.role || (function(){
+                <Button onClick={() => updateMutation.mutate()} disabled={!selected?.id || !editForm.roleId || (function(){
                   const nRole = normalizeRole(editForm.role);
                   if (nRole === 'regional_manager') return !editForm.regionId;
                   if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
