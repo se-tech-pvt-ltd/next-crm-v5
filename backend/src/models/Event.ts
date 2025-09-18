@@ -30,6 +30,7 @@ export class EventModel {
 
   static async delete(id: string): Promise<boolean> {
     const result = await db.delete(events).where(eq(events.id, id));
-    return ((result as any).rowCount || 0) > 0;
+    const affected = (result as any)?.affectedRows ?? (result as any)?.rowCount ?? 0;
+    return affected > 0;
   }
 }
