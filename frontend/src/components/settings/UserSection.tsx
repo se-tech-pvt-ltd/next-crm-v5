@@ -493,7 +493,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                       firstName: String((u.firstName ?? u.first_name) || ''),
                       lastName: String((u.lastName ?? u.last_name) || ''),
                       role: String(u.role || 'counselor'),
-                      roleId: String(u.roleId ?? u.role_id || ''),
+                      roleId: String((u.roleId ?? u.role_id) || ''),
                       branchId: String((u.branchId ?? u.branch_id) || ''),
                       department: String(u.department || ''),
                       regionId: String((u.regionId ?? u.region_id) || ''),
