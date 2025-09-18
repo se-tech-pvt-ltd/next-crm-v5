@@ -101,7 +101,7 @@ export default function UserProfileWizard() {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { /* prevent closing by clicking backdrop until complete */ }}>
-      <DialogContent className="max-w-2xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
+      <DialogContent hideClose className="max-w-2xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
         <div className="rounded-lg bg-card text-card-foreground overflow-hidden">
           <DialogHeader className="px-6 pt-6 pb-4 border-b">
             <DialogTitle className="text-2xl">Welcome — finish your profile</DialogTitle>
