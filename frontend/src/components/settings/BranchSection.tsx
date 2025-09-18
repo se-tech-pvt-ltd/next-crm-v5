@@ -306,12 +306,12 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         })()}</TableCell>
                         <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
                         <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
-                        <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
                         <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                         <TableCell className="p-2 text-xs">{headName}</TableCell>
                         <TableCell className="p-2 text-xs text-right">
                           {count > 0 ? (
-                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
+                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2 flex items-center justify-end gap-2" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
+                              <span className="text-xs text-muted-foreground">{count}</span>
                               {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </Button>
                           ) : null}
@@ -325,7 +325,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         if (mappings.length === 0) return null;
                         return (
                           <TableRow key={`${b.id}-sub`} className="bg-muted/30">
-                            <TableCell colSpan={6} className="p-0">
+                            <TableCell colSpan={7} className="p-0">
                               <div className="px-2 py-2 text-[11px]">
                                 <Table className="text-xs">
                                   <TableHeader>
