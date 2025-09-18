@@ -345,7 +345,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                                   <TableBody>
                                     {mappings.map((m: any) => {
                                       const u: any = (users as any[]).find((x: any) => String(x.id) === String(m.userId ?? m.user_id));
-                                      const name = u ? (`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '-') : '-';
+                                      const name = u ? (([u.firstName ?? u.first_name, u.lastName ?? u.last_name].filter(Boolean).join(' ')) || u.email || '-') : '-';
                                       const email = u?.email || '';
                                       const role = u ? (String(u.role || '').replace(/_/g, ' ')) : '';
                                       return (
