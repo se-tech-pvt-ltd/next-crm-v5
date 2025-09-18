@@ -103,7 +103,9 @@ export class AuthController {
       if (!token) return res.status(401).json({ message: 'Unauthorized' });
       const payload = verifyAccessToken(token);
       if (!payload) return res.status(401).json({ message: 'Unauthorized' });
-      res.json({ id: payload.sub, role: payload.role });
+      const out: any = { id: payload.sub, role: payload.role };
+      if (payload.role_details) out.role_details = payload.role_details;
+      res.json(out);
     } catch (error) {
       res.status(401).json({ message: 'Unauthorized' });
     }
