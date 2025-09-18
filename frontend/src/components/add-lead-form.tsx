@@ -1,9 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
 import * as RegService from '@/services/event-registrations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -134,6 +133,29 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     staleTime: 30000,
   });
 
+  const form = useForm<AddLeadFormData>({
+    resolver: zodResolver(addLeadFormSchema),
+    defaultValues: {
+      type: '',
+      status: '',
+      name: '',
+      phone: '',
+      email: '',
+      city: '',
+      source: '',
+      country: [],
+      studyLevel: '',
+      studyPlan: '',
+      elt: '',
+      regionId: '',
+      branchId: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+      counselorId: '',
+      notes: '',
+    },
+  });
+
   const selectedRegionId = (form?.watch?.('regionId') || '') as string;
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
 
@@ -252,19 +274,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     [existingLeads, existingStudents]
   );
 
-  const counselorOptions = counselors 
-    ? counselors
-        .filter((user: any) => 
-          counselorSearchQuery === '' || 
-          user.name?.toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
-          user.email?.toLowerCase().includes(counselorSearchQuery.toLowerCase())
-        )
-        .map((user: any) => ({
-          label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-          value: user.id,
-          subtitle: user.email !== user.name ? user.email : undefined
-        }))
-    : [];
 
   const branchOptions = (Array.isArray(branchesList) ? branchesList : [])
     .filter((b: any) => !selectedRegionId || String(b.regionId ?? b.region_id ?? '') === String(selectedRegionId))
@@ -330,29 +339,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const handleBranchSearch = useCallback((query: string) => {
     setBranchSearchQuery(query);
   }, []);
-
-  const form = useForm<AddLeadFormData>({
-    resolver: zodResolver(addLeadFormSchema),
-    defaultValues: {
-      type: '',
-      status: '',
-      name: '',
-      phone: '',
-      email: '',
-      city: '',
-      source: '',
-      country: [],
-      studyLevel: '',
-      studyPlan: '',
-      elt: '',
-      regionId: '',
-      branchId: '',
-      counsellorId: '',
-      admissionOfficerId: '',
-      counselorId: '',
-      notes: '',
-    },
-  });
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
@@ -469,6 +455,45 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     }
   }, [initialData, dropdownData]);
 
+  // Auto-select region based on logged-in user's role and assignments
+  useEffect(() => {
+    try {
+      const currentRegion = String(form.getValues('regionId') || '');
+      if (currentRegion) return;
+      const roleName = normalizeRole((user as any)?.role);
+      let resolvedRegionId = '' as string;
+
+      const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+      if (userRegionId) {
+        resolvedRegionId = userRegionId;
+      } else if (roleName === 'regional_manager') {
+        const r = (Array.isArray(regionsList) ? regionsList : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+        resolvedRegionId = String(r?.id || '');
+      } else if (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer') {
+        const branches = Array.isArray(branchesList) ? branchesList : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '' as string;
+        const headBranch = branches.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          const b = branches.find((bb: any) => String(bb.id) === String(userBranchId));
+          resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+        }
+      }
+
+      if (resolvedRegionId) {
+        form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
+        form.setValue('branchId', '');
+        form.setValue('counsellorId', '');
+        form.setValue('admissionOfficerId', '');
+      }
+    } catch {}
+  }, [user, regionsList, branchesList, branchEmps]);
+
   const onSubmit = (data: AddLeadFormData) => {
     if (emailDuplicateStatus.isDuplicate) {
       toast({
@@ -526,75 +551,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center space-x-2">
-                <Users className="w-5 h-5 text-primary" />
-                <span>Record Access</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <FormField control={form.control} name="regionId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Region</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="branchId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Branch</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="counsellorId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Counsellor</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="admissionOfficerId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Admission Officer</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <User className="w-5 h-5 text-primary" />
-                <span>Personal Information</span>
+                <span>Personal Details</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -687,57 +649,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center space-x-2">
-                <Target className="w-5 h-5 text-primary" />
-                <span>Lead Management</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <FormField control={form.control} name="type" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>Lead Type</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select type" searchPlaceholder="Search types..." options={dropdownData?.Type?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No types found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="status" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Target className="w-4 h-4" />
-                      <span>Lead Status *</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select lead status" searchPlaceholder="Search statuses..." options={dropdownData?.Status?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No statuses found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="source" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <Globe className="w-4 h-4" />
-                      <span>Lead Source</span>
-                    </FormLabel>
-                    <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select source" searchPlaceholder="Search sources..." options={dropdownData?.Source?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No sources found" className="transition-all focus:ring-2 focus:ring-primary/20" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic Interests</span>
               </CardTitle>
@@ -800,6 +711,70 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           <Label htmlFor="elt-no" className="text-sm font-normal cursor-pointer">No</Label>
                         </div>
                       </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Users className="w-5 h-5 text-primary" />
+                <span>Record Access</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <FormField control={form.control} name="regionId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Region</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="branchId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Branch</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="counsellorId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Counsellor</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="admissionOfficerId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <Users className="w-4 h-4" />
+                      <span>Admission Officer</span>
+                    </FormLabel>
+                    <FormControl>
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
