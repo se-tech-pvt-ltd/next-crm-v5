@@ -1,11 +1,11 @@
 import { Link, useLocation } from 'wouter';
-import { useState, useEffect, useRef } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  GraduationCap, 
-  Trophy, 
-  BarChart3, 
+import { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  Trophy,
+  BarChart3,
   Settings,
   Menu,
   X,
@@ -16,6 +16,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
+import { useAuth } from '@/contexts/AuthContext';
+import * as UserAccessService from '@/services/userAccess';
 
 export function Sidebar() {
   const [location] = useLocation();
