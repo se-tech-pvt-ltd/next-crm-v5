@@ -65,6 +65,12 @@ export class UserController {
             password: String(password),
           },
         });
+        try {
+          await UserService.updateUser(String(created.id), { isRegistrationEmailSent: true } as any);
+          (created as any).isRegistrationEmailSent = true;
+        } catch (flagErr) {
+          console.error('Failed to set is_registration_email_sent flag:', flagErr);
+        }
       } catch (mailErr: any) {
         console.error('Email send error:', mailErr?.message || mailErr);
       }
