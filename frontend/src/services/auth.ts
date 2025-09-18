@@ -14,6 +14,12 @@ export interface UserSession {
 
 export async function login(data: LoginRequest): Promise<UserSession> {
   const res = await http.post<any>('/api/auth/login', data);
+  // If token present, store temporarily for subsequent requests
+  try {
+    if (res && typeof res === 'object' && 'token' in res && res.token) {
+      try { localStorage.setItem('auth_token', String(res.token)); } catch {}
+    }
+  } catch {}
   // API returns { user, token, expiresIn } — return user object for callers
   return res?.user || res;
 }
