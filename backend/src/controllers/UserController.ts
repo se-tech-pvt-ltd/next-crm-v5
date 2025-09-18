@@ -248,7 +248,29 @@ export class UserController {
       const userId = req.params.id;
       const user = await UserService.getUser(userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
-      res.json(user);
+
+      // Normalize output to include both snake_case and camelCase fields used across frontend
+      const out: any = {
+        ...user,
+        // names
+        first_name: user.firstName ?? user.first_name ?? undefined,
+        firstName: user.firstName ?? user.first_name ?? undefined,
+        last_name: user.lastName ?? user.last_name ?? undefined,
+        lastName: user.lastName ?? user.last_name ?? undefined,
+        // phone
+        phone_number: user.phoneNumber ?? user.phone_number ?? undefined,
+        phoneNumber: user.phoneNumber ?? user.phone_number ?? undefined,
+        // profile image
+        profile_image_url: (user as any).profileImageUrl ?? (user as any).profile_image_url ?? undefined,
+        profileImageUrl: (user as any).profileImageUrl ?? (user as any).profile_image_url ?? undefined,
+        profile_image_id: (user as any).profileImageId ?? (user as any).profile_image_id ?? undefined,
+        profileImageId: (user as any).profileImageId ?? (user as any).profile_image_id ?? undefined,
+        // profile complete flag
+        is_profile_complete: (user as any).isProfileComplete ?? (user as any).is_profile_complete ?? undefined,
+        isProfileComplete: (user as any).isProfileComplete ?? (user as any).is_profile_complete ?? undefined,
+      };
+
+      res.json(out);
     } catch (error) {
       console.error('Get user error:', error);
       res.status(500).json({ message: 'Failed to get user' });
