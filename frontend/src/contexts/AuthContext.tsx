@@ -101,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     isLoading,
+    refreshUser,
   };
 
   return (
