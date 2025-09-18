@@ -266,15 +266,18 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead className="h-8 px-2 text-[11px]">Region</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Country</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">City</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Official Phone</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Official Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Head</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px] text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(pageItems as any[]).map((b: any) => {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
+                  const idStr = String(b.id);
+                  const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
+                  const isOpen = expanded.has(idStr);
                   return (
                     <React.Fragment key={String(b.id)}>
                       <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
@@ -294,16 +297,6 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                       }}>
                         <TableCell className="font-medium p-2 text-xs">
                           <div className="flex items-center gap-2">
-                            {(() => {
-                              const idStr = String(b.id);
-                              const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
-                              const isOpen = expanded.has(idStr);
-                              return count > 0 ? (
-                                <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[11px]" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
-                                  {count} {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
-                                </Button>
-                              ) : null;
-                            })()}
                             <span>{b.branchName || b.name || '-'}</span>
                           </div>
                         </TableCell>
@@ -316,6 +309,13 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
                         <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
                         <TableCell className="p-2 text-xs">{headName}</TableCell>
+                        <TableCell className="p-2 text-xs text-right">
+                          {count > 0 ? (
+                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
+                              {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </Button>
+                          ) : null}
+                        </TableCell>
                       </TableRow>
                       {(() => {
                         const idStr = String(b.id);
@@ -325,7 +325,7 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                         if (mappings.length === 0) return null;
                         return (
                           <TableRow key={`${b.id}-sub`} className="bg-muted/30">
-                            <TableCell colSpan={7} className="p-0">
+                            <TableCell colSpan={6} className="p-0">
                               <div className="px-2 py-2 text-[11px]">
                                 <Table className="text-xs">
                                   <TableHeader>
