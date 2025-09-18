@@ -189,7 +189,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       toast({ title: 'User updated', duration: 2000 });
     },
     onError: (err: any) => {
-      const msg = err?.message || err?.data?.message || 'Failed to update user';
+      const status = Number(err?.status || err?.response?.status || 0);
+      const raw = String(err?.data?.message || err?.message || '').toLowerCase();
+      let msg = 'Failed to update user';
+      if (status === 409 || /already exists|duplicate/.test(raw)) {
+        msg = 'A user with this email already exists';
+      } else if (status === 400) {
+        msg = (err?.data?.message || 'Please check the form and try again');
+      }
       toast({ title: 'Error', description: msg, variant: 'destructive', duration: 3000 });
     }
   });
@@ -710,6 +717,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <span className="flex items-center gap-2"><IdCard className="w-5 h-5" /> Edit User</span>
                   <div className="flex items-center gap-2">
                     <Button size="icon" aria-label="Save user" title="Save" onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !editForm.roleId || (function(){
+                      const emailTrim = String(editForm.email || '').trim().toLowerCase();
+                      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(emailTrim);
+                      if (!emailOk) return true;
+                      const dup = Array.isArray(users) && (users as any[]).some((u: any) => String(u.email || '').trim().toLowerCase() === emailTrim && String(u.id) !== String(selected?.id || ''));
+                      if (dup) return true;
                       const nRole = normalizeRole(editForm.role);
                       if (nRole === 'regional_manager') return !editForm.regionId;
                       if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !editForm.regionId || !editForm.branchId;
@@ -766,7 +778,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="flex flex-col">
                             <Label>Email</Label>
-                            <Input className="mt-2" type="email" value={editForm.email} disabled />
+                            <Input className="mt-2 focus-visible:ring-primary focus-visible:border-primary/40" type="email" value={editForm.email} onChange={(e) => setEditForm((s) => ({ ...s, email: e.target.value }))} />
                           </div>
                           <div className="flex flex-col">
                             <Label>Phone number</Label>

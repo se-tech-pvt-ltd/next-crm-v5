@@ -39,7 +39,7 @@ export default function Settings() {
             <ShieldCheck className="w-4 h-4" /> User management
           </Button>
           <Button type="button" variant={category === 'branch-emps' ? 'default' : 'outline'} onClick={() => setCategory('branch-emps')} className="gap-2">
-            <Database className="w-4 h-4" /> Branch Emp mappings
+            <Database className="w-4 h-4" /> Branch Employees
           </Button>
           <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
             <Mail className="w-4 h-4" /> Email (SMTP)
@@ -77,7 +77,7 @@ export default function Settings() {
         {category === 'branch-emps' && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Database className="w-4 h-4" /> Branch Employee mappings</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Database className="w-4 h-4" /> Branch Employees</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4"><BranchEmpSectionComp toast={toast} /></CardContent>
           </Card>

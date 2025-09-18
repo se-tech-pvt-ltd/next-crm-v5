@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
-import { Database, Plus } from 'lucide-react';
+import * as BranchEmpService from '@/services/branchEmps';
+import { Database, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 
@@ -48,6 +49,17 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
   const [selected, setSelected] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', city: '', country: '', address: '', officialPhone: '', officialEmail: '', managerId: '', regionId: '' });
+
+  // Branch employees and expand/collapse state
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpService.listBranchEmps(), staleTime: 30000 });
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const createMutation = useMutation({
     mutationFn: () => BranchesService.createBranch({ ...form }),
@@ -264,32 +276,87 @@ export default function BranchSection({ toast }: { toast: (v: any) => void }) {
                   const headUser = (users as any[]).find((u: any) => u.id === (b.branchHeadId || b.managerId));
                   const headName = headUser ? (`${headUser.firstName || ''} ${headUser.lastName || ''}`.trim() || headUser.email || '-') : '-';
                   return (
-                    <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
-                      setSelected(b);
-                      setEditForm({
-                        name: String(b.branchName || b.name || ''),
-                        city: String(b.city || ''),
-                        country: String(b.country || ''),
-                        address: String(b.address || ''),
-                        officialPhone: String(b.officialPhone || ''),
-                        officialEmail: String(b.officialEmail || ''),
-                        managerId: String(b.branchHeadId || b.managerId || ''),
-                        regionId: String((b as any).regionId || ''),
-                      });
-                      setIsEditing(false);
-                      setDetailOpen(true);
-                    }}>
-                      <TableCell className="font-medium p-2 text-xs">{b.branchName || b.name || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{(() => {
-                        const r = (regions as any[]).find((x: any) => x.id === (b as any).regionId);
-                        return r?.regionName || '-';
-                      })()}</TableCell>
-                      <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
-                      <TableCell className="p-2 text-xs">{headName}</TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={b.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
+                        setSelected(b);
+                        setEditForm({
+                          name: String(b.branchName || b.name || ''),
+                          city: String(b.city || ''),
+                          country: String(b.country || ''),
+                          address: String(b.address || ''),
+                          officialPhone: String(b.officialPhone || ''),
+                          officialEmail: String(b.officialEmail || ''),
+                          managerId: String(b.branchHeadId || b.managerId || ''),
+                          regionId: String((b as any).regionId || ''),
+                        });
+                        setIsEditing(false);
+                        setDetailOpen(true);
+                      }}>
+                        <TableCell className="font-medium p-2 text-xs">
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const idStr = String(b.id);
+                              const count = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr).length;
+                              const isOpen = expanded.has(idStr);
+                              return count > 0 ? (
+                                <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[11px]" aria-label={isOpen ? 'Collapse' : 'Expand'} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); toggleExpand(idStr); }}>
+                                  {count} {isOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                                </Button>
+                              ) : null;
+                            })()}
+                            <span>{b.branchName || b.name || '-'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-2 text-xs">{(() => {
+                          const r = (regions as any[]).find((x: any) => x.id === (b as any).regionId);
+                          return r?.regionName || '-';
+                        })()}</TableCell>
+                        <TableCell className="p-2 text-xs">{b.country || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{b.city || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{b.officialPhone || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs max-w-[240px] truncate" title={b.officialEmail || ''}>{b.officialEmail || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{headName}</TableCell>
+                      </TableRow>
+                      {(() => {
+                        const idStr = String(b.id);
+                        const isOpen = expanded.has(idStr);
+                        if (!isOpen) return null;
+                        const mappings = (branchEmps as any[]).filter((m: any) => String(m.branchId ?? m.branch_id) === idStr);
+                        if (mappings.length === 0) return null;
+                        return (
+                          <TableRow key={`${b.id}-sub`} className="bg-muted/30">
+                            <TableCell colSpan={7} className="p-0">
+                              <div className="px-2 py-2 text-[11px]">
+                                <Table className="text-xs">
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="h-7 px-2 text-[11px]">Employee</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">Email</TableHead>
+                                      <TableHead className="h-7 px-2 text-[11px]">Role</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {mappings.map((m: any) => {
+                                      const u: any = (users as any[]).find((x: any) => String(x.id) === String(m.userId ?? m.user_id));
+                                      const name = u ? (`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '-') : '-';
+                                      const email = u?.email || '';
+                                      const role = u ? (String(u.role || '').replace(/_/g, ' ')) : '';
+                                      return (
+                                        <TableRow key={String(m.id)}>
+                                          <TableCell className="p-2 text-xs truncate">{name}</TableCell>
+                                          <TableCell className="p-2 text-xs truncate">{email || '—'}</TableCell>
+                                          <TableCell className="p-2 text-xs truncate">{role || '—'}</TableCell>
+                                        </TableRow>
+                                      );
+                                    })}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })()}
+                    </>
                   );
                 })}
               </TableBody>
