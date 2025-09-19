@@ -16,6 +16,8 @@ import { useLocation } from 'wouter';
 import { queryClient } from '@/lib/queryClient';
 import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -117,6 +119,18 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     queryFn: async () => UsersService.getUsers(),
   });
 
+  const { data: regions = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: async () => RegionsService.listRegions(),
+    staleTime: 60_000,
+  });
+
+  const { data: branches = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: async () => BranchesService.listBranches(),
+    staleTime: 60_000,
+  });
+
   // Check if the lead has been converted to a student
   const { data: convertedStudent, isLoading: convertedLoading } = useQuery({
     queryKey: ['/api/students/by-lead', lead?.id],
@@ -200,7 +214,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
-          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
+          <div className="grid grid-cols-[1fr_420px] h-[90vh] min-h-0">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Sticky header inside scroll context */}
@@ -332,15 +346,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
-                        <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
-                          <SelectContent>
-                            {users.map((u: any) => (
-                              <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
+                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select counselor" /></SelectTrigger>
+                        <SelectContent>
+                          {users.filter((u: any) => String((u.role || '')).toLowerCase().replace(/\s+/g,'_') === 'counselor').map((u: any) => (
+                            <SelectItem key={u.id} value={u.id}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       </div>
                     </div>
                   </CardContent>
@@ -408,6 +422,60 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       />
                     </div>
 
+                  </div>
+                </CollapsibleCard>
+
+                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-access`} header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Lead Access</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const regionId = (lead as any).regionId || (editData as any).regionId;
+                          const r = Array.isArray(regions) ? regions.find((x: any) => String(x.id) === String(regionId)) : null;
+                          return r ? (r.regionName || r.name || r.id) : '—';
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Branch</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const branchId = (lead as any).branchId || (editData as any).branchId;
+                          const b = Array.isArray(branches) ? branches.find((x: any) => String(x.id) === String(branchId)) : null;
+                          const name = b ? (b.branchName || b.name || b.code || b.id) : null;
+                          return name || '—';
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const norm = (v: string) => String(v || '').toLowerCase().replace(/\s+/g,'_').replace(/-+/g,'_');
+                          const branchId = (lead as any).branchId || (editData as any).branchId;
+                          const officer = Array.isArray(users)
+                            ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role) === 'admission_officer')
+                            : null;
+                          const nm = officer ? [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim() || officer.email || officer.id : null;
+                          return nm || '—';
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const cid = (lead as any).counselorId || (editData as any).counselorId;
+                          const c = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(cid)) : null;
+                          const nm = c ? [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim() || c.email || c.id : null;
+                          return nm || '—';
+                        })()}
+                      </div>
+                    </div>
                   </div>
                 </CollapsibleCard>
               </div>
