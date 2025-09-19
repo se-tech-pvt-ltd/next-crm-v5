@@ -310,11 +310,17 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
           String(u.email || '').toLowerCase().includes(counselorSearchQuery.toLowerCase())
         )
-        .map((u: any) => ({
-          label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
-          value: String(u.id),
-          subtitle: u.email,
-        }))
+        .map((u: any) => {
+          const displayName = (`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim()) || String(u.full_name || u.fullName || u.name || '');
+          const email = String(u.email || '');
+          const subtitle = email && email !== displayName ? email : undefined;
+          return {
+            label: displayName || email,
+            value: String(u.id),
+            email: subtitle,
+            subtitle,
+          };
+        })
     : [];
 
   const admissionOfficerOptions = Array.isArray(usersList)
@@ -329,11 +335,17 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           const links = Array.isArray(branchEmps) ? branchEmps : [];
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
         })
-        .map((u: any) => ({
-          label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
-          value: String(u.id),
-          subtitle: u.email,
-        }))
+        .map((u: any) => {
+          const displayName = (`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim()) || String(u.full_name || u.fullName || u.name || '');
+          const email = String(u.email || '');
+          const subtitle = email && email !== displayName ? email : undefined;
+          return {
+            label: displayName || email,
+            value: String(u.id),
+            email: subtitle,
+            subtitle,
+          };
+        })
     : [];
 
   const handleCounselorSearch = useCallback((query: string) => {
