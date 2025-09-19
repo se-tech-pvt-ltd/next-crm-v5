@@ -21,6 +21,7 @@ interface SearchableComboboxProps {
   loading?: boolean;
   className?: string;
   emptyMessage?: string;
+  disabled?: boolean;
 }
 
 export function SearchableComboboxV3({
@@ -32,7 +33,8 @@ export function SearchableComboboxV3({
   options,
   loading = false,
   className,
-  emptyMessage = "No results found."
+  emptyMessage = "No results found.",
+  disabled = false
 }: SearchableComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
