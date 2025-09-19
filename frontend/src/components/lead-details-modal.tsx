@@ -433,7 +433,17 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         {(() => {
                           const regionId = (lead as any).regionId || (editData as any).regionId;
                           const r = Array.isArray(regions) ? regions.find((x: any) => String(x.id) === String(regionId)) : null;
-                          return r ? (r.regionName || r.name || r.id) : '—';
+                          if (!r) return '—';
+                          const regionName = r.regionName || r.name || r.id;
+                          const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId || '')) : null;
+                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                          const headEmail = head?.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
