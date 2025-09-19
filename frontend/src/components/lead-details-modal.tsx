@@ -470,50 +470,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       </div>
                     </div>
 
-                    {/* Region Head */}
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Region Head</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const regionId = (lead as any).regionId || (editData as any).regionId;
-                          const r = Array.isArray(regions) ? regions.find((x: any) => String(x.id) === String(regionId)) : null;
-                          if (!r || !r.regionHeadId) return '—';
-                          const head = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(r.regionHeadId)) : null;
-                          if (!head) return '—';
-                          const fullName = [head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim();
-                          const email = head.email || '';
-                          return (
-                            <div>
-                              <div className="font-medium text-xs">{fullName || email || head.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    {/* Branch Head */}
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Branch Head</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const branchId = (lead as any).branchId || (editData as any).branchId;
-                          const b = Array.isArray(branches) ? branches.find((x: any) => String(x.id) === String(branchId)) : null;
-                          const headId = b ? (b.branchHeadId || b.managerId || null) : null;
-                          if (!headId) return '—';
-                          const head = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(headId)) : null;
-                          if (!head) return '—';
-                          const fullName = [head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim();
-                          const email = head.email || '';
-                          return (
-                            <div>
-                              <div className="font-medium text-xs">{fullName || email || head.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
 
                     <div className="space-y-1.5">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
