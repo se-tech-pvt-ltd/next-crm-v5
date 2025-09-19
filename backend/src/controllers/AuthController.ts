@@ -24,16 +24,20 @@ export class AuthController {
       // Fetch role/branch/region details for the user to include in token
       try {
         const { connection } = await import('../config/database.js');
-        const sql = `SELECT ur.role_name AS role_name, COALESCE(r.id, r2.id, r3.id) AS region_id, COALESCE(r.region_name, r2.region_name, r3.region_name) AS region_name, COALESCE(b.id, b2.id) AS branch_id, COALESCE(b.branch_name, b2.branch_name) AS branch_name
-          FROM users u
-          JOIN user_roles ur ON u.role_id = ur.id
-          LEFT JOIN regions r ON r.region_head_id = u.id
-          LEFT JOIN branches b ON b.branch_head_id = u.id
-          LEFT JOIN branch_emps be ON be.user_id = u.id
-          LEFT JOIN branches b2 ON b2.id = be.branch_id
-          LEFT JOIN regions r2 ON r2.id = b2.branch_region
-          LEFT JOIN regions r3 ON r3.id = b2.branch_region
-          WHERE u.id = ? LIMIT 1`;
+        const sql = `SELECT ur.role_name,
+       COALESCE(r.id, r2.id, r3.id) AS region_id,
+       COALESCE(r.region_name, r2.region_name, r3.region_name) AS region_name,
+       COALESCE(b.id, b2.id) AS branch_id,
+       COALESCE(b.branch_name, b2.branch_name) AS branch_name
+FROM users u
+JOIN user_roles ur ON u.role_id = ur.id
+LEFT JOIN regions r ON (ur.role_name = 'regional manager' AND r.region_head_id = u.id)
+LEFT JOIN branches b ON (ur.role_name = 'branch manager' AND b.branch_head_id = u.id)
+LEFT JOIN regions r2 ON (ur.role_name = 'branch manager' AND r2.id = b.branch_region)
+LEFT JOIN branch_emps be ON (ur.role_name IN ('counsellor','admission officer') AND be.user_id = u.id)
+LEFT JOIN branches b2 ON (ur.role_name IN ('counsellor','admission officer') AND b2.id = be.branch_id)
+LEFT JOIN regions r3 ON (ur.role_name IN ('counsellor','admission officer') AND r3.id = b2.branch_region)
+WHERE u.id = ? LIMIT 1`;
         const [rows] = await connection.query<any[]>(sql, [user.id]);
         const row = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
         const roleDetails = row ? {

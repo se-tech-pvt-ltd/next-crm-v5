@@ -31,7 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Register global unauthorized handler (401) to logout
     setUnauthorizedHandler(() => {
       setUser(null);
-      localStorage.removeItem('auth_user');
+      try { localStorage.removeItem('auth_user'); } catch {}
+      try { localStorage.removeItem('auth_token'); } catch {}
     });
     return () => setUnauthorizedHandler(null);
   }, []);
@@ -136,7 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiLogout();
     } catch {}
     setUser(null);
-    localStorage.removeItem('auth_user');
+    try { localStorage.removeItem('auth_user'); } catch {}
+    try { localStorage.removeItem('auth_token'); } catch {}
   };
 
   const refreshUser = async () => {

@@ -21,6 +21,7 @@ interface SearchableComboboxProps {
   loading?: boolean;
   className?: string;
   emptyMessage?: string;
+  disabled?: boolean;
 }
 
 export function SearchableComboboxV3({
@@ -32,7 +33,8 @@ export function SearchableComboboxV3({
   options,
   loading = false,
   className,
-  emptyMessage = "No results found."
+  emptyMessage = "No results found.",
+  disabled = false
 }: SearchableComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,10 +76,12 @@ export function SearchableComboboxV3({
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     setIsOpen(prev => !prev);
   };
 
   const handleSelect = (selectedValue: string) => {
+    if (disabled) return;
     onValueChange(selectedValue);
     setIsOpen(false);
     setSearchQuery('');
@@ -86,6 +90,7 @@ export function SearchableComboboxV3({
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     onValueChange('');
   };
 
@@ -108,9 +113,11 @@ export function SearchableComboboxV3({
         role="combobox"
         aria-expanded={isOpen}
         onClick={handleToggle}
+        disabled={disabled}
         className={cn(
           "w-full justify-between h-10 text-left font-normal",
           !selectedOption && "text-muted-foreground",
+          disabled && "opacity-50 pointer-events-none",
           className
         )}
       >
@@ -129,7 +136,10 @@ export function SearchableComboboxV3({
                 )}
               </div>
               <div
-                className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground rounded cursor-pointer flex items-center justify-center transition-colors"
+                className={cn(
+                  "h-4 w-4 p-0 rounded flex items-center justify-center transition-colors",
+                  disabled ? "opacity-0 pointer-events-none" : "hover:bg-destructive hover:text-destructive-foreground cursor-pointer"
+                )}
                 onClick={handleClear}
               >
                 <X className="h-3 w-3" />
@@ -145,7 +155,7 @@ export function SearchableComboboxV3({
         )} />
       </Button>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md animate-in fade-in-0 zoom-in-95 min-w-80 max-w-lg">
           <div className="flex items-center border-b px-3 py-2">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
