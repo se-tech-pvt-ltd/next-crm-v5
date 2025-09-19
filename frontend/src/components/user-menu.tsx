@@ -19,9 +19,13 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
 
   if (!user) return null;
 
-  const displayName = typeof user.email === 'string'
-    ? (user.email.includes('@') ? user.email.split('@')[0] : user.email)
-    : 'User';
+  const firstName = (user as any)?.firstName ?? (user as any)?.first_name ?? '';
+  const lastName = (user as any)?.lastName ?? (user as any)?.last_name ?? '';
+  const fullName = `${firstName} ${lastName}`.trim();
+  const emailStr = String((user as any)?.email || '');
+  const displayName = fullName || (emailStr.includes('@') ? emailStr.split('@')[0] : emailStr) || 'User';
+  const phoneStr = String((user as any)?.phoneNumber ?? (user as any)?.phone_number ?? (user as any)?.phone ?? '');
+  const profileImageUrl = String((user as any)?.profileImageUrl ?? (user as any)?.profile_image_url ?? '');
 
   const getRoleDisplay = (role: string) => {
     switch (role) {
@@ -71,8 +75,12 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                 </div>
               ) : (
                 <div className="flex items-center space-x-3 w-full">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+                    {profileImageUrl ? (
+                      <img src={profileImageUrl} alt="avatar" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                      <User className="w-4 h-4 text-white" />
+                    )}
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-gray-900 truncate">
@@ -109,8 +117,12 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
           <div className="space-y-6">
             {/* Profile Header */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center mx-auto mb-4">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt="avatar" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                ) : (
+                  <User className="w-8 h-8 text-white" />
+                )}
               </div>
               <h3 className="font-semibold text-lg">{displayName}</h3>
               <Badge className={getRoleColor(user.role)}>
@@ -137,6 +149,16 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                   <p className="text-sm text-gray-600">{getRoleDisplay(user.role)}</p>
                 </div>
               </div>
+
+              {phoneStr && (
+                <div className="flex items-center space-x-3">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="text-sm font-medium">Phone</p>
+                    <p className="text-sm text-gray-600">{phoneStr}</p>
+                  </div>
+                </div>
+              )}
 
               {user.branch && (
                 <div className="flex items-center space-x-3">
