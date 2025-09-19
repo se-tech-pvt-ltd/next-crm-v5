@@ -16,10 +16,15 @@ interface PaginatedLeadsResult {
 }
 
 export class LeadService {
-  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions, regionId?: string): Promise<PaginatedLeadsResult> {
     if (userRole === 'counselor' && userId) {
       return await LeadModel.findByCounselor(userId, pagination);
     }
+
+    if (userRole === 'regional_manager' && regionId) {
+      return await LeadModel.findByRegion(regionId, pagination);
+    }
+
     return await LeadModel.findAll(pagination);
   }
 
