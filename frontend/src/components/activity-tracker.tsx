@@ -354,9 +354,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={profileImage || ''} alt={activity.userName || 'User'} />
-                            <AvatarFallback>{(activity.userName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
+                          <Avatar className="h-7 w-7 rounded-none">
+                            <AvatarImage className="object-cover" src={profileImage || ''} alt={activity.userName || 'User'} />
+                            <AvatarFallback className="rounded-none">{(activity.userName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
                           </Avatar>
                           <span className="font-semibold text-gray-900">{activity.userName || 'Unknown User'}</span>
                           <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
