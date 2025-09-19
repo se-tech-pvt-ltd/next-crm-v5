@@ -51,7 +51,7 @@ app.use(
       ? { maxAge: 15552000, includeSubDomains: true, preload: false }
       : false,
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-    crossOriginResourcePolicy: { policy: "same-site" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     crossOriginEmbedderPolicy: false,
   })
 );
