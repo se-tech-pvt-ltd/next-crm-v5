@@ -24,6 +24,20 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     user.regionId = rd.region_id || rd.regionId || null;
     user.branchId = rd.branch_id || rd.branchId || null;
     user.roleDetails = rd;
+    // Prefer role from role_details if present and normalize it
+    const rawRole = rd.role_name || rd.role || payload.role;
+    if (rawRole) {
+      let norm = String(rawRole).toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+      if (norm === 'branch_head') norm = 'branch_manager';
+      if (norm === 'counsellor') norm = 'counselor';
+      user.role = norm;
+    }
+  } else if (payload.role) {
+    // Normalize role from payload.role if no role_details
+    let norm = String(payload.role).toLowerCase().replace(/\s+/g, '_').replace(/-+/g, '_');
+    if (norm === 'branch_head') norm = 'branch_manager';
+    if (norm === 'counsellor') norm = 'counselor';
+    user.role = norm;
   }
 
   req.user = user;

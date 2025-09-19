@@ -19,7 +19,7 @@ export class LeadController {
 
       console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}, user=${currentUser.id}, role=${currentUser.role}`);
 
-      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId);
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId, (currentUser as any).branchId);
 
       console.log(`Lead results: total=${result.total}, leads count=${result.leads.length}`);
 
@@ -48,7 +48,7 @@ export class LeadController {
     try {
       const id = req.params.id;
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role, (currentUser as any).regionId);
+      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -65,7 +65,21 @@ export class LeadController {
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
       const validatedData = insertLeadSchema.parse(req.body);
       console.log("Validated data:", JSON.stringify(validatedData, null, 2));
+
+      // Enforce region/branch from authenticated user where applicable
+      const role = String((currentUser as any)?.role || '').toLowerCase();
+      const userRegionId = (currentUser as any)?.regionId;
+      const userBranchId = (currentUser as any)?.branchId;
+
       const payload = { ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any;
+      if (role === 'regional_manager' && userRegionId) {
+        payload.regionId = userRegionId;
+      }
+      if (role === 'branch_manager') {
+        if (userRegionId) payload.regionId = userRegionId;
+        if (userBranchId) payload.branchId = userBranchId;
+      }
+
       console.log("Create payload (with audit fields):", JSON.stringify(payload, null, 2));
       const lead = await LeadService.createLead(payload, currentUser.id);
       console.log("Created lead:", JSON.stringify(lead, null, 2));
@@ -131,7 +145,7 @@ export class LeadController {
         return res.status(400).json({ message: "Search query is required" });
       }
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role, (currentUser as any).regionId);
+      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(leads);
     } catch (error) {
       console.error("Search leads error:", error);

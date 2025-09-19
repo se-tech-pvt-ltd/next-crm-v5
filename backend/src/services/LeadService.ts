@@ -16,9 +16,16 @@ interface PaginatedLeadsResult {
 }
 
 export class LeadService {
-  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions, regionId?: string): Promise<PaginatedLeadsResult> {
+  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions, regionId?: string, branchId?: string): Promise<PaginatedLeadsResult> {
     if (userRole === 'counselor' && userId) {
       return await LeadModel.findByCounselor(userId, pagination);
+    }
+
+    if (userRole === 'branch_manager') {
+      if (branchId) {
+        return await LeadModel.findByBranch(branchId, pagination);
+      }
+      return { leads: [], total: 0 };
     }
 
     if (userRole === 'regional_manager') {
@@ -29,10 +36,15 @@ export class LeadService {
       return { leads: [], total: 0 };
     }
 
+    // Default: if user has a region, scope by region unless super_admin
+    if (regionId && userRole !== 'super_admin') {
+      return await LeadModel.findByRegion(regionId, pagination);
+    }
+
     return await LeadModel.findAll(pagination);
   }
 
-  static async getLead(id: string, userId?: string, userRole?: string, regionId?: string): Promise<Lead | undefined> {
+  static async getLead(id: string, userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Lead | undefined> {
     const lead = await LeadModel.findById(id);
 
     if (!lead) return undefined;
@@ -42,8 +54,14 @@ export class LeadService {
       return undefined;
     }
 
-    if (userRole === 'regional_manager') {
-      if (!regionId) return undefined;
+    // Branch manager scoping
+    if (userRole === 'branch_manager') {
+      if (!branchId) return undefined;
+      if ((lead as any).branchId !== branchId) return undefined;
+    }
+
+    // Region scoping for any role that has a region (except super_admin)
+    if (regionId && userRole !== 'super_admin' && userRole !== 'branch_manager') {
       if ((lead as any).regionId !== regionId) return undefined;
     }
 
@@ -162,7 +180,7 @@ export class LeadService {
     return success;
   }
 
-  static async searchLeads(query: string, userId?: string, userRole?: string, regionId?: string): Promise<Lead[]> {
+  static async searchLeads(query: string, userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Lead[]> {
     const searchConditions = or(
       ilike(leads.name, `%${query}%`),
       ilike(leads.email, `%${query}%`),
@@ -179,8 +197,23 @@ export class LeadService {
           searchConditions
         )
       );
+    } else if (userRole === 'branch_manager') {
+      if (!branchId) return [];
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.branchId, branchId),
+          searchConditions
+        )
+      );
     } else if (userRole === 'regional_manager') {
       if (!regionId) return [];
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.regionId, regionId),
+          searchConditions
+        )
+      );
+    } else if (regionId && userRole !== 'super_admin') {
       results = await db.select().from(leads).where(
         and(
           eq(leads.regionId, regionId),
