@@ -480,13 +480,13 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     }
   }, [initialData, dropdownData]);
 
-  // Auto-select region based on logged-in user's role, assignments, or JWT token
+  // Auto-select region/branch based on JWT and assignments
   useEffect(() => {
     try {
       const currentRegion = String(form.getValues('regionId') || '');
-      if (currentRegion) return;
+      const currentBranch = String(form.getValues('branchId') || '');
+      if (currentRegion && currentBranch) return;
 
-      // Try to decode JWT token first (if available) to prefer region/branch from token
       const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
       const token = safeGetToken();
       let resolvedRegionId = '' as string;
@@ -501,37 +501,43 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
             const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
             const payload = JSON.parse(json) as any;
-            if (payload?.role_details) {
-              if (payload.role_details.region_id) resolvedRegionId = String(payload.role_details.region_id);
-              if (payload.role_details.branch_id) resolvedBranchId = String(payload.role_details.branch_id);
-            }
+            const rd = payload?.role_details || payload?.roleDetails || {};
+            const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+            const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.branch?.id ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+            if (candidateRegion) resolvedRegionId = String(candidateRegion);
+            if (candidateBranch) resolvedBranchId = String(candidateBranch);
           }
         } catch {}
       }
 
-      // Fallback to existing user-based resolution if token didn't provide values
-      if (!resolvedRegionId) {
-        const roleName = normalizeRole((user as any)?.role);
+      // Fallbacks using current user and assignments
+      const roleName = normalizeRole((user as any)?.role);
 
+      if (!resolvedRegionId) {
         const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
         if (userRegionId) {
           resolvedRegionId = userRegionId;
         } else if (roleName === 'regional_manager') {
           const r = (Array.isArray(regionsList) ? regionsList : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
-          resolvedRegionId = String(r?.id || '');
-        } else if (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer') {
-          const branches = Array.isArray(branchesList) ? branchesList : [];
-          const links = Array.isArray(branchEmps) ? branchEmps : [];
-          let userBranchId = '' as string;
-          const headBranch = branches.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
-          if (headBranch) userBranchId = String(headBranch.id);
-          if (!userBranchId) {
-            const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
-            if (be) userBranchId = String(be.branchId ?? be.branch_id);
-          }
-          if (userBranchId) {
-            const b = branches.find((bb: any) => String(bb.id) === String(userBranchId));
-            resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+          if (r?.id) resolvedRegionId = String(r.id);
+        }
+      }
+
+      if (!resolvedBranchId && (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer')) {
+        const branches = Array.isArray(branchesList) ? branchesList : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '' as string;
+        const headBranch = branches.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          resolvedBranchId = userBranchId;
+          if (!resolvedRegionId) {
+            const b = (Array.isArray(branchesList) ? branchesList : []).find((bb: any) => String(bb.id) === String(userBranchId));
+            if (b) resolvedRegionId = String(b.regionId ?? b.region_id ?? '');
           }
         }
       }
@@ -539,18 +545,20 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
         setAutoRegionDisabled(true);
-        // If token provided branch id, set it and lock branch; otherwise clear branch selection to force user choice
-        if (resolvedBranchId) {
-          form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
-          setAutoBranchDisabled(true);
-        } else {
-          form.setValue('branchId', '');
-          setAutoBranchDisabled(false);
-        }
+      }
+
+      if (resolvedBranchId) {
+        form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
+        setAutoBranchDisabled(true);
+      } else if (resolvedRegionId && !currentBranch) {
+        form.setValue('branchId', '');
+        setAutoBranchDisabled(false);
+      }
+
+      if (resolvedRegionId || resolvedBranchId) {
         form.setValue('counsellorId', '');
         form.setValue('admissionOfficerId', '');
       } else {
-        // No resolved region - ensure auto flags are off
         setAutoRegionDisabled(false);
         setAutoBranchDisabled(false);
       }
