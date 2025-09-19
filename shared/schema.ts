@@ -38,7 +38,7 @@ export const leads = mysqlTable("leads", {
   budget: text("budget"),
   timeline: text("timeline"),
   notes: text("notes"),
-  counselorId: varchar("counselor_id", { length: 255 }),
+  counselorId: varchar("counsellor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -59,7 +59,7 @@ export const students = mysqlTable("students", {
   budget: text("budget"),
   status: text("status").notNull().default("active"),
   notes: text("notes"),
-  counselorId: varchar("counselor_id", { length: 255 }),
+  counselorId: varchar("counsellor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
