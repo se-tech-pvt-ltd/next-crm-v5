@@ -300,7 +300,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           return r === 'counselor' || r === 'counsellor';
         })
         .filter((u: any) => {
-          if (!selectedBranchId) return true;
+          // Only include counselors when a branch is selected
+          if (!selectedBranchId) return false;
           const links = Array.isArray(branchEmps) ? branchEmps : [];
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
         })
@@ -323,7 +324,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
         })
         .filter((u: any) => {
-          if (!selectedBranchId) return true;
+          // Only include admission officers when a branch is selected
+          if (!selectedBranchId) return false;
           const links = Array.isArray(branchEmps) ? branchEmps : [];
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
         })
