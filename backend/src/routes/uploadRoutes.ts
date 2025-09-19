@@ -5,10 +5,11 @@ import { AttachmentModel } from '../models/Attachment.js';
 import { promises as fs } from 'fs';
 
 const router = Router();
-const REMOTE_BASE = process.env.UPLOAD_REMOTE_BASE || 'https://sales.crm-setech.cloud/api';
-const REMOTE_HOST = REMOTE_BASE.replace(/\/?api\/?$/, '');
+const REMOTE_BASE = String(process.env.UPLOAD_REMOTE_BASE || '').trim();
+const REMOTE_HOST = REMOTE_BASE ? REMOTE_BASE.replace(/\/?api\/?$/, '') : '';
 
 async function forwardToRemote(fieldName: 'file' | 'profilePicture', file: any) {
+  if (!REMOTE_BASE) return { ok: false, absoluteUrl: '' } as const;
   try {
     const buf = await fs.readFile(file.path);
     const FD: any = (globalThis as any).FormData;
