@@ -875,7 +875,24 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
               </Button>
             </motion.div>
 
-            <Button type="submit" disabled={createLeadMutation.isPending || emailDuplicateStatus.isDuplicate || phoneDuplicateStatus.isDuplicate || checkingEmail || checkingPhone} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button type="submit" onClick={async (e) => {
+              // ensure validation runs and surface errors if present
+              try {
+                const ok = await form.trigger();
+                if (!ok) {
+                  const errs = form.formState.errors;
+                  const firstKey = Object.keys(errs)[0];
+                  const message = firstKey ? (`Please complete or correct ${firstKey}`) : 'Please complete the form';
+                  toast({ title: 'Validation error', description: message, variant: 'destructive' });
+                  // try focusing first invalid field
+                  try { const el = document.querySelector(`[name="${String(firstKey)}"]`) as HTMLElement | null; if (el) el.focus(); } catch {}
+                  e.preventDefault();
+                  return;
+                }
+              } catch (err) {
+                // ignore
+              }
+            }} disabled={createLeadMutation.isPending || emailDuplicateStatus.isDuplicate || phoneDuplicateStatus.isDuplicate || checkingEmail || checkingPhone} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
               {createLeadMutation.isPending ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
