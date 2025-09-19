@@ -8,16 +8,17 @@ const router = Router();
 const REMOTE_BASE = process.env.UPLOAD_REMOTE_BASE || 'https://sales.crm-setech.cloud/api';
 const REMOTE_HOST = REMOTE_BASE.replace(/\/?api\/?$/, '');
 
-async function forwardToRemote(fieldName: string, file: Express.Multer.File) {
+async function forwardToRemote(fieldName: 'file' | 'profilePicture', file: any) {
   try {
     const buf = await fs.readFile(file.path);
-    const fd = new FormData();
-    // @ts-ignore Blob is available in Node 18+
-    const blob = new Blob([buf], { type: file.mimetype || 'application/octet-stream' });
-    fd.append(fieldName, blob as any, file.originalname);
+    const FD: any = (globalThis as any).FormData;
+    const BL: any = (globalThis as any).Blob;
+    const fd = new FD();
+    const blob = new BL([buf], { type: file.mimetype || 'application/octet-stream' });
+    fd.append(fieldName, blob, file.originalname);
     const resp = await fetch(`${REMOTE_BASE}/upload/${fieldName === 'profilePicture' ? 'profile-picture' : 'file'}`, {
       method: 'POST',
-      body: fd,
+      body: fd as any,
     });
     const json: any = await resp.json().catch(() => null);
     if (resp.ok && json && (json.fileUrl || json.url)) {
