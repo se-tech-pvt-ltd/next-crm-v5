@@ -19,7 +19,7 @@ export class LeadController {
 
       console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}, user=${currentUser.id}, role=${currentUser.role}`);
 
-      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset });
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId);
 
       console.log(`Lead results: total=${result.total}, leads count=${result.leads.length}`);
 
