@@ -131,7 +131,7 @@ export class LeadController {
         return res.status(400).json({ message: "Search query is required" });
       }
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role);
+      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role, (currentUser as any).regionId);
       res.json(leads);
     } catch (error) {
       console.error("Search leads error:", error);
