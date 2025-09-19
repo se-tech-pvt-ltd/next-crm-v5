@@ -157,7 +157,7 @@ export default function ConvertLeadToStudent() {
 
   const [formData, setFormData] = useState(initialFormData);
 
-  const counsellorRenderList = useMemo(() => {
+  const counsellorRenderList = React.useMemo(() => {
     const sel = String(formData.counsellor || '');
     const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
