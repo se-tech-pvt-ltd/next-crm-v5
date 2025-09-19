@@ -167,7 +167,7 @@ export default function ConvertLeadToStudent() {
     return list;
   }, [counsellorList, formData.counsellor, users]);
 
-  const admissionOfficerRenderList = useMemo(() => {
+  const admissionOfficerRenderList = React.useMemo(() => {
     const sel = String(formData.admissionOfficer || '');
     const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
