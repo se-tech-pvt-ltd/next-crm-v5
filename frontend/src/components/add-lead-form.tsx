@@ -295,7 +295,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const counselorOptions = Array.isArray(usersList)
     ? usersList
-        .filter((u: any) => normalizeRole(u.role) === 'counselor')
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'counselor' || r === 'counsellor';
+        })
         .filter((u: any) => {
           if (!selectedBranchId) return true;
           const links = Array.isArray(branchEmps) ? branchEmps : [];
@@ -315,7 +318,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const admissionOfficerOptions = Array.isArray(usersList)
     ? usersList
-        .filter((u: any) => normalizeRole(u.role) === 'admission_officer')
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
+        })
         .filter((u: any) => {
           if (!selectedBranchId) return true;
           const links = Array.isArray(branchEmps) ? branchEmps : [];
