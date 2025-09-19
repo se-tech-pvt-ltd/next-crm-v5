@@ -92,6 +92,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   }>({ isDuplicate: false });
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [checkingPhone, setCheckingPhone] = useState(false);
+  const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
+  const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
 
   const { data: dropdownData } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
@@ -513,14 +515,21 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
-        // If token provided branch id, set it. Otherwise clear branch selection to force user choice.
+        setAutoRegionDisabled(true);
+        // If token provided branch id, set it and lock branch; otherwise clear branch selection to force user choice
         if (resolvedBranchId) {
           form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
+          setAutoBranchDisabled(true);
         } else {
           form.setValue('branchId', '');
+          setAutoBranchDisabled(false);
         }
         form.setValue('counsellorId', '');
         form.setValue('admissionOfficerId', '');
+      } else {
+        // No resolved region - ensure auto flags are off
+        setAutoRegionDisabled(false);
+        setAutoBranchDisabled(false);
       }
     } catch {}
   }, [user, regionsList, branchesList, branchEmps]);
@@ -766,7 +775,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Region</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -779,7 +788,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Branch</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoBranchDisabled(false); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
