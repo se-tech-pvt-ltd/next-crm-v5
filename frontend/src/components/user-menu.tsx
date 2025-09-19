@@ -175,6 +175,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent hideClose className="no-not-allowed p-0 sm:max-w-lg md:max-w-2xl w-[92vw] overflow-hidden">
+          <DialogTitle className="sr-only">User Profile</DialogTitle>
           <div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent px-6 py-5 border-b flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center ring-2 ring-primary/40">
