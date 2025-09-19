@@ -56,11 +56,14 @@ app.use(
   })
 );
 
-// CORS configuration: require Origin header and only allow configured frontend origin(s)
+// CORS configuration: allow same-origin (no Origin header) and restrict to allowlist in prod
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    // Reject requests without Origin (prevents access from curl/postman without Origin)
-    if (!origin) return callback(new Error("Not allowed by CORS - missing Origin header"));
+    // Allow requests without Origin (same-origin, server-to-server, health checks)
+    if (!origin) return callback(null, true);
+    // In development, allow any origin to support local proxies/preview iframes
+    if (!isProd) return callback(null, true);
+    // In production, restrict to explicit allowlist
     if (allowedOrigins.has(origin)) return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },
