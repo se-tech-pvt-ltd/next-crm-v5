@@ -19,7 +19,7 @@ export class LeadController {
 
       console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}, user=${currentUser.id}, role=${currentUser.role}`);
 
-      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId);
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId, (currentUser as any).branchId);
 
       console.log(`Lead results: total=${result.total}, leads count=${result.leads.length}`);
 
@@ -48,7 +48,7 @@ export class LeadController {
     try {
       const id = req.params.id;
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role, (currentUser as any).regionId);
+      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -131,7 +131,7 @@ export class LeadController {
         return res.status(400).json({ message: "Search query is required" });
       }
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role, (currentUser as any).regionId);
+      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(leads);
     } catch (error) {
       console.error("Search leads error:", error);
