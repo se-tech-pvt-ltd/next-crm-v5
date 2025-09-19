@@ -459,8 +459,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           const officer = Array.isArray(users)
                             ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role) === 'admission_officer')
                             : null;
-                          const nm = officer ? [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim() || officer.email || officer.id : null;
-                          return nm || '—';
+                          if (!officer) return '—';
+                          const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
+                          const email = officer.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{fullName || email || officer.id}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
@@ -471,8 +478,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         {(() => {
                           const cid = (lead as any).counselorId || (editData as any).counselorId;
                           const c = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(cid)) : null;
-                          const nm = c ? [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim() || c.email || c.id : null;
-                          return nm || '—';
+                          if (!c) return '—';
+                          const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
+                          const email = c.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{fullName || email || c.id}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
