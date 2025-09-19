@@ -67,6 +67,8 @@ export class LeadModel {
         notes: leads.notes,
         counselorId: leads.counselorId,
         eventRegId: leads.eventRegId,
+        branchId: leads.branchId,
+        regionId: leads.regionId,
         createdBy: leads.createdBy,
         updatedBy: leads.updatedBy,
         createdAt: leads.createdAt,
