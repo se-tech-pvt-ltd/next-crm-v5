@@ -16,23 +16,37 @@ interface PaginatedLeadsResult {
 }
 
 export class LeadService {
-  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions, regionId?: string): Promise<PaginatedLeadsResult> {
     if (userRole === 'counselor' && userId) {
       return await LeadModel.findByCounselor(userId, pagination);
     }
+
+    if (userRole === 'regional_manager') {
+      if (regionId) {
+        return await LeadModel.findByRegion(regionId, pagination);
+      }
+      // If regional manager role but no region assigned, return empty result to avoid exposing all records
+      return { leads: [], total: 0 };
+    }
+
     return await LeadModel.findAll(pagination);
   }
 
-  static async getLead(id: string, userId?: string, userRole?: string): Promise<Lead | undefined> {
+  static async getLead(id: string, userId?: string, userRole?: string, regionId?: string): Promise<Lead | undefined> {
     const lead = await LeadModel.findById(id);
-    
+
     if (!lead) return undefined;
-    
+
     // Check role-based access
     if (userRole === 'counselor' && userId && lead.counselorId !== userId) {
       return undefined;
     }
-    
+
+    if (userRole === 'regional_manager') {
+      if (!regionId) return undefined;
+      if ((lead as any).regionId !== regionId) return undefined;
+    }
+
     return lead;
   }
 
@@ -148,7 +162,7 @@ export class LeadService {
     return success;
   }
 
-  static async searchLeads(query: string, userId?: string, userRole?: string): Promise<Lead[]> {
+  static async searchLeads(query: string, userId?: string, userRole?: string, regionId?: string): Promise<Lead[]> {
     const searchConditions = or(
       ilike(leads.name, `%${query}%`),
       ilike(leads.email, `%${query}%`),
@@ -162,6 +176,14 @@ export class LeadService {
       results = await db.select().from(leads).where(
         and(
           eq(leads.counselorId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'regional_manager') {
+      if (!regionId) return [];
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.regionId, regionId),
           searchConditions
         )
       );

@@ -4,17 +4,13 @@ import { LeadService } from "../services/LeadService.js";
 import { insertLeadSchema } from "../shared/schema.js";
 
 export class LeadController {
-  // Mock current user for demonstration (in production, this would come from authentication middleware)
-  private static getCurrentUser() {
-    return {
-      id: 'admin1',
-      role: 'admin_staff' // Change this to test different roles: 'counselor', 'branch_manager', 'admin_staff'
-    };
+  static getFallbackUser() {
+    return { id: 'admin1', role: 'admin_staff' };
   }
 
   static async getLeads(req: Request, res: Response) {
     try {
-      const currentUser = LeadController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
 
       // Parse pagination parameters
       const page = parseInt(req.query.page as string) || 1;
@@ -23,7 +19,7 @@ export class LeadController {
 
       console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}, user=${currentUser.id}, role=${currentUser.role}`);
 
-      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset });
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId);
 
       console.log(`Lead results: total=${result.total}, leads count=${result.leads.length}`);
 
@@ -51,8 +47,8 @@ export class LeadController {
   static async getLead(req: Request, res: Response) {
     try {
       const id = req.params.id;
-      const currentUser = LeadController.getCurrentUser();
-      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role);
+      const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
+      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role, (currentUser as any).regionId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -66,7 +62,7 @@ export class LeadController {
   static async createLead(req: Request, res: Response) {
     try {
       console.log("Received lead data:", JSON.stringify(req.body, null, 2));
-      const currentUser = LeadController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
       const validatedData = insertLeadSchema.parse(req.body);
       console.log("Validated data:", JSON.stringify(validatedData, null, 2));
       const payload = { ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any;
@@ -90,7 +86,7 @@ export class LeadController {
       console.log('Updating lead:', id, 'with data:', req.body);
       const { processLeadUpdatePayload } = await import("../utils/helpers.js");
       const processedData = processLeadUpdatePayload(req.body);
-      const currentUser = LeadController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
       const validatedData = insertLeadSchema.partial().parse(processedData);
       const lead = await LeadService.updateLead(id, { ...validatedData, updatedBy: currentUser.id } as any, currentUser.id);
       if (!lead) {
@@ -134,8 +130,8 @@ export class LeadController {
       if (!query) {
         return res.status(400).json({ message: "Search query is required" });
       }
-      const currentUser = LeadController.getCurrentUser();
-      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role);
+      const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
+      const leads = await LeadService.searchLeads(query, currentUser.id, currentUser.role, (currentUser as any).regionId);
       res.json(leads);
     } catch (error) {
       console.error("Search leads error:", error);

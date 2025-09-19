@@ -18,7 +18,8 @@ export class UserController {
         return res.status(400).json({ message: 'email and roleId are required' });
       }
       const id = (await import('uuid')).v4();
-      const password = generateNumericPassword(10);
+      // For testing environments, allow a deterministic password via TEST_USER_PASSWORD env var; default to 'admin123'
+      const password = (process.env.TEST_USER_PASSWORD && String(process.env.TEST_USER_PASSWORD)) || 'admin123';
       const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, roleId, branchId, department, profileImageId } as any, password);
 
       try {
