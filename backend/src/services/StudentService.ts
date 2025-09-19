@@ -211,7 +211,7 @@ export class StudentService {
       // Prefer values coming from request; fallback to lead record
       branchId: (studentData as any).branchId ?? (lead as any)?.branchId ?? undefined,
       regionId: (studentData as any).regionId ?? (lead as any)?.regionId ?? undefined,
-      counselorId: (studentData as any).counselorId ?? (lead as any)?.counselorId ?? undefined,
+      counsellorId: (studentData as any).counsellorId ?? (studentData as any).counselorId ?? (lead as any)?.counselorId ?? undefined,
       admissionOfficerId: (studentData as any).admissionOfficerId ?? (lead as any)?.admissionOfficerId ?? undefined,
     } as any;
     console.log('[StudentService.convertFromLead] payload:', JSON.stringify(payload));
