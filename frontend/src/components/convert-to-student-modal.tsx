@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/convert-to-student-modal.tsx');
 import { Button } from '@/components/ui/button';
@@ -113,25 +114,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         })
     : [];
 
-  const counsellorRenderList = (() => {
-    const sel = String(formData.counsellor || '');
-    let list = (Array.isArray(counselorOptions) ? counselorOptions : []).slice();
-    if (sel && !list.some((u: any) => String(u.id) === sel)) {
-      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
-      if (u) list.unshift(u);
-    }
-    return list;
-  })();
-
-  const admissionOfficerRenderList = (() => {
-    const sel = String(formData.admissionOfficer || '');
-    let list = (Array.isArray(admissionOfficerList) ? admissionOfficerList : []).slice();
-    if (sel && !list.some((u: any) => String(u.id) === sel)) {
-      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
-      if (u) list.unshift(u);
-    }
-    return list;
-  })();
 
   const initialFormData = {
     // Student status and expectation
@@ -163,6 +145,27 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   };
 
   const [formData, setFormData] = useState(initialFormData);
+
+  // Ensure the selected counsellor/admission officer from the lead is always visible
+  const counsellorRenderList = useMemo(() => {
+    const sel = String(formData.counsellor || '');
+    const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [counsellorList, formData.counsellor, users]);
+
+  const admissionOfficerRenderList = useMemo(() => {
+    const sel = String(formData.admissionOfficer || '');
+    const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [admissionOfficerList, formData.admissionOfficer, users]);
 
   // Helper to normalize lead fields (arrays/JSON strings) into text
   const normalizeToText = useCallback((value: unknown): string => {
