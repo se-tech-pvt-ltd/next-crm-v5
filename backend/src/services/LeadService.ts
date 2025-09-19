@@ -179,7 +179,8 @@ export class LeadService {
           searchConditions
         )
       );
-    } else if (userRole === 'regional_manager' && regionId) {
+    } else if (userRole === 'regional_manager') {
+      if (!regionId) return [];
       results = await db.select().from(leads).where(
         and(
           eq(leads.regionId, regionId),
