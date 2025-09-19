@@ -70,10 +70,15 @@ export class StudentController {
     try {
       const { leadId, ...studentData } = req.body as any;
 
+      if (!leadId) {
+        return res.status(400).json({ message: 'leadId is required' });
+      }
+
       const { mapStudentFromLeadPayload } = await import("../utils/helpers.js");
       const transformed = mapStudentFromLeadPayload(studentData);
+      const toValidate = { ...transformed, leadId };
 
-      const validatedData = insertStudentSchema.parse(transformed);
+      const validatedData = insertStudentSchema.parse(toValidate);
       const student = await StudentService.convertFromLead(leadId, validatedData);
       res.status(201).json(student);
     } catch (error) {

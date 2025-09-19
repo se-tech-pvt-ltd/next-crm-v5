@@ -463,13 +463,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                       </Label>
                       <Input value={formData.studyPlan} disabled className="bg-background h-8 text-xs" />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
-                        <Users className="w-3 h-3" />
-                        <span>Admission Officer</span>
-                      </Label>
-                      <Input value={formData.admissionOfficer} disabled className="bg-background h-8 text-xs" />
-                    </div>
                   </div>
                 </CardContent>
               </CollapsibleContent>
