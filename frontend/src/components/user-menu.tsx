@@ -94,8 +94,15 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
     try {
       const { uploadProfilePicture } = await import('@/services/uploads');
       const res = await uploadProfilePicture(file);
-      setProfileImageUrl(String(res.fileUrl || ''));
-      setProfileImageId(String(res.attachmentId || ''));
+      const newUrl = String(res.fileUrl || '');
+      const newId = String(res.attachmentId || '');
+      setProfileImageUrl(newUrl);
+      setProfileImageId(newId);
+      try {
+        const UsersService = await import('@/services/users');
+        await UsersService.updateUser(String((user as any).id), { profileImageId: newId });
+        await refreshUser?.();
+      } catch {}
       toast({ title: 'Uploaded', description: 'Profile picture updated' });
     } catch (err: any) {
       toast({ title: 'Upload failed', description: err?.message || 'Could not upload image', variant: 'destructive' });
