@@ -250,22 +250,35 @@ export class UserController {
       const user = await UserService.getUser(userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
 
+      // Resolve profile image URL from attachments using profile_image_id, if present
+      let profileImageId: string | undefined = (user as any).profileImageId ?? (user as any).profile_image_id;
+      let profileImageUrl: string | undefined = (user as any).profileImageUrl ?? (user as any).profile_image_url;
+      if (!profileImageUrl && profileImageId) {
+        try {
+          const { AttachmentModel } = await import('../models/Attachment.js');
+          const att = await AttachmentModel.findById(String(profileImageId));
+          if (att && att.path) profileImageUrl = String(att.path);
+        } catch (e) {
+          console.error('Failed to resolve profile image url for user', userId, e);
+        }
+      }
+
       // Normalize output to include both snake_case and camelCase fields used across frontend
       const out: any = {
         ...user,
         // names
-        first_name: user.firstName ?? user.first_name ?? undefined,
-        firstName: user.firstName ?? user.first_name ?? undefined,
-        last_name: user.lastName ?? user.last_name ?? undefined,
-        lastName: user.lastName ?? user.last_name ?? undefined,
+        first_name: (user as any).firstName ?? (user as any).first_name ?? undefined,
+        firstName: (user as any).firstName ?? (user as any).first_name ?? undefined,
+        last_name: (user as any).lastName ?? (user as any).last_name ?? undefined,
+        lastName: (user as any).lastName ?? (user as any).last_name ?? undefined,
         // phone
-        phone_number: user.phoneNumber ?? user.phone_number ?? undefined,
-        phoneNumber: user.phoneNumber ?? user.phone_number ?? undefined,
+        phone_number: (user as any).phoneNumber ?? (user as any).phone_number ?? undefined,
+        phoneNumber: (user as any).phoneNumber ?? (user as any).phone_number ?? undefined,
         // profile image
-        profile_image_url: (user as any).profileImageUrl ?? (user as any).profile_image_url ?? undefined,
-        profileImageUrl: (user as any).profileImageUrl ?? (user as any).profile_image_url ?? undefined,
-        profile_image_id: (user as any).profileImageId ?? (user as any).profile_image_id ?? undefined,
-        profileImageId: (user as any).profileImageId ?? (user as any).profile_image_id ?? undefined,
+        profile_image_url: profileImageUrl,
+        profileImageUrl: profileImageUrl,
+        profile_image_id: profileImageId,
+        profileImageId: profileImageId,
         // profile complete flag
         is_profile_complete: (user as any).isProfileComplete ?? (user as any).is_profile_complete ?? undefined,
         isProfileComplete: (user as any).isProfileComplete ?? (user as any).is_profile_complete ?? undefined,
