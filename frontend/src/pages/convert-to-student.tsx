@@ -157,6 +157,26 @@ export default function ConvertLeadToStudent() {
 
   const [formData, setFormData] = useState(initialFormData);
 
+  const counsellorRenderList = useMemo(() => {
+    const sel = String(formData.counsellor || '');
+    const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [counsellorList, formData.counsellor, users]);
+
+  const admissionOfficerRenderList = useMemo(() => {
+    const sel = String(formData.admissionOfficer || '');
+    const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [admissionOfficerList, formData.admissionOfficer, users]);
+
   // Align defaults with fetched student dropdowns
   useEffect(() => {
     if (!studentDropdowns) return;
