@@ -21,8 +21,12 @@ export class LeadService {
       return await LeadModel.findByCounselor(userId, pagination);
     }
 
-    if (userRole === 'regional_manager' && regionId) {
-      return await LeadModel.findByRegion(regionId, pagination);
+    if (userRole === 'regional_manager') {
+      if (regionId) {
+        return await LeadModel.findByRegion(regionId, pagination);
+      }
+      // If regional manager role but no region assigned, return empty result to avoid exposing all records
+      return { leads: [], total: 0 };
     }
 
     return await LeadModel.findAll(pagination);
