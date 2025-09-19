@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { parseAuthHeader, parseCookies, verifyAccessToken } from '../utils/jwt.js';
 
 export interface AuthenticatedRequest extends Request {
