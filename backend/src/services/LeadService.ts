@@ -29,6 +29,11 @@ export class LeadService {
       return { leads: [], total: 0 };
     }
 
+    // Default: if user has a region, scope by region unless super_admin
+    if (regionId && userRole !== 'super_admin') {
+      return await LeadModel.findByRegion(regionId, pagination);
+    }
+
     return await LeadModel.findAll(pagination);
   }
 
@@ -42,8 +47,8 @@ export class LeadService {
       return undefined;
     }
 
-    if (userRole === 'regional_manager') {
-      if (!regionId) return undefined;
+    // Region scoping for any role that has a region (except super_admin)
+    if (regionId && userRole !== 'super_admin') {
       if ((lead as any).regionId !== regionId) return undefined;
     }
 
@@ -181,6 +186,13 @@ export class LeadService {
       );
     } else if (userRole === 'regional_manager') {
       if (!regionId) return [];
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.regionId, regionId),
+          searchConditions
+        )
+      );
+    } else if (regionId && userRole !== 'super_admin') {
       results = await db.select().from(leads).where(
         and(
           eq(leads.regionId, regionId),
