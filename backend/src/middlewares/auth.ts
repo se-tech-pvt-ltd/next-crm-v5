@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { parseAuthHeader, parseCookies, verifyAccessToken } from '../utils/jwt.js';
 
 export interface AuthenticatedRequest extends Request {
-  user?: { id: string; role?: string };
+  user?: { id: string; role?: string; regionId?: string | null; branchId?: string | null; roleDetails?: any };
 }
 
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -15,6 +15,16 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
   if (!token) return res.status(401).json({ message: 'Unauthorized' });
   const payload = verifyAccessToken(token);
   if (!payload) return res.status(401).json({ message: 'Unauthorized' });
-  req.user = { id: payload.sub, role: payload.role };
+
+  // Populate request user with role details if available in token
+  const user: any = { id: payload.sub, role: payload.role };
+  if ((payload as any).role_details) {
+    const rd = (payload as any).role_details;
+    user.regionId = rd.region_id || rd.regionId || null;
+    user.branchId = rd.branch_id || rd.branchId || null;
+    user.roleDetails = rd;
+  }
+
+  req.user = user;
   next();
 }
