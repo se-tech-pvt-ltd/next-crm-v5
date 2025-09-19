@@ -16,6 +16,8 @@ import { useLocation } from 'wouter';
 import { queryClient } from '@/lib/queryClient';
 import * as LeadsService from '@/services/leads';
 import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -115,6 +117,18 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const { data: users = [] } = useQuery({
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
+  });
+
+  const { data: regions = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: async () => RegionsService.listRegions(),
+    staleTime: 60_000,
+  });
+
+  const { data: branches = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: async () => BranchesService.listBranches(),
+    staleTime: 60_000,
   });
 
   // Check if the lead has been converted to a student
@@ -408,6 +422,59 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       />
                     </div>
 
+                  </div>
+                </CollapsibleCard>
+
+                <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-access`} header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Lead Access</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const regionId = (lead as any).regionId || (editData as any).regionId;
+                          const r = Array.isArray(regions) ? regions.find((x: any) => String(x.id) === String(regionId)) : null;
+                          return r ? (r.regionName || r.name || r.id) : '—';
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Branch</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const branchId = (lead as any).branchId || (editData as any).branchId;
+                          const b = Array.isArray(branches) ? branches.find((x: any) => String(x.id) === String(branchId)) : null;
+                          const name = b ? (b.branchName || b.name || b.code || b.id) : null;
+                          return name || '—';
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const branchId = (lead as any).branchId || (editData as any).branchId;
+                          const officer = Array.isArray(users)
+                            ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && String(u.role).toLowerCase() === 'admission_officer')
+                            : null;
+                          const nm = officer ? [officer.firstName, officer.lastName].filter(Boolean).join(' ').trim() || officer.email : null;
+                          return nm || '—';
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const cid = (lead as any).counselorId || (editData as any).counselorId;
+                          const c = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(cid)) : null;
+                          const nm = c ? [c.firstName, c.lastName].filter(Boolean).join(' ').trim() || c.email : null;
+                          return nm || '—';
+                        })()}
+                      </div>
+                    </div>
                   </div>
                 </CollapsibleCard>
               </div>
