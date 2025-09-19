@@ -276,8 +276,8 @@ export default function Leads() {
       const id = leadParams?.id;
       if (id) {
         const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
-        if (found) setSelectedLead(found as any);
-        else if (leadById) setSelectedLead(leadById as any);
+        if (leadById) setSelectedLead(leadById as any);
+        else if (found) setSelectedLead(found as any);
       }
     }
   }, [matchLead, leadParams, leads, leadById]);
@@ -288,12 +288,12 @@ export default function Leads() {
       const id = convertParams?.id;
       if (id) {
         const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
-        if (found) {
-          setSelectedLead(found as any);
-          setConvertLead(found as any);
-        } else if (leadByIdForConvert) {
+        if (leadByIdForConvert) {
           setSelectedLead(leadByIdForConvert as any);
           setConvertLead(leadByIdForConvert as any);
+        } else if (found) {
+          setSelectedLead(found as any);
+          setConvertLead(found as any);
         }
       }
     }
@@ -305,8 +305,8 @@ export default function Leads() {
       const id = editParams?.id;
       if (id) {
         const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
-        if (found) setSelectedLead(found as any);
-        else if (leadByIdForEdit) setSelectedLead(leadByIdForEdit as any);
+        if (leadByIdForEdit) setSelectedLead(leadByIdForEdit as any);
+        else if (found) setSelectedLead(found as any);
       }
     }
   }, [matchEdit, editParams, leads, leadByIdForEdit]);
