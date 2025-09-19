@@ -73,6 +73,7 @@ Behavior rules implemented
 Key implementation notes & gotchas
 - JWT decoding: the code decodes the second JWT segment (payload) using atob; it does not verify signature (client-side only). If your auth uses cookie-based session tokens, adapt to read token from cookie or the appropriate localStorage key.
 - Roles: backend may return role names in multiple shapes (role, role_name, roleName); code checks all three fields and normalizes values. Accepts both "counselor" and "counsellor" spelling variations.
+- Display format: Combobox options for counsellor and admission officer use the user's full name as the primary label (firstName + lastName or full_name) and show the email as a subtitle beneath the name. The option object sets both `label` and `subtitle`/`email` for consistent rendering in SearchableComboboxV3.
 - Do NOT auto-populate counsellor/admission officer unless branch is selected. Previously there was logic to auto-fill; this was removed due to UX correctness.
 - The combobox components accept a disabled prop; ensure any other screens reuse the same components or pass equivalent props.
 - When implementing the panel across multiple screens, reuse the following building blocks:
