@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
 import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
@@ -60,9 +61,16 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     queryKey: ['/api/leads'],
   });
 
-  // Fetch users for counsellor dropdown
+  // Fetch users for counsellor/admission officer dropdowns
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
+  });
+
+  // Branch-employee relationships (to filter users by branch)
+  const { data: branchEmps = [] } = useQuery({
+    queryKey: ['/api/branch-emps'],
+    queryFn: () => BranchEmpsService.listBranchEmps(),
+    staleTime: 60_000,
   });
 
   // Dropdowns for mapping keys -> labels
@@ -76,6 +84,34 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
+
+  // Role + branch filtering helpers
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const selectedBranchId = String((lead as any)?.branchId ?? '');
+
+  const counsellorList = Array.isArray(users) && selectedBranchId
+    ? users
+        .filter((u: any) => {
+          const role = normalizeRole(u.role || u.role_name || u.roleName);
+          return role === 'counselor' || role === 'counsellor';
+        })
+        .filter((u: any) => {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+    : [];
+
+  const admissionOfficerList = Array.isArray(users) && selectedBranchId
+    ? users
+        .filter((u: any) => {
+          const role = normalizeRole(u.role || u.role_name || u.roleName);
+          return role === 'admission_officer' || role === 'admission officer' || role === 'admissionofficer';
+        })
+        .filter((u: any) => {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+    : [];
 
   const initialFormData = {
     // Student status and expectation
@@ -470,12 +506,31 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Please select" />
+                      <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(users) && users.map((user: any) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.firstName} {user.lastName} ({user.email})
+                      {counsellorList.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="admissionOfficer" className="text-sm font-medium flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>Admission Officer</span>
+                  </Label>
+                  <Select value={formData.admissionOfficer} onValueChange={(value) => handleInputChange('admissionOfficer', value)}>
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {admissionOfficerList.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
