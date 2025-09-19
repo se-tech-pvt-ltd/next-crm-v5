@@ -90,7 +90,7 @@ export function mapStudentFromLeadPayload(studentData: any) {
     passportNumber: studentData.passport || studentData.passportNumber || undefined,
     targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
     status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
-    counselorId: studentData.counsellor || studentData.counselorId || undefined,
+    counsellorId: studentData.counsellor || studentData.counsellorId || studentData.counselorId || undefined,
     admissionOfficerId: studentData.admissionOfficer || studentData.admissionOfficerId || undefined,
     // optionally accept branch/region if frontend sends them
     branchId: studentData.branchId || studentData.branch_id || undefined,
