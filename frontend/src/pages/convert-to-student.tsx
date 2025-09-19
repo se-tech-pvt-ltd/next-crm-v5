@@ -84,6 +84,26 @@ export default function ConvertLeadToStudent() {
       });
   }, [users, branchEmps, selectedBranchId]);
 
+  const counsellorRenderList = React.useMemo(() => {
+    const sel = String(formData.counsellor || '');
+    let list = counsellorList.slice();
+    if (sel && !list.some(u => String(u.id) === sel)) {
+      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [counsellorList, formData.counsellor, users]);
+
+  const admissionOfficerRenderList = React.useMemo(() => {
+    const sel = String(formData.admissionOfficer || '');
+    let list = admissionOfficerList.slice();
+    if (sel && !list.some(u => String(u.id) === sel)) {
+      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [admissionOfficerList, formData.admissionOfficer, users]);
+
   const normalizeToText = React.useCallback((value: unknown): string => {
     if (!value) return '';
     if (Array.isArray(value)) return value.filter(Boolean).join(', ');
@@ -194,7 +214,7 @@ export default function ConvertLeadToStudent() {
         interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
-        admissionOfficer: lead.createdBy || '',
+        admissionOfficer: (lead as any)?.admissionOfficerId || (lead as any)?.admission_officer_id || '',
         expectation: lead.expectation || prev.expectation,
         counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || prev.counsellor || '',
       }));
@@ -326,7 +346,7 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {counsellorList.map((user: any) => (
+                    {counsellorRenderList.map((user: any) => (
                       <SelectItem key={user.id} value={String(user.id)}>{(user.firstName || '')} {(user.lastName || '')} ({user.email})</SelectItem>
                     ))}
                   </SelectContent>
@@ -343,7 +363,7 @@ export default function ConvertLeadToStudent() {
                     <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {admissionOfficerList.map((user: any) => (
+                    {admissionOfficerRenderList.map((user: any) => (
                       <SelectItem key={user.id} value={String(user.id)}>{(user.firstName || '')} {(user.lastName || '')} ({user.email})</SelectItem>
                     ))}
                   </SelectContent>
