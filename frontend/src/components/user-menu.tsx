@@ -19,13 +19,28 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
 
   if (!user) return null;
 
-  const firstName = (user as any)?.firstName ?? (user as any)?.first_name ?? '';
-  const lastName = (user as any)?.lastName ?? (user as any)?.last_name ?? '';
+  const safeToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
+  const parseJwt = (t: string | null) => {
+    if (!t) return {} as any;
+    try {
+      const p = t.split('.')[1];
+      const b64 = p.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = b64.length % 4;
+      const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+      const json = decodeURIComponent(atob(b64p).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(json) || {};
+    } catch { return {} as any; }
+  };
+  const payload: any = parseJwt(safeToken());
+
+  const firstName = (user as any)?.firstName ?? (user as any)?.first_name ?? payload?.first_name ?? payload?.firstName ?? payload?.user?.first_name ?? payload?.user?.firstName ?? '';
+  const lastName = (user as any)?.lastName ?? (user as any)?.last_name ?? payload?.last_name ?? payload?.lastName ?? payload?.user?.last_name ?? payload?.user?.lastName ?? '';
   const fullName = `${firstName} ${lastName}`.trim();
-  const emailStr = String((user as any)?.email || '');
+  const emailStr = String((user as any)?.email ?? payload?.email ?? payload?.user?.email ?? '');
   const displayName = fullName || (emailStr.includes('@') ? emailStr.split('@')[0] : emailStr) || 'User';
-  const phoneStr = String((user as any)?.phoneNumber ?? (user as any)?.phone_number ?? (user as any)?.phone ?? '');
-  const profileImageUrl = String((user as any)?.profileImageUrl ?? (user as any)?.profile_image_url ?? '');
+  const phoneStr = String((user as any)?.phoneNumber ?? (user as any)?.phone_number ?? (user as any)?.phone ?? payload?.phone ?? payload?.phone_number ?? payload?.user?.phone ?? payload?.user?.phone_number ?? '');
+  const profileImageUrl = String((user as any)?.profileImageUrl ?? (user as any)?.profile_image_url ?? payload?.profile_image_url ?? payload?.profileImageUrl ?? payload?.user?.profile_image_url ?? payload?.user?.profileImageUrl ?? '');
+  const roleRaw = String((user as any)?.role ?? payload?.role ?? payload?.role_name ?? payload?.user?.role ?? '');
 
   const getRoleDisplay = (role: string) => {
     switch (role) {
@@ -87,7 +102,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                       {displayName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {getRoleDisplay(user.role)}
+                      {getRoleDisplay(roleRaw || user.role)}
                     </p>
                   </div>
                   <Settings className="w-4 h-4 text-gray-400" />
@@ -125,8 +140,8 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                 )}
               </div>
               <h3 className="font-semibold text-lg">{displayName}</h3>
-              <Badge className={getRoleColor(user.role)}>
-                {getRoleDisplay(user.role)}
+              <Badge className={getRoleColor(roleRaw || user.role)}>
+                {getRoleDisplay(roleRaw || user.role)}
               </Badge>
             </div>
 
@@ -135,10 +150,18 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
             {/* Profile Details */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
+                <User className="w-4 h-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium">Name</p>
+                  <p className="text-sm text-gray-600">{fullName || displayName}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-500" />
                 <div>
                   <p className="text-sm font-medium">Email</p>
-                  <p className="text-sm text-gray-600">{user.email}</p>
+                  <p className="text-sm text-gray-600">{emailStr || '-'}</p>
                 </div>
               </div>
 
@@ -146,19 +169,17 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                 <Shield className="w-4 h-4 text-gray-500" />
                 <div>
                   <p className="text-sm font-medium">Role</p>
-                  <p className="text-sm text-gray-600">{getRoleDisplay(user.role)}</p>
+                  <p className="text-sm text-gray-600">{getRoleDisplay(roleRaw || user.role || 'Unknown')}</p>
                 </div>
               </div>
 
-              {phoneStr && (
-                <div className="flex items-center space-x-3">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm font-medium">Phone</p>
-                    <p className="text-sm text-gray-600">{phoneStr}</p>
-                  </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="w-4 h-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium">Phone</p>
+                  <p className="text-sm text-gray-600">{phoneStr || 'Not set'}</p>
                 </div>
-              )}
+              </div>
 
               {user.branch && (
                 <div className="flex items-center space-x-3">
@@ -174,14 +195,6 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
                   </div>
                 </div>
               )}
-
-              <div className="flex items-center space-x-3">
-                <User className="w-4 h-4 text-gray-500" />
-                <div>
-                  <p className="text-sm font-medium">User ID</p>
-                  <p className="text-sm text-gray-600 font-mono">{user.id}</p>
-                </div>
-              </div>
             </div>
 
             <Separator />
