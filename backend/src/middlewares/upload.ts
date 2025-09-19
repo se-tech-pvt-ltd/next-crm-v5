@@ -5,7 +5,7 @@ import { promises as fs } from "fs";
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadsDir = path.join(process.cwd(), 'uploads');
+    const uploadsDir = path.resolve(process.cwd(), '..', 'uploads');
     try {
       await fs.mkdir(uploadsDir, { recursive: true });
     } catch (error) {

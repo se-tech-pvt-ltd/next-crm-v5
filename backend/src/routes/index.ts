@@ -16,8 +16,8 @@ import eventRegistrationRoutes from "./eventRegistrationRoutes.js";
 import branchRoutes from './branchRoutes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Create uploads directory if it doesn't exist and serve uploaded files statically
-  const uploadsDir = path.join(process.cwd(), 'uploads');
+  // Create uploads directory if it doesn't exist and serve uploaded files statically (repo root)
+  const uploadsDir = path.resolve(process.cwd(), '..', 'uploads');
   app.use('/uploads', express.static(uploadsDir));
 
   // Register auth route first (public)
