@@ -28,16 +28,20 @@ export class LeadService {
     return await LeadModel.findAll(pagination);
   }
 
-  static async getLead(id: string, userId?: string, userRole?: string): Promise<Lead | undefined> {
+  static async getLead(id: string, userId?: string, userRole?: string, regionId?: string): Promise<Lead | undefined> {
     const lead = await LeadModel.findById(id);
-    
+
     if (!lead) return undefined;
-    
+
     // Check role-based access
     if (userRole === 'counselor' && userId && lead.counselorId !== userId) {
       return undefined;
     }
-    
+
+    if (userRole === 'regional_manager' && regionId && (lead as any).regionId !== regionId) {
+      return undefined;
+    }
+
     return lead;
   }
 
