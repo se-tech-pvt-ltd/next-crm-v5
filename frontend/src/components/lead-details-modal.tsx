@@ -454,8 +454,18 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         {(() => {
                           const branchId = (lead as any).branchId || (editData as any).branchId;
                           const b = Array.isArray(branches) ? branches.find((x: any) => String(x.id) === String(branchId)) : null;
-                          const name = b ? (b.branchName || b.name || b.code || b.id) : null;
-                          return name || '—';
+                          if (!b) return '—';
+                          const branchName = b.branchName || b.name || b.code || b.id;
+                          const headId = b.branchHeadId || b.managerId || null;
+                          const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
+                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                          const headEmail = head?.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
