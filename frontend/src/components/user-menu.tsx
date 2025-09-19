@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { Settings, LogOut, User, Building, Mail, Shield } from 'lucide-react';
+import { Settings, LogOut, User, Building, Mail, Shield, Phone } from 'lucide-react';
 
 interface UserMenuProps {
   collapsed?: boolean;
