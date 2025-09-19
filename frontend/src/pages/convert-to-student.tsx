@@ -84,25 +84,6 @@ export default function ConvertLeadToStudent() {
       });
   }, [users, branchEmps, selectedBranchId]);
 
-  const counsellorRenderList = React.useMemo(() => {
-    const sel = String(formData.counsellor || '');
-    let list = counsellorList.slice();
-    if (sel && !list.some(u => String(u.id) === sel)) {
-      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
-      if (u) list.unshift(u);
-    }
-    return list;
-  }, [counsellorList, formData.counsellor, users]);
-
-  const admissionOfficerRenderList = React.useMemo(() => {
-    const sel = String(formData.admissionOfficer || '');
-    let list = admissionOfficerList.slice();
-    if (sel && !list.some(u => String(u.id) === sel)) {
-      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
-      if (u) list.unshift(u);
-    }
-    return list;
-  }, [admissionOfficerList, formData.admissionOfficer, users]);
 
   const normalizeToText = React.useCallback((value: unknown): string => {
     if (!value) return '';
