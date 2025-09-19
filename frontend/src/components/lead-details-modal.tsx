@@ -214,7 +214,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
-          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
+          <div className="grid grid-cols-[1fr_420px] h-[90vh] min-h-0">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Sticky header inside scroll context */}
