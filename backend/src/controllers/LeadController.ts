@@ -48,7 +48,7 @@ export class LeadController {
     try {
       const id = req.params.id;
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role);
+      const lead = await LeadService.getLead(id, currentUser.id, currentUser.role, (currentUser as any).regionId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
