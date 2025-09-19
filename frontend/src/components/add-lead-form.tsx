@@ -790,7 +790,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="source"
@@ -807,16 +807,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="website">🌐 Website</SelectItem>
-                          <SelectItem value="referral">👥 Referral</SelectItem>
-                          <SelectItem value="social-media">📱 Social Media</SelectItem>
-                          <SelectItem value="google-ads">🔍 Google Ads</SelectItem>
-                          <SelectItem value="facebook-ads">📘 Facebook Ads</SelectItem>
-                          <SelectItem value="education-fair">🎓 Education Fair</SelectItem>
-                          <SelectItem value="partner-agent">🤝 Partner Agent</SelectItem>
-                          <SelectItem value="cold-outreach">📞 Cold Outreach</SelectItem>
-                          <SelectItem value="word-of-mouth">💬 Word of Mouth</SelectItem>
-                          <SelectItem value="other">❓ Other</SelectItem>
+                          {Array.isArray((dropdownData as any)?.Source) ? ((dropdownData as any).Source).map((option: any) => (
+                            <SelectItem key={option.key || option.id || option.value} value={option.key || option.id || option.value}>{option.value}</SelectItem>
+                          )) : null}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -840,30 +833,35 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="hot">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="destructive" className="w-2 h-2 rounded-full p-0"></Badge>
-                              <span>Hot - Ready to Apply</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="warm">
-                            <div className="flex items-center space-x-2">
-                              <Badge className="w-2 h-2 rounded-full p-0 bg-yellow-500"></Badge>
-                              <span>Warm - Interested</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="new">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="secondary" className="w-2 h-2 rounded-full p-0"></Badge>
-                              <span>New - Just Inquired</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="cold">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="w-2 h-2 rounded-full p-0"></Badge>
-                              <span>Cold - Long Term</span>
-                            </div>
-                          </SelectItem>
+                          {Array.isArray((dropdownData as any)?.Status) ? ((dropdownData as any).Status).map((option: any) => (
+                            <SelectItem key={option.key || option.id || option.value} value={option.key || option.id || option.value}>{option.value}</SelectItem>
+                          )) : null}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4" />
+                        <span>Lead Type</span>
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Array.isArray((dropdownData as any)?.Type) ? ((dropdownData as any).Type).map((option: any) => (
+                            <SelectItem key={option.key || option.id || option.value} value={option.key || option.id || option.value}>{option.value}</SelectItem>
+                          )) : null}
                         </SelectContent>
                       </Select>
                       <FormMessage />
