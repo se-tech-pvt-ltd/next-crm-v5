@@ -65,7 +65,21 @@ export class LeadController {
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
       const validatedData = insertLeadSchema.parse(req.body);
       console.log("Validated data:", JSON.stringify(validatedData, null, 2));
+
+      // Enforce region/branch from authenticated user where applicable
+      const role = String((currentUser as any)?.role || '').toLowerCase();
+      const userRegionId = (currentUser as any)?.regionId;
+      const userBranchId = (currentUser as any)?.branchId;
+
       const payload = { ...validatedData, createdBy: currentUser.id, updatedBy: currentUser.id } as any;
+      if (role === 'regional_manager' && userRegionId) {
+        payload.regionId = userRegionId;
+      }
+      if (role === 'branch_manager') {
+        if (userRegionId) payload.regionId = userRegionId;
+        if (userBranchId) payload.branchId = userBranchId;
+      }
+
       console.log("Create payload (with audit fields):", JSON.stringify(payload, null, 2));
       const lead = await LeadService.createLead(payload, currentUser.id);
       console.log("Created lead:", JSON.stringify(lead, null, 2));
