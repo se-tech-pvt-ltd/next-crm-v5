@@ -153,7 +153,7 @@ export class LeadService {
     return success;
   }
 
-  static async searchLeads(query: string, userId?: string, userRole?: string): Promise<Lead[]> {
+  static async searchLeads(query: string, userId?: string, userRole?: string, regionId?: string): Promise<Lead[]> {
     const searchConditions = or(
       ilike(leads.name, `%${query}%`),
       ilike(leads.email, `%${query}%`),
@@ -167,6 +167,13 @@ export class LeadService {
       results = await db.select().from(leads).where(
         and(
           eq(leads.counselorId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'regional_manager' && regionId) {
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.regionId, regionId),
           searchConditions
         )
       );
