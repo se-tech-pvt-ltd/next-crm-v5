@@ -42,8 +42,9 @@ export class LeadService {
       return undefined;
     }
 
-    if (userRole === 'regional_manager' && regionId && (lead as any).regionId !== regionId) {
-      return undefined;
+    if (userRole === 'regional_manager') {
+      if (!regionId) return undefined;
+      if ((lead as any).regionId !== regionId) return undefined;
     }
 
     return lead;
