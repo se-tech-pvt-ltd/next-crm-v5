@@ -342,6 +342,51 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     setBranchSearchQuery(query);
   }, []);
 
+  // Auto-populate counsellor and admission officer based on selected branch
+  useEffect(() => {
+    try {
+      const branchId = String(form.getValues('branchId') || '');
+      if (!branchId) return;
+
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const users = Array.isArray(usersList) ? usersList : [];
+
+      // Find counselors linked to branch
+      const linkedCounselors = links
+        .filter((be: any) => String(be.branchId ?? be.branch_id) === String(branchId))
+        .map((be: any) => String(be.userId ?? be.user_id))
+        .filter(Boolean)
+        .map((uid) => users.find((u: any) => String(u.id) === String(uid)))
+        .filter(Boolean) as any[];
+
+      // Find admission officers linked to branch
+      const linkedOfficers = links
+        .filter((be: any) => String(be.branchId ?? be.branch_id) === String(branchId))
+        .map((be: any) => String(be.userId ?? be.user_id))
+        .filter(Boolean)
+        .map((uid) => users.find((u: any) => String(u.id) === String(uid)))
+        .filter(Boolean) as any[];
+
+      // From linked users, pick first matching role for counselor/admission
+      const firstCounselor = linkedCounselors.find((u: any) => normalizeRole(u.role) === 'counselor');
+      const firstOfficer = linkedOfficers.find((u: any) => normalizeRole(u.role) === 'admission_officer');
+
+      // Only set if form fields are empty (do not override manual selection)
+      const currentCounselor = String(form.getValues('counsellorId') || form.getValues('counselorId') || '');
+      const currentOfficer = String(form.getValues('admissionOfficerId') || '');
+
+      if (!currentCounselor && firstCounselor) {
+        form.setValue('counsellorId', String(firstCounselor.id), { shouldDirty: true });
+      }
+
+      if (!currentOfficer && firstOfficer) {
+        form.setValue('admissionOfficerId', String(firstOfficer.id), { shouldDirty: true });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [form, branchEmps, usersList, form.watch && form.watch('branchId')]);
+
   const createLeadMutation = useMutation({
     mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
     onSuccess: async () => {
