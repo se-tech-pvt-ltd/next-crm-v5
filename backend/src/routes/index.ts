@@ -20,8 +20,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const uploadsDir = path.join(process.cwd(), 'uploads');
   app.use('/uploads', express.static(uploadsDir));
 
-  // Register all routes
+  // Register auth route first (public)
   app.use('/api/auth', authRoutes);
+
+  // Enforce authentication for all subsequent /api routes
+  const { requireAuth } = await import('../middlewares/auth.js');
+  app.use('/api', requireAuth);
+
+  // Register protected routes
   app.use('/api/leads', leadRoutes);
   app.use('/api/students', studentRoutes);
   app.use('/api/applications', applicationRoutes);
@@ -48,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Regions
   app.use('/api/regions', (await import('./regionRoutes.js')).default);
 
-  // Search routes
+  // Search routes (protected)
   app.use('/api/search', leadRoutes); // This includes search functionality
   app.use('/api/search', studentRoutes); // This includes search functionality
 
