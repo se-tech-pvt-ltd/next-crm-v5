@@ -113,6 +113,26 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         })
     : [];
 
+  const counsellorRenderList = (() => {
+    const sel = String(formData.counsellor || '');
+    let list = (Array.isArray(counselorOptions) ? counselorOptions : []).slice();
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
+      if (u) list.unshift(u);
+    }
+    return list;
+  })();
+
+  const admissionOfficerRenderList = (() => {
+    const sel = String(formData.admissionOfficer || '');
+    let list = (Array.isArray(admissionOfficerList) ? admissionOfficerList : []).slice();
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = (Array.isArray(users) ? users : []).find((x: any) => String(x.id) === sel);
+      if (u) list.unshift(u);
+    }
+    return list;
+  })();
+
   const initialFormData = {
     // Student status and expectation
     status: '',
@@ -207,7 +227,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
-        admissionOfficer: lead.createdBy || '',
+        admissionOfficer: (lead as any)?.admissionOfficerId || (lead as any)?.admission_officer_id || '',
 
         // Set default expectation from lead if present; otherwise keep empty to show placeholder
         expectation: lead.expectation || prev.expectation || '',
@@ -509,7 +529,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                       <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {counsellorList.map((user: any) => (
+                      {counsellorRenderList.map((user: any) => (
                         <SelectItem key={user.id} value={String(user.id)}>
                           {(user.firstName || '')} {(user.lastName || '')} ({user.email})
                         </SelectItem>
@@ -528,7 +548,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                       <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {admissionOfficerList.map((user: any) => (
+                      {admissionOfficerRenderList.map((user: any) => (
                         <SelectItem key={user.id} value={String(user.id)}>
                           {(user.firstName || '')} {(user.lastName || '')} ({user.email})
                         </SelectItem>
