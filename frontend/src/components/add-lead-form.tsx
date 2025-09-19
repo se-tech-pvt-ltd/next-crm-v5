@@ -565,6 +565,24 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     } catch {}
   }, [user, regionsList, branchesList, branchEmps]);
 
+  // Ensure region is derived from selected branch if missing
+  useEffect(() => {
+    try {
+      const rid = String(form.getValues('regionId') || '');
+      const bid = String(form.getValues('branchId') || '');
+      if (!rid && bid) {
+        const branches = Array.isArray(branchesList) ? branchesList : [];
+        const b = branches.find((x: any) => String(x.id) === String(bid));
+        const regionFromBranch = String(b?.regionId ?? b?.region_id ?? '');
+        if (regionFromBranch) {
+          form.setValue('regionId', regionFromBranch, { shouldDirty: true, shouldValidate: true });
+          setAutoRegionDisabled(true);
+        }
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [branchesList, selectedBranchId]);
+
   const onSubmit = (data: AddLeadFormData) => {
     if (emailDuplicateStatus.isDuplicate) {
       toast({
