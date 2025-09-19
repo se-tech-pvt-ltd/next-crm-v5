@@ -91,6 +91,10 @@ export function mapStudentFromLeadPayload(studentData: any) {
     targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
     status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
     counselorId: studentData.counsellor || studentData.counselorId || undefined,
+    admissionOfficerId: studentData.admissionOfficer || studentData.admissionOfficerId || undefined,
+    // optionally accept branch/region if frontend sends them
+    branchId: studentData.branchId || studentData.branch_id || undefined,
+    regionId: studentData.regionId || studentData.region_id || undefined,
     address: studentData.address || studentData.city || undefined,
     consultancyFree: ['yes','true','1','on'].includes(String(studentData.consultancyFee ?? studentData.consultancy_free ?? studentData.consultancyFree ?? '').toLowerCase()),
     scholarship: ['yes','true','1','on'].includes(String(studentData.scholarship ?? '').toLowerCase()),
