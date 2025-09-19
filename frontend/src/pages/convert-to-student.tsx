@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
 import * as UsersService from '@/services/users';
+import * as BranchEmpsService from '@/services/branchEmps';
 import { useToast } from '@/hooks/use-toast';
 import { type Lead, type Student } from '@/lib/types';
 import { ArrowLeft, Award, Calendar, DollarSign, FileText, GraduationCap, MapPin, Target, Users } from 'lucide-react';
@@ -40,11 +42,49 @@ export default function ConvertLeadToStudent() {
     queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
   });
 
+  // Branch-employee relationships (to filter users by branch)
+  const { data: branchEmps = [] } = useQuery({
+    queryKey: ['/api/branch-emps'],
+    queryFn: () => BranchEmpsService.listBranchEmps(),
+    staleTime: 60_000,
+  });
+
   // Fetch dropdowns for Students module (status, expectation, ELT Test)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
+
+  // Helpers for role + branch filtering
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const selectedBranchId = String((lead as any)?.branchId ?? '');
+
+  const counsellorList = React.useMemo(() => {
+    if (!Array.isArray(users) || !selectedBranchId) return [] as any[];
+    return users
+      .filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'counselor' || role === 'counsellor';
+      })
+      .filter((u: any) => {
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+      });
+  }, [users, branchEmps, selectedBranchId]);
+
+  const admissionOfficerList = React.useMemo(() => {
+    if (!Array.isArray(users) || !selectedBranchId) return [] as any[];
+    return users
+      .filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+      })
+      .filter((u: any) => {
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+      });
+  }, [users, branchEmps, selectedBranchId]);
+
 
   const normalizeToText = React.useCallback((value: unknown): string => {
     if (!value) return '';
@@ -118,6 +158,26 @@ export default function ConvertLeadToStudent() {
 
   const [formData, setFormData] = useState(initialFormData);
 
+  const counsellorRenderList = React.useMemo(() => {
+    const sel = String(formData.counsellor || '');
+    const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [counsellorList, formData.counsellor, users]);
+
+  const admissionOfficerRenderList = React.useMemo(() => {
+    const sel = String(formData.admissionOfficer || '');
+    const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [admissionOfficerList, formData.admissionOfficer, users]);
+
   // Align defaults with fetched student dropdowns
   useEffect(() => {
     if (!studentDropdowns) return;
@@ -156,7 +216,7 @@ export default function ConvertLeadToStudent() {
         interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
-        admissionOfficer: lead.createdBy || '',
+        admissionOfficer: (lead as any)?.admissionOfficerId || (lead as any)?.admission_officer_id || '',
         expectation: lead.expectation || prev.expectation,
         counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || prev.counsellor || '',
       }));
@@ -285,11 +345,28 @@ export default function ConvertLeadToStudent() {
                 </Label>
                 <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
                   <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Please select" />
+                    <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(users) && users.map((user: any) => (
-                      <SelectItem key={user.id} value={user.id}>{user.firstName} {user.lastName} ({user.email})</SelectItem>
+                    {counsellorRenderList.map((user: any) => (
+                      <SelectItem key={user.id} value={String(user.id)}>{(user.firstName || '')} {(user.lastName || '')} ({user.email})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="admissionOfficer" className="text-sm font-medium flex items-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span>Admission Officer</span>
+                </Label>
+                <Select value={formData.admissionOfficer} onValueChange={(value) => handleInputChange('admissionOfficer', value)}>
+                  <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {admissionOfficerRenderList.map((user: any) => (
+                      <SelectItem key={user.id} value={String(user.id)}>{(user.firstName || '')} {(user.lastName || '')} ({user.email})</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-console.log('[modal] loaded: frontend/src/components/convert-to-student-modal.tsx');
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
@@ -14,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
 import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
@@ -60,9 +60,16 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     queryKey: ['/api/leads'],
   });
 
-  // Fetch users for counsellor dropdown
+  // Fetch users for counsellor/admission officer dropdowns
   const { data: users } = useQuery({
     queryKey: ['/api/users'],
+  });
+
+  // Branch-employee relationships (to filter users by branch)
+  const { data: branchEmps = [] } = useQuery({
+    queryKey: ['/api/branch-emps'],
+    queryFn: () => BranchEmpsService.listBranchEmps(),
+    staleTime: 60_000,
   });
 
   // Dropdowns for mapping keys -> labels
@@ -76,6 +83,35 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
+
+  // Role + branch filtering helpers
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const selectedBranchId = String((lead as any)?.branchId ?? '');
+
+  const counsellorList = Array.isArray(users) && selectedBranchId
+    ? users
+        .filter((u: any) => {
+          const role = normalizeRole(u.role || u.role_name || u.roleName);
+          return role === 'counselor' || role === 'counsellor';
+        })
+        .filter((u: any) => {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+    : [];
+
+  const admissionOfficerList = Array.isArray(users) && selectedBranchId
+    ? users
+        .filter((u: any) => {
+          const role = normalizeRole(u.role || u.role_name || u.roleName);
+          return role === 'admission_officer' || role === 'admission officer' || role === 'admissionofficer';
+        })
+        .filter((u: any) => {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
+        })
+    : [];
+
 
   const initialFormData = {
     // Student status and expectation
@@ -107,6 +143,27 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   };
 
   const [formData, setFormData] = useState(initialFormData);
+
+  // Ensure the selected counsellor/admission officer from the lead is always visible
+  const counsellorRenderList = useMemo(() => {
+    const sel = String(formData.counsellor || '');
+    const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [counsellorList, formData.counsellor, users]);
+
+  const admissionOfficerRenderList = useMemo(() => {
+    const sel = String(formData.admissionOfficer || '');
+    const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
+    if (sel && !list.some((u: any) => String(u.id) === sel)) {
+      const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
+      if (u) list.unshift(u);
+    }
+    return list;
+  }, [admissionOfficerList, formData.admissionOfficer, users]);
 
   // Helper to normalize lead fields (arrays/JSON strings) into text
   const normalizeToText = useCallback((value: unknown): string => {
@@ -171,7 +228,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
-        admissionOfficer: lead.createdBy || '',
+        admissionOfficer: (lead as any)?.admissionOfficerId || (lead as any)?.admission_officer_id || '',
 
         // Set default expectation from lead if present; otherwise keep empty to show placeholder
         expectation: lead.expectation || prev.expectation || '',
@@ -470,12 +527,31 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                      <SelectValue placeholder="Please select" />
+                      <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(users) && users.map((user: any) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.firstName} {user.lastName} ({user.email})
+                      {counsellorRenderList.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="admissionOfficer" className="text-sm font-medium flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>Admission Officer</span>
+                  </Label>
+                  <Select value={formData.admissionOfficer} onValueChange={(value) => handleInputChange('admissionOfficer', value)}>
+                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {admissionOfficerRenderList.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
