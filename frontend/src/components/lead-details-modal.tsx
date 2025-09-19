@@ -345,17 +345,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
                         <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
-                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select counselor" /></SelectTrigger>
-                        <SelectContent>
-                          {users.filter((u: any) => String((u.role || '')).toLowerCase().replace(/\s+/g,'_') === 'counselor').map((u: any) => (
-                            <SelectItem key={u.id} value={u.id}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -426,14 +415,24 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                 </CollapsibleCard>
 
                 <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-access`} header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Lead Access</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                     <div className="space-y-1.5">
                       <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
                       <div className="text-xs px-2 py-1.5 rounded border bg-white">
                         {(() => {
                           const regionId = (lead as any).regionId || (editData as any).regionId;
                           const r = Array.isArray(regions) ? regions.find((x: any) => String(x.id) === String(regionId)) : null;
-                          return r ? (r.regionName || r.name || r.id) : '—';
+                          if (!r) return '—';
+                          const regionName = r.regionName || r.name || r.id;
+                          const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(r.regionHeadId || '')) : null;
+                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                          const headEmail = head?.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
@@ -444,11 +443,22 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         {(() => {
                           const branchId = (lead as any).branchId || (editData as any).branchId;
                           const b = Array.isArray(branches) ? branches.find((x: any) => String(x.id) === String(branchId)) : null;
-                          const name = b ? (b.branchName || b.name || b.code || b.id) : null;
-                          return name || '—';
+                          if (!b) return '—';
+                          const branchName = b.branchName || b.name || b.code || b.id;
+                          const headId = b.branchHeadId || b.managerId || null;
+                          const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
+                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                          const headEmail = head?.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
+
 
                     <div className="space-y-1.5">
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
@@ -459,8 +469,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           const officer = Array.isArray(users)
                             ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role) === 'admission_officer')
                             : null;
-                          const nm = officer ? [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim() || officer.email || officer.id : null;
-                          return nm || '—';
+                          if (!officer) return '—';
+                          const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
+                          const email = officer.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{fullName || email || officer.id}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
@@ -471,8 +488,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         {(() => {
                           const cid = (lead as any).counselorId || (editData as any).counselorId;
                           const c = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(cid)) : null;
-                          const nm = c ? [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim() || c.email || c.id : null;
-                          return nm || '—';
+                          if (!c) return '—';
+                          const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
+                          const email = c.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{fullName || email || c.id}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
