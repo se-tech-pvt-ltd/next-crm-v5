@@ -455,39 +455,70 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     }
   }, [initialData, dropdownData]);
 
-  // Auto-select region based on logged-in user's role and assignments
+  // Auto-select region based on logged-in user's role, assignments, or JWT token
   useEffect(() => {
     try {
       const currentRegion = String(form.getValues('regionId') || '');
       if (currentRegion) return;
-      const roleName = normalizeRole((user as any)?.role);
-      let resolvedRegionId = '' as string;
 
-      const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
-      if (userRegionId) {
-        resolvedRegionId = userRegionId;
-      } else if (roleName === 'regional_manager') {
-        const r = (Array.isArray(regionsList) ? regionsList : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
-        resolvedRegionId = String(r?.id || '');
-      } else if (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer') {
-        const branches = Array.isArray(branchesList) ? branchesList : [];
-        const links = Array.isArray(branchEmps) ? branchEmps : [];
-        let userBranchId = '' as string;
-        const headBranch = branches.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
-        if (headBranch) userBranchId = String(headBranch.id);
-        if (!userBranchId) {
-          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
-          if (be) userBranchId = String(be.branchId ?? be.branch_id);
-        }
-        if (userBranchId) {
-          const b = branches.find((bb: any) => String(bb.id) === String(userBranchId));
-          resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+      // Try to decode JWT token first (if available) to prefer region/branch from token
+      const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
+      const token = safeGetToken();
+      let resolvedRegionId = '' as string;
+      let resolvedBranchId = '' as string;
+
+      if (token) {
+        try {
+          const parts = String(token).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            if (payload?.role_details) {
+              if (payload.role_details.region_id) resolvedRegionId = String(payload.role_details.region_id);
+              if (payload.role_details.branch_id) resolvedBranchId = String(payload.role_details.branch_id);
+            }
+          }
+        } catch {}
+      }
+
+      // Fallback to existing user-based resolution if token didn't provide values
+      if (!resolvedRegionId) {
+        const roleName = normalizeRole((user as any)?.role);
+
+        const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+        if (userRegionId) {
+          resolvedRegionId = userRegionId;
+        } else if (roleName === 'regional_manager') {
+          const r = (Array.isArray(regionsList) ? regionsList : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+          resolvedRegionId = String(r?.id || '');
+        } else if (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer') {
+          const branches = Array.isArray(branchesList) ? branchesList : [];
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          let userBranchId = '' as string;
+          const headBranch = branches.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+          if (headBranch) userBranchId = String(headBranch.id);
+          if (!userBranchId) {
+            const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+            if (be) userBranchId = String(be.branchId ?? be.branch_id);
+          }
+          if (userBranchId) {
+            const b = branches.find((bb: any) => String(bb.id) === String(userBranchId));
+            resolvedRegionId = String(b?.regionId ?? b?.region_id ?? '');
+          }
         }
       }
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
-        form.setValue('branchId', '');
+        // If token provided branch id, set it. Otherwise clear branch selection to force user choice.
+        if (resolvedBranchId) {
+          form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
+        } else {
+          form.setValue('branchId', '');
+        }
         form.setValue('counsellorId', '');
         form.setValue('admissionOfficerId', '');
       }
