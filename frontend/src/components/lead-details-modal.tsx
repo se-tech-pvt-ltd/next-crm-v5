@@ -346,15 +346,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
-                        <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select officer" /></SelectTrigger>
-                          <SelectContent>
-                            {users.map((u: any) => (
-                              <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
+                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select counselor" /></SelectTrigger>
+                        <SelectContent>
+                          {users.filter((u: any) => String((u.role || '')).toLowerCase().replace(/\s+/g,'_') === 'counselor').map((u: any) => (
+                            <SelectItem key={u.id} value={u.id}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       </div>
                     </div>
                   </CardContent>
@@ -454,11 +454,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
                       <div className="text-xs px-2 py-1.5 rounded border bg-white">
                         {(() => {
+                          const norm = (v: string) => String(v || '').toLowerCase().replace(/\s+/g,'_').replace(/-+/g,'_');
                           const branchId = (lead as any).branchId || (editData as any).branchId;
                           const officer = Array.isArray(users)
-                            ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && String(u.role).toLowerCase() === 'admission_officer')
+                            ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role) === 'admission_officer')
                             : null;
-                          const nm = officer ? [officer.firstName, officer.lastName].filter(Boolean).join(' ').trim() || officer.email : null;
+                          const nm = officer ? [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim() || officer.email || officer.id : null;
                           return nm || '—';
                         })()}
                       </div>
@@ -470,7 +471,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         {(() => {
                           const cid = (lead as any).counselorId || (editData as any).counselorId;
                           const c = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(cid)) : null;
-                          const nm = c ? [c.firstName, c.lastName].filter(Boolean).join(' ').trim() || c.email : null;
+                          const nm = c ? [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim() || c.email || c.id : null;
                           return nm || '—';
                         })()}
                       </div>
