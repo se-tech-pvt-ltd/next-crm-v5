@@ -11,14 +11,17 @@ const app = express();
 app.disable("x-powered-by");
 const isProd = process.env.NODE_ENV === "production";
 
-// Configure allowed CORS origins via env (comma-separated). In dev, allow common localhost defaults.
+// Configure allowed CORS origins via env (comma-separated) or FRONTEND_URL. In dev, default to localhost unless FRONTEND_URL provided.
 const allowedOriginsFromEnv = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+const frontendUrl = (process.env.FRONTEND_URL || '').trim();
+const defaultLocalhosts = ["http://localhost:5173", "http://127.0.0.1:5173"];
 const allowedOrigins = new Set<string>([
+  ...(frontendUrl ? [frontendUrl] : []),
   ...allowedOriginsFromEnv,
-  ...(isProd ? [] : ["http://localhost:5173", "http://127.0.0.1:5173"]),
+  ...(isProd ? [] : defaultLocalhosts),
 ]);
 
 app.use(
@@ -53,11 +56,11 @@ app.use(
   })
 );
 
-// CORS configuration (restricted origins and methods, allow credentials for auth cookies)
+// CORS configuration: require Origin header and only allow configured frontend origin(s)
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (!isProd) return callback(null, true);
+    // Reject requests without Origin (prevents access from curl/postman without Origin)
+    if (!origin) return callback(new Error("Not allowed by CORS - missing Origin header"));
     if (allowedOrigins.has(origin)) return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },
