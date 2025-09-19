@@ -345,17 +345,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
                         <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
-                      <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })} disabled={!isEditing || updateLeadMutation.isPending}>
-                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select counselor" /></SelectTrigger>
-                        <SelectContent>
-                          {users.filter((u: any) => String((u.role || '')).toLowerCase().replace(/\s+/g,'_') === 'counselor').map((u: any) => (
-                            <SelectItem key={u.id} value={u.id}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
