@@ -81,8 +81,6 @@ export class ActivityModel {
         newValue: activity.newValue,
         fieldName: activity.fieldName,
         userId: activity.userId,
-        userName: activity.userName,
-        userProfileImage: activity.userProfileImage,
         createdAt: activity.createdAt,
       });
     }
@@ -94,7 +92,6 @@ export class ActivityModel {
       activityType: 'converted',
       title: `Converted from ${fromEntityType}`,
       description: `This record was converted from ${fromEntityType} ID ${fromEntityIdStr}. All previous activities have been preserved.`,
-      userName: "Next Bot",
     });
   }
 

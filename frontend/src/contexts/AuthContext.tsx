@@ -41,35 +41,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Restore from localStorage and validate session with backend
     const init = async () => {
       try {
-        const savedUser = localStorage.getItem('auth_user');
-        if (savedUser) {
-          try {
-            const parsedUser = JSON.parse(savedUser);
-            setUser(parsedUser);
-          } catch {
-            localStorage.removeItem('auth_user');
-          }
+        const savedUserRaw = (() => { try { return localStorage.getItem('auth_user'); } catch { return null; } })();
+        let parsedSavedUser: any = null;
+        if (savedUserRaw) {
+          try { parsedSavedUser = JSON.parse(savedUserRaw); setUser(parsedSavedUser); } catch { try { localStorage.removeItem('auth_user'); } catch {} }
         }
 
-        // Validate session and fetch authoritative user id from backend
+        // Validate session and fetch authoritative user id from backend (single call)
+        let me: { id?: string; role?: string } | null = null;
         try {
-          const me = await http.get<{ id: string; role?: string }>('/api/auth/me');
-          if (me?.id) {
-            try {
-              const UsersService = await import('@/services/users');
-              const full = await UsersService.getUser(String(me.id));
-              if (full) {
-                setUser(full as any);
-                localStorage.setItem('auth_user', JSON.stringify(full));
-              }
-            } catch {}
-          }
-        } catch {}
+          me = await http.get<{ id: string; role?: string }>('/api/auth/me');
+        } catch {
+          me = null;
+        }
+
+        if (me?.id) {
+          try {
+            const UsersService = await import('@/services/users');
+            const full = await UsersService.getUser(String(me.id)).catch(() => null);
+            if (full) {
+              setUser(full as any);
+              try { localStorage.setItem('auth_user', JSON.stringify(full)); } catch {}
+            }
+          } catch {}
+        }
 
         // After user is determined, fetch role access
-        const uid = (savedUser ? (JSON.parse(savedUser)?.id) : undefined) || (await (async () => {
-          try { const me = await http.get<{ id: string }>('/api/auth/me'); return me?.id; } catch { return undefined; }
-        })());
+        const uid = parsedSavedUser?.id || me?.id;
         if (uid) {
           try {
             const UsersService = await import('@/services/users');
@@ -81,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (cached.length > 0) setAccessByRole(cached);
             setIsAccessLoading(true);
             const UserAccessService = await import('@/services/userAccess');
-            const all = await UserAccessService.listUserAccess();
+            const all = await UserAccessService.listUserAccess().catch(() => []);
             const filtered = (Array.isArray(all) ? all : []).filter((a: any) => String(a.roleId ?? a.role_id) === roleId);
             setAccessByRole(filtered);
             try { if (cacheKey) localStorage.setItem(cacheKey, JSON.stringify(filtered)); } catch {}

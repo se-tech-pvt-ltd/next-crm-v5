@@ -5,7 +5,51 @@ import { type Activity, type InsertActivity } from "../shared/schema.js";
 
 export class ActivityService {
   static async getActivities(entityType: string, entityId: string | number): Promise<Activity[]> {
-    return await ActivityModel.findByEntity(entityType, entityId);
+    const activities = await ActivityModel.findByEntity(entityType, entityId);
+    if (!Array.isArray(activities) || activities.length === 0) return [];
+
+    // collect unique userIds that are present
+    const userIds = Array.from(new Set(activities.map(a => (a as any).userId).filter(Boolean)));
+
+    // Fetch users and resolve display name and profile image from users table
+    const userMap: Record<string, { userName: string; userProfileImage: string | null }> = {};
+    for (const uid of userIds) {
+      try {
+        const user = await UserModel.findById(String(uid));
+        if (user) {
+          const userName = `${(user as any).firstName || ''} ${(user as any).lastName || ''}`.trim() || (user as any).email || 'User';
+          // Resolve profile image path if present
+          let profileImage: string | null = null;
+          const profileImageId = (user as any).profile_image_id || (user as any).profileImageId || (user as any).profileImageId;
+          if (profileImageId) {
+            try {
+              const att = await AttachmentModel.findById(String(profileImageId));
+              profileImage = att?.path || null;
+            } catch (err) {
+              profileImage = null;
+            }
+          } else {
+            profileImage = (user as any).profileImageUrl || (user as any).profile_image_url || (user as any).profileImage || null;
+          }
+          userMap[String(uid)] = { userName, userProfileImage: profileImage };
+        }
+      } catch (err) {
+        // ignore individual user failures
+      }
+    }
+
+    // attach resolved userName and profile images from users table (do not rely on stored columns)
+    const enriched = activities.map(a => {
+      const uid = String((a as any).userId || '');
+      const resolved = userMap[uid];
+      return {
+        ...a,
+        userName: resolved ? resolved.userName : (a as any).userName || 'Next Bot',
+        userProfileImage: resolved ? resolved.userProfileImage : null,
+      };
+    });
+
+    return enriched;
   }
 
   static async createActivity(activityData: InsertActivity): Promise<Activity> {
@@ -13,31 +57,14 @@ export class ActivityService {
   }
 
   static async createActivityWithUser(activityData: InsertActivity, userId?: string): Promise<Activity> {
-    let userName = "Next Bot";
-    let userProfileImage = null;
-    
-    if (userId) {
-      const user = await UserModel.findById(userId);
-      if (user) {
-        userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || "User";
-        if ((user as any).profileImageId) {
-          try {
-            const att = await AttachmentModel.findById(String((user as any).profileImageId));
-            userProfileImage = att?.path || null;
-          } catch {}
-        }
-      }
-    }
-    
-    const activityWithUser = {
+    // Do not persist userName and userProfileImage on activities; only store userId.
+    const activityWithUser: any = {
       ...activityData,
       entityId: String(activityData.entityId), // Convert to string for consistency
-      userId,
-      userName,
-      userProfileImage,
+      userId: userId || null,
     };
-    
-    return await ActivityModel.create(activityWithUser);
+
+    return await ActivityModel.create(activityWithUser as InsertActivity);
   }
 
   static async logActivity(
@@ -49,9 +76,7 @@ export class ActivityService {
     fieldName?: string,
     oldValue?: string,
     newValue?: string,
-    userId?: string,
-    userName?: string,
-    userProfileImage?: string
+    userId?: string
   ): Promise<void> {
     try {
       await ActivityModel.create({
@@ -63,9 +88,7 @@ export class ActivityService {
         fieldName,
         oldValue,
         newValue,
-        userId,
-        userName: userName || "Next Bot",
-        userProfileImage,
+        userId: userId || null,
       });
     } catch (error) {
       console.warn('Failed to log activity:', error);

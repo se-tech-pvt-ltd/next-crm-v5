@@ -44,7 +44,7 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose className={contentClassName}>
         <DialogTitle className="sr-only">{title}</DialogTitle>
-        <div className="flex flex-col h-[90vh] min-h-0 bg-white">
+        <div className="flex flex-col h-[90vh] min-h-0 bg-[#EDEDED]">
           {/* Header */}
           <div className="sticky top-0 z-20">
             <div className={`px-4 py-3 flex items-center justify-between ${headerClassName}`}>

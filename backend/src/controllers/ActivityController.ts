@@ -3,6 +3,8 @@ import { z } from "zod";
 import { ActivityService } from "../services/ActivityService.js";
 import { UserModel } from "../models/User.js";
 import { insertActivitySchema } from "../shared/schema.js";
+import type { Request, Response } from 'express';
+import type { AuthenticatedRequest } from "../middlewares/auth.js";
 
 export class ActivityController {
   private static async getCurrentUser() {
@@ -38,11 +40,12 @@ export class ActivityController {
     }
   }
 
-  static async createActivity(req: Request, res: Response) {
+  static async createActivity(req: AuthenticatedRequest, res: Response) {
     try {
-      const currentUser = await ActivityController.getCurrentUser();
+      // Prefer authenticated request user if middleware provided it
+      const currentUserId = req.user?.id || (await ActivityController.getCurrentUser()).id;
       const activityData = insertActivitySchema.parse(req.body);
-      const activity = await ActivityService.createActivityWithUser(activityData, currentUser.id);
+      const activity = await ActivityService.createActivityWithUser(activityData, currentUserId);
       res.json(activity);
     } catch (error) {
       console.error("Create activity error:", error);

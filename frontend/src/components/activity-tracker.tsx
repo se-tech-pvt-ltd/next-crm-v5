@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, KeyboardEvent } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "./help-tooltip";
@@ -12,7 +12,10 @@ import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calend
 import { Activity, User as UserType } from "@/lib/types";
 import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
+import * as UsersService from '@/services/users';
 import { format } from "date-fns";
+import { useAuth } from '@/contexts/AuthContext';
+import { createPortal } from 'react-dom';
 
 interface ActivityTrackerProps {
   entityType: string;
@@ -88,6 +91,27 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   // Generic dropdown label resolution
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  // Normalize activity object keys (accept snake_case from backend)
+  const normalizeActivity = (a: any) => {
+    if (!a || typeof a !== 'object') return a;
+    return {
+      ...a,
+      id: a.id ?? a.ID,
+      entityType: a.entityType ?? a.entity_type,
+      entityId: a.entityId ?? a.entity_id,
+      activityType: a.activityType ?? a.activity_type ?? a.activityType,
+      title: a.title ?? a.title,
+      description: a.description ?? a.description,
+      oldValue: a.oldValue ?? a.old_value,
+      newValue: a.newValue ?? a.new_value,
+      fieldName: a.fieldName ?? a.field_name,
+      userId: a.userId ?? a.user_id,
+      userName: a.userName ?? a.user_name,
+      userProfileImage: a.userProfileImage ?? a.user_profile_image,
+      createdAt: a.createdAt ?? a.created_at,
+    } as any;
+  };
   const getOptionsForField = (fieldName?: string): any[] => {
     if (!fieldName || !moduleDropdowns) return [];
     const target = normalize(fieldName);
@@ -105,9 +129,64 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   // Create a lookup function for user profile images
   const getUserProfileImage = (userId: string) => {
-    const user = users.find((u: UserType) => u.id === userId);
-    return user?.profileImageUrl || null;
+    const user = users.find((u: UserType) => String(u.id) === String(userId));
+    return (user as any)?.profileImageUrl || (user as any)?.profileImage || null;
   };
+
+  // Image viewer modal state
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageOpen, setImageOpen] = useState(false);
+
+  // Close overlay on Escape key
+  useEffect(() => {
+    if (!imageOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setImageOpen(false);
+        setSelectedImage(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [imageOpen]);
+
+  // Current authenticated user (used for optimistic fallback)
+  const { user } = useAuth();
+
+  // cache for fetched user profiles not present in the users list
+  const [fetchedProfiles, setFetchedProfiles] = useState<Record<string, string | null>>({});
+
+  const getCurrentUserProfileIfMatch = (activity: any) => {
+    if (!user) return null;
+    const displayName = ((user as any).name || (user as any).firstName || (user as any).email || '').toString().trim();
+    const activityName = (activity?.userName || '').toString().trim();
+    if (!activityName) return null;
+    // compare lowercased substrings to be tolerant
+    if (activityName.toLowerCase().includes(displayName.toLowerCase()) || displayName.toLowerCase().includes(activityName.toLowerCase())) {
+      return (user as any).profileImageUrl || (user as any).profileImage || null;
+    }
+    return null;
+  };
+
+  // Fetch missing user profiles returned by activities (server often omits userProfileImage)
+  useEffect(() => {
+    const missingIds = Array.from(new Set(
+      (Array.isArray(activities) ? activities.map(normalizeActivity) : [])
+        .map((a: any) => a.userId)
+        .filter(Boolean)
+        .filter((id: string) => !getUserProfileImage(id) && !(id in fetchedProfiles))
+    ));
+    if (missingIds.length === 0) return;
+    missingIds.forEach(async (id: string) => {
+      try {
+        const u = await UsersService.getUser(String(id));
+        const img = (u as any)?.profileImageUrl || (u as any)?.profileImage || null;
+        setFetchedProfiles(prev => ({ ...prev, [id]: img }));
+      } catch (err) {
+        setFetchedProfiles(prev => ({ ...prev, [id]: null }));
+      }
+    });
+  }, [activities, users, fetchedProfiles]);
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
@@ -121,18 +200,46 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       console.log('Activity created:', result);
       return result;
     },
-    onSuccess: (data) => {
-      console.log('Activity mutation success:', data);
-      queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
-      // Trigger a refetch to immediately show the new activity
-      refetch();
-      setNewActivity("");
-      setActivityType("comment");
+    // Optimistic update: add a temporary activity to the cache immediately
+    onMutate: async (data) => {
+      const tempId = `temp-${Date.now()}`;
+      const createdAt = new Date().toISOString();
+      const optimisticActivity: any = {
+        id: tempId,
+        entityType: String(entityType),
+        entityId: String(entityId),
+        activityType: data.type,
+        title: '',
+        description: data.content,
+        userName: user?.firstName || user?.name || user?.email || 'You',
+        userId: user?.id,
+        userProfileImage: (user as any)?.profileImageUrl || (user as any)?.profileImage || null,
+        createdAt,
+        isOptimistic: true,
+      };
+
+      await queryClient.cancelQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
+      const previous = queryClient.getQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`]);
+      queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], (old = []) => [optimisticActivity as any, ...(Array.isArray(old) ? old : [])]);
+      setNewActivity('');
+      setActivityType('comment');
       setIsAddingActivity(false);
+      return { previous, tempId };
     },
-    onError: (error) => {
-      console.error('Activity mutation error:', error);
+    onError: (err, variables, context: any) => {
+      console.error('Activity mutation error:', err);
+      if (context?.previous) {
+        queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], context.previous as any);
+      }
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
+      refetch();
+    },
+    onSuccess: (data, variables, context: any) => {
+      // server will provide actual activity; ensure cache refreshed
+      console.log('Activity mutation success:', data);
+    }
   });
 
   const handleAddActivity = () => {
@@ -141,7 +248,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleAddActivity();
@@ -202,6 +309,18 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       });
     }
     return text.replace(/[0-9a-fA-F-]{36}/g, (token) => getStatusLabel(token));
+  };
+
+  // Safely format dates that may be missing/invalid
+  const safeFormatDate = (d: any) => {
+    try {
+      if (!d) return '';
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return '';
+      return format(dt, 'MMM d, h:mm a');
+    } catch {
+      return '';
+    }
   };
 
   if (isLoading) {
@@ -312,7 +431,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         {/* Activities List */}
         <div className="space-y-5 pl-1">
           {(() => {
-            let list: Activity[] = Array.isArray(activities) ? [...(activities as Activity[])] : [];
+            let list: Activity[] = Array.isArray(activities) ? (activities as Activity[]).map(normalizeActivity) : [];
             if (initialInfo && initialInfo.trim().length > 0) {
               const createdActivity = list.find(a => a.activityType === 'created');
               const userName = initialInfoUserName || createdActivity?.userName || 'Admin User';
@@ -354,7 +473,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
             return list.map((activity: Activity, idx: number) => {
               const isLast = idx === list.length - 1;
-              const profileImage = (activity as any).userId ? getUserProfileImage((activity as any).userId as any) : (activity as any).userProfileImage;
+              const profileImage = (activity as any).userProfileImage || ((activity as any).userId ? (getUserProfileImage((activity as any).userId as any) || fetchedProfiles[(activity as any).userId]) : null) || getCurrentUserProfileIfMatch(activity);
               return (
                 <div key={`${activity.id}-${activity.createdAt}`} className="relative flex gap-3">
                   <div className="relative w-5 flex flex-col items-center">
@@ -365,16 +484,16 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <Avatar className="h-7 w-7 rounded-none">
-                            <AvatarImage className="object-cover" src={profileImage || ''} alt={activity.userName || 'User'} />
+                          <Avatar className="h-7 w-7 rounded-none" onClick={() => { if (profileImage) { setSelectedImage(profileImage); setImageOpen(true); } }} style={{ cursor: profileImage ? 'pointer' : 'default' }}>
+                            <AvatarImage className="object-cover" src={profileImage || undefined} alt={activity.userName || 'User'} />
                             <AvatarFallback className="rounded-none">{(activity.userName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col leading-tight">
                             <span className="font-semibold text-gray-900">{activity.userName || 'Unknown User'}</span>
-                            <span className="text-gray-600 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                            <span className="text-gray-600 capitalize">{(activity.activityType || '').replace('_', ' ')}</span>
                           </div>
                         </div>
-                        <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
+                        <span className="text-gray-500">{safeFormatDate(activity.createdAt)}</span>
                       </div>
                       {(activity.description || (activity as any).title) && (
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
@@ -402,6 +521,16 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
             });
           })()}
         </div>
+
+      {imageOpen && selectedImage && (createPortal(
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 pointer-events-auto" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+          <button aria-label="Close image" className="absolute right-6 top-6 z-[100000] rounded-full bg-white text-black p-2 shadow-lg hover:opacity-90" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+            ×
+          </button>
+          <img src={String(selectedImage)} alt="Profile" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
+        </div>,
+        typeof document !== 'undefined' ? document.body : null
+      ))}
 
     </div>
   );

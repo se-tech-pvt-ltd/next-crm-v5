@@ -117,8 +117,6 @@ export interface Activity {
   newValue: string | null;
   fieldName: string | null;
   userId: string | null;
-  userName: string | null;
-  userProfileImage: string | null;
   createdAt: Date;
 }
 
@@ -223,8 +221,6 @@ export const insertActivitySchema = z.object({
   newValue: z.string().optional(),
   fieldName: z.string().optional(),
   userId: z.string().optional(),
-  userName: z.string().optional(),
-  userProfileImage: z.string().optional(),
 });
 
 // Insert types for forms
