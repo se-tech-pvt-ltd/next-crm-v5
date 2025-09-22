@@ -371,7 +371,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                     </>
                   ) : (
                     <>
-                      <Button size="xs" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending} title="Save Changes">
+                      <Button size="xs" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
                         <Save className="w-3.5 h-3.5 mr-1" />
                         <span>Save Changes</span>
                       </Button>
