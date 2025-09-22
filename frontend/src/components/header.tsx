@@ -121,7 +121,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-2" role="banner">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-1" role="banner">
         <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
