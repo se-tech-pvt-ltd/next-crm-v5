@@ -348,7 +348,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Button
                     variant="outline"
                     size="xs"
-                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 bg-transparent hover:bg-white/10 hover:text-white"
+                    className="px-3 [&_svg]:size-3 bg-white/20 text-white hover:bg-white/30 border border-white/30 rounded-md"
                     onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
                     title="Add Application"
                   >
@@ -358,7 +358,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Button
                     variant="outline"
                     size="xs"
-                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 bg-transparent hover:bg-white/10 hover:text-white"
+                    className="px-3 [&_svg]:size-3 bg-white/20 text-white hover:bg-white/30 border border-white/30 rounded-md"
                     onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
                     disabled={isLoading}
                     title="Edit"
@@ -366,7 +366,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                     <Edit />
                     <span>Edit</span>
                   </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10 border border-white/30" onClick={() => onOpenChange(false)}>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-blue-700 hover:bg-white/90" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
