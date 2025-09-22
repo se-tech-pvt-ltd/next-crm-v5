@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "./help-tooltip";
@@ -13,6 +14,7 @@ import { Activity, User as UserType } from "@/lib/types";
 import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
 import { format } from "date-fns";
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ActivityTrackerProps {
   entityType: string;
