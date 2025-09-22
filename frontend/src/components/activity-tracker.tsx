@@ -114,6 +114,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   // Current authenticated user (used for optimistic fallback)
   const { user } = useAuth();
 
+  // cache for fetched user profiles not present in the users list
+  const [fetchedProfiles, setFetchedProfiles] = useState<Record<string, string | null>>({});
+
   const getCurrentUserProfileIfMatch = (activity: any) => {
     if (!user) return null;
     const displayName = ((user as any).name || (user as any).firstName || (user as any).email || '').toString().trim();
@@ -125,6 +128,26 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     }
     return null;
   };
+
+  // Fetch missing user profiles returned by activities (server often omits userProfileImage)
+  useEffect(() => {
+    const missingIds = Array.from(new Set(
+      (Array.isArray(activities) ? activities : [])
+        .map((a: any) => a.userId)
+        .filter(Boolean)
+        .filter((id: string) => !getUserProfileImage(id) && !(id in fetchedProfiles))
+    ));
+    if (missingIds.length === 0) return;
+    missingIds.forEach(async (id: string) => {
+      try {
+        const u = await UsersService.getUser(String(id));
+        const img = (u as any)?.profileImageUrl || (u as any)?.profileImage || null;
+        setFetchedProfiles(prev => ({ ...prev, [id]: img }));
+      } catch (err) {
+        setFetchedProfiles(prev => ({ ...prev, [id]: null }));
+      }
+    });
+  }, [activities, users, fetchedProfiles]);
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
