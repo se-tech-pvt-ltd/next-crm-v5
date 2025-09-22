@@ -5,7 +5,45 @@ import { type Activity, type InsertActivity } from "../shared/schema.js";
 
 export class ActivityService {
   static async getActivities(entityType: string, entityId: string | number): Promise<Activity[]> {
-    return await ActivityModel.findByEntity(entityType, entityId);
+    const activities = await ActivityModel.findByEntity(entityType, entityId);
+    if (!Array.isArray(activities) || activities.length === 0) return [];
+
+    // collect unique userIds that are present but missing userProfileImage
+    const userIds = Array.from(new Set(activities.map(a => (a as any).userId).filter(Boolean)));
+    const profileMap: Record<string, string | null> = {};
+
+    for (const uid of userIds) {
+      try {
+        const user = await UserModel.findById(String(uid));
+        if (user) {
+          // profile image may be stored as profile_image_id or profileImageId depending on schema
+          const profileImageId = (user as any).profile_image_id || (user as any).profileImageId || (user as any).profileImageId;
+          if (profileImageId) {
+            try {
+              const att = await AttachmentModel.findById(String(profileImageId));
+              profileMap[String(uid)] = att?.path || null;
+            } catch (err) {
+              profileMap[String(uid)] = null;
+            }
+          } else {
+            // user table may have direct path column named profileImageUrl or profile_image_url
+            profileMap[String(uid)] = (user as any).profileImageUrl || (user as any).profile_image_url || (user as any).profileImage || null;
+          }
+        } else {
+          profileMap[String(uid)] = null;
+        }
+      } catch (err) {
+        profileMap[String(uid)] = null;
+      }
+    }
+
+    // attach resolved profile images back to activities where missing
+    const enriched = activities.map(a => ({
+      ...a,
+      userProfileImage: (a as any).userProfileImage || profileMap[String((a as any).userId)] || null,
+    }));
+
+    return enriched;
   }
 
   static async createActivity(activityData: InsertActivity): Promise<Activity> {
