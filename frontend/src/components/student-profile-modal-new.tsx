@@ -386,7 +386,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   </Button>
                 </div>
               </div>
-              <div className="px-4 py-2 bg-[#223E7D] text-white">
+              <div className="px-4 py-2 bg-[#223E7D] text-white -mt-px">
                 {statusSequence.length > 0 && <StatusProgressBar />}
               </div>
             </div>
