@@ -90,9 +90,7 @@ export class ActivityService {
         fieldName,
         oldValue,
         newValue,
-        userId,
-        userName: userName || "Next Bot",
-        userProfileImage,
+        userId: userId || null,
       });
     } catch (error) {
       console.warn('Failed to log activity:', error);
