@@ -220,7 +220,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               {/* Sticky header inside scroll context */}
               <div className="sticky top-0 z-20">
                 {/* Blue title bar */}
-                <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
+                <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full">
                   <div>
                     <div className="text-[12px] opacity-80">Lead</div>
                     <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{lead.name || 'Lead'}</div>
@@ -237,7 +237,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-blue-800 hover:bg-white/90"
+                            className="bg-white text-primary hover:bg-white/90"
                             onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
                           >
                             View Student
@@ -246,7 +246,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-blue-800 hover:bg-white/90"
+                            className="bg-white text-primary hover:bg-white/90"
                             onClick={() => {
                               try { onOpenChange(false); } catch {}
                               if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`);
@@ -546,7 +546,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             <div className="border-l bg-white flex flex-col min-h-0">
               <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white flex items-center justify-between">
                 <h2 className="text-sm font-semibold">Activity Timeline</h2>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.dispatchEvent(new CustomEvent('open-activity-composer', { detail: { entityType: 'lead', entityId: lead.id } }))}>
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => window.dispatchEvent(new CustomEvent('open-activity-composer', { detail: { entityType: 'lead', entityId: lead.id } }))}>
                   + Add Activity
                 </Button>
               </div>
