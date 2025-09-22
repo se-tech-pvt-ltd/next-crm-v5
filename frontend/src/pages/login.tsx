@@ -64,7 +64,7 @@ export default function Login({ onLogin }: LoginProps) {
   return (
     <main role="main" className="min-h-screen bg-white flex">
       {/* Left Side - Branding */}
-      <aside aria-label="Branding" className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 flex-col justify-between relative overflow-hidden">
+      <aside aria-label="Branding" className="hidden lg:flex lg:w-1/2 bg-[#223E7D] p-12 flex-col justify-between relative overflow-hidden">
         {/* Background Pattern (decorative) */}
         <div className="absolute inset-0 opacity-10" aria-hidden="true">
           <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full"></div>
@@ -77,9 +77,9 @@ export default function Login({ onLogin }: LoginProps) {
         <header className="relative z-10">
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center" aria-hidden="true">
-              <GraduationCap className="w-7 h-7 text-blue-600" aria-hidden="true" />
+              <GraduationCap className="w-7 h-7 text-[#223E7D]" aria-hidden="true" />
             </div>
-            <h1 className="text-3xl font-bold text-white">SetCrm</h1>
+            <h1 className="text-3xl font-bold text-white">SetCRM</h1>
           </div>
 
           <div className="space-y-6">
@@ -144,10 +144,10 @@ export default function Login({ onLogin }: LoginProps) {
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center" aria-hidden="true">
+              <div className="w-10 h-10 bg-[#223E7D] rounded-xl flex items-center justify-center" aria-hidden="true">
                 <GraduationCap className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">SetCrm</h1>
+              <h1 className="text-2xl font-bold text-gray-900">SetCRM</h1>
             </div>
           </div>
 
@@ -173,7 +173,7 @@ export default function Login({ onLogin }: LoginProps) {
                           placeholder="Enter your email"
                           autoComplete="email"
                           inputMode="email"
-                          className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
+                          className="h-12 border-gray-300 focus:border-[#223E7D] focus:ring-[#223E7D] bg-white"
                         />
                       </FormControl>
                       <FormMessage />
@@ -209,7 +209,7 @@ export default function Login({ onLogin }: LoginProps) {
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           autoComplete="current-password"
-                          className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white"
+                          className="h-12 border-gray-300 focus:border-[#223E7D] focus:ring-[#223E7D] bg-white"
                         />
                       </FormControl>
                       <FormMessage />
@@ -223,7 +223,7 @@ export default function Login({ onLogin }: LoginProps) {
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-[#223E7D] focus:ring-[#223E7D] border-gray-300 rounded"
                     />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                       Remember me
@@ -231,7 +231,7 @@ export default function Login({ onLogin }: LoginProps) {
                   </div>
                   <button
                     type="button"
-                    className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+                    className="text-sm text-[#223E7D] hover:opacity-90 font-medium"
                     aria-label="Forgot password"
                   >
                     Forgot password?
@@ -247,7 +247,7 @@ export default function Login({ onLogin }: LoginProps) {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50"
+                  className="w-full h-12 bg-[#223E7D] hover:bg-[#223E7D]/90 text-white font-semibold transition-colors duration-200 disabled:opacity-50"
                   disabled={isLoading}
                   aria-busy={isLoading}
                 >
@@ -266,7 +266,7 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="text-center">
               <p className="text-sm text-gray-500">
                 Don't have an account?{' '}
-                <button className="text-blue-600 hover:text-blue-500 font-medium" aria-label="Contact Administrator">
+                <button className="text-[#223E7D] hover:opacity-90 font-medium" aria-label="Contact Administrator">
                   Contact Administrator
                 </button>
               </p>
