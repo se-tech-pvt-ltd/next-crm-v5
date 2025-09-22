@@ -337,23 +337,25 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
-            {/* Left: Content */}
-            <div className="flex flex-col min-h-0">
-              {/* Sticky header inside scroll context */}
-              <div className="sticky top-0 z-20">
-                <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
-                  <div>
-                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
-                  </div>
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
+          <div className="flex flex-col h-[90vh] min-h-0">
+            {/* Global sticky header spanning both columns */}
+            <div className="sticky top-0 z-20">
+              <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
+                <div>
+                  <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
                 </div>
-                <div className="px-4 py-2 bg-blue-800 text-white">
-                  {statusSequence.length > 0 && <StatusProgressBar />}
-                </div>
+                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
+              <div className="px-4 py-2 bg-blue-800 text-white">
+                {statusSequence.length > 0 && <StatusProgressBar />}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-[1fr_360px] flex-1 min-h-0">
+              {/* Left: Content */}
+              <div className="flex flex-col min-h-0">
 
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
@@ -589,13 +591,11 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
             {/* Right: Timeline */}
             <div className="bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-4 py-3 bg-blue-800 text-white flex items-center justify-start">
-                <h2 className="text-xs font-semibold">Activity Timeline</h2>
-              </div>
               <div className="flex-1 overflow-y-auto pt-1 min-h-0">
                 <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
               </div>
             </div>
+          </div>
           </div>
         </DialogContent>
       </Dialog>
