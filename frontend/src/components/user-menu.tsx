@@ -133,11 +133,15 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
       <div className="mt-auto pt-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={`${fullWidth ? 'w-full' : 'w-auto'} h-auto p-2 ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
+            <Button variant="ghost" className={`${fullWidth ? 'w-full' : 'w-auto'} h-auto ${fullWidth ? 'p-2' : 'p-1'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
               {collapsed ? (
                 <div className="relative group">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+                    {profileImageUrlSrc ? (
+                      <img src={profileImageUrlSrc} alt="avatar" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                      <span className="text-xs font-semibold text-white">{(displayName || 'U').slice(0,2).toUpperCase()}</span>
+                    )}
                   </div>
                   <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     {displayName} - {getRoleDisplay((user as any).role)}
