@@ -334,7 +334,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
           <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
