@@ -523,8 +523,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         </div>
 
       {imageOpen && selectedImage && (createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
-          <button aria-label="Close image" className="absolute right-4 top-4 z-60 rounded-md bg-black/60 p-2 text-white hover:bg-black/80" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 pointer-events-auto" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+          <button aria-label="Close image" className="absolute right-6 top-6 z-[100000] rounded-full bg-white text-black p-2 shadow-lg hover:opacity-90" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
             ×
           </button>
           <img src={String(selectedImage)} alt="Profile" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
