@@ -439,7 +439,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                           </Avatar>
                           <div className="flex flex-col leading-tight">
                             <span className="font-semibold text-gray-900">{activity.userName || 'Unknown User'}</span>
-                            <span className="text-gray-600 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                            <span className="text-gray-600 capitalize">{(activity.activityType || '').replace('_', ' ')}</span>
                           </div>
                         </div>
                         <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
