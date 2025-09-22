@@ -117,8 +117,6 @@ export interface Activity {
   newValue: string | null;
   fieldName: string | null;
   userId: string | null;
-  userName: string | null;
-  userProfileImage: string | null;
   createdAt: Date;
 }
 
