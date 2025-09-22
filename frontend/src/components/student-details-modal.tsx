@@ -261,7 +261,7 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
           </div>
 
           {/* Right: Timeline */}
-          <div className="w-[360px] border-l bg-white flex flex-col min-h-0">
+          <div className="w-[420px] border-l bg-white flex flex-col min-h-0">
             <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
               <h2 className="text-sm font-semibold">Activity Timeline</h2>
             </div>

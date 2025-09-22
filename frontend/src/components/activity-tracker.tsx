@@ -369,8 +369,10 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                             <AvatarImage className="object-cover" src={profileImage || ''} alt={activity.userName || 'User'} />
                             <AvatarFallback className="rounded-none">{(activity.userName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <span className="font-semibold text-gray-900">{activity.userName || 'Unknown User'}</span>
-                          <span className="text-gray-700 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-semibold text-gray-900">{activity.userName || 'Unknown User'}</span>
+                            <span className="text-gray-600 capitalize">{activity.activityType.replace('_', ' ')}</span>
+                          </div>
                         </div>
                         <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
                       </div>

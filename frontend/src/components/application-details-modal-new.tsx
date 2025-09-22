@@ -467,7 +467,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
             </div>
           </div>
 
-          <div className="w-[360px] flex-shrink-0 bg-white border-l p-3 flex flex-col min-h-0">
+          <div className="w-[420px] flex-shrink-0 bg-white border-l p-3 flex flex-col min-h-0">
             <div className="sticky top-0 z-10 px-1 pb-2 bg-white">
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />

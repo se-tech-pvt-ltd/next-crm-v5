@@ -220,10 +220,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               {/* Sticky header inside scroll context */}
               <div className="sticky top-0 z-20">
                 {/* Blue title bar */}
-                <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
+                <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full">
                   <div>
-                    <div className="text-[12px] opacity-80">Lead</div>
-                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{lead.name || 'Lead'}</div>
+                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[720px]">{lead.name || 'Lead'}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {convertedLoading ? (
@@ -237,7 +236,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-blue-800 hover:bg-white/90"
+                            className="bg-white text-primary hover:bg-white/90"
                             onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
                           >
                             View Student
@@ -246,7 +245,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-blue-800 hover:bg-white/90"
+                            className="bg-white text-primary hover:bg-white/90"
                             onClick={() => {
                               try { onOpenChange(false); } catch {}
                               if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`);
@@ -544,13 +543,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
             {/* Right: Timeline */}
             <div className="border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white flex items-center justify-between">
-                <h2 className="text-xs font-semibold">Activity Timeline</h2>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.dispatchEvent(new CustomEvent('open-activity-composer', { detail: { entityType: 'lead', entityId: lead.id } }))}>
-                  + Add Activity
-                </Button>
-              </div>
-              <div className="flex-1 overflow-y-auto pt-1 min-h-0">
+              <div className="flex-1 overflow-y-auto pt-2 min-h-0 mt-7">
                 <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>
             </div>
