@@ -310,7 +310,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           </div>
 
           {/* Full-width status bar */}
-          <div className="px-4 pt-0 pb-2 bg-[#223E7D] text-white -mt-[17px]">
+          <div className="px-4 py-2 bg-[#223E7D] text-white -mt-px">
             {statusSequence.length > 0 && (
               <div className="w-full bg-gray-100 rounded-md p-1">
                 <div className="flex items-center justify-between relative">
@@ -528,7 +528,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </div>
 
             {/* Right: Timeline */}
-            <div className="border-l bg-white flex flex-col min-h-0">
+            <div className="bg-white flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto min-h-0">
                 <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>
