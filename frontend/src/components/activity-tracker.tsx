@@ -422,7 +422,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
             return list.map((activity: Activity, idx: number) => {
               const isLast = idx === list.length - 1;
-              const profileImage = (activity as any).userProfileImage || ((activity as any).userId ? getUserProfileImage((activity as any).userId as any) : null) || getCurrentUserProfileIfMatch(activity);
+              const profileImage = (activity as any).userProfileImage || ((activity as any).userId ? (getUserProfileImage((activity as any).userId as any) || fetchedProfiles[(activity as any).userId]) : null) || getCurrentUserProfileIfMatch(activity);
               return (
                 <div key={`${activity.id}-${activity.createdAt}`} className="relative flex gap-3">
                   <div className="relative w-5 flex flex-col items-center">
