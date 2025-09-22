@@ -344,9 +344,32 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <div>
                   <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
                 </div>
-                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
-                  <X className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 hover:bg-white/10"
+                    onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                    title="Add Application"
+                  >
+                    <Plus />
+                    <span className="hidden lg:inline">Add Application</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 hover:bg-white/10"
+                    onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
+                    disabled={isLoading}
+                    title="Edit"
+                  >
+                    <Edit />
+                    <span className="hidden lg:inline">Edit</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10 border border-white/30" onClick={() => onOpenChange(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               <div className="px-4 py-2 bg-blue-800 text-white">
                 {statusSequence.length > 0 && <StatusProgressBar />}
@@ -364,24 +387,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                     <div className="flex items-center justify-between">
                       <CardTitle>Student Information</CardTitle>
                       <div className="flex items-center space-x-2">
-                        {!isEditing ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
-                              title="Add Application"
-                            >
-                              <Plus />
-                              <span className="hidden lg:inline">Add Application</span>
-                            </Button>
-                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }} disabled={isLoading} title="Edit">
-                              <Edit />
-                              <span className="hidden lg:inline">Edit</span>
-                            </Button>
-                          </>
-                        ) : (
+                        {isEditing ? (
                           <>
                             <Button size="sm" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending}>
                               <Save className="w-4 h-4 mr-1" />
@@ -392,7 +398,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               Cancel
                             </Button>
                           </>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </CardHeader>
