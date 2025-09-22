@@ -121,13 +121,13 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-[#223E7D] text-white shadow-sm px-3 sm:px-5 py-2" role="banner">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-2" role="banner">
         <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg sm:text-xl font-semibold text-white truncate">{title}</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{title}</h2>
               {subtitle && (
-                <p className="text-xs text-white/70 line-clamp-1 hidden sm:block">{subtitle}</p>
+                <p className="text-xs text-gray-500 line-clamp-1 hidden sm:block">{subtitle}</p>
               )}
             </div>
           </div>
@@ -142,7 +142,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                     id="global-search"
                     type="text"
                     placeholder="Search students, leads..."
-                    className="w-36 lg:w-48 bg-white text-gray-900 placeholder:text-gray-500"
+                    className="w-36 lg:w-48"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     aria-controls={searchQuery && searchResults.length > 0 ? 'search-results' : undefined}
@@ -182,7 +182,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative p-2 text-white hover:bg-white/10" aria-label="Open notifications" aria-haspopup="menu">
+                <Button variant="ghost" size="sm" className="relative p-2" aria-label="Open notifications" aria-haspopup="menu">
                   <Bell size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />
                   <Badge aria-label="3 unread notifications" className="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs">
                     3
