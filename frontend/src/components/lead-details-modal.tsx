@@ -342,7 +342,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Scrollable body */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+              <div className="flex-1 overflow-y-auto pt-0 px-3 pb-3 space-y-3 min-h-0">
                 <Card className="w-full shadow-md border border-gray-200 bg-white">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
