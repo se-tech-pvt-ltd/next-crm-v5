@@ -113,7 +113,7 @@ export const leads = mysqlTable("leads", {
 export const students = mysqlTable("students", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
   studentId: varchar("student_id", { length: 50 }).notNull(),
-  leadId: varchar("lead_id", { length: 255 }),
+  leadId: varchar("lead_id", { length: 255 }).notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -127,8 +127,6 @@ export const students = mysqlTable("students", {
   budget: text("budget"),
   status: text("status").notNull().default("active"),
   notes: text("notes"),
-  counselorId: varchar("counsellor_id", { length: 255 }),
-  branchId: varchar("branch_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   address: varchar("address", { length: 255 }),
@@ -136,7 +134,14 @@ export const students = mysqlTable("students", {
   scholarship: boolean("scholarship").notNull(),
   expectation: varchar("expectation", { length: 255 }).notNull(),
   eltTest: varchar("elt_test", { length: 255 }).notNull(),
+
+  // ✅ corrected/added fields
+  branchId: varchar("branch_id", { length: 255 }),
+  regionId: varchar("region_id", { length: 50 }),
+  counsellorId: varchar("counsellor_id", { length: 50 }),
+  admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
 });
+
 
 export const applications = mysqlTable("applications", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
@@ -153,6 +158,9 @@ export const applications = mysqlTable("applications", {
   googleDriveLink: text("google_drive_link"),
   notes: text("notes"),
   branchId: varchar("branch_id", { length: 255 }),
+  regionId: varchar("region_id", { length: 50 }),
+  counsellorId: varchar("counsellor_id", { length: 50 }),
+  admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -173,6 +181,9 @@ export const admissions = mysqlTable("admissions", {
   visaStatus: text("visa_status").default("pending"),
   admissionId: varchar("admission_id", { length: 255 }),
   branchId: varchar("branch_id", { length: 255 }),
+  regionId: varchar("region_id", { length: 50 }),
+  counsellorId: varchar("counsellor_id", { length: 50 }),
+  admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

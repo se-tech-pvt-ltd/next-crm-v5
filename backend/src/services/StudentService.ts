@@ -201,7 +201,19 @@ export class StudentService {
 
   static async convertFromLead(leadId: string, studentData: InsertStudent): Promise<Student> {
     console.log('[StudentService.convertFromLead] leadId:', leadId);
-    const payload = { ...(studentData as any), leadId } as any;
+    // Fetch lead to inherit branch/region and default counselor/admission officer if missing
+    const { LeadModel } = await import('../models/Lead.js');
+    const lead = await LeadModel.findById(leadId);
+
+    const payload = {
+      ...(studentData as any),
+      leadId,
+      // Prefer values coming from request; fallback to lead record
+      branchId: (studentData as any).branchId ?? (lead as any)?.branchId ?? undefined,
+      regionId: (studentData as any).regionId ?? (lead as any)?.regionId ?? undefined,
+      counsellorId: (studentData as any).counsellorId ?? (studentData as any).counselorId ?? (lead as any)?.counselorId ?? undefined,
+      admissionOfficerId: (studentData as any).admissionOfficerId ?? (lead as any)?.admissionOfficerId ?? undefined,
+    } as any;
     console.log('[StudentService.convertFromLead] payload:', JSON.stringify(payload));
 
     const student = await StudentModel.create(payload);
