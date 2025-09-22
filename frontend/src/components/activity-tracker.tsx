@@ -133,6 +133,10 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return (user as any)?.profileImageUrl || (user as any)?.profileImage || null;
   };
 
+  // Image viewer modal state
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageOpen, setImageOpen] = useState(false);
+
   // Current authenticated user (used for optimistic fallback)
   const { user } = useAuth();
 
