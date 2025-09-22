@@ -12,7 +12,8 @@ interface DetailsDialogLayoutProps {
   statusBarWrapperClassName?: string;
   leftContent: React.ReactNode;
   rightContent?: React.ReactNode;
-  rightWidthClassName?: string; // e.g. w-[420px]
+  rightWidth?: string; // e.g. '420px'
+  rightWidthClassName?: string; // legacy support e.g. 'w-[420px]'
   contentClassName?: string;
   headerClassName?: string; // e.g. 'bg-primary text-primary-foreground'
   showDefaultClose?: boolean;
@@ -28,12 +29,17 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
   statusBarWrapperClassName = 'px-4 py-2 bg-gray-50 border-t',
   leftContent,
   rightContent,
+  rightWidth,
   rightWidthClassName = 'w-[420px]',
   contentClassName = 'no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl',
   headerClassName = 'bg-white',
   showDefaultClose,
 }) => {
   const hasRight = !!rightContent;
+  // Determine right pane width (support old prop form like 'w-[420px]')
+  const extracted = rightWidthClassName?.match(/\[(.+?)\]/)?.[1];
+  const rightPaneWidth = rightWidth || extracted || '420px';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose className={contentClassName}>
@@ -63,14 +69,14 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
           </div>
 
           {/* Body */}
-          <div className={hasRight ? `grid grid-cols-[1fr_${rightWidthClassName}] flex-1 min-h-0` : 'flex-1 min-h-0'}>
+          <div className={hasRight ? 'grid flex-1 min-h-0' : 'flex-1 min-h-0'} style={hasRight ? { gridTemplateColumns: `1fr ${rightPaneWidth}` } : undefined}>
             <div className="flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
                 {leftContent}
               </div>
             </div>
             {hasRight && (
-              <div className="border-l bg-white flex flex-col min-h-0">
+              <div className="border-l bg-white flex flex-col min-h-0" style={{ width: rightPaneWidth }}>
                 <div className="flex-1 overflow-y-auto min-h-0">
                   {rightContent}
                 </div>
