@@ -15,6 +15,7 @@ import * as ActivitiesService from "@/services/activities";
 import * as UsersService from '@/services/users';
 import { format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
+import { createPortal } from 'react-dom';
 
 interface ActivityTrackerProps {
   entityType: string;
