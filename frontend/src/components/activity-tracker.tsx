@@ -236,7 +236,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                 <Button
                   size="sm"
                   onClick={() => setIsAddingActivity(true)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full bg-[#0071B0] hover:bg-[#00649D] text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Activity
