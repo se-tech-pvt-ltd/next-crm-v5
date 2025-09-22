@@ -1,3 +1,4 @@
+import React, { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
 import * as DropdownsService from '@/services/dropdowns';
