@@ -206,7 +206,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   if (isLoading) {
     return (
-      <div className="space-y-3 p-3">
+      <div className="space-y-3 pt-0 px-3 pb-3">
         <div className="text-center py-4 text-gray-500">Loading activities...</div>
       </div>
     );
@@ -214,7 +214,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   if (error) {
     return (
-      <div className="space-y-3 p-3">
+      <div className="space-y-3 pt-0 px-3 pb-3">
         <div className="text-center py-4">
           <div className="text-red-600 mb-2">Error loading activities</div>
           <div className="text-sm text-gray-500 mb-3">{error.message}</div>
@@ -227,7 +227,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   }
 
   return (
-    <div className="space-y-3 p-3">
+    <div className="space-y-3 pt-0 px-3 pb-3">
 
         {canAdd && (
           <>
