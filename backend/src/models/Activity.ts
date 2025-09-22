@@ -81,8 +81,6 @@ export class ActivityModel {
         newValue: activity.newValue,
         fieldName: activity.fieldName,
         userId: activity.userId,
-        userName: activity.userName,
-        userProfileImage: activity.userProfileImage,
         createdAt: activity.createdAt,
       });
     }
