@@ -311,7 +311,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           </div>
 
           {/* Full-width status bar */}
-          <div className="px-4 py-2 bg-[#223E7D] -mt-px">
+          <div className="px-4 pt-5 pb-2 bg-[#223E7D] -mt-5">
             {statusSequence.length > 0 && (
               <div className="w-full bg-gray-100 rounded-md p-1">
                 <div className="flex items-center justify-between relative">
