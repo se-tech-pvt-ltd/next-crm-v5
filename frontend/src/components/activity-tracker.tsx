@@ -229,87 +229,6 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   return (
     <div className="space-y-3 p-3">
 
-        {/* Add Activity Section (hidden when canAdd is false) */}
-        {canAdd && (
-          <>
-            <div className="space-y-2.5 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
-              {!isAddingActivity ? (
-                <Button
-                  size="sm"
-                  onClick={() => setIsAddingActivity(true)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Activity
-                </Button>
-              ) : (
-                <div className="space-y-3">
-                  <Select value={activityType} onValueChange={setActivityType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select activity type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ACTIVITY_TYPES.map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex items-center gap-2">
-                              <IconComponent className="h-4 w-4" />
-                              {type.label}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-
-                  <Textarea
-                    ref={textareaRef}
-                    placeholder="Enter activity details... (Press Enter to submit, Shift+Enter for new line)"
-                    value={newActivity}
-                    onChange={(e) => setNewActivity(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="min-h-[80px]"
-                  />
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleAddActivity}
-                      disabled={!newActivity.trim() || addActivityMutation.isPending}
-                    >
-                      {addActivityMutation.isPending ? "Adding..." : "Add Activity"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsAddingActivity(false);
-                        setNewActivity("");
-                        setActivityType("comment");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-
-                  {addActivityMutation.error && (
-                    <div className="text-red-600 text-xs p-2 bg-red-50 rounded">
-                      Error: {addActivityMutation.error.message}
-                    </div>
-                  )}
-
-                  <p className="text-xs text-gray-600">
-                    Press Enter to submit, Shift+Enter for new line
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <Separator />
-          </>
-        )}
-
         {/* Activities List */}
         <div className="space-y-5 pl-1">
           {(() => {
@@ -401,6 +320,86 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
             });
           })()}
         </div>
+
+        {/* Add Activity Section (moved to bottom) */}
+        {canAdd && (
+          <>
+            <Separator />
+            <div className="space-y-2.5 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 mt-2">
+              {!isAddingActivity ? (
+                <Button
+                  size="sm"
+                  onClick={() => setIsAddingActivity(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Activity
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <Select value={activityType} onValueChange={setActivityType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select activity type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ACTIVITY_TYPES.map((type) => {
+                        const IconComponent = type.icon;
+                        return (
+                          <SelectItem key={type.value} value={type.value}>
+                            <div className="flex items-center gap-2">
+                              <IconComponent className="h-4 w-4" />
+                              {type.label}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+
+                  <Textarea
+                    ref={textareaRef}
+                    placeholder="Enter activity details... (Press Enter to submit, Shift+Enter for new line)"
+                    value={newActivity}
+                    onChange={(e) => setNewActivity(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="min-h-[80px]"
+                  />
+
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleAddActivity}
+                      disabled={!newActivity.trim() || addActivityMutation.isPending}
+                    >
+                      {addActivityMutation.isPending ? "Adding..." : "Add Activity"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsAddingActivity(false);
+                        setNewActivity("");
+                        setActivityType("comment");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+
+                  {addActivityMutation.error && (
+                    <div className="text-red-600 text-xs p-2 bg-red-50 rounded">
+                      Error: {addActivityMutation.error.message}
+                    </div>
+                  )}
+
+                  <p className="text-xs text-gray-600">
+                    Press Enter to submit, Shift+Enter for new line
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
     </div>
   );
 }
