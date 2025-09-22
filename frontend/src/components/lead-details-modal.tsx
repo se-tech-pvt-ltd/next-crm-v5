@@ -19,7 +19,7 @@ import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
+import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadDetailsModalProps {
@@ -211,156 +211,142 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
-          <div className="grid grid-cols-[1fr_420px] h-[90vh] min-h-0">
-            {/* Left: Content */}
-            <div className="flex flex-col min-h-0">
-              {/* Sticky header inside scroll context */}
-              <div className="sticky top-0 z-20">
-                {/* Blue title bar */}
-                <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full">
-                  <div>
-                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[720px]">{lead.name || 'Lead'}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {convertedLoading ? (
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-8 w-24 bg-white/20" />
-                        <Skeleton className="h-8 w-8 rounded-full bg-white/20" />
-                      </div>
-                    ) : (
-                      <>
-                        {convertedStudent ? (
+          {/* Full-width top header */}
+          <div className="sticky top-0 z-30 px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full rounded-t-xl">
+            <div>
+              <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[75vw]">{lead.name || 'Lead'}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              {convertedLoading ? (
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-24 bg-white/20" />
+                  <Skeleton className="h-8 w-8 rounded-full bg-white/20" />
+                </div>
+              ) : (
+                <>
+                  {convertedStudent ? (
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                      onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
+                      title="View Student"
+                    >
+                      View Student
+                    </Button>
+                  ) : (
+                    <>
+                      {!isEditing && (
+                        <>
                           <Button
                             variant="outline"
-                            size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
-                            onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
-                          >
-                            View Student
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
+                            size="xs"
+                            className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
                             onClick={() => {
                               try { onOpenChange(false); } catch {}
                               if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`);
                             }}
+                            title="Convert to Student"
                           >
+                            <UserPlus className="w-4 h-4 mr-2" />
                             Convert to Student
                           </Button>
-                        )}
-                        <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Status stepper */}
-                <div className="px-3 py-2 bg-white border-b">
-                  {statusSequence.length > 0 && (
-                    <div className="w-full bg-gray-100 rounded-md p-1">
-                      <div className="flex items-center justify-between relative">
-                        {statusSequence.map((statusId, index) => {
-                          const currentIndex = statusSequence.indexOf(currentStatus);
-                          const isCompleted = index <= currentIndex;
-                          const statusName = getStatusDisplayName(statusId);
-                          const handleClick = () => {
-                            if (statusUpdateMutation.isPending) return;
-                            if (currentStatus === statusId) return;
-                            statusUpdateMutation.mutate(statusId);
-                          };
-                          return (
-                            <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}></div>
-                              <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
-                              {index < statusSequence.length - 1 && (
-                                <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                            onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                            onClick={() => setShowMarkAsLostModal(true)}
+                            title="Mark as Lost"
+                          >
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Lost
+                          </Button>
+                        </>
+                      )}
+                      {isEditing && (
+                        <>
+                          <Button
+                            size="xs"
+                            className="bg-[#0071B0] hover:bg-[#00649D] text-white"
+                            onClick={handleSaveChanges}
+                            title="Save"
+                            disabled={updateLeadMutation.isPending}
+                          >
+                            {updateLeadMutation.isPending ? 'Saving…' : 'Save'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="bg-white text-[#223E7D] hover:bg-white/90 border border-white"
+                            onClick={() => { setIsEditing(false); setEditData(lead); try { setLocation(`/leads/${lead?.id}`); } catch {} }}
+                            title="Cancel"
+                            disabled={updateLeadMutation.isPending}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      )}
+                    </>
                   )}
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)} title="Close">
+                    <X className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Full-width status bar */}
+          <div className="px-4 pt-0 pb-2 bg-[#223E7D] text-white border-t border-white/20 -mt-3">
+            {statusSequence.length > 0 && (
+              <div className="w-full bg-gray-100 rounded-md p-1">
+                <div className="flex items-center justify-between relative">
+                  {statusSequence.map((statusId, index) => {
+                    const currentIndex = statusSequence.indexOf(currentStatus);
+                    const isCompleted = index <= currentIndex;
+                    const statusName = getStatusDisplayName(statusId);
+                    const handleClick = () => {
+                      if (statusUpdateMutation.isPending) return;
+                      if (currentStatus === statusId) return;
+                      statusUpdateMutation.mutate(statusId);
+                    };
+                    return (
+                      <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}></div>
+                        <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
+                        {index < statusSequence.length - 1 && (
+                          <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            )}
+          </div>
 
+          <div className="grid grid-cols-[1fr_420px] h-[calc(90vh-92px)] min-h-0">
+            {/* Left: Content */}
+            <div className="flex flex-col min-h-0">
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
                 <Card className="w-full shadow-md border border-gray-200 bg-white">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle>Personal Information</CardTitle>
-                      <div className="flex items-center gap-2">
-                        {convertedLoading ? (
-                          <div className="flex items-center gap-2">
-                            <Skeleton className="h-8 w-20" />
-                            <Skeleton className="h-8 w-24" />
-                            <Skeleton className="h-8 w-16" />
-                          </div>
-                        ) : (
-                          <>
-                            {convertedStudent ? (
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                className="rounded-full h-7 text-[11px] px-2 [&_svg]:size-3"
-                                onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
-                                title="View Student"
-                              >
-                                <UserPlus />
-                                <span className="hidden lg:inline">View Student</span>
-                              </Button>
-                            ) : !isEditing ? (
-                              <>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }} title="Edit">
-                                  <Edit />
-                                  <span className="hidden lg:inline">Edit</span>
-                                </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => {
-                                  try {
-                                    // close this modal first
-                                    try { onOpenChange(false); } catch {}
-                                    if (typeof onOpenConvert === 'function') {
-                                      onOpenConvert(lead);
-                                    } else {
-                                      setLocation(`/leads/${lead?.id}/student`);
-                                    }
-                                  } catch (e) {
-                                    try { onOpenChange(false); } catch {}
-                                    setLocation(`/leads/${lead?.id}/student`);
-                                  }
-                                }} title="Convert to Student">
-                                  <UserPlus />
-                                  <span className="hidden lg:inline">Convert</span>
-                                </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setShowMarkAsLostModal(true)} title="Mark as Lost">
-                                  <XCircle />
-                                  <span className="hidden lg:inline">Lost</span>
-                                </Button>
-                              </>
-                            ) : (
-                              <>
-                                <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateLeadMutation.isPending}>
-                                  <Save />
-                                  <span className="hidden lg:inline">{updateLeadMutation.isPending ? 'Saving…' : 'Save'}</span>
-                                </Button>
-                                <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(lead); try { setLocation(`/leads/${lead?.id}`); } catch {} }} title="Cancel" disabled={updateLeadMutation.isPending}>
-                                  <X />
-                                  <span className="hidden lg:inline">Cancel</span>
-                                </Button>
-                              </>
-                            )}
-                          </>
-                        )}
-                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -543,7 +529,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
             {/* Right: Timeline */}
             <div className="border-l bg-white flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto pt-2 min-h-0 mt-7">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>
             </div>
