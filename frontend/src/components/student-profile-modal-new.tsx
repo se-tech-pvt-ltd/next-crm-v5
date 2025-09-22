@@ -334,280 +334,267 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
-          <DialogTitle className="sr-only">Student Profile</DialogTitle>
-          
-          <div className="flex flex-col h-[90vh] min-h-0 bg-[#EDEDED]">
-            {/* Global sticky header spanning both columns */}
-            <div className="sticky top-0 z-20">
-              <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between rounded-t-xl">
-                <div>
-                  <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
+      <DetailsDialogLayout
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Student Profile"
+        headerClassName="bg-[#223E7D] text-white"
+        statusBarWrapperClassName="px-4 py-2 bg-[#223E7D] text-white -mt-px"
+        headerLeft={(
+          <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
+        )}
+        headerRight={(
+          <div className="flex items-center gap-2">
+            {!isEditing ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                  onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                  title="Add Application"
+                >
+                  <Plus />
+                  <span>Add Application</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                  onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
+                  disabled={isLoading}
+                  title="Edit"
+                >
+                  <Edit />
+                  <span>Edit</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="xs" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
+                  <Save className="w-3.5 h-3.5 mr-1" />
+                  <span>Save Changes</span>
+                </Button>
+                <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel" className="bg-white text-[#223E7D] hover:bg-white/90 border border-white">
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  <span>Cancel</span>
+                </Button>
+              </>
+            )}
+            <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+        statusBar={statusSequence.length > 0 ? <StatusProgressBar /> : undefined}
+        leftContent={(
+          <>
+            <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Student Information</CardTitle>
+                  <div className="flex items-center space-x-2"></div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {!isEditing ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                        onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
-                        title="Add Application"
-                      >
-                        <Plus />
-                        <span>Add Application</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                        onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
-                        disabled={isLoading}
-                        title="Edit"
-                      >
-                        <Edit />
-                        <span>Edit</span>
-                      </Button>
-                    </>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div className="space-y-2">
+                    <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
+                    <div className="text-sm text-gray-700">{student?.student_id || student?.id || 'N/A'}</div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="flex items-center space-x-2">
+                      <UserIcon className="w-4 h-4" />
+                      <span>Full Name</span>
+                    </Label>
+                    <Input id="name" value={isEditing ? (editData.name || '') : (student?.name || '')} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="passportNumber" className="flex items-center space-x-2">
+                      <UserIcon className="w-4 h-4" />
+                      <span>Passport Number</span>
+                    </Label>
+                    <Input id="passportNumber" value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')} onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4" />
+                      <span>Email Address</span>
+                    </Label>
+                    <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4" />
+                      <span>Phone Number</span>
+                    </Label>
+                    <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Date of Birth</span>
+                    </Label>
+                    <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>Address</span>
+                    </Label>
+                    <Textarea id="address" rows={3} value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="flex items-center space-x-2"><GraduationCap className="w-4 h-4 text-primary" /><span>Academic Information</span></CardTitle>}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="space-y-2">
+                  <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>English Proficiency</span>
+                  </Label>
+                  {isEditing ? (
+                    <Select value={editData.englishProficiency || ''} onValueChange={(v) => setEditData({ ...editData, englishProficiency: v })}>
+                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
+                      <SelectContent>
+                        {getFieldOptions('englishProficiency').map((opt: any) => (
+                          <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                            {opt.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   ) : (
-                    <>
-                      <Button size="xs" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
-                        <Save className="w-3.5 h-3.5 mr-1" />
-                        <span>Save Changes</span>
-                      </Button>
-                      <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel" className="bg-white text-[#223E7D] hover:bg-white/90 border border-white">
-                        <X className="w-3.5 h-3.5 mr-1" />
-                        <span>Cancel</span>
-                      </Button>
-                    </>
+                    <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled className="h-7 text-[11px]" />
                   )}
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
-                    <X className="w-4 h-4" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center space-x-2"><span>Counsellor</span></Label>
+                  {isEditing ? (
+                    <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
+                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectContent>
+                        {counselorOptions().map((opt: any) => (
+                          <SelectItem key={opt.id} value={opt.id}>{opt.value}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="text-sm text-gray-700">{(() => { const found = counselorOptions().find((d: any) => d.id === student?.counselorId); return found?.value || 'Unassigned'; })()}</div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
+                  {isEditing ? (
+                    <Select value={editData.expectation || ''} onValueChange={(v) => setEditData({ ...editData, expectation: v })}>
+                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select expectation" /></SelectTrigger>
+                      <SelectContent>
+                        {getFieldOptions('expectation').map((opt: any) => (
+                          <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                            {opt.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {isEditing ? (
+                    <div className="flex items-center space-x-6">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox checked={!!editData.consultancyFree} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} />
+                        <span className="text-sm">Consultancy Free</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Checkbox checked={!!editData.scholarship} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} />
+                        <span className="text-sm">Scholarship</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <div className="text-[11px] text-gray-600">Consultancy Fee</div>
+                        <div className="text-sm text-gray-700">{student?.consultancyFree ? 'Yes' : 'No'}</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-gray-600">Scholarship</div>
+                        <div className="text-sm text-gray-700">{student?.scholarship ? 'Yes' : 'No'}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </CollapsibleCard>
+
+            <CollapsibleCard
+              persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
+              cardClassName="shadow-sm hover:shadow-md transition-shadow"
+              header={
+                <div className="flex items-center justify-between w-full">
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span>Applications</span>
+                    {Array.isArray(applications) && (
+                      <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
+                    )}
+                  </CardTitle>
+                  <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
+                    <Plus />
+                    <span>Add Application</span>
                   </Button>
                 </div>
-              </div>
-              <div className="px-4 py-2 bg-[#223E7D] text-white -mt-px">
-                {statusSequence.length > 0 && <StatusProgressBar />}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-[1fr_420px] flex-1 min-h-0">
-              {/* Left: Content */}
-              <div className="flex flex-col min-h-0">
-
-              {/* Scrollable body */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-                <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Student Information</CardTitle>
-                      <div className="flex items-center space-x-2"></div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      <div className="space-y-2">
-                        <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
-                        <div className="text-sm text-gray-700">{student?.student_id || student?.id || 'N/A'}</div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="name" className="flex items-center space-x-2">
-                          <UserIcon className="w-4 h-4" />
-                          <span>Full Name</span>
-                        </Label>
-                        <Input id="name" value={isEditing ? (editData.name || '') : (student?.name || '')} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="passportNumber" className="flex items-center space-x-2">
-                          <UserIcon className="w-4 h-4" />
-                          <span>Passport Number</span>
-                        </Label>
-                        <Input id="passportNumber" value={isEditing ? (editData.passportNumber || '') : (student?.passportNumber || '')} onChange={(e) => setEditData({ ...editData, passportNumber: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email Address</span>
-                        </Label>
-                        <Input id="email" type="email" value={isEditing ? (editData.email || '') : (student?.email || '')} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="phone" className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4" />
-                          <span>Phone Number</span>
-                        </Label>
-                        <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="dateOfBirth" className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>Date of Birth</span>
-                        </Label>
-                        <DobPicker id="dateOfBirth" value={isEditing ? (editData.dateOfBirth || '') : (student?.dateOfBirth || '')} onChange={(v) => setEditData({ ...editData, dateOfBirth: v })} disabled={!isEditing} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="address" className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4" />
-                          <span>Address</span>
-                        </Label>
-                        <Textarea id="address" rows={3} value={isEditing ? (editData.address || '') : (student?.address || '')} onChange={(e) => setEditData({ ...editData, address: e.target.value })} disabled={!isEditing} className="text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="flex items-center space-x-2"><GraduationCap className="w-4 h-4 text-primary" /><span>Academic Information</span></CardTitle>}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="englishProficiency" className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4" />
-                        <span>English Proficiency</span>
-                      </Label>
-                      {isEditing ? (
-                        <Select value={editData.englishProficiency || ''} onValueChange={(v) => setEditData({ ...editData, englishProficiency: v })}>
-                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
-                          <SelectContent>
-                            {getFieldOptions('englishProficiency').map((opt: any) => (
-                              <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
-                                {opt.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled className="h-7 text-[11px]" />
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><span>Counsellor</span></Label>
-                      {isEditing ? (
-                        <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
-                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                          <SelectContent>
-                            {counselorOptions().map((opt: any) => (
-                              <SelectItem key={opt.id} value={opt.id}>{opt.value}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="text-sm text-gray-700">{(() => { const found = counselorOptions().find((d: any) => d.id === student?.counselorId); return found?.value || 'Unassigned'; })()}</div>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
-                      {isEditing ? (
-                        <Select value={editData.expectation || ''} onValueChange={(v) => setEditData({ ...editData, expectation: v })}>
-                          <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select expectation" /></SelectTrigger>
-                          <SelectContent>
-                            {getFieldOptions('expectation').map((opt: any) => (
-                              <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
-                                {opt.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      {isEditing ? (
-                        <div className="flex items-center space-x-6">
-                          <div className="flex items-center space-x-3">
-                            <Checkbox checked={!!editData.consultancyFree} onCheckedChange={(v) => setEditData({ ...editData, consultancyFree: !!v })} />
-                            <span className="text-sm">Consultancy Free</span>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <Checkbox checked={!!editData.scholarship} onCheckedChange={(v) => setEditData({ ...editData, scholarship: !!v })} />
-                            <span className="text-sm">Scholarship</span>
-                          </div>
+              }
+            >
+              {(!applications || applications.length === 0) ? (
+                <div className="text-xs text-gray-500">No applications yet.</div>
+              ) : (
+                <div className="divide-y">
+                  {applications.map((app) => (
+                    <button
+                      key={app.id}
+                      type="button"
+                      onClick={() => { try { setLocation(`/applications/${app.id}`); } catch {} if (typeof onOpenApplication === 'function') { onOpenApplication(app); onOpenChange(false); } else { setSelectedApplication(app); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); } onOpenChange(false); } }}
+                      className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">{app.university} — {app.program}</div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {(app.country || '-')}{app.intake ? ` • ${app.intake}` : ''}
                         </div>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <div className="text-[11px] text-gray-600">Consultancy Fee</div>
-                            <div className="text-sm text-gray-700">{student?.consultancyFree ? 'Yes' : 'No'}</div>
-                          </div>
-                          <div>
-                            <div className="text-[11px] text-gray-600">Scholarship</div>
-                            <div className="text-sm text-gray-700">{student?.scholarship ? 'Yes' : 'No'}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-[10px]">{app.appStatus}</Badge>
+                        {app.caseStatus && <Badge variant="secondary" className="text-[10px]">{app.caseStatus}</Badge>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </CollapsibleCard>
 
-                  </div>
-                </CollapsibleCard>
-
-                <CollapsibleCard
-                  persistKey={`student-details:${authUser?.id || 'anon'}:applications`}
-                  cardClassName="shadow-sm hover:shadow-md transition-shadow"
-                  header={
-                    <div className="flex items-center justify-between w-full">
-                      <CardTitle className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-primary" />
-                        <span>Applications</span>
-                        {Array.isArray(applications) && (
-                          <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
-                        )}
-                      </CardTitle>
-                      <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
-                        <Plus />
-                        <span>Add Application</span>
-                      </Button>
-                    </div>
-                  }
-                >
-                  {(!applications || applications.length === 0) ? (
-                    <div className="text-xs text-gray-500">No applications yet.</div>
-                  ) : (
-                    <div className="divide-y">
-                      {applications.map((app) => (
-                        <button
-                          key={app.id}
-                          type="button"
-                          onClick={() => { try { setLocation(`/applications/${app.id}`); } catch {} if (typeof onOpenApplication === 'function') { onOpenApplication(app); onOpenChange(false); } else { setSelectedApplication(app); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); } onOpenChange(false); } }}
-                          className="w-full text-left flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        >
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium truncate">{app.university} — {app.program}</div>
-                            <div className="text-xs text-gray-500 truncate">
-                              {(app.country || '-')}{app.intake ? ` • ${app.intake}` : ''}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Badge variant="outline" className="text-[10px]">{app.appStatus}</Badge>
-                            {app.caseStatus && <Badge variant="secondary" className="text-[10px]">{app.caseStatus}</Badge>}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </CollapsibleCard>
-
-              </div>
-            </div>
-
-            {/* Right: Timeline */}
-            <div className="bg-white flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto pt-1 min-h-0">
-                <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
-              </div>
-            </div>
+          </>
+        )}
+        rightContent={(
+          <div className="pt-1">
+            <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
           </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+        )}
+        rightWidthClassName="w-[420px]"
+      />
 
 
       <ApplicationDetailsModal
