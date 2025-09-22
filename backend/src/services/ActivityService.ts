@@ -57,31 +57,14 @@ export class ActivityService {
   }
 
   static async createActivityWithUser(activityData: InsertActivity, userId?: string): Promise<Activity> {
-    let userName = "Next Bot";
-    let userProfileImage = null;
-    
-    if (userId) {
-      const user = await UserModel.findById(userId);
-      if (user) {
-        userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || "User";
-        if ((user as any).profileImageId) {
-          try {
-            const att = await AttachmentModel.findById(String((user as any).profileImageId));
-            userProfileImage = att?.path || null;
-          } catch {}
-        }
-      }
-    }
-    
-    const activityWithUser = {
+    // Do not persist userName and userProfileImage on activities; only store userId.
+    const activityWithUser: any = {
       ...activityData,
       entityId: String(activityData.entityId), // Convert to string for consistency
-      userId,
-      userName,
-      userProfileImage,
+      userId: userId || null,
     };
-    
-    return await ActivityModel.create(activityWithUser);
+
+    return await ActivityModel.create(activityWithUser as InsertActivity);
   }
 
   static async logActivity(
