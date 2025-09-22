@@ -257,7 +257,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_420px] h-[90vh] min-h-0">
+          <div className="grid grid-cols-[1fr_420px] h-[calc(90vh-48px)] min-h-0">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Status stepper */}
