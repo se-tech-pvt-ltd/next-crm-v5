@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Calendar,
-  GraduationCap as ToolkitIcon
+  GraduationCap as ToolkitIcon,
+  LifeBuoy
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -102,68 +103,18 @@ export function Sidebar() {
   }, [accessByRole]);
 
   const navItems = [
-    {
-      path: '/',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      count: undefined
-    },
-    {
-      path: '/toolkit',
-      label: 'Toolkit',
-      icon: ToolkitIcon,
-      count: undefined
-    },
-    {
-      path: '/events',
-      label: 'Events',
-      icon: Calendar,
-      count: Array.isArray(eventsData) ? eventsData.length : 0,
-      countColor: 'bg-blue-500'
-    },
-    {
-      path: '/leads',
-      label: 'Leads',
-      icon: Users,
-      count: newLeadsCount,
-      countColor: 'bg-emerald-500'
-    },
-    {
-      path: '/students',
-      label: 'Students',
-      icon: GraduationCap,
-      count: studentsCount,
-      countColor: 'bg-purple-600'
-    },
-    {
-      path: '/applications',
-      label: 'Applications',
-      icon: GraduationCap,
-      count: applicationsCount,
-      countColor: 'bg-amber-500'
-    },
-    {
-      path: '/admissions',
-      label: 'Admissions',
-      icon: Trophy,
-      count: acceptedAdmissionsCount,
-      countColor: 'bg-emerald-500'
-    },
-    {
-      path: '/reports',
-      label: 'Reports',
-      icon: BarChart3,
-      count: undefined
-    },
-    {
-      path: '/settings',
-      label: 'Settings',
-      icon: Settings,
-      count: undefined
-    },
+    { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
+    { path: '/events', label: 'Event', icon: Calendar, count: Array.isArray(eventsData) ? eventsData.length : 0, countColor: 'bg-blue-500' },
+    { path: '/leads', label: 'Leads', icon: Users, count: newLeadsCount, countColor: 'bg-emerald-500' },
+    { path: '/students', label: 'Students', icon: GraduationCap, count: studentsCount, countColor: 'bg-purple-600' },
+    { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
+    { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
+    { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
+    { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
+    { path: '/toolkit', label: 'Toolkit', icon: ToolkitIcon, count: undefined },
   ].filter(item => isModuleVisible(item.label));
 
-  const sidebarWidth = isExpanded ? 'w-48' : 'w-16';
+  const sidebarWidth = isExpanded ? 'w-56' : 'w-16';
 
   const handleMouseEnter = () => {
     if (!isMobile) {
@@ -176,11 +127,10 @@ export function Sidebar() {
   };
 
   const handleMouseLeave = () => {
-    // Do not auto-collapse on desktop. Only collapse on mobile.
     if (isMobile) {
       const timeout = setTimeout(() => {
         setIsExpanded(false);
-      }, 300); // 300ms delay before closing on mobile
+      }, 300);
       setHoverTimeout(timeout);
     }
   };
@@ -188,32 +138,33 @@ export function Sidebar() {
   return (
     <aside
       aria-label="Primary navigation"
-      className={`${sidebarWidth} bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out relative`}
+      className={`${sidebarWidth} bg-gradient-to-b from-blue-800 to-blue-700 text-white flex flex-col transition-all duration-300 ease-in-out relative border-r border-blue-900/40`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Toggle Button */}
-      <div className="p-3 border-b border-gray-200 flex items-center justify-between" role="presentation">
+      {/* Brand / Toggle */}
+      <div className="p-3 border-b border-white/10 flex items-center justify-between" role="presentation">
         {isExpanded ? (
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
-              <GraduationCap className="text-white" size={14} />
+            <div className="w-8 h-8 bg-white/10 rounded-md flex items-center justify-center ring-1 ring-white/20">
+              <GraduationCap className="text-white" size={16} />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-gray-900">SetCrm</h1>
+              <h1 className="text-sm font-bold">SetCrm</h1>
+              <p className="text-[10px] text-white/70">Consultancy</p>
             </div>
           </div>
         ) : (
-          <div className="w-6 h-6 bg-primary rounded flex items-center justify-center mx-auto">
-            <GraduationCap className="text-white" size={14} />
+          <div className="w-8 h-8 bg-white/10 rounded-md flex items-center justify-center mx-auto ring-1 ring-white/20">
+            <GraduationCap className="text-white" size={16} />
           </div>
         )}
-        
+
         {isMobile && (
           <Button
             variant="ghost"
             size="sm"
-            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-expanded={isExpanded}
             aria-controls="primary-nav"
             onClick={() => {
@@ -223,7 +174,7 @@ export function Sidebar() {
                 setHoverTimeout(null);
               }
             }}
-            className="p-1 h-6 w-6"
+            className="p-1 h-7 w-7 text-white hover:bg-white/10"
           >
             {isExpanded ? <X size={14} /> : <Menu size={14} />}
           </Button>
@@ -236,13 +187,10 @@ export function Sidebar() {
           const isActive = location === item.path;
 
           const handleNavClick = () => {
-            // Clear any existing timeout
             if (hoverTimeout) {
               clearTimeout(hoverTimeout);
               setHoverTimeout(null);
             }
-
-            // Only close sidebar on mobile after navigation
             if (isMobile && isExpanded) {
               setTimeout(() => setIsExpanded(false), 150);
             }
@@ -253,11 +201,10 @@ export function Sidebar() {
               <div
                 className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
                   isActive
-                    ? 'bg-primary text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-white text-blue-800 shadow'
+                    : 'text-white/90 hover:bg-white/10'
                 } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
                 onMouseDown={() => {
-                  // set lock immediately on pointer down to avoid race with mouseleave
                   if (!isMobile) {
                     navigationLockRef.current = true;
                     setNavigationLock(true);
@@ -272,12 +219,10 @@ export function Sidebar() {
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={item.label}
               >
-                
                 <div className="relative">
                   <item.icon size={16} />
-                  {/* Show count as dot when collapsed */}
                   {!isExpanded && item.count !== undefined && item.count > 0 && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full"></div>
                   )}
                 </div>
 
@@ -285,21 +230,16 @@ export function Sidebar() {
                   <>
                     <span className="font-medium text-sm">{item.label}</span>
                     {item.count !== undefined && item.count > 0 && (
-                      <Badge className={`ml-auto ${item.countColor} text-white text-xs px-2 py-0.5`}>
-                        {item.count}
-                      </Badge>
+                      <Badge className={`ml-auto ${item.countColor || ''} text-white text-[10px] px-1.5 py-0.5 rounded-full`}>{item.count}</Badge>
                     )}
                   </>
                 )}
 
-                {/* Tooltip for collapsed state */}
                 {!isExpanded && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     {item.label}
                     {item.count !== undefined && item.count > 0 && (
-                      <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded">
-                        {item.count}
-                      </span>
+                      <span className="ml-1 bg-red-500 text-white text-[10px] px-1 rounded">{item.count}</span>
                     )}
                   </div>
                 )}
@@ -309,8 +249,19 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Support button */}
+      <div className="px-2 pb-2">
+        <Link href="/settings">
+          <div className={`flex items-center ${isExpanded ? 'justify-center space-x-2' : 'justify-center'} bg-white text-blue-800 rounded-lg px-3 py-2 font-medium cursor-pointer hover:shadow`}
+               aria-label="Support">
+            <LifeBuoy size={16} />
+            {isExpanded && <span className="text-sm">Support</span>}
+          </div>
+        </Link>
+      </div>
+
       {/* User Profile */}
-      <div className={`border-t border-gray-200 ${isExpanded ? '' : 'px-2'}`}>
+      <div className={`border-t border-white/10 ${isExpanded ? '' : 'px-2'}`}>
         <UserMenu collapsed={!isExpanded} />
       </div>
     </aside>

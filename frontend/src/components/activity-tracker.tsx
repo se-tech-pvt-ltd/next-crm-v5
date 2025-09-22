@@ -1,4 +1,4 @@
-import { useState, useRef, KeyboardEvent } from "react";
+import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "./help-tooltip";
@@ -40,6 +40,19 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      const match = String(d.entityType) === String(entityType) && String(d.entityId) === String(entityId);
+      if (match) {
+        setIsAddingActivity(true);
+        setTimeout(() => textareaRef.current?.focus(), 0);
+      }
+    };
+    window.addEventListener('open-activity-composer', handler as EventListener);
+    return () => window.removeEventListener('open-activity-composer', handler as EventListener);
+  }, [entityType, entityId]);
 
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
