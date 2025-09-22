@@ -341,14 +341,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Sticky header inside scroll context */}
-              <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-                <div className="px-3 py-2 flex items-center justify-between">
-                  <div className="flex-1">
-                    {statusSequence.length > 0 && <StatusProgressBar />}
+              <div className="sticky top-0 z-20">
+                <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
+                  <div>
+                    <div className="text-[12px] opacity-80">Student</div>
+                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
                   </div>
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
+                </div>
+                <div className="px-3 py-2 bg-white border-b">
+                  {statusSequence.length > 0 && <StatusProgressBar />}
                 </div>
               </div>
 
