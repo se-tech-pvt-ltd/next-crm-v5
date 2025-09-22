@@ -264,15 +264,22 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             <>
               {!isEditing && (
                 <>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                    onClick={() => { try { onOpenChange(false); } catch {} if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`); }}
+                    title="Convert to Student"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Convert
+                  </Button>
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="xs" className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md" aria-label="Actions">Actions</Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="text-sm">
-                      <DropdownMenuItem onClick={() => { try { onOpenChange(false); } catch {} if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`); }}>
-                        <UserPlus className="w-4 h-4 mr-2 inline-block" />
-                        Convert to Student
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
                         <Edit className="w-4 h-4 mr-2 inline-block" />
                         Edit
