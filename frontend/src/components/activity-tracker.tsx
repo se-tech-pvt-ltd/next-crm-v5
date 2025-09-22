@@ -470,14 +470,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <Avatar className="h-7 w-7 rounded-none">
-                            {profileImage ? (
-                              <button type="button" onClick={() => { setSelectedImage(profileImage); setImageOpen(true); }} className="w-full h-full">
-                                <AvatarImage className="object-cover" src={profileImage || ''} alt={activity.userName || 'User'} />
-                              </button>
-                            ) : (
-                              <AvatarImage className="object-cover" src={''} alt={activity.userName || 'User'} />
-                            )}
+                          <Avatar className="h-7 w-7 rounded-none" onClick={() => { if (profileImage) { setSelectedImage(profileImage); setImageOpen(true); } }} style={{ cursor: profileImage ? 'pointer' : 'default' }}>
+                            <AvatarImage className="object-cover" src={profileImage || undefined} alt={activity.userName || 'User'} />
                             <AvatarFallback className="rounded-none">{(activity.userName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col leading-tight">
