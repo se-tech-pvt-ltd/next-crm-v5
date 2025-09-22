@@ -272,6 +272,18 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return text.replace(/[0-9a-fA-F-]{36}/g, (token) => getStatusLabel(token));
   };
 
+  // Safely format dates that may be missing/invalid
+  const safeFormatDate = (d: any) => {
+    try {
+      if (!d) return '';
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return '';
+      return format(dt, 'MMM d, h:mm a');
+    } catch {
+      return '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3 pt-0 px-3 pb-3">
@@ -442,7 +454,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                             <span className="text-gray-600 capitalize">{(activity.activityType || '').replace('_', ' ')}</span>
                           </div>
                         </div>
-                        <span className="text-gray-500">{format(new Date(activity.createdAt as any), 'MMM d, h:mm a')}</span>
+                        <span className="text-gray-500">{safeFormatDate(activity.createdAt)}</span>
                       </div>
                       {(activity.description || (activity as any).title) && (
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
