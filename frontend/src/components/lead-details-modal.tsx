@@ -338,7 +338,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             )}
           </div>
 
-          <div className="grid grid-cols-[1fr_420px] flex-1 min-h-0">
+          <div className="grid grid-cols-[1fr_420px] flex-1 min-h-0 bg-[#EDEDED]">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Scrollable body */}
