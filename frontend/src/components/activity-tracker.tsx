@@ -41,6 +41,19 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail || {};
+      const match = String(d.entityType) === String(entityType) && String(d.entityId) === String(entityId);
+      if (match) {
+        setIsAddingActivity(true);
+        setTimeout(() => textareaRef.current?.focus(), 0);
+      }
+    };
+    window.addEventListener('open-activity-composer', handler as EventListener);
+    return () => window.removeEventListener('open-activity-composer', handler as EventListener);
+  }, [entityType, entityId]);
+
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
     enabled: !!entityId,
