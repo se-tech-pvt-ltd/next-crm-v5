@@ -210,7 +210,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="ml-1">
-              <UserMenu collapsed />
+              <UserMenu collapsed fullWidth={false} />
             </div>
 
           </div>
