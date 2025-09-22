@@ -125,7 +125,6 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return null;
   };
 
-  const { user } = useAuth();
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
       console.log('Adding activity:', { entityType, entityId, data });
