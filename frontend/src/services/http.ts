@@ -18,9 +18,15 @@ export function setUnauthorizedHandler(handler: (() => void) | null) {
 
 async function request<T>(method: HttpMethod, url: string, body?: unknown): Promise<T> {
   try {
+    const baseHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (t) baseHeaders['Authorization'] = `Bearer ${t}`;
+    } catch {}
+
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: baseHeaders,
       body: body == null ? undefined : JSON.stringify(body),
       credentials: 'include',
     });

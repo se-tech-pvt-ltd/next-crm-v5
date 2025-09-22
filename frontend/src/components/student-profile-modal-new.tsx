@@ -345,27 +345,42 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    className="px-3 [&_svg]:size-3 bg-[#D6E4FE] text-white hover:bg-[#C6D8FD] border border-[#D6E4FE] rounded-md"
-                    onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
-                    title="Add Application"
-                  >
-                    <Plus />
-                    <span>Add Application</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    className="px-3 [&_svg]:size-3 bg-[#D6E4FE] text-white hover:bg-[#C6D8FD] border border-[#D6E4FE] rounded-md"
-                    onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
-                    disabled={isLoading}
-                    title="Edit"
-                  >
-                    <Edit />
-                    <span>Edit</span>
-                  </Button>
+                  {!isEditing ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                        onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                        title="Add Application"
+                      >
+                        <Plus />
+                        <span>Add Application</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                        onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
+                        disabled={isLoading}
+                        title="Edit"
+                      >
+                        <Edit />
+                        <span>Edit</span>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button size="xs" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
+                        <Save className="w-3.5 h-3.5 mr-1" />
+                        <span>Save Changes</span>
+                      </Button>
+                      <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel" className="bg-white text-[#223E7D] hover:bg-white/90 border border-white">
+                        <X className="w-3.5 h-3.5 mr-1" />
+                        <span>Cancel</span>
+                      </Button>
+                    </>
+                  )}
                   <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
@@ -386,20 +401,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle>Student Information</CardTitle>
-                      <div className="flex items-center space-x-2">
-                        {isEditing ? (
-                          <>
-                            <Button size="sm" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending}>
-                              <Save className="w-4 h-4 mr-1" />
-                              Save Changes
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }}>
-                              <X className="w-4 h-4 mr-1" />
-                              Cancel
-                            </Button>
-                          </>
-                        ) : null}
-                      </div>
+                      <div className="flex items-center space-x-2"></div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">

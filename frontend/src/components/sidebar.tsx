@@ -16,7 +16,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { UserMenu } from './user-menu';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Sidebar() {
@@ -138,7 +137,7 @@ export function Sidebar() {
   return (
     <aside
       aria-label="Primary navigation"
-      className={`${sidebarWidth} bg-gradient-to-b from-blue-800 to-blue-700 text-white flex flex-col transition-all duration-300 ease-in-out relative border-r border-blue-900/40`}
+      className={`${sidebarWidth} bg-[#223E7D] text-white flex flex-col transition-all duration-300 ease-in-out relative border-r border-[#223E7D]/40`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -201,7 +200,7 @@ export function Sidebar() {
               <div
                 className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
                   isActive
-                    ? 'bg-white text-blue-800 shadow'
+                    ? 'bg-white text-[#223E7D] shadow'
                     : 'text-white/90 hover:bg-white/10'
                 } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
                 onMouseDown={() => {
@@ -252,7 +251,7 @@ export function Sidebar() {
       {/* Support button */}
       <div className="px-2 pb-2">
         <Link href="/settings">
-          <div className={`flex items-center ${isExpanded ? 'justify-center space-x-2' : 'justify-center'} bg-white text-blue-800 rounded-lg px-3 py-2 font-medium cursor-pointer hover:shadow`}
+          <div className={`flex items-center ${isExpanded ? 'justify-center space-x-2' : 'justify-center'} bg-white text-[#223E7D] rounded-lg px-3 py-2 font-medium cursor-pointer hover:shadow`}
                aria-label="Support">
             <LifeBuoy size={16} />
             {isExpanded && <span className="text-sm">Support</span>}
@@ -260,10 +259,6 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* User Profile */}
-      <div className={`border-t border-white/10 ${isExpanded ? '' : 'px-2'}`}>
-        <UserMenu collapsed={!isExpanded} />
-      </div>
-    </aside>
+          </aside>
   );
 }

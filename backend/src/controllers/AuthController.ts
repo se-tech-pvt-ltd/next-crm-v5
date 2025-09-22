@@ -56,29 +56,63 @@ WHERE u.id = ? LIMIT 1`;
         if (roleDetails) tokenPayload.role_details = roleDetails;
 
         const token = signAccessToken(tokenPayload);
+        const expRaw = process.env.JWT_EXPIRES_IN || '60m';
+        const expMs = (() => {
+          const m = String(expRaw);
+          const num = parseInt(m, 10);
+          if (Number.isFinite(num)) return m.endsWith('m') || m.endsWith('h') || m.endsWith('s') ? 0 : num * 1000; // plain seconds
+          const match = m.match(/^(\d+)([smhd])$/i);
+          if (match) {
+            const v = parseInt(match[1], 10);
+            const u = match[2].toLowerCase();
+            if (u === 's') return v * 1000;
+            if (u === 'm') return v * 60 * 1000;
+            if (u === 'h') return v * 60 * 60 * 1000;
+            if (u === 'd') return v * 24 * 60 * 60 * 1000;
+          }
+          return 60 * 60 * 1000; // default 1h
+        })();
+        const isProd = process.env.NODE_ENV === 'production';
         res.cookie('access_token', token, {
           httpOnly: true,
-          sameSite: 'none',
-          secure: true,
-          maxAge: 15 * 60 * 1000,
+          sameSite: isProd ? 'none' : 'lax',
+          secure: isProd,
+          maxAge: expMs,
           path: '/',
         });
 
-        res.json({ user, token, expiresIn: 15 * 60 });
+        res.json({ user, token, expiresIn: Math.floor(expMs / 1000) });
         return;
       } catch (fetchErr) {
         console.error('Failed to fetch role details for token:', fetchErr);
         // Fallback: sign basic token without role_details
         const token = signAccessToken({ sub: user.id, role: (user as any).role });
+        const expRaw = process.env.JWT_EXPIRES_IN || '60m';
+        const expMs = (() => {
+          const m = String(expRaw);
+          const num = parseInt(m, 10);
+          if (Number.isFinite(num)) return m.endsWith('m') || m.endsWith('h') || m.endsWith('s') ? 0 : num * 1000;
+          const match = m.match(/^(\d+)([smhd])$/i);
+          if (match) {
+            const v = parseInt(match[1], 10);
+            const u = match[2].toLowerCase();
+            if (u === 's') return v * 1000;
+            if (u === 'm') return v * 60 * 1000;
+            if (u === 'h') return v * 60 * 60 * 1000;
+            if (u === 'd') return v * 24 * 60 * 60 * 1000;
+          }
+          return 60 * 60 * 1000;
+        })();
+        const isProd = process.env.NODE_ENV === 'production';
         res.cookie('access_token', token, {
           httpOnly: true,
-          sameSite: 'none',
-          secure: true,
-          maxAge: 15 * 60 * 1000,
+          sameSite: isProd ? 'none' : 'lax',
+          secure: isProd,
+          maxAge: expMs,
           path: '/',
         });
 
-        res.json({ user, token, expiresIn: 15 * 60 });
+        res.json({ user, token, expiresIn: Math.floor(expMs / 1000) });
         return;
       }
     } catch (error) {
@@ -118,10 +152,11 @@ WHERE u.id = ? LIMIT 1`;
   static async logout(req: Request, res: Response) {
     try {
       // Clear the access_token cookie by setting it to empty and expiring it
+      const isProd = process.env.NODE_ENV === 'production';
       res.cookie('access_token', '', {
         httpOnly: true,
-        sameSite: 'none',
-        secure: true,
+        sameSite: isProd ? 'none' : 'lax',
+        secure: isProd,
         expires: new Date(0),
         path: '/',
       });
