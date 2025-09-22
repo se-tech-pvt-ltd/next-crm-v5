@@ -137,6 +137,19 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageOpen, setImageOpen] = useState(false);
 
+  // Close overlay on Escape key
+  useEffect(() => {
+    if (!imageOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setImageOpen(false);
+        setSelectedImage(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [imageOpen]);
+
   // Current authenticated user (used for optimistic fallback)
   const { user } = useAuth();
 
@@ -511,6 +524,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
       {imageOpen && selectedImage && (createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+          <button aria-label="Close image" className="absolute right-4 top-4 z-60 rounded-md bg-black/60 p-2 text-white hover:bg-black/80" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+            ×
+          </button>
           <img src={String(selectedImage)} alt="Profile" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
         </div>,
         typeof document !== 'undefined' ? document.body : null
