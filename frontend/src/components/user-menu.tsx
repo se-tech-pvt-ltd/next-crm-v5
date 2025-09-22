@@ -14,9 +14,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UserMenuProps {
   collapsed?: boolean;
+  fullWidth?: boolean;
 }
 
-export function UserMenu({ collapsed = false }: UserMenuProps) {
+export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps) {
   const { user, logout, refreshUser } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -132,7 +133,7 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
       <div className="mt-auto pt-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={`w-full h-auto p-2 ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
+            <Button variant="ghost" className={`${fullWidth ? 'w-full' : 'w-auto'} h-auto p-2 ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
               {collapsed ? (
                 <div className="relative group">
                   <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
