@@ -211,7 +211,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl flex flex-col">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
           {/* Full-width top header */}
@@ -338,7 +338,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             )}
           </div>
 
-          <div className="grid grid-cols-[1fr_420px] h-[calc(90vh-92px)] min-h-0">
+          <div className="grid grid-cols-[1fr_420px] flex-1 min-h-0">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Scrollable body */}
