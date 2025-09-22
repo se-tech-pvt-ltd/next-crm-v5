@@ -312,8 +312,6 @@ export const activities = mysqlTable("activities", {
   newValue: text("new_value"),
   fieldName: text("field_name"),
   userId: varchar("user_id", { length: 255 }), // User who performed the action
-  userName: text("user_name"), // For system actions, this can be "Next Bot"
-  userProfileImage: text("user_profile_image"), // User's profile image URL
   createdAt: timestamp("created_at").defaultNow(),
 });
 
