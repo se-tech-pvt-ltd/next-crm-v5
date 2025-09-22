@@ -153,7 +153,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   // Fetch missing user profiles returned by activities (server often omits userProfileImage)
   useEffect(() => {
     const missingIds = Array.from(new Set(
-      (Array.isArray(activities) ? activities : [])
+      (Array.isArray(activities) ? activities.map(normalizeActivity) : [])
         .map((a: any) => a.userId)
         .filter(Boolean)
         .filter((id: string) => !getUserProfileImage(id) && !(id in fetchedProfiles))
@@ -413,7 +413,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         {/* Activities List */}
         <div className="space-y-5 pl-1">
           {(() => {
-            let list: Activity[] = Array.isArray(activities) ? [...(activities as Activity[])] : [];
+            let list: Activity[] = Array.isArray(activities) ? (activities as Activity[]).map(normalizeActivity) : [];
             if (initialInfo && initialInfo.trim().length > 0) {
               const createdActivity = list.find(a => a.activityType === 'created');
               const userName = initialInfoUserName || createdActivity?.userName || 'Admin User';
