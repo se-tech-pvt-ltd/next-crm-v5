@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const DEFAULT_EXPIRY = process.env.JWT_EXPIRES_IN || '15m';
+const DEFAULT_EXPIRY = process.env.JWT_EXPIRES_IN || '60m';
 const SECRET = process.env.JWT_SECRET || 'dev_insecure_secret_change_me';
 
 export type JwtPayload = { sub: string; role?: string } & Record<string, any>;
