@@ -8,40 +8,46 @@ export class ActivityService {
     const activities = await ActivityModel.findByEntity(entityType, entityId);
     if (!Array.isArray(activities) || activities.length === 0) return [];
 
-    // collect unique userIds that are present but missing userProfileImage
+    // collect unique userIds that are present
     const userIds = Array.from(new Set(activities.map(a => (a as any).userId).filter(Boolean)));
-    const profileMap: Record<string, string | null> = {};
 
+    // Fetch users and resolve display name and profile image from users table
+    const userMap: Record<string, { userName: string; userProfileImage: string | null }> = {};
     for (const uid of userIds) {
       try {
         const user = await UserModel.findById(String(uid));
         if (user) {
-          // profile image may be stored as profile_image_id or profileImageId depending on schema
+          const userName = `${(user as any).firstName || ''} ${(user as any).lastName || ''}`.trim() || (user as any).email || 'User';
+          // Resolve profile image path if present
+          let profileImage: string | null = null;
           const profileImageId = (user as any).profile_image_id || (user as any).profileImageId || (user as any).profileImageId;
           if (profileImageId) {
             try {
               const att = await AttachmentModel.findById(String(profileImageId));
-              profileMap[String(uid)] = att?.path || null;
+              profileImage = att?.path || null;
             } catch (err) {
-              profileMap[String(uid)] = null;
+              profileImage = null;
             }
           } else {
-            // user table may have direct path column named profileImageUrl or profile_image_url
-            profileMap[String(uid)] = (user as any).profileImageUrl || (user as any).profile_image_url || (user as any).profileImage || null;
+            profileImage = (user as any).profileImageUrl || (user as any).profile_image_url || (user as any).profileImage || null;
           }
-        } else {
-          profileMap[String(uid)] = null;
+          userMap[String(uid)] = { userName, userProfileImage: profileImage };
         }
       } catch (err) {
-        profileMap[String(uid)] = null;
+        // ignore individual user failures
       }
     }
 
-    // attach resolved profile images back to activities where missing
-    const enriched = activities.map(a => ({
-      ...a,
-      userProfileImage: (a as any).userProfileImage || profileMap[String((a as any).userId)] || null,
-    }));
+    // attach resolved userName and profile images from users table (do not rely on stored columns)
+    const enriched = activities.map(a => {
+      const uid = String((a as any).userId || '');
+      const resolved = userMap[uid];
+      return {
+        ...a,
+        userName: resolved ? resolved.userName : (a as any).userName || 'Next Bot',
+        userProfileImage: resolved ? resolved.userProfileImage : null,
+      };
+    });
 
     return enriched;
   }
