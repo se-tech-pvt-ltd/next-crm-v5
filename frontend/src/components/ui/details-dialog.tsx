@@ -9,6 +9,7 @@ interface DetailsDialogLayoutProps {
   headerLeft?: React.ReactNode;
   headerRight?: React.ReactNode;
   statusBar?: React.ReactNode;
+  statusBarWrapperClassName?: string;
   leftContent: React.ReactNode;
   rightContent?: React.ReactNode;
   rightWidthClassName?: string; // e.g. w-[420px]
@@ -24,6 +25,7 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
   headerLeft,
   headerRight,
   statusBar,
+  statusBarWrapperClassName = 'px-4 py-2 bg-gray-50 border-t',
   leftContent,
   rightContent,
   rightWidthClassName = 'w-[420px]',
@@ -56,7 +58,7 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
               </div>
             </div>
             {statusBar && (
-              <div className="px-4 py-2 bg-gray-50 border-t">{statusBar}</div>
+              <div className={statusBarWrapperClassName}>{statusBar}</div>
             )}
           </div>
 
