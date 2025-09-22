@@ -375,7 +375,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                         <Save className="w-3.5 h-3.5 mr-1" />
                         <span>Save Changes</span>
                       </Button>
-                      <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel">
+                      <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel" className="bg-white text-[#223E7D] hover:bg-white/90 border border-white">
                         <X className="w-3.5 h-3.5 mr-1" />
                         <span>Cancel</span>
                       </Button>
