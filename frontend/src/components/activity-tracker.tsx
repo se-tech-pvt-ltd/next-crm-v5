@@ -90,6 +90,27 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   // Generic dropdown label resolution
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  // Normalize activity object keys (accept snake_case from backend)
+  const normalizeActivity = (a: any) => {
+    if (!a || typeof a !== 'object') return a;
+    return {
+      ...a,
+      id: a.id ?? a.ID,
+      entityType: a.entityType ?? a.entity_type,
+      entityId: a.entityId ?? a.entity_id,
+      activityType: a.activityType ?? a.activity_type ?? a.activityType,
+      title: a.title ?? a.title,
+      description: a.description ?? a.description,
+      oldValue: a.oldValue ?? a.old_value,
+      newValue: a.newValue ?? a.new_value,
+      fieldName: a.fieldName ?? a.field_name,
+      userId: a.userId ?? a.user_id,
+      userName: a.userName ?? a.user_name,
+      userProfileImage: a.userProfileImage ?? a.user_profile_image,
+      createdAt: a.createdAt ?? a.created_at,
+    } as any;
+  };
   const getOptionsForField = (fieldName?: string): any[] => {
     if (!fieldName || !moduleDropdowns) return [];
     const target = normalize(fieldName);
