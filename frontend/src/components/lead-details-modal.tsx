@@ -526,11 +526,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </div>
 
             {/* Right: Timeline */}
-            <div className="border-l bg-white flex flex-col min-h-0 -mt-[5px]">
-              <div className="flex-1 overflow-y-auto pt-2 min-h-0 mt-7">
-                <div className="p-3 mt-[19px]">
-                  <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
-                </div>
+            <div className="border-l bg-white flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>
             </div>
           </div>
