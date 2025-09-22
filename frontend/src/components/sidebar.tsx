@@ -16,7 +16,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { UserMenu } from './user-menu';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Sidebar() {
@@ -260,10 +259,6 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* User Profile */}
-      <div className={`border-t border-white/10 ${isExpanded ? '' : 'px-2'}`}>
-        <UserMenu collapsed={!isExpanded} />
-      </div>
-    </aside>
+          </aside>
   );
 }
