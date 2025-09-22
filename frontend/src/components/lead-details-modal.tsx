@@ -339,35 +339,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           <div className="grid grid-cols-[1fr_420px] h-[calc(90vh-92px)] min-h-0">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
-              {/* Status stepper */}
-              <div className="px-3 py-2 bg-white border-b">
-                {statusSequence.length > 0 && (
-                  <div className="w-full bg-gray-100 rounded-md p-1">
-                    <div className="flex items-center justify-between relative">
-                      {statusSequence.map((statusId, index) => {
-                        const currentIndex = statusSequence.indexOf(currentStatus);
-                        const isCompleted = index <= currentIndex;
-                        const statusName = getStatusDisplayName(statusId);
-                        const handleClick = () => {
-                          if (statusUpdateMutation.isPending) return;
-                          if (currentStatus === statusId) return;
-                          statusUpdateMutation.mutate(statusId);
-                        };
-                        return (
-                          <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}></div>
-                            <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
-                            {index < statusSequence.length - 1 && (
-                              <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
                 <Card className="w-full shadow-md border border-gray-200 bg-white">
