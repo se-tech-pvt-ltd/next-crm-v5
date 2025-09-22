@@ -588,8 +588,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
             </div>
 
             {/* Right: Timeline */}
-            <div className="border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white flex items-center justify-start">
+            <div className="bg-white flex flex-col min-h-0">
+              <div className="sticky top-0 z-10 px-4 py-3 bg-blue-800 text-white flex items-center justify-start">
                 <h2 className="text-xs font-semibold">Activity Timeline</h2>
               </div>
               <div className="flex-1 overflow-y-auto pt-1 min-h-0">
