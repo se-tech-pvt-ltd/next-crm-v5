@@ -244,7 +244,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       {convertedLoading ? (
         <div className="flex items-center gap-2">
           <Skeleton className="h-8 w-24 bg-white/20" />
-          <Skeleton className="h-8 w-8 rounded-full bg_white/20" />
+          <Skeleton className="h-8 w-8 rounded-full bg-white/20" />
         </div>
       ) : (
         <>
@@ -265,7 +265,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   <Button
                     variant="outline"
                     size="xs"
-                    className="px-3 [&_svg]:size-3 bg-white text_black hover:bg-gray-100 border border-gray-300 rounded-md"
+                    className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
                     onClick={() => { try { onOpenChange(false); } catch {} if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`); }}
                     title="Convert to Student"
                   >
@@ -343,7 +343,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           <>
             <Card className="w-full shadow-md border border-gray-200 bg-white">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify_between">
+                <div className="flex items-center justify-between">
                   <CardTitle>Personal Information</CardTitle>
                 </div>
               </CardHeader>
