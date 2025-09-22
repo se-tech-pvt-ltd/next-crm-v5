@@ -215,7 +215,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
           {/* Full-width top header */}
-          <div className="sticky top-0 z-30 px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full">
+          <div className="sticky top-0 z-30 px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full rounded-t-xl">
             <div>
               <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[75vw]">{lead.name || 'Lead'}</div>
             </div>
@@ -230,8 +230,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   {convertedStudent ? (
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="bg-white text-primary hover:bg-white/90"
+                      size="xs"
+                      className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
                       onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
                       title="View Student"
                     >
@@ -243,8 +243,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                         <>
                           <Button
                             variant="outline"
-                            size="sm"
-                            className="bg-white text-black hover:bg-white/90"
+                            size="xs"
+                            className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
                             onClick={() => {
                               try { onOpenChange(false); } catch {}
                               if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`);
@@ -256,8 +256,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           </Button>
                           <Button
                             variant="outline"
-                            size="sm"
-                            className="bg-white text-black hover:bg-white/90"
+                            size="xs"
+                            className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
                             onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}
                             title="Edit"
                           >
@@ -266,8 +266,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           </Button>
                           <Button
                             variant="outline"
-                            size="sm"
-                            className="bg-white text-black hover:bg-white/90"
+                            size="xs"
+                            className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
                             onClick={() => setShowMarkAsLostModal(true)}
                             title="Mark as Lost"
                           >
@@ -279,9 +279,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       {isEditing && (
                         <>
                           <Button
-                            variant="default"
-                            size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
+                            size="xs"
+                            className="bg-[#0071B0] hover:bg-[#00649D] text-white"
                             onClick={handleSaveChanges}
                             title="Save"
                             disabled={updateLeadMutation.isPending}
@@ -290,8 +289,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           </Button>
                           <Button
                             variant="outline"
-                            size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
+                            size="xs"
+                            className="bg-white text-[#223E7D] hover:bg-white/90 border border-white"
                             onClick={() => { setIsEditing(false); setEditData(lead); try { setLocation(`/leads/${lead?.id}`); } catch {} }}
                             title="Cancel"
                             disabled={updateLeadMutation.isPending}
@@ -302,7 +301,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       )}
                     </>
                   )}
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10 ring-2 ring-white/30" onClick={() => onOpenChange(false)} title="Close">
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)} title="Close">
                     <X className="w-4 h-4" />
                   </Button>
                 </>
@@ -311,7 +310,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           </div>
 
           {/* Full-width status bar */}
-          <div className="px-4 pt-5 pb-2 bg-[#223E7D] -mt-5">
+          <div className="px-4 py-2 bg-[#223E7D] text-white">
             {statusSequence.length > 0 && (
               <div className="w-full bg-gray-100 rounded-md p-1">
                 <div className="flex items-center justify-between relative">
