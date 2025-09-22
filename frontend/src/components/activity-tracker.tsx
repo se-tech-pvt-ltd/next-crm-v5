@@ -514,6 +514,12 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
           })()}
         </div>
 
+      {imageOpen && selectedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => { setImageOpen(false); setSelectedImage(null); }}>
+          <img src={String(selectedImage)} alt="Profile" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
     </div>
   );
 }
