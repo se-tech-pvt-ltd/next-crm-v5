@@ -111,6 +111,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return user?.profileImageUrl || null;
   };
 
+  const { user } = useAuth();
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string }) => {
       console.log('Adding activity:', { entityType, entityId, data });
@@ -123,18 +124,46 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       console.log('Activity created:', result);
       return result;
     },
-    onSuccess: (data) => {
-      console.log('Activity mutation success:', data);
-      queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
-      // Trigger a refetch to immediately show the new activity
-      refetch();
-      setNewActivity("");
-      setActivityType("comment");
+    // Optimistic update: add a temporary activity to the cache immediately
+    onMutate: async (data) => {
+      const tempId = `temp-${Date.now()}`;
+      const createdAt = new Date().toISOString();
+      const optimisticActivity: any = {
+        id: tempId,
+        entityType: String(entityType),
+        entityId: String(entityId),
+        activityType: data.type,
+        title: '',
+        description: data.content,
+        userName: user?.firstName || user?.name || user?.email || 'You',
+        userId: user?.id,
+        userProfileImage: (user as any)?.profileImageUrl || (user as any)?.profileImage || null,
+        createdAt,
+        isOptimistic: true,
+      };
+
+      await queryClient.cancelQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
+      const previous = queryClient.getQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`]);
+      queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], (old = []) => [optimisticActivity as any, ...(Array.isArray(old) ? old : [])]);
+      setNewActivity('');
+      setActivityType('comment');
       setIsAddingActivity(false);
+      return { previous, tempId };
     },
-    onError: (error) => {
-      console.error('Activity mutation error:', error);
+    onError: (err, variables, context: any) => {
+      console.error('Activity mutation error:', err);
+      if (context?.previous) {
+        queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], context.previous as any);
+      }
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/${entityType}/${entityId}`] });
+      refetch();
+    },
+    onSuccess: (data, variables, context: any) => {
+      // server will provide actual activity; ensure cache refreshed
+      console.log('Activity mutation success:', data);
+    }
   });
 
   const handleAddActivity = () => {
