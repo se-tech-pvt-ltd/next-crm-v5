@@ -123,7 +123,7 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
           {/* Left: Content */}
           <div className="flex flex-col min-h-0">
             {/* Sticky header inside scroll context */}
-            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+            <div className="sticky top-0 z-20 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
               <div className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">

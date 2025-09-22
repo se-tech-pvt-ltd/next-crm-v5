@@ -211,11 +211,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
+        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl flex flex-col">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
-          {/* Full-width top header */}
-          <div className="sticky top-0 z-30 px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full rounded-t-xl">
+          {/* Full-width top header (with embedded status) */}
+          <div className="sticky top-0 z-30">
+            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between w-full rounded-t-xl">
             <div>
               <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[75vw]">{lead.name || 'Lead'}</div>
             </div>
@@ -309,8 +310,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </div>
           </div>
 
-          {/* Full-width status bar */}
-          <div className="px-4 pt-0 pb-2 bg-[#223E7D] text-white border-t border-white/20 -mt-3">
+          {/* Status inside header */}
+          <div className="px-4 py-2 bg-[#223E7D] text-white -mt-px">
             {statusSequence.length > 0 && (
               <div className="w-full bg-gray-100 rounded-md p-1">
                 <div className="flex items-center justify-between relative">
@@ -337,12 +338,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               </div>
             )}
           </div>
+        </div>
 
-          <div className="grid grid-cols-[1fr_420px] h-[calc(90vh-92px)] min-h-0">
+          <div className="grid grid-cols-[1fr_420px] flex-1 min-h-0 bg-[#EDEDED]">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Scrollable body */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+              <div className="flex-1 overflow-y-auto pt-0 px-3 pb-3 space-y-3 min-h-0">
                 <Card className="w-full shadow-md border border-gray-200 bg-white">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -528,7 +530,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </div>
 
             {/* Right: Timeline */}
-            <div className="border-l bg-white flex flex-col min-h-0">
+            <div className="bg-white flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto min-h-0">
                 <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
               </div>

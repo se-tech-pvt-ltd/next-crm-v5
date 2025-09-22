@@ -337,7 +337,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          <div className="flex flex-col h-[90vh] min-h-0">
+          <div className="flex flex-col h-[90vh] min-h-0 bg-[#EDEDED]">
             {/* Global sticky header spanning both columns */}
             <div className="sticky top-0 z-20">
               <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between rounded-t-xl">
@@ -386,7 +386,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   </Button>
                 </div>
               </div>
-              <div className="px-4 py-2 bg-[#223E7D] text-white">
+              <div className="px-4 py-2 bg-[#223E7D] text-white -mt-px">
                 {statusSequence.length > 0 && <StatusProgressBar />}
               </div>
             </div>
