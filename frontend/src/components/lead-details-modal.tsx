@@ -19,7 +19,7 @@ import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
+import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadDetailsModalProps {
@@ -244,31 +244,34 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
+                            className="bg-white text-black hover:bg-white/90"
                             onClick={() => {
                               try { onOpenChange(false); } catch {}
                               if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`);
                             }}
                             title="Convert to Student"
                           >
+                            <UserPlus className="w-4 h-4 mr-2" />
                             Convert to Student
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
+                            className="bg-white text-black hover:bg-white/90"
                             onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}
                             title="Edit"
                           >
+                            <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-primary hover:bg-white/90"
+                            className="bg-white text-black hover:bg-white/90"
                             onClick={() => setShowMarkAsLostModal(true)}
                             title="Mark as Lost"
                           >
+                            <XCircle className="w-4 h-4 mr-2" />
                             Lost
                           </Button>
                         </>
@@ -308,7 +311,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           </div>
 
           {/* Full-width status bar */}
-          <div className="px-3 py-2 bg-white border-b">
+          <div className="px-3 py-2 bg-[#223E7D] border-b border-[#223E7D]">
             {statusSequence.length > 0 && (
               <div className="w-full bg-gray-100 rounded-md p-1">
                 <div className="flex items-center justify-between relative">
