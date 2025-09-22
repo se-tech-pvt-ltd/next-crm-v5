@@ -211,49 +211,86 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
+        <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
           <DialogTitle className="sr-only">Lead Details</DialogTitle>
 
           <div className="grid grid-cols-[1fr_420px] h-[90vh] min-h-0">
             {/* Left: Content */}
             <div className="flex flex-col min-h-0">
               {/* Sticky header inside scroll context */}
-              <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-                <div className="px-3 py-2 flex items-center justify-between">
-                  <div className="flex-1">
-                    {statusSequence.length > 0 && (
-                      <div className="w-full bg-gray-100 rounded-md p-1">
-                        <div className="flex items-center justify-between relative">
-                          {statusSequence.map((statusId, index) => {
-                            const currentIndex = statusSequence.indexOf(currentStatus);
-                            const isCompleted = index <= currentIndex;
-                            const statusName = getStatusDisplayName(statusId);
-                            const handleClick = () => {
-                              if (statusUpdateMutation.isPending) return;
-                              if (currentStatus === statusId) return;
-                              statusUpdateMutation.mutate(statusId);
-                            };
-                            return (
-                              <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
-                                  {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
-                                </div>
-                                <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
-                                {index < statusSequence.length - 1 && (
-                                  <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+              <div className="sticky top-0 z-20">
+                {/* Blue title bar */}
+                <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
+                  <div>
+                    <div className="text-[12px] opacity-80">Lead</div>
+                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{lead.name || 'Lead'}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {convertedLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-24 bg-white/20" />
+                        <Skeleton className="h-8 w-8 rounded-full bg-white/20" />
                       </div>
+                    ) : (
+                      <>
+                        {convertedStudent ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white text-blue-800 hover:bg-white/90"
+                            onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${convertedStudent.id}`); }}
+                          >
+                            View Student
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white text-blue-800 hover:bg-white/90"
+                            onClick={() => {
+                              try { onOpenChange(false); } catch {}
+                              if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`);
+                            }}
+                          >
+                            Convert to Student
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </>
                     )}
                   </div>
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
                 </div>
 
+                {/* Status stepper */}
+                <div className="px-3 py-2 bg-white border-b">
+                  {statusSequence.length > 0 && (
+                    <div className="w-full bg-gray-100 rounded-md p-1">
+                      <div className="flex items-center justify-between relative">
+                        {statusSequence.map((statusId, index) => {
+                          const currentIndex = statusSequence.indexOf(currentStatus);
+                          const isCompleted = index <= currentIndex;
+                          const statusName = getStatusDisplayName(statusId);
+                          const handleClick = () => {
+                            if (statusUpdateMutation.isPending) return;
+                            if (currentStatus === statusId) return;
+                            statusUpdateMutation.mutate(statusId);
+                          };
+                          return (
+                            <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}></div>
+                              <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
+                              {index < statusSequence.length - 1 && (
+                                <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Scrollable body */}
@@ -507,8 +544,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
             {/* Right: Timeline */}
             <div className="border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white">
+              <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white flex items-center justify-between">
                 <h2 className="text-xs font-semibold">Activity Timeline</h2>
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.dispatchEvent(new CustomEvent('open-activity-composer', { detail: { entityType: 'lead', entityId: lead.id } }))}>
+                  + Add Activity
+                </Button>
               </div>
               <div className="flex-1 overflow-y-auto pt-1 min-h-0">
                 <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
