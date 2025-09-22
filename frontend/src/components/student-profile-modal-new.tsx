@@ -348,23 +348,23 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Button
                     variant="outline"
                     size="xs"
-                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 hover:bg-white/10"
+                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 bg-transparent hover:bg-white/10 hover:text-white"
                     onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
                     title="Add Application"
                   >
                     <Plus />
-                    <span className="hidden lg:inline">Add Application</span>
+                    <span>Add Application</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="xs"
-                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 hover:bg-white/10"
+                    className="rounded-full px-2 [&_svg]:size-3 text-white border-white/40 bg-transparent hover:bg-white/10 hover:text-white"
                     onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
                     disabled={isLoading}
                     title="Edit"
                   >
                     <Edit />
-                    <span className="hidden lg:inline">Edit</span>
+                    <span>Edit</span>
                   </Button>
                   <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10 border border-white/30" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
@@ -560,7 +560,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </CardTitle>
                       <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
                         <Plus />
-                        <span className="hidden lg:inline">Add Application</span>
+                        <span>Add Application</span>
                       </Button>
                     </div>
                   }
