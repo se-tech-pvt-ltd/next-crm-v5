@@ -221,8 +221,6 @@ export const insertActivitySchema = z.object({
   newValue: z.string().optional(),
   fieldName: z.string().optional(),
   userId: z.string().optional(),
-  userName: z.string().optional(),
-  userProfileImage: z.string().optional(),
 });
 
 // Insert types for forms
