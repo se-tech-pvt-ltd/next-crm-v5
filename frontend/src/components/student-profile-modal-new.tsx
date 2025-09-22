@@ -340,7 +340,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
           <div className="flex flex-col h-[90vh] min-h-0">
             {/* Global sticky header spanning both columns */}
             <div className="sticky top-0 z-20">
-              <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
+              <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between rounded-t-xl">
                 <div>
                   <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
                 </div>
@@ -348,7 +348,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Button
                     variant="outline"
                     size="xs"
-                    className="px-3 [&_svg]:size-3 bg-white/20 text-white hover:bg-white/30 border border-white/30 rounded-md"
+                    className="px-3 [&_svg]:size-3 bg-[#D6E4FE] text-white hover:bg-[#C6D8FD] border border-[#D6E4FE] rounded-md"
                     onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
                     title="Add Application"
                   >
@@ -358,7 +358,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Button
                     variant="outline"
                     size="xs"
-                    className="px-3 [&_svg]:size-3 bg-white/20 text-white hover:bg-white/30 border border-white/30 rounded-md"
+                    className="px-3 [&_svg]:size-3 bg-[#D6E4FE] text-white hover:bg-[#C6D8FD] border border-[#D6E4FE] rounded-md"
                     onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
                     disabled={isLoading}
                     title="Edit"
@@ -366,12 +366,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                     <Edit />
                     <span>Edit</span>
                   </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-blue-700 hover:bg-white/90" onClick={() => onOpenChange(false)}>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
-              <div className="px-4 py-2 bg-blue-800 text-white">
+              <div className="px-4 py-2 bg-[#223E7D] text-white">
                 {statusSequence.length > 0 && <StatusProgressBar />}
               </div>
             </div>
