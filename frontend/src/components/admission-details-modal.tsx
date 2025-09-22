@@ -334,7 +334,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
           </div>
 
           {/* Right Sidebar - Activity Timeline */}
-          <div className="w-[360px] border-l bg-white flex flex-col min-h-0 pt-5 lg:pt-0 max-[991px]:pt-5">
+          <div className="w-[420px] border-l bg-white flex flex-col min-h-0 pt-5 lg:pt-0 max-[991px]:pt-5">
             <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
               <div className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
