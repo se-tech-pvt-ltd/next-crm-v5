@@ -19,7 +19,7 @@ import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, Edit, Save, X, UserPlus, XCircle, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
+import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadDetailsModalProps {
