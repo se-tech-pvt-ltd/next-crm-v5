@@ -80,14 +80,14 @@ function DashboardContent() {
   };
 
   const Stat = ({ title, value, icon, bubbleClass }: { title: string; value: number | string; icon: React.ReactNode; bubbleClass: string; }) => (
-    <Card className="overflow-hidden">
-      <CardContent className="p-3">
+    <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm">
+      <CardContent className="px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[12px] text-gray-500">{title}</p>
-            {isLoading ? <Skeleton className="h-7 w-12 mt-1" /> : <p className="text-xl font-semibold text-gray-900">{value}</p>}
+            <p className="text-xs text-gray-600">{title}</p>
+            {isLoading ? <Skeleton className="h-8 w-14 mt-1" /> : <p className="text-3xl font-bold text-gray-900 leading-tight">{value}</p>}
           </div>
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${bubbleClass}`}>
+          <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${bubbleClass}`}>
             {icon}
           </div>
         </div>
@@ -96,7 +96,7 @@ function DashboardContent() {
   );
 
   return (
-    <Layout title="Dashboard" helpText="Overview of key metrics, pipeline and recent activity.">
+    <Layout title="Dashboard" showSearch={false} helpText="Overview of key metrics, pipeline and recent activity.">
       <div className="space-y-4">
         {/* Stat strip */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">

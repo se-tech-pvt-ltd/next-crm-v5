@@ -120,11 +120,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-2 sm:px-4 py-0" role="banner">
-        <div className="flex items-center justify-between min-w-0 gap-1">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-2" role="banner">
+        <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h2 className="text-sm sm:text-base font-medium text-gray-900 truncate">{title}</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{title}</h2>
               {subtitle && (
                 <p className="text-xs text-gray-500 line-clamp-1 hidden sm:block">{subtitle}</p>
               )}
@@ -208,7 +208,10 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+            <Button variant="ghost" size="sm" className="p-2" aria-label="Account">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </Button>
+
           </div>
         </div>
       </header>
