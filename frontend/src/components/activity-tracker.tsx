@@ -106,8 +106,23 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   // Create a lookup function for user profile images
   const getUserProfileImage = (userId: string) => {
-    const user = users.find((u: UserType) => u.id === userId);
-    return user?.profileImageUrl || null;
+    const user = users.find((u: UserType) => String(u.id) === String(userId));
+    return (user as any)?.profileImageUrl || (user as any)?.profileImage || null;
+  };
+
+  // Current authenticated user (used for optimistic fallback)
+  const { user } = useAuth();
+
+  const getCurrentUserProfileIfMatch = (activity: any) => {
+    if (!user) return null;
+    const displayName = ((user as any).name || (user as any).firstName || (user as any).email || '').toString().trim();
+    const activityName = (activity?.userName || '').toString().trim();
+    if (!activityName) return null;
+    // compare lowercased substrings to be tolerant
+    if (activityName.toLowerCase().includes(displayName.toLowerCase()) || displayName.toLowerCase().includes(activityName.toLowerCase())) {
+      return (user as any).profileImageUrl || (user as any).profileImage || null;
+    }
+    return null;
   };
 
   const { user } = useAuth();
