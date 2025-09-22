@@ -76,9 +76,7 @@ export class ActivityService {
     fieldName?: string,
     oldValue?: string,
     newValue?: string,
-    userId?: string,
-    userName?: string,
-    userProfileImage?: string
+    userId?: string
   ): Promise<void> {
     try {
       await ActivityModel.create({
