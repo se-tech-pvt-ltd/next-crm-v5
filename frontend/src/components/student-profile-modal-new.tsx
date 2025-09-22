@@ -337,24 +337,48 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
           <DialogTitle className="sr-only">Student Profile</DialogTitle>
           
-          <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
-            {/* Left: Content */}
-            <div className="flex flex-col min-h-0">
-              {/* Sticky header inside scroll context */}
-              <div className="sticky top-0 z-20">
-                <div className="px-4 py-3 bg-blue-800 text-white flex items-center justify-between rounded-t-xl">
-                  <div>
-                    <div className="text-[12px] opacity-80">Student</div>
-                    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
-                  </div>
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-col h-[90vh] min-h-0">
+            {/* Global sticky header spanning both columns */}
+            <div className="sticky top-0 z-20">
+              <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between rounded-t-xl">
+                <div>
+                  <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || 'Student'}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="px-3 [&_svg]:size-3 bg-[#D6E4FE] text-white hover:bg-[#C6D8FD] border border-[#D6E4FE] rounded-md"
+                    onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                    title="Add Application"
+                  >
+                    <Plus />
+                    <span>Add Application</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="px-3 [&_svg]:size-3 bg-[#D6E4FE] text-white hover:bg-[#C6D8FD] border border-[#D6E4FE] rounded-md"
+                    onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
+                    disabled={isLoading}
+                    title="Edit"
+                  >
+                    <Edit />
+                    <span>Edit</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <div className="px-3 py-2 bg-white border-b">
-                  {statusSequence.length > 0 && <StatusProgressBar />}
-                </div>
               </div>
+              <div className="px-4 py-2 bg-[#223E7D] text-white">
+                {statusSequence.length > 0 && <StatusProgressBar />}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-[1fr_360px] flex-1 min-h-0">
+              {/* Left: Content */}
+              <div className="flex flex-col min-h-0">
 
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
@@ -363,24 +387,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                     <div className="flex items-center justify-between">
                       <CardTitle>Student Information</CardTitle>
                       <div className="flex items-center space-x-2">
-                        {!isEditing ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
-                              title="Add Application"
-                            >
-                              <Plus />
-                              <span className="hidden lg:inline">Add Application</span>
-                            </Button>
-                            <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }} disabled={isLoading} title="Edit">
-                              <Edit />
-                              <span className="hidden lg:inline">Edit</span>
-                            </Button>
-                          </>
-                        ) : (
+                        {isEditing ? (
                           <>
                             <Button size="sm" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending}>
                               <Save className="w-4 h-4 mr-1" />
@@ -391,7 +398,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                               Cancel
                             </Button>
                           </>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </CardHeader>
@@ -553,7 +560,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </CardTitle>
                       <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
                         <Plus />
-                        <span className="hidden lg:inline">Add Application</span>
+                        <span>Add Application</span>
                       </Button>
                     </div>
                   }
@@ -589,17 +596,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
             </div>
 
             {/* Right: Timeline */}
-            <div className="border-l bg-white flex flex-col min-h-0">
-              <div className="sticky top-0 z-10 px-3 py-2 border-b bg-white flex items-center justify-between">
-                <h2 className="text-xs font-semibold">Activity Timeline</h2>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.dispatchEvent(new CustomEvent('open-activity-composer', { detail: { entityType: 'student', entityId: student.id } }))}>
-                  + Add Activity
-                </Button>
-              </div>
+            <div className="bg-white flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto pt-1 min-h-0">
                 <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
               </div>
             </div>
+          </div>
           </div>
         </DialogContent>
       </Dialog>

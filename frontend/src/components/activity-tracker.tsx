@@ -229,16 +229,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   return (
     <div className="space-y-3 p-3">
 
-        {/* Add Activity Section (hidden when canAdd is false) */}
         {canAdd && (
           <>
             <div className="space-y-2.5 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
               {!isAddingActivity ? (
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={() => setIsAddingActivity(true)}
-                  className="w-full"
+                  className="w-full bg-[#0071B0] hover:bg-[#00649D] text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Activity
@@ -402,6 +400,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
             });
           })()}
         </div>
+
     </div>
   );
 }
