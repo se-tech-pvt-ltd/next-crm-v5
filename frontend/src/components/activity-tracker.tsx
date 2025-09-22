@@ -361,7 +361,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(activity.activityType)} ring-2 ring-white shadow mt-2`} />
                     {!isLast && <div className="w-px flex-1 bg-gray-200 mt-1" />}
                   </div>
-                  <div className="flex-1 rounded-md border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex-1 rounded-md border border-gray-200 bg-[#EDEDED] p-2.5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
