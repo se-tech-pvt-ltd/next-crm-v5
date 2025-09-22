@@ -20,7 +20,6 @@ import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import ToolkitPage from "@/pages/toolkit";
 import Login from "@/pages/login";
-import { Route, Switch } from 'wouter';
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
