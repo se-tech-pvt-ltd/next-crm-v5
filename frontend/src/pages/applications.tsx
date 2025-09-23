@@ -109,8 +109,9 @@ export default function Applications() {
   // Get unique universities for filter dropdown
   const uniqueUniversities = applicationsArray ?
     applicationsArray.reduce((universities: string[], app) => {
-      if (app.university && !universities.includes(app.university)) {
-        universities.push(app.university);
+      const uni = cleanLabel(app.university || '');
+      if (uni && !universities.includes(uni)) {
+        universities.push(uni);
       }
       return universities;
     }, []) : [];
