@@ -102,6 +102,11 @@ export interface Admission {
   depositDeadline: Date | null;
   visaStatus: string | null;
   admissionId?: string | null;
+  // Access fields
+  branchId?: string | null;
+  regionId?: string | null;
+  counsellorId?: string | null;
+  admissionOfficerId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -209,6 +214,11 @@ export const insertAdmissionSchema = z.object({
   depositDeadline: z.date().optional(),
   visaStatus: z.string().default("pending"),
   admissionId: z.string().optional(),
+  // Access fields (optional)
+  branchId: z.string().optional(),
+  regionId: z.string().optional(),
+  counsellorId: z.string().optional(),
+  admissionOfficerId: z.string().optional(),
 });
 
 export const insertActivitySchema = z.object({
