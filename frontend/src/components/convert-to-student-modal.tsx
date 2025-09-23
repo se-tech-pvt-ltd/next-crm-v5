@@ -92,7 +92,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     ? users
         .filter((u: any) => {
           const role = normalizeRole(u.role || u.role_name || u.roleName);
-          return role === 'counselor' || role === 'counsellor';
+          return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
         })
         .filter((u: any) => {
           const links = Array.isArray(branchEmps) ? branchEmps : [];
@@ -151,10 +151,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
       const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
       if (u) {
-        const role = normalizeRole((u as any).role || (u as any).role_name || (u as any).roleName);
-        if (role === 'counselor' || role === 'counsellor') {
-          list.unshift(u);
-        }
+        list.unshift(u);
       }
     }
     return list;
