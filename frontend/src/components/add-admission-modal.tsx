@@ -14,6 +14,7 @@ import { insertAdmissionSchema, type InsertAdmission, type Student, type Applica
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
 import { ApplicationDetailsModal } from './application-details-modal-new';
