@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Database, Plus, UserPlus, Image as ImageIcon, IdCard, Building2, Save, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
+import { queryClient } from '@/lib/queryClient';
 
 export default function UserSection({ toast }: { toast: (v: any) => void }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
@@ -45,8 +46,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Filters and pagination
 
   // Filters and pagination
-  const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
+  const [filters, setFilters] = useState<{ query: string; role: string; branchId: string; regionId: string }>({ query: '', role: '', branchId: '', regionId: '' });
   const [branchSearch, setBranchSearch] = useState('');
+  const [regionFilterSearch, setRegionFilterSearch] = useState('');
   const [branchFilterSearch, setBranchFilterSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -71,8 +73,14 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     enabled: branchFilterTrim.length > 0,
     staleTime: 10_000,
   });
-  const branchFilterList = branchFilterTrim ? branchFilterSearched : initialBranches;
-  const branchFilterOptions = (Array.isArray(branchFilterList) ? branchFilterList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+  const branchFilterAll = branchFilterTrim ? branchFilterSearched : initialBranches;
+  const branchFilterList = (Array.isArray(branchFilterAll) ? branchFilterAll : []).filter((b: any) => !filters.regionId || String(b.regionId ?? b.region_id ?? '') === String(filters.regionId));
+  const branchFilterOptions = branchFilterList.map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
+  const regionFilterTrim = regionFilterSearch.trim().toLowerCase();
+  const regionFilterOptions = (Array.isArray(regions) ? regions : [])
+    .map((r: any) => ({ value: String(r.id), label: String(r.name ?? r.regionName ?? r.region_name ?? r.id) }))
+    .filter((opt: any) => !regionFilterTrim || opt.label.toLowerCase().includes(regionFilterTrim));
 
   const branchAddTrim = branchSearch.trim();
   const { data: branchAddSearched = [], isFetching: branchAddIsFetching } = useQuery({
@@ -96,8 +104,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
-    onSuccess: async () => {
+    onSuccess: async (created) => {
       await refetch();
+      try {
+        await queryClient.invalidateQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+        await queryClient.refetchQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+      } catch {}
       setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
@@ -183,6 +195,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     onSuccess: async (updated: any) => {
       setIsEditing(false);
       const res = await refetch();
+      try {
+        await queryClient.invalidateQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+        await queryClient.refetchQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+      } catch {}
       const freshList = (res as any)?.data || users;
       const fresh = (Array.isArray(freshList) ? freshList : []).find((u: any) => String(u.id) === String(updated?.id || selected?.id));
       setSelected(fresh || { ...selected, ...updated });
@@ -236,7 +252,18 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       String(u.email || '').toLowerCase().includes(q);
     const matchesRole = !filters.role || String(u.role || '') === filters.role;
     const matchesBranch = !filters.branchId || String((u.branchId ?? u.branch_id) || '') === filters.branchId;
-    return matchesQuery && matchesRole && matchesBranch;
+    const matchesRegion = !filters.regionId || (() => {
+      const nRole = normalizeRole(String(u.role || ''));
+      if (nRole === 'regional_manager') {
+        const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String(u.id));
+        return String(r?.id || '') === String(filters.regionId);
+      }
+      const bId = String((u.branchId ?? u.branch_id) || '');
+      const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
+      const regId = b ? String(b.regionId ?? b.region_id ?? '') : '';
+      return String(regId) === String(filters.regionId);
+    })();
+    return matchesQuery && matchesRole && matchesBranch && matchesRegion;
   });
   const sortedUsers = [...filteredUsers].sort((a: any, b: any) => {
     const aDate = new Date(a.createdAt || a.created_at || a.created_on || 0).getTime();
@@ -246,7 +273,18 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters.query, filters.role, filters.branchId]);
+  }, [filters.query, filters.role, filters.branchId, filters.regionId]);
+
+  useEffect(() => {
+    if (!filters.regionId) return;
+    if (!filters.branchId) return;
+    const all = branchFilterTrim ? branchFilterSearched : initialBranches;
+    const b = (Array.isArray(all) ? all : []).find((bb: any) => String(bb.id) === String(filters.branchId));
+    const regId = String(b?.regionId ?? b?.region_id ?? '');
+    if (regId && regId !== String(filters.regionId)) {
+      setFilters((s) => ({ ...s, branchId: '' }));
+    }
+  }, [filters.regionId]);
 
   const total = sortedUsers.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -290,6 +328,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <SelectItem value="admin_staff">Admin Staff</SelectItem>
             </SelectContent>
           </Select>
+          <div className="w-56">
+            <SearchableCombobox
+              value={filters.regionId}
+              onValueChange={(v) => setFilters((s) => ({ ...s, regionId: v }))}
+              placeholder="Filter by region"
+              searchPlaceholder="Search regions..."
+              onSearch={setRegionFilterSearch}
+              options={[{ value: '', label: 'All regions' }, ...regionFilterOptions]}
+            />
+          </div>
           <div className="w-56">
             <SearchableCombobox
               value={filters.branchId}
@@ -528,6 +576,8 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                   <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Region</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Active</TableHead>
                 </TableRow>
               </TableHeader>
@@ -567,6 +617,27 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <TableCell className="p-2 text-xs">{[(u.firstName ?? u.first_name), (u.lastName ?? u.last_name)].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
+                    <TableCell className="p-2 text-xs">{(() => {
+                      const roleName = String(u.role || '');
+                      const nRole = normalizeRole(roleName);
+                      // If regional manager, derive region by regionHeadId
+                      if (nRole === 'regional_manager') {
+                        const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String(u.id));
+                        return r ? String(r.name ?? r.regionName ?? r.region_name ?? r.id) : '—';
+                      }
+                      // Otherwise infer region from branch
+                      const bId = String((u.branchId ?? u.branch_id) || '');
+                      const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
+                      if (!b) return '—';
+                      const reg = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.id) === String(b.regionId ?? b.region_id));
+                      return reg ? String(reg.name ?? reg.regionName ?? reg.region_name ?? reg.id) : '—';
+                    })()}</TableCell>
+                    <TableCell className="p-2 text-xs">{(() => {
+                      const bId = String((u.branchId ?? u.branch_id) || '');
+                      if (!bId) return '—';
+                      const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
+                      return b ? String(b.name ?? b.branchName ?? b.branch_name ?? b.id) : '—';
+                    })()}</TableCell>
                     <TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}

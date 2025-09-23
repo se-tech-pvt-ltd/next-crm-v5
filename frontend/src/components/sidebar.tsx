@@ -104,7 +104,7 @@ export function Sidebar() {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
     { path: '/toolkit', label: 'Toolkit', icon: ToolkitIcon, count: undefined },
-    { path: '/events', label: 'Event', icon: Calendar, count: Array.isArray(eventsData) ? eventsData.length : 0, countColor: 'bg-blue-500' },
+    { path: '/events', label: 'Event', icon: Calendar, count: Array.isArray(eventsData) ? eventsData.length : 0, countColor: 'bg-primary' },
     { path: '/leads', label: 'Leads', icon: Users, count: newLeadsCount, countColor: 'bg-emerald-500' },
     { path: '/students', label: 'Students', icon: GraduationCap, count: studentsCount, countColor: 'bg-purple-600' },
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },

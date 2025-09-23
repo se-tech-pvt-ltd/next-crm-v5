@@ -178,7 +178,7 @@ export default function Applications() {
           <Card>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
-                <CheckCircle className="w-3 h-3 text-blue-500" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 Open
               </CardTitle>
             </CardHeader>
