@@ -60,6 +60,8 @@ export class StudentService {
     let rows: any[];
     if (userRole === 'counselor' && userId) {
       rows = await StudentModel.findByCounselor(userId);
+    } else if (userRole === 'admission_officer' && userId) {
+      rows = await StudentModel.findByAdmissionOfficer(userId);
     } else {
       rows = await StudentModel.findAll();
     }
