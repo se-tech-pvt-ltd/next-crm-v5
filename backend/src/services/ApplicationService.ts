@@ -10,7 +10,10 @@ export class ApplicationService {
   // Map dropdown-backed fields (e.g., status, intake, courseType, etc.) to their display labels
   static async enrichDropdownFields(rows: any[]) {
     if (!Array.isArray(rows) || rows.length === 0) return rows;
-    const dropdowns = await DropdownService.getDropdownsByModule('applications');
+    // Pull both Applications module dropdowns and global list as fallback (some fields like Country may live elsewhere)
+    const moduleDropdowns = await DropdownService.getDropdownsByModule('applications');
+    const allDropdowns = await DropdownService.getAllDropdowns();
+    const dropdowns = [...moduleDropdowns, ...allDropdowns];
 
     // Group dropdowns by normalized field name
     const normalize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
