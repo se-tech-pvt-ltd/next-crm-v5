@@ -85,6 +85,20 @@ export default function Applications() {
     },
   });
 
+  const cleanLabel = (val?: string | null) => {
+    if (!val) return '';
+    const uuidRe = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
+    // take first non-empty line if multiple
+    const parts = val.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      const nonUuid = parts.find(s => !uuidRe.test(s));
+      if (nonUuid) return nonUuid;
+    }
+    let s = (parts[0] || val).replace(/\(([0-9a-fA-F-]{36})\)/g, '').trim();
+    s = s.replace(uuidRe, '').replace(/\s{2,}/g, ' ').trim();
+    return s || (val || '').trim();
+  };
+
   // Apply client-side filters to the full applications array
   const filteredAll = (applicationsArray || []).filter(app => {
     const appStatusValue = cleanLabel(app.appStatus || '');
