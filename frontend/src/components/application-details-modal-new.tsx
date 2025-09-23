@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 console.log('[modal] loaded: frontend/src/components/application-details-modal-new.tsx');
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -198,28 +198,37 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const statusSequence = ['Open', 'Needs Attention', 'Closed'];
   const StatusProgressBar = () => {
     const currentIndex = statusSequence.findIndex((s) => (currentStatus || 'Open') === s);
+
     return (
-      <div className="w-full bg-gray-100 rounded-md p-1.5 mb-3">
-        <div className="flex items-center justify-between relative">
+      <div className="w-full bg-gray-100 rounded-md p-1 mb-2">
+        <div className="flex items-center justify-center relative">
           {statusSequence.map((status, index) => {
             const isCompleted = index <= (currentIndex < 0 ? 0 : currentIndex);
             const handleClick = () => {
+              if (updateStatusMutation.isPending) return;
               if (!currentApp) return;
               if (status === currentStatus) return;
               updateStatusMutation.mutate(status);
             };
+
             return (
-              <div key={status} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${status}`}>
-                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                  isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+              <div
+                key={status}
+                className="flex items-center cursor-pointer select-none"
+                onClick={handleClick}
+                role="button"
+                aria-label={`Set status to ${status}`}
+              >
+                <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap ${
+                  isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'
                 }`}>
-                  {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
-                </div>
-                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>
                   {status}
-                </span>
+                </div>
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                  <div className="relative mx-2 w-16 sm:w-24 md:w-32 lg:w-40 h-2 flex items-center">
+                    <div className={`${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'} h-0.5 w-full`} />
+                    <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-l-[8px] ${index < currentIndex ? 'border-l-green-500' : 'border-l-gray-300'}`} />
+                  </div>
                 )}
               </div>
             );
@@ -257,217 +266,245 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   if (!currentApp) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
-        <DialogTitle className="sr-only">Application Details</DialogTitle>
-
-        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
-          <div className="flex flex-col min-h-0">
-            <div className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-              <div className="px-4 py-2 flex items-center justify-between">
-                <div className="flex-1 pr-3">
-                  <StatusProgressBar />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                    <X className="w-4 h-4" />
+    <>
+      <DetailsDialogLayout
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Application Details"
+        headerClassName="bg-[#223E7D] text-white"
+        statusBarWrapperClassName="px-4 py-2 bg-[#223E7D] text-white -mt-px"
+        statusBar={<StatusProgressBar />}
+        rightWidth="420px"
+        headerLeft={(
+          <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">
+            {currentApp.university || 'Application'}{currentApp.applicationCode ? ` (${currentApp.applicationCode})` : ''}
+          </div>
+        )}
+        headerRight={(
+          <div className="flex items-center gap-2">
+            {!isEditing ? (
+              <>
+                {admissionForApp ? (
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                    onClick={() => { try { setLocation(`/admissions/${admissionForApp.id}`); } catch { try { window.location.hash = `#/admissions/${admissionForApp.id}`; } catch {} } }}
+                    title="View Admission"
+                  >
+                    <ExternalLink />
+                    <span>View Admission</span>
                   </Button>
-                </div>
-              </div>
-            </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                    onClick={() => { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); }}
+                    title="Add Admission"
+                  >
+                    <Plus />
+                    <span>Add Admission</span>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                  onClick={() => { setIsEditing(true); try { setLocation(`/applications/${currentApp?.id}/edit`); } catch {} }}
+                  title="Edit"
+                >
+                  <Edit />
+                  <span>Edit</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="xs" onClick={handleSave} disabled={updateApplicationMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
+                  <Save className="w-3.5 h-3.5 mr-1" />
+                  <span>Save Changes</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => { setIsEditing(false); setEditData({
+                    university: currentApp.university,
+                    program: currentApp.program,
+                    courseType: currentApp.courseType,
+                    country: currentApp.country,
+                    intake: currentApp.intake,
+                    channelPartner: currentApp.channelPartner,
+                    googleDriveLink: currentApp.googleDriveLink,
+                    caseStatus: currentApp.caseStatus || 'Raw',
+                  }); try { setLocation(`/applications/${currentApp?.id}`); } catch {} }}
+                  title="Cancel"
+                  className="bg-white text-[#223E7D] hover:bg-white/90 border border-white"
+                >
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  <span>Cancel</span>
+                </Button>
+              </>
+            )}
+            <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+        leftContent={(
+          <div className="flex gap-0 w-full">
+            <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
+              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
+                    <div className="flex items-center gap-3" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Student</span></Label>
+                      {student ? (
+                        <Button type="button" variant="link" className="h-8 p-0 text-xs" onClick={() => { openStudentProfile(student.id); }}>
+                          {student.name}
+                        </Button>
+                      ) : (
+                        <Input value={currentApp.studentId} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
+                      {isEditing ? (
+                        <Select value={(editData.caseStatus as string) || ''} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {caseStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={currentApp.caseStatus || 'Raw'} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
+                      <Input value={currentApp.applicationCode || 'Not provided'} disabled className="h-8 text-xs transition-all" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-              <div className="flex gap-0 w-full">
-                <div className="flex-1 flex flex-col space-y-4 min-w-0 w-full">
-                  <Card className="w-full">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center"><School className="w-5 h-5 mr-2" />Application Information</CardTitle>
-                        <div className="flex items-center gap-3">
-                          {admissionForApp ? (
-                            <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { try { setLocation(`/admissions/${admissionForApp.id}`); } catch { try { window.location.hash = `#/admissions/${admissionForApp.id}`; } catch {} } }} title="View Admission">
-                              <ExternalLink />
-                              <span className="hidden lg:inline">View Admission</span>
-                            </Button>
-                          ) : !isEditing ? (
-                            <>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); }} title="Add Admission">
-                                <Plus />
-                                <span className="hidden lg:inline">Add Admission</span>
-                              </Button>
-                              <Button variant="outline" size="sm" className="rounded-full px-2 md:px-3 [&_svg]:size-5" onClick={() => { setIsEditing(true); try { setLocation(`/applications/${currentApp?.id}/edit`); } catch {} }} title="Edit">
-                                <Edit />
-                                <span className="hidden lg:inline">Edit</span>
-                              </Button>
-                            </>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" onClick={handleSave} disabled={updateApplicationMutation.isPending}>
-                                <Save className="w-4 h-4 mr-1" /> Save Changes
-                              </Button>
-                              <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditData({
-                               university: currentApp.university,
-                               program: currentApp.program,
-                               courseType: currentApp.courseType,
-                               country: currentApp.country,
-                               intake: currentApp.intake,
-                               channelPartner: currentApp.channelPartner,
-                               googleDriveLink: currentApp.googleDriveLink,
-                               caseStatus: currentApp.caseStatus || 'Raw',
-                             }); try { setLocation(`/applications/${currentApp?.id}`); } catch {} }}>
-                                <X className="w-4 h-4 mr-1" /> Cancel
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><span>Student</span></Label>
-                          {student ? (
-                            <Button type="button" variant="link" className="h-8 p-0 text-xs" onClick={() => { openStudentProfile(student.id); }}>
-                              {student.name}
-                            </Button>
-                          ) : (
-                            <Input value={currentApp.studentId} disabled className="h-8 text-xs transition-all" />
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><span>Case Status</span></Label>
-                          {isEditing ? (
-                            <Select value={(editData.caseStatus as string) || ''} onValueChange={(v) => setEditData({ ...editData, caseStatus: v })}>
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue placeholder="Please select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {caseStatusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input value={currentApp.caseStatus || 'Raw'} disabled className="h-8 text-xs transition-all" />
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><span>Application ID</span></Label>
-                          <Input value={currentApp.applicationCode || 'Not provided'} disabled className="h-8 text-xs transition-all" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><School className="w-4 h-4" /><span>University</span></Label>
+                      <Input value={isEditing ? (editData.university || '') : (currentApp.university || '')} onChange={(e) => setEditData({ ...editData, university: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Program</span></Label>
+                      <Input value={isEditing ? (editData.program || '') : (currentApp.program || '')} onChange={(e) => setEditData({ ...editData, program: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Course Type</span></Label>
+                      {isEditing ? (
+                        <Select value={(editData.courseType as string) || ''} onValueChange={(v) => setEditData({ ...editData, courseType: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={currentApp.courseType || ''} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Country</span></Label>
+                      {isEditing ? (
+                        <Select value={(editData.country as string) || ''} onValueChange={(v) => setEditData({ ...editData, country: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={currentApp.country || ''} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
+                      {isEditing ? (
+                        <Select value={(editData.intake as string) || ''} onValueChange={(v) => setEditData({ ...editData, intake: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={currentApp.intake || ''} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <Card className="w-full">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><School className="w-4 h-4" /><span>University</span></Label>
-                          <Input value={isEditing ? (editData.university || '') : (currentApp.university || '')} onChange={(e) => setEditData({ ...editData, university: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Program</span></Label>
-                          <Input value={isEditing ? (editData.program || '') : (currentApp.program || '')} onChange={(e) => setEditData({ ...editData, program: e.target.value })} disabled={!isEditing} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Course Type</span></Label>
-                          {isEditing ? (
-                            <Select value={(editData.courseType as string) || ''} onValueChange={(v) => setEditData({ ...editData, courseType: v })}>
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue placeholder="Please select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input value={currentApp.courseType || ''} disabled className="h-8 text-xs transition-all" />
+              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center"><ExternalLink className="w-5 h-5 mr-2" />Operations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Channel Partner</span></Label>
+                      {isEditing ? (
+                        <Select value={(editData.channelPartner as string) || ''} onValueChange={(v) => setEditData({ ...editData, channelPartner: v })}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Please select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input value={currentApp.channelPartner || ''} disabled className="h-8 text-xs transition-all" />
+                      )}
+                    </div>
+                    <div className="space-y-2 md:col-span-1">
+                      <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>
+                      {isEditing ? (
+                        <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={async (e) => { e.preventDefault(); if (!currentApp.googleDriveLink) { toast({ title: 'No link', description: 'Google Drive link is not provided', variant: 'destructive' }); return; } const ok = await copyToClipboard(currentApp.googleDriveLink); toast({ title: ok ? 'Copied' : 'Copy failed', description: ok ? 'Google Drive link copied to clipboard' : 'Could not copy link', variant: ok ? undefined : 'destructive' }); }} disabled={!currentApp.googleDriveLink}>
+                            <Copy className="w-4 h-4 mr-1" /> Copy
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); if (currentApp.googleDriveLink) window.open(currentApp.googleDriveLink, '_blank', 'noopener'); }} disabled={!currentApp.googleDriveLink}>
+                            <ExternalLink className="w-4 h-4 mr-1" /> Open
+                          </Button>
+                          {!currentApp.googleDriveLink && (
+                            <span className="text-[11px] text-gray-500">Not provided</span>
                           )}
                         </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Country</span></Label>
-                          {isEditing ? (
-                            <Select value={(editData.country as string) || ''} onValueChange={(v) => setEditData({ ...editData, country: v })}>
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue placeholder="Please select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input value={currentApp.country || ''} disabled className="h-8 text-xs transition-all" />
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
-                          {isEditing ? (
-                            <Select value={(editData.intake as string) || ''} onValueChange={(v) => setEditData({ ...editData, intake: v })}>
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue placeholder="Please select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input value={currentApp.intake || ''} disabled className="h-8 text-xs transition-all" />
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="w-full">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center"><ExternalLink className="w-5 h-5 mr-2" />Operations</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Channel Partner</span></Label>
-                          {isEditing ? (
-                            <Select value={(editData.channelPartner as string) || ''} onValueChange={(v) => setEditData({ ...editData, channelPartner: v })}>
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue placeholder="Please select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input value={currentApp.channelPartner || ''} disabled className="h-8 text-xs transition-all" />
-                          )}
-                        </div>
-                        <div className="space-y-2 md:col-span-1">
-                          <Label className="flex items-center space-x-2"><ExternalLink className="w-4 h-4" /><span>Google Drive Link</span></Label>
-                          {isEditing ? (
-                            <Input value={editData.googleDriveLink || ''} onChange={(e) => setEditData({ ...editData, googleDriveLink: e.target.value })} className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" variant="outline" onClick={async (e) => { e.preventDefault(); if (!currentApp.googleDriveLink) { toast({ title: 'No link', description: 'Google Drive link is not provided', variant: 'destructive' }); return; } const ok = await copyToClipboard(currentApp.googleDriveLink); toast({ title: ok ? 'Copied' : 'Copy failed', description: ok ? 'Google Drive link copied to clipboard' : 'Could not copy link', variant: ok ? undefined : 'destructive' }); }} disabled={!currentApp.googleDriveLink}>
-                                <Copy className="w-4 h-4 mr-1" /> Copy
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); if (currentApp.googleDriveLink) window.open(currentApp.googleDriveLink, '_blank', 'noopener'); }} disabled={!currentApp.googleDriveLink}>
-                                <ExternalLink className="w-4 h-4 mr-1" /> Open
-                              </Button>
-                              {!currentApp.googleDriveLink && (
-                                <span className="text-[11px] text-gray-500">Not provided</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
-
-          <div className="w-[420px] flex-shrink-0 bg-white border-l p-3 flex flex-col min-h-0">
+        )}
+        rightContent={(
+          <div className="p-3">
             <div className="sticky top-0 z-10 px-1 pb-2 bg-white">
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
@@ -475,25 +512,20 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto">
-              <ActivityTracker
-                entityType="application"
-                entityId={currentApp.id}
-                initialInfoDate={currentApp.createdAt as any}
-              />
+              <ActivityTracker entityType="application" entityId={currentApp.id} initialInfoDate={currentApp.createdAt as any} />
             </div>
           </div>
-        </div>
+        )}
+      />
 
-        <AddAdmissionModal
-          open={isAddAdmissionOpen}
-          onOpenChange={setIsAddAdmissionOpen}
-          applicationId={currentApp?.id as any}
-          studentId={currentApp?.studentId}
-        />
+      <AddAdmissionModal
+        open={isAddAdmissionOpen}
+        onOpenChange={setIsAddAdmissionOpen}
+        applicationId={currentApp?.id as any}
+        studentId={currentApp?.studentId}
+      />
 
-        <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={selectedStudentId} />
-
-      </DialogContent>
-    </Dialog>
+      <StudentProfileModal open={isStudentProfileOpen} onOpenChange={setIsStudentProfileOpen} studentId={selectedStudentId} />
+    </>
   );
 }

@@ -58,18 +58,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     staleTime: 5 * 60 * 1000,
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const counsellorOptions = Array.isArray(users)
-    ? users.filter((u: any) => {
-        const role = normalizeRole(u.role || u.role_name || u.roleName);
-        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
-      }).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
-    : [];
-  const officerOptions = Array.isArray(users)
-    ? users.filter((u: any) => {
-        const role = normalizeRole(u.role || u.role_name || u.roleName);
-        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
-      }).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
-    : [];
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
@@ -89,6 +77,40 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       admissionOfficerId: '',
     },
   });
+
+  // Determine selected student's branch (depends on form)
+  const selectedStudentId = form.watch('studentId');
+  const selectedStudent = (Array.isArray(students) ? students.find((s) => s.id === selectedStudentId) : null) || presetStudent;
+  const selectedBranchId = (selectedStudent as any)?.branchId || null;
+
+  // Reset access selections when branch context changes
+  useEffect(() => {
+    form.setValue('counsellorId', '');
+    form.setValue('admissionOfficerId', '');
+  }, [selectedBranchId]);
+
+  const counsellorOptions = Array.isArray(users) && selectedBranchId
+    ? users
+        .filter((u: any) => {
+          const role = normalizeRole(u.role || u.role_name || u.roleName);
+          return (
+            (role === 'counselor' || role === 'counsellor' || role === 'admin_staff') &&
+            String(u.branchId || '') === String(selectedBranchId || '')
+          );
+        })
+        .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+  const officerOptions = Array.isArray(users) && selectedBranchId
+    ? users
+        .filter((u: any) => {
+          const role = normalizeRole(u.role || u.role_name || u.roleName);
+          return (
+            (role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer') &&
+            String(u.branchId || '') === String(selectedBranchId || '')
+          );
+        })
+        .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
 
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
@@ -121,8 +143,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     createApplicationMutation.mutate(data);
   };
 
-  const selectedStudentId = form.watch('studentId');
-  const selectedStudent = students?.find((s) => s.id === selectedStudentId) || presetStudent;
 
   useEffect(() => {
     if (studentId) {
@@ -369,7 +389,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select counsellor" />
+                                <SelectValue placeholder={selectedBranchId ? 'Select counsellor' : 'No branch linked to student'} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -394,7 +414,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select admission officer" />
+                                <SelectValue placeholder={selectedBranchId ? 'Select admission officer' : 'No branch linked to student'} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
