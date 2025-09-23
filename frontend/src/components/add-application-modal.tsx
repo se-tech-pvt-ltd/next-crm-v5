@@ -59,7 +59,26 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
 
-  // Determine selected student's branch
+  const form = useForm({
+    resolver: zodResolver(insertApplicationSchema),
+    defaultValues: {
+      studentId: studentId || '',
+      university: '',
+      program: presetStudent?.targetProgram || '',
+      courseType: '',
+      appStatus: 'Open',
+      caseStatus: 'Raw',
+      country: '',
+      channelPartner: '',
+      intake: '',
+      googleDriveLink: '',
+      notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+    },
+  });
+
+  // Determine selected student's branch (depends on form)
   const selectedStudentId = form.watch('studentId');
   const selectedStudent = (Array.isArray(students) ? students.find((s) => s.id === selectedStudentId) : null) || presetStudent;
   const selectedBranchId = (selectedStudent as any)?.branchId || null;
@@ -92,25 +111,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         })
         .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
     : [];
-
-  const form = useForm({
-    resolver: zodResolver(insertApplicationSchema),
-    defaultValues: {
-      studentId: studentId || '',
-      university: '',
-      program: presetStudent?.targetProgram || '',
-      courseType: '',
-      appStatus: 'Open',
-      caseStatus: 'Raw',
-      country: '',
-      channelPartner: '',
-      intake: '',
-      googleDriveLink: '',
-      notes: '',
-      counsellorId: '',
-      admissionOfficerId: '',
-    },
-  });
 
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
