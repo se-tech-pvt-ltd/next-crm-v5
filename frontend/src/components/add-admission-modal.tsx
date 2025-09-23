@@ -109,6 +109,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         depositAmount: data.depositAmount || data.initialDeposit || null,
         depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
         visaStatus: data.visaStatus || 'pending',
+        counsellorId: data.counsellorId || undefined,
+        admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
       const created = await AdmissionsService.createAdmission(payload as any);
       try {
