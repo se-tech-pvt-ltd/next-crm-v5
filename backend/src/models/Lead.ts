@@ -190,6 +190,62 @@ export class LeadModel {
     };
   }
 
+  static async findByAdmissionOfficer(admissionOfficerId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+    const baseQuery = db
+      .select({
+        id: leads.id,
+        name: leads.name,
+        email: leads.email,
+        phone: leads.phone,
+        city: leads.city,
+        country: leads.country,
+        program: leads.program,
+        source: leads.source,
+        status: leads.status,
+        expectation: leads.expectation,
+        type: leads.type,
+        studyLevel: leads.studyLevel,
+        studyPlan: leads.studyPlan,
+        elt: leads.elt,
+        lostReason: leads.lostReason,
+        notes: leads.notes,
+        counselorId: leads.counselorId,
+        admissionOfficerId: leads.admissionOfficerId,
+        eventRegId: leads.eventRegId,
+        createdBy: leads.createdBy,
+        updatedBy: leads.updatedBy,
+        createdAt: leads.createdAt,
+        updatedAt: leads.updatedAt,
+      })
+      .from(leads)
+      .where(eq(leads.admissionOfficerId, admissionOfficerId));
+
+    if (pagination) {
+      // Get total count
+      const [totalResult] = await db.select({ count: count() })
+        .from(leads)
+        .where(eq(leads.admissionOfficerId, admissionOfficerId));
+
+      // Get paginated results
+      const paginatedLeads = await baseQuery
+        .orderBy(desc(leads.createdAt))
+        .limit(pagination.limit)
+        .offset(pagination.offset);
+
+      return {
+        leads: paginatedLeads.map(LeadModel.parseLeadFields),
+        total: totalResult.count
+      };
+    }
+
+    // Return all leads if no pagination
+    const allLeads = await baseQuery.orderBy(desc(leads.createdAt));
+    return {
+      leads: allLeads.map(LeadModel.parseLeadFields),
+      total: allLeads.length
+    };
+  }
+
   static async findByRegion(regionId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
     const baseQuery = db
       .select({
