@@ -18,6 +18,7 @@ import AddAdmissionPage from "@/pages/add-admission";
 import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import Forbidden from "@/pages/forbidden";
 import ToolkitPage from "@/pages/toolkit";
 import Login from "@/pages/login";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
