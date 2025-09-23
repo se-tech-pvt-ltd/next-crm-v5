@@ -124,6 +124,8 @@ export default function AddApplication() {
       intake: '',
       googleDriveLink: '',
       notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
     } as any,
   });
 
