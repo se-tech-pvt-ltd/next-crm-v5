@@ -21,6 +21,8 @@ import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
 import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -39,6 +41,7 @@ import {
   GraduationCap,
   BookOpen,
   Target,
+  Users,
   User as UserIcon
 } from 'lucide-react';
 
@@ -106,6 +109,20 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
     enabled: open,
+  });
+
+  const { data: regions = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: async () => RegionsService.listRegions(),
+    enabled: open,
+    staleTime: 60_000,
+  });
+
+  const { data: branches = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: async () => BranchesService.listBranches(),
+    enabled: open,
+    staleTime: 60_000,
   });
 
   // Helpers to resolve dropdown-backed labels (case-insensitive field keys)
@@ -442,6 +459,98 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
               </CardContent>
             </Card>
 
+            <CollapsibleCard
+              persistKey={`student-details:${authUser?.id || 'anon'}:student-access`}
+              cardClassName="shadow-sm hover:shadow-md transition-shadow"
+              header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Student Access</span></CardTitle>}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
+                <div className="space-y-1.5">
+                  <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
+                  <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                    {(() => {
+                      const regionId = (student as any).regionId || (editData as any).regionId;
+                      const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(regionId)) : null;
+                      if (!r) return '—';
+                      const regionName = (r as any).regionName || (r as any).name || (r as any).id;
+                      const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String((r as any).regionHeadId || '')) : null;
+                      const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                      const headEmail = head?.email || '';
+                      return (
+                        <div>
+                          <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                          {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Branch</span></Label>
+                  <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                    {(() => {
+                      const branchId = (student as any).branchId || (editData as any).branchId;
+                      const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(branchId)) : null;
+                      if (!b) return '—';
+                      const branchName = (b as any).branchName || (b as any).name || (b as any).code || (b as any).id;
+                      const headId = (b as any).branchHeadId || (b as any).managerId || null;
+                      const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
+                      const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                      const headEmail = head?.email || '';
+                      return (
+                        <div>
+                          <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                          {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Admission Officer</span></Label>
+                  <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                    {(() => {
+                      const norm = (v: string) => String(v || '').toLowerCase().replace(/\s+/g,'_').replace(/-+/g,'_');
+                      const branchId = (student as any).branchId || (editData as any).branchId;
+                      const officer = Array.isArray(users)
+                        ? (users as any[]).find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role || u.roleId || '') === 'admission_officer')
+                        : null;
+                      if (!officer) return '—';
+                      const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
+                      const email = officer.email || '';
+                      return (
+                        <div>
+                          <div className="font-medium text-xs">{fullName || email || officer.id}</div>
+                          {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
+                  <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                    {(() => {
+                      const cid = (student as any).counselorId || (student as any).counsellorId || (editData as any).counselorId || (editData as any).counsellorId;
+                      const c = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(cid)) : null;
+                      if (!c) return '—';
+                      const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
+                      const email = c.email || '';
+                      return (
+                        <div>
+                          <div className="font-medium text-xs">{fullName || email || c.id}</div>
+                          {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </CollapsibleCard>
+
             <CollapsibleCard persistKey={`student-details:${authUser?.id || 'anon'}:academic-information`} cardClassName="shadow-sm hover:shadow-md transition-shadow" header={<CardTitle className="flex items-center space-x-2"><GraduationCap className="w-4 h-4 text-primary" /><span>Academic Information</span></CardTitle>}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div className="space-y-2">
@@ -465,21 +574,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center space-x-2"><span>Counsellor</span></Label>
-                  {isEditing ? (
-                    <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
-                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                      <SelectContent>
-                        {counselorOptions().map((opt: any) => (
-                          <SelectItem key={opt.id} value={opt.id}>{opt.value}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="text-sm text-gray-700">{(() => { const found = counselorOptions().find((d: any) => d.id === student?.counselorId); return found?.value || 'Unassigned'; })()}</div>
-                  )}
-                </div>
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><span>Expectation</span></Label>

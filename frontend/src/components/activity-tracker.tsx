@@ -13,9 +13,11 @@ import { Activity, User as UserType } from "@/lib/types";
 import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
 import * as UsersService from '@/services/users';
+import * as LeadsService from '@/services/leads';
 import { format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
 import { createPortal } from 'react-dom';
+import { useLocation } from 'wouter';
 
 interface ActivityTrackerProps {
   entityType: string;
@@ -43,6 +45,37 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Extract conversion details like: "This record was converted from lead ID <uuid>. All previous..."
+  const parseConversionDescription = (desc?: string): { fromType?: string; fromId?: string } => {
+    if (!desc) return {};
+    const m = desc.match(/converted from\s+([a-z_]+)\s+id\s+([a-z0-9-]+)/i);
+    if (!m) return {};
+    return { fromType: (m[1] || '').toLowerCase(), fromId: m[2] };
+  };
+
+  const ConversionFromLead = ({ id }: { id: string }) => {
+    const { data: lead } = useQuery({
+      queryKey: ["/api/leads", id],
+      queryFn: () => LeadsService.getLead(id),
+      staleTime: 5 * 60 * 1000,
+    });
+    const name = (lead as any)?.name || id;
+    return (
+      <span>
+        This record was converted from <span className="font-medium">Lead</span> : {" "}
+        <button
+          type="button"
+          className="text-blue-600 hover:underline"
+          onClick={() => setLocation(`/leads/${id}`)}
+        >
+          {name}
+        </button>
+        . All previous activities have been preserved.
+      </span>
+    );
+  };
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -305,10 +338,27 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       return text.replace(statusChangeRegex, (_m, fromId, toId) => {
         const fromLabel = getStatusLabel(fromId);
         const toLabel = getStatusLabel(toId);
+        if ((fromLabel || '').toLowerCase().trim() === (toLabel || '').toLowerCase().trim()) return '';
         return `Status changed from "${fromLabel}" to "${toLabel}"`;
       });
     }
     return text.replace(/[0-9a-fA-F-]{36}/g, (token) => getStatusLabel(token));
+  };
+
+  // Determine if an activity is a redundant status change (same status before/after)
+  const isRedundantStatusChange = (a: any) => {
+    const an = normalizeActivity(a);
+    const type = (an.activityType || '').toLowerCase();
+    const field = normalize(an.fieldName || '');
+    const hasValues = ((an.oldValue ?? '') !== '' || (an.newValue ?? '') !== '');
+    if (!hasValues) return false;
+    if (field === 'status' || type === 'status_changed') {
+      const fromLabel = getLabelForField('status', String(an.oldValue || ''));
+      const toLabel = getLabelForField('status', String(an.newValue || ''));
+      if ((fromLabel || '').toLowerCase().trim() === (toLabel || '').toLowerCase().trim()) return true;
+      if (String(an.oldValue || '') === String(an.newValue || '')) return true;
+    }
+    return false;
   };
 
   // Safely format dates that may be missing/invalid
@@ -471,6 +521,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
               );
             }
 
+            list = list.filter((a) => !isRedundantStatusChange(a));
             return list.map((activity: Activity, idx: number) => {
               const isLast = idx === list.length - 1;
               const profileImage = (activity as any).userProfileImage || ((activity as any).userId ? (getUserProfileImage((activity as any).userId as any) || fetchedProfiles[(activity as any).userId]) : null) || getCurrentUserProfileIfMatch(activity);
@@ -506,6 +557,13 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                                 .replace(/([A-Z])/g, ' $1')
                                 .replace(/^./, (str) => str.toUpperCase());
                               return `${fieldLabel} changed from "${fromLabel}" to "${toLabel}"`;
+                            }
+                            // Special handling for conversion activities to show clickable Lead name
+                            if ((activity.activityType || '').toLowerCase() === 'converted') {
+                              const { fromType, fromId } = parseConversionDescription(activity.description || '');
+                              if (fromType === 'lead' && fromId) {
+                                return <ConversionFromLead id={fromId} />;
+                              }
                             }
                             if ((moduleDropdowns as any)?.Status) {
                               return mapStatusIdsInText(activity.description || (activity as any).title);
