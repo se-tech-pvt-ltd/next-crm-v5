@@ -32,16 +32,16 @@ export default function Settings() {
           <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className={`gap-2 ${category === 'regions' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
             <Globe2 className="w-4 h-4" /> Region manager
           </Button>
-          <Button type="button" variant={category === 'branches' ? 'default' : 'outline'} onClick={() => setCategory('branches')} className="gap-2">
+          <Button type="button" variant={category === 'branches' ? 'default' : 'outline'} onClick={() => setCategory('branches')} className={`gap-2 ${category === 'branches' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
             <Database className="w-4 h-4" /> Branch management
           </Button>
-          <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className="gap-2">
+          <Button type="button" variant={category === 'users' ? 'default' : 'outline'} onClick={() => setCategory('users')} className={`gap-2 ${category === 'users' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
             <ShieldCheck className="w-4 h-4" /> User management
           </Button>
-          <Button type="button" variant={category === 'role-access' ? 'default' : 'outline'} onClick={() => setCategory('role-access')} className="gap-2">
+          <Button type="button" variant={category === 'role-access' ? 'default' : 'outline'} onClick={() => setCategory('role-access')} className={`gap-2 ${category === 'role-access' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
             <ShieldCheck className="w-4 h-4" /> Role access
           </Button>
-          <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className="gap-2">
+          <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className={`gap-2 ${category === 'smtp' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
             <Mail className="w-4 h-4" /> Email (SMTP)
           </Button>
         </div>
