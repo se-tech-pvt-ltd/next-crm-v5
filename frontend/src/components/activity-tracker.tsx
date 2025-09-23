@@ -258,7 +258,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const getActivityIcon = (activityType: string, size: string = "h-4 w-4") => {
     switch (activityType) {
       case 'created': return <Plus className={`${size} text-green-500`} />;
-      case 'updated': return <ActivityIcon className={`${size} text-blue-500`} />;
+      case 'updated': return <ActivityIcon className={`${size} text-primary`} />;
       case 'status_changed': return <ActivityIcon className={`${size} text-orange-500`} />;
       case 'comment': return <MessageSquare className={`${size} text-purple-500`} />;
       case 'deleted': return <ActivityIcon className={`${size} text-red-500`} />;
@@ -280,7 +280,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const getDotColor = (activityType: string) => {
     switch (activityType) {
       case 'created': return 'bg-green-500';
-      case 'updated': return 'bg-blue-500';
+      case 'updated': return 'bg-primary';
       case 'status_changed': return 'bg-orange-500';
       case 'comment': return 'bg-purple-500';
       case 'deleted': return 'bg-red-500';

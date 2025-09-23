@@ -337,7 +337,7 @@ export default function Leads() {
           <Card>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
-                <UserPlus className="w-3 h-3 text-blue-500" />
+                <UserPlus className="w-3 h-3 text-primary" />
                 New Leads
               </CardTitle>
             </CardHeader>

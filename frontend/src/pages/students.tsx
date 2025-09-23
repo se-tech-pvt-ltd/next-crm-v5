@@ -228,7 +228,7 @@ export default function Students() {
           <Card>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
-                <Target className="w-3 h-3 text-blue-500" />
+                <Target className="w-3 h-3 text-primary" />
                 Applied
               </CardTitle>
             </CardHeader>

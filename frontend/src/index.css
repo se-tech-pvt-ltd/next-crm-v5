@@ -13,7 +13,7 @@
   --card-foreground: hsl(240, 10%, 3.9%);
   --border: hsl(240, 5.9%, 90%);
   --input: hsl(240, 5.9%, 90%);
-  --primary: hsl(217, 91%, 60%);
+  --primary: hsl(222, 57%, 31%);
   --primary-foreground: hsl(210, 40%, 98%);
   --secondary: hsl(6, 78%, 57%);
   --secondary-foreground: hsl(210, 40%, 98%);
@@ -38,7 +38,7 @@
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(217, 91%, 60%);
+  --primary: hsl(222, 57%, 31%);
   --primary-foreground: hsl(210, 40%, 98%);
   --secondary: hsl(6, 78%, 57%);
   --secondary-foreground: hsl(210, 40%, 98%);
@@ -208,7 +208,7 @@
   }
 
   .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-    background-color: rgb(59 130 246); /* blue-500 */
+    background-color: #223E7D; /* blue-500 */
   }
 
   /* Firefox */
@@ -252,7 +252,7 @@
   }
 
   [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(59 130 246); /* blue-500 */
+    background-color: #223E7D; /* blue-500 */
   }
 
   [data-radix-popover-content] .overflow-y-auto::-webkit-scrollbar-thumb:active {
