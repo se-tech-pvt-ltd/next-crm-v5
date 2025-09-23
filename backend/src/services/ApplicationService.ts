@@ -80,14 +80,20 @@ export class ApplicationService {
   }
 
   static async getApplicationsByStudent(studentId: string, userId?: string, userRole?: string): Promise<Application[]> {
-    // Check role-based access for counselors
+    // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
       if (!student || student.counselorId !== userId) {
         return [];
       }
     }
-    
+    if (userRole === 'admission_officer' && userId) {
+      const student = await StudentModel.findById(studentId);
+      if (!student || (student as any).admissionOfficerId !== userId) {
+        return [];
+      }
+    }
+
     return await ApplicationModel.findByStudent(studentId);
   }
 
