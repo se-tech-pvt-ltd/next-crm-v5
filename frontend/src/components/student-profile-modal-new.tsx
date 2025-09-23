@@ -281,7 +281,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   {statusName}
                 </div>
                 {index < statusSequence.length - 1 && (
-                  <div className="relative mx-2 w-12 sm:w-16 md:w-20 lg:w-24 h-2 flex items-center">
+                  <div className="relative mx-2 w-16 sm:w-24 md:w-32 lg:w-40 h-2 flex items-center">
                     <div className={`${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'} h-0.5 w-full`} />
                     <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-l-[8px] ${index < currentIndex ? 'border-l-green-500' : 'border-l-gray-300'}`} />
                   </div>
