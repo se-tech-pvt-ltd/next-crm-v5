@@ -62,14 +62,20 @@ export class ApplicationService {
     
     if (!application) return undefined;
     
-    // Check role-based access for counselors
+    // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(application.studentId);
       if (!student || student.counselorId !== userId) {
         return undefined;
       }
     }
-    
+    if (userRole === 'admission_officer' && userId) {
+      const student = await StudentModel.findById(application.studentId);
+      if (!student || (student as any).admissionOfficerId !== userId) {
+        return undefined;
+      }
+    }
+
     return application;
   }
 
