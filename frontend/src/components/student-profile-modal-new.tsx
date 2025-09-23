@@ -253,7 +253,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
     return (
       <div className="w-full bg-gray-100 rounded-md p-1 mb-2">
-        <div className="flex items-center justify-between relative">
+        <div className="flex items-center justify-center relative">
           {statusSequence.map((statusId, index) => {
             const isActive = index === currentIndex;
             const isCompleted = index <= currentIndex;
@@ -270,33 +270,21 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
             return (
               <div
                 key={statusId}
-                className="flex flex-col items-center relative flex-1 cursor-pointer select-none"
+                className="flex items-center cursor-pointer select-none"
                 onClick={handleClick}
                 role="button"
                 aria-label={`Set status to ${statusName}`}
               >
-                {/* Status Circle */}
-                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                  isCompleted
-                    ? 'bg-green-500 border-green-500 text-white'
-                    : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
-                }`}>
-                  {isCompleted && <div className="w-1 h-1 bg-white rounded-full" />}
-                  {!isCompleted && <div className="w-1 h-1 bg-gray-300 rounded-full" />}
-                </div>
-
-                {/* Status Label */}
-                <span className={`mt-1 text-[11px] font-medium text-center ${
-                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap ${
+                  isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'
                 }`}>
                   {statusName}
-                </span>
-
-                {/* Connector Line */}
+                </div>
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
-                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
-                  }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                  <div className="relative mx-2 w-16 sm:w-24 md:w-32 lg:w-40 h-2 flex items-center">
+                    <div className={`${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'} h-0.5 w-full`} />
+                    <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-l-[8px] ${index < currentIndex ? 'border-l-green-500' : 'border-l-gray-300'}`} />
+                  </div>
                 )}
               </div>
             );

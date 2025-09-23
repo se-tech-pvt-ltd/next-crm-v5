@@ -21,7 +21,7 @@ import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle } from 'lucide-react';
+import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle, MoreVertical } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadDetailsModalProps {
@@ -212,7 +212,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const StatusBar = (
     statusSequence.length > 0 ? (
       <div className="w-full bg-gray-100 rounded-md p-1">
-        <div className="flex items-center justify-between relative">
+        <div className="flex items-center justify-center relative">
           {statusSequence.map((statusId, index) => {
             const currentIndex = statusSequence.indexOf(currentStatus);
             const isCompleted = index <= currentIndex;
@@ -223,11 +223,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               handleStatusChange(statusId);
             };
             return (
-              <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}></div>
-                <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{statusName}</span>
+              <div key={statusId} className="flex items-center cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
+                <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap ${isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'}`}>{statusName}</div>
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                  <div className="relative mx-2 w-12 sm:w-16 md:w-20 lg:w-24 h-2 flex items-center">
+                    <div className={`h-0.5 w-full ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-l-[8px] ${index < currentIndex ? 'border-l-green-500' : 'border-l-gray-300'}`} />
+                  </div>
                 )}
               </div>
             );
@@ -277,7 +279,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="xs" className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md" aria-label="Actions">Actions</Button>
+                      <Button variant="outline" size="icon" className="w-8 h-8 [&_svg]:size-4 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md" aria-label="Actions">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="text-sm">
                       <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
