@@ -83,6 +83,11 @@ export interface Application {
   intake: string | null;
   googleDriveLink: string | null;
   notes: string | null;
+  // Access fields
+  branchId?: string | null;
+  regionId?: string | null;
+  counsellorId?: string | null;
+  admissionOfficerId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -102,6 +107,11 @@ export interface Admission {
   depositDeadline: Date | null;
   visaStatus: string | null;
   admissionId?: string | null;
+  // Access fields
+  branchId?: string | null;
+  regionId?: string | null;
+  counsellorId?: string | null;
+  admissionOfficerId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -193,6 +203,11 @@ export const insertApplicationSchema = z.object({
   intake: z.string().optional(),
   googleDriveLink: z.string().url().optional().transform((v) => (v && v.trim().length === 0 ? undefined : v)),
   notes: z.string().optional(),
+  // Access fields (optional)
+  branchId: z.string().optional(),
+  regionId: z.string().optional(),
+  counsellorId: z.string().optional(),
+  admissionOfficerId: z.string().optional(),
 });
 
 export const insertAdmissionSchema = z.object({
@@ -209,6 +224,11 @@ export const insertAdmissionSchema = z.object({
   depositDeadline: z.date().optional(),
   visaStatus: z.string().default("pending"),
   admissionId: z.string().optional(),
+  // Access fields (optional)
+  branchId: z.string().optional(),
+  regionId: z.string().optional(),
+  counsellorId: z.string().optional(),
+  admissionOfficerId: z.string().optional(),
 });
 
 export const insertActivitySchema = z.object({

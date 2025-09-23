@@ -12,6 +12,7 @@ import { insertAdmissionSchema, type InsertAdmission, type Student, type Applica
 import { http } from '@/services/http';
 import * as ApplicationsService from '@/services/applications';
 import * as AdmissionsService from '@/services/admissions';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import { motion } from 'framer-motion';
@@ -74,6 +75,9 @@ export default function AddAdmissionPage() {
       depositDate: null as any,
       visaDate: null as any,
       googleDriveLink: '',
+      // Access
+      counsellorId: '',
+      admissionOfficerId: '',
     },
   });
 
@@ -101,6 +105,8 @@ export default function AddAdmissionPage() {
         depositAmount: data.depositAmount || data.initialDeposit || null,
         depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
         visaStatus: data.visaStatus || 'pending',
+        counsellorId: data.counsellorId || undefined,
+        admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
       const created = await AdmissionsService.createAdmission(payload as any);
       try {
@@ -140,6 +146,28 @@ export default function AddAdmissionPage() {
   const linkedApp = selectedApp;
   const linkedStudent = presetStudent || (students?.find((s) => s.id === (linkedApp?.studentId || presetStudentId)) as Student | undefined);
 
+  // Users for access assignment
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const counsellorOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+  const officerOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+
   // Ensure required values are set from linked application so form can submit
   useEffect(() => {
     if (linkedApp) {
@@ -152,6 +180,11 @@ export default function AddAdmissionPage() {
       }
       form.setValue('university', linkedApp.university || '');
       form.setValue('program', linkedApp.program || '');
+      try {
+        const anyApp: any = linkedApp as any;
+        if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
+        if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
+      } catch {}
     }
   }, [linkedApp, form]);
 
@@ -341,6 +374,62 @@ export default function AddAdmissionPage() {
                     )}
                   />
 
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Access */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2"><School className="w-5 h-5 text-primary" /> Access</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="counsellorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Counsellor</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select counsellor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {counsellorOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="admissionOfficerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Admission Officer</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select admission officer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {officerOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>

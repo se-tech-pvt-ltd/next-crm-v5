@@ -13,9 +13,10 @@ import { insertApplicationSchema, type Student, type InsertApplication } from '@
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
-import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save } from 'lucide-react';
+import * as UsersService from '@/services/users';
+import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users } from 'lucide-react';
 import * as DropdownsService from '@/services/dropdowns';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -123,6 +124,8 @@ export default function AddApplication() {
       intake: '',
       googleDriveLink: '',
       notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
     } as any,
   });
 
@@ -143,6 +146,28 @@ export default function AddApplication() {
   });
 
   const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
+
+  // Users for access assignment
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const counsellorOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+  const officerOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
@@ -344,6 +369,62 @@ export default function AddApplication() {
                             {channelPartnerOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Access Panel */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Access</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="counsellorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Counsellor</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select counsellor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {counsellorOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="admissionOfficerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Admission Officer</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select admission officer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {officerOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
