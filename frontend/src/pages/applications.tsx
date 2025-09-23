@@ -343,9 +343,9 @@ export default function Applications() {
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">
-                          {application.program}
+                          {cleanLabel(application.program)}
                           {application.courseType && (
-                            <div className="text-[11px] text-gray-500">{application.courseType}</div>
+                            <div className="text-[11px] text-gray-500">{cleanLabel(application.courseType)}</div>
                           )}
                         </div>
                       </TableCell>
@@ -356,7 +356,7 @@ export default function Applications() {
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">
-                          {application.intake || '—'}
+                          {cleanLabel(application.intake) || '—'}
                         </div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
