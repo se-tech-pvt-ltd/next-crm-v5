@@ -226,7 +226,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               <div key={statusId} className="flex items-center cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
                 <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap ${isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'}`}>{statusName}</div>
                 {index < statusSequence.length - 1 && (
-                  <div className={`h-0.5 mx-2 w-12 sm:w-16 md:w-20 lg:w-24 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <div className="relative mx-2 w-12 sm:w-16 md:w-20 lg:w-24 h-2 flex items-center">
+                    <div className={`h-0.5 w-full ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-l-[8px] ${index < currentIndex ? 'border-l-green-500' : 'border-l-gray-300'}`} />
+                  </div>
                 )}
               </div>
             );
