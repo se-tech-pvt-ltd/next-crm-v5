@@ -164,14 +164,14 @@ export default function UserProfileWizard() {
             <div className="mt-2 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4 items-start">
                 <div className="flex flex-col items-center">
-                  <div className="w-28 h-28 rounded-full overflow-hidden border bg-muted flex items-center justify-center mb-2">
+                  <div
+                    className="w-28 h-28 rounded-full overflow-hidden border bg-muted flex items-center justify-center mb-2 cursor-pointer"
+                    onClick={() => fileRef.current?.click()}
+                    title="Click to upload"
+                  >
                     {profileImageUrl ? <img src={profileImageUrl} alt="avatar" className="w-full h-full object-cover" /> : <div className="text-muted-foreground">No image</div>}
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }} />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => fileRef.current?.click()}>Upload</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setProfileImageUrl(''); setProfileImageId(''); }}>Remove</Button>
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
