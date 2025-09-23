@@ -96,8 +96,12 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   const create = useMutation({
     mutationFn: () => UsersService.createUser(form),
-    onSuccess: async () => {
+    onSuccess: async (created) => {
       await refetch();
+      try {
+        await queryClient.invalidateQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+        await queryClient.refetchQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+      } catch {}
       setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
       setModalOpen(false);
       toast({ title: 'User created', description: 'User added successfully', duration: 2500 });
