@@ -29,7 +29,7 @@ export default function Settings() {
       <div className="space-y-3">
         {/* Top bar tabs */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className="gap-2">
+          <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className={`gap-2 ${category === 'regions' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
             <Globe2 className="w-4 h-4" /> Region manager
           </Button>
           <Button type="button" variant={category === 'branches' ? 'default' : 'outline'} onClick={() => setCategory('branches')} className="gap-2">
