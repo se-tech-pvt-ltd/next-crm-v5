@@ -87,8 +87,9 @@ export default function Applications() {
 
   // Apply client-side filters to the full applications array
   const filteredAll = (applicationsArray || []).filter(app => {
-    const statusMatch = statusFilter === 'all' || app.appStatus === statusFilter;
-    const universityMatch = universityFilter === 'all' || app.university === universityFilter;
+    const appStatusValue = cleanLabel(app.appStatus || '');
+    const statusMatch = statusFilter === 'all' || appStatusValue === statusFilter;
+    const universityMatch = universityFilter === 'all' || (cleanLabel(app.university || '') === universityFilter);
     return statusMatch && universityMatch;
   }) || [];
 
@@ -199,7 +200,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-blue-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Open').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : (applicationsArray || []).filter(a => cleanLabel(a.appStatus || '') === 'Open').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -213,7 +214,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-yellow-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Needs Attention').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : (applicationsArray || []).filter(a => cleanLabel(a.appStatus || '') === 'Needs Attention').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -227,7 +228,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Closed').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : (applicationsArray || []).filter(a => cleanLabel(a.appStatus || '') === 'Closed').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -350,8 +351,8 @@ export default function Applications() {
                         </div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Badge className={getStatusColor(application.appStatus || 'Open')}>
-                          {application.appStatus || 'Open'}
+                        <Badge className={getStatusColor(cleanLabel(application.appStatus || 'Open') || 'Open')}>
+                          {cleanLabel(application.appStatus || 'Open') || 'Open'}
                         </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
