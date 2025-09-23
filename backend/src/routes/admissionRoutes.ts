@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { AdmissionController } from "../controllers/AdmissionController.js";
+import { requireAuth } from "../middlewares/auth.js";
 
 export const admissionRoutes = Router();
 
-admissionRoutes.get("/", AdmissionController.getAdmissions);
-admissionRoutes.get("/student/:studentId", AdmissionController.getAdmissionsByStudent);
-admissionRoutes.post("/", AdmissionController.createAdmission);
-admissionRoutes.put("/:id", AdmissionController.updateAdmission);
+admissionRoutes.get("/", requireAuth, AdmissionController.getAdmissions);
+admissionRoutes.get("/student/:studentId", requireAuth, AdmissionController.getAdmissionsByStudent);
+admissionRoutes.post("/", requireAuth, AdmissionController.createAdmission);
+admissionRoutes.put("/:id", requireAuth, AdmissionController.updateAdmission);
