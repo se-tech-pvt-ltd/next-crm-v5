@@ -151,6 +151,11 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (!form.getValues('studentId')) form.setValue('studentId', linkedApp.studentId);
       form.setValue('university', linkedApp.university || '');
       form.setValue('program', linkedApp.program || '');
+      try {
+        const anyApp: any = linkedApp as any;
+        if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
+        if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
+      } catch {}
     }
   }, [applicationId, studentId, linkedApp, form]);
 
