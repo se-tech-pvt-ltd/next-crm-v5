@@ -31,6 +31,29 @@ export class ApplicationService {
       .where(eq(students.counselorId, userId))
       .orderBy(desc(applications.createdAt));
     }
+    if (userRole === 'admission_officer' && userId) {
+      return await db.select({
+        id: applications.id,
+        applicationCode: applications.applicationCode,
+        studentId: applications.studentId,
+        university: applications.university,
+        program: applications.program,
+        courseType: applications.courseType,
+        appStatus: applications.appStatus,
+        caseStatus: applications.caseStatus,
+        country: applications.country,
+        channelPartner: applications.channelPartner,
+        intake: applications.intake,
+        googleDriveLink: applications.googleDriveLink,
+        notes: applications.notes,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt
+      })
+      .from(applications)
+      .innerJoin(students, eq(applications.studentId, students.id))
+      .where(eq(students.admissionOfficerId, userId))
+      .orderBy(desc(applications.createdAt));
+    }
     return await ApplicationModel.findAll();
   }
 
