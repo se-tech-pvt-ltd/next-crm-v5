@@ -419,7 +419,7 @@ export default function AddApplication() {
                         <FormControl>
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Select counsellor" />
+                              <SelectValue placeholder={selectedBranchId ? 'Select counsellor' : 'No branch linked to student'} />
                             </SelectTrigger>
                             <SelectContent>
                               {counsellorOptions.map((opt) => (
