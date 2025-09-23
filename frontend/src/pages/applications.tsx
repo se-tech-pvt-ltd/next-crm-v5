@@ -59,7 +59,8 @@ export default function Applications() {
     let list: any[] = dd?.Status || dd?.status || dd?.AppStatus || [];
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    // Use the human label as the filter value to match enriched appStatus values
+    return list.map((o: any) => ({ label: o.value, value: o.value }));
   }, [applicationsDropdowns]);
 
   const { data: students } = useQuery<Student[]>({
@@ -84,10 +85,25 @@ export default function Applications() {
     },
   });
 
+  const cleanLabel = (val?: string | null) => {
+    if (!val) return '';
+    const uuidRe = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
+    // take first non-empty line if multiple
+    const parts = val.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      const nonUuid = parts.find(s => !uuidRe.test(s));
+      if (nonUuid) return nonUuid;
+    }
+    let s = (parts[0] || val).replace(/\(([0-9a-fA-F-]{36})\)/g, '').trim();
+    s = s.replace(uuidRe, '').replace(/\s{2,}/g, ' ').trim();
+    return s || (val || '').trim();
+  };
+
   // Apply client-side filters to the full applications array
   const filteredAll = (applicationsArray || []).filter(app => {
-    const statusMatch = statusFilter === 'all' || app.appStatus === statusFilter;
-    const universityMatch = universityFilter === 'all' || app.university === universityFilter;
+    const appStatusValue = cleanLabel(app.appStatus || '');
+    const statusMatch = statusFilter === 'all' || appStatusValue === statusFilter;
+    const universityMatch = universityFilter === 'all' || (cleanLabel(app.university || '') === universityFilter);
     return statusMatch && universityMatch;
   }) || [];
 
@@ -107,8 +123,9 @@ export default function Applications() {
   // Get unique universities for filter dropdown
   const uniqueUniversities = applicationsArray ?
     applicationsArray.reduce((universities: string[], app) => {
-      if (app.university && !universities.includes(app.university)) {
-        universities.push(app.university);
+      const uni = cleanLabel(app.university || '');
+      if (uni && !universities.includes(uni)) {
+        universities.push(uni);
       }
       return universities;
     }, []) : [];
@@ -184,7 +201,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-blue-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Open').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : (applicationsArray || []).filter(a => cleanLabel(a.appStatus || '') === 'Open').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -198,7 +215,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-yellow-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Needs Attention').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : (applicationsArray || []).filter(a => cleanLabel(a.appStatus || '') === 'Needs Attention').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -212,7 +229,7 @@ export default function Applications() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : applicationsArray?.filter(a => a.appStatus === 'Closed').length || 0}
+                {applicationsLoading ? <Skeleton className="h-6 w-12" /> : (applicationsArray || []).filter(a => cleanLabel(a.appStatus || '') === 'Closed').length || 0}
               </div>
             </CardContent>
           </Card>
@@ -320,7 +337,7 @@ export default function Applications() {
                       <TableCell className="p-2 text-xs">
                         <div className="flex items-center text-xs">
                           <School className="w-3 h-3 mr-1" />
-                          <span>{application.university}</span>
+                          <span>{cleanLabel(application.university)}</span>
                           {application.applicationCode && (
                             <span className="ml-2 text-[11px] text-gray-500">({application.applicationCode})</span>
                           )}
@@ -328,20 +345,20 @@ export default function Applications() {
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">
-                          {application.program}
+                          {cleanLabel(application.program)}
                           {application.courseType && (
-                            <div className="text-[11px] text-gray-500">{application.courseType}</div>
+                            <div className="text-[11px] text-gray-500">{cleanLabel(application.courseType)}</div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Badge className={getStatusColor(application.appStatus || 'Open')}>
-                          {application.appStatus || 'Open'}
+                        <Badge className={getStatusColor(cleanLabel(application.appStatus || 'Open') || 'Open')}>
+                          {cleanLabel(application.appStatus || 'Open') || 'Open'}
                         </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">
-                          {application.intake || '—'}
+                          {cleanLabel(application.intake) || '—'}
                         </div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
