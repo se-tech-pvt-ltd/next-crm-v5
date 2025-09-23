@@ -377,6 +377,62 @@ export default function AddApplication() {
               </CardContent>
             </Card>
 
+            {/* Access Panel */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Access</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="counsellorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Counsellor</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select counsellor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {counsellorOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="admissionOfficerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Admission Officer</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select admission officer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {officerOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Additional Details</CardTitle>
