@@ -187,6 +187,10 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     onSuccess: async (updated: any) => {
       setIsEditing(false);
       const res = await refetch();
+      try {
+        await queryClient.invalidateQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+        await queryClient.refetchQueries({ predicate: ({ queryKey }) => String(queryKey?.[0] || '').startsWith('/api/branches') });
+      } catch {}
       const freshList = (res as any)?.data || users;
       const fresh = (Array.isArray(freshList) ? freshList : []).find((u: any) => String(u.id) === String(updated?.id || selected?.id));
       setSelected(fresh || { ...selected, ...updated });
