@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { insertApplicationSchema, type Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
