@@ -574,21 +574,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center space-x-2"><span>Counsellor</span></Label>
-                  {isEditing ? (
-                    <Select value={editData.counselorId || ''} onValueChange={(value) => setEditData({ ...editData, counselorId: value })}>
-                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                      <SelectContent>
-                        {counselorOptions().map((opt: any) => (
-                          <SelectItem key={opt.id} value={opt.id}>{opt.value}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="text-sm text-gray-700">{(() => { const found = counselorOptions().find((d: any) => d.id === student?.counselorId); return found?.value || 'Unassigned'; })()}</div>
-                  )}
-                </div>
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><span>Expectation</span></Label>
