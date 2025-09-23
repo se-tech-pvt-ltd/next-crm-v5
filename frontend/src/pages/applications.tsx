@@ -337,7 +337,7 @@ export default function Applications() {
                       <TableCell className="p-2 text-xs">
                         <div className="flex items-center text-xs">
                           <School className="w-3 h-3 mr-1" />
-                          <span>{application.university}</span>
+                          <span>{cleanLabel(application.university)}</span>
                           {application.applicationCode && (
                             <span className="ml-2 text-[11px] text-gray-500">({application.applicationCode})</span>
                           )}
