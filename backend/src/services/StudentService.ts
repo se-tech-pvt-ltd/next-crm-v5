@@ -98,6 +98,9 @@ export class StudentService {
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
       return undefined;
     }
+    if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
+      return undefined;
+    }
     const [enriched] = await this.enrichDropdownFields([student]);
     const dropdowns = await DropdownModel.findByModule('students');
     const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
