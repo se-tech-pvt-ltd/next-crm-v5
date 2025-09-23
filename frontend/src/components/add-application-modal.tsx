@@ -143,8 +143,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     createApplicationMutation.mutate(data);
   };
 
-  const selectedStudentId = form.watch('studentId');
-  const selectedStudent = students?.find((s) => s.id === selectedStudentId) || presetStudent;
 
   useEffect(() => {
     if (studentId) {
