@@ -139,20 +139,6 @@ export default function Applications() {
     return new Date(date).toLocaleDateString();
   };
 
-  const cleanLabel = (val?: string | null) => {
-    if (!val) return '';
-    const uuidRe = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
-    // take first non-empty line if multiple
-    let out = val.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    if (out.length > 1) {
-      const nonUuid = out.find(s => !uuidRe.test(s));
-      if (nonUuid) return nonUuid;
-    }
-    let s = (out[0] || val).replace(/\(([0-9a-fA-F-]{36})\)/g, '').trim();
-    s = s.replace(uuidRe, '').replace(/\s{2,}/g, ' ').trim();
-    return s || (val || '').trim();
-  };
-
   // Open details modal when route matches and ensure selected application is set
   useEffect(() => {
     const id = (matchEdit ? editParams?.id : appParams?.id) || null;
