@@ -13,6 +13,7 @@ import { insertApplicationSchema, type Student, type InsertApplication } from '@
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
+import * as UsersService from '@/services/users';
 import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users } from 'lucide-react';
 import * as DropdownsService from '@/services/dropdowns';
 import { useMemo, useEffect } from 'react';
