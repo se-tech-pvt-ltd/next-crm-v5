@@ -64,7 +64,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     const name = (lead as any)?.name || id;
     return (
       <span>
-        This record was converted from <span className="font-medium">Lead</span>: {" "}
+        This record was converted from <span className="font-medium">Lead</span> : {" "}
         <button
           type="button"
           className="text-blue-600 hover:underline"
