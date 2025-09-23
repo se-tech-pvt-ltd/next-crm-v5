@@ -353,6 +353,64 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 </CardContent>
               </Card>
 
+              {/* Access */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Access</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="counsellorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Counsellor</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select counsellor" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {counsellorOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="admissionOfficerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Admission Officer</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select admission officer" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {officerOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Status & Links</CardTitle>
