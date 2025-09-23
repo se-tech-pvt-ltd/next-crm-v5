@@ -224,9 +224,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             };
             return (
               <div key={statusId} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap ${isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'}`}>{statusName}</div>
+                <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap z-10 ${isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'}`}>{statusName}</div>
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-1/2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                  <div className={`absolute left-1/2 w-full h-0.5 z-0 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ top: 'calc(100% + 6px)', marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
             );
