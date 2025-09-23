@@ -338,10 +338,27 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       return text.replace(statusChangeRegex, (_m, fromId, toId) => {
         const fromLabel = getStatusLabel(fromId);
         const toLabel = getStatusLabel(toId);
+        if ((fromLabel || '').toLowerCase().trim() === (toLabel || '').toLowerCase().trim()) return '';
         return `Status changed from "${fromLabel}" to "${toLabel}"`;
       });
     }
     return text.replace(/[0-9a-fA-F-]{36}/g, (token) => getStatusLabel(token));
+  };
+
+  // Determine if an activity is a redundant status change (same status before/after)
+  const isRedundantStatusChange = (a: any) => {
+    const an = normalizeActivity(a);
+    const type = (an.activityType || '').toLowerCase();
+    const field = normalize(an.fieldName || '');
+    const hasValues = ((an.oldValue ?? '') !== '' || (an.newValue ?? '') !== '');
+    if (!hasValues) return false;
+    if (field === 'status' || type === 'status_changed') {
+      const fromLabel = getLabelForField('status', String(an.oldValue || ''));
+      const toLabel = getLabelForField('status', String(an.newValue || ''));
+      if ((fromLabel || '').toLowerCase().trim() === (toLabel || '').toLowerCase().trim()) return true;
+      if (String(an.oldValue || '') === String(an.newValue || '')) return true;
+    }
+    return false;
   };
 
   // Safely format dates that may be missing/invalid
