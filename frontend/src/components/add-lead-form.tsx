@@ -607,9 +607,11 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       payload.eventRegId = (initialData as any).eventRegId;
     }
 
-    if (!payload.counselorId && payload.admissionOfficerId) {
-      payload.counselorId = payload.admissionOfficerId;
+    // Normalize British/American spelling for backend schema
+    if (!payload.counselorId && (payload as any).counsellorId) {
+      payload.counselorId = (payload as any).counsellorId;
     }
+    delete (payload as any).counsellorId;
 
     createLeadMutation.mutate(payload);
   };
