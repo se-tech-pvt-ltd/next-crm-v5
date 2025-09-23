@@ -272,6 +272,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         onOpenChange={onOpenChange}
         title="Application Details"
         headerClassName="bg-[#223E7D] text-white"
+        statusBarWrapperClassName="px-4 py-2 bg-[#223E7D] text-white -mt-px"
         statusBar={<StatusProgressBar />}
         rightWidth="420px"
         headerLeft={(
