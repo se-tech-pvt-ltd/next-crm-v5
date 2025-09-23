@@ -540,6 +540,13 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                                 .replace(/^./, (str) => str.toUpperCase());
                               return `${fieldLabel} changed from "${fromLabel}" to "${toLabel}"`;
                             }
+                            // Special handling for conversion activities to show clickable Lead name
+                            if ((activity.activityType || '').toLowerCase() === 'converted') {
+                              const { fromType, fromId } = parseConversionDescription(activity.description || '');
+                              if (fromType === 'lead' && fromId) {
+                                return <ConversionFromLead id={fromId} />;
+                              }
+                            }
                             if ((moduleDropdowns as any)?.Status) {
                               return mapStatusIdsInText(activity.description || (activity as any).title);
                             }
