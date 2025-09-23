@@ -416,7 +416,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select admission officer" />
+                                <SelectValue placeholder={selectedBranchId ? 'Select admission officer' : 'No branch linked to student'} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
