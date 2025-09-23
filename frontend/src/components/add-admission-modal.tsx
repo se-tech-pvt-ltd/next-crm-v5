@@ -177,6 +177,29 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const statusOptions = getOptions('Status', admissionDropdowns);
   const caseStatusOptions = getOptions('Case Status', admissionDropdowns);
 
+  // Users for access assignment
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+  const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const counsellorOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+  const officerOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
@@ -333,6 +356,43 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                           <SelectContent>
                             {caseStatusOptions?.map((opt: any) => (
                               <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Access Panel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">Access</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <FormLabel>Counsellor</FormLabel>
+                        <Select value={form.watch('counsellorId') || ''} onValueChange={(v) => form.setValue('counsellorId', v)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select counsellor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {counsellorOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <FormLabel>Admission Officer</FormLabel>
+                        <Select value={form.watch('admissionOfficerId') || ''} onValueChange={(v) => form.setValue('admissionOfficerId', v)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select admission officer" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {officerOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
