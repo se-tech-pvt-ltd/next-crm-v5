@@ -46,8 +46,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Filters and pagination
 
   // Filters and pagination
-  const [filters, setFilters] = useState<{ query: string; role: string; branchId: string }>({ query: '', role: '', branchId: '' });
+  const [filters, setFilters] = useState<{ query: string; role: string; branchId: string; regionId: string }>({ query: '', role: '', branchId: '', regionId: '' });
   const [branchSearch, setBranchSearch] = useState('');
+  const [regionFilterSearch, setRegionFilterSearch] = useState('');
   const [branchFilterSearch, setBranchFilterSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -74,6 +75,11 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   });
   const branchFilterList = branchFilterTrim ? branchFilterSearched : initialBranches;
   const branchFilterOptions = (Array.isArray(branchFilterList) ? branchFilterList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+
+  const regionFilterTrim = regionFilterSearch.trim().toLowerCase();
+  const regionFilterOptions = (Array.isArray(regions) ? regions : [])
+    .map((r: any) => ({ value: String(r.id), label: String(r.name ?? r.regionName ?? r.region_name ?? r.id) }))
+    .filter((opt: any) => !regionFilterTrim || opt.label.toLowerCase().includes(regionFilterTrim));
 
   const branchAddTrim = branchSearch.trim();
   const { data: branchAddSearched = [], isFetching: branchAddIsFetching } = useQuery({
@@ -245,7 +251,18 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       String(u.email || '').toLowerCase().includes(q);
     const matchesRole = !filters.role || String(u.role || '') === filters.role;
     const matchesBranch = !filters.branchId || String((u.branchId ?? u.branch_id) || '') === filters.branchId;
-    return matchesQuery && matchesRole && matchesBranch;
+    const matchesRegion = !filters.regionId || (() => {
+      const nRole = normalizeRole(String(u.role || ''));
+      if (nRole === 'regional_manager') {
+        const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String(u.id));
+        return String(r?.id || '') === String(filters.regionId);
+      }
+      const bId = String((u.branchId ?? u.branch_id) || '');
+      const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
+      const regId = b ? String(b.regionId ?? b.region_id ?? '') : '';
+      return String(regId) === String(filters.regionId);
+    })();
+    return matchesQuery && matchesRole && matchesBranch && matchesRegion;
   });
   const sortedUsers = [...filteredUsers].sort((a: any, b: any) => {
     const aDate = new Date(a.createdAt || a.created_at || a.created_on || 0).getTime();
@@ -255,7 +272,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters.query, filters.role, filters.branchId]);
+  }, [filters.query, filters.role, filters.branchId, filters.regionId]);
 
   const total = sortedUsers.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -299,6 +316,16 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <SelectItem value="admin_staff">Admin Staff</SelectItem>
             </SelectContent>
           </Select>
+          <div className="w-56">
+            <SearchableCombobox
+              value={filters.regionId}
+              onValueChange={(v) => setFilters((s) => ({ ...s, regionId: v }))}
+              placeholder="Filter by region"
+              searchPlaceholder="Search regions..."
+              onSearch={setRegionFilterSearch}
+              options={[{ value: '', label: 'All regions' }, ...regionFilterOptions]}
+            />
+          </div>
           <div className="w-56">
             <SearchableCombobox
               value={filters.branchId}
