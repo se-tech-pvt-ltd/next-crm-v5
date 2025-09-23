@@ -59,7 +59,8 @@ export default function Applications() {
     let list: any[] = dd?.Status || dd?.status || dd?.AppStatus || [];
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
+    // Use the human label as the filter value to match enriched appStatus values
+    return list.map((o: any) => ({ label: o.value, value: o.value }));
   }, [applicationsDropdowns]);
 
   const { data: students } = useQuery<Student[]>({
