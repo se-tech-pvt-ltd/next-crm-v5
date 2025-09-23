@@ -31,6 +31,29 @@ export class ApplicationService {
       .where(eq(students.counselorId, userId))
       .orderBy(desc(applications.createdAt));
     }
+    if (userRole === 'admission_officer' && userId) {
+      return await db.select({
+        id: applications.id,
+        applicationCode: applications.applicationCode,
+        studentId: applications.studentId,
+        university: applications.university,
+        program: applications.program,
+        courseType: applications.courseType,
+        appStatus: applications.appStatus,
+        caseStatus: applications.caseStatus,
+        country: applications.country,
+        channelPartner: applications.channelPartner,
+        intake: applications.intake,
+        googleDriveLink: applications.googleDriveLink,
+        notes: applications.notes,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt
+      })
+      .from(applications)
+      .innerJoin(students, eq(applications.studentId, students.id))
+      .where(eq(students.admissionOfficerId, userId))
+      .orderBy(desc(applications.createdAt));
+    }
     return await ApplicationModel.findAll();
   }
 
@@ -39,26 +62,38 @@ export class ApplicationService {
     
     if (!application) return undefined;
     
-    // Check role-based access for counselors
+    // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(application.studentId);
       if (!student || student.counselorId !== userId) {
         return undefined;
       }
     }
-    
+    if (userRole === 'admission_officer' && userId) {
+      const student = await StudentModel.findById(application.studentId);
+      if (!student || (student as any).admissionOfficerId !== userId) {
+        return undefined;
+      }
+    }
+
     return application;
   }
 
   static async getApplicationsByStudent(studentId: string, userId?: string, userRole?: string): Promise<Application[]> {
-    // Check role-based access for counselors
+    // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
       if (!student || student.counselorId !== userId) {
         return [];
       }
     }
-    
+    if (userRole === 'admission_officer' && userId) {
+      const student = await StudentModel.findById(studentId);
+      if (!student || (student as any).admissionOfficerId !== userId) {
+        return [];
+      }
+    }
+
     return await ApplicationModel.findByStudent(studentId);
   }
 

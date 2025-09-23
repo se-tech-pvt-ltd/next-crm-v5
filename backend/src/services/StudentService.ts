@@ -60,6 +60,8 @@ export class StudentService {
     let rows: any[];
     if (userRole === 'counselor' && userId) {
       rows = await StudentModel.findByCounselor(userId);
+    } else if (userRole === 'admission_officer' && userId) {
+      rows = await StudentModel.findByAdmissionOfficer(userId);
     } else {
       rows = await StudentModel.findAll();
     }
@@ -82,6 +84,9 @@ export class StudentService {
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
       return undefined;
     }
+    if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
+      return undefined;
+    }
     const [enriched] = await this.enrichDropdownFields([student]);
     // counselor name
     const dropdowns = await DropdownModel.findByModule('students');
@@ -96,6 +101,9 @@ export class StudentService {
     const student = await StudentModel.findByLeadId(leadId);
     if (!student) return undefined;
     if (userRole === 'counselor' && userId && student.counselorId !== userId) {
+      return undefined;
+    }
+    if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
       return undefined;
     }
     const [enriched] = await this.enrichDropdownFields([student]);
@@ -189,6 +197,13 @@ export class StudentService {
       rows = await db.select().from(students).where(
         and(
           eq(students.counselorId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'admission_officer' && userId) {
+      rows = await db.select().from(students).where(
+        and(
+          eq(students.admissionOfficerId, userId),
           searchConditions
         )
       );

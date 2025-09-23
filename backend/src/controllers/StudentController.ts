@@ -1,19 +1,13 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
 import { z } from "zod";
 import { StudentService } from "../services/StudentService.js";
 import { insertStudentSchema } from "../shared/schema.js";
+import type { AuthenticatedRequest } from "../middlewares/auth.js";
 
 export class StudentController {
-  private static getCurrentUser() {
-    return {
-      id: 'admin1',
-      role: 'admin_staff'
-    };
-  }
-
-  static async getStudents(req: Request, res: Response) {
+  static async getStudents(req: AuthenticatedRequest, res: Response) {
     try {
-      const currentUser = StudentController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const students = await StudentService.getStudents(currentUser.id, currentUser.role);
       res.json(students);
     } catch (error) {
@@ -22,10 +16,10 @@ export class StudentController {
     }
   }
 
-  static async getStudent(req: Request, res: Response) {
+  static async getStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
-      const currentUser = StudentController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const student = await StudentService.getStudent(id, currentUser.id, currentUser.role);
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
@@ -37,10 +31,10 @@ export class StudentController {
     }
   }
 
-  static async getStudentByLeadId(req: Request, res: Response) {
+  static async getStudentByLeadId(req: AuthenticatedRequest, res: Response) {
     try {
       const leadId = req.params.leadId;
-      const currentUser = StudentController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const student = await StudentService.getStudentByLeadId(leadId, currentUser.id, currentUser.role);
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
@@ -52,7 +46,7 @@ export class StudentController {
     }
   }
 
-  static async createStudent(req: Request, res: Response) {
+  static async createStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const validatedData = insertStudentSchema.parse(req.body);
       const student = await StudentService.createStudent(validatedData);
@@ -66,7 +60,7 @@ export class StudentController {
     }
   }
 
-  static async convertFromLead(req: Request, res: Response) {
+  static async convertFromLead(req: AuthenticatedRequest, res: Response) {
     try {
       const { leadId, ...studentData } = req.body as any;
 
@@ -90,7 +84,7 @@ export class StudentController {
     }
   }
 
-  static async updateStudent(req: Request, res: Response) {
+  static async updateStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
       const validatedData = insertStudentSchema.partial().parse(req.body);
@@ -108,7 +102,7 @@ export class StudentController {
     }
   }
 
-  static async deleteStudent(req: Request, res: Response) {
+  static async deleteStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
       const success = await StudentService.deleteStudent(id);
@@ -122,13 +116,13 @@ export class StudentController {
     }
   }
 
-  static async searchStudents(req: Request, res: Response) {
+  static async searchStudents(req: AuthenticatedRequest, res: Response) {
     try {
       const query = req.query.q as string;
       if (!query) {
         return res.status(400).json({ message: "Search query is required" });
       }
-      const currentUser = StudentController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const students = await StudentService.searchStudents(query, currentUser.id, currentUser.role);
       res.json(students);
     } catch (error) {

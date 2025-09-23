@@ -27,6 +27,12 @@ export class StudentModel {
       .orderBy(desc(students.createdAt));
   }
 
+  static async findByAdmissionOfficer(admissionOfficerId: string): Promise<Student[]> {
+    return await db.select().from(students)
+      .where(eq(students.admissionOfficerId, admissionOfficerId))
+      .orderBy(desc(students.createdAt));
+  }
+
   static async create(studentData: InsertStudent): Promise<Student> {
     const newId = uuidv4();
 
