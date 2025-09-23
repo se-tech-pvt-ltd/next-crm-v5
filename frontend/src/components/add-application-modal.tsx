@@ -85,6 +85,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       intake: '',
       googleDriveLink: '',
       notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
     },
   });
 
