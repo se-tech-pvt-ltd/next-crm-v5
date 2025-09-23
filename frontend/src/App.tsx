@@ -24,7 +24,34 @@ import Login from "@/pages/login";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
-  const { isAuthenticated, isLoading, login, isAccessLoading } = useAuth() as any;
+  const { isAuthenticated, isLoading, login, isAccessLoading, accessByRole } = useAuth() as any;
+
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const isModuleVisible = (label: string) => {
+    const mod = singularize(normalize(label));
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === mod);
+    if (entries.length === 0) return true; // no specific rule -> visible
+    const allNone = entries.every((e: any) => normalize(e.viewLevel ?? e.view_level) === 'none');
+    return !allNone;
+  };
+
+  const SettingsGuard = () => {
+    if (isLoading || (isAuthenticated && isAccessLoading)) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      );
+    }
+    if (!isModuleVisible('Settings')) {
+      return <Forbidden />;
+    }
+    return <Settings />;
+  };
 
   console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
 
@@ -89,7 +116,7 @@ function Router() {
       <Route path="/admissions" component={Admissions} />
       <Route path="/events" component={EventsPage} />
       <Route path="/reports" component={Reports} />
-      <Route path="/settings" component={Settings} />
+      <Route path="/settings" component={SettingsGuard} />
       <Route path="/toolkit" component={ToolkitPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
