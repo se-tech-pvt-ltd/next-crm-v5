@@ -33,6 +33,30 @@ export class AdmissionService {
       .where(eq(students.counselorId, userId))
       .orderBy(desc(admissions.createdAt));
     }
+    if (userRole === 'admission_officer' && userId) {
+      return await db.select({
+        id: admissions.id,
+        applicationId: admissions.applicationId,
+        studentId: admissions.studentId,
+        university: admissions.university,
+        program: admissions.program,
+        decision: admissions.decision,
+        decisionDate: admissions.decisionDate,
+        scholarshipAmount: admissions.scholarshipAmount,
+        conditions: admissions.conditions,
+        depositRequired: admissions.depositRequired,
+        depositAmount: admissions.depositAmount,
+        depositDeadline: admissions.depositDeadline,
+        visaStatus: admissions.visaStatus,
+        admissionId: admissions.admissionId,
+        createdAt: admissions.createdAt,
+        updatedAt: admissions.updatedAt
+      })
+      .from(admissions)
+      .innerJoin(students, eq(admissions.studentId, students.id))
+      .where(eq(students.admissionOfficerId, userId))
+      .orderBy(desc(admissions.createdAt));
+    }
     return await AdmissionModel.findAll();
   }
 
