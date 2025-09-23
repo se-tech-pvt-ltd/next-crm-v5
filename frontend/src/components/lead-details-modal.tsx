@@ -21,7 +21,7 @@ import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle } from 'lucide-react';
+import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle, MoreVertical } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadDetailsModalProps {
@@ -277,7 +277,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="xs" className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md" aria-label="Actions">Actions</Button>
+                      <Button variant="outline" size="icon" className="w-8 h-8 [&_svg]:size-4 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md" aria-label="Actions">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="text-sm">
                       <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
