@@ -20,6 +20,9 @@ export class LeadService {
     if (userRole === 'counselor' && userId) {
       return await LeadModel.findByCounselor(userId, pagination);
     }
+    if (userRole === 'admission_officer' && userId) {
+      return await LeadModel.findByAdmissionOfficer(userId, pagination);
+    }
 
     if (userRole === 'branch_manager') {
       if (branchId) {
@@ -51,6 +54,9 @@ export class LeadService {
 
     // Check role-based access
     if (userRole === 'counselor' && userId && lead.counselorId !== userId) {
+      return undefined;
+    }
+    if (userRole === 'admission_officer' && userId && (lead as any).admissionOfficerId !== userId) {
       return undefined;
     }
 
@@ -194,6 +200,13 @@ export class LeadService {
       results = await db.select().from(leads).where(
         and(
           eq(leads.counselorId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'admission_officer' && userId) {
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.admissionOfficerId, userId),
           searchConditions
         )
       );

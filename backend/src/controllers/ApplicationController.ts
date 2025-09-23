@@ -1,19 +1,13 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
 import { z } from "zod";
 import { ApplicationService } from "../services/ApplicationService.js";
 import { insertApplicationSchema } from "../shared/schema.js";
+import type { AuthenticatedRequest } from "../middlewares/auth.js";
 
 export class ApplicationController {
-  private static getCurrentUser() {
-    return {
-      id: 'admin1',
-      role: 'admin_staff'
-    };
-  }
-
-  static async getApplications(req: Request, res: Response) {
+  static async getApplications(req: AuthenticatedRequest, res: Response) {
     try {
-      const currentUser = ApplicationController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const applications = await ApplicationService.getApplications(currentUser.id, currentUser.role);
       res.json(applications);
     } catch (error) {
@@ -22,10 +16,10 @@ export class ApplicationController {
     }
   }
 
-  static async getApplicationsByStudent(req: Request, res: Response) {
+  static async getApplicationsByStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const studentId = req.params.studentId;
-      const currentUser = ApplicationController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const applications = await ApplicationService.getApplicationsByStudent(studentId, currentUser.id, currentUser.role);
       res.json(applications);
     } catch (error) {
@@ -34,10 +28,10 @@ export class ApplicationController {
     }
   }
 
-  static async getApplication(req: Request, res: Response) {
+  static async getApplication(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
-      const currentUser = ApplicationController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       console.log('[GetApplication] id:', id);
       const application = await ApplicationService.getApplication(id, currentUser.id, currentUser.role);
       console.log('[GetApplication] found:', !!application);
@@ -51,7 +45,7 @@ export class ApplicationController {
     }
   }
 
-  static async createApplication(req: Request, res: Response) {
+  static async createApplication(req: AuthenticatedRequest, res: Response) {
     try {
       const validatedData = insertApplicationSchema.parse(req.body);
       const application = await ApplicationService.createApplication(validatedData);
@@ -65,7 +59,7 @@ export class ApplicationController {
     }
   }
 
-  static async updateApplication(req: Request, res: Response) {
+  static async updateApplication(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
       const validatedData = insertApplicationSchema.partial().parse(req.body);

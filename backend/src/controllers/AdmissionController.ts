@@ -1,19 +1,13 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
 import { z } from "zod";
 import { AdmissionService } from "../services/AdmissionService.js";
 import { insertAdmissionSchema } from "../shared/schema.js";
+import type { AuthenticatedRequest } from "../middlewares/auth.js";
 
 export class AdmissionController {
-  private static getCurrentUser() {
-    return {
-      id: 'admin1',
-      role: 'admin_staff'
-    };
-  }
-
-  static async getAdmissions(req: Request, res: Response) {
+  static async getAdmissions(req: AuthenticatedRequest, res: Response) {
     try {
-      const currentUser = AdmissionController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const admissions = await AdmissionService.getAdmissions(currentUser.id, currentUser.role);
       res.json(admissions);
     } catch (error) {
@@ -22,10 +16,10 @@ export class AdmissionController {
     }
   }
 
-  static async getAdmissionsByStudent(req: Request, res: Response) {
+  static async getAdmissionsByStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const studentId = req.params.studentId;
-      const currentUser = AdmissionController.getCurrentUser();
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const admissions = await AdmissionService.getAdmissionsByStudent(studentId, currentUser.id, currentUser.role);
       res.json(admissions);
     } catch (error) {
@@ -34,7 +28,7 @@ export class AdmissionController {
     }
   }
 
-  static async createAdmission(req: Request, res: Response) {
+  static async createAdmission(req: AuthenticatedRequest, res: Response) {
     try {
       const validatedData = insertAdmissionSchema.parse(req.body);
       const admission = await AdmissionService.createAdmission(validatedData);
@@ -48,7 +42,7 @@ export class AdmissionController {
     }
   }
 
-  static async updateAdmission(req: Request, res: Response) {
+  static async updateAdmission(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
       const validatedData = insertAdmissionSchema.partial().parse(req.body);
