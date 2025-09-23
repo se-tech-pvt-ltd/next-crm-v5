@@ -14,6 +14,27 @@ export class ApplicationService {
 
     // Group dropdowns by normalized field name
     const normalize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const stripComposite = (val: string) => {
+      if (typeof val !== 'string') return val as any;
+      // Split on newlines and prefer the non-UUID part
+      const parts = val.split(/\r?\n/).map((p) => p.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        const nonUuid = parts.find((p) => !uuidRe.test(p));
+        if (nonUuid) return nonUuid;
+      }
+      // Remove UUIDs wrapped in parentheses or trailing/leading UUID tokens
+      let s = val.replace(/\(([0-9a-fA-F-]{36})\)/g, '').trim();
+      s = s.replace(uuidRe, '').trim();
+      // Remove any remaining naked UUID tokens
+      s = s
+        .split(/\s+/)
+        .filter((tok) => !uuidRe.test(tok))
+        .join(' ')
+        .trim();
+      return s || val;
+    };
+
     const groups: Record<string, Record<string, string>> = {};
     for (const d of dropdowns) {
       const fn = normalize((d as any).fieldName);
@@ -27,14 +48,21 @@ export class ApplicationService {
       if (val) map[val] = val;
     }
 
-    // For each row, for each property that matches a known dropdown field, map value -> label if present
+    // For each row, for each property that matches a known dropdown field, strip composite values and map value -> label if present
     return rows.map((r) => {
       const out: Record<string, any> = { ...r };
       for (const [k, v] of Object.entries(out)) {
         const fn = normalize(k);
         const map = groups[fn];
-        if (map && typeof v === 'string' && v in map) {
-          out[k] = map[v];
+        if (typeof v === 'string') {
+          const stripped = stripComposite(v);
+          if (map && (stripped in map)) {
+            out[k] = map[stripped];
+          } else if (map && (v in map)) {
+            out[k] = map[v as string];
+          } else {
+            out[k] = stripped;
+          }
         }
       }
       return out as any;
