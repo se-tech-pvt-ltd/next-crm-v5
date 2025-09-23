@@ -328,7 +328,7 @@ export default function RegionSection({ toast }: { toast: (v: any) => void }) {
 
         <Drawer open={addOpen} onOpenChange={setAddOpen}>
           <DrawerTrigger asChild>
-            <Button size="sm" className="h-8" title="Add Region" type="button">
+            <Button size="sm" className={`h-8 ${addOpen ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`} title="Add Region" type="button">
               <Plus className="w-4 h-4 mr-2" /> Add Region
             </Button>
           </DrawerTrigger>
