@@ -212,7 +212,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const StatusBar = (
     statusSequence.length > 0 ? (
       <div className="w-full bg-gray-100 rounded-md p-1">
-        <div className="flex items-center justify-between relative">
+        <div className="flex items-center justify-center relative">
           {statusSequence.map((statusId, index) => {
             const currentIndex = statusSequence.indexOf(currentStatus);
             const isCompleted = index <= currentIndex;
@@ -223,10 +223,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               handleStatusChange(statusId);
             };
             return (
-              <div key={statusId} className="flex items-center flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
+              <div key={statusId} className="flex items-center cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
                 <div className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-all whitespace-nowrap ${isCompleted ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-green-500'}`}>{statusName}</div>
                 {index < statusSequence.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <div className={`h-0.5 mx-2 w-12 sm:w-16 md:w-20 lg:w-24 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} />
                 )}
               </div>
             );
