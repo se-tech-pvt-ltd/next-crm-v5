@@ -64,7 +64,7 @@ export default function ConvertLeadToStudent() {
     return users
       .filter((u: any) => {
         const role = normalizeRole(u.role || u.role_name || u.roleName);
-        return role === 'counselor' || role === 'counsellor';
+        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
       })
       .filter((u: any) => {
         const links = Array.isArray(branchEmps) ? branchEmps : [];
@@ -164,10 +164,7 @@ export default function ConvertLeadToStudent() {
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
       const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
       if (u) {
-        const role = normalizeRole((u as any).role || (u as any).role_name || (u as any).roleName);
-        if (role === 'counselor' || role === 'counsellor') {
-          list.unshift(u);
-        }
+        list.unshift(u);
       }
     }
     return list;
@@ -308,6 +305,67 @@ export default function ConvertLeadToStudent() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center space-x-2">
+              <GraduationCap className="w-5 h-5 text-primary" />
+              <span>Academic & Location Details</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="space-y-2">
+                <Label htmlFor="city" className="text-sm font-medium flex items-center space-x-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>City</span>
+                </Label>
+                <Input id="city" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder="Enter city" className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="eltTest" className="text-sm font-medium flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span>ELT Test</span>
+                </Label>
+                <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
+                  <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectValue placeholder="Please select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(studentDropdowns?.['ELT Test']) && studentDropdowns['ELT Test'].map((opt: any) => (
+                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="passport" className="text-sm font-medium flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span>Passport</span>
+                </Label>
+                <Input id="passport" type="text" value={formData.passport} onChange={(e) => handleInputChange('passport', e.target.value)} placeholder="Enter passport number" className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dateOfBirth" className="text-sm font-medium flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>Date of Birth</span>
+                </Label>
+                <DobPicker id="dateOfBirth" value={formData.dateOfBirth} onChange={(v) => handleInputChange('dateOfBirth', v)} className="h-8 text-xs" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address" className="text-sm font-medium flex items-center space-x-2">
+                <MapPin className="w-4 h-4" />
+                <span>Full Address</span>
+              </Label>
+              <Textarea id="address" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder="Enter complete address with street, city, postal code..." rows={2} className="text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center space-x-2">
               <Target className="w-5 h-5 text-primary" />
               <span>Student Status & Priority</span>
             </CardTitle>
@@ -381,67 +439,6 @@ export default function ConvertLeadToStudent() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dateOfBirth" className="text-sm font-medium flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Date of Birth</span>
-                </Label>
-                <DobPicker id="dateOfBirth" value={formData.dateOfBirth} onChange={(v) => handleInputChange('dateOfBirth', v)} className="h-8 text-xs" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center space-x-2">
-              <GraduationCap className="w-5 h-5 text-primary" />
-              <span>Academic & Location Details</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              <div className="space-y-2">
-                <Label htmlFor="city" className="text-sm font-medium flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>City</span>
-                </Label>
-                <Input id="city" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder="Enter city" className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="eltTest" className="text-sm font-medium flex items-center space-x-2">
-                  <FileText className="w-4 h-4" />
-                  <span>ELT Test</span>
-                </Label>
-                <Select value={formData.eltTest} onValueChange={(value) => handleInputChange('eltTest', value)}>
-                  <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Please select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(studentDropdowns?.['ELT Test']) && studentDropdowns['ELT Test'].map((opt: any) => (
-                      <SelectItem key={opt.key} value={opt.key}>{opt.value}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="passport" className="text-sm font-medium flex items-center space-x-2">
-                  <FileText className="w-4 h-4" />
-                  <span>Passport</span>
-                </Label>
-                <Input id="passport" type="text" value={formData.passport} onChange={(e) => handleInputChange('passport', e.target.value)} placeholder="Enter passport number" className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address" className="text-sm font-medium flex items-center space-x-2">
-                <MapPin className="w-4 h-4" />
-                <span>Full Address</span>
-              </Label>
-              <Textarea id="address" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder="Enter complete address with street, city, postal code..." rows={2} className="text-xs transition-all focus:ring-2 focus:ring-primary/20" />
             </div>
           </CardContent>
         </Card>
