@@ -150,7 +150,12 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
       const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
-      if (u) list.unshift(u);
+      if (u) {
+        const role = normalizeRole((u as any).role || (u as any).role_name || (u as any).roleName);
+        if (role === 'counselor' || role === 'counsellor') {
+          list.unshift(u);
+        }
+      }
     }
     return list;
   }, [counsellorList, formData.counsellor, users]);
@@ -160,7 +165,12 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
       const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
-      if (u) list.unshift(u);
+      if (u) {
+        const role = normalizeRole((u as any).role || (u as any).role_name || (u as any).roleName);
+        if (role === 'admission_officer' || role === 'admission officer' || role === 'admissionofficer') {
+          list.unshift(u);
+        }
+      }
     }
     return list;
   }, [admissionOfficerList, formData.admissionOfficer, users]);

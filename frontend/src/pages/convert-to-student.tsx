@@ -163,7 +163,12 @@ export default function ConvertLeadToStudent() {
     const list = Array.isArray(counsellorList) ? counsellorList.slice() : [];
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
       const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
-      if (u) list.unshift(u);
+      if (u) {
+        const role = normalizeRole((u as any).role || (u as any).role_name || (u as any).roleName);
+        if (role === 'counselor' || role === 'counsellor') {
+          list.unshift(u);
+        }
+      }
     }
     return list;
   }, [counsellorList, formData.counsellor, users]);
@@ -173,7 +178,12 @@ export default function ConvertLeadToStudent() {
     const list = Array.isArray(admissionOfficerList) ? admissionOfficerList.slice() : [];
     if (sel && !list.some((u: any) => String(u.id) === sel)) {
       const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === sel) : undefined;
-      if (u) list.unshift(u);
+      if (u) {
+        const role = normalizeRole((u as any).role || (u as any).role_name || (u as any).roleName);
+        if (role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer') {
+          list.unshift(u);
+        }
+      }
     }
     return list;
   }, [admissionOfficerList, formData.admissionOfficer, users]);
