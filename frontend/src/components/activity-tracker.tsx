@@ -13,9 +13,11 @@ import { Activity, User as UserType } from "@/lib/types";
 import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
 import * as UsersService from '@/services/users';
+import * as LeadsService from '@/services/leads';
 import { format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
 import { createPortal } from 'react-dom';
+import { useLocation } from 'wouter';
 
 interface ActivityTrackerProps {
   entityType: string;
