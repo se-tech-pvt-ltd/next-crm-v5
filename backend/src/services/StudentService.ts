@@ -195,6 +195,13 @@ export class StudentService {
           searchConditions
         )
       );
+    } else if (userRole === 'admission_officer' && userId) {
+      rows = await db.select().from(students).where(
+        and(
+          eq(students.admissionOfficerId, userId),
+          searchConditions
+        )
+      );
     } else {
       rows = await db.select().from(students).where(searchConditions);
     }
