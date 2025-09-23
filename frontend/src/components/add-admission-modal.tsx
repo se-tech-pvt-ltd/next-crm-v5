@@ -79,6 +79,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       visaDate: null as any,
       googleDriveLink: '',
       notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
     }
   });
 
