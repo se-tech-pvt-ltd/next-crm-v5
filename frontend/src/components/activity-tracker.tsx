@@ -45,6 +45,37 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Extract conversion details like: "This record was converted from lead ID <uuid>. All previous..."
+  const parseConversionDescription = (desc?: string): { fromType?: string; fromId?: string } => {
+    if (!desc) return {};
+    const m = desc.match(/converted from\s+([a-z_]+)\s+id\s+([a-z0-9-]+)/i);
+    if (!m) return {};
+    return { fromType: (m[1] || '').toLowerCase(), fromId: m[2] };
+  };
+
+  const ConversionFromLead = ({ id }: { id: string }) => {
+    const { data: lead } = useQuery({
+      queryKey: ["/api/leads", id],
+      queryFn: () => LeadsService.getLead(id),
+      staleTime: 5 * 60 * 1000,
+    });
+    const name = (lead as any)?.name || id;
+    return (
+      <span>
+        This record was converted from <span className="font-medium">Lead</span>: {" "}
+        <button
+          type="button"
+          className="text-blue-600 hover:underline"
+          onClick={() => setLocation(`/leads/${id}`)}
+        >
+          {name}
+        </button>
+        . All previous activities have been preserved.
+      </span>
+    );
+  };
 
   useEffect(() => {
     const handler = (e: any) => {
