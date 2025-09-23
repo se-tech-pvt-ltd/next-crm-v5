@@ -73,8 +73,9 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
     enabled: branchFilterTrim.length > 0,
     staleTime: 10_000,
   });
-  const branchFilterList = branchFilterTrim ? branchFilterSearched : initialBranches;
-  const branchFilterOptions = (Array.isArray(branchFilterList) ? branchFilterList : []).map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
+  const branchFilterAll = branchFilterTrim ? branchFilterSearched : initialBranches;
+  const branchFilterList = (Array.isArray(branchFilterAll) ? branchFilterAll : []).filter((b: any) => !filters.regionId || String(b.regionId ?? b.region_id ?? '') === String(filters.regionId));
+  const branchFilterOptions = branchFilterList.map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.id) }));
 
   const regionFilterTrim = regionFilterSearch.trim().toLowerCase();
   const regionFilterOptions = (Array.isArray(regions) ? regions : [])
@@ -273,6 +274,17 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   useEffect(() => {
     setCurrentPage(1);
   }, [filters.query, filters.role, filters.branchId, filters.regionId]);
+
+  useEffect(() => {
+    if (!filters.regionId) return;
+    if (!filters.branchId) return;
+    const all = branchFilterTrim ? branchFilterSearched : initialBranches;
+    const b = (Array.isArray(all) ? all : []).find((bb: any) => String(bb.id) === String(filters.branchId));
+    const regId = String(b?.regionId ?? b?.region_id ?? '');
+    if (regId && regId !== String(filters.regionId)) {
+      setFilters((s) => ({ ...s, branchId: '' }));
+    }
+  }, [filters.regionId]);
 
   const total = sortedUsers.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
