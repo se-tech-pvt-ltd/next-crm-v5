@@ -147,6 +147,28 @@ export default function AddApplication() {
 
   const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
 
+  // Users for access assignment
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const counsellorOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+  const officerOptions = Array.isArray(users)
+    ? users.filter((u: any) => {
+        const role = normalizeRole(u.role || u.role_name || u.roleName);
+        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+      })
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+    : [];
+
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
   return (
