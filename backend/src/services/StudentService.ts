@@ -4,6 +4,7 @@ import { students, type Student, type InsertStudent } from "../shared/schema.js"
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
 import { DropdownModel } from "../models/Dropdown.js";
+import { eq, desc } from "drizzle-orm";
 
 export class StudentService {
   // Helper to expose student_id (snake_case) in API responses
@@ -56,12 +57,26 @@ export class StudentService {
     });
   }
 
-  static async getStudents(userId?: string, userRole?: string): Promise<Student[]> {
+  static async getStudents(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Student[]> {
     let rows: any[];
     if (userRole === 'counselor' && userId) {
       rows = await StudentModel.findByCounselor(userId);
     } else if (userRole === 'admission_officer' && userId) {
       rows = await StudentModel.findByAdmissionOfficer(userId);
+    } else if (userRole === 'branch_manager') {
+      if (branchId) {
+        rows = await db.select().from(students).where(eq(students.branchId, branchId)).orderBy(desc(students.createdAt));
+      } else {
+        rows = [];
+      }
+    } else if (userRole === 'regional_manager') {
+      if (regionId) {
+        rows = await db.select().from(students).where(eq(students.regionId, regionId)).orderBy(desc(students.createdAt));
+      } else {
+        rows = [];
+      }
+    } else if (regionId && userRole !== 'super_admin') {
+      rows = await db.select().from(students).where(eq(students.regionId, regionId)).orderBy(desc(students.createdAt));
     } else {
       rows = await StudentModel.findAll();
     }
@@ -75,7 +90,7 @@ export class StudentService {
     return withCounselorName.map(this.mapStudentForApi);
   }
 
-  static async getStudent(id: string, userId?: string, userRole?: string): Promise<Student | undefined> {
+  static async getStudent(id: string, userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Student | undefined> {
     const student = await StudentModel.findById(id);
 
     if (!student) return undefined;
@@ -87,6 +102,18 @@ export class StudentService {
     if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
       return undefined;
     }
+
+    // Branch manager scoping
+    if (userRole === 'branch_manager') {
+      if (!branchId) return undefined;
+      if ((student as any).branchId !== branchId) return undefined;
+    }
+
+    // Region scoping for any role that has a region (except super_admin and branch_manager)
+    if (regionId && userRole !== 'super_admin' && userRole !== 'branch_manager') {
+      if ((student as any).regionId !== regionId) return undefined;
+    }
+
     const [enriched] = await this.enrichDropdownFields([student]);
     // counselor name
     const dropdowns = await DropdownModel.findByModule('students');

@@ -8,7 +8,7 @@ export class ApplicationController {
   static async getApplications(req: AuthenticatedRequest, res: Response) {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-      const applications = await ApplicationService.getApplications(currentUser.id, currentUser.role);
+      const applications = await ApplicationService.getApplications(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(applications);
     } catch (error) {
       console.error("Get applications error:", error);
@@ -33,7 +33,7 @@ export class ApplicationController {
       const id = req.params.id;
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       console.log('[GetApplication] id:', id);
-      const application = await ApplicationService.getApplication(id, currentUser.id, currentUser.role);
+      const application = await ApplicationService.getApplication(id, currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       console.log('[GetApplication] found:', !!application);
       if (!application) {
         return res.status(404).json({ message: "Application not found" });

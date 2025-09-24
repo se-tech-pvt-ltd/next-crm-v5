@@ -8,7 +8,7 @@ export class StudentController {
   static async getStudents(req: AuthenticatedRequest, res: Response) {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-      const students = await StudentService.getStudents(currentUser.id, currentUser.role);
+      const students = await StudentService.getStudents(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(students);
     } catch (error) {
       console.error("Get students error:", error);
@@ -20,7 +20,7 @@ export class StudentController {
     try {
       const id = req.params.id;
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-      const student = await StudentService.getStudent(id, currentUser.id, currentUser.role);
+      const student = await StudentService.getStudent(id, currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
