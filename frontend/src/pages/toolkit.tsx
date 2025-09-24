@@ -224,7 +224,7 @@ const ToolkitPage = () => {
 
   // Persist selection to localStorage
   useEffect(() => {
-    try { localStorage.setItem('toolkit_view_mode', viewMode); } catch {}
+    try { localStorage.setItem('universities_view_mode', viewMode); } catch {}
   }, [viewMode]);
 
   const allInstitutions = useMemo(() => groups.flatMap(g => g.universities), [groups]);
