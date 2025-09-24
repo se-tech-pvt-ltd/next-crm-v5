@@ -7,6 +7,9 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 
+// Expose server start time for diagnostics
+process.env.SERVER_STARTED_AT = new Date().toISOString();
+
 // Security hardening
 app.disable("x-powered-by");
 const isProd = process.env.NODE_ENV === "production";

@@ -23,6 +23,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register auth route first (public)
   app.use('/api/auth', authRoutes);
 
+  // Public version endpoint for diagnostics
+  app.get('/api/version', (_req, res) => {
+    res.json({
+      startedAt: process.env.SERVER_STARTED_AT || null,
+      nodeEnv: process.env.NODE_ENV || null,
+    });
+  });
+
   // Enforce authentication for all subsequent /api routes
   const { requireAuth } = await import('../middlewares/auth.js');
   app.use('/api', requireAuth);
