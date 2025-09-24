@@ -107,7 +107,7 @@ const initialGroups: InstitutionGroup[] = [
         priority: 'High',
         focusUniversity: true,
         details: {
-          institutionDetails: 'Canada’s top research university with three campuses and a wide range of programs.',
+          institutionDetails: 'Canada���s top research university with three campuses and a wide range of programs.',
           cluster: 'U15 Group of Canadian Research Universities',
           totalFee: 'CAD $45,000 - $65,000 per year (international)',
           scholarship: 'Lester B. Pearson, Faculty awards',
@@ -368,25 +368,24 @@ const ToolkitPage = () => {
               <Card key={i.id} className="overflow-hidden group relative">
                 <div className="h-36 w-full bg-cover bg-center rounded-t" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
 
-                {/* Logo overlapping */}
+                {/* Logo overlapping (left) */}
                 <div className="absolute left-4 -translate-y-1/2 top-28">
-                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center" style={{ margin: '70px 0 0 -5px' }}>
+                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center" style={{ transform: 'translateY(36px)' }}>
                     <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full" />
                   </div>
                 </div>
 
-                <CardContent className="pt-4 px-3 pb-[5px]">
-                  <div className="px-4" style={{ marginRight: '26px' }}>
-                    <CardTitle className="text-base font-semibold truncate" style={{ fontSize: '12px', margin: '-15px 0 0 66px' }}>{i.name}</CardTitle>
+                {/* Centered content */}
+                <CardContent className="pt-6 px-4 pb-4 flex flex-col items-center text-center">
+                  <CardTitle className="text-sm font-semibold truncate max-w-[90%]">{i.name}</CardTitle>
 
-                    <div className="text-xs" style={{ margin: '-4px 0 0 55px' }}>
-                      <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate" style={{ fontSize: '10px', margin: '6px 0 0 12px', display: 'inline-block' }}>{i.website}</a>
-                    </div>
+                  {i.website && (
+                    <a href={i.website} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline mt-1 truncate max-w-[90%]">{i.website}</a>
+                  )}
 
-                    <div style={{ display: 'flex', alignItems: 'center', fontWeight: 400, justifyContent: 'space-between', marginTop: '8px', width: '100%', padding: '0 16px' }}>
-                      <Button size="sm" className="px-3" style={{ marginLeft: '-15px' }} onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
-                      <Button variant="outline" size="sm" style={{ margin: '0 -35px 0 auto' }} onClick={() => setSelected(i)}>View Details</Button>
-                    </div>
+                  <div className="mt-3 flex items-center gap-3">
+                    <Button size="sm" className="px-4" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
+                    <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
                   </div>
                 </CardContent>
               </Card>
