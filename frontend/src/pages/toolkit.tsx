@@ -401,17 +401,15 @@ const ToolkitPage = () => {
             {filtered.map((i) => (
               <div key={i.id} className="flex items-center justify-between p-3 bg-white border rounded">
                 <div className="flex items-center gap-3 min-w-0">
-                  <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
+                  <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full bg-white p-1 border" />
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">{i.name}</div>
                     <div className="text-xs text-muted-foreground truncate">{i.location} • {i.country} • {i.type}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline">Priority: {i.priority}</Badge>
-                  {i.focusUniversity && <Badge className="bg-emerald-600 mr-2">Focus</Badge>}
-                  <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
-                  <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                  <Button size="sm" className="px-3" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
                 </div>
               </div>
             ))}
