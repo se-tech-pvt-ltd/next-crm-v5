@@ -295,10 +295,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="text-sm">
-                      <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
-                        <Edit className="w-4 h-4 mr-2 inline-block" />
-                        Edit
-                      </DropdownMenuItem>
+                      {canEditLead && (
+                        <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
+                          <Edit className="w-4 h-4 mr-2 inline-block" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={() => setShowMarkAsLostModal(true)}>
                         <XCircle className="w-4 h-4 mr-2 inline-block" />
                         Mark as Lost
