@@ -370,21 +370,21 @@ const ToolkitPage = () => {
 
                 {/* Logo overlapping */}
                 <div className="absolute left-4 -translate-y-1/2 top-28">
-                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center">
+                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center" style={{ margin: '28px 0 0 -5px' }}>
                     <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full" />
                   </div>
                 </div>
 
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 px-3 pb-[5px]">
                   <div className="px-4">
-                    <CardTitle className="text-base font-semibold truncate">{i.name}</CardTitle>
+                    <CardTitle className="text-base font-semibold truncate" style={{ margin: '-1px 0 0 46px' }}>{i.name}</CardTitle>
 
                     <div className="text-xs mb-3">
                       <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{i.website}</a>
                     </div>
 
                     <div className="flex items-center gap-2 justify-start">
-                      <Button size="sm" className="px-3" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
+                      <Button size="sm" className="px-3 -ml-1" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
                       <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
                     </div>
                   </div>
