@@ -54,8 +54,20 @@ function Router() {
     return <Settings />;
   };
 
-  console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
+  // Redirects should not run during render. Use effects to perform navigation.
+  React.useEffect(() => {
+    if (!isLoading && !isAuthenticated && location !== '/login') {
+      try { setLocation('/login'); } catch {}
+    }
+  }, [isLoading, isAuthenticated, location, setLocation]);
 
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated && location === '/login') {
+      try { setLocation('/'); } catch {}
+    }
+  }, [isLoading, isAuthenticated, location, setLocation]);
+
+  console.log('Router: isLoading =', isLoading, ', isAuthenticated =', isAuthenticated);
 
   if (isLoading || (isAuthenticated && isAccessLoading)) {
     console.log('Router: Showing loading screen');
@@ -71,29 +83,10 @@ function Router() {
 
   if (!isAuthenticated) {
     console.log('Router: User not authenticated, showing Login component');
-    try {
-      if (location !== '/login') setLocation('/login');
-      return <Login onLogin={login} />;
-    } catch (error) {
-      console.error('Router: Error rendering Login component:', error);
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-red-50">
-          <div className="text-center p-8">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Login Error</h1>
-            <p className="text-gray-700">There was an error loading the login page.</p>
-            <pre className="mt-4 text-sm text-gray-600 bg-gray-100 p-4 rounded">
-              {error instanceof Error ? error.message : 'Unknown error'}
-            </pre>
-          </div>
-        </div>
-      );
-    }
+    return <Login onLogin={login} />;
   }
 
   console.log('Router: User authenticated, showing main app');
-
-  // If already authenticated, don't stay on /login
-  try { const [loc, nav] = useLocation(); if (loc === '/login') nav('/'); } catch {}
 
   return (
     <Switch>
