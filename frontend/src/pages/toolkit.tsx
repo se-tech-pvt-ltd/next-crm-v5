@@ -270,7 +270,7 @@ const ToolkitPage = () => {
                 value={groupId}
                 onValueChange={setGroupId}
                 placeholder="Select university..."
-                searchPlaceholder="Search toolkits..."
+                searchPlaceholder="Search universities..."
                 onSearch={setGroupSearch}
                 options={groupOptions}
               />
