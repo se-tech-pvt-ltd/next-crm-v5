@@ -38,7 +38,7 @@ export default function Students() {
   const [location, setLocation] = useLocation();
   const [matchStudent, studentParams] = useRoute('/students/:id');
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
-  const [matchCreateApp, createAppParams] = useRoute('/students/:id/admission');
+  const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page
@@ -219,7 +219,7 @@ export default function Students() {
 
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
-    try { setLocation(`/students/${studentId}/admission`); } catch {}
+    try { setLocation(`/students/${studentId}/application`); } catch {}
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); }
   };
 
