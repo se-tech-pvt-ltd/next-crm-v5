@@ -104,7 +104,49 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   };
 
   const createStudentMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (payload: any) => {
+      const student = await StudentsService.createStudent(payload);
+      return student;
+    },
+    onSuccess: (student: Student) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
+      toast({ title: 'Success', description: 'Student created successfully.' });
+      onSuccess?.(student);
+      try { setLocation(`/students?studentId=${(student as any).id}`); } catch {}
+      onOpenChange(false);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error?.message || 'Failed to create student.', variant: 'destructive' });
+    }
+  });
+
+  const handleCreate = async () => {
+    // Check duplicates for email and phone
+    try {
+      const res = await StudentsService.getStudents();
+      let list: any[] = [];
+      if (Array.isArray(res)) list = res as any[];
+      else if (res && typeof res === 'object') list = (res as any).data || [];
+
+      const email = (formData.email || '').trim().toLowerCase();
+      const phone = String(formData.phone || '').replace(/\D/g, '');
+
+      if (email) {
+        const found = list.find(s => s && s.email && String(s.email).trim().toLowerCase() === email);
+        if (found) {
+          toast({ title: 'Duplicate email', description: 'A student with this email already exists.', variant: 'destructive' });
+          return;
+        }
+      }
+
+      if (phone) {
+        const found = list.find(s => s && s.phone && String(s.phone).replace(/\D/g, '') === phone);
+        if (found) {
+          toast({ title: 'Duplicate phone', description: 'A student with this phone number already exists.', variant: 'destructive' });
+          return;
+        }
+      }
+
       const payload: any = {
         name: formData.name,
         email: formData.email,
@@ -121,20 +163,28 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         consultancyFree: formData.consultancyFee === 'Yes',
         scholarship: formData.scholarship === 'Yes',
       };
-      const student = await StudentsService.createStudent(payload);
-      return student;
-    },
-    onSuccess: (student: Student) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
-      toast({ title: 'Success', description: 'Student created successfully.' });
-      onSuccess?.(student);
-      try { setLocation(`/students?studentId=${(student as any).id}`); } catch {}
-      onOpenChange(false);
-    },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error?.message || 'Failed to create student.', variant: 'destructive' });
+
+      createStudentMutation.mutate(payload);
+    } catch (err: any) {
+      // If fetching list fails, still attempt to create but warn
+      try { createStudentMutation.mutate({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth || undefined,
+        address: formData.address || undefined,
+        expectation: formData.expectation || undefined,
+        status: formData.status || 'active',
+        targetCountry: formData.interestedCountry || undefined,
+        targetProgram: formData.studyPlan || undefined,
+        passportNumber: formData.passport || undefined,
+        englishProficiency: formData.eltTest || undefined,
+        counselorId: formData.counsellor || undefined,
+        consultancyFree: formData.consultancyFee === 'Yes',
+        scholarship: formData.scholarship === 'Yes',
+      }); } catch {}
     }
-  });
+  };
 
   const getList = (name: string): any[] => {
     const d = leadDropdowns as any;
