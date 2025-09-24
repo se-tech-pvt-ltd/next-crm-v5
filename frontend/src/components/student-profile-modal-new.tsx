@@ -145,9 +145,22 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     return hit?.value || value;
   };
 
+  // Map a stored raw value to the selectable option value (id/key/value) for a given field
+  const mapToOptionValue = (fieldName: string, raw?: string | null) => {
+    if (!raw) return '';
+    const options = getFieldOptions(fieldName);
+    const found = options.find((opt: any) => opt.id === raw || opt.key === raw || opt.value === raw || String(opt.id) === String(raw) || String(opt.key) === String(raw) || String(opt.value) === String(raw));
+    return (found && (found.key || found.id || found.value)) || raw;
+  };
+
   useEffect(() => {
     if (student) {
-      setEditData(student);
+      setEditData({
+        ...student,
+        // Normalize dropdown-backed fields to option keys for proper Select pre-selection
+        expectation: mapToOptionValue('expectation', student.expectation),
+        englishProficiency: mapToOptionValue('englishProficiency', (student as any).englishProficiency),
+      });
       setCurrentStatus(student.status);
     }
   }, [student]);
