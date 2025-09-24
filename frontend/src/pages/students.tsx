@@ -22,7 +22,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { AddStudentModal } from '@/components/add-student-modal';
+import { CreateStudentModal } from '@/components/create-student-modal';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -198,9 +198,10 @@ export default function Students() {
     }, 200);
   };
 
-  // Open profile when route matches
+  // Open profile when route matches (ignore /students/new)
   useEffect(() => {
-    if (matchStudent || matchEdit) {
+    const isNew = studentParams?.id === 'new';
+    if ((matchStudent && !isNew) || matchEdit) {
       const id = (matchEdit ? editParams?.id : studentParams?.id) || null;
       if (id) setSelectedStudentId(id);
       setIsProfileModalOpen(true);
@@ -561,7 +562,7 @@ export default function Students() {
         studentId={selectedStudentId || undefined}
       />
 
-      <AddStudentModal
+      <CreateStudentModal
         open={addStudentOpen}
         onOpenChange={(open) => {
           setAddStudentOpen(open);
