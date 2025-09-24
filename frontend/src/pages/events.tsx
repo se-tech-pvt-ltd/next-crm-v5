@@ -244,17 +244,44 @@ export default function EventsPage() {
   useEffect(() => {
     if (!isCreateRoute) return;
     if (!user) return;
+
+    let resolvedRegionId = '' as string;
+
+    // 1) Try extracting from JWT (same approach as Leads form)
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (t) {
+        const parts = String(t).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const rd = payload?.role_details || payload?.roleDetails || {};
+          const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+          if (candidateRegion) resolvedRegionId = String(candidateRegion);
+        }
+      }
+    } catch {}
+
+    // 2) Fallback to current user object and assignments
     const norm = (r: string) => String(r || '').toLowerCase().replace(/\s+/g, '_');
     const roleName = norm(String(user.role || user.role_name || ''));
-    let resolvedRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
-    if (!resolvedRegionId && roleName === 'regional_manager') {
-      const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
-      if (r?.id) resolvedRegionId = String(r.id);
+    if (!resolvedRegionId) {
+      const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+      if (userRegionId) {
+        resolvedRegionId = userRegionId;
+      } else if (roleName === 'regional_manager') {
+        const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+        if (r?.id) resolvedRegionId = String(r.id);
+      }
     }
+
     if (resolvedRegionId && !eventAccess.regionId) {
       setEventAccess((s) => ({ ...s, regionId: resolvedRegionId }));
     }
-  }, [isCreateRoute, user, regions]);
+  }, [isCreateRoute, user, regions, eventAccess.regionId]);
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
   const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
