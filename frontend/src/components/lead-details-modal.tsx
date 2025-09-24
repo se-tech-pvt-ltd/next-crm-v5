@@ -199,6 +199,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   };
 
 
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canEditLead = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canEdit ?? e.can_edit) === true);
+  }, [accessByRole]);
+
   if (!lead) return null;
 
   const lostReasonOptions = [
