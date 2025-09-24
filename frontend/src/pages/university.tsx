@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { Layout } from '@/components/layout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { MapPin } from 'lucide-react';
+import { Globe, X } from 'lucide-react';
 import { Link } from 'wouter';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 interface UniversityItem {
   id: string;
@@ -24,6 +25,7 @@ interface UniversityItem {
   interviewRequired: boolean;
   imageUrl: string;
   avatarUrl: string;
+  website: string;
 }
 
 const UNIVERSITY_DATA: UniversityItem[] = [
@@ -44,6 +46,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/oxford/800/400',
     avatarUrl:
       'https://picsum.photos/seed/oxford-logo/64/64',
+    website: 'https://www.ox.ac.uk',
   },
   {
     id: 'cambridge',
@@ -62,6 +65,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/cambridge/800/400',
     avatarUrl:
       'https://picsum.photos/seed/cambridge-logo/64/64',
+    website: 'https://www.cam.ac.uk',
   },
   {
     id: 'mit',
@@ -80,6 +84,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/mit/800/400',
     avatarUrl:
       'https://picsum.photos/seed/mit-logo/64/64',
+    website: 'https://www.mit.edu',
   },
   {
     id: 'toronto',
@@ -98,6 +103,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/toronto/800/400',
     avatarUrl:
       'https://picsum.photos/seed/toronto-logo/64/64',
+    website: 'https://www.utoronto.ca',
   },
 ];
 
@@ -120,6 +126,7 @@ export default function UniversityPage() {
   const [interviewRequired, setInterviewRequired] = useState(false);
   const [tuitionBelow18k, setTuitionBelow18k] = useState(false);
   const [acceptingMOI, setAcceptingMOI] = useState(false);
+  const [details, setDetails] = useState<UniversityItem | null>(null);
 
   const filtered = useMemo(() => {
     return UNIVERSITY_DATA.filter((u) => {
@@ -159,7 +166,7 @@ export default function UniversityPage() {
   );
 
   const UniversityCard = ({ item }: { item: UniversityItem }) => (
-    <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm">
+    <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm flex h-full flex-col">
       <div className="relative">
         <img
           src={item.imageUrl}
@@ -167,22 +174,20 @@ export default function UniversityPage() {
           className="w-full h-40 object-cover"
           loading="lazy"
         />
-        <img src={item.avatarUrl} alt={`${item.name} logo`} className="absolute -bottom-10 left-4 w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-md" loading="lazy" />
+        <img src={item.avatarUrl} alt={`${item.name} logo`} className="absolute -bottom-10 left-4 w-16 h-16 rounded-full object-cover ring-2 ring-white shadow-md" loading="lazy" />
       </div>
-      <CardContent className="p-4 pt-4">
-        <div className="pl-20">
+      <CardContent className="p-4 pt-4 flex-1">
+        <div className="pl-[76px] -mt-[10px] -ml-[3px]">
           <div className="font-semibold text-sm leading-tight">{item.name}</div>
-          <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
+          <div className="text-xs text-gray-500 flex items-center gap-1"><Globe className="w-3.5 h-3.5" /><a href={item.website} target="_blank" rel="noopener noreferrer" className="hover:underline">{new URL(item.website).hostname}</a></div>
         </div>
 
 
-        <div className="mt-4 flex items-center">
-          <Link href="/applications/add"><Button size="sm">Apply Now</Button></Link>
-          <div className="ml-auto">
-            <Link href="/applications"><Button size="sm" variant="outline">View Details</Button></Link>
-          </div>
-        </div>
       </CardContent>
+      <CardFooter className="p-4 pt-0 justify-between">
+        <Button size="sm" variant="outline" onClick={() => setDetails(item)}>View Details</Button>
+        <Link href="/applications/add"><Button size="sm">Apply Now</Button></Link>
+      </CardFooter>
     </Card>
   );
 
@@ -277,6 +282,50 @@ export default function UniversityPage() {
           )}
         </div>
       </div>
+      <Dialog open={!!details} onOpenChange={(o) => { if (!o) setDetails(null); }}>
+        <DialogContent hideClose className="p-0 max-w-3xl w-[90vw] max-h-[90vh] h-[85vh] overflow-hidden rounded-xl">
+          <DialogTitle className="sr-only">University Details</DialogTitle>
+          <div className="flex flex-col h-full">
+            <div className="bg-[#1e3a8a] text-white px-5 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">University Details</h2>
+              <button aria-label="Close" onClick={() => setDetails(null)} className="w-8 h-8 rounded-full bg-white/90 text-[#1e3a8a] inline-flex items-center justify-center hover:bg-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid flex-1 min-h-0 overflow-hidden" style={{ gridTemplateColumns: '220px 1fr' }}>
+              <aside className="bg-white border-r p-5 space-y-4 overflow-y-auto">
+                <div className="font-semibold text-[#1e3a8a]">University Information</div>
+                <div className="text-gray-700">IELTS Required</div>
+              </aside>
+              <section className="bg-white p-6 overflow-y-auto min-h-0">
+                {details && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <img src={details.avatarUrl} alt={`${details.name} logo`} className="w-16 h-16 rounded-full object-cover" />
+                      <div className="text-lg font-semibold text-gray-900">{details.name}</div>
+                    </div>
+                    <div className="space-y-4 text-sm">
+                      <div>
+                        <div className="text-gray-500">Location</div>
+                        <div className="text-[#1e3a8a] font-semibold">{details.country}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">Website URL</div>
+                        <a href={details.website} target="_blank" rel="noopener noreferrer" className="text-[#1e3a8a] font-semibold break-all">{details.website}</a>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">Tuition Fee</div>
+                        <div className="text-[#1e3a8a] font-semibold">Approx ${details.tuitionFee.toLocaleString()}</div>
+                        <div className="text-gray-500 text-xs">Tuition fees vary depending on the course</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </section>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
