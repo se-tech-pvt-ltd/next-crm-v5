@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -1102,55 +1103,58 @@ export default function EventsPage() {
         </Dialog>
 
         {/* Create Event Modal */}
-        <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Event</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <Label>Event Name</Label>
-                <Input
-                  value={newEvent.name}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
-                    setNewEvent({ ...newEvent, name: title });
-                  }}
-                />
+        <DetailsDialogLayout
+          open={isAddEventOpen}
+          onOpenChange={setIsAddEventOpen}
+          title="Create Event"
+          headerClassName="bg-[#223E7D] text-white"
+          leftContent={(
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Event Name</Label>
+                  <Input
+                    value={newEvent.name}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                      setNewEvent({ ...newEvent, name: title });
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label>Type</Label>
+                  <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Date & Time</Label>
+                  <Input
+                    type="datetime-local"
+                    step="60"
+                    value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (!v) {
+                        setNewEvent({ ...newEvent, date: '', time: '' });
+                        return;
+                      }
+                      const [d, t] = v.split('T');
+                      setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label>Venue</Label>
+                  <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+                </div>
               </div>
-              <div>
-                <Label>Type</Label>
-                <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
-              </div>
-              <div>
-                <Label>Date & Time</Label>
-                <Input
-                  type="datetime-local"
-                  step="60"
-                  value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (!v) {
-                      setNewEvent({ ...newEvent, date: '', time: '' });
-                      return;
-                    }
-                    const [d, t] = v.split('T');
-                    setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
-                  }}
-                />
-              </div>
-              <div>
-                <Label>Venue</Label>
-                <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancel</Button>
+                <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
               </div>
             </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancel</Button>
-              <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+          )}
+        />
       </div>
     </Layout>
   );
