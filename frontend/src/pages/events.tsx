@@ -511,8 +511,56 @@ export default function EventsPage() {
     setImportValidRows(valid);
   };
 
-  const eventOptions = [{ label: 'All Events', value: 'all' }, ...((events || []).map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))];
-  const selectedEvent = useMemo(() => (events || []).find((e: any) => e.id === filterEventId), [events, filterEventId]);
+  const normalizeRoleList = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const isRegionalManagerList = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName) === 'regional_manager';
+
+  const myRegionId = useMemo(() => {
+    let rid = '' as string;
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (t) {
+        const parts = String(t).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const rd = payload?.role_details || payload?.roleDetails || {};
+          const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+          if (candidateRegion) rid = String(candidateRegion);
+        }
+      }
+    } catch {}
+    if (!rid) {
+      const uRid = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+      if (uRid) rid = uRid;
+    }
+    if (!rid && isRegionalManagerList) {
+      const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+      if (r?.id) rid = String(r.id);
+    }
+    return rid;
+  }, [user, regions, isRegionalManagerList]);
+
+  const visibleEvents = useMemo(() => {
+    const all = Array.isArray(events) ? events : [];
+    if (isRegionalManagerList && myRegionId) return all.filter((e: any) => String(e.regionId ?? e.region_id ?? '') === String(myRegionId));
+    return all;
+  }, [events, isRegionalManagerList, myRegionId]);
+
+  useEffect(() => {
+    if (filterEventId && filterEventId !== 'all') {
+      const ok = visibleEvents.some((e: any) => String(e.id) === String(filterEventId));
+      if (!ok) {
+        setFilterEventId('all');
+        setShowList(false);
+      }
+    }
+  }, [visibleEvents, filterEventId]);
+
+  const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
+  const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
 
   useEffect(() => { setPage(1); }, [filterEventId, registrations]);
 
@@ -622,7 +670,7 @@ export default function EventsPage() {
               </CardHeader>
               <CardContent className="p-2 pt-0">
                 <div className="text-base font-semibold">
-                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : (Array.isArray(events) ? events.length : 0)}
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : visibleEvents.length}
                 </div>
               </CardContent>
             </Card>
@@ -636,7 +684,7 @@ export default function EventsPage() {
               </CardHeader>
               <CardContent className="p-2 pt-0">
                 <div className="text-base font-semibold text-red-600">
-                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : ((Array.isArray(events) ? events : []).filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() < Date.now() : false; }).length)}
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : (visibleEvents.filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() < Date.now() : false; }).length)}
                 </div>
               </CardContent>
             </Card>
@@ -650,7 +698,7 @@ export default function EventsPage() {
               </CardHeader>
               <CardContent className="p-2 pt-0">
                 <div className="text-base font-semibold text-green-600">
-                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : ((Array.isArray(events) ? events : []).filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() >= Date.now() : false; }).length)}
+                  {eventsLoading ? <Skeleton className="h-6 w-12" /> : (visibleEvents.filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() >= Date.now() : false; }).length)}
                 </div>
               </CardContent>
             </Card>
@@ -658,7 +706,7 @@ export default function EventsPage() {
         )}
 
         {!showList && (
-          (Array.isArray(events) && events.length === 0) ? (
+          (Array.isArray(visibleEvents) && visibleEvents.length === 0) ? (
             <EmptyState
               icon={<Calendar className="h-10 w-10" />}
               title="No events found"
@@ -674,7 +722,7 @@ export default function EventsPage() {
             />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(events || []).map((e: any) => { const p = getPalette(e.type); return (
+              {visibleEvents.map((e: any) => { const p = getPalette(e.type); return (
                 <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
                   <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
                   <CardHeader className="pb-1">
