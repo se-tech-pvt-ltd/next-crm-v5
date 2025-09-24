@@ -290,7 +290,7 @@ const ToolkitPage = () => {
                 {groupId !== 'all' && (
                   <>
                     <DropdownMenuItem onClick={() => setAddUniOpen(true)}>Add University</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setEditGroupOpen(true)}>Edit Toolkit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEditGroupOpen(true)}>Edit Group</DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuContent>
