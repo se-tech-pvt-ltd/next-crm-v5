@@ -56,12 +56,26 @@ export class StudentService {
     });
   }
 
-  static async getStudents(userId?: string, userRole?: string): Promise<Student[]> {
+  static async getStudents(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Student[]> {
     let rows: any[];
     if (userRole === 'counselor' && userId) {
       rows = await StudentModel.findByCounselor(userId);
     } else if (userRole === 'admission_officer' && userId) {
       rows = await StudentModel.findByAdmissionOfficer(userId);
+    } else if (userRole === 'branch_manager') {
+      if (branchId) {
+        rows = await db.select().from(students).where(eq(students.branchId, branchId)).orderBy(desc(students.createdAt));
+      } else {
+        rows = [];
+      }
+    } else if (userRole === 'regional_manager') {
+      if (regionId) {
+        rows = await db.select().from(students).where(eq(students.regionId, regionId)).orderBy(desc(students.createdAt));
+      } else {
+        rows = [];
+      }
+    } else if (regionId && userRole !== 'super_admin') {
+      rows = await db.select().from(students).where(eq(students.regionId, regionId)).orderBy(desc(students.createdAt));
     } else {
       rows = await StudentModel.findAll();
     }
