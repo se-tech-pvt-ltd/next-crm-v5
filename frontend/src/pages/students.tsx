@@ -38,7 +38,7 @@ export default function Students() {
   const [location, setLocation] = useLocation();
   const [matchStudent, studentParams] = useRoute('/students/:id');
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
-  const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
+  const [matchCreateApp, createAppParams] = useRoute('/students/:id/admission');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page
@@ -208,7 +208,7 @@ export default function Students() {
     }
   }, [matchStudent, matchEdit, studentParams?.id, editParams?.id]);
 
-  // Open Add Application modal when route matches /students/:id/application
+  // Open Add Application modal when route matches /students/:id/admission
   useEffect(() => {
     if (matchCreateApp) {
       const id = createAppParams?.id || studentParams?.id || null;
@@ -219,7 +219,7 @@ export default function Students() {
 
   const handleCreateApplication = (studentId: string) => {
     setSelectedStudentId(studentId);
-    try { setLocation(`/students/${studentId}/application`); } catch {}
+    try { setLocation(`/students/${studentId}/admission`); } catch {}
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddApplicationModalOpen(true)); } catch { setIsAddApplicationModalOpen(true); }
   };
 
