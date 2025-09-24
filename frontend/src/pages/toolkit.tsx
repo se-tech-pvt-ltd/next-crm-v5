@@ -369,14 +369,14 @@ const ToolkitPage = () => {
                 <div className="h-36 w-full bg-cover bg-center rounded-t" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
 
                 {/* Logo overlapping */}
-                <div className="absolute left-4 -translate-y-1/2 top-28">
+                <div className="absolute left-6 -translate-y-1/2 top-28">
                   <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center">
                     <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full" />
                   </div>
                 </div>
 
                 <CardContent className="pt-8">
-                  <div className="pl-24 pr-4">
+                  <div className="pl-20 pr-4">
                     <CardTitle className="text-base font-semibold truncate">{i.name}</CardTitle>
 
                     <div className="text-xs mb-3">
