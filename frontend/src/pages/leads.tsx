@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 const useState = React.useState;
 import AddLeadForm from '@/components/add-lead-form';
 
