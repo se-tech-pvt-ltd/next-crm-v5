@@ -197,6 +197,9 @@ export const events = mysqlTable("events", {
   venue: varchar("venue", { length: 255 }).notNull(),
   time: varchar("time", { length: 50 }).notNull(),
   branchId: varchar("branch_id", { length: 255 }),
+  regionId: varchar("region_id", { length: 50 }),
+  counsellorId: varchar("counsellor_id", { length: 50 }),
+  admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
