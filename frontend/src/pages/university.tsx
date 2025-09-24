@@ -172,8 +172,7 @@ export default function UniversityPage() {
         </div>
 
 
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm"><span className="text-gray-500">Tuition Fee</span> <span className="font-semibold">${item.tuitionFee.toLocaleString()}</span></div>
+        <div className="mt-4 flex items-center justify-start">
           <div className="flex gap-2">
             <Link href="/applications/add"><Button size="sm" className="rounded-full">Apply Now</Button></Link>
             <Link href="/applications"><Button size="sm" variant="outline" className="rounded-full">View Details</Button></Link>
