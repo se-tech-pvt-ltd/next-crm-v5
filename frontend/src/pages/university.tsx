@@ -23,6 +23,7 @@ interface UniversityItem {
   lowTuition: boolean; // helper flag for quick filter
   interviewRequired: boolean;
   imageUrl: string;
+  avatarUrl: string;
 }
 
 const UNIVERSITY_DATA: UniversityItem[] = [
@@ -41,6 +42,8 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     interviewRequired: true,
     imageUrl:
       'https://picsum.photos/seed/oxford/800/400',
+    avatarUrl:
+      'https://picsum.photos/seed/oxford-logo/64/64',
   },
   {
     id: 'cambridge',
@@ -57,6 +60,8 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     interviewRequired: false,
     imageUrl:
       'https://picsum.photos/seed/cambridge/800/400',
+    avatarUrl:
+      'https://picsum.photos/seed/cambridge-logo/64/64',
   },
   {
     id: 'mit',
@@ -73,6 +78,8 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     interviewRequired: false,
     imageUrl:
       'https://picsum.photos/seed/mit/800/400',
+    avatarUrl:
+      'https://picsum.photos/seed/mit-logo/64/64',
   },
   {
     id: 'toronto',
@@ -89,6 +96,8 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     interviewRequired: false,
     imageUrl:
       'https://picsum.photos/seed/toronto/800/400',
+    avatarUrl:
+      'https://picsum.photos/seed/toronto-logo/64/64',
   },
 ];
 
@@ -160,9 +169,7 @@ export default function UniversityPage() {
       <CardContent className="p-4">
         <div className="flex items-center justify-start">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-              {item.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
-            </div>
+            <img src={item.avatarUrl} alt={`${item.name} logo`} className="w-8 h-8 rounded-full object-cover ring-1 ring-black/5" loading="lazy" />
             <div>
               <div className="font-semibold text-sm leading-tight">{item.name}</div>
               <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
