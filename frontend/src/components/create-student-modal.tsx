@@ -409,7 +409,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-4 h-8 text-xs">
               Cancel
             </Button>
-            <Button onClick={() => createStudentMutation.mutate()} disabled={disabled} className="px-4 h-8 text-xs bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed" title={'Create Student'}>
+            <Button onClick={handleCreate} disabled={disabled} className="px-4 h-8 text-xs bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed" title={'Create Student'}>
               {disabled ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
