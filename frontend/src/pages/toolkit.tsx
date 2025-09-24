@@ -216,7 +216,7 @@ const ToolkitPage = () => {
   const [editUniOpen, setEditUniOpen] = useState<Institution | null>(null);
   const [viewMode, setViewMode] = useState<'grid'|'list'>(() => {
     try {
-      const saved = localStorage.getItem('toolkit_view_mode');
+      const saved = localStorage.getItem('universities_view_mode');
       if (saved === 'grid' || saved === 'list') return saved as 'grid'|'list';
     } catch {}
     return 'grid';
