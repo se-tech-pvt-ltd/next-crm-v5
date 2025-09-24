@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { Label } from '@/components/ui/label';
@@ -1123,44 +1124,83 @@ export default function EventsPage() {
           rightWidth="380px"
           leftContent={(
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label>Event Name</Label>
-                  <Input
-                    value={newEvent.name}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
-                      setNewEvent({ ...newEvent, name: title });
-                    }}
-                  />
+              <CollapsibleCard
+                persistKey={`events:new:details`}
+                header={<CardTitle className="flex items-center space-x-2"><span>Event Details</span></CardTitle>}
+                cardClassName="shadow-md border border-gray-200 bg-white"
+                defaultOpen
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Event Name</Label>
+                    <Input
+                      value={newEvent.name}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setNewEvent({ ...newEvent, name: title });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Type</Label>
+                    <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      step="60"
+                      value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (!v) {
+                          setNewEvent({ ...newEvent, date: '', time: '' });
+                          return;
+                        }
+                        const [d, t] = v.split('T');
+                        setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Venue</Label>
+                    <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+                  </div>
                 </div>
-                <div>
-                  <Label>Type</Label>
-                  <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+              </CollapsibleCard>
+
+              <CollapsibleCard
+                persistKey={`events:new:access`}
+                header={<CardTitle className="flex items-center space-x-2"><span>Event Access</span></CardTitle>}
+                cardClassName="shadow-md border border-gray-200 bg-white"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Region</Label>
+                    <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(regions) && regions.map((r: any) => (
+                          <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Branch</Label>
+                    <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(branches) && branches.map((b: any) => (
+                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div>
-                  <Label>Date & Time</Label>
-                  <Input
-                    type="datetime-local"
-                    step="60"
-                    value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (!v) {
-                        setNewEvent({ ...newEvent, date: '', time: '' });
-                        return;
-                      }
-                      const [d, t] = v.split('T');
-                      setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label>Venue</Label>
-                  <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
-                </div>
-              </div>
+              </CollapsibleCard>
+
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => navigate('/events')}>Cancel</Button>
                 <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
@@ -1169,31 +1209,14 @@ export default function EventsPage() {
           )}
           rightContent={(
             <div className="p-4 space-y-4">
-              <div className="text-sm font-semibold text-gray-900">Event Access</div>
-              <div className="space-y-3">
-                <div>
-                  <Label>Region</Label>
-                  <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v }))}>
-                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select region" /></SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(regions) && regions.map((r: any) => (
-                        <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Branch</Label>
-                  <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v }))}>
-                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(branches) && branches.map((b: any) => (
-                        <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <Card className="shadow-none border border-gray-200 bg-white">
+                <CardHeader className="pb-2">
+                  <CardTitle>Activity</CardTitle>
+                </CardHeader>
+                <CardContent className="text-xs text-gray-700">
+                  Activities will appear here after the event is created.
+                </CardContent>
+              </Card>
             </div>
           )}
         />
