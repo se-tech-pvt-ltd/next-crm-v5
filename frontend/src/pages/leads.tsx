@@ -89,6 +89,15 @@ export default function Leads() {
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
+  // Access control for Leads: show Create button only if allowed
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateLead = React.useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  }, [accessByRole]);
   // Removed no activity filter since we don't have activities API configured
   const { toast } = useToast();
   const queryClient = useQueryClient();
