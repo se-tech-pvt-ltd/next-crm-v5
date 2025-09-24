@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Globe } from 'lucide-react';
+import { Globe, X } from 'lucide-react';
 import { Link } from 'wouter';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 interface UniversityItem {
   id: string;
@@ -125,6 +126,7 @@ export default function UniversityPage() {
   const [interviewRequired, setInterviewRequired] = useState(false);
   const [tuitionBelow18k, setTuitionBelow18k] = useState(false);
   const [acceptingMOI, setAcceptingMOI] = useState(false);
+  const [details, setDetails] = useState<UniversityItem | null>(null);
 
   const filtered = useMemo(() => {
     return UNIVERSITY_DATA.filter((u) => {
@@ -183,7 +185,7 @@ export default function UniversityPage() {
 
       </CardContent>
       <CardFooter className="p-4 pt-0 justify-between">
-        <Link href="/applications"><Button size="sm" variant="outline">View Details</Button></Link>
+        <Button size="sm" variant="outline" onClick={() => setDetails(item)}>View Details</Button>
         <Link href="/applications/add"><Button size="sm">Apply Now</Button></Link>
       </CardFooter>
     </Card>
@@ -280,6 +282,48 @@ export default function UniversityPage() {
           )}
         </div>
       </div>
+      <Dialog open={!!details} onOpenChange={(o) => { if (!o) setDetails(null); }}>
+        <DialogContent hideClose className="p-0 max-w-4xl w-[95vw] overflow-hidden rounded-xl">
+          <DialogTitle className="sr-only">University Details</DialogTitle>
+          <div className="bg-[#1e3a8a] text-white px-5 py-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">University Details</h2>
+            <button aria-label="Close" onClick={() => setDetails(null)} className="w-8 h-8 rounded-full bg-white/90 text-[#1e3a8a] inline-flex items-center justify-center hover:bg-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid" style={{ gridTemplateColumns: '220px 1fr' }}>
+            <aside className="bg-white border-r p-5 space-y-4">
+              <div className="font-semibold text-[#1e3a8a]">University Information</div>
+              <div className="text-gray-700">IELTS Required</div>
+            </aside>
+            <section className="bg-white p-6">
+              {details && (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <img src={details.avatarUrl} alt={`${details.name} logo`} className="w-16 h-16 rounded-full object-cover" />
+                    <div className="text-lg font-semibold text-gray-900">{details.name}</div>
+                  </div>
+                  <div className="space-y-4 text-sm">
+                    <div>
+                      <div className="text-gray-500">Location</div>
+                      <div className="text-[#1e3a8a] font-semibold">{details.country}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Website URL</div>
+                      <a href={details.website} target="_blank" rel="noopener noreferrer" className="text-[#1e3a8a] font-semibold break-all">{details.website}</a>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Tuition Fee</div>
+                      <div className="text-[#1e3a8a] font-semibold">Approx ${details.tuitionFee.toLocaleString()}</div>
+                      <div className="text-gray-500 text-xs">Tuition fees vary depending on the course</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
