@@ -365,29 +365,31 @@ const ToolkitPage = () => {
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {filtered.map((i) => (
-              <Card key={i.id} className="overflow-hidden group">
-                <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
-                <CardHeader className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <img src={i.logo} alt={`${i.name} logo`} className="h-10 w-10 object-contain rounded bg-white p-1 border" />
-                    <div className="min-w-0">
-                      <CardTitle className="text-base truncate">{i.name}</CardTitle>
-                      <div className="text-xs text-muted-foreground truncate">{i.location}</div>
+              <Card key={i.id} className="overflow-hidden group relative">
+                <div className="h-36 w-full bg-cover bg-center rounded-t" style={{ backgroundImage: `url(${i.coverPhoto})` }} />
+
+                {/* Logo overlapping */}
+                <div className="absolute left-4 -translate-y-1/2 top-28">
+                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center">
+                    <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full" />
+                  </div>
+                </div>
+
+                <CardContent className="pt-8">
+                  <div className="pl-24 pr-4">
+                    <CardTitle className="text-base font-semibold truncate">{i.name}</CardTitle>
+                    <div className="text-xs text-muted-foreground truncate mb-2">{i.location}</div>
+
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                      <Badge variant="outline">{i.country}</Badge>
+                      <Badge variant="secondary">{i.type}</Badge>
+                      <Badge variant="outline">Priority: {i.priority}</Badge>
+                      {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline">{i.country}</Badge>
-                    <Badge variant="secondary">{i.type}</Badge>
-                    <Badge variant="outline">Priority: {i.priority}</Badge>
-                    {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <a className="text-xs text-blue-600 hover:underline truncate" href={i.website} target="_blank" rel="noreferrer">{i.website}</a>
+
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setEditUniOpen(i)}>Edit</Button>
-                      <Button size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                      <Button size="sm" className="px-3" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
+                      <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
                     </div>
                   </div>
                 </CardContent>
