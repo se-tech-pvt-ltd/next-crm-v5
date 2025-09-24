@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -229,6 +231,9 @@ export default function EventsPage() {
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
+  const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string }>({ regionId: '', branchId: '' });
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
+  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
   const [emailError, setEmailError] = useState(false);
 
@@ -1108,6 +1113,9 @@ export default function EventsPage() {
           onOpenChange={setIsAddEventOpen}
           title="Create Event"
           headerClassName="bg-[#223E7D] text-white"
+          headerLeft={(<div className="text-base font-semibold">Create Event</div>)}
+          showDefaultClose
+          rightWidth="380px"
           leftContent={(
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1151,6 +1159,35 @@ export default function EventsPage() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancel</Button>
                 <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
+              </div>
+            </div>
+          )}
+          rightContent={(
+            <div className="p-4 space-y-4">
+              <div className="text-sm font-semibold text-gray-900">Event Access</div>
+              <div className="space-y-3">
+                <div>
+                  <Label>Region</Label>
+                  <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v }))}>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select region" /></SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(regions) && regions.map((r: any) => (
+                        <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Branch</Label>
+                  <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v }))}>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(branches) && branches.map((b: any) => (
+                        <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           )}
