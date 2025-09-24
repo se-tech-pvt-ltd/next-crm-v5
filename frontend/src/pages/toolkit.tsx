@@ -375,11 +375,11 @@ const ToolkitPage = () => {
                   </div>
                 </div>
 
-                <CardContent className="pt-6 px-3 pb-[5px]">
+                <CardContent className="pt-4 px-3 pb-[5px]">
                   <div className="px-4">
-                    <CardTitle className="text-base font-semibold truncate" style={{ margin: '-1px 0 0 46px' }}>{i.name}</CardTitle>
+                    <CardTitle className="text-base font-semibold truncate" style={{ margin: '-6px 0 0 46px' }}>{i.name}</CardTitle>
 
-                    <div className="text-xs mb-3">
+                    <div className="text-xs mb-1" style={{ marginTop: '-6px' }}>
                       <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{i.website}</a>
                     </div>
 
