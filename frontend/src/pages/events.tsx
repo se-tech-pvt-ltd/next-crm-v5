@@ -10,6 +10,7 @@ import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
+import * as UsersService from '@/services/users';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -235,9 +236,10 @@ export default function EventsPage() {
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
-  const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string }>({ regionId: '', branchId: '' });
+  const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
+  const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
   const [emailError, setEmailError] = useState(false);
 
@@ -246,7 +248,14 @@ export default function EventsPage() {
       toast({ title: 'Please fill all fields', variant: 'destructive' });
       return;
     }
-    addEventMutation.mutate(newEvent);
+    const payload = {
+      ...newEvent,
+      regionId: eventAccess.regionId || undefined,
+      branchId: eventAccess.branchId || undefined,
+      counsellorId: eventAccess.counsellorId || undefined,
+      admissionOfficerId: eventAccess.admissionOfficerId || undefined,
+    } as any;
+    addEventMutation.mutate(payload);
   };
 
   const openAddRegistration = () => {
@@ -1208,12 +1217,37 @@ export default function EventsPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label>Counsellor</Label>
+                    <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectContent>
+                        {(Array.isArray(users) ? users : []).filter((u: any) => {
+                          const role = String(u.role || u.role_name || u.roleName || '').toLowerCase().replace(/\s+/g,'_');
+                          return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+                        }).map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Admission Officer</Label>
+                    <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectContent>
+                        {(Array.isArray(users) ? users : []).filter((u: any) => {
+                          const role = String(u.role || u.role_name || u.roleName || '').toLowerCase().replace(/\s+/g,'_');
+                          return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+                        }).map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CollapsibleCard>
 
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => navigate('/events')}>Cancel</Button>
-              </div>
             </div>
           )}
         />
