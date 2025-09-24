@@ -378,13 +378,9 @@ const ToolkitPage = () => {
                 <CardContent className="pt-8">
                   <div className="pl-24 pr-4">
                     <CardTitle className="text-base font-semibold truncate">{i.name}</CardTitle>
-                    <div className="text-xs text-muted-foreground truncate mb-2">{i.location}</div>
 
-                    <div className="flex items-center gap-2 flex-wrap mb-3">
-                      <Badge variant="outline">{i.country}</Badge>
-                      <Badge variant="secondary">{i.type}</Badge>
-                      <Badge variant="outline">Priority: {i.priority}</Badge>
-                      {i.focusUniversity && <Badge className="bg-emerald-600">Focus</Badge>}
+                    <div className="text-xs mb-3">
+                      <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{i.website}</a>
                     </div>
 
                     <div className="flex items-center gap-2">
