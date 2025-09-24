@@ -92,6 +92,9 @@ function Router() {
 
   console.log('Router: User authenticated, showing main app');
 
+  // If already authenticated, don't stay on /login
+  try { const [loc, nav] = useLocation(); if (loc === '/login') nav('/'); } catch {}
+
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
