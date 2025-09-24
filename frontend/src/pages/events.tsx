@@ -10,6 +10,7 @@ import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
+import * as BranchEmpsService from '@/services/branchEmps';
 import * as UsersService from '@/services/users';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -283,9 +284,43 @@ export default function EventsPage() {
     }
   }, [isCreateRoute, user, regions, eventAccess.regionId]);
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps() });
   const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
   const [emailError, setEmailError] = useState(false);
+
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const isRegionalManager = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName) === 'regional_manager';
+
+  const filteredBranches = Array.isArray(branches)
+    ? branches.filter((b: any) => !eventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId))
+    : [];
+
+  const counselorOptions = Array.isArray(users)
+    ? users
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'counselor' || r === 'counsellor';
+        })
+        .filter((u: any) => {
+          if (!eventAccess.branchId) return false;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(eventAccess.branchId));
+        })
+    : [];
+
+  const admissionOfficerOptions = Array.isArray(users)
+    ? users
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
+        })
+        .filter((u: any) => {
+          if (!eventAccess.branchId) return false;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(eventAccess.branchId));
+        })
+    : [];
 
   const handleCreateEvent = () => {
     if (!newEvent.name || !newEvent.type || !newEvent.date || !newEvent.venue || !newEvent.time) {
@@ -1241,8 +1276,8 @@ export default function EventsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <Label>Region</Label>
-                    <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select region" /></SelectTrigger>
+                    <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v, branchId: '', counsellorId: '', admissionOfficerId: '' }))}>
+                      <SelectTrigger className="h-8 text-sm" disabled={isRegionalManager}><SelectValue placeholder="Select region" /></SelectTrigger>
                       <SelectContent>
                         {Array.isArray(regions) && regions.map((r: any) => (
                           <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
@@ -1252,10 +1287,10 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Branch</Label>
-                    <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v }))}>
+                    <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v, counsellorId: '', admissionOfficerId: '' }))}>
                       <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
                       <SelectContent>
-                        {Array.isArray(branches) && branches.map((b: any) => (
+                        {filteredBranches.map((b: any) => (
                           <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1266,11 +1301,8 @@ export default function EventsPage() {
                     <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
                       <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
-                        {(Array.isArray(users) ? users : []).filter((u: any) => {
-                          const role = String(u.role || u.role_name || u.roleName || '').toLowerCase().replace(/\s+/g,'_');
-                          return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
-                        }).map((u: any) => (
-                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        {counselorOptions.map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1280,11 +1312,8 @@ export default function EventsPage() {
                     <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
                       <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
-                        {(Array.isArray(users) ? users : []).filter((u: any) => {
-                          const role = String(u.role || u.role_name || u.roleName || '').toLowerCase().replace(/\s+/g,'_');
-                          return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
-                        }).map((u: any) => (
-                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        {admissionOfficerOptions.map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
