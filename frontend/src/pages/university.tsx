@@ -44,7 +44,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     imageUrl:
       'https://picsum.photos/seed/oxford/800/400',
     avatarUrl:
-      'httpsum.photos/seed/oxford-logo/64/64',
+      'https://picsum.photos/seed/oxford-logo/64/64',
     website: 'https://www.ox.ac.uk',
   },
   {
