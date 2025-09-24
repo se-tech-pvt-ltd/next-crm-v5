@@ -158,7 +158,7 @@ export default function UniversityPage() {
         loading="lazy"
       />
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
               {item.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
@@ -168,7 +168,6 @@ export default function UniversityPage() {
               <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
             </div>
           </div>
-          <Badge className="bg-blue-100 text-blue-700 border border-blue-200">{item.type}</Badge>
         </div>
 
 
