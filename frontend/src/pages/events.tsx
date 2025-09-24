@@ -1126,7 +1126,7 @@ export default function EventsPage() {
             <div className="space-y-4">
               <CollapsibleCard
                 persistKey={`events:new:details`}
-                header={<CardTitle className="flex items-center space-x-2"><span>Event Details</span></CardTitle>}
+                header={<CardTitle className="flex items-center space-x-2"><Calendar className="w-4 h-4 text-primary" /><span>Event Details</span></CardTitle>}
                 cardClassName="shadow-md border border-gray-200 bg-white"
                 defaultOpen
               >
@@ -1172,7 +1172,7 @@ export default function EventsPage() {
 
               <CollapsibleCard
                 persistKey={`events:new:access`}
-                header={<CardTitle className="flex items-center space-x-2"><span>Event Access</span></CardTitle>}
+                header={<CardTitle className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-primary" /><span>Event Access</span></CardTitle>}
                 cardClassName="shadow-md border border-gray-200 bg-white"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1205,18 +1205,6 @@ export default function EventsPage() {
                 <Button variant="outline" onClick={() => navigate('/events')}>Cancel</Button>
                 <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
               </div>
-            </div>
-          )}
-          rightContent={(
-            <div className="p-4 space-y-4">
-              <Card className="shadow-none border border-gray-200 bg-white">
-                <CardHeader className="pb-2">
-                  <CardTitle>Activity</CardTitle>
-                </CardHeader>
-                <CardContent className="text-xs text-gray-700">
-                  Activities will appear here after the event is created.
-                </CardContent>
-              </Card>
             </div>
           )}
         />
