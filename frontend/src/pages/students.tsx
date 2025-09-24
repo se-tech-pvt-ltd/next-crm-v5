@@ -521,8 +521,15 @@ export default function Students() {
           setIsProfileModalOpen(open);
           if (!open) {
             setSelectedStudentId(null);
-            if (location && location.startsWith('/students/')) {
-              setLocation('/students');
+            try {
+              const path = typeof window !== 'undefined' ? window.location.pathname : location;
+              // Only navigate back to /students when we're not deep-linking into admission/application
+              if (path && path.startsWith('/students/') && !path.includes('/admission') && !path.includes('/application')) {
+                setLocation('/students');
+              }
+            } catch (e) {
+              // fallback to previous behavior
+              if (location && location.startsWith('/students/')) setLocation('/students');
             }
           }
         }}

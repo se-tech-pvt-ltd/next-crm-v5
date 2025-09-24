@@ -145,9 +145,22 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     return hit?.value || value;
   };
 
+  // Map a stored raw value to the selectable option value (id/key/value) for a given field
+  const mapToOptionValue = (fieldName: string, raw?: string | null) => {
+    if (!raw) return '';
+    const options = getFieldOptions(fieldName);
+    const found = options.find((opt: any) => opt.id === raw || opt.key === raw || opt.value === raw || String(opt.id) === String(raw) || String(opt.key) === String(raw) || String(opt.value) === String(raw));
+    return (found && (found.key || found.id || found.value)) || raw;
+  };
+
   useEffect(() => {
     if (student) {
-      setEditData(student);
+      setEditData({
+        ...student,
+        // Normalize dropdown-backed fields to option keys for proper Select pre-selection
+        expectation: mapToOptionValue('expectation', student.expectation),
+        englishProficiency: mapToOptionValue('englishProficiency', (student as any).englishProficiency),
+      });
       setCurrentStatus(student.status);
     }
   }, [student]);
@@ -356,7 +369,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   variant="outline"
                   size="xs"
                   className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                  onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                  onClick={() => {
+                      if (typeof onOpenAddApplication === 'function') {
+                        try { onOpenAddApplication(student?.id); } catch {}
+                      }
+                      try { setLocation(`/students/${student?.id}/application`); } catch {}
+                      onOpenChange(false);
+                    }}
                   title="Add Application"
                 >
                   <Plus />
@@ -634,7 +653,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
                     )}
                   </CardTitle>
-                  <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
+                  <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { if (typeof onOpenAddApplication === 'function') { try { onOpenAddApplication(student?.id); } catch {} } try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); }}>
                     <Plus />
                     <span>Add Application</span>
                   </Button>

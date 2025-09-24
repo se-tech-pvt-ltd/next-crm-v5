@@ -19,7 +19,6 @@ import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Forbidden from "@/pages/forbidden";
-import ToolkitPage from "@/pages/toolkit";
 import Login from "@/pages/login";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
@@ -117,7 +116,6 @@ function Router() {
       <Route path="/events" component={EventsPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
-      <Route path="/toolkit" component={ToolkitPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
