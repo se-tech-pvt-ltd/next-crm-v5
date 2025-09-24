@@ -547,7 +547,7 @@ export default function Leads() {
                 icon={<UserPlus className="h-10 w-10" />}
                 title="No leads found"
                 description={statusFilter === 'all' ? 'Get started by adding your first lead.' : `No leads with status "${statusFilter}".`}
-                action={
+                action={canCreateLead ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                       <Button className="h-8" onClick={handleAddLeadClick} disabled={isNavigating}>
@@ -564,7 +564,7 @@ export default function Leads() {
                       </Button>
                     </motion.div>
                   </motion.div>
-                }
+                ) : undefined}
               />
             ) : (
               <Table className="text-xs">
