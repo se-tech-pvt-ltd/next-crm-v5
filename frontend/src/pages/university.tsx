@@ -160,21 +160,19 @@ export default function UniversityPage() {
 
   const UniversityCard = ({ item }: { item: UniversityItem }) => (
     <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm">
-      <img
-        src={item.imageUrl}
-        alt={item.name}
-        className="w-full h-40 object-cover"
-        loading="lazy"
-      />
-      <CardContent className="p-4">
-        <div className="flex items-center justify-start">
-          <div className="flex items-center gap-2">
-            <img src={item.avatarUrl} alt={`${item.name} logo`} className="w-8 h-8 rounded-full object-cover ring-1 ring-black/5" loading="lazy" />
-            <div>
-              <div className="font-semibold text-sm leading-tight">{item.name}</div>
-              <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
-            </div>
-          </div>
+      <div className="relative">
+        <img
+          src={item.imageUrl}
+          alt={item.name}
+          className="w-full h-40 object-cover"
+          loading="lazy"
+        />
+        <img src={item.avatarUrl} alt={`${item.name} logo`} className="absolute -bottom-6 left-4 w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-md" loading="lazy" />
+      </div>
+      <CardContent className="p-4 pt-8">
+        <div className="pl-20">
+          <div className="font-semibold text-sm leading-tight">{item.name}</div>
+          <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
         </div>
 
 
