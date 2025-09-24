@@ -23,6 +23,7 @@ import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle, MoreVertical } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LeadDetailsModalProps {
   open: boolean;
