@@ -17,9 +17,12 @@ import { Student } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
-import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen } from 'lucide-react';
+import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useLocation, useRoute } from 'wouter';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { CreateStudentModal } from '@/components/create-student-modal';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -39,6 +42,16 @@ export default function Students() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateStudent = (() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'student');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  })();
 
   const { data: studentsResponse, isLoading } = useQuery({
     queryKey: ['/api/students', { page: currentPage, limit: pageSize }],
@@ -165,9 +178,30 @@ export default function Students() {
     setLocation(`/students/${studentId}`);
   };
 
-  // Open profile when route matches
+  // Open create student modal when navigating to /students/new
   useEffect(() => {
-    if (matchStudent || matchEdit) {
+    if (location === '/students/new') setAddStudentOpen(true);
+  }, [location]);
+
+  const handleAddStudentClick = () => {
+    setLocation('/students/new');
+    setIsNavigating(true);
+    setTimeout(() => {
+      try {
+        const { useModalManager } = require('@/contexts/ModalManagerContext');
+        const { openModal } = useModalManager();
+        openModal(() => setAddStudentOpen(true));
+      } catch {
+        setAddStudentOpen(true);
+      }
+      setIsNavigating(false);
+    }, 200);
+  };
+
+  // Open profile when route matches (ignore /students/new)
+  useEffect(() => {
+    const isNew = studentParams?.id === 'new';
+    if ((matchStudent && !isNew) || matchEdit) {
       const id = (matchEdit ? editParams?.id : studentParams?.id) || null;
       if (id) setSelectedStudentId(id);
       setIsProfileModalOpen(true);
@@ -306,6 +340,36 @@ export default function Students() {
                 )}
               </div>
 
+              <div className="flex items-center gap-2">
+                {canCreateStudent && (
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                    className="ml-2"
+                  >
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
+                      onClick={handleAddStudentClick}
+                      disabled={isNavigating}
+                      title="Add New Student"
+                    >
+                      {isNavigating ? (
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }}>
+                          <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div initial={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                          <Plus className="w-4 h-4" />
+                        </motion.div>
+                      )}
+                    </Button>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-3 pt-0">
@@ -325,6 +389,24 @@ export default function Students() {
                 icon={<GraduationCap className="h-10 w-10" />}
                 title="No students found"
                 description={statusFilter === 'all' ? 'Students will appear here when leads are converted.' : `No students with status "${statusFilter}".`}
+                action={canCreateStudent ? (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button className="h-8" onClick={handleAddStudentClick} disabled={isNavigating}>
+                        {isNavigating ? (
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 mr-1">
+                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                          </motion.div>
+                        ) : (
+                          <motion.div initial={{ rotate: 0 }} animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                            <Plus className="w-3 h-3 mr-1" />
+                          </motion.div>
+                        )}
+                        <span className="text-sm">{isNavigating ? 'Opening...' : 'Add Student'}</span>
+                      </Button>
+                    </motion.div>
+                  </motion.div>
+                ) : undefined}
               />
             ) : (
               <Table className="text-xs">
@@ -438,11 +520,10 @@ export default function Students() {
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            // if current URL already contains a students deep-link (e.g. /students/:id/application or /students/:id/edit), preserve it
-            if (location && location.startsWith('/students/') && location !== '/students') {
-              // keep existing location
-            } else if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
-            else setLocation('/students');
+            setSelectedStudentId(null);
+            if (location && location.startsWith('/students/')) {
+              setLocation('/students');
+            }
           }
         }}
         studentId={selectedStudentId}
@@ -478,6 +559,15 @@ export default function Students() {
           }
         }}
         studentId={selectedStudentId || undefined}
+      />
+
+      <CreateStudentModal
+        open={addStudentOpen}
+        onOpenChange={(open) => {
+          setAddStudentOpen(open);
+          if (!open && location === '/students/new') setLocation('/students');
+          if (open && location !== '/students/new') setLocation('/students/new');
+        }}
       />
     </Layout>
   );

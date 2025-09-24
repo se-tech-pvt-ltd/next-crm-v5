@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
 import * as DropdownsService from '@/services/dropdowns';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,6 +23,7 @@ import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, X, Mail, Phone, MapPin, Target, GraduationCap, Globe, BookOpen, Users, Edit, UserPlus, XCircle, MoreVertical } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LeadDetailsModalProps {
   open: boolean;
@@ -198,13 +198,14 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     statusUpdateMutation.mutate(newStatus);
   };
 
+
   const { accessByRole } = useAuth() as any;
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
-  const canConvertLead = useMemo(() => {
+  const canEditLead = useMemo(() => {
     const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
     if (entries.length === 0) return true;
-    return entries.some((e: any) => (e.canConvert ?? e.can_convert) === true);
+    return entries.some((e: any) => (e.canEdit ?? e.can_edit) === true);
   }, [accessByRole]);
 
   if (!lead) return null;
@@ -276,18 +277,16 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             <>
               {!isEditing && (
                 <>
-                  {canConvertLead && (
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                      onClick={() => { try { onOpenChange(false); } catch {} if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`); }}
-                      title="Convert to Student"
-                    >
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Convert
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                    onClick={() => { try { onOpenChange(false); } catch {} if (typeof onOpenConvert === 'function') onOpenConvert(lead); else setLocation(`/leads/${lead?.id}/student`); }}
+                    title="Convert to Student"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Convert
+                  </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -296,10 +295,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="text-sm">
-                      <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
-                        <Edit className="w-4 h-4 mr-2 inline-block" />
-                        Edit
-                      </DropdownMenuItem>
+                      {canEditLead && (
+                        <DropdownMenuItem onClick={() => { setIsEditing(true); try { setLocation(`/leads/${lead?.id}/edit`); } catch {} }}>
+                          <Edit className="w-4 h-4 mr-2 inline-block" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={() => setShowMarkAsLostModal(true)}>
                         <XCircle className="w-4 h-4 mr-2 inline-block" />
                         Mark as Lost

@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 const useState = React.useState;
 import AddLeadForm from '@/components/add-lead-form';
 
@@ -88,6 +89,15 @@ export default function Leads() {
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
+  // Access control for Leads: show Create button only if allowed
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateLead = React.useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  }, [accessByRole]);
   // Removed no activity filter since we don't have activities API configured
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -482,39 +492,41 @@ export default function Leads() {
               </div>
 
               <div className="flex items-center gap-2">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
-                  className="ml-2"
-                >
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
-                    onClick={handleAddLeadClick}
-                    disabled={isNavigating}
-                    title="Add New Lead"
+                {canCreateLead && (
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                    className="ml-2"
                   >
-                    {isNavigating ? (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                      >
-                        <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ rotate: 0 }}
-                        whileHover={{ rotate: 90 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </motion.div>
-                    )}
-                  </Button>
-                </motion.div>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
+                      onClick={handleAddLeadClick}
+                      disabled={isNavigating}
+                      title="Add New Lead"
+                    >
+                      {isNavigating ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ rotate: 0 }}
+                          whileHover={{ rotate: 90 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </motion.div>
+                      )}
+                    </Button>
+                  </motion.div>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -535,7 +547,7 @@ export default function Leads() {
                 icon={<UserPlus className="h-10 w-10" />}
                 title="No leads found"
                 description={statusFilter === 'all' ? 'Get started by adding your first lead.' : `No leads with status "${statusFilter}".`}
-                action={
+                action={canCreateLead ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                       <Button className="h-8" onClick={handleAddLeadClick} disabled={isNavigating}>
@@ -552,7 +564,7 @@ export default function Leads() {
                       </Button>
                     </motion.div>
                   </motion.div>
-                }
+                ) : undefined}
               />
             ) : (
               <Table className="text-xs">

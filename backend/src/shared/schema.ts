@@ -53,7 +53,6 @@ export const userAccess = mysqlTable("user_access", {
   viewLevel: varchar("view_level", { length: 255 }).notNull(),
   canCreate: boolean("can_create").notNull().default(false),
   canEdit: boolean("can_edit").notNull().default(false),
-  canConvert: boolean("can_convert").notNull().default(false),
   createdOn: timestamp("created_on").defaultNow().notNull(),
   updatedOn: timestamp("updated_on").defaultNow().notNull(),
 });
@@ -114,7 +113,7 @@ export const leads = mysqlTable("leads", {
 export const students = mysqlTable("students", {
   id: varchar("id", { length: 255 }).primaryKey().notNull(),
   studentId: varchar("student_id", { length: 50 }).notNull(),
-  leadId: varchar("lead_id", { length: 255 }).notNull(),
+  leadId: varchar("lead_id", { length: 255 }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
