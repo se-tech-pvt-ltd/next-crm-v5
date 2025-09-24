@@ -290,7 +290,10 @@ export default function EventsPage() {
   const [emailError, setEmailError] = useState(false);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const isRegionalManager = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName) === 'regional_manager';
+  const isRegionalManager = (() => {
+    const rn = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    return rn === 'regional_manager' || rn === 'region_manager' || rn === 'regionalmanager' || rn === 'regionmanager';
+  })();
 
   const filteredBranches = Array.isArray(branches)
     ? branches.filter((b: any) => !eventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId))
