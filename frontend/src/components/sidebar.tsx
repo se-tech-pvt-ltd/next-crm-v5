@@ -108,6 +108,7 @@ export function Sidebar() {
     { path: '/students', label: 'Students', icon: GraduationCap, count: studentsCount, countColor: 'bg-purple-600' },
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
+    { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ].filter(item => isModuleVisible(item.label));
