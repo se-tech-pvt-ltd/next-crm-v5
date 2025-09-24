@@ -6,7 +6,8 @@ import { insertUserAccessSchema } from "../shared/schema.js";
 export class UserAccessController {
   static async list(req: Request, res: Response) {
     try {
-      const rows = await UserAccessService.listAccess();
+      const roleId = String((req.query as any)?.roleId ?? '').trim();
+      const rows = await UserAccessService.listAccess(roleId ? { roleId } : undefined);
       res.json(rows);
     } catch (err) {
       console.error("List user access error:", err);
