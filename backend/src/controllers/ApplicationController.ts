@@ -8,7 +8,7 @@ export class ApplicationController {
   static async getApplications(req: AuthenticatedRequest, res: Response) {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-      const applications = await ApplicationService.getApplications(currentUser.id, currentUser.role);
+      const applications = await ApplicationService.getApplications(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(applications);
     } catch (error) {
       console.error("Get applications error:", error);
