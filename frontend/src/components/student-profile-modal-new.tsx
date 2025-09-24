@@ -653,7 +653,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       <Badge variant="secondary" className="ml-2 text-[10px]">{applications.length}</Badge>
                     )}
                   </CardTitle>
-                  <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}>
+                  <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { if (typeof onOpenAddApplication === 'function') { try { onOpenAddApplication(student?.id); } catch {} } try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); }}>
                     <Plus />
                     <span>Add Application</span>
                   </Button>
