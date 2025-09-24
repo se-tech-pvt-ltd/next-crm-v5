@@ -1120,8 +1120,18 @@ export default function EventsPage() {
           title="Create Event"
           headerClassName="bg-[#223E7D] text-white"
           headerLeft={(<div className="text-base font-semibold">Create Event</div>)}
+          headerRight={(
+            <Button
+              size="xs"
+              className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+              onClick={handleCreateEvent}
+              disabled={addEventMutation.isPending}
+            >
+              {addEventMutation.isPending ? 'Saving…' : 'Save'}
+            </Button>
+          )}
           showDefaultClose
-          rightWidth="380px"
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
           leftContent={(
             <div className="space-y-4">
               <CollapsibleCard
@@ -1203,7 +1213,6 @@ export default function EventsPage() {
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => navigate('/events')}>Cancel</Button>
-                <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
               </div>
             </div>
           )}
