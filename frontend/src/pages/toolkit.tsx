@@ -254,7 +254,7 @@ const ToolkitPage = () => {
   const focusInstitutions = useMemo(() => filtered.filter(i => i.focusUniversity), [filtered]);
 
   const groupOptions = useMemo(() => {
-    const base = [{ value: 'all', label: 'All Toolkits' }, ...groups.map(g => ({ value: g.id, label: g.name }))];
+    const base = [{ value: 'all', label: 'All Universities' }, ...groups.map(g => ({ value: g.id, label: g.name }))];
     if (!groupSearch.trim()) return base;
     const q = groupSearch.toLowerCase();
     return base.filter(o => o.label.toLowerCase().includes(q));
