@@ -208,7 +208,7 @@ export default function Students() {
     }
   }, [matchStudent, matchEdit, studentParams?.id, editParams?.id]);
 
-  // Open Add Application modal when route matches /students/:id/admission
+  // Open Add Application modal when route matches /students/:id/application
   useEffect(() => {
     if (matchCreateApp) {
       const id = createAppParams?.id || studentParams?.id || null;
