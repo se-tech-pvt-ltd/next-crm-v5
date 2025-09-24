@@ -515,7 +515,10 @@ export default function EventsPage() {
   };
 
   const normalizeRoleList = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const isRegionalManagerList = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName) === 'regional_manager';
+  const isRegionalManagerList = (() => {
+    const rn = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    return rn === 'regional_manager' || rn === 'region_manager' || rn === 'regionalmanager' || rn === 'regionmanager';
+  })();
 
   const myRegionId = useMemo(() => {
     let rid = '' as string;
