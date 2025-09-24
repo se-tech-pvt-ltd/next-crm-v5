@@ -286,7 +286,7 @@ const ToolkitPage = () => {
                 <Button variant="outline" size="sm" className="flex items-center gap-2" aria-label="Actions">Actions</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setAddGroupOpen(true)}>Add Toolkit</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setAddGroupOpen(true)}>Add Group</DropdownMenuItem>
                 {groupId !== 'all' && (
                   <>
                     <DropdownMenuItem onClick={() => setAddUniOpen(true)}>Add University</DropdownMenuItem>
