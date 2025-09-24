@@ -117,7 +117,7 @@ function Router() {
       <Route path="/events" component={EventsPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
-      <Route path="/toolkit" component={ToolkitPage} />
+      <Route path="/universities" component={ToolkitPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
