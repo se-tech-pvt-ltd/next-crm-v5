@@ -520,11 +520,10 @@ export default function Students() {
         onOpenChange={(open) => {
           setIsProfileModalOpen(open);
           if (!open) {
-            // if current URL already contains a students deep-link (e.g. /students/:id/application or /students/:id/edit), preserve it
-            if (location && location.startsWith('/students/') && location !== '/students') {
-              // keep existing location
-            } else if (matchEdit && editParams?.id) setLocation(`/students/${editParams.id}`);
-            else setLocation('/students');
+            setSelectedStudentId(null);
+            if (location && location.startsWith('/students/')) {
+              setLocation('/students');
+            }
           }
         }}
         studentId={selectedStudentId}
