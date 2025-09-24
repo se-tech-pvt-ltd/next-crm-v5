@@ -5,6 +5,7 @@ import { ApplicationModel } from "../models/Application.js";
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
 import { DropdownService } from "./DropdownService.js";
+import { eq, desc } from "drizzle-orm";
 
 export class ApplicationService {
   // Map dropdown-backed fields (e.g., status, intake, courseType, etc.) to their display labels
