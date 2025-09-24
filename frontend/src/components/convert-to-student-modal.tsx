@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,14 +49,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   const [, setLocation] = useLocation();
   const [isLeadDetailsOpen, setIsLeadDetailsOpen] = useState(false);
 
-  const { accessByRole } = useAuth() as any;
-  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const singularize = (s: string) => s.replace(/s$/i, '');
-  const canConvertLead = useMemo(() => {
-    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
-    if (entries.length === 0) return true;
-    return entries.some((e: any) => (e.canConvert ?? e.can_convert) === true);
-  }, [accessByRole]);
 
   // Check for existing students to prevent duplicates
   const { data: existingStudents } = useQuery({
@@ -695,7 +686,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Yes">🎓 Yes</SelectItem>
-                      <SelectItem value="No">❌ No</SelectItem>
+                      <SelectItem value="No">�� No</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -752,9 +743,9 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={convertToStudentMutation.isPending || !canConvertLead}
+            disabled={convertToStudentMutation.isPending}
             className="px-4 h-8 text-xs bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
-            title={canConvertLead ? 'Convert to Student' : 'You do not have permission to convert leads'}
+            title={'Convert to Student'}
           >
             {convertToStudentMutation.isPending ? (
               <div className="flex items-center space-x-2">
@@ -764,7 +755,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
             ) : (
               <div className="flex items-center space-x-2">
                 <UserPlus className="w-4 h-4" />
-                <span>{canConvertLead ? 'Convert to Student' : 'No permission'}</span>
+                <span>Convert to Student</span>
               </div>
             )}
           </Button>
