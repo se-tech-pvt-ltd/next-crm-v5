@@ -4,6 +4,7 @@ import { students, type Student, type InsertStudent } from "../shared/schema.js"
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
 import { DropdownModel } from "../models/Dropdown.js";
+import { eq, desc } from "drizzle-orm";
 
 export class StudentService {
   // Helper to expose student_id (snake_case) in API responses
