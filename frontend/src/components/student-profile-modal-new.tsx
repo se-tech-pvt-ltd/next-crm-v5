@@ -369,7 +369,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   variant="outline"
                   size="xs"
                   className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                  onClick={() => { try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); if (typeof onOpenAddApplication === 'function') { setTimeout(() => onOpenAddApplication(student?.id), 160); } }}
+                  onClick={() => {
+                      if (typeof onOpenAddApplication === 'function') {
+                        try { onOpenAddApplication(student?.id); } catch {}
+                      }
+                      try { setLocation(`/students/${student?.id}/application`); } catch {}
+                      onOpenChange(false);
+                    }}
                   title="Add Application"
                 >
                   <Plus />
