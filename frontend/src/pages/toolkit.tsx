@@ -376,16 +376,16 @@ const ToolkitPage = () => {
                 </div>
 
                 <CardContent className="pt-4 px-3 pb-[5px]">
-                  <div className="px-4">
-                    <CardTitle className="text-base font-semibold truncate" style={{ margin: '-15px 0 0 55px' }}>{i.name}</CardTitle>
+                  <div className="px-4" style={{ marginRight: '26px' }}>
+                    <CardTitle className="text-base font-semibold truncate" style={{ fontSize: '12px', margin: '-15px 0 0 66px' }}>{i.name}</CardTitle>
 
-                    <div className="text-xs mb-1" style={{ margin: '-4px 0 0 55px' }}>
-                      <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{i.website}</a>
+                    <div className="text-xs" style={{ margin: '-4px 0 0 55px' }}>
+                      <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate" style={{ fontSize: '10px', margin: '6px 0 0 12px', display: 'inline-block' }}>{i.website}</a>
                     </div>
 
-                    <div style={{ width: '100%', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '16px', paddingRight: '16px' }}>
-                      <Button size="sm" className="px-3" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
-                      <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
+                    <div style={{ display: 'flex', alignItems: 'center', fontWeight: 400, justifyContent: 'space-between', marginTop: '8px', width: '100%', padding: '0 16px' }}>
+                      <Button size="sm" className="px-3" style={{ marginLeft: '-15px' }} onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
+                      <Button variant="outline" size="sm" style={{ margin: '0 -35px 0 auto' }} onClick={() => setSelected(i)}>View Details</Button>
                     </div>
                   </div>
                 </CardContent>
