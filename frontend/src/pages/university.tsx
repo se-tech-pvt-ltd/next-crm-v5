@@ -178,10 +178,10 @@ export default function UniversityPage() {
         </div>
 
 
-        <div className="mt-4 flex items-center justify-start">
-          <div className="flex gap-2">
-            <Link href="/applications/add"><Button size="sm" className="rounded-full">Apply Now</Button></Link>
-            <Link href="/applications"><Button size="sm" variant="outline" className="rounded-full">View Details</Button></Link>
+        <div className="mt-4 flex items-center">
+          <Link href="/applications/add"><Button size="sm">Apply Now</Button></Link>
+          <div className="ml-auto">
+            <Link href="/applications"><Button size="sm" variant="outline">View Details</Button></Link>
           </div>
         </div>
       </CardContent>
