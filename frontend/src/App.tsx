@@ -20,6 +20,7 @@ import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Forbidden from "@/pages/forbidden";
 import Login from "@/pages/login";
+import UniversityPage from "@/pages/university";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
@@ -114,6 +115,7 @@ function Router() {
       <Route path="/admissions/:id" component={Admissions} />
       <Route path="/admissions" component={Admissions} />
       <Route path="/events" component={EventsPage} />
+      <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
       {/* Fallback to 404 */}
