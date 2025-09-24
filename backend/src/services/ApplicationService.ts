@@ -72,7 +72,7 @@ export class ApplicationService {
     });
   }
 
-  static async getApplications(userId?: string, userRole?: string): Promise<Application[]> {
+  static async getApplications(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Application[]> {
     if (userRole === 'counselor' && userId) {
       // Counselors can only see applications for their assigned students
       const rows = await db
@@ -124,11 +124,97 @@ export class ApplicationService {
         .orderBy(desc(applications.createdAt));
       return (await this.enrichDropdownFields(rows)) as any;
     }
+
+    if (userRole === 'branch_manager') {
+      if (branchId) {
+        const rows = await db
+          .select({
+            id: applications.id,
+            applicationCode: applications.applicationCode,
+            studentId: applications.studentId,
+            university: applications.university,
+            program: applications.program,
+            courseType: applications.courseType,
+            appStatus: applications.appStatus,
+            caseStatus: applications.caseStatus,
+            country: applications.country,
+            channelPartner: applications.channelPartner,
+            intake: applications.intake,
+            googleDriveLink: applications.googleDriveLink,
+            notes: applications.notes,
+            createdAt: applications.createdAt,
+            updatedAt: applications.updatedAt,
+          })
+          .from(applications)
+          .innerJoin(students, eq(applications.studentId, students.id))
+          .where(eq(students.branchId, branchId))
+          .orderBy(desc(applications.createdAt));
+        return (await this.enrichDropdownFields(rows)) as any;
+      }
+      return [];
+    }
+
+    if (userRole === 'regional_manager') {
+      if (regionId) {
+        const rows = await db
+          .select({
+            id: applications.id,
+            applicationCode: applications.applicationCode,
+            studentId: applications.studentId,
+            university: applications.university,
+            program: applications.program,
+            courseType: applications.courseType,
+            appStatus: applications.appStatus,
+            caseStatus: applications.caseStatus,
+            country: applications.country,
+            channelPartner: applications.channelPartner,
+            intake: applications.intake,
+            googleDriveLink: applications.googleDriveLink,
+            notes: applications.notes,
+            createdAt: applications.createdAt,
+            updatedAt: applications.updatedAt,
+          })
+          .from(applications)
+          .innerJoin(students, eq(applications.studentId, students.id))
+          .where(eq(students.regionId, regionId))
+          .orderBy(desc(applications.createdAt));
+        return (await this.enrichDropdownFields(rows)) as any;
+      }
+      return [];
+    }
+
+    // Default: scope by region if provided and not super_admin
+    if (regionId && userRole !== 'super_admin') {
+      const rows = await db
+        .select({
+          id: applications.id,
+          applicationCode: applications.applicationCode,
+          studentId: applications.studentId,
+          university: applications.university,
+          program: applications.program,
+          courseType: applications.courseType,
+          appStatus: applications.appStatus,
+          caseStatus: applications.caseStatus,
+          country: applications.country,
+          channelPartner: applications.channelPartner,
+          intake: applications.intake,
+          googleDriveLink: applications.googleDriveLink,
+          notes: applications.notes,
+          createdAt: applications.createdAt,
+          updatedAt: applications.updatedAt,
+        })
+        .from(applications)
+        .innerJoin(students, eq(applications.studentId, students.id))
+        .where(eq(students.regionId, regionId))
+        .orderBy(desc(applications.createdAt));
+      return (await this.enrichDropdownFields(rows)) as any;
+    }
+
     const rows = await ApplicationModel.findAll();
     return (await this.enrichDropdownFields(rows)) as any;
   }
 
-  static async getApplication(id: string, userId?: string, userRole?: string): Promise<Application | undefined> {
+  static async getApplication(id: string, userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Application | undefined> {
     const application = await ApplicationModel.findById(id);
 
     if (!application) return undefined;
@@ -145,6 +231,19 @@ export class ApplicationService {
       if (!student || (student as any).admissionOfficerId !== userId) {
         return undefined;
       }
+    }
+
+    // Branch manager scoping
+    if (userRole === 'branch_manager') {
+      if (!branchId) return undefined;
+      const student = await StudentModel.findById(application.studentId);
+      if (!student || (student as any).branchId !== branchId) return undefined;
+    }
+
+    // Region scoping for any role that has a region (except super_admin and branch_manager)
+    if (regionId && userRole !== 'super_admin' && userRole !== 'branch_manager') {
+      const student = await StudentModel.findById(application.studentId);
+      if (!student || (student as any).regionId !== regionId) return undefined;
     }
 
     const [enriched] = await this.enrichDropdownFields([application]);
