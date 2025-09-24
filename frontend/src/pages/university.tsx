@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { MapPin } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { Link } from 'wouter';
 
 interface UniversityItem {
@@ -24,6 +24,7 @@ interface UniversityItem {
   interviewRequired: boolean;
   imageUrl: string;
   avatarUrl: string;
+  website: string;
 }
 
 const UNIVERSITY_DATA: UniversityItem[] = [
@@ -43,7 +44,8 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     imageUrl:
       'https://picsum.photos/seed/oxford/800/400',
     avatarUrl:
-      'https://picsum.photos/seed/oxford-logo/64/64',
+      'httpsum.photos/seed/oxford-logo/64/64',
+    website: 'https://www.ox.ac.uk',
   },
   {
     id: 'cambridge',
@@ -62,6 +64,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/cambridge/800/400',
     avatarUrl:
       'https://picsum.photos/seed/cambridge-logo/64/64',
+    website: 'https://www.cam.ac.uk',
   },
   {
     id: 'mit',
@@ -80,6 +83,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/mit/800/400',
     avatarUrl:
       'https://picsum.photos/seed/mit-logo/64/64',
+    website: 'https://www.mit.edu',
   },
   {
     id: 'toronto',
@@ -98,6 +102,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
       'https://picsum.photos/seed/toronto/800/400',
     avatarUrl:
       'https://picsum.photos/seed/toronto-logo/64/64',
+    website: 'https://www.utoronto.ca',
   },
 ];
 
@@ -172,7 +177,7 @@ export default function UniversityPage() {
       <CardContent className="p-4 pt-4 flex-1">
         <div className="pl-[76px] -mt-[10px] -ml-[3px]">
           <div className="font-semibold text-sm leading-tight">{item.name}</div>
-          <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
+          <div className="text-xs text-gray-500 flex items-center gap-1"><Globe className="w-3.5 h-3.5" /><a href={item.website} target="_blank" rel="noopener noreferrer" className="hover:underline">{new URL(item.website).hostname}</a></div>
         </div>
 
 
