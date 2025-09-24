@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Layout } from '@/components/layout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -159,7 +159,7 @@ export default function UniversityPage() {
   );
 
   const UniversityCard = ({ item }: { item: UniversityItem }) => (
-    <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm">
+    <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm flex h-full flex-col">
       <div className="relative">
         <img
           src={item.imageUrl}
@@ -169,20 +169,18 @@ export default function UniversityPage() {
         />
         <img src={item.avatarUrl} alt={`${item.name} logo`} className="absolute -bottom-10 left-4 w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-md" loading="lazy" />
       </div>
-      <CardContent className="p-4 pt-4">
+      <CardContent className="p-4 pt-4 flex-1">
         <div className="pl-20">
           <div className="font-semibold text-sm leading-tight">{item.name}</div>
           <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
         </div>
 
 
-        <div className="mt-4 flex items-center">
-          <Link href="/applications/add"><Button size="sm">Apply Now</Button></Link>
-          <div className="ml-auto">
-            <Link href="/applications"><Button size="sm" variant="outline">View Details</Button></Link>
-          </div>
-        </div>
       </CardContent>
+      <CardFooter className="p-4 pt-0 justify-between">
+        <Link href="/applications"><Button size="sm" variant="outline">View Details</Button></Link>
+        <Link href="/applications/add"><Button size="sm">Apply Now</Button></Link>
+      </CardFooter>
     </Card>
   );
 
