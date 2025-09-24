@@ -19,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
@@ -236,8 +237,24 @@ export default function EventsPage() {
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
+  const { user } = useAuth() as any;
   const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
+
+  useEffect(() => {
+    if (!isCreateRoute) return;
+    if (!user) return;
+    const norm = (r: string) => String(r || '').toLowerCase().replace(/\s+/g, '_');
+    const roleName = norm(String(user.role || user.role_name || ''));
+    let resolvedRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+    if (!resolvedRegionId && roleName === 'regional_manager') {
+      const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+      if (r?.id) resolvedRegionId = String(r.id);
+    }
+    if (resolvedRegionId && !eventAccess.regionId) {
+      setEventAccess((s) => ({ ...s, regionId: resolvedRegionId }));
+    }
+  }, [isCreateRoute, user, regions]);
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
   const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
