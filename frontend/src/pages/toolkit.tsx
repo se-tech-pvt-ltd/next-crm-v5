@@ -375,12 +375,12 @@ const ToolkitPage = () => {
                   </div>
                 </div>
 
-                {/* Centered content */}
-                <CardContent className="pt-12 px-4 pb-4 flex flex-col items-center text-center">
-                  <CardTitle className="text-sm font-semibold truncate max-w-[90%]">{i.name}</CardTitle>
+                {/* Centered content: place title and website right under cover */}
+                <CardContent style={{ padding: '48px 16px 16px' }} className="flex flex-col items-center text-center">
+                  <CardTitle className="truncate max-w-[90%]" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '20px', marginTop: '-1px' }}>{i.name}</CardTitle>
 
                   {i.website && (
-                    <a href={i.website} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline mt-1 truncate max-w-[90%]">{i.website}</a>
+                    <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate max-w-[90%]" style={{ display: 'block', fontSize: '12px', fontWeight: 400, lineHeight: '16px', marginTop: '4px' }}>{i.website}</a>
                   )}
 
                   <div className="mt-3 flex items-center gap-3">
