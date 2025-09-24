@@ -400,7 +400,7 @@ const ToolkitPage = () => {
                   <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full bg-white p-1 border" />
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">{i.name}</div>
-                    <div className="text-xs text-muted-foreground truncate">{i.location} • {i.country} • {i.type}</div>
+                    <div className="text-xs truncate text-blue-600"><a href={i.website} target="_blank" rel="noreferrer" className="hover:underline">{i.website}</a></div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
