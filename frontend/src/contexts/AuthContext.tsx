@@ -117,10 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const roleId = String((merged as any)?.roleId ?? (merged as any)?.role_id ?? '');
         const UserAccessService = await import('@/services/userAccess');
-        const all = await UserAccessService.listUserAccess();
-        const filtered = (Array.isArray(all) ? all : []).filter((a: any) => String(a.roleId ?? a.role_id) === roleId);
-        setAccessByRole(filtered);
-        try { if (roleId) localStorage.setItem(`user_access_cache_${roleId}`, JSON.stringify(filtered)); } catch {}
+        const list = await UserAccessService.listUserAccess({ roleId }).catch(() => []);
+        setAccessByRole(Array.isArray(list) ? list : []);
+        try { if (roleId) localStorage.setItem(`user_access_cache_${roleId}`, JSON.stringify(Array.isArray(list) ? list : [])); } catch {}
       } catch {}
       finally {
         setIsAccessLoading(false);
