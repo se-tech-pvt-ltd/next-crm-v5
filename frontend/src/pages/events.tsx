@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
+import { Link, useLocation, useRoute } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -6,8 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
+import * as UsersService from '@/services/users';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
@@ -25,7 +29,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function EventsPage() {
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isAddRegOpen, setIsAddRegOpen] = useState(false);
   const [isEditRegOpen, setIsEditRegOpen] = useState(false);
   const [editingReg, setEditingReg] = useState<any | null>(null);
@@ -171,9 +174,12 @@ export default function EventsPage() {
     return (val?: string) => (val ? (map.get(String(val)) || val) : '');
   }, [eventsDropdowns]);
 
+  const [, navigate] = useLocation();
+  const [isCreateRoute] = useRoute('/events/new');
+
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
-    onSuccess: () => { toast({ title: 'Event created' }); refetchEvents(); setIsAddEventOpen(false); },
+    onSuccess: () => { toast({ title: 'Event created' }); refetchEvents(); navigate('/events'); },
     onError: () => toast({ title: 'Failed to create event', variant: 'destructive' }),
   });
 
@@ -231,9 +237,26 @@ export default function EventsPage() {
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
-  const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string }>({ regionId: '', branchId: '' });
+  const { user } = useAuth() as any;
+  const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
+
+  useEffect(() => {
+    if (!isCreateRoute) return;
+    if (!user) return;
+    const norm = (r: string) => String(r || '').toLowerCase().replace(/\s+/g, '_');
+    const roleName = norm(String(user.role || user.role_name || ''));
+    let resolvedRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+    if (!resolvedRegionId && roleName === 'regional_manager') {
+      const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+      if (r?.id) resolvedRegionId = String(r.id);
+    }
+    if (resolvedRegionId && !eventAccess.regionId) {
+      setEventAccess((s) => ({ ...s, regionId: resolvedRegionId }));
+    }
+  }, [isCreateRoute, user, regions]);
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
+  const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
   const [emailError, setEmailError] = useState(false);
 
@@ -242,7 +265,14 @@ export default function EventsPage() {
       toast({ title: 'Please fill all fields', variant: 'destructive' });
       return;
     }
-    addEventMutation.mutate(newEvent);
+    const payload = {
+      ...newEvent,
+      regionId: eventAccess.regionId || undefined,
+      branchId: eventAccess.branchId || undefined,
+      counsellorId: eventAccess.counsellorId || undefined,
+      admissionOfficerId: eventAccess.admissionOfficerId || undefined,
+    } as any;
+    addEventMutation.mutate(payload);
   };
 
   const openAddRegistration = () => {
@@ -572,10 +602,12 @@ export default function EventsPage() {
               title="No events found"
               description="There are no events at the moment."
               action={
-                <Button className="h-8" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddEventOpen(true)); } catch { setIsAddEventOpen(true); } }}>
-                  <Plus className="w-3 h-3 mr-1" />
-                  Add Event
-                </Button>
+                <Link href="/events/new">
+                  <Button className="h-8">
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add Event
+                  </Button>
+                </Link>
               }
             />
           ) : (
@@ -1109,86 +1141,130 @@ export default function EventsPage() {
 
         {/* Create Event Modal */}
         <DetailsDialogLayout
-          open={isAddEventOpen}
-          onOpenChange={setIsAddEventOpen}
+          open={Boolean(isCreateRoute)}
+          onOpenChange={(open) => navigate(open ? '/events/new' : '/events')}
           title="Create Event"
           headerClassName="bg-[#223E7D] text-white"
           headerLeft={(<div className="text-base font-semibold">Create Event</div>)}
+          headerRight={(
+            <Button
+              size="xs"
+              className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+              onClick={handleCreateEvent}
+              disabled={addEventMutation.isPending}
+            >
+              {addEventMutation.isPending ? 'Saving…' : 'Save'}
+            </Button>
+          )}
           showDefaultClose
-          rightWidth="380px"
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
           leftContent={(
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label>Event Name</Label>
-                  <Input
-                    value={newEvent.name}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
-                      setNewEvent({ ...newEvent, name: title });
-                    }}
-                  />
+              <CollapsibleCard
+                persistKey={`events:new:details`}
+                header={<CardTitle className="flex items-center space-x-2"><Calendar className="w-4 h-4 text-primary" /><span>Event Details</span></CardTitle>}
+                cardClassName="shadow-md border border-gray-200 bg-white"
+                defaultOpen
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Event Name</Label>
+                    <Input
+                      value={newEvent.name}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setNewEvent({ ...newEvent, name: title });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Type</Label>
+                    <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      step="60"
+                      value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (!v) {
+                          setNewEvent({ ...newEvent, date: '', time: '' });
+                          return;
+                        }
+                        const [d, t] = v.split('T');
+                        setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Venue</Label>
+                    <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+                  </div>
                 </div>
-                <div>
-                  <Label>Type</Label>
-                  <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+              </CollapsibleCard>
+
+              <CollapsibleCard
+                persistKey={`events:new:access`}
+                header={<CardTitle className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-primary" /><span>Event Access</span></CardTitle>}
+                cardClassName="shadow-md border border-gray-200 bg-white"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Region</Label>
+                    <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(regions) && regions.map((r: any) => (
+                          <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Branch</Label>
+                    <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(branches) && branches.map((b: any) => (
+                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Counsellor</Label>
+                    <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectContent>
+                        {(Array.isArray(users) ? users : []).filter((u: any) => {
+                          const role = String(u.role || u.role_name || u.roleName || '').toLowerCase().replace(/\s+/g,'_');
+                          return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+                        }).map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Admission Officer</Label>
+                    <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectContent>
+                        {(Array.isArray(users) ? users : []).filter((u: any) => {
+                          const role = String(u.role || u.role_name || u.roleName || '').toLowerCase().replace(/\s+/g,'_');
+                          return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+                        }).map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div>
-                  <Label>Date & Time</Label>
-                  <Input
-                    type="datetime-local"
-                    step="60"
-                    value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (!v) {
-                        setNewEvent({ ...newEvent, date: '', time: '' });
-                        return;
-                      }
-                      const [d, t] = v.split('T');
-                      setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label>Venue</Label>
-                  <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
-              </div>
-            </div>
-          )}
-          rightContent={(
-            <div className="p-4 space-y-4">
-              <div className="text-sm font-semibold text-gray-900">Event Access</div>
-              <div className="space-y-3">
-                <div>
-                  <Label>Region</Label>
-                  <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v }))}>
-                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select region" /></SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(regions) && regions.map((r: any) => (
-                        <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Branch</Label>
-                  <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v }))}>
-                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(branches) && branches.map((b: any) => (
-                        <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              </CollapsibleCard>
+
             </div>
           )}
         />

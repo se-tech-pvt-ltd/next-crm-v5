@@ -25,6 +25,7 @@ import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
   const { isAuthenticated, isLoading, login, isAccessLoading, accessByRole } = useAuth() as any;
+  const [location, setLocation] = useLocation();
 
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
@@ -71,6 +72,7 @@ function Router() {
   if (!isAuthenticated) {
     console.log('Router: User not authenticated, showing Login component');
     try {
+      if (location !== '/login') setLocation('/login');
       return <Login onLogin={login} />;
     } catch (error) {
       console.error('Router: Error rendering Login component:', error);
@@ -89,6 +91,9 @@ function Router() {
   }
 
   console.log('Router: User authenticated, showing main app');
+
+  // If already authenticated, don't stay on /login
+  try { const [loc, nav] = useLocation(); if (loc === '/login') nav('/'); } catch {}
 
   return (
     <Switch>
@@ -114,10 +119,12 @@ function Router() {
       <Route path="/admissions/:id/edit" component={Admissions} />
       <Route path="/admissions/:id" component={Admissions} />
       <Route path="/admissions" component={Admissions} />
+      <Route path="/events/new" component={EventsPage} />
       <Route path="/events" component={EventsPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
+      <Route path="/login" component={Login} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

@@ -6,6 +6,10 @@ export interface EventPayload {
   date: string;
   venue: string;
   time: string;
+  regionId?: string;
+  branchId?: string;
+  counsellorId?: string;
+  admissionOfficerId?: string;
 }
 
 export async function getEvents() {

@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Settings, LogOut, User, Edit2, Save, X, Upload } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,6 +20,7 @@ interface UserMenuProps {
 
 export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps) {
   const { user, logout, refreshUser } = useAuth();
+  const [, setLocation] = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -79,7 +81,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
     }
   };
 
-  const handleLogout = () => { logout(); };
+  const handleLogout = () => { logout(); try { setLocation('/login'); } catch {} };
 
   const openProfile = () => {
     setIsProfileOpen(true);
