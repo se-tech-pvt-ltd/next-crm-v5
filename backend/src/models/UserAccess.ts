@@ -7,6 +7,10 @@ export class UserAccessModel {
     return await db.select().from(userAccess);
   }
 
+  static async findByRoleId(roleId: string): Promise<UserAccess[]> {
+    return await db.select().from(userAccess).where(eq(userAccess.roleId, roleId));
+  }
+
   static async findById(id: string): Promise<UserAccess | undefined> {
     const [row] = await db.select().from(userAccess).where(eq(userAccess.id, id));
     return row;

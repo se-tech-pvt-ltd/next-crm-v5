@@ -1,7 +1,8 @@
 import { http } from './http';
 
-export async function listUserAccess() {
-  return http.get<any[]>('/api/user-access');
+export async function listUserAccess(params?: { roleId?: string }) {
+  const qs = params?.roleId ? `?roleId=${encodeURIComponent(params.roleId)}` : '';
+  return http.get<any[]>(`/api/user-access${qs}`);
 }
 
 export async function createUserAccess(data: any) {

@@ -2,7 +2,8 @@ import { UserAccessModel } from "../models/UserAccess.js";
 import { type UserAccess, type InsertUserAccess } from "../shared/schema.js";
 
 export class UserAccessService {
-  static async listAccess(): Promise<UserAccess[]> {
+  static async listAccess(params?: { roleId?: string }): Promise<UserAccess[]> {
+    if (params?.roleId) return await UserAccessModel.findByRoleId(params.roleId);
     return await UserAccessModel.findAll();
   }
 
