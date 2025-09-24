@@ -283,7 +283,7 @@ export default function UniversityPage() {
         </div>
       </div>
       <Dialog open={!!details} onOpenChange={(o) => { if (!o) setDetails(null); }}>
-        <DialogContent hideClose className="p-0 max-w-5xl w-[95vw] max-h-[90vh] h-[85vh] overflow-hidden rounded-xl">
+        <DialogContent hideClose className="p-0 max-w-3xl w-[90vw] max-h-[90vh] h-[85vh] overflow-hidden rounded-xl">
           <DialogTitle className="sr-only">University Details</DialogTitle>
           <div className="flex flex-col h-full">
             <div className="bg-[#1e3a8a] text-white px-5 py-4 flex items-center justify-between">
