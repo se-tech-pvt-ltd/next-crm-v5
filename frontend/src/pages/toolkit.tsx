@@ -269,7 +269,7 @@ const ToolkitPage = () => {
               <SearchableCombobox
                 value={groupId}
                 onValueChange={setGroupId}
-                placeholder="Select toolkit..."
+                placeholder="Select university..."
                 searchPlaceholder="Search toolkits..."
                 onSearch={setGroupSearch}
                 options={groupOptions}
