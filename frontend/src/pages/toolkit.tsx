@@ -383,7 +383,7 @@ const ToolkitPage = () => {
                       <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{i.website}</a>
                     </div>
 
-                    <div style={{ marginLeft: '55px', width: 'calc(100% - 55px)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: '100%', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '16px', paddingRight: '16px' }}>
                       <Button size="sm" className="px-3" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
                       <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
                     </div>
