@@ -370,7 +370,7 @@ const ToolkitPage = () => {
 
                 {/* Logo overlapping */}
                 <div className="absolute left-4 -translate-y-1/2 top-28">
-                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center" style={{ margin: '54px 0 0 -5px' }}>
+                  <div className="h-16 w-16 rounded-full bg-white p-1 border shadow-md flex items-center justify-center" style={{ margin: '70px 0 0 -5px' }}>
                     <img src={i.logo} alt={`${i.name} logo`} className="h-12 w-12 object-contain rounded-full" />
                   </div>
                 </div>
@@ -379,12 +379,12 @@ const ToolkitPage = () => {
                   <div className="px-4">
                     <CardTitle className="text-base font-semibold truncate" style={{ margin: '-15px 0 0 55px' }}>{i.name}</CardTitle>
 
-                    <div className="text-xs mb-1" style={{ margin: '7px 0 0 55px' }}>
+                    <div className="text-xs mb-1" style={{ margin: '-4px 0 0 55px' }}>
                       <a href={i.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{i.website}</a>
                     </div>
 
-                    <div className="flex items-center gap-2 justify-start">
-                      <Button size="sm" className="px-3" style={{ margin: '8px 0 0 -3px' }} onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
+                    <div style={{ marginLeft: '55px', width: 'calc(100% - 55px)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Button size="sm" className="px-3" onClick={() => window.open(i.website, '_blank')}>Apply Now</Button>
                       <Button variant="outline" size="sm" onClick={() => setSelected(i)}>View Details</Button>
                     </div>
                   </div>
