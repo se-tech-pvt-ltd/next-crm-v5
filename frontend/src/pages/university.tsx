@@ -170,7 +170,7 @@ export default function UniversityPage() {
         <img src={item.avatarUrl} alt={`${item.name} logo`} className="absolute -bottom-10 left-4 w-16 h-16 rounded-full object-cover ring-2 ring-white shadow-md" loading="lazy" />
       </div>
       <CardContent className="p-4 pt-4 flex-1">
-        <div className="pl-24">
+        <div className="pl-[76px] -mt-[10px] -ml-[3px]">
           <div className="font-semibold text-sm leading-tight">{item.name}</div>
           <div className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.country}</div>
         </div>
