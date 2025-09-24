@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
+import { Link, useLocation, useRoute } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function EventsPage() {
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isAddRegOpen, setIsAddRegOpen] = useState(false);
   const [isEditRegOpen, setIsEditRegOpen] = useState(false);
   const [editingReg, setEditingReg] = useState<any | null>(null);
@@ -171,9 +171,12 @@ export default function EventsPage() {
     return (val?: string) => (val ? (map.get(String(val)) || val) : '');
   }, [eventsDropdowns]);
 
+  const [, navigate] = useLocation();
+  const [isCreateRoute] = useRoute('/events/new');
+
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
-    onSuccess: () => { toast({ title: 'Event created' }); refetchEvents(); setIsAddEventOpen(false); },
+    onSuccess: () => { toast({ title: 'Event created' }); refetchEvents(); navigate('/events'); },
     onError: () => toast({ title: 'Failed to create event', variant: 'destructive' }),
   });
 
@@ -572,10 +575,12 @@ export default function EventsPage() {
               title="No events found"
               description="There are no events at the moment."
               action={
-                <Button className="h-8" onClick={() => { try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddEventOpen(true)); } catch { setIsAddEventOpen(true); } }}>
-                  <Plus className="w-3 h-3 mr-1" />
-                  Add Event
-                </Button>
+                <Link href="/events/new">
+                  <Button className="h-8">
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add Event
+                  </Button>
+                </Link>
               }
             />
           ) : (
@@ -1109,8 +1114,8 @@ export default function EventsPage() {
 
         {/* Create Event Modal */}
         <DetailsDialogLayout
-          open={isAddEventOpen}
-          onOpenChange={setIsAddEventOpen}
+          open={Boolean(isCreateRoute)}
+          onOpenChange={(open) => navigate(open ? '/events/new' : '/events')}
           title="Create Event"
           headerClassName="bg-[#223E7D] text-white"
           headerLeft={(<div className="text-base font-semibold">Create Event</div>)}
@@ -1157,7 +1162,7 @@ export default function EventsPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancel</Button>
+                <Button variant="outline" onClick={() => navigate('/events')}>Cancel</Button>
                 <Button onClick={handleCreateEvent} disabled={addEventMutation.isPending}>{addEventMutation.isPending ? 'Creating…' : 'Create'}</Button>
               </div>
             </div>
