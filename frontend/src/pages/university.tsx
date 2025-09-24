@@ -171,13 +171,6 @@ export default function UniversityPage() {
           <Badge className="bg-blue-100 text-blue-700 border border-blue-200">{item.type}</Badge>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {item.focus && <Badge variant="secondary">Focus University</Badge>}
-          {item.lowInitialDeposit && <Badge variant="secondary">Low Initial Deposit</Badge>}
-          {item.onlineTestAccepted && <Badge variant="secondary">Online Test accepted</Badge>}
-          {item.moiAccepted && <Badge variant="secondary">MOI accepted</Badge>}
-          {item.lowTuition && <Badge variant="secondary">Low Tuition Fees</Badge>}
-        </div>
 
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm"><span className="text-gray-500">Tuition Fee</span> <span className="font-semibold">${item.tuitionFee.toLocaleString()}</span></div>
