@@ -198,6 +198,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     statusUpdateMutation.mutate(newStatus);
   };
 
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canConvertLead = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canConvert ?? e.can_convert) === true);
+  }, [accessByRole]);
+
   if (!lead) return null;
 
   const lostReasonOptions = [
@@ -243,15 +252,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const headerLeft = (
     <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{lead.name || 'Lead'}</div>
   );
-
-  const { accessByRole } = useAuth() as any;
-  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const singularize = (s: string) => s.replace(/s$/i, '');
-  const canConvertLead = React.useMemo(() => {
-    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
-    if (entries.length === 0) return true;
-    return entries.some((e: any) => (e.canConvert ?? e.can_convert) === true);
-  }, [accessByRole]);
 
   const headerRight = (
     <div className="flex items-center gap-2">
