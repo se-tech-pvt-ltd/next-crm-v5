@@ -8,7 +8,7 @@ export class AdmissionController {
   static async getAdmissions(req: AuthenticatedRequest, res: Response) {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-      const admissions = await AdmissionService.getAdmissions(currentUser.id, currentUser.role);
+      const admissions = await AdmissionService.getAdmissions(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(admissions);
     } catch (error) {
       console.error("Get admissions error:", error);
