@@ -40,7 +40,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     lowTuition: true,
     interviewRequired: true,
     imageUrl:
-      'https://cdn.builder.io/api/v1/image/assets%2Feebbd39c9f344fff8d13cadcac5500de%2F085635753af1455293acdffc65f90384?format=webp&width=800',
+      'https://picsum.photos/seed/oxford/800/400',
   },
   {
     id: 'cambridge',
@@ -56,7 +56,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     lowTuition: false,
     interviewRequired: false,
     imageUrl:
-      'https://cdn.builder.io/api/v1/image/assets%2Feebbd39c9f344fff8d13cadcac5500de%2F085635753af1455293acdffc65f90384?format=webp&width=800',
+      'https://picsum.photos/seed/cambridge/800/400',
   },
   {
     id: 'mit',
@@ -72,7 +72,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     lowTuition: false,
     interviewRequired: false,
     imageUrl:
-      'https://cdn.builder.io/api/v1/image/assets%2Feebbd39c9f344fff8d13cadcac5500de%2F085635753af1455293acdffc65f90384?format=webp&width=800',
+      'https://picsum.photos/seed/mit/800/400',
   },
   {
     id: 'toronto',
@@ -88,7 +88,7 @@ const UNIVERSITY_DATA: UniversityItem[] = [
     lowTuition: true,
     interviewRequired: false,
     imageUrl:
-      'https://cdn.builder.io/api/v1/image/assets%2Feebbd39c9f344fff8d13cadcac5500de%2F085635753af1455293acdffc65f90384?format=webp&width=800',
+      'https://picsum.photos/seed/toronto/800/400',
   },
 ];
 
