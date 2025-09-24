@@ -8,7 +8,7 @@ export class StudentController {
   static async getStudents(req: AuthenticatedRequest, res: Response) {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-      const students = await StudentService.getStudents(currentUser.id, currentUser.role);
+      const students = await StudentService.getStudents(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
       res.json(students);
     } catch (error) {
       console.error("Get students error:", error);
