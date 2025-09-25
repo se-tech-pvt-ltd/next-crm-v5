@@ -54,8 +54,24 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
   const phoneStr = String((user as any)?.phoneNumber ?? (user as any)?.phone_number ?? (user as any)?.phone ?? payload?.phone ?? payload?.phone_number ?? payload?.user?.phone ?? payload?.user?.phone_number ?? '');
   const profileImageUrlSrc = String((user as any)?.profileImageUrl ?? (user as any)?.profile_image_url ?? payload?.profile_image_url ?? payload?.profileImageUrl ?? payload?.user?.profile_image_url ?? payload?.user?.profileImageUrl ?? '');
   const roleRaw = String((user as any)?.role ?? payload?.role ?? payload?.role_name ?? payload?.user?.role ?? '');
+  const roleIdRaw = String((user as any)?.roleId ?? (user as any)?.role_id ?? payload?.role_id ?? payload?.user?.role_id ?? '');
+  const [resolvedRoleName, setResolvedRoleName] = useState<string>('');
+
+  React.useEffect(() => {
+    (async () => {
+      if (!roleIdRaw) return;
+      try {
+        const UserRolesService = await import('@/services/userRoles');
+        const roles = await UserRolesService.listRoles().catch(() => []);
+        const match = Array.isArray(roles) ? (roles as any[]).find((r) => String(r.id) === String(roleIdRaw)) : null;
+        const name = String((match as any)?.roleName ?? (match as any)?.role_name ?? '').trim();
+        if (name) setResolvedRoleName(name);
+      } catch {}
+    })();
+  }, [roleIdRaw]);
 
   const getRoleDisplay = (role: string) => {
+    if (resolvedRoleName) return resolvedRoleName;
     switch (role) {
       case 'admin_staff':
         return 'Admin Staff';
@@ -64,7 +80,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
       case 'counselor':
         return 'Counselor';
       default:
-        return role;
+        return role || '—';
     }
   };
 
@@ -164,7 +180,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
-                    <p className="text-xs text-gray-500">{getRoleDisplay(roleRaw || (user as any).role)}</p>
+                    <p className="text-xs text-gray-500">{getRoleDisplay(roleRaw || String((user as any).role || ''))}</p>
                   </div>
                   <Settings className="w-4 h-4 text-gray-400" />
                 </div>
@@ -221,12 +237,12 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
             <div className="bg-white rounded-xl border shadow-sm p-4 h-max">
               <div className="mb-3">
                 <div className="text-lg font-semibold leading-tight">{displayName}</div>
-                <div className="mt-1"><Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || (user as any).role)}</Badge></div>
+                <div className="mt-1"><Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || String((user as any).role || ''))}</Badge></div>
               </div>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2 text-gray-600"><Mail className="w-4 h-4" /> <span className="break-all">{emailStr || '-'}</span></div>
                 <div className="flex items-center gap-2 text-gray-600"><Phone className="w-4 h-4" /> <span>{phoneStr || 'Not set'}</span></div>
-                <div className="flex items-center gap-2 text-gray-600"><Shield className="w-4 h-4" /> <span>{getRoleDisplay(roleRaw || (user as any).role || 'Unknown')}</span></div>
+                <div className="flex items-center gap-2 text-gray-600"><Shield className="w-4 h-4" /> <span>{getRoleDisplay(roleRaw || String((user as any).role || ''))}</span></div>
                 {(user as any).branch && (
                   <div className="flex items-center gap-2 text-gray-600"><Building2 className="w-4 h-4" />
                     <span>
@@ -277,7 +293,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                   </div>
                   <div className="p-3 rounded-lg bg-muted/40">
                     <div className="text-xs text-muted-foreground">Role</div>
-                    <div className="text-sm font-medium">{getRoleDisplay(roleRaw || (user as any).role || 'Unknown')}</div>
+                    <div className="text-sm font-medium">{getRoleDisplay(roleRaw || String((user as any).role || ''))}</div>
                   </div>
                   {(user as any).branch && (
                     <div className="p-3 rounded-lg bg-muted/40 sm:col-span-2">
