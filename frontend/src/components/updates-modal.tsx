@@ -93,9 +93,9 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
         </div>
 
         {/* Content */}
-        <div className="bg-white px-3 sm:px-5 py-4 overflow-y-auto min-h-0">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 min-h-0">
-            {/* Left list */}
+        <div className="bg-white px-3 sm:px-5 py-4 overflow-hidden min-h-0 h-full">
+          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 min-h-0 h-full">
+            {/* Left list (fixed column with its own scroll) */}
             <div className="border rounded-md overflow-hidden bg-gray-50 h-full">
               <ScrollArea className="h-full">
                 <ul>
@@ -115,8 +115,8 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
               </ScrollArea>
             </div>
 
-            {/* Right panel */}
-            <div className="border rounded-md p-4 h-full overflow-auto">
+            {/* Right panel (independent scroll) */}
+            <div className="border rounded-md p-4 h-full overflow-auto min-h-0">
               <h3 className="text-xl font-semibold mb-2">{updates[active].title}</h3>
               <div className="prose prose-sm max-w-none">
                 {updates[active].body}
