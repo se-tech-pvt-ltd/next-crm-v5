@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useLocation, useRoute } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
@@ -27,6 +26,7 @@ import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { queryClient } from '@/lib/queryClient';
 import { Skeleton } from '@/components/ui/skeleton';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 
 
 export default function EventsPage() {
@@ -175,9 +175,14 @@ export default function EventsPage() {
     return (val?: string) => (val ? (map.get(String(val)) || val) : '');
   }, [eventsDropdowns]);
 
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const [isCreateRoute] = useRoute('/events/new');
   const [isEditRoute, editParams] = useRoute('/events/:id/edit');
+  const [isRegsRoute, regsParams] = useRoute('/events/:id/registrations');
+  const [isRegDetailRoute, regDetailParams] = useRoute('/events/:id/registrations/:regId');
+  const [isLeadRoute, leadParams] = useRoute('/events/:id/registrations/:regId/lead');
+  const [pendingRegId, setPendingRegId] = useState<string | null>(null);
+  const [pendingOpenLeadId, setPendingOpenLeadId] = useState<string | null>(null);
 
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
@@ -237,17 +242,63 @@ export default function EventsPage() {
       email: reg.email,
       phone: reg.number,
       city: reg.city,
-      source: reg.source,
+      // ensure source defaults to Events for conversion flow
+      source: 'Events',
       status: 'new',
       eventRegId: reg.id,
     });
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
+
+    // close the registration details modal first
+    try { setIsViewRegOpen(false); } catch {}
+
+    // navigate to /lead route for this registration
+    try {
+      const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
+      navigate(`/events/${eventId}/registrations/${reg.id}/lead`);
+    } catch {}
+
+    // open the Add Lead modal after a short delay so the view modal closes first
+    const openModalFn = () => {
+      try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
+    };
+    setTimeout(openModalFn, 150);
   };
+
+  // Keep URL in sync when the Add Lead modal opens/closes
+  useEffect(() => {
+    if (addLeadModalOpen) return; // when open, already set by openConvertToLeadModal
+    // when modal closes, revert URL to registration detail or registrations list
+    try {
+      const regId = (leadInitialData && leadInitialData.eventRegId) || (regDetailParams && regDetailParams.regId) || pendingRegId || (leadParams && leadParams.regId);
+      const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (leadParams && leadParams.id) || (selectedEvent && selectedEvent.id) || (leadInitialData && leadInitialData.eventId) || null;
+      if (eventId && regId) {
+        navigate(`/events/${eventId}/registrations/${regId}`);
+      } else if (eventId) {
+        navigate(`/events/${eventId}/registrations`);
+      }
+    } catch {}
+  }, [addLeadModalOpen]);
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEvent, setEditEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEventAccess, setEditEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { user, accessByRole } = useAuth() as any;
+  // Parse token payload once for fallback ids
+  const tokenPayload = React.useMemo(() => {
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (!t) return null;
+      const parts = String(t).split('.');
+      if (parts.length < 2) return null;
+      const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const pad = b64.length % 4;
+      const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+      const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(json) as any;
+    } catch { return null; }
+  }, []);
+  const tokenSub = String((tokenPayload && (tokenPayload.sub || tokenPayload.user?.id)) || '');
+
   const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
   const canCreateEvent = useMemo(() => {
@@ -283,9 +334,20 @@ export default function EventsPage() {
     if (eventViewLevel === 'region') d.region = true;
     else if (eventViewLevel === 'branch') { d.region = true; d.branch = true; }
     else if (eventViewLevel === 'assigned') { d.region = true; d.branch = true; d.counsellor = true; d.admissionOfficer = true; }
-    // 'all' and default: nothing disabled
+    // Allow some roles (admission officer, counsellor) to have these fields enabled even if 'assigned' view
+    try {
+      const tokenRole = tokenPayload?.role_details?.role_name || tokenPayload?.role_name || '';
+      const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || tokenRole || '';
+      const roleNorm = String(rawRole || '').trim().toLowerCase().replace(/\s+/g, '_');
+      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission_officer' || roleNorm === 'admission officer';
+      const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+      if (isAdmissionOfficer || isCounsellor) {
+        d.counsellor = false;
+        d.admissionOfficer = false;
+      }
+    } catch {}
     return d;
-  }, [eventViewLevel]);
+  }, [eventViewLevel, user]);
 
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
@@ -330,9 +392,160 @@ export default function EventsPage() {
       setEventAccess((s) => ({ ...s, regionId: resolvedRegionId }));
     }
   }, [isCreateRoute, user, regions, eventAccess.regionId]);
-  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
+
+    const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
   const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps() });
   const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
+
+
+  // Auto-select branch for admission officers when creating events or on page load
+  useEffect(() => {
+    try {
+      const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+      const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+      if (!isAdmissionOfficer && !isCounsellor) return;
+
+      // If branch already selected, nothing to do
+      if (eventAccess.branchId) {
+        // still ensure role id selected
+        setEventAccess((s) => ({
+          ...s,
+          counsellorId: s.counsellorId || (isCounsellor ? (String((user as any)?.id || tokenSub) || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? (String((user as any)?.id || tokenSub) || '') : s.admissionOfficerId),
+        }));
+        return;
+      }
+
+      // Try to read branch from JWT token role_details or payload
+      let candidateBranch = '';
+      try {
+        const t = localStorage.getItem('auth_token');
+        if (t) {
+          const parts = String(t).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            const rd = payload?.role_details || payload?.roleDetails || {};
+            candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.user?.branch_id ?? payload?.user?.branchId ?? '';
+            if (candidateBranch) candidateBranch = String(candidateBranch);
+          }
+        }
+      } catch {}
+
+      // If not found in token, try user object
+      if (!candidateBranch) {
+        const uBranch = String((user as any)?.branchId ?? (user as any)?.branch_id ?? '');
+        if (uBranch) candidateBranch = uBranch;
+      }
+
+      // If still not found, try branchEmps mapping: if user is mapped to exactly one branch, use it
+      if (!candidateBranch && Array.isArray(branchEmps)) {
+        const mappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
+        if (mappings.length === 1) candidateBranch = String(mappings[0].branchId ?? mappings[0].branch_id);
+      }
+
+      if (candidateBranch) {
+        // Ensure branch exists in list and optionally set region
+        const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(candidateBranch) || String(x.id) === String(candidateBranch)) : null;
+        const regionIdFromBranch = b ? String(b.regionId ?? b.region_id ?? '') : '';
+        setEventAccess((s) => ({
+          ...s,
+          branchId: String(candidateBranch),
+          regionId: s.regionId || regionIdFromBranch,
+          counsellorId: s.counsellorId || (isCounsellor ? (String((user as any)?.id || tokenSub) || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? (String((user as any)?.id || tokenSub) || '') : s.admissionOfficerId),
+        }));
+      }
+    } catch (err) {
+      // ignore
+    }
+  }, [user, branches, branchEmps, eventAccess.branchId]);
+
+  // Ensure admission officer is set automatically when opening Create modal
+  useEffect(() => {
+    if (!isCreateRoute) return;
+    try {
+      const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '');
+      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+      if (isAdmissionOfficer) {
+        const id = String((user as any)?.id || tokenSub || '');
+        if (id && (!eventAccess.admissionOfficerId || String(eventAccess.admissionOfficerId) !== id)) {
+          setEventAccess((s) => ({ ...s, admissionOfficerId: id }));
+        }
+      }
+
+      const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+      if (isCounsellor) {
+        const id = String((user as any)?.id || tokenSub || '');
+        if (id && (!eventAccess.counsellorId || String(eventAccess.counsellorId) !== id)) {
+          setEventAccess((s) => ({ ...s, counsellorId: id }));
+        }
+      }
+    } catch {}
+  }, [isCreateRoute, user, tokenSub, eventAccess.admissionOfficerId, eventAccess.counsellorId]);
+
+  // If branch selector is disabled by role/ACL, ensure a sensible branch is selected (prefer user's branch, or single mapping)
+  useEffect(() => {
+    if (!disableByView.branch) return;
+    if (eventAccess.branchId) return;
+    try {
+      let candidateBranch = '';
+      // Prefer eventAccess.regionId: try to find a branch in same region mapped to user
+      if (eventAccess.regionId && Array.isArray(branchEmps) && Array.isArray(branches)) {
+        const userMappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
+        // find mapping where branch belongs to the selected region
+        for (const m of userMappings) {
+          const bid = String((m.branchId ?? m.branch_id) || '');
+          const b = (branches as any[]).find((x: any) => String(x.id) === bid);
+          if (b && String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId)) { candidateBranch = bid; break; }
+        }
+        // if still not found and only one mapping, use it
+        if (!candidateBranch && userMappings.length === 1) candidateBranch = String(userMappings[0].branchId ?? userMappings[0].branch_id);
+      }
+      // fallback: try token / user object
+      if (!candidateBranch) {
+        try {
+          const t = localStorage.getItem('auth_token');
+          if (t) {
+            const parts = String(t).split('.');
+            if (parts.length >= 2) {
+              const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+              const pad = b64.length % 4;
+              const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+              const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const payload = JSON.parse(json) as any;
+              const rd = payload?.role_details || payload?.roleDetails || {};
+              candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.user?.branch_id ?? payload?.user?.branchId ?? '';
+              if (candidateBranch) candidateBranch = String(candidateBranch);
+            }
+          }
+        } catch {}
+      }
+      if (!candidateBranch) {
+        const uBranch = String((user as any)?.branchId ?? (user as any)?.branch_id ?? '');
+        if (uBranch) candidateBranch = uBranch;
+      }
+      if (candidateBranch) {
+        const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(candidateBranch)) : null;
+        const regionIdFromBranch = b ? String(b.regionId ?? b.region_id ?? '') : '';
+        const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+        const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+        const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+        setEventAccess((s) => ({
+          ...s,
+          branchId: String(candidateBranch),
+          regionId: s.regionId || regionIdFromBranch,
+          counsellorId: s.counsellorId || (isCounsellor ? (String((user as any)?.id || tokenSub) || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? (String((user as any)?.id || tokenSub) || '') : s.admissionOfficerId),
+        }));
+      }
+    } catch {}
+  }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
+
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
   const [emailError, setEmailError] = useState(false);
 
@@ -347,7 +560,7 @@ export default function EventsPage() {
     : [];
 
   // For Create modal (based on eventAccess)
-  const counselorOptions = Array.isArray(users)
+  let counselorOptions = Array.isArray(users)
     ? users
         .filter((u: any) => {
           const r = normalizeRole(u.role || u.role_name || u.roleName);
@@ -360,7 +573,26 @@ export default function EventsPage() {
         })
     : [];
 
-  const admissionOfficerOptions = Array.isArray(users)
+  // Ensure selected counsellor or current user (if counsellor) is present in options so Select shows it
+  try {
+    const sel = String(eventAccess.counsellorId || '');
+    const currentId = String((user as any)?.id || tokenSub);
+    if (sel && sel.trim()) {
+      if (!counselorOptions.some((u: any) => String(u.id) === sel) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === sel);
+        if (u) counselorOptions = [u, ...counselorOptions];
+      }
+    }
+    const roleNormU = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    if ((roleNormU === 'counselor' || roleNormU === 'counsellor') && currentId) {
+      if (!counselorOptions.some((u: any) => String(u.id) === currentId) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === currentId);
+        if (u) counselorOptions = [u, ...counselorOptions];
+      }
+    }
+  } catch {}
+
+  let admissionOfficerOptions = Array.isArray(users)
     ? users
         .filter((u: any) => {
           const r = normalizeRole(u.role || u.role_name || u.roleName);
@@ -372,6 +604,25 @@ export default function EventsPage() {
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(eventAccess.branchId));
         })
     : [];
+
+  // Ensure selected admission officer or current user (if admission officer) is present in options so Select shows it
+  try {
+    const selA = String(eventAccess.admissionOfficerId || '');
+    const currentIdA = String((user as any)?.id || tokenSub);
+    if (selA && selA.trim()) {
+      if (!admissionOfficerOptions.some((u: any) => String(u.id) === selA) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === selA);
+        if (u) admissionOfficerOptions = [u, ...admissionOfficerOptions];
+      }
+    }
+    const roleNormUA = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    if ((roleNormUA === 'admission_officer' || roleNormUA === 'admission officer' || roleNormUA === 'admissionofficer') && currentIdA) {
+      if (!admissionOfficerOptions.some((u: any) => String(u.id) === currentIdA) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === currentIdA);
+        if (u) admissionOfficerOptions = [u, ...admissionOfficerOptions];
+      }
+    }
+  } catch {}
 
   // For Edit modal (based on editEventAccess)
   const filteredBranchesEdit = Array.isArray(branches)
@@ -738,6 +989,8 @@ export default function EventsPage() {
   }, [visibleEvents, timeFilter, typeFilter, searchTerm]);
 
   useEffect(() => {
+    // If the route explicitly requested an event registrations view, don't override it while events are loading
+    if (isRegsRoute || isRegDetailRoute) return;
     if (filterEventId && filterEventId !== 'all') {
       const ok = visibleEvents.some((e: any) => String(e.id) === String(filterEventId));
       if (!ok) {
@@ -745,7 +998,54 @@ export default function EventsPage() {
         setShowList(false);
       }
     }
-  }, [visibleEvents, filterEventId]);
+  }, [visibleEvents, filterEventId, isRegsRoute, isRegDetailRoute]);
+
+  // Sync state with /events/:id/registrations route
+  useEffect(() => {
+    if ((isRegsRoute && regsParams?.id) || (isRegDetailRoute && regDetailParams?.id) || (isLeadRoute && leadParams?.id)) {
+      const id = String((regsParams?.id || regDetailParams?.id || leadParams?.id));
+      setFilterEventId(id);
+      setShowList(true);
+      // if we have a regId in the detail route, mark it pending so we can open when data loads
+      if (regDetailParams?.regId) setPendingRegId(String(regDetailParams.regId));
+      if (isLeadRoute && leadParams?.regId) setPendingOpenLeadId(String(leadParams.regId));
+    } else if (!isEditRoute && !isCreateRoute) {
+      setShowList(false);
+    }
+  }, [isRegsRoute, regsParams?.id, isRegDetailRoute, regDetailParams?.id, regDetailParams?.regId, isLeadRoute, leadParams?.id, leadParams?.regId, isEditRoute, isCreateRoute]);
+
+  // When registrations data loads, if there's a pendingRegId from the route, open the view modal for it
+  useEffect(() => {
+    if (!pendingRegId && !pendingOpenLeadId) return;
+    const list = (registrations || []) as any[];
+    if (pendingRegId) {
+      const match = list.find(r => String(r.id) === String(pendingRegId) || String(r.eventRegId) === String(pendingRegId));
+      if (match) {
+        setViewReg(match);
+        setIsViewRegOpen(true);
+        setPendingRegId(null);
+      }
+    }
+
+    if (pendingOpenLeadId) {
+      const match2 = list.find(r => String(r.id) === String(pendingOpenLeadId) || String(r.eventRegId) === String(pendingOpenLeadId));
+      if (match2) {
+        // prepare initial data preferring 'Events' as source
+        setLeadInitialData({
+          name: match2.name,
+          email: match2.email,
+          phone: match2.number,
+          city: match2.city,
+          // ensure lead source is set to Events when opening via /lead route
+          source: 'Events',
+          status: 'new',
+          eventRegId: match2.id,
+        });
+        setAddLeadModalOpen(true);
+        setPendingOpenLeadId(null);
+      }
+    }
+  }, [registrations, pendingRegId, pendingOpenLeadId]);
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
@@ -955,7 +1255,7 @@ export default function EventsPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
-                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { navigate(`/events/${e.id}/registrations`); }}>
                       <div className="h-1 bg-gradient-to-r from-[#223E7D] to-[#223E7D]/30" />
                       <CardHeader className="pb-1">
                         <div className="flex items-start justify-between gap-2">
@@ -1006,7 +1306,7 @@ export default function EventsPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setShowList(false)} className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50">
+                  <button type="button" onClick={() => navigate('/events')} className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50">
                     <ChevronLeft className="w-4 h-4 text-gray-600" />
                   </button>
                   <CardTitle className="text-sm flex items-center">Event Registrations</CardTitle>
@@ -1071,7 +1371,7 @@ export default function EventsPage() {
                           </TableHeader>
                           <TableBody>
                             {pageItems.map((r: any) => (
-                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { setViewReg(r); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsViewRegOpen(true)); } catch { setIsViewRegOpen(true); } }}>
+                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { const eventId = selectedEvent?.id || r.eventId || r.event_id; const target = `/events/${eventId}/registrations/${r.id}`; if (location === target) { setViewReg(r); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsViewRegOpen(true)); } catch { setIsViewRegOpen(true); } } else { navigate(target); } }}>
                                 <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.name}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
@@ -1507,7 +1807,7 @@ export default function EventsPage() {
         {/* Edit Event Modal */}
         <DetailsDialogLayout
           open={Boolean(isEditRoute)}
-          onOpenChange={(open) => navigate(open ? `/events/${editParams?.id}/edit` : '/events')}
+          onOpenChange={(open) => navigate(open ? `/events/${editParams?.id}/edit` : (isRegsRoute && editParams?.id ? `/events/${editParams.id}/registrations` : '/events'))}
           title="Edit Event"
           headerClassName="bg-[#223E7D] text-white"
           headerLeft={(<div className="text-base font-semibold">Edit Event</div>)}
@@ -1737,7 +2037,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Counsellor</Label>
                     <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor}><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor && !( ( (String((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '')).toLowerCase().includes('counsel') ) && isCreateRoute ) }><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
                         {counselorOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
@@ -1748,7 +2048,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Admission Officer</Label>
                     <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer}><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer && !( ( (String((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '')).toLowerCase().includes('admission') ) && isCreateRoute ) }><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>

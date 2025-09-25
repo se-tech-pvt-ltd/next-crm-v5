@@ -44,7 +44,7 @@ export default function Students() {
   const [pageSize] = useState(8); // 8 records per page
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const { accessByRole } = useAuth() as any;
+  const { accessByRole, user } = useAuth() as any;
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
   const canCreateStudent = (() => {
@@ -60,8 +60,22 @@ export default function Students() {
     refetchOnMount: true,
   });
 
-  const studentsArray: Student[] = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
+  const studentsArrayAll: Student[] = Array.isArray(studentsResponse) ? studentsResponse : (studentsResponse?.data || []);
   const rawPagination = studentsResponse && !Array.isArray(studentsResponse) ? studentsResponse.pagination : undefined;
+
+  // Restrict visible students for counsellors and admission officers to only records assigned to them
+  const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || '');
+  const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+  const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer' || roleNorm === 'admission';
+
+  const studentsArray: Student[] = (Array.isArray(studentsArrayAll) ? studentsArrayAll.slice() : []).filter((s: any) => {
+    if (!isCounsellor && !isAdmissionOfficer) return true;
+    const sCoun = String((s.counsellorId ?? s.counselorId ?? s.counsellor ?? s.counselor) || '').trim();
+    const sAdm = String((s.admissionOfficerId ?? s.admission_officer_id ?? s.admissionOfficer ?? s.admission_officer) || '').trim();
+    const uid = String((user as any)?.id || (user as any)?.userId || (user as any)?.sub || '').trim();
+    return (sCoun && sCoun === uid) || (sAdm && sAdm === uid);
+  });
 
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
@@ -85,7 +99,10 @@ export default function Students() {
   }) || [];
 
   // Detect if server returned pagination metadata
-  const serverPaginated = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
+  const serverPaginatedRaw = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
+  // If current user is a counsellor or admission officer, server-side pagination may include other users' records.
+  // Force client-side pagination in that case to correctly restrict visible records.
+  const serverPaginated = serverPaginatedRaw && !(isCounsellor || isAdmissionOfficer);
 
   // Effective pagination: if server provides it, use that; otherwise compute based on filteredAll
   const effectivePagination = serverPaginated ? rawPagination : { page: currentPage, limit: pageSize, total: filteredAll.length, totalPages: Math.max(1, Math.ceil(filteredAll.length / pageSize)), hasNextPage: currentPage * pageSize < (filteredAll.length || 0), hasPrevPage: currentPage > 1 };
