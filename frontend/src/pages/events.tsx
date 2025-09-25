@@ -242,7 +242,8 @@ export default function EventsPage() {
       email: reg.email,
       phone: reg.number,
       city: reg.city,
-      source: reg.source,
+      // ensure source defaults to Events for conversion flow
+      source: 'Events',
       status: 'new',
       eventRegId: reg.id,
     });
