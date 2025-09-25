@@ -437,13 +437,22 @@ export default function EventsPage() {
     try {
       const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '');
       const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
-      if (!isAdmissionOfficer) return;
-      const id = String((user as any)?.id || tokenSub || '');
-      if (id && (!eventAccess.admissionOfficerId || String(eventAccess.admissionOfficerId) !== id)) {
-        setEventAccess((s) => ({ ...s, admissionOfficerId: id }));
+      if (isAdmissionOfficer) {
+        const id = String((user as any)?.id || tokenSub || '');
+        if (id && (!eventAccess.admissionOfficerId || String(eventAccess.admissionOfficerId) !== id)) {
+          setEventAccess((s) => ({ ...s, admissionOfficerId: id }));
+        }
+      }
+
+      const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+      if (isCounsellor) {
+        const id = String((user as any)?.id || tokenSub || '');
+        if (id && (!eventAccess.counsellorId || String(eventAccess.counsellorId) !== id)) {
+          setEventAccess((s) => ({ ...s, counsellorId: id }));
+        }
       }
     } catch {}
-  }, [isCreateRoute, user, tokenSub, eventAccess.admissionOfficerId]);
+  }, [isCreateRoute, user, tokenSub, eventAccess.admissionOfficerId, eventAccess.counsellorId]);
 
   // If branch selector is disabled by role/ACL, ensure a sensible branch is selected (prefer user's branch, or single mapping)
   useEffect(() => {
