@@ -250,7 +250,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
       String(first).toLowerCase().includes(q) ||
       String(last).toLowerCase().includes(q) ||
       String(u.email || '').toLowerCase().includes(q);
-    const matchesRole = !filters.role || String(u.role || '') === filters.role;
+    const matchesRole = !filters.role || normalizeRole(String(u.role || '')) === filters.role;
     const matchesBranch = !filters.branchId || String((u.branchId ?? u.branch_id) || '') === filters.branchId;
     const matchesRegion = !filters.regionId || (() => {
       const nRole = normalizeRole(String(u.role || ''));
