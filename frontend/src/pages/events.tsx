@@ -968,14 +968,28 @@ export default function EventsPage() {
 
   // Sync state with /events/:id/registrations route
   useEffect(() => {
-    if (isRegsRoute && regsParams?.id) {
-      const id = String(regsParams.id);
+    if ((isRegsRoute && regsParams?.id) || (isRegDetailRoute && regDetailParams?.id)) {
+      const id = String((regsParams?.id || regDetailParams?.id));
       setFilterEventId(id);
       setShowList(true);
+      // if we have a regId in the detail route, mark it pending so we can open when data loads
+      if (regDetailParams?.regId) setPendingRegId(String(regDetailParams.regId));
     } else if (!isEditRoute && !isCreateRoute) {
       setShowList(false);
     }
-  }, [isRegsRoute, regsParams?.id, isEditRoute, isCreateRoute]);
+  }, [isRegsRoute, regsParams?.id, isRegDetailRoute, regDetailParams?.id, regDetailParams?.regId, isEditRoute, isCreateRoute]);
+
+  // When registrations data loads, if there's a pendingRegId from the route, open the view modal for it
+  useEffect(() => {
+    if (!pendingRegId) return;
+    const list = (registrations || []) as any[];
+    const match = list.find(r => String(r.id) === String(pendingRegId) || String(r.eventRegId) === String(pendingRegId));
+    if (match) {
+      setViewReg(match);
+      setIsViewRegOpen(true);
+      setPendingRegId(null);
+    }
+  }, [registrations, pendingRegId]);
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
