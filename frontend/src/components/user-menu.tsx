@@ -137,12 +137,12 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              size={fullWidth ? undefined : 'sm'}
-              className={`${fullWidth ? 'w-full p-2 h-auto' : 'w-auto h-9 p-1'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}
+              size={fullWidth ? undefined : 'icon'}
+              className={`${fullWidth ? 'w-full p-2 h-auto' : 'w-9 h-9 p-0 rounded-full border border-gray-200 hover:bg-gray-50'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}
             >
               {collapsed ? (
                 <div className="relative group">
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
                     {profileImageUrlSrc ? (
                       <img src={profileImageUrlSrc} alt="avatar" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                     ) : (
