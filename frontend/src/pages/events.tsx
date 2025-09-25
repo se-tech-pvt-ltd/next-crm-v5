@@ -21,7 +21,7 @@ import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
@@ -719,64 +719,115 @@ export default function EventsPage() {
         )}
 
         {!showList && (
-          (Array.isArray(visibleEvents) && visibleEvents.length === 0) ? (
-            <EmptyState
-              icon={<Calendar className="h-10 w-10" />}
-              title="No events found"
-              description="There are no events at the moment."
-              action={
-                <Link href="/events/new">
-                  <Button className="h-8">
-                    <Plus className="w-3 h-3 mr-1" />
-                    Add Event
+          <>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-3 h-3 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+
+                <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v as any)}>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v)}>
+                  <SelectTrigger className="w-36 h-7 text-xs">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    {uniqueTypes.map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="relative">
+                  <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search events" className="h-7 pl-7 text-xs w-44" />
+                </div>
+
+                {(timeFilter !== 'all' || typeFilter !== 'all' || searchTerm) && (
+                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => { setTimeFilter('all'); setTypeFilter('all'); setSearchTerm(''); }}>
+                    Clear All
                   </Button>
-                </Link>
-              }
-            />
-          ) : (
-            <div>
-              {canCreateEvent && (
-                <div className="flex justify-end mb-1">
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {canCreateEvent && (
                   <Link href="/events/new">
-                    <Button className="h-8 rounded-full">
+                    <Button variant="default" size="sm" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title="Add Event">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {(Array.isArray(visibleEvents) && visibleEvents.length === 0) ? (
+              <EmptyState
+                icon={<Calendar className="h-10 w-10" />}
+                title="No events found"
+                description="There are no events at the moment."
+                action={canCreateEvent ? (
+                  <Link href="/events/new">
+                    <Button className="h-8">
                       <Plus className="w-3 h-3 mr-1" />
                       Add Event
                     </Button>
                   </Link>
+                ) : undefined}
+              />
+            ) : (
+              filteredEvents.length === 0 ? (
+                <EmptyState
+                  icon={<Calendar className="h-10 w-10" />}
+                  title="No matching events"
+                  description="Try adjusting your filters."
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
+                    <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                      <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
+                      <CardHeader className="pb-1">
+                        <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-1 space-y-2">
+                        <div className="flex items-center text-xs text-gray-700">
+                          <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                          <span>{formatEventDate(e.date)}</span>
+                          {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                        </div>
+                        <div className="flex items-center text-xs text-gray-700">
+                          <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                          <span className="truncate">{e.venue}</span>
+                        </div>
+                        <div>
+                          <span className={`inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border ${p.badgeBg} ${p.badgeText} ${p.badgeBorder}`}>{e.type}</span>
+                        </div>
+                        <div className="pt-1">
+                          <div className={`inline-flex items-center text-[11px] group-hover:translate-x-0.5 transition ${p.text}`}>
+                            View Registrations
+                            <ArrowRight className="ml-1 w-3 h-3" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ); })}
                 </div>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visibleEvents.map((e: any) => { const p = getPalette(e.type); return (
-                <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
-                  <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
-                  <CardHeader className="pb-1">
-                    <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-1 space-y-2">
-                    <div className="flex items-center text-xs text-gray-700">
-                      <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
-                      <span>{formatEventDate(e.date)}</span>
-                      {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
-                    </div>
-                    <div className="flex items-center text-xs text-gray-700">
-                      <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
-                      <span className="truncate">{e.venue}</span>
-                    </div>
-                    <div>
-                      <span className={`inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border ${p.badgeBg} ${p.badgeText} ${p.badgeBorder}`}>{e.type}</span>
-                    </div>
-                    <div className="pt-1">
-                      <div className={`inline-flex items-center text-[11px] group-hover:translate-x-0.5 transition ${p.text}`}>
-                        View Registrations
-                        <ArrowRight className="ml-1 w-3 h-3" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ); })}
-            </div>
-            </div>
-          )
+              )
+            )}
+          </>
         )}
 
         {showList && (
