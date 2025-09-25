@@ -23,7 +23,7 @@ export class StudentModel {
 
   static async findByCounselor(counselorId: string): Promise<Student[]> {
     return await db.select().from(students)
-      .where(eq(students.counselorId, counselorId))
+      .where(eq(students.counsellorId, counselorId))
       .orderBy(desc(students.createdAt));
   }
 
