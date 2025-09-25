@@ -24,7 +24,8 @@ async function request<T>(method: HttpMethod, url: string, body?: unknown): Prom
       if (t) baseHeaders['Authorization'] = `Bearer ${t}`;
     } catch {}
 
-    const res = await fetch(url, {
+    const fetchUrl = (typeof window !== 'undefined' && !/^https?:\/\//i.test(String(url))) ? `${window.location.origin}${url}` : url;
+    const res = await fetch(fetchUrl, {
       method,
       headers: baseHeaders,
       body: body == null ? undefined : JSON.stringify(body),
