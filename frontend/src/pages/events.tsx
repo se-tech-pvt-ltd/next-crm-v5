@@ -177,6 +177,7 @@ export default function EventsPage() {
 
   const [, navigate] = useLocation();
   const [isCreateRoute] = useRoute('/events/new');
+  const [isEditRoute, editParams] = useRoute('/events/:id/edit');
 
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
@@ -203,6 +204,12 @@ export default function EventsPage() {
     mutationFn: (id: string) => RegService.deleteRegistration(id),
     onSuccess: () => { toast({ title: 'Deleted' }); refetchRegs(); },
     onError: () => toast({ title: 'Delete failed', variant: 'destructive' }),
+  });
+
+  const updateEventMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<EventsService.EventPayload> }) => EventsService.updateEvent(id, data),
+    onSuccess: () => { toast({ title: 'Event updated' }); refetchEvents(); navigate('/events'); },
+    onError: () => toast({ title: 'Failed to update event', variant: 'destructive' }),
   });
 
   const convertMutation = useMutation({
@@ -238,6 +245,8 @@ export default function EventsPage() {
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
+  const [editEvent, setEditEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
+  const [editEventAccess, setEditEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { user, accessByRole } = useAuth() as any;
   const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
@@ -246,6 +255,16 @@ export default function EventsPage() {
     if (entries.length === 0) return true;
     return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
   }, [accessByRole]);
+  const canUpdateEvent = useMemo(() => {
+    const normRole = String((user as any)?.role || (user as any)?.role_name || '').toLowerCase();
+    if (normRole === 'admin' || normRole === 'super_admin' || normRole === 'superadmin') return true;
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => {
+      const can = (e.canUpdate ?? e.can_update ?? e.canEdit ?? e.can_edit ?? e.canManage ?? e.can_manage ?? e.manage ?? e.update ?? e.edit);
+      return can === true || can === 1 || can === '1';
+    });
+  }, [accessByRole, user]);
   const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
@@ -562,6 +581,39 @@ export default function EventsPage() {
     return all;
   }, [events, isRegionalManagerList, myRegionId]);
 
+  const editingEvent = useMemo(() => visibleEvents.find((e: any) => String(e.id) === String(editParams?.id)), [visibleEvents, editParams?.id]);
+
+  useEffect(() => {
+    if (!isEditRoute) return;
+    const ev: any = editingEvent;
+    if (!ev) return;
+    let dateStr = '';
+    let timeStr = '';
+    try {
+      const d = (typeof ev.date === 'string' || typeof ev.date === 'number') ? new Date(ev.date) : new Date(ev.date);
+      if (!Number.isNaN(d.getTime())) {
+        dateStr = d.toISOString().slice(0, 10);
+        if (ev.time && String(ev.time).includes(':')) {
+          const [hh, mm = '00'] = String(ev.time).split(':');
+          const h = String(hh).padStart(2, '0');
+          const m = String(mm).padStart(2, '0');
+          timeStr = `${h}:${m}`;
+        } else if (d instanceof Date) {
+          const h = String(d.getHours()).padStart(2, '0');
+          const m = String(d.getMinutes()).padStart(2, '0');
+          timeStr = `${h}:${m}`;
+        }
+      }
+    } catch {}
+    setEditEvent({ name: ev.name || '', type: ev.type || '', venue: ev.venue || '', date: dateStr, time: timeStr });
+    setEditEventAccess({
+      regionId: String(ev.regionId ?? ev.region_id ?? '') || '',
+      branchId: String(ev.branchId ?? ev.branch_id ?? '') || '',
+      counsellorId: String(ev.counsellorId ?? ev.counselorId ?? ev.counsellor_id ?? ev.counselor_id ?? '') || '',
+      admissionOfficerId: String(ev.admissionOfficerId ?? ev.admission_officer_id ?? '') || '',
+    });
+  }, [isEditRoute, editingEvent]);
+
   // Helper: compute event datetime (moved above filters to avoid TDZ)
   const getEventDateTime = (e: any): Date | null => {
     if (!e || !e.date) return null;
@@ -829,10 +881,23 @@ export default function EventsPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
-                    <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
-                      <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
+                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                      <div className="h-1 bg-gradient-to-r from-[#223E7D] to-[#223E7D]/30" />
                       <CardHeader className="pb-1">
-                        <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                          {canUpdateEvent && (
+                            <button
+                              type="button"
+                              aria-label="Edit event"
+                              onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); navigate(`/events/${e.id}/edit`); }}
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#223E7D] hover:bg-[#223E7D]/10"
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </CardHeader>
                       <CardContent className="pt-1 space-y-2">
                         <div className="flex items-center text-xs text-gray-700">
@@ -845,10 +910,10 @@ export default function EventsPage() {
                           <span className="truncate">{e.venue}</span>
                         </div>
                         <div>
-                          <span className={`inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border ${p.badgeBg} ${p.badgeText} ${p.badgeBorder}`}>{e.type}</span>
+                          <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-[#223E7D]/20 bg-[#223E7D]/5 text-[#223E7D]">{e.type}</span>
                         </div>
                         <div className="pt-1">
-                          <div className={`inline-flex items-center text-[11px] group-hover:translate-x-0.5 transition ${p.text}`}>
+                          <div className="inline-flex items-center text-[11px] text-[#223E7D] group-hover:translate-x-0.5 transition">
                             View Registrations
                             <ArrowRight className="ml-1 w-3 h-3" />
                           </div>
@@ -878,6 +943,14 @@ export default function EventsPage() {
                       <Clock className="w-3.5 h-3.5 text-indigo-600 mr-1" />
                       <span>{countdown}</span>
                     </span>
+                  )}
+                  {showList && selectedEvent && canUpdateEvent && (
+                    <Link href={`/events/${selectedEvent.id}/edit`}>
+                      <Button variant="outline" size="xs" className="rounded-full px-3 [&_svg]:size-3" title="Edit Event">
+                        <Edit />
+                        <span className="hidden lg:inline">Edit Event</span>
+                      </Button>
+                    </Link>
                   )}
                   {filterEventId && filterEventId !== 'all' && (
                     <>
@@ -1356,6 +1429,141 @@ export default function EventsPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Event Modal */}
+        <DetailsDialogLayout
+          open={Boolean(isEditRoute)}
+          onOpenChange={(open) => navigate(open ? `/events/${editParams?.id}/edit` : '/events')}
+          title="Edit Event"
+          headerClassName="bg-[#223E7D] text-white"
+          headerLeft={(<div className="text-base font-semibold">Edit Event</div>)}
+          headerRight={(
+            <Button
+              size="xs"
+              className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+              onClick={() => {
+                if (!editParams?.id) return;
+                if (!editEvent.name || !editEvent.type || !editEvent.date || !editEvent.venue || !editEvent.time) {
+                  toast({ title: 'Please fill all fields', variant: 'destructive' });
+                  return;
+                }
+                const payload = {
+                  ...editEvent,
+                  regionId: editEventAccess.regionId || undefined,
+                  branchId: editEventAccess.branchId || undefined,
+                  counsellorId: editEventAccess.counsellorId || undefined,
+                  admissionOfficerId: editEventAccess.admissionOfficerId || undefined,
+                } as any;
+                updateEventMutation.mutate({ id: String(editParams.id), data: payload });
+              }}
+              disabled={updateEventMutation.isPending}
+            >
+              {updateEventMutation.isPending ? 'Saving…' : 'Save'}
+            </Button>
+          )}
+          showDefaultClose
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
+          leftContent={(
+            <div className="space-y-4">
+              <CollapsibleCard
+                persistKey={`events:edit:${editParams?.id}:details`}
+                header={<CardTitle className="flex items-center space-x-2"><Calendar className="w-4 h-4 text-primary" /><span>Event Details</span></CardTitle>}
+                cardClassName="shadow-md border border-gray-200 bg-white"
+                defaultOpen
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Event Name</Label>
+                    <Input
+                      value={editEvent.name}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setEditEvent({ ...editEvent, name: title });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Type</Label>
+                    <Input value={editEvent.type} onChange={(e) => setEditEvent({ ...editEvent, type: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      step="60"
+                      value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (!v) { setEditEvent({ ...editEvent, date: '', time: '' }); return; }
+                        const [d, t] = v.split('T');
+                        setEditEvent({ ...editEvent, date: d || '', time: (t || '').slice(0, 5) });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Venue</Label>
+                    <Input value={editEvent.venue} onChange={(e) => setEditEvent({ ...editEvent, venue: e.target.value })} />
+                  </div>
+                </div>
+              </CollapsibleCard>
+
+              <CollapsibleCard
+                persistKey={`events:edit:${editParams?.id}:access`}
+                header={<CardTitle className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-primary" /><span>Event Access</span></CardTitle>}
+                cardClassName="shadow-md border border-gray-200 bg-white"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Region</Label>
+                    <Select value={editEventAccess.regionId} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, regionId: v, branchId: '', counsellorId: '', admissionOfficerId: '' }))}>
+                      <SelectTrigger className="h-8 text-sm" disabled={isRegionalManager}><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(regions) && regions.map((r: any) => (
+                          <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Branch</Label>
+                    <Select value={editEventAccess.branchId} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, branchId: v, counsellorId: '', admissionOfficerId: '' }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectContent>
+                        {filteredBranches.map((b: any) => (
+                          <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Counsellor</Label>
+                    <Select value={editEventAccess.counsellorId || ''} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, counsellorId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectContent>
+                        {counselorOptions.map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Admission Officer</Label>
+                    <Select value={editEventAccess.admissionOfficerId || ''} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectContent>
+                        {admissionOfficerOptions.map((u: any) => (
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CollapsibleCard>
+
+            </div>
+          )}
+        />
 
         {/* Create Event Modal */}
         <DetailsDialogLayout

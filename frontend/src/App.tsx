@@ -113,6 +113,7 @@ function Router() {
       <Route path="/admissions/:id" component={Admissions} />
       <Route path="/admissions" component={Admissions} />
       <Route path="/events/new" component={EventsPage} />
+      <Route path="/events/:id/edit" component={EventsPage} />
       <Route path="/events" component={EventsPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
