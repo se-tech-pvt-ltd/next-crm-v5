@@ -308,17 +308,6 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
-                <Button variant="outline" onClick={() => setIsProfileOpen(false)}>Close</Button>
-                {!isEditing ? (
-                  <Button onClick={() => setIsEditing(true)} variant="secondary"><Edit2 className="w-4 h-4 mr-2" />Edit</Button>
-                ) : (
-                  <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" />Save changes</Button>
-                )}
-                <Button onClick={handleLogout} variant="destructive">
-                  <LogOut className="w-4 h-4 mr-2" /> Log Out
-                </Button>
-              </div>
             </div>
           </div>
         </DialogContent>
