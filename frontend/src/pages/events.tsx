@@ -388,6 +388,55 @@ export default function EventsPage() {
     }
   }, [user, branches, branchEmps, eventAccess.branchId]);
 
+  // If branch selector is disabled by role/ACL, ensure a sensible branch is selected (prefer user's branch, or single mapping)
+  useEffect(() => {
+    if (!disableByView.branch) return;
+    if (eventAccess.branchId) return;
+    try {
+      let candidateBranch = '';
+      // Prefer eventAccess.regionId: try to find a branch in same region mapped to user
+      if (eventAccess.regionId && Array.isArray(branchEmps) && Array.isArray(branches)) {
+        const userMappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
+        // find mapping where branch belongs to the selected region
+        for (const m of userMappings) {
+          const bid = String(m.branchId ?? m.branch_id || '');
+          const b = (branches as any[]).find((x: any) => String(x.id) === bid);
+          if (b && String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId)) { candidateBranch = bid; break; }
+        }
+        // if still not found and only one mapping, use it
+        if (!candidateBranch && userMappings.length === 1) candidateBranch = String(userMappings[0].branchId ?? userMappings[0].branch_id);
+      }
+      // fallback: try token / user object
+      if (!candidateBranch) {
+        try {
+          const t = localStorage.getItem('auth_token');
+          if (t) {
+            const parts = String(t).split('.');
+            if (parts.length >= 2) {
+              const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+              const pad = b64.length % 4;
+              const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+              const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const payload = JSON.parse(json) as any;
+              const rd = payload?.role_details || payload?.roleDetails || {};
+              candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.user?.branch_id ?? payload?.user?.branchId ?? '';
+              if (candidateBranch) candidateBranch = String(candidateBranch);
+            }
+          }
+        } catch {}
+      }
+      if (!candidateBranch) {
+        const uBranch = String((user as any)?.branchId ?? (user as any)?.branch_id ?? '');
+        if (uBranch) candidateBranch = uBranch;
+      }
+      if (candidateBranch) {
+        const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(candidateBranch)) : null;
+        const regionIdFromBranch = b ? String(b.regionId ?? b.region_id ?? '') : '';
+        setEventAccess((s) => ({ ...s, branchId: String(candidateBranch), regionId: s.regionId || regionIdFromBranch }));
+      }
+    } catch {}
+  }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
+
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
   const [emailError, setEmailError] = useState(false);
 
