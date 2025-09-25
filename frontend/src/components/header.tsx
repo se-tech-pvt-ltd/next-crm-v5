@@ -10,6 +10,7 @@ import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
+import { UpdatesModal } from './updates-modal';
 import { AdmissionDetailsModal } from './admission-details-modal-new';
 import { StudentProfileModal } from './student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
@@ -36,6 +37,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
+  const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
 
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -180,31 +182,18 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             )}
             
             {/* Updates */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Open updates" aria-haspopup="menu">
-                  <Megaphone size={18} aria-hidden="true" />
-                  <Badge aria-label="2 new updates" className="absolute top-0 right-0 bg-accent text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
-                    2
-                  </Badge>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-3">
-                  <h4 className="font-medium text-sm mb-2">Product updates</h4>
-                  <div className="space-y-2">
-                    <div className="p-2 bg-purple-100 rounded-md">
-                      <p className="text-xs text-purple">New Dashboard widgets available</p>
-                      <p className="text-xs text-gray-500">Today</p>
-                    </div>
-                    <div className="p-2 bg-blue-50 rounded-md">
-                      <p className="text-xs text-blue-800">Improved search performance</p>
-                      <p className="text-xs text-gray-500">Yesterday</p>
-                    </div>
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50"
+              aria-label="Open updates"
+              onClick={() => setIsUpdatesOpen(true)}
+            >
+              <Megaphone size={18} aria-hidden="true" />
+              <Badge aria-label="2 new updates" className="absolute top-0 right-0 bg-accent text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
+                2
+              </Badge>
+            </Button>
 
             {/* Notifications */}
             <DropdownMenu>
@@ -284,6 +273,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         onOpenChange={(open) => { setIsStudentProfileOpen(open); if (!open) setSelectedStudentId(null); }}
         studentId={selectedStudentId}
       />
+
+      <UpdatesModal open={isUpdatesOpen} onOpenChange={setIsUpdatesOpen} />
     </>
   );
 }
