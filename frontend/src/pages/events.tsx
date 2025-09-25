@@ -575,6 +575,7 @@ export default function EventsPage() {
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
 
+  // Reset pagination when filters change on registrations list
   useEffect(() => { setPage(1); }, [filterEventId, registrations]);
 
   const formatEventDate = (d: any) => {
