@@ -1001,16 +1001,17 @@ export default function EventsPage() {
 
   // Sync state with /events/:id/registrations route
   useEffect(() => {
-    if ((isRegsRoute && regsParams?.id) || (isRegDetailRoute && regDetailParams?.id)) {
-      const id = String((regsParams?.id || regDetailParams?.id));
+    if ((isRegsRoute && regsParams?.id) || (isRegDetailRoute && regDetailParams?.id) || (isLeadRoute && leadParams?.id)) {
+      const id = String((regsParams?.id || regDetailParams?.id || leadParams?.id));
       setFilterEventId(id);
       setShowList(true);
       // if we have a regId in the detail route, mark it pending so we can open when data loads
       if (regDetailParams?.regId) setPendingRegId(String(regDetailParams.regId));
+      if (isLeadRoute && leadParams?.regId) setPendingOpenLeadId(String(leadParams.regId));
     } else if (!isEditRoute && !isCreateRoute) {
       setShowList(false);
     }
-  }, [isRegsRoute, regsParams?.id, isRegDetailRoute, regDetailParams?.id, regDetailParams?.regId, isEditRoute, isCreateRoute]);
+  }, [isRegsRoute, regsParams?.id, isRegDetailRoute, regDetailParams?.id, regDetailParams?.regId, isLeadRoute, leadParams?.id, leadParams?.regId, isEditRoute, isCreateRoute]);
 
   // When registrations data loads, if there's a pendingRegId from the route, open the view modal for it
   useEffect(() => {
