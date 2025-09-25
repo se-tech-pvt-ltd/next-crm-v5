@@ -341,10 +341,19 @@ export default function EventsPage() {
     try {
       const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
       const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
-      if (!isAdmissionOfficer) return;
+      const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+      if (!isAdmissionOfficer && !isCounsellor) return;
 
       // If branch already selected, nothing to do
-      if (eventAccess.branchId) return;
+      if (eventAccess.branchId) {
+        // still ensure role id selected
+        setEventAccess((s) => ({
+          ...s,
+          counsellorId: s.counsellorId || (isCounsellor ? String((user as any)?.id || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? String((user as any)?.id || '') : s.admissionOfficerId),
+        }));
+        return;
+      }
 
       // Try to read branch from JWT token role_details or payload
       let candidateBranch = '';
@@ -381,7 +390,13 @@ export default function EventsPage() {
         // Ensure branch exists in list and optionally set region
         const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(candidateBranch) || String(x.id) === String(candidateBranch)) : null;
         const regionIdFromBranch = b ? String(b.regionId ?? b.region_id ?? '') : '';
-        setEventAccess((s) => ({ ...s, branchId: String(candidateBranch), regionId: s.regionId || regionIdFromBranch }));
+        setEventAccess((s) => ({
+          ...s,
+          branchId: String(candidateBranch),
+          regionId: s.regionId || regionIdFromBranch,
+          counsellorId: s.counsellorId || (isCounsellor ? String((user as any)?.id || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? String((user as any)?.id || '') : s.admissionOfficerId),
+        }));
       }
     } catch (err) {
       // ignore
