@@ -286,8 +286,10 @@ export default function EventsPage() {
     else if (eventViewLevel === 'assigned') { d.region = true; d.branch = true; d.counsellor = true; d.admissionOfficer = true; }
     // Allow some roles (admission officer, counsellor) to have these fields enabled even if 'assigned' view
     try {
-      const roleNorm = String((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || '').trim().toLowerCase().replace(/\s+/g, '_');
-      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+      const tokenRole = tokenPayload?.role_details?.role_name || tokenPayload?.role_name || '';
+      const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || tokenRole || '';
+      const roleNorm = String(rawRole || '').trim().toLowerCase().replace(/\s+/g, '_');
+      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission_officer' || roleNorm === 'admission officer';
       const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
       if (isAdmissionOfficer || isCounsellor) {
         d.counsellor = false;
