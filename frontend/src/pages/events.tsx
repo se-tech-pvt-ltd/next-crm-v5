@@ -249,6 +249,22 @@ export default function EventsPage() {
   const [editEvent, setEditEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEventAccess, setEditEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { user, accessByRole } = useAuth() as any;
+  // Parse token payload once for fallback ids
+  const tokenPayload = React.useMemo(() => {
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (!t) return null;
+      const parts = String(t).split('.');
+      if (parts.length < 2) return null;
+      const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const pad = b64.length % 4;
+      const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+      const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(json) as any;
+    } catch { return null; }
+  }, []);
+  const tokenSub = String((tokenPayload && (tokenPayload.sub || tokenPayload.user?.id)) || '');
+
   const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
   const canCreateEvent = useMemo(() => {
