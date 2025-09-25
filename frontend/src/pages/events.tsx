@@ -986,6 +986,8 @@ export default function EventsPage() {
   }, [visibleEvents, timeFilter, typeFilter, searchTerm]);
 
   useEffect(() => {
+    // If the route explicitly requested an event registrations view, don't override it while events are loading
+    if (isRegsRoute || isRegDetailRoute) return;
     if (filterEventId && filterEventId !== 'all') {
       const ok = visibleEvents.some((e: any) => String(e.id) === String(filterEventId));
       if (!ok) {
@@ -993,7 +995,7 @@ export default function EventsPage() {
         setShowList(false);
       }
     }
-  }, [visibleEvents, filterEventId]);
+  }, [visibleEvents, filterEventId, isRegsRoute, isRegDetailRoute]);
 
   // Sync state with /events/:id/registrations route
   useEffect(() => {
