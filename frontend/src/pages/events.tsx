@@ -562,6 +562,25 @@ export default function EventsPage() {
     return all;
   }, [events, isRegionalManagerList, myRegionId]);
 
+  // Helper: compute event datetime (moved above filters to avoid TDZ)
+  const getEventDateTime = (e: any): Date | null => {
+    if (!e || !e.date) return null;
+    try {
+      const d = (typeof e.date === 'string' || typeof e.date === 'number') ? new Date(e.date) : new Date(e.date);
+      if (e.time) {
+        const [hh, mm = '00'] = String(e.time).split(':');
+        const h = Number(hh);
+        const m = Number(mm);
+        if (!Number.isNaN(h) && !Number.isNaN(m)) {
+          d.setHours(h, m, 0, 0);
+        }
+      }
+      return d;
+    } catch {
+      return null;
+    }
+  };
+
   // Filters for Events list (similar to Leads)
   const [timeFilter, setTimeFilter] = useState<'all' | 'upcoming' | 'past'>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
