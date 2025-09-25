@@ -71,8 +71,8 @@ export default function Students() {
 
   const studentsArray: Student[] = (Array.isArray(studentsArrayAll) ? studentsArrayAll.slice() : []).filter((s: any) => {
     if (!isCounsellor && !isAdmissionOfficer) return true;
-    const sCoun = String(s.counsellorId ?? s.counselorId ?? s.counsellor ?? s.counselor || '').trim();
-    const sAdm = String(s.admissionOfficerId ?? s.admission_officer_id ?? s.admissionOfficer ?? s.admission_officer || '').trim();
+    const sCoun = String((s.counsellorId ?? s.counselorId ?? s.counsellor ?? s.counselor) || '').trim();
+    const sAdm = String((s.admissionOfficerId ?? s.admission_officer_id ?? s.admissionOfficer ?? s.admission_officer) || '').trim();
     const uid = String((user as any)?.id || (user as any)?.userId || (user as any)?.sub || '').trim();
     return (sCoun && sCoun === uid) || (sAdm && sAdm === uid);
   });
