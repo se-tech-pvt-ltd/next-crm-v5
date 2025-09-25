@@ -175,7 +175,7 @@ export default function EventsPage() {
     return (val?: string) => (val ? (map.get(String(val)) || val) : '');
   }, [eventsDropdowns]);
 
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const [isCreateRoute] = useRoute('/events/new');
   const [isEditRoute, editParams] = useRoute('/events/:id/edit');
   const [isRegsRoute, regsParams] = useRoute('/events/:id/registrations');
