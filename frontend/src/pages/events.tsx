@@ -238,7 +238,14 @@ export default function EventsPage() {
   };
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
-  const { user } = useAuth() as any;
+  const { user, accessByRole } = useAuth() as any;
+  const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateEvent = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  }, [accessByRole]);
   const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
@@ -664,6 +671,17 @@ export default function EventsPage() {
   return (
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
+
+        {!showList && canCreateEvent && (
+          <div className="flex justify-end">
+            <Link href="/events/new">
+              <Button className="h-8 rounded-full">
+                <Plus className="w-3 h-3 mr-1" />
+                Add Event
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {!showList && (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2">
