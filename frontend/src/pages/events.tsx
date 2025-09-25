@@ -367,8 +367,8 @@ export default function EventsPage() {
         // still ensure role id selected
         setEventAccess((s) => ({
           ...s,
-          counsellorId: s.counsellorId || (isCounsellor ? String((user as any)?.id || '') : s.counsellorId),
-          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? String((user as any)?.id || '') : s.admissionOfficerId),
+          counsellorId: s.counsellorId || (isCounsellor ? (String((user as any)?.id || tokenSub) || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? (String((user as any)?.id || tokenSub) || '') : s.admissionOfficerId),
         }));
         return;
       }
@@ -412,8 +412,8 @@ export default function EventsPage() {
           ...s,
           branchId: String(candidateBranch),
           regionId: s.regionId || regionIdFromBranch,
-          counsellorId: s.counsellorId || (isCounsellor ? String((user as any)?.id || '') : s.counsellorId),
-          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? String((user as any)?.id || '') : s.admissionOfficerId),
+          counsellorId: s.counsellorId || (isCounsellor ? (String((user as any)?.id || tokenSub) || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? (String((user as any)?.id || tokenSub) || '') : s.admissionOfficerId),
         }));
       }
     } catch (err) {
@@ -472,8 +472,8 @@ export default function EventsPage() {
           ...s,
           branchId: String(candidateBranch),
           regionId: s.regionId || regionIdFromBranch,
-          counsellorId: s.counsellorId || (isCounsellor ? String((user as any)?.id || '') : s.counsellorId),
-          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? String((user as any)?.id || '') : s.admissionOfficerId),
+          counsellorId: s.counsellorId || (isCounsellor ? (String((user as any)?.id || tokenSub) || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? (String((user as any)?.id || tokenSub) || '') : s.admissionOfficerId),
         }));
       }
     } catch {}
@@ -509,7 +509,7 @@ export default function EventsPage() {
   // Ensure selected counsellor or current user (if counsellor) is present in options so Select shows it
   try {
     const sel = String(eventAccess.counsellorId || '');
-    const currentId = String((user as any)?.id || '');
+    const currentId = String((user as any)?.id || tokenSub);
     if (sel && sel.trim()) {
       if (!counselorOptions.some((u: any) => String(u.id) === sel) && Array.isArray(users)) {
         const u = users.find((x: any) => String(x.id) === sel);
@@ -541,7 +541,7 @@ export default function EventsPage() {
   // Ensure selected admission officer or current user (if admission officer) is present in options so Select shows it
   try {
     const selA = String(eventAccess.admissionOfficerId || '');
-    const currentIdA = String((user as any)?.id || '');
+    const currentIdA = String((user as any)?.id || tokenSub);
     if (selA && selA.trim()) {
       if (!admissionOfficerOptions.some((u: any) => String(u.id) === selA) && Array.isArray(users)) {
         const u = users.find((x: any) => String(x.id) === selA);
