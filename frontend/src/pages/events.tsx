@@ -244,12 +244,21 @@ export default function EventsPage() {
       status: 'new',
       eventRegId: reg.id,
     });
+
+    // close the registration details modal first
+    try { setIsViewRegOpen(false); } catch {}
+
     // navigate to /lead route for this registration
     try {
       const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
       navigate(`/events/${eventId}/registrations/${reg.id}/lead`);
     } catch {}
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
+
+    // open the Add Lead modal after a short delay so the view modal closes first
+    const openModalFn = () => {
+      try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
+    };
+    setTimeout(openModalFn, 150);
   };
 
   // Keep URL in sync when the Add Lead modal opens/closes
