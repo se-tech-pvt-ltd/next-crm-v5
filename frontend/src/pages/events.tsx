@@ -1942,7 +1942,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Counsellor</Label>
                     <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor}><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor && !( ( (String((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '')).toLowerCase().includes('counsel') ) && isCreateRoute ) }><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
                         {counselorOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
