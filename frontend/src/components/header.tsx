@@ -121,7 +121,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-1" role="banner">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-2" role="banner">
         <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
@@ -182,7 +182,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Updates */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full" aria-label="Open updates" aria-haspopup="menu">
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Open updates" aria-haspopup="menu">
                   <Megaphone size={18} aria-hidden="true" />
                   <Badge aria-label="2 new updates" className="absolute top-0 right-0 bg-accent text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
                     2
@@ -209,7 +209,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full" aria-label="Open notifications" aria-haspopup="menu">
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Open notifications" aria-haspopup="menu">
                   <Bell size={18} aria-hidden="true" />
                   <Badge aria-label="3 unread notifications" className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
                     3
