@@ -913,7 +913,7 @@ export default function EventsPage() {
                           <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-[#223E7D]/20 bg-[#223E7D]/5 text-[#223E7D]">{e.type}</span>
                         </div>
                         <div className="pt-1">
-                          <div className="inline-flex items-center text-[11px] text-white/90 group-hover:translate-x-0.5 transition">
+                          <div className="inline-flex items-center text-[11px] text-[#223E7D] group-hover:translate-x-0.5 transition">
                             View Registrations
                             <ArrowRight className="ml-1 w-3 h-3" />
                           </div>
