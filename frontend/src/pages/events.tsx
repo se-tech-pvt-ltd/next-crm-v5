@@ -1621,7 +1621,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Admission Officer</Label>
                     <Select value={editEventAccess.admissionOfficerId || ''} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer}><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptionsEdit.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
