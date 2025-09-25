@@ -363,23 +363,6 @@ export default function EventsPage() {
   const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps() });
   const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
 
-  // Parse token payload once for fallback ids
-  const tokenPayload = React.useMemo(() => {
-    try {
-      const t = localStorage.getItem('auth_token');
-      if (!t) return null;
-      const parts = String(t).split('.');
-      if (parts.length < 2) return null;
-      const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      const pad = b64.length % 4;
-      const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
-      const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-      return JSON.parse(json) as any;
-    } catch {
-      return null;
-    }
-  }, []);
-  const tokenSub = String((tokenPayload && (tokenPayload.sub || tokenPayload.user?.id)) || '');
 
   // Auto-select branch for admission officers when creating events or on page load
   useEffect(() => {
