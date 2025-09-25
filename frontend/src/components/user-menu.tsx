@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 console.log('[component] loaded: frontend/src/components/user-menu.tsx');
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
