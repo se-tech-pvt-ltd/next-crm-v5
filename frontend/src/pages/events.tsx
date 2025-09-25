@@ -14,6 +14,7 @@ import * as BranchEmpsService from '@/services/branchEmps';
 import * as UsersService from '@/services/users';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState } from '@/components/empty-state';
 import { toast } from '@/hooks/use-toast';
@@ -21,7 +22,7 @@ import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, MoreVertical } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
@@ -212,6 +213,16 @@ export default function EventsPage() {
     onError: () => toast({ title: 'Failed to update event', variant: 'destructive' }),
   });
 
+  const deleteEventMutation = useMutation({
+    mutationFn: (id: string) => EventsService.deleteEvent(id),
+    onSuccess: (_d, id) => {
+      toast({ title: 'Event deleted' });
+      if (String(filterEventId) === String(id)) { setShowList(false); setFilterEventId('all'); }
+      refetchEvents();
+    },
+    onError: () => toast({ title: 'Failed to delete event', variant: 'destructive' }),
+  });
+
   const convertMutation = useMutation({
     mutationFn: (id: string) => RegService.convertToLead(id),
     onSuccess: () => {
@@ -262,6 +273,16 @@ export default function EventsPage() {
     if (entries.length === 0) return true;
     return entries.some((e: any) => {
       const can = (e.canUpdate ?? e.can_update ?? e.canEdit ?? e.can_edit ?? e.canManage ?? e.can_manage ?? e.manage ?? e.update ?? e.edit);
+      return can === true || can === 1 || can === '1';
+    });
+  }, [accessByRole, user]);
+  const canDeleteEvent = useMemo(() => {
+    const normRole = String((user as any)?.role || (user as any)?.role_name || '').toLowerCase();
+    if (normRole === 'admin' || normRole === 'super_admin' || normRole === 'superadmin') return true;
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => {
+      const can = (e.canDelete ?? e.can_delete ?? e.delete ?? e.remove ?? e.canManage ?? e.can_manage ?? e.manage);
       return can === true || can === 1 || can === '1';
     });
   }, [accessByRole, user]);
@@ -884,7 +905,30 @@ export default function EventsPage() {
                     <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
                       <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
                       <CardHeader className="pb-1">
-                        <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label="Open event actions"
+                                onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); }}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-muted/60"
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" onClick={(ev) => ev.stopPropagation()}>
+                              <DropdownMenuItem onSelect={(ev) => { ev.preventDefault(); setFilterEventId(e.id); setShowList(true); }}>View registrations</DropdownMenuItem>
+                              {canUpdateEvent && (
+                                <DropdownMenuItem onSelect={(ev) => { ev.preventDefault(); navigate(`/events/${e.id}/edit`); }}>Edit event</DropdownMenuItem>
+                              )}
+                              {canDeleteEvent && (
+                                <DropdownMenuItem className="text-red-600" onSelect={(ev) => { ev.preventDefault(); if (confirm('Delete this event? This cannot be undone.')) deleteEventMutation.mutate(e.id); }}>Delete event</DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </CardHeader>
                       <CardContent className="pt-1 space-y-2">
                         <div className="flex items-center text-xs text-gray-700">
