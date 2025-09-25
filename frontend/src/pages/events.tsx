@@ -562,6 +562,36 @@ export default function EventsPage() {
     return all;
   }, [events, isRegionalManagerList, myRegionId]);
 
+  // Filters for Events list (similar to Leads)
+  const [timeFilter, setTimeFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const uniqueTypes = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of Array.isArray(visibleEvents) ? visibleEvents : []) {
+      const t = String(e.type || '').trim();
+      if (t) set.add(t);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [visibleEvents]);
+
+  const filteredEvents = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return (Array.isArray(visibleEvents) ? visibleEvents : []).filter((e: any) => {
+      const dt = getEventDateTime(e);
+      const isUpcoming = dt ? dt.getTime() >= Date.now() : false;
+      if (timeFilter === 'upcoming' && !isUpcoming) return false;
+      if (timeFilter === 'past' && isUpcoming) return false;
+      if (typeFilter !== 'all' && String(e.type || '') !== typeFilter) return false;
+      if (term) {
+        const hay = `${String(e.name || '')} ${String(e.venue || '')}`.toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      return true;
+    });
+  }, [visibleEvents, timeFilter, typeFilter, searchTerm]);
+
   useEffect(() => {
     if (filterEventId && filterEventId !== 'all') {
       const ok = visibleEvents.some((e: any) => String(e.id) === String(filterEventId));
