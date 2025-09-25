@@ -284,9 +284,18 @@ export default function EventsPage() {
     if (eventViewLevel === 'region') d.region = true;
     else if (eventViewLevel === 'branch') { d.region = true; d.branch = true; }
     else if (eventViewLevel === 'assigned') { d.region = true; d.branch = true; d.counsellor = true; d.admissionOfficer = true; }
-    // 'all' and default: nothing disabled
+    // Allow some roles (admission officer, counsellor) to have these fields enabled even if 'assigned' view
+    try {
+      const roleNorm = String((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || '').trim().toLowerCase().replace(/\s+/g, '_');
+      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+      const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+      if (isAdmissionOfficer || isCounsellor) {
+        d.counsellor = false;
+        d.admissionOfficer = false;
+      }
+    } catch {}
     return d;
-  }, [eventViewLevel]);
+  }, [eventViewLevel, user]);
 
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
