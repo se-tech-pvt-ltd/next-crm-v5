@@ -325,6 +325,7 @@ export default function EventsPage() {
     ? branches.filter((b: any) => !eventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId))
     : [];
 
+  // For Create modal (based on eventAccess)
   const counselorOptions = Array.isArray(users)
     ? users
         .filter((u: any) => {
@@ -350,6 +351,58 @@ export default function EventsPage() {
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(eventAccess.branchId));
         })
     : [];
+
+  // For Edit modal (based on editEventAccess)
+  const filteredBranchesEdit = Array.isArray(branches)
+    ? branches.filter((b: any) => !editEventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(editEventAccess.regionId))
+    : [];
+
+  const counselorOptionsEdit = Array.isArray(users)
+    ? users
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'counselor' || r === 'counsellor';
+        })
+        .filter((u: any) => {
+          if (!editEventAccess.branchId) return false;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(editEventAccess.branchId));
+        })
+    : [];
+
+  const admissionOfficerOptionsEdit = Array.isArray(users)
+    ? users
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
+        })
+        .filter((u: any) => {
+          if (!editEventAccess.branchId) return false;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(editEventAccess.branchId));
+        })
+    : [];
+
+  // Auto-preselect for Edit: if only one branch/counsellor/officer is available and not already set
+  useEffect(() => {
+    if (!isEditRoute) return;
+    if (editEventAccess.branchId) return;
+    const list = filteredBranchesEdit;
+    if (Array.isArray(list) && list.length === 1) {
+      setEditEventAccess((s) => ({ ...s, branchId: String((list[0] as any).id) }));
+    }
+  }, [isEditRoute, filteredBranchesEdit, editEventAccess.branchId]);
+
+  useEffect(() => {
+    if (!isEditRoute) return;
+    if (!editEventAccess.branchId) return;
+    if (!editEventAccess.counsellorId && Array.isArray(counselorOptionsEdit) && counselorOptionsEdit.length === 1) {
+      setEditEventAccess((s) => ({ ...s, counsellorId: String((counselorOptionsEdit[0] as any).id) }));
+    }
+    if (!editEventAccess.admissionOfficerId && Array.isArray(admissionOfficerOptionsEdit) && admissionOfficerOptionsEdit.length === 1) {
+      setEditEventAccess((s) => ({ ...s, admissionOfficerId: String((admissionOfficerOptionsEdit[0] as any).id) }));
+    }
+  }, [isEditRoute, editEventAccess.branchId, editEventAccess.counsellorId, editEventAccess.admissionOfficerId, counselorOptionsEdit, admissionOfficerOptionsEdit]);
 
   const handleCreateEvent = () => {
     if (!newEvent.name || !newEvent.type || !newEvent.date || !newEvent.venue || !newEvent.time) {
