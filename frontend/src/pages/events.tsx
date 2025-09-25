@@ -628,23 +628,6 @@ export default function EventsPage() {
     return `${hr12}:${String(mm).padStart(2, '0')} ${ampm}`;
   };
 
-  const getEventDateTime = (e: any): Date | null => {
-    if (!e || !e.date) return null;
-    try {
-      const d = (typeof e.date === 'string' || typeof e.date === 'number') ? new Date(e.date) : new Date(e.date);
-      if (e.time) {
-        const [hh, mm = '00'] = String(e.time).split(':');
-        const h = Number(hh);
-        const m = Number(mm);
-        if (!Number.isNaN(h) && !Number.isNaN(m)) {
-          d.setHours(h, m, 0, 0);
-        }
-      }
-      return d;
-    } catch {
-      return null;
-    }
-  };
 
   const getCountdownString = (target: Date | null) => {
     if (!target) return '';
