@@ -1583,7 +1583,7 @@ export default function EventsPage() {
                     <Select value={editEventAccess.branchId} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, branchId: v, counsellorId: '', admissionOfficerId: '' }))}>
                       <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
                       <SelectContent>
-                        {filteredBranches.map((b: any) => (
+                        {filteredBranchesEdit.map((b: any) => (
                           <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
                         ))}
                       </SelectContent>
