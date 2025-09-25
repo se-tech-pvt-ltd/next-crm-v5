@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 console.log('[component] loaded: frontend/src/components/user-menu.tsx');
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { Settings, LogOut, User, Edit2, Save, X, Upload } from 'lucide-react';
+import { Settings, LogOut, User, Edit2, Save, X, Upload, Mail, Phone, Shield, Building2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,8 +54,24 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
   const phoneStr = String((user as any)?.phoneNumber ?? (user as any)?.phone_number ?? (user as any)?.phone ?? payload?.phone ?? payload?.phone_number ?? payload?.user?.phone ?? payload?.user?.phone_number ?? '');
   const profileImageUrlSrc = String((user as any)?.profileImageUrl ?? (user as any)?.profile_image_url ?? payload?.profile_image_url ?? payload?.profileImageUrl ?? payload?.user?.profile_image_url ?? payload?.user?.profileImageUrl ?? '');
   const roleRaw = String((user as any)?.role ?? payload?.role ?? payload?.role_name ?? payload?.user?.role ?? '');
+  const roleIdRaw = String((user as any)?.roleId ?? (user as any)?.role_id ?? payload?.role_id ?? payload?.user?.role_id ?? '');
+  const [resolvedRoleName, setResolvedRoleName] = useState<string>('');
+
+  React.useEffect(() => {
+    (async () => {
+      if (!roleIdRaw) return;
+      try {
+        const UserRolesService = await import('@/services/userRoles');
+        const roles = await UserRolesService.listRoles().catch(() => []);
+        const match = Array.isArray(roles) ? (roles as any[]).find((r) => String(r.id) === String(roleIdRaw)) : null;
+        const name = String((match as any)?.roleName ?? (match as any)?.role_name ?? '').trim();
+        if (name) setResolvedRoleName(name);
+      } catch {}
+    })();
+  }, [roleIdRaw]);
 
   const getRoleDisplay = (role: string) => {
+    if (resolvedRoleName) return resolvedRoleName;
     switch (role) {
       case 'admin_staff':
         return 'Admin Staff';
@@ -64,7 +80,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
       case 'counselor':
         return 'Counselor';
       default:
-        return role;
+        return role || '—';
     }
   };
 
@@ -132,13 +148,17 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
 
   return (
     <>
-      <div className="mt-auto pt-2">
+      <div className={fullWidth ? "mt-auto pt-2" : ""}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={`${fullWidth ? 'w-full' : 'w-auto'} h-auto ${fullWidth ? 'p-2' : 'p-1'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
+            <Button
+              variant="ghost"
+              size={fullWidth ? undefined : 'icon'}
+              className={`${fullWidth ? 'w-full p-2 h-auto' : 'w-9 h-9 p-0 rounded-full border border-gray-200 hover:bg-gray-50'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}
+            >
               {collapsed ? (
                 <div className="relative group">
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
                     {profileImageUrlSrc ? (
                       <img src={profileImageUrlSrc} alt="avatar" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                     ) : (
@@ -160,7 +180,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
-                    <p className="text-xs text-gray-500">{getRoleDisplay(roleRaw || (user as any).role)}</p>
+                    <p className="text-xs text-gray-500">{getRoleDisplay(roleRaw || String((user as any).role || ''))}</p>
                   </div>
                   <Settings className="w-4 h-4 text-gray-400" />
                 </div>
@@ -181,121 +201,99 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
       </div>
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent hideClose className="no-not-allowed p-0 sm:max-w-lg md:max-w-2xl w-[92vw] overflow-hidden">
+        <DialogContent hideClose className="no-not-allowed p-0 sm:max-w-xl md:max-w-3xl w-[94vw] overflow-hidden rounded-2xl">
           <DialogTitle className="sr-only">User Profile</DialogTitle>
-          <div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent px-6 py-5 border-b flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center ring-2 ring-primary/40">
-                {profileImageUrl ? (
-                  <img src={profileImageUrl || profileImageUrlSrc} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-6 h-6 text-primary" />
-                )}
-              </div>
-              <div>
-                <div className="text-lg font-semibold">{displayName}</div>
-                <Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || (user as any).role)}</Badge>
-              </div>
-            </div>
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
-                  <X className="w-4 h-4 mr-1" />Cancel
-                </Button>
-                <Button size="sm" onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-1" />Save
-                </Button>
-              </div>
-            ) : (
-              <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                <Edit2 className="w-4 h-4 mr-1" />Edit
-              </Button>
-            )}
-          </div>
 
-          <div className="p-6 grid md:grid-cols-[220px_1fr] gap-6">
-            <div className="space-y-4">
-              <div className="relative w-40 h-40 rounded-full overflow-hidden border bg-muted mx-auto md:mx-0">
+          {/* Cover */}
+          <div className="relative">
+            <div className="h-28 bg-gradient-to-r from-[#223E7D] via-blue-600 to-accent" />
+            <button
+              aria-label="Close"
+              onClick={() => setIsProfileOpen(false)}
+              className="absolute right-3 top-3 h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 text-white grid place-items-center"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="absolute -bottom-10 left-6">
+              <div className="relative w-20 h-20 rounded-full ring-4 ring-white shadow-xl overflow-hidden bg-white">
                 <Avatar className="w-full h-full">
                   <AvatarImage src={profileImageUrl || profileImageUrlSrc} alt={displayName} />
                   <AvatarFallback>{(displayName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 {isEditing && (
-                  <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 flex items-center justify-center gap-2">
-                    <Upload className="w-3.5 h-3.5" />
+                  <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[11px] py-1 flex items-center justify-center gap-1">
+                    <Upload className="w-3 h-3" />
                     <button className="underline" onClick={() => fileRef.current?.click()}>Change</button>
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); }} />
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 pt-14 pb-6">
+            {/* Left card */}
+            <div className="bg-white rounded-xl border shadow-sm p-4">
+              <div className="mb-3">
+                <div className="text-lg font-semibold leading-tight">{displayName}</div>
+                <div className="mt-1"><Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || String((user as any).role || ''))}</Badge></div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-gray-600"><Mail className="w-4 h-4" /> <span className="break-all">{emailStr || '-'}</span></div>
+                <div className="flex items-center gap-2 text-gray-600"><Phone className="w-4 h-4" /> <span>{phoneStr || 'Not set'}</span></div>
+                <div className="flex items-center gap-2 text-gray-600"><Shield className="w-4 h-4" /> <span>{getRoleDisplay(roleRaw || String((user as any).role || ''))}</span></div>
+                {(user as any).branch && (
+                  <div className="flex items-center gap-2 text-gray-600"><Building2 className="w-4 h-4" />
+                    <span>
+                      {(user as any).branch === 'branch_alpha' ? 'Branch Alpha - New York, NY' :
+                       (user as any).branch === 'branch_beta' ? 'Branch Beta - Los Angeles, CA' :
+                       (user as any).branch === 'branch_gamma' ? 'Branch Gamma - Chicago, IL' :
+                       (user as any).branch}
+                    </span>
+                  </div>
+                )}
+              </div>
               {isEditing && profileImageUrl && (
-                <Button variant="ghost" size="sm" onClick={() => { setProfileImageUrl(''); setProfileImageId(''); }}>Remove</Button>
+                <div className="mt-3">
+                  <Button variant="ghost" size="sm" onClick={() => { setProfileImageUrl(''); setProfileImageId(''); }}>Remove photo</Button>
+                </div>
               )}
 
-              <div className="hidden md:block">
-                <div className="text-xs text-muted-foreground mb-1">Email</div>
-                <div className="text-sm break-all">{emailStr || '-'}</div>
-              </div>
-            </div>
-
-            <div className="space-y-5">
               {!isEditing ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Name</div>
-                    <div className="text-sm">{`${firstNameSrc} ${lastNameSrc}`.trim() || displayName}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Phone</div>
-                    <div className="text-sm">{phoneStr || 'Not set'}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Role</div>
-                    <div className="text-sm">{getRoleDisplay(roleRaw || (user as any).role || 'Unknown')}</div>
-                  </div>
-                  {(user as any).branch && (
-                    <div className="sm:col-span-2">
-                      <div className="text-xs text-muted-foreground">Branch</div>
-                      <div className="text-sm">
-                        {(user as any).branch === 'branch_alpha' ? 'Branch Alpha - New York, NY' :
-                         (user as any).branch === 'branch_beta' ? 'Branch Beta - Los Angeles, CA' :
-                         (user as any).branch === 'branch_gamma' ? 'Branch Gamma - Chicago, IL' :
-                         (user as any).branch}
-                      </div>
-                    </div>
-                  )}
+                <div className="flex justify-end pt-3">
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                    <Edit2 className="w-4 h-4 mr-1" />Edit
+                  </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
+                <div className="pt-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="phone">Phone number</Label>
+                      <Input id="phone" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1234567890" />
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" />
-                  </div>
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="phone">Phone number</Label>
-                    <Input id="phone" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1234567890" />
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
+                      <X className="w-4 h-4 mr-1" />Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleSave}>
+                      <Save className="w-4 h-4 mr-1" />Save
+                    </Button>
                   </div>
                 </div>
               )}
-
-              <Separator />
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-end">
-                <Button variant="outline" onClick={() => setIsProfileOpen(false)}>Close</Button>
-                {!isEditing ? (
-                  <Button onClick={() => setIsEditing(true)} variant="secondary"><Edit2 className="w-4 h-4 mr-2" />Edit</Button>
-                ) : (
-                  <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" />Save changes</Button>
-                )}
-                <Button onClick={handleLogout} variant="destructive">
-                  <LogOut className="w-4 h-4 mr-2" /> Log Out
-                </Button>
-              </div>
             </div>
+
           </div>
         </DialogContent>
       </Dialog>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, UserPlus, GraduationCap } from 'lucide-react';
+import { Search, Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
@@ -10,6 +10,7 @@ import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
+import { UpdatesModal } from './updates-modal';
 import { AdmissionDetailsModal } from './admission-details-modal-new';
 import { StudentProfileModal } from './student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
@@ -36,6 +37,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
+  const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
 
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -121,7 +123,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-1" role="banner">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-5 py-2" role="banner">
         <div className="flex items-center justify-between min-w-0 gap-2">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
@@ -179,12 +181,26 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               </div>
             )}
             
+            {/* Updates */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50"
+              aria-label="Open updates"
+              onClick={() => setIsUpdatesOpen(true)}
+            >
+              <Megaphone size={18} aria-hidden="true" />
+              <Badge aria-label="2 new updates" className="absolute top-0 right-0 bg-accent text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
+                2
+              </Badge>
+            </Button>
+
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative p-2" aria-label="Open notifications" aria-haspopup="menu">
-                  <Bell size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />
-                  <Badge aria-label="3 unread notifications" className="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs">
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Open notifications" aria-haspopup="menu">
+                  <Bell size={18} aria-hidden="true" />
+                  <Badge aria-label="3 unread notifications" className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
                     3
                   </Badge>
                 </Button>
@@ -209,6 +225,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
+
             <div className="ml-1">
               <UserMenu collapsed fullWidth={false} />
             </div>
@@ -256,6 +273,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         onOpenChange={(open) => { setIsStudentProfileOpen(open); if (!open) setSelectedStudentId(null); }}
         studentId={selectedStudentId}
       />
+
+      <UpdatesModal open={isUpdatesOpen} onOpenChange={setIsUpdatesOpen} />
     </>
   );
 }
