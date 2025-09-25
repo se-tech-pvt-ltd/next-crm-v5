@@ -1588,7 +1588,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Region</Label>
                     <Select value={editEventAccess.regionId} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, regionId: v, branchId: '', counsellorId: '', admissionOfficerId: '' }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.region}><SelectValue placeholder="Select region" /></SelectTrigger>
                       <SelectContent>
                         {Array.isArray(regions) && regions.map((r: any) => (
                           <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
