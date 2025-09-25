@@ -1035,7 +1035,8 @@ export default function EventsPage() {
           email: match2.email,
           phone: match2.number,
           city: match2.city,
-          source: match2.source || undefined,
+          // ensure lead source is set to Events when opening via /lead route
+          source: 'Events',
           status: 'new',
           eventRegId: match2.id,
         });
