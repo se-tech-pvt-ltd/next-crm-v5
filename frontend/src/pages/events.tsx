@@ -244,8 +244,28 @@ export default function EventsPage() {
       status: 'new',
       eventRegId: reg.id,
     });
+    // navigate to /lead route for this registration
+    try {
+      const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
+      navigate(`/events/${eventId}/registrations/${reg.id}/lead`);
+    } catch {}
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
   };
+
+  // Keep URL in sync when the Add Lead modal opens/closes
+  useEffect(() => {
+    if (addLeadModalOpen) return; // when open, already set by openConvertToLeadModal
+    // when modal closes, revert URL to registration detail or registrations list
+    try {
+      const regId = (leadInitialData && leadInitialData.eventRegId) || (regDetailParams && regDetailParams.regId) || pendingRegId;
+      const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (selectedEvent && selectedEvent.id) || (leadInitialData && leadInitialData.eventId) || null;
+      if (eventId && regId) {
+        navigate(`/events/${eventId}/registrations/${regId}`);
+      } else if (eventId) {
+        navigate(`/events/${eventId}/registrations`);
+      }
+    } catch {}
+  }, [addLeadModalOpen]);
 
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEvent, setEditEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
