@@ -881,8 +881,8 @@ export default function EventsPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
-                    <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
-                      <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
+                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-white/15 bg-[#223E7D] text-white hover:shadow-lg hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                      <div className="h-1 bg-gradient-to-r from-white/40 to-white/10" />
                       <CardHeader className="pb-1">
                         <div className="flex items-start justify-between gap-2">
                           <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
@@ -891,7 +891,7 @@ export default function EventsPage() {
                               type="button"
                               aria-label="Edit event"
                               onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); navigate(`/events/${e.id}/edit`); }}
-                              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-muted/60"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-white hover:bg-white/10"
                               title="Edit"
                             >
                               <Edit className="w-4 h-4" />
@@ -900,20 +900,20 @@ export default function EventsPage() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-1 space-y-2">
-                        <div className="flex items-center text-xs text-gray-700">
-                          <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                        <div className="flex items-center text-xs text-white/90">
+                          <Calendar className="w-3.5 h-3.5 mr-2 text-white/80" />
                           <span>{formatEventDate(e.date)}</span>
-                          {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                          {e.time ? (<><span className="mx-2 text-white/40">•</span><Clock className="w-3.5 h-3.5 mr-1 text-white/80" /><span>{formatEventTime(e.time)}</span></>) : null}
                         </div>
-                        <div className="flex items-center text-xs text-gray-700">
-                          <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                        <div className="flex items-center text-xs text-white/90">
+                          <MapPin className="w-3.5 h-3.5 mr-2 text-white/80" />
                           <span className="truncate">{e.venue}</span>
                         </div>
                         <div>
-                          <span className={`inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border ${p.badgeBg} ${p.badgeText} ${p.badgeBorder}`}>{e.type}</span>
+                          <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-white/20 bg-white/10 text-white">{e.type}</span>
                         </div>
                         <div className="pt-1">
-                          <div className={`inline-flex items-center text-[11px] group-hover:translate-x-0.5 transition ${p.text}`}>
+                          <div className="inline-flex items-center text-[11px] text-white/90 group-hover:translate-x-0.5 transition">
                             View Registrations
                             <ArrowRight className="ml-1 w-3 h-3" />
                           </div>
