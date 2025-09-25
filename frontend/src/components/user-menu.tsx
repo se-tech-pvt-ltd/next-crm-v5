@@ -232,9 +232,9 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
           </div>
 
           {/* Body */}
-          <div className="px-6 pt-14 pb-6 grid md:grid-cols-[260px_1fr] gap-6">
+          <div className="px-6 pt-14 pb-6">
             {/* Left card */}
-            <div className="bg-white rounded-xl border shadow-sm p-4 h-max">
+            <div className="bg-white rounded-xl border shadow-sm p-4">
               <div className="mb-3">
                 <div className="text-lg font-semibold leading-tight">{displayName}</div>
                 <div className="mt-1"><Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || String((user as any).role || ''))}</Badge></div>
@@ -259,18 +259,30 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                   <Button variant="ghost" size="sm" onClick={() => { setProfileImageUrl(''); setProfileImageId(''); }}>Remove photo</Button>
                 </div>
               )}
-            </div>
 
-            {/* Right panel */}
-            <div className="bg-white rounded-xl border shadow-sm p-5 space-y-5">
-              <div className="flex items-center justify-between">
-                <div className="text-base font-semibold">Profile details</div>
-                {!isEditing ? (
+              {!isEditing ? (
+                <div className="flex justify-end pt-3">
                   <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
                     <Edit2 className="w-4 h-4 mr-1" />Edit
                   </Button>
-                ) : (
-                  <div className="flex items-center gap-2">
+                </div>
+              ) : (
+                <div className="pt-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="phone">Phone number</Label>
+                      <Input id="phone" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1234567890" />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
                     <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
                       <X className="w-4 h-4 mr-1" />Cancel
                     </Button>
@@ -278,53 +290,10 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                       <Save className="w-4 h-4 mr-1" />Save
                     </Button>
                   </div>
-                )}
-              </div>
-
-              {!isEditing ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <div className="text-xs text-muted-foreground">Name</div>
-                    <div className="text-sm font-medium">{`${firstNameSrc} ${lastNameSrc}`.trim() || displayName}</div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <div className="text-xs text-muted-foreground">Phone</div>
-                    <div className="text-sm font-medium">{phoneStr || 'Not set'}</div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <div className="text-xs text-muted-foreground">Role</div>
-                    <div className="text-sm font-medium">{getRoleDisplay(roleRaw || String((user as any).role || ''))}</div>
-                  </div>
-                  {(user as any).branch && (
-                    <div className="p-3 rounded-lg bg-muted/40 sm:col-span-2">
-                      <div className="text-xs text-muted-foreground">Branch</div>
-                      <div className="text-sm font-medium">
-                        {(user as any).branch === 'branch_alpha' ? 'Branch Alpha - New York, NY' :
-                         (user as any).branch === 'branch_beta' ? 'Branch Beta - Los Angeles, CA' :
-                         (user as any).branch === 'branch_gamma' ? 'Branch Gamma - Chicago, IL' :
-                         (user as any).branch}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" />
-                  </div>
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="phone">Phone number</Label>
-                    <Input id="phone" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1234567890" />
-                  </div>
                 </div>
               )}
-
             </div>
+
           </div>
         </DialogContent>
       </Dialog>
