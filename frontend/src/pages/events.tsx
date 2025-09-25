@@ -475,7 +475,7 @@ export default function EventsPage() {
     : [];
 
   // For Create modal (based on eventAccess)
-  const counselorOptions = Array.isArray(users)
+  let counselorOptions = Array.isArray(users)
     ? users
         .filter((u: any) => {
           const r = normalizeRole(u.role || u.role_name || u.roleName);
@@ -488,7 +488,26 @@ export default function EventsPage() {
         })
     : [];
 
-  const admissionOfficerOptions = Array.isArray(users)
+  // Ensure selected counsellor or current user (if counsellor) is present in options so Select shows it
+  try {
+    const sel = String(eventAccess.counsellorId || '');
+    const currentId = String((user as any)?.id || '');
+    if (sel && sel.trim()) {
+      if (!counselorOptions.some((u: any) => String(u.id) === sel) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === sel);
+        if (u) counselorOptions = [u, ...counselorOptions];
+      }
+    }
+    const roleNormU = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    if ((roleNormU === 'counselor' || roleNormU === 'counsellor') && currentId) {
+      if (!counselorOptions.some((u: any) => String(u.id) === currentId) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === currentId);
+        if (u) counselorOptions = [u, ...counselorOptions];
+      }
+    }
+  } catch {}
+
+  let admissionOfficerOptions = Array.isArray(users)
     ? users
         .filter((u: any) => {
           const r = normalizeRole(u.role || u.role_name || u.roleName);
@@ -500,6 +519,25 @@ export default function EventsPage() {
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(eventAccess.branchId));
         })
     : [];
+
+  // Ensure selected admission officer or current user (if admission officer) is present in options so Select shows it
+  try {
+    const selA = String(eventAccess.admissionOfficerId || '');
+    const currentIdA = String((user as any)?.id || '');
+    if (selA && selA.trim()) {
+      if (!admissionOfficerOptions.some((u: any) => String(u.id) === selA) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === selA);
+        if (u) admissionOfficerOptions = [u, ...admissionOfficerOptions];
+      }
+    }
+    const roleNormUA = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    if ((roleNormUA === 'admission_officer' || roleNormUA === 'admission officer' || roleNormUA === 'admissionofficer') && currentIdA) {
+      if (!admissionOfficerOptions.some((u: any) => String(u.id) === currentIdA) && Array.isArray(users)) {
+        const u = users.find((x: any) => String(x.id) === currentIdA);
+        if (u) admissionOfficerOptions = [u, ...admissionOfficerOptions];
+      }
+    }
+  } catch {}
 
   // For Edit modal (based on editEventAccess)
   const filteredBranchesEdit = Array.isArray(branches)
