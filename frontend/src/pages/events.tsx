@@ -447,7 +447,16 @@ export default function EventsPage() {
       if (candidateBranch) {
         const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(candidateBranch)) : null;
         const regionIdFromBranch = b ? String(b.regionId ?? b.region_id ?? '') : '';
-        setEventAccess((s) => ({ ...s, branchId: String(candidateBranch), regionId: s.regionId || regionIdFromBranch }));
+        const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+        const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+        const isCounsellor = roleNorm === 'counselor' || roleNorm === 'counsellor';
+        setEventAccess((s) => ({
+          ...s,
+          branchId: String(candidateBranch),
+          regionId: s.regionId || regionIdFromBranch,
+          counsellorId: s.counsellorId || (isCounsellor ? String((user as any)?.id || '') : s.counsellorId),
+          admissionOfficerId: s.admissionOfficerId || (isAdmissionOfficer ? String((user as any)?.id || '') : s.admissionOfficerId),
+        }));
       }
     } catch {}
   }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
