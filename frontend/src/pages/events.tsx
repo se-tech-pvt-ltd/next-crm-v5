@@ -256,10 +256,15 @@ export default function EventsPage() {
     return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
   }, [accessByRole]);
   const canUpdateEvent = useMemo(() => {
+    const normRole = String((user as any)?.role || (user as any)?.role_name || '').toLowerCase();
+    if (normRole === 'admin' || normRole === 'super_admin' || normRole === 'superadmin') return true;
     const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
     if (entries.length === 0) return true;
-    return entries.some((e: any) => (e.canUpdate ?? e.can_update) === true);
-  }, [accessByRole]);
+    return entries.some((e: any) => {
+      const can = (e.canUpdate ?? e.can_update ?? e.canEdit ?? e.can_edit ?? e.canManage ?? e.can_manage ?? e.manage ?? e.update ?? e.edit);
+      return can === true || can === 1 || can === '1';
+    });
+  }, [accessByRole, user]);
   const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
