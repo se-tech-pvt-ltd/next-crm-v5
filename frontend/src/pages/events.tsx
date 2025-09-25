@@ -910,7 +910,7 @@ export default function EventsPage() {
                           <span className="truncate">{e.venue}</span>
                         </div>
                         <div>
-                          <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-white/20 bg-white/10 text-white">{e.type}</span>
+                          <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-[#223E7D]/20 bg-[#223E7D]/5 text-[#223E7D]">{e.type}</span>
                         </div>
                         <div className="pt-1">
                           <div className="inline-flex items-center text-[11px] text-white/90 group-hover:translate-x-0.5 transition">
