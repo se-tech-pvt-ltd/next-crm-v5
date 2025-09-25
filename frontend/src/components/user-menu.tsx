@@ -132,10 +132,14 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
 
   return (
     <>
-      <div className="mt-auto pt-2">
+      <div className={fullWidth ? "mt-auto pt-2" : ""}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={`${fullWidth ? 'w-full' : 'w-auto'} h-auto ${fullWidth ? 'p-2' : 'p-1'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}>
+            <Button
+              variant="ghost"
+              size={fullWidth ? undefined : 'sm'}
+              className={`${fullWidth ? 'w-full p-2 h-auto' : 'w-auto h-9 p-1'} ${collapsed ? 'justify-center' : 'justify-start p-3'}`}
+            >
               {collapsed ? (
                 <div className="relative group">
                   <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
