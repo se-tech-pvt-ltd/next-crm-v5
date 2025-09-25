@@ -75,7 +75,7 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="p-0 sm:max-w-4xl md:max-w-5xl w-[96vw] h-[520px] sm:h-[560px] grid grid-rows-[auto_1fr_auto]">
+      <DialogContent hideClose className="p-0 sm:max-w-3xl md:max-w-4xl w-[90vw] h-[460px] sm:h-[500px] grid grid-rows-[auto_1fr_auto]">
         <DialogTitle className="sr-only">Latest Updates</DialogTitle>
         {/* Top bar */}
         <div className="bg-[#223E7D] text-white px-5 py-3 rounded-t-md flex items-center justify-between">
@@ -94,7 +94,7 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
         {/* Content */}
         <div className="bg-white px-3 sm:px-5 py-4 overflow-hidden min-h-0 h-full">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 min-h-0 h-full">
+          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 min-h-0 h-full">
             {/* Left list (fixed column with its own scroll) */}
             <div className="border rounded-md overflow-hidden bg-gray-50 h-full">
               <ScrollArea className="h-full">
