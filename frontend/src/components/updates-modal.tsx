@@ -75,7 +75,7 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="p-0 sm:max-w-4xl md:max-w-5xl w-[96vw]">
+      <DialogContent hideClose className="p-0 sm:max-w-4xl md:max-w-5xl w-[96vw] max-h-[85vh] grid grid-rows-[auto_1fr_auto]">
         <DialogTitle className="sr-only">Latest Updates</DialogTitle>
         {/* Top bar */}
         <div className="bg-[#223E7D] text-white px-5 py-3 rounded-t-md flex items-center justify-between">
@@ -93,11 +93,11 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
         </div>
 
         {/* Content */}
-        <div className="bg-white px-3 sm:px-5 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4">
+        <div className="bg-white px-3 sm:px-5 py-4 overflow-y-auto min-h-0">
+          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 min-h-0">
             {/* Left list */}
-            <div className="border rounded-md overflow-hidden bg-gray-50">
-              <ScrollArea className="h-[360px]">
+            <div className="border rounded-md overflow-hidden bg-gray-50 h-full">
+              <ScrollArea className="h-full">
                 <ul>
                   {updates.map((u, idx) => (
                     <li key={u.id}>
@@ -116,7 +116,7 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right panel */}
-            <div className="border rounded-md p-4">
+            <div className="border rounded-md p-4 h-full overflow-auto">
               <h3 className="text-xl font-semibold mb-2">{updates[active].title}</h3>
               <div className="prose prose-sm max-w-none">
                 {updates[active].body}
