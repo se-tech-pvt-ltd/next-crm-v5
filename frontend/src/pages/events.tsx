@@ -891,7 +891,7 @@ export default function EventsPage() {
                               type="button"
                               aria-label="Edit event"
                               onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); navigate(`/events/${e.id}/edit`); }}
-                              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-white hover:bg-white/10"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#223E7D] hover:bg-[#223E7D]/10"
                               title="Edit"
                             >
                               <Edit className="w-4 h-4" />
@@ -901,12 +901,12 @@ export default function EventsPage() {
                       </CardHeader>
                       <CardContent className="pt-1 space-y-2">
                         <div className="flex items-center text-xs text-gray-700">
-                          <Calendar className="w-3.5 h-3.5 mr-2 text-white/80" />
+                          <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           <span>{formatEventDate(e.date)}</span>
-                          {e.time ? (<><span className="mx-2 text-white/40">•</span><Clock className="w-3.5 h-3.5 mr-1 text-white/80" /><span>{formatEventTime(e.time)}</span></>) : null}
+                          {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
                         </div>
                         <div className="flex items-center text-xs text-gray-700">
-                          <MapPin className="w-3.5 h-3.5 mr-2 text-white/80" />
+                          <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           <span className="truncate">{e.venue}</span>
                         </div>
                         <div>
