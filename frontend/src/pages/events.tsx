@@ -178,6 +178,7 @@ export default function EventsPage() {
   const [, navigate] = useLocation();
   const [isCreateRoute] = useRoute('/events/new');
   const [isEditRoute, editParams] = useRoute('/events/:id/edit');
+  const [isRegsRoute, regsParams] = useRoute('/events/:id/registrations');
 
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
@@ -747,6 +748,17 @@ export default function EventsPage() {
     }
   }, [visibleEvents, filterEventId]);
 
+  // Sync state with /events/:id/registrations route
+  useEffect(() => {
+    if (isRegsRoute && regsParams?.id) {
+      const id = String(regsParams.id);
+      setFilterEventId(id);
+      setShowList(true);
+    } else if (!isEditRoute && !isCreateRoute) {
+      setShowList(false);
+    }
+  }, [isRegsRoute, regsParams?.id, isEditRoute, isCreateRoute]);
+
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
 
@@ -955,7 +967,7 @@ export default function EventsPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
-                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
+                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { navigate(`/events/${e.id}/registrations`); }}>
                       <div className="h-1 bg-gradient-to-r from-[#223E7D] to-[#223E7D]/30" />
                       <CardHeader className="pb-1">
                         <div className="flex items-start justify-between gap-2">
@@ -1006,7 +1018,7 @@ export default function EventsPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setShowList(false)} className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50">
+                  <button type="button" onClick={() => navigate('/events')} className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50">
                     <ChevronLeft className="w-4 h-4 text-gray-600" />
                   </button>
                   <CardTitle className="text-sm flex items-center">Event Registrations</CardTitle>
@@ -1507,7 +1519,7 @@ export default function EventsPage() {
         {/* Edit Event Modal */}
         <DetailsDialogLayout
           open={Boolean(isEditRoute)}
-          onOpenChange={(open) => navigate(open ? `/events/${editParams?.id}/edit` : '/events')}
+          onOpenChange={(open) => navigate(open ? `/events/${editParams?.id}/edit` : (isRegsRoute && editParams?.id ? `/events/${editParams.id}/registrations` : '/events'))}
           title="Edit Event"
           headerClassName="bg-[#223E7D] text-white"
           headerLeft={(<div className="text-base font-semibold">Edit Event</div>)}
