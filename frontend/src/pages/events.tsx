@@ -1014,15 +1014,35 @@ export default function EventsPage() {
 
   // When registrations data loads, if there's a pendingRegId from the route, open the view modal for it
   useEffect(() => {
-    if (!pendingRegId) return;
+    if (!pendingRegId && !pendingOpenLeadId) return;
     const list = (registrations || []) as any[];
-    const match = list.find(r => String(r.id) === String(pendingRegId) || String(r.eventRegId) === String(pendingRegId));
-    if (match) {
-      setViewReg(match);
-      setIsViewRegOpen(true);
-      setPendingRegId(null);
+    if (pendingRegId) {
+      const match = list.find(r => String(r.id) === String(pendingRegId) || String(r.eventRegId) === String(pendingRegId));
+      if (match) {
+        setViewReg(match);
+        setIsViewRegOpen(true);
+        setPendingRegId(null);
+      }
     }
-  }, [registrations, pendingRegId]);
+
+    if (pendingOpenLeadId) {
+      const match2 = list.find(r => String(r.id) === String(pendingOpenLeadId) || String(r.eventRegId) === String(pendingOpenLeadId));
+      if (match2) {
+        // prepare initial data preferring 'Events' as source
+        setLeadInitialData({
+          name: match2.name,
+          email: match2.email,
+          phone: match2.number,
+          city: match2.city,
+          source: match2.source || undefined,
+          status: 'new',
+          eventRegId: match2.id,
+        });
+        setAddLeadModalOpen(true);
+        setPendingOpenLeadId(null);
+      }
+    }
+  }, [registrations, pendingRegId, pendingOpenLeadId]);
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
