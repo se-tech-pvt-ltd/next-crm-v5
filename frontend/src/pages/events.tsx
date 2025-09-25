@@ -269,8 +269,8 @@ export default function EventsPage() {
     if (addLeadModalOpen) return; // when open, already set by openConvertToLeadModal
     // when modal closes, revert URL to registration detail or registrations list
     try {
-      const regId = (leadInitialData && leadInitialData.eventRegId) || (regDetailParams && regDetailParams.regId) || pendingRegId;
-      const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (selectedEvent && selectedEvent.id) || (leadInitialData && leadInitialData.eventId) || null;
+      const regId = (leadInitialData && leadInitialData.eventRegId) || (regDetailParams && regDetailParams.regId) || pendingRegId || (leadParams && leadParams.regId);
+      const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (leadParams && leadParams.id) || (selectedEvent && selectedEvent.id) || (leadInitialData && leadInitialData.eventId) || null;
       if (eventId && regId) {
         navigate(`/events/${eventId}/registrations/${regId}`);
       } else if (eventId) {
