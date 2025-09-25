@@ -1344,7 +1344,7 @@ export default function EventsPage() {
                           </TableHeader>
                           <TableBody>
                             {pageItems.map((r: any) => (
-                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { const eventId = selectedEvent?.id || r.eventId || r.event_id; navigate(`/events/${eventId}/registrations/${r.id}`); }}>
+                              <TableRow key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => { const eventId = selectedEvent?.id || r.eventId || r.event_id; const target = `/events/${eventId}/registrations/${r.id}`; if (location === target) { setViewReg(r); try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsViewRegOpen(true)); } catch { setIsViewRegOpen(true); } } else { navigate(target); } }}>
                                 <TableCell className="p-2 text-xs">{r.registrationCode}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.name}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
