@@ -1594,7 +1594,7 @@ export default function EventsPage() {
                     <Select value={editEventAccess.counsellorId || ''} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, counsellorId: v }))}>
                       <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
-                        {counselorOptions.map((u: any) => (
+                        {counselorOptionsEdit.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
                         ))}
                       </SelectContent>
