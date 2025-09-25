@@ -1723,7 +1723,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Branch</Label>
                     <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v, counsellorId: '', admissionOfficerId: '' }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.branch}><SelectValue placeholder="Select branch" /></SelectTrigger>
                       <SelectContent>
                         {filteredBranches.map((b: any) => (
                           <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
