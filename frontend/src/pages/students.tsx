@@ -44,7 +44,7 @@ export default function Students() {
   const [pageSize] = useState(8); // 8 records per page
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const { accessByRole } = useAuth() as any;
+  const { accessByRole, user } = useAuth() as any;
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
   const canCreateStudent = (() => {
