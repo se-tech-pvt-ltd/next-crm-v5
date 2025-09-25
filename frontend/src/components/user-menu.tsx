@@ -142,7 +142,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
             >
               {collapsed ? (
                 <div className="relative group">
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
                     {profileImageUrlSrc ? (
                       <img src={profileImageUrlSrc} alt="avatar" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                     ) : (
