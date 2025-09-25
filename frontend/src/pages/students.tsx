@@ -99,7 +99,10 @@ export default function Students() {
   }) || [];
 
   // Detect if server returned pagination metadata
-  const serverPaginated = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
+  const serverPaginatedRaw = Boolean(studentsResponse && !Array.isArray(studentsResponse) && studentsResponse.pagination);
+  // If current user is a counsellor or admission officer, server-side pagination may include other users' records.
+  // Force client-side pagination in that case to correctly restrict visible records.
+  const serverPaginated = serverPaginatedRaw && !(isCounsellor || isAdmissionOfficer);
 
   // Effective pagination: if server provides it, use that; otherwise compute based on filteredAll
   const effectivePagination = serverPaginated ? rawPagination : { page: currentPage, limit: pageSize, total: filteredAll.length, totalPages: Math.max(1, Math.ceil(filteredAll.length / pageSize)), hasNextPage: currentPage * pageSize < (filteredAll.length || 0), hasPrevPage: currentPage > 1 };
