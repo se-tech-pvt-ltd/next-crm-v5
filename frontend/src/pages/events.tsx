@@ -900,12 +900,12 @@ export default function EventsPage() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-1 space-y-2">
-                        <div className="flex items-center text-xs text-white/90">
+                        <div className="flex items-center text-xs text-gray-700">
                           <Calendar className="w-3.5 h-3.5 mr-2 text-white/80" />
                           <span>{formatEventDate(e.date)}</span>
                           {e.time ? (<><span className="mx-2 text-white/40">•</span><Clock className="w-3.5 h-3.5 mr-1 text-white/80" /><span>{formatEventTime(e.time)}</span></>) : null}
                         </div>
-                        <div className="flex items-center text-xs text-white/90">
+                        <div className="flex items-center text-xs text-gray-700">
                           <MapPin className="w-3.5 h-3.5 mr-2 text-white/80" />
                           <span className="truncate">{e.venue}</span>
                         </div>
