@@ -399,7 +399,7 @@ export default function EventsPage() {
         const userMappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
         // find mapping where branch belongs to the selected region
         for (const m of userMappings) {
-          const bid = String(m.branchId ?? m.branch_id || '');
+          const bid = String((m.branchId ?? m.branch_id) || '');
           const b = (branches as any[]).find((x: any) => String(x.id) === bid);
           if (b && String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId)) { candidateBranch = bid; break; }
         }
