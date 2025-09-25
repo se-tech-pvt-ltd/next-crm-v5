@@ -672,17 +672,6 @@ export default function EventsPage() {
     <Layout title="Events" helpText="Manage events and registrations. Similar to Leads.">
       <div className="space-y-4">
 
-        {!showList && canCreateEvent && (
-          <div className="flex justify-end">
-            <Link href="/events/new">
-              <Button className="h-8 rounded-full">
-                <Plus className="w-3 h-3 mr-1" />
-                Add Event
-              </Button>
-            </Link>
-          </div>
-        )}
-
         {!showList && (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2">
             <Card>
@@ -745,7 +734,18 @@ export default function EventsPage() {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              {canCreateEvent && (
+                <div className="flex justify-end mb-1">
+                  <Link href="/events/new">
+                    <Button className="h-8 rounded-full">
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add Event
+                    </Button>
+                  </Link>
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {visibleEvents.map((e: any) => { const p = getPalette(e.type); return (
                 <Card key={e.id} className={`group cursor-pointer rounded-xl border bg-white hover:shadow-md transition overflow-hidden ${p.cardBorder}`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
                   <div className={`h-1 bg-gradient-to-r ${p.gradientFrom} ${p.gradientTo}`} />
@@ -774,6 +774,7 @@ export default function EventsPage() {
                   </CardContent>
                 </Card>
               ); })}
+            </div>
             </div>
           )
         )}
