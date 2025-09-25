@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { Settings, LogOut, User, Edit2, Save, X, Upload } from 'lucide-react';
+import { Settings, LogOut, User, Edit2, Save, X, Upload, Mail, Phone, Shield, Building2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -185,82 +185,104 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
       </div>
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent hideClose className="no-not-allowed p-0 sm:max-w-lg md:max-w-2xl w-[92vw] overflow-hidden">
+        <DialogContent hideClose className="no-not-allowed p-0 sm:max-w-xl md:max-w-3xl w-[94vw] overflow-hidden rounded-2xl">
           <DialogTitle className="sr-only">User Profile</DialogTitle>
-          <div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent px-6 py-5 border-b flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center ring-2 ring-primary/40">
-                {profileImageUrl ? (
-                  <img src={profileImageUrl || profileImageUrlSrc} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-6 h-6 text-primary" />
-                )}
-              </div>
-              <div>
-                <div className="text-lg font-semibold">{displayName}</div>
-                <Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || (user as any).role)}</Badge>
-              </div>
-            </div>
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
-                  <X className="w-4 h-4 mr-1" />Cancel
-                </Button>
-                <Button size="sm" onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-1" />Save
-                </Button>
-              </div>
-            ) : (
-              <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                <Edit2 className="w-4 h-4 mr-1" />Edit
-              </Button>
-            )}
-          </div>
 
-          <div className="p-6 grid md:grid-cols-[220px_1fr] gap-6">
-            <div className="space-y-4">
-              <div className="relative w-40 h-40 rounded-full overflow-hidden border bg-muted mx-auto md:mx-0">
+          {/* Cover */}
+          <div className="relative">
+            <div className="h-28 bg-gradient-to-r from-[#223E7D] via-blue-600 to-accent" />
+            <button
+              aria-label="Close"
+              onClick={() => setIsProfileOpen(false)}
+              className="absolute right-3 top-3 h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 text-white grid place-items-center"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="absolute -bottom-10 left-6">
+              <div className="relative w-20 h-20 rounded-full ring-4 ring-white shadow-xl overflow-hidden bg-white">
                 <Avatar className="w-full h-full">
                   <AvatarImage src={profileImageUrl || profileImageUrlSrc} alt={displayName} />
                   <AvatarFallback>{(displayName || 'U').slice(0,2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 {isEditing && (
-                  <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 flex items-center justify-center gap-2">
-                    <Upload className="w-3.5 h-3.5" />
+                  <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[11px] py-1 flex items-center justify-center gap-1">
+                    <Upload className="w-3 h-3" />
                     <button className="underline" onClick={() => fileRef.current?.click()}>Change</button>
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); }} />
                   </div>
                 )}
               </div>
-              {isEditing && profileImageUrl && (
-                <Button variant="ghost" size="sm" onClick={() => { setProfileImageUrl(''); setProfileImageId(''); }}>Remove</Button>
-              )}
+            </div>
+          </div>
 
-              <div className="hidden md:block">
-                <div className="text-xs text-muted-foreground mb-1">Email</div>
-                <div className="text-sm break-all">{emailStr || '-'}</div>
+          {/* Body */}
+          <div className="px-6 pt-14 pb-6 grid md:grid-cols-[260px_1fr] gap-6">
+            {/* Left card */}
+            <div className="bg-white rounded-xl border shadow-sm p-4 h-max">
+              <div className="mb-3">
+                <div className="text-lg font-semibold leading-tight">{displayName}</div>
+                <div className="mt-1"><Badge className={getRoleColor(roleRaw || (user as any).role)}>{getRoleDisplay(roleRaw || (user as any).role)}</Badge></div>
               </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-gray-600"><Mail className="w-4 h-4" /> <span className="break-all">{emailStr || '-'}</span></div>
+                <div className="flex items-center gap-2 text-gray-600"><Phone className="w-4 h-4" /> <span>{phoneStr || 'Not set'}</span></div>
+                <div className="flex items-center gap-2 text-gray-600"><Shield className="w-4 h-4" /> <span>{getRoleDisplay(roleRaw || (user as any).role || 'Unknown')}</span></div>
+                {(user as any).branch && (
+                  <div className="flex items-center gap-2 text-gray-600"><Building2 className="w-4 h-4" />
+                    <span>
+                      {(user as any).branch === 'branch_alpha' ? 'Branch Alpha - New York, NY' :
+                       (user as any).branch === 'branch_beta' ? 'Branch Beta - Los Angeles, CA' :
+                       (user as any).branch === 'branch_gamma' ? 'Branch Gamma - Chicago, IL' :
+                       (user as any).branch}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {isEditing && profileImageUrl && (
+                <div className="mt-3">
+                  <Button variant="ghost" size="sm" onClick={() => { setProfileImageUrl(''); setProfileImageId(''); }}>Remove photo</Button>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-5">
+            {/* Right panel */}
+            <div className="bg-white rounded-xl border shadow-sm p-5 space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="text-base font-semibold">Profile details</div>
+                {!isEditing ? (
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                    <Edit2 className="w-4 h-4 mr-1" />Edit
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
+                      <X className="w-4 h-4 mr-1" />Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleSave}>
+                      <Save className="w-4 h-4 mr-1" />Save
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               {!isEditing ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
+                  <div className="p-3 rounded-lg bg-muted/40">
                     <div className="text-xs text-muted-foreground">Name</div>
-                    <div className="text-sm">{`${firstNameSrc} ${lastNameSrc}`.trim() || displayName}</div>
+                    <div className="text-sm font-medium">{`${firstNameSrc} ${lastNameSrc}`.trim() || displayName}</div>
                   </div>
-                  <div>
+                  <div className="p-3 rounded-lg bg-muted/40">
                     <div className="text-xs text-muted-foreground">Phone</div>
-                    <div className="text-sm">{phoneStr || 'Not set'}</div>
+                    <div className="text-sm font-medium">{phoneStr || 'Not set'}</div>
                   </div>
-                  <div>
+                  <div className="p-3 rounded-lg bg-muted/40">
                     <div className="text-xs text-muted-foreground">Role</div>
-                    <div className="text-sm">{getRoleDisplay(roleRaw || (user as any).role || 'Unknown')}</div>
+                    <div className="text-sm font-medium">{getRoleDisplay(roleRaw || (user as any).role || 'Unknown')}</div>
                   </div>
                   {(user as any).branch && (
-                    <div className="sm:col-span-2">
+                    <div className="p-3 rounded-lg bg-muted/40 sm:col-span-2">
                       <div className="text-xs text-muted-foreground">Branch</div>
-                      <div className="text-sm">
+                      <div className="text-sm font-medium">
                         {(user as any).branch === 'branch_alpha' ? 'Branch Alpha - New York, NY' :
                          (user as any).branch === 'branch_beta' ? 'Branch Beta - Los Angeles, CA' :
                          (user as any).branch === 'branch_gamma' ? 'Branch Gamma - Chicago, IL' :
@@ -286,9 +308,7 @@ export function UserMenu({ collapsed = false, fullWidth = true }: UserMenuProps)
                 </div>
               )}
 
-              <Separator />
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-end">
+              <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
                 <Button variant="outline" onClick={() => setIsProfileOpen(false)}>Close</Button>
                 {!isEditing ? (
                   <Button onClick={() => setIsEditing(true)} variant="secondary"><Edit2 className="w-4 h-4 mr-2" />Edit</Button>
