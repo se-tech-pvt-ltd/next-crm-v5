@@ -180,7 +180,9 @@ export default function EventsPage() {
   const [isEditRoute, editParams] = useRoute('/events/:id/edit');
   const [isRegsRoute, regsParams] = useRoute('/events/:id/registrations');
   const [isRegDetailRoute, regDetailParams] = useRoute('/events/:id/registrations/:regId');
+  const [isLeadRoute, leadParams] = useRoute('/events/:id/registrations/:regId/lead');
   const [pendingRegId, setPendingRegId] = useState<string | null>(null);
+  const [pendingOpenLeadId, setPendingOpenLeadId] = useState<string | null>(null);
 
   const addEventMutation = useMutation({
     mutationFn: EventsService.createEvent,
