@@ -271,6 +271,8 @@ export default function EventsPage() {
   const eventViewLevel = useMemo(() => {
     const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
     const levels = entries.map((e: any) => String(e.viewLevel ?? e.view_level ?? '').trim().toLowerCase());
+    if (levels.some((v: string) => v === 'none')) return 'none' as const; // sidebar already hides module
+    if (levels.some((v: string) => v === 'all')) return 'all' as const; // nothing disabled
     if (levels.some((v: string) => v === 'assigned')) return 'assigned' as const;
     if (levels.some((v: string) => v === 'branch')) return 'branch' as const;
     if (levels.some((v: string) => v === 'region')) return 'region' as const;
@@ -281,6 +283,7 @@ export default function EventsPage() {
     if (eventViewLevel === 'region') d.region = true;
     else if (eventViewLevel === 'branch') { d.region = true; d.branch = true; }
     else if (eventViewLevel === 'assigned') { d.region = true; d.branch = true; d.counsellor = true; d.admissionOfficer = true; }
+    // 'all' and default: nothing disabled
     return d;
   }, [eventViewLevel]);
 
