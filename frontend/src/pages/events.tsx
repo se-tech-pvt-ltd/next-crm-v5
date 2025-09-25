@@ -431,6 +431,20 @@ export default function EventsPage() {
     }
   }, [user, branches, branchEmps, eventAccess.branchId]);
 
+  // Ensure admission officer is set automatically when opening Create modal
+  useEffect(() => {
+    if (!isCreateRoute) return;
+    try {
+      const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '');
+      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
+      if (!isAdmissionOfficer) return;
+      const id = String((user as any)?.id || tokenSub || '');
+      if (id && (!eventAccess.admissionOfficerId || String(eventAccess.admissionOfficerId) !== id)) {
+        setEventAccess((s) => ({ ...s, admissionOfficerId: id }));
+      }
+    } catch {}
+  }, [isCreateRoute, user, tokenSub, eventAccess.admissionOfficerId]);
+
   // If branch selector is disabled by role/ACL, ensure a sensible branch is selected (prefer user's branch, or single mapping)
   useEffect(() => {
     if (!disableByView.branch) return;
