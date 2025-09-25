@@ -882,7 +882,7 @@ export default function EventsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
                     <Card key={e.id} className={`group cursor-pointer rounded-xl border border-white/15 bg-[#223E7D] text-white hover:shadow-lg hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { setFilterEventId(e.id); setShowList(true); }}>
-                      <div className="h-1 bg-gradient-to-r from-white/40 to-white/10" />
+                      <div className="h-1 bg-gradient-to-r from-[#223E7D] to-[#223E7D]/30" />
                       <CardHeader className="pb-1">
                         <div className="flex items-start justify-between gap-2">
                           <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
