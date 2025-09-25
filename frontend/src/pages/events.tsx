@@ -266,6 +266,24 @@ export default function EventsPage() {
     });
   }, [accessByRole, user]);
   const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+
+  // Role access view level for Events module
+  const eventViewLevel = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
+    const levels = entries.map((e: any) => String(e.viewLevel ?? e.view_level ?? '').trim().toLowerCase());
+    if (levels.some((v: string) => v === 'assigned')) return 'assigned' as const;
+    if (levels.some((v: string) => v === 'branch')) return 'branch' as const;
+    if (levels.some((v: string) => v === 'region')) return 'region' as const;
+    return '' as const;
+  }, [accessByRole]);
+  const disableByView = useMemo(() => {
+    const d = { region: false, branch: false, counsellor: false, admissionOfficer: false };
+    if (eventViewLevel === 'region') d.region = true;
+    else if (eventViewLevel === 'branch') { d.region = true; d.branch = true; }
+    else if (eventViewLevel === 'assigned') { d.region = true; d.branch = true; d.counsellor = true; d.admissionOfficer = true; }
+    return d;
+  }, [eventViewLevel]);
+
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
   useEffect(() => {
