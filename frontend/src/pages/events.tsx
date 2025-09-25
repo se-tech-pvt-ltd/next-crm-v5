@@ -332,58 +332,7 @@ export default function EventsPage() {
     }
   }, [isCreateRoute, user, regions, eventAccess.regionId]);
 
-  // Auto-select branch for admission officers when creating events or on page load
-  useEffect(() => {
-    try {
-      const roleNorm = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
-      const isAdmissionOfficer = roleNorm === 'admission_officer' || roleNorm === 'admission' || roleNorm === 'admissionofficer' || roleNorm === 'admission officer';
-      if (!isAdmissionOfficer) return;
-
-      // If branch already selected, nothing to do
-      if (eventAccess.branchId) return;
-
-      // Try to read branch from JWT token role_details or payload
-      let candidateBranch = '';
-      try {
-        const t = localStorage.getItem('auth_token');
-        if (t) {
-          const parts = String(t).split('.');
-          if (parts.length >= 2) {
-            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-            const pad = b64.length % 4;
-            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
-            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-            const payload = JSON.parse(json) as any;
-            const rd = payload?.role_details || payload?.roleDetails || {};
-            candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.user?.branch_id ?? payload?.user?.branchId ?? '';
-            if (candidateBranch) candidateBranch = String(candidateBranch);
-          }
-        }
-      } catch {}
-
-      // If not found in token, try user object
-      if (!candidateBranch) {
-        const uBranch = String((user as any)?.branchId ?? (user as any)?.branch_id ?? '');
-        if (uBranch) candidateBranch = uBranch;
-      }
-
-      // If still not found, try branchEmps mapping: if user is mapped to exactly one branch, use it
-      if (!candidateBranch && Array.isArray(branchEmps)) {
-        const mappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
-        if (mappings.length === 1) candidateBranch = String(mappings[0].branchId ?? mappings[0].branch_id);
-      }
-
-      if (candidateBranch) {
-        // Ensure branch exists in list and optionally set region
-        const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(candidateBranch) || String(x.id) === String(candidateBranch)) : null;
-        const regionIdFromBranch = b ? String(b.regionId ?? b.region_id ?? '') : '';
-        setEventAccess((s) => ({ ...s, branchId: String(candidateBranch), regionId: s.regionId || regionIdFromBranch }));
-      }
-    } catch (err) {
-      // ignore
-    }
-  }, [user, branches, branchEmps, eventAccess.branchId]);
-  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
+    const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches() });
   const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps() });
   const { data: users = [] } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
