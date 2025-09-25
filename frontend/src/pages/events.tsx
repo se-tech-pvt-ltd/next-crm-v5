@@ -266,6 +266,27 @@ export default function EventsPage() {
     });
   }, [accessByRole, user]);
   const [eventAccess, setEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+
+  // Role access view level for Events module
+  const eventViewLevel = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'event');
+    const levels = entries.map((e: any) => String(e.viewLevel ?? e.view_level ?? '').trim().toLowerCase());
+    if (levels.some((v: string) => v === 'none')) return 'none' as const; // sidebar already hides module
+    if (levels.some((v: string) => v === 'all')) return 'all' as const; // nothing disabled
+    if (levels.some((v: string) => v === 'assigned')) return 'assigned' as const;
+    if (levels.some((v: string) => v === 'branch')) return 'branch' as const;
+    if (levels.some((v: string) => v === 'region')) return 'region' as const;
+    return '' as const;
+  }, [accessByRole]);
+  const disableByView = useMemo(() => {
+    const d = { region: false, branch: false, counsellor: false, admissionOfficer: false };
+    if (eventViewLevel === 'region') d.region = true;
+    else if (eventViewLevel === 'branch') { d.region = true; d.branch = true; }
+    else if (eventViewLevel === 'assigned') { d.region = true; d.branch = true; d.counsellor = true; d.admissionOfficer = true; }
+    // 'all' and default: nothing disabled
+    return d;
+  }, [eventViewLevel]);
+
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions() });
 
   useEffect(() => {
@@ -325,6 +346,7 @@ export default function EventsPage() {
     ? branches.filter((b: any) => !eventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId))
     : [];
 
+  // For Create modal (based on eventAccess)
   const counselorOptions = Array.isArray(users)
     ? users
         .filter((u: any) => {
@@ -350,6 +372,58 @@ export default function EventsPage() {
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(eventAccess.branchId));
         })
     : [];
+
+  // For Edit modal (based on editEventAccess)
+  const filteredBranchesEdit = Array.isArray(branches)
+    ? branches.filter((b: any) => !editEventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(editEventAccess.regionId))
+    : [];
+
+  const counselorOptionsEdit = Array.isArray(users)
+    ? users
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'counselor' || r === 'counsellor';
+        })
+        .filter((u: any) => {
+          if (!editEventAccess.branchId) return false;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(editEventAccess.branchId));
+        })
+    : [];
+
+  const admissionOfficerOptionsEdit = Array.isArray(users)
+    ? users
+        .filter((u: any) => {
+          const r = normalizeRole(u.role || u.role_name || u.roleName);
+          return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
+        })
+        .filter((u: any) => {
+          if (!editEventAccess.branchId) return false;
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(editEventAccess.branchId));
+        })
+    : [];
+
+  // Auto-preselect for Edit: if only one branch/counsellor/officer is available and not already set
+  useEffect(() => {
+    if (!isEditRoute) return;
+    if (editEventAccess.branchId) return;
+    const list = filteredBranchesEdit;
+    if (Array.isArray(list) && list.length === 1) {
+      setEditEventAccess((s) => ({ ...s, branchId: String((list[0] as any).id) }));
+    }
+  }, [isEditRoute, filteredBranchesEdit, editEventAccess.branchId]);
+
+  useEffect(() => {
+    if (!isEditRoute) return;
+    if (!editEventAccess.branchId) return;
+    if (!editEventAccess.counsellorId && Array.isArray(counselorOptionsEdit) && counselorOptionsEdit.length === 1) {
+      setEditEventAccess((s) => ({ ...s, counsellorId: String((counselorOptionsEdit[0] as any).id) }));
+    }
+    if (!editEventAccess.admissionOfficerId && Array.isArray(admissionOfficerOptionsEdit) && admissionOfficerOptionsEdit.length === 1) {
+      setEditEventAccess((s) => ({ ...s, admissionOfficerId: String((admissionOfficerOptionsEdit[0] as any).id) }));
+    }
+  }, [isEditRoute, editEventAccess.branchId, editEventAccess.counsellorId, editEventAccess.admissionOfficerId, counselorOptionsEdit, admissionOfficerOptionsEdit]);
 
   const handleCreateEvent = () => {
     if (!newEvent.name || !newEvent.type || !newEvent.date || !newEvent.venue || !newEvent.time) {
@@ -1112,7 +1186,7 @@ export default function EventsPage() {
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t">
                 <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving…' : 'Save Registration'}</Button>
+                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving��' : 'Save Registration'}</Button>
               </div>
             </form>
           </DialogContent>
@@ -1517,7 +1591,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Region</Label>
                     <Select value={editEventAccess.regionId} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, regionId: v, branchId: '', counsellorId: '', admissionOfficerId: '' }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={isRegionalManager}><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.region}><SelectValue placeholder="Select region" /></SelectTrigger>
                       <SelectContent>
                         {Array.isArray(regions) && regions.map((r: any) => (
                           <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
@@ -1528,9 +1602,9 @@ export default function EventsPage() {
                   <div>
                     <Label>Branch</Label>
                     <Select value={editEventAccess.branchId} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, branchId: v, counsellorId: '', admissionOfficerId: '' }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.branch}><SelectValue placeholder="Select branch" /></SelectTrigger>
                       <SelectContent>
-                        {filteredBranches.map((b: any) => (
+                        {filteredBranchesEdit.map((b: any) => (
                           <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1539,9 +1613,9 @@ export default function EventsPage() {
                   <div>
                     <Label>Counsellor</Label>
                     <Select value={editEventAccess.counsellorId || ''} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, counsellorId: v }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor}><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
-                        {counselorOptions.map((u: any) => (
+                        {counselorOptionsEdit.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1550,9 +1624,9 @@ export default function EventsPage() {
                   <div>
                     <Label>Admission Officer</Label>
                     <Select value={editEventAccess.admissionOfficerId || ''} onValueChange={(v) => setEditEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer}><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
-                        {admissionOfficerOptions.map((u: any) => (
+                        {admissionOfficerOptionsEdit.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1641,7 +1715,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Region</Label>
                     <Select value={eventAccess.regionId} onValueChange={(v) => setEventAccess((a) => ({ ...a, regionId: v, branchId: '', counsellorId: '', admissionOfficerId: '' }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={isRegionalManager}><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.region}><SelectValue placeholder="Select region" /></SelectTrigger>
                       <SelectContent>
                         {Array.isArray(regions) && regions.map((r: any) => (
                           <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
@@ -1652,7 +1726,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Branch</Label>
                     <Select value={eventAccess.branchId} onValueChange={(v) => setEventAccess((a) => ({ ...a, branchId: v, counsellorId: '', admissionOfficerId: '' }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.branch}><SelectValue placeholder="Select branch" /></SelectTrigger>
                       <SelectContent>
                         {filteredBranches.map((b: any) => (
                           <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
@@ -1663,7 +1737,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Counsellor</Label>
                     <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor}><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
                         {counselorOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
@@ -1674,7 +1748,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Admission Officer</Label>
                     <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer}><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>

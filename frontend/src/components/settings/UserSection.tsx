@@ -244,13 +244,22 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
   // Users filtering
   const filteredUsers = (Array.isArray(users) ? users : []).filter((u: any) => {
     const q = filters.query.trim().toLowerCase();
-    const first = (u.firstName ?? u.first_name) ?? '';
-    const last = (u.lastName ?? u.last_name) ?? '';
+    const firstRaw = String((u.firstName ?? u.first_name) ?? '').trim();
+    const lastRaw = String((u.lastName ?? u.last_name) ?? '').trim();
+    const emailRaw = String(u.email || '').trim();
+    const phoneRaw = String(u.phoneNumber ?? u.phone_number ?? '').trim();
+    const full1 = [firstRaw, lastRaw].filter(Boolean).join(' ').toLowerCase();
+    const full2 = [lastRaw, firstRaw].filter(Boolean).join(' ').toLowerCase();
+
     const matchesQuery = !q ||
-      String(first).toLowerCase().includes(q) ||
-      String(last).toLowerCase().includes(q) ||
-      String(u.email || '').toLowerCase().includes(q);
-    const matchesRole = !filters.role || String(u.role || '') === filters.role;
+      firstRaw.toLowerCase().includes(q) ||
+      lastRaw.toLowerCase().includes(q) ||
+      full1.includes(q) ||
+      full2.includes(q) ||
+      emailRaw.toLowerCase().includes(q) ||
+      phoneRaw.toLowerCase().includes(q);
+
+    const matchesRole = !filters.role || normalizeRole(String(u.role || '')) === filters.role;
     const matchesBranch = !filters.branchId || String((u.branchId ?? u.branch_id) || '') === filters.branchId;
     const matchesRegion = !filters.regionId || (() => {
       const nRole = normalizeRole(String(u.role || ''));
