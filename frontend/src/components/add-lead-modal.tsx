@@ -248,6 +248,13 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
           >
             Cancel
           </Button>
+          <Button
+            type="button"
+            onClick={() => { try { (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {} }}
+            className="px-3 h-8 text-xs bg-white text-[#223E7D] hover:bg-white/90 border border-white rounded-md"
+          >
+            Save
+          </Button>
         </div>
       )}
       leftContent={(
