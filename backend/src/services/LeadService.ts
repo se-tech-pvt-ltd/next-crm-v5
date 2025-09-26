@@ -3,6 +3,7 @@ import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
 import { LeadModel } from "../models/Lead.js";
 import { ActivityService } from "./ActivityService.js";
+import { eq, and, or, ilike, ne } from "drizzle-orm";
 
 interface PaginationOptions {
   page: number;
@@ -113,9 +114,11 @@ export class LeadService {
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
 
-    // Validate email and phone are not equal after update
+    // Normalize incoming values
     const nextEmail = String((updates as any).email ?? (currentLead as any).email ?? '').trim().toLowerCase();
     const nextPhone = String((updates as any).phone ?? (currentLead as any).phone ?? '').trim();
+
+    // Validate email and phone are not equal after update
     if (nextEmail && nextPhone) {
       const emailCompact = nextEmail.replace(/\s+/g, '');
       const phoneDigits = nextPhone.replace(/\D/g, '');
@@ -131,8 +134,36 @@ export class LeadService {
       }
     }
 
+    // Duplicate detection across other leads (email and phone)
+    let emailDup = false;
+    let phoneDup = false;
+    if (nextEmail) {
+      const rows = await db
+        .select({ id: leads.id })
+        .from(leads)
+        .where(and(eq(leads.email, nextEmail), ne(leads.id, id)))
+        .limit(1);
+      emailDup = Array.isArray(rows) && rows.length > 0;
+    }
+    if (nextPhone) {
+      const rows = await db
+        .select({ id: leads.id })
+        .from(leads)
+        .where(and(eq(leads.phone, nextPhone), ne(leads.id, id)))
+        .limit(1);
+      phoneDup = Array.isArray(rows) && rows.length > 0;
+    }
+    if (emailDup || phoneDup) {
+      const err = new Error('DUPLICATE');
+      // @ts-expect-error attach metadata
+      (err as any).fields = { email: emailDup, phone: phoneDup };
+      // @ts-expect-error attach status
+      (err as any).status = 409;
+      throw err;
+    }
+
     const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
-    
+
     if (lead) {
       // Log only selected changes
       for (const [fieldName, newValue] of Object.entries(updates)) {

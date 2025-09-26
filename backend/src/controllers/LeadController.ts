@@ -123,6 +123,19 @@ export class LeadController {
       if (error instanceof Error && (error as any).message === 'EMAIL_PHONE_SAME') {
         return res.status((error as any).status || 400).json({ message: 'Email and phone cannot be the same' });
       }
+      if (error instanceof Error && (error as any).message === 'DUPLICATE') {
+        const f = (error as any).fields || {};
+        const emailDup = Boolean(f.email);
+        const phoneDup = Boolean(f.phone);
+        const msg = emailDup && phoneDup
+          ? 'Duplicate email and phone'
+          : emailDup
+            ? 'Duplicate email'
+            : phoneDup
+              ? 'Duplicate phone'
+              : 'Duplicate';
+        return res.status((error as any).status || 409).json({ message: msg, fields: { email: emailDup, phone: phoneDup } });
+      }
       res.status(500).json({ message: "Failed to update lead" });
     }
   }

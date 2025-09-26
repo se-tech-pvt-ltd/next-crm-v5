@@ -105,6 +105,19 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     },
     onError: (error: any) => {
       console.error('Update lead error:', error);
+      const status = (error && (error.status || (error as any).code)) || 0;
+      const data = (error && (error.data || (error as any).response)) || {};
+      const fields = (data && (data.fields || {})) as { email?: boolean; phone?: boolean };
+      if (status === 409) {
+        let msg = data?.message || 'Duplicate';
+        if (!data?.message) {
+          const e = !!fields.email;
+          const p = !!fields.phone;
+          msg = e && p ? 'Duplicate email and phone' : e ? 'Duplicate email' : p ? 'Duplicate phone' : 'Duplicate';
+        }
+        toast({ title: 'Error', description: msg, variant: 'destructive' });
+        return;
+      }
       toast({ title: 'Error', description: error.message || 'Failed to update lead. Please try again.', variant: 'destructive' });
     },
   });
@@ -177,6 +190,24 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
           toast({ title: 'Invalid input', description: 'Email and phone cannot be the same.', variant: 'destructive' });
           return;
         }
+      }
+    } catch {}
+
+    // Client-side duplicate detection using cached leads
+    try {
+      const cache = queryClient.getQueryData<any>(['/api/leads']);
+      const list: any[] = Array.isArray(cache)
+        ? cache
+        : (cache && Array.isArray(cache.data) ? cache.data : []);
+      const idStr = String(lead?.id || '');
+      const nextEmail = String(editData.email || '').trim().toLowerCase();
+      const nextPhone = String(editData.phone || '').trim();
+      const existsEmail = nextEmail && list.some((l: any) => String(l.id) !== idStr && String(l.email || '').trim().toLowerCase() === nextEmail);
+      const existsPhone = nextPhone && list.some((l: any) => String(l.id) !== idStr && String(l.phone || '').trim() === nextPhone);
+      if (existsEmail || existsPhone) {
+        const msg = existsEmail && existsPhone ? 'Duplicate email and phone' : existsEmail ? 'Duplicate email' : 'Duplicate phone';
+        toast({ title: 'Error', description: msg, variant: 'destructive' });
+        return;
       }
     } catch {}
 
