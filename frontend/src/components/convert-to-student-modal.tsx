@@ -9,8 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ActivityTracker } from '@/components/activity-tracker';
-import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
 import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -384,6 +382,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       onOpenChange={onOpenChange}
       title="Convert Lead to Student"
       headerClassName="bg-[#223E7D] text-white"
+      contentClassName="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
       headerLeft={(
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -433,7 +432,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardHeader>
               <CollapsibleContent>
                 <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-2 bg-muted/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2 p-2 bg-muted/30 rounded-lg">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <User className="w-3 h-3" />
@@ -512,7 +511,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="city" className="text-sm font-medium flex items-center space-x-2">
                     <MapPin className="w-4 h-4" />
@@ -599,7 +598,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="status" className="text-sm font-medium flex items-center space-x-2">
                     <Target className="w-4 h-4" />
@@ -718,7 +717,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 {formData.consultancyFee === 'Yes' && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center space-x-2">
@@ -756,12 +755,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
 
           <Separator />
         </>
-      )}
-      rightWidth="420px"
-      rightContent={(
-        <div className="pt-1">
-          <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
-        </div>
       )}
     />
   );

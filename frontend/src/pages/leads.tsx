@@ -19,13 +19,12 @@ import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calend
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 const useState = React.useState;
-import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
   // Helper functions for display names using dropdown data
@@ -654,29 +653,15 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
-      <Dialog open={addLeadOpen} onOpenChange={(open) => {
-        setAddLeadOpen(open);
-        if (!open && location === '/leads/new') {
-          setLocation('/leads');
-        }
-      }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          <DialogHeader>
-            <DialogTitle className="sr-only">Add New Lead</DialogTitle>
-          </DialogHeader>
-          <AddLeadForm
-            onCancel={() => {
-              setAddLeadOpen(false);
-              if (location === '/leads/new') setLocation('/leads');
-            }}
-            onSuccess={() => {
-              setAddLeadOpen(false);
-              if (location === '/leads/new') setLocation('/leads');
-              queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      <AddLeadModal
+        open={addLeadOpen}
+        onOpenChange={(open) => {
+          setAddLeadOpen(open);
+          if (!open && location === '/leads/new') {
+            setLocation('/leads');
+          }
+        }}
+      />
       <LeadDetailsModal
         open={leadModalOpen}
         startInEdit={Boolean(matchEdit)}
