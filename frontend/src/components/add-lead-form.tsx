@@ -558,12 +558,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
-        setAutoRegionDisabled(true);
+        const roleName = normalizeRole((user as any)?.role);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoRegionDisabled(!isRegional);
       }
 
       if (resolvedBranchId) {
         form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
-        setAutoBranchDisabled(true);
+        const roleName = normalizeRole((user as any)?.role);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoBranchDisabled(!isRegional);
       } else if (resolvedRegionId && !currentBranch) {
         form.setValue('branchId', '');
         setAutoBranchDisabled(false);
@@ -590,7 +594,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         const regionFromBranch = String(b?.regionId ?? b?.region_id ?? '');
         if (regionFromBranch) {
           form.setValue('regionId', regionFromBranch, { shouldDirty: true, shouldValidate: true });
-          setAutoRegionDisabled(true);
+          const roleName = normalizeRole((user as any)?.role);
+          const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+          setAutoRegionDisabled(!isRegional);
         }
       }
     } catch {}
@@ -1007,7 +1013,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Branch *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoBranchDisabled(true); setAutoRegionDisabled(true); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = normalizeRole((user as any)?.role); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(!isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
