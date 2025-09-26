@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
 import * as DropdownsService from '@/services/dropdowns';
@@ -51,9 +51,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         program: parseFieldValue(lead.program)
       };
       setEditData(processedLead);
+      // Initialize current status on first load of this lead id
       setCurrentStatus(lead.status);
     }
-  }, [lead]);
+  }, [lead?.id]);
 
   useEffect(() => {
     if (open && startInEdit) {
@@ -93,6 +94,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async (data: Partial<Lead>) => LeadsService.updateLead(lead?.id, data),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      try {
+        const key = [`/api/activities/lead/${String(lead?.id)}`];
+        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key });
+      } catch {}
       setIsEditing(false);
       onLeadUpdate?.(updatedLead);
       toast({ title: 'Success', description: 'Lead updated successfully.' });
@@ -107,6 +113,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async ({ reason }: { reason: string }) => LeadsService.markLeadAsLost(lead?.id, reason),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      try {
+        const key = [`/api/activities/lead/${String(lead?.id)}`];
+        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key });
+      } catch {}
       setShowMarkAsLostModal(false);
       setLostReason('');
       onLeadUpdate?.(updatedLead);
@@ -150,6 +161,25 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       toast({ title: 'Error', description: 'Name and email are required.', variant: 'destructive' });
       return;
     }
+
+    // Runtime validation: email and phone must not be the same
+    try {
+      const emailStr = String(editData.email || '').trim().toLowerCase();
+      const phoneStr = String(editData.phone || '').trim();
+      const emailCompact = emailStr.replace(/\s+/g, '');
+      const phoneDigits = phoneStr.replace(/\D/g, '');
+      if (emailCompact && phoneStr) {
+        if (
+          emailCompact === phoneStr.replace(/\s+/g, '') ||
+          emailCompact === ('+' + phoneDigits).toLowerCase() ||
+          emailCompact === phoneDigits.toLowerCase()
+        ) {
+          toast({ title: 'Invalid input', description: 'Email and phone cannot be the same.', variant: 'destructive' });
+          return;
+        }
+      }
+    } catch {}
+
     const dataToSave = {
       ...editData,
       country: Array.isArray(editData.country) ? JSON.stringify(editData.country) : editData.country,
@@ -180,20 +210,28 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
   }, [dropdownData]);
 
+  const prevStatusRef = useRef<string>('');
   const statusUpdateMutation = useMutation({
     mutationFn: async (status: string) => LeadsService.updateLead(lead?.id, { status }),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      try {
+        const key = [`/api/activities/lead/${String(lead?.id)}`];
+        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key });
+      } catch {}
       onLeadUpdate?.(updatedLead);
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
     onError: (error: any) => {
-      setCurrentStatus(lead?.status || '');
+      // Revert to previous status if API fails
+      setCurrentStatus(prevStatusRef.current || lead?.status || '');
       toast({ title: 'Error', description: error.message || 'Failed to update lead status.', variant: 'destructive' });
     },
   });
 
   const handleStatusChange = (newStatus: string) => {
+    prevStatusRef.current = currentStatus;
     setCurrentStatus(newStatus);
     statusUpdateMutation.mutate(newStatus);
   };

@@ -89,7 +89,11 @@ export class LeadService {
       lead.id,
       'created',
       'Lead created',
-      `Lead ${lead.name} was added to the system`
+      `Lead ${lead.name} was added to the system`,
+      undefined,
+      undefined,
+      undefined,
+      currentUserId
     );
 
     return lead;
@@ -108,6 +112,24 @@ export class LeadService {
     // Get the current lead to track changes
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
+
+    // Validate email and phone are not equal after update
+    const nextEmail = String((updates as any).email ?? (currentLead as any).email ?? '').trim().toLowerCase();
+    const nextPhone = String((updates as any).phone ?? (currentLead as any).phone ?? '').trim();
+    if (nextEmail && nextPhone) {
+      const emailCompact = nextEmail.replace(/\s+/g, '');
+      const phoneDigits = nextPhone.replace(/\D/g, '');
+      if (
+        emailCompact === nextPhone.replace(/\s+/g, '').toLowerCase() ||
+        emailCompact === ('+' + phoneDigits).toLowerCase() ||
+        emailCompact === phoneDigits.toLowerCase()
+      ) {
+        const err = new Error('EMAIL_PHONE_SAME');
+        // @ts-expect-error tag
+        (err as any).status = 400;
+        throw err;
+      }
+    }
 
     const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
     
@@ -129,8 +151,7 @@ export class LeadService {
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
-              undefined,
-              'Next Bot'
+              currentUserId
             );
           } else if (fieldName === 'counselorId') {
             await ActivityService.logActivity(
@@ -142,8 +163,7 @@ export class LeadService {
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
-              undefined,
-              'Next Bot'
+              currentUserId
             );
           }
         }
@@ -158,11 +178,15 @@ export class LeadService {
     
     if (success) {
       await ActivityService.logActivity(
-        'lead', 
-        leadId, 
-        'assigned', 
+        'lead',
+        leadId,
+        'assigned',
         'Lead assigned to counselor',
-        `Lead assigned to counselor ${counselorId}`
+        `Lead assigned to counselor ${counselorId}`,
+        undefined,
+        undefined,
+        undefined,
+        counselorId
       );
     }
     
@@ -175,11 +199,15 @@ export class LeadService {
     
     if (success && lead) {
       await ActivityService.logActivity(
-        'lead', 
-        id, 
-        'deleted', 
+        'lead',
+        id,
+        'deleted',
         'Lead deleted',
-        `Lead ${lead.name} was deleted from the system`
+        `Lead ${lead.name} was deleted from the system`,
+        undefined,
+        undefined,
+        undefined,
+        (lead as any).updatedBy || (lead as any).createdBy || undefined
       );
     }
     
