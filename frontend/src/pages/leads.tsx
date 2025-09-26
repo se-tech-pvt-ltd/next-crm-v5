@@ -134,7 +134,7 @@ export default function Leads() {
   const { data: leadById } = useQuery({
     queryKey: ['/api/leads', leadParams?.id],
     queryFn: async () => LeadsService.getLead(leadParams?.id),
-    enabled: Boolean(matchLead && leadParams?.id),
+    enabled: Boolean(matchLead && leadParams?.id && leadParams.id !== 'new'),
     staleTime: 0,
   });
 
