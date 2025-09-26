@@ -707,6 +707,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           placeholder="name1@example.com"
                           className={`transition-all focus:ring-2 focus:ring-primary/20 ${emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
                           value={field.value}
+                          onKeyDown={(e) => { if (e.key === ' ' || e.code === 'Space' || (e as any).keyCode === 32) { e.preventDefault(); } }}
                           onChange={(e) => {
                             let s = (e.target.value || '').replace(/\s+/g, '');
                             // remove leading non-alphanumeric chars so it starts with a letter or number
