@@ -680,7 +680,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
@@ -690,6 +690,34 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormControl>
                       <Input
                         placeholder="Enter full name"
+                        className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20"
+                        value={field.value}
+                        onChange={(e) => {
+                          let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
+                          s = s.replace(/\s+/g, ' ').replace(/^\s+/, '');
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                        onBlur={(e) => {
+                          let s = (e.target.value || '').replace(/\s+/g, ' ').trim();
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="city" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>City *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter city"
                         className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20"
                         value={field.value}
                         onChange={(e) => {
@@ -796,34 +824,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         </div>
                       )}
                     </div>
-                  </FormItem>
-                )} />
-
-                <FormField control={form.control} name="city" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>City *</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter city"
-                        className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20"
-                        value={field.value}
-                        onChange={(e) => {
-                          let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
-                          s = s.replace(/\s+/g, ' ').replace(/^\s+/, '');
-                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
-                          field.onChange(s);
-                        }}
-                        onBlur={(e) => {
-                          let s = (e.target.value || '').replace(/\s+/g, ' ').trim();
-                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
-                          field.onChange(s);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )} />
               </div>
