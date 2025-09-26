@@ -431,7 +431,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardHeader>
               <CollapsibleContent>
                 <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-2 bg-muted/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2 p-2 bg-muted/30 rounded-lg">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
                         <User className="w-3 h-3" />
@@ -510,7 +510,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="city" className="text-sm font-medium flex items-center space-x-2">
                     <MapPin className="w-4 h-4" />
@@ -597,7 +597,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="status" className="text-sm font-medium flex items-center space-x-2">
                     <Target className="w-4 h-4" />
@@ -716,7 +716,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 {formData.consultancyFee === 'Yes' && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center space-x-2">
