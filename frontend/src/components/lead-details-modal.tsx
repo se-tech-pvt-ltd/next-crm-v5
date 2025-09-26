@@ -51,9 +51,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         program: parseFieldValue(lead.program)
       };
       setEditData(processedLead);
+      // Initialize current status on first load of this lead id
       setCurrentStatus(lead.status);
     }
-  }, [lead]);
+  }, [lead?.id]);
 
   useEffect(() => {
     if (open && startInEdit) {
@@ -190,6 +191,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
   }, [dropdownData]);
 
+  const prevStatusRef = useRef<string>('');
   const statusUpdateMutation = useMutation({
     mutationFn: async (status: string) => LeadsService.updateLead(lead?.id, { status }),
     onSuccess: (updatedLead) => {
@@ -203,12 +205,14 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
     onError: (error: any) => {
-      setCurrentStatus(lead?.status || '');
+      // Revert to previous status if API fails
+      setCurrentStatus(prevStatusRef.current || lead?.status || '');
       toast({ title: 'Error', description: error.message || 'Failed to update lead status.', variant: 'destructive' });
     },
   });
 
   const handleStatusChange = (newStatus: string) => {
+    prevStatusRef.current = currentStatus;
     setCurrentStatus(newStatus);
     statusUpdateMutation.mutate(newStatus);
   };
