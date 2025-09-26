@@ -460,6 +460,20 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         if (defaultStatus && !form.getValues('status')) {
           form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
         }
+        // Fallback: if no default is set in dropdowns, prefer 'Raw' as the initial priority
+        if (!form.getValues('status')) {
+          const rawOption = statusList.find((s: any) => {
+            const val = String(s.value || '').toLowerCase();
+            const key = String(s.key || s.id || '').toLowerCase();
+            return val === 'raw' || key === 'raw' || val.includes('raw');
+          });
+          if (rawOption) {
+            form.setValue('status', rawOption.key || rawOption.id || rawOption.value);
+          } else {
+            // As a last resort, set literal 'Raw' so validation passes and backend stores a sensible default
+            form.setValue('status', 'Raw');
+          }
+        }
       } catch {}
 
       try {
@@ -852,12 +866,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <Target className="w-4 h-4" />
-                        <span>Priority Level</span>
+                        <span>Status</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                            <SelectValue placeholder="Set priority" />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

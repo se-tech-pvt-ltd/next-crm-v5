@@ -42,7 +42,8 @@ import {
   BookOpen,
   Target,
   Users,
-  User as UserIcon
+  User as UserIcon,
+  Globe
 } from 'lucide-react';
 
 interface StudentProfileModalProps {
@@ -104,6 +105,12 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
     enabled: open,
   });
+  // Fallback to Leads module for target country options if needed
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+    enabled: open,
+  });
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/users'],
@@ -129,14 +136,23 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
   const getFieldOptions = (fieldName: string): any[] => {
     const data = dropdownData as any;
-    if (!data) return [];
+    const leadsData = leadsDropdowns as any;
     const target = normalize(fieldName);
     const candidates = [target];
     if (target === 'englishproficiency') {
       candidates.push('elttest', 'elt', 'englishtest', 'english');
     }
-    const entry = Object.entries(data).find(([k]) => candidates.includes(normalize(String(k))));
-    return (entry?.[1] as any[]) || [];
+    if (target === 'targetcountry') {
+      candidates.push('targetcountry', 'interestedcountry', 'country');
+    }
+    const findIn = (obj: any) => {
+      if (!obj || typeof obj !== 'object') return [] as any[];
+      const entry = Object.entries(obj).find(([k]) => candidates.includes(normalize(String(k))));
+      return (entry?.[1] as any[]) || [];
+    };
+    const opts = findIn(data);
+    if (opts.length > 0) return opts;
+    return findIn(leadsData);
   };
   const getDropdownLabel = (fieldName: string, value?: string | null) => {
     if (!value) return '';
@@ -160,6 +176,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         // Normalize dropdown-backed fields to option keys for proper Select pre-selection
         expectation: mapToOptionValue('expectation', student.expectation),
         englishProficiency: mapToOptionValue('englishProficiency', (student as any).englishProficiency),
+        targetCountry: mapToOptionValue('targetCountry', (student as any).targetCountry),
       });
       setCurrentStatus(student.status);
     }
@@ -531,10 +548,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Admission Officer</span></Label>
                   <div className="text-xs px-2 py-1.5 rounded border bg-white">
                     {(() => {
-                      const norm = (v: string) => String(v || '').toLowerCase().replace(/\s+/g,'_').replace(/-+/g,'_');
-                      const branchId = (student as any).branchId || (editData as any).branchId;
-                      const officer = Array.isArray(users)
-                        ? (users as any[]).find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role || u.roleId || '') === 'admission_officer')
+                      const officerId = (student as any).admissionOfficerId || (student as any).admission_officer_id || (editData as any)?.admissionOfficerId || (editData as any)?.admission_officer_id || '';
+                      const officer = officerId && Array.isArray(users)
+                        ? (users as any[]).find((u: any) => String(u.id) === String(officerId))
                         : null;
                       if (!officer) return '—';
                       const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
@@ -609,6 +625,24 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                     </Select>
                   ) : (
                     <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Target Country</span></Label>
+                  {isEditing ? (
+                    <Select value={(editData as any).targetCountry || ''} onValueChange={(v) => setEditData({ ...editData, targetCountry: v })}>
+                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select country" /></SelectTrigger>
+                      <SelectContent>
+                        {getFieldOptions('targetCountry').map((opt: any) => (
+                          <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
+                            {opt.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input value={getDropdownLabel('targetCountry', (student as any)?.targetCountry || '')} disabled className="h-7 text-[11px]" />
                   )}
                 </div>
 
