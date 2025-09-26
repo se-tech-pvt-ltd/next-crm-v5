@@ -498,10 +498,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
                   <div className="text-xs px-2 py-1.5 rounded border bg-white">
                     {(() => {
-                      const norm = (v: string) => String(v || '').toLowerCase().replace(/\s+/g,'_').replace(/-+/g,'_');
-                      const branchId = (lead as any).branchId || (editData as any).branchId;
-                      const officer = Array.isArray(users)
-                        ? users.find((u: any) => (String(u.branchId || '') === String(branchId)) && norm(u.role) === 'admission_officer')
+                      const officerId = (lead as any).admissionOfficerId || (lead as any).admission_officer_id || (editData as any)?.admissionOfficerId || (editData as any)?.admission_officer_id || '';
+                      const officer = officerId && Array.isArray(users)
+                        ? (users as any[]).find((u: any) => String(u.id) === String(officerId))
                         : null;
                       if (!officer) return '—';
                       const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
