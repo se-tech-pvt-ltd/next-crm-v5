@@ -19,13 +19,12 @@ import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calend
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 const useState = React.useState;
-import AddLeadForm from '@/components/add-lead-form';
 
 export default function Leads() {
   // Helper functions for display names using dropdown data
