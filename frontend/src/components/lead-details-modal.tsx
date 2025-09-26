@@ -193,6 +193,24 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       }
     } catch {}
 
+    // Client-side duplicate detection using cached leads
+    try {
+      const cache = queryClient.getQueryData<any>(['/api/leads']);
+      const list: any[] = Array.isArray(cache)
+        ? cache
+        : (cache && Array.isArray(cache.data) ? cache.data : []);
+      const idStr = String(lead?.id || '');
+      const nextEmail = String(editData.email || '').trim().toLowerCase();
+      const nextPhone = String(editData.phone || '').trim();
+      const existsEmail = nextEmail && list.some((l: any) => String(l.id) !== idStr && String(l.email || '').trim().toLowerCase() === nextEmail);
+      const existsPhone = nextPhone && list.some((l: any) => String(l.id) !== idStr && String(l.phone || '').trim() === nextPhone);
+      if (existsEmail || existsPhone) {
+        const msg = existsEmail && existsPhone ? 'Duplicate email and phone' : existsEmail ? 'Duplicate email' : 'Duplicate phone';
+        toast({ title: 'Error', description: msg, variant: 'destructive' });
+        return;
+      }
+    } catch {}
+
     const dataToSave = {
       ...editData,
       country: Array.isArray(editData.country) ? JSON.stringify(editData.country) : editData.country,
