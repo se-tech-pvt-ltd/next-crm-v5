@@ -654,29 +654,15 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
-      <Dialog open={addLeadOpen} onOpenChange={(open) => {
-        setAddLeadOpen(open);
-        if (!open && location === '/leads/new') {
-          setLocation('/leads');
-        }
-      }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          <DialogHeader>
-            <DialogTitle className="sr-only">Add New Lead</DialogTitle>
-          </DialogHeader>
-          <AddLeadForm
-            onCancel={() => {
-              setAddLeadOpen(false);
-              if (location === '/leads/new') setLocation('/leads');
-            }}
-            onSuccess={() => {
-              setAddLeadOpen(false);
-              if (location === '/leads/new') setLocation('/leads');
-              queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      <AddLeadModal
+        open={addLeadOpen}
+        onOpenChange={(open) => {
+          setAddLeadOpen(open);
+          if (!open && location === '/leads/new') {
+            setLocation('/leads');
+          }
+        }}
+      />
       <LeadDetailsModal
         open={leadModalOpen}
         startInEdit={Boolean(matchEdit)}
