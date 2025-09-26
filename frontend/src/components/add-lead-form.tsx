@@ -578,7 +578,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
-        const roleName = normalizeRole((user as any)?.role);
+        const roleName = getNormalizedRole();
         const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
         setAutoRegionDisabled(!isRegional);
       }
