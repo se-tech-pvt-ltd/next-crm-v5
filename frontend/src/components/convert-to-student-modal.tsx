@@ -378,31 +378,47 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   if (!lead) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-6xl max-h-[90vh] overflow-y-auto"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <DialogTitle className="text-base">Convert Lead to Student</DialogTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Transform your lead into an active student with complete profile information
-                </p>
-              </div>
-            </div>
+    <DetailsDialogLayout
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Convert Lead to Student"
+      headerClassName="bg-[#223E7D] text-white"
+      headerLeft={(
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <UserPlus className="w-5 h-5 text-white" />
           </div>
-        </DialogHeader>
-
-        <div className="space-y-3">
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate">Convert Lead to Student</div>
+            <div className="text-xs opacity-90 truncate">{lead?.name || ''}</div>
+          </div>
+        </div>
+      )}
+      headerRight={(
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={convertToStudentMutation.isPending}
+            className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+            title={'Convert to Student'}
+          >
+            {convertToStudentMutation.isPending ? 'Converting…' : 'Convert'}
+          </Button>
+        </div>
+      )}
+      leftContent={(
+        <>
           {/* Collapsible Lead Details */}
           <Collapsible open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
-            <Card>
+            <Card className="shadow-md border border-gray-200 bg-white">
               <CardHeader className="pb-3">
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" className="w-full justify-between hover:bg-muted/50 transition-all">
@@ -487,7 +503,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           </Collapsible>
 
           {/* Academic & Location Details */}
-          <Card>
+          <Card className="shadow-md border border-gray-200 bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
@@ -574,7 +590,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           </Card>
 
           {/* Student Status & Basic Info */}
-          <Card>
+          <Card className="shadow-md border border-gray-200 bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -607,8 +623,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                   </Label>
                   <Select value={formData.expectation} onValueChange={(value) => handleInputChange('expectation', value)}>
                     <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Please select" />
-                  </SelectTrigger>
+                      <SelectValue placeholder="Please select" />
+                    </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(studentDropdowns?.['Expectation']) ? studentDropdowns['Expectation'].map((opt: any) => (
                         <SelectItem key={opt.key || opt.id || opt.value} value={opt.key || opt.id || opt.value}>{opt.value}</SelectItem>
@@ -659,7 +675,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           </Card>
 
           {/* Financial & Documentation */}
-          <Card>
+          <Card className="shadow-md border border-gray-200 bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center space-x-2">
                 <DollarSign className="w-5 h-5 text-primary" />
@@ -679,7 +695,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Yes">✅ Yes</SelectItem>
-                      <SelectItem value="No">❌ No</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -695,7 +711,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Yes">🎓 Yes</SelectItem>
-                      <SelectItem value="No">�� No</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -738,38 +754,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           </Card>
 
           <Separator />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="px-4 h-8 text-xs"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={convertToStudentMutation.isPending}
-            className="px-4 h-8 text-xs bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
-            title={'Convert to Student'}
-          >
-            {convertToStudentMutation.isPending ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Converting...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <UserPlus className="w-4 h-4" />
-                <span>Convert to Student</span>
-              </div>
-            )}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </>
+      )}
+    />
   );
 }
