@@ -164,6 +164,26 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const getNormalizedRole = () => {
+    try {
+      const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
+      if (rawRole) return normalizeRole(String(rawRole));
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          return normalizeRole(String(tokenRole || ''));
+        }
+      }
+    } catch {}
+    return '';
+  };
 
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
