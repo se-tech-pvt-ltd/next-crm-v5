@@ -161,6 +161,25 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       toast({ title: 'Error', description: 'Name and email are required.', variant: 'destructive' });
       return;
     }
+
+    // Runtime validation: email and phone must not be the same
+    try {
+      const emailStr = String(editData.email || '').trim().toLowerCase();
+      const phoneStr = String(editData.phone || '').trim();
+      const emailCompact = emailStr.replace(/\s+/g, '');
+      const phoneDigits = phoneStr.replace(/\D/g, '');
+      if (emailCompact && phoneStr) {
+        if (
+          emailCompact === phoneStr.replace(/\s+/g, '') ||
+          emailCompact === ('+' + phoneDigits).toLowerCase() ||
+          emailCompact === phoneDigits.toLowerCase()
+        ) {
+          toast({ title: 'Invalid input', description: 'Email and phone cannot be the same.', variant: 'destructive' });
+          return;
+        }
+      }
+    } catch {}
+
     const dataToSave = {
       ...editData,
       country: Array.isArray(editData.country) ? JSON.stringify(editData.country) : editData.country,
