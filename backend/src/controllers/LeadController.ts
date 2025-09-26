@@ -120,6 +120,9 @@ export class LeadController {
       if (error instanceof Error && (error as any).code === 'LEAD_CONVERTED') {
         return res.status(400).json({ message: "Lead has been converted to a student and cannot be edited" });
       }
+      if (error instanceof Error && (error as any).message === 'EMAIL_PHONE_SAME') {
+        return res.status((error as any).status || 400).json({ message: 'Email and phone cannot be the same' });
+      }
       res.status(500).json({ message: "Failed to update lead" });
     }
   }
