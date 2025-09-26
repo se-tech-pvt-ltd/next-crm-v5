@@ -709,19 +709,25 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           value={field.value}
                           onChange={(e) => {
                             let s = (e.target.value || '').replace(/\s+/g, '');
-                            if (s && !/^\d/.test(s)) {
-                              const idx = s.search(/\d/);
-                              s = idx !== -1 ? s.slice(idx) : '';
+                            if (s === '') {
+                              field.onChange('');
+                              checkEmailDuplicate('');
+                              return;
+                            }
+                            if (!/^\d/.test(s)) {
+                              const firstDigit = s.search(/\d/);
+                              if (firstDigit >= 0) {
+                                s = s.slice(firstDigit);
+                              } else {
+                                s = String(field.value || '');
+                              }
                             }
                             field.onChange(s);
                             checkEmailDuplicate(s);
                           }}
                           onBlur={(e) => {
                             let s = (e.target.value || '').replace(/\s+/g, '');
-                            if (s && !/^\d/.test(s)) {
-                              const idx = s.search(/\d/);
-                              s = idx !== -1 ? s.slice(idx) : '';
-                            }
+                            s = s.replace(/^\D+/, '');
                             field.onChange(s);
                           }}
                         />
