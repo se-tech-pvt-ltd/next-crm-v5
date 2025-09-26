@@ -105,6 +105,19 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     },
     onError: (error: any) => {
       console.error('Update lead error:', error);
+      const status = (error && (error.status || (error as any).code)) || 0;
+      const data = (error && (error.data || (error as any).response)) || {};
+      const fields = (data && (data.fields || {})) as { email?: boolean; phone?: boolean };
+      if (status === 409) {
+        let msg = data?.message || 'Duplicate';
+        if (!data?.message) {
+          const e = !!fields.email;
+          const p = !!fields.phone;
+          msg = e && p ? 'Duplicate email and phone' : e ? 'Duplicate email' : p ? 'Duplicate phone' : 'Duplicate';
+        }
+        toast({ title: 'Error', description: msg, variant: 'destructive' });
+        return;
+      }
       toast({ title: 'Error', description: error.message || 'Failed to update lead. Please try again.', variant: 'destructive' });
     },
   });
