@@ -616,7 +616,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           form.setValue('regionId', regionFromBranch, { shouldDirty: true, shouldValidate: true });
           const roleName = getNormalizedRole();
           const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
-          setAutoRegionDisabled(!isRegional);
+          setAutoRegionDisabled(isRegional ? true : !isRegional);
         }
       }
     } catch {}
