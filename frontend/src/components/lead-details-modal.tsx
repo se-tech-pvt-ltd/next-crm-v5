@@ -93,6 +93,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async (data: Partial<Lead>) => LeadsService.updateLead(lead?.id, data),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      try {
+        const key = [`/api/activities/lead/${String(lead?.id)}`];
+        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key });
+      } catch {}
       setIsEditing(false);
       onLeadUpdate?.(updatedLead);
       toast({ title: 'Success', description: 'Lead updated successfully.' });
@@ -107,6 +112,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async ({ reason }: { reason: string }) => LeadsService.markLeadAsLost(lead?.id, reason),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      try {
+        const key = [`/api/activities/lead/${String(lead?.id)}`];
+        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key });
+      } catch {}
       setShowMarkAsLostModal(false);
       setLostReason('');
       onLeadUpdate?.(updatedLead);
@@ -184,6 +194,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async (status: string) => LeadsService.updateLead(lead?.id, { status }),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      try {
+        const key = [`/api/activities/lead/${String(lead?.id)}`];
+        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key });
+      } catch {}
       onLeadUpdate?.(updatedLead);
       toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
     },
