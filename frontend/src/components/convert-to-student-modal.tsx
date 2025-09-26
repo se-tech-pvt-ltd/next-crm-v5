@@ -382,7 +382,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       onOpenChange={onOpenChange}
       title="Convert Lead to Student"
       headerClassName="bg-[#223E7D] text-white"
-      contentClassName="no-not-allowed w-[50vw] max-w-3xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
+      contentClassName="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
       headerLeft={(
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
