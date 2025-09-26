@@ -163,7 +163,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const selectedRegionId = (form?.watch?.('regionId') || '') as string;
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
 
-  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
