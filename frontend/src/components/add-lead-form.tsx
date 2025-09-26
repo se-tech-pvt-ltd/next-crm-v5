@@ -704,30 +704,19 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <div className="relative">
                         <Input
                           type="email"
-                          placeholder="1name@example.com"
+                          placeholder="name1@example.com"
                           className={`transition-all focus:ring-2 focus:ring-primary/20 ${emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
                           value={field.value}
                           onChange={(e) => {
                             let s = (e.target.value || '').replace(/\s+/g, '');
-                            if (s === '') {
-                              field.onChange('');
-                              checkEmailDuplicate('');
-                              return;
-                            }
-                            if (!/^\d/.test(s)) {
-                              const firstDigit = s.search(/\d/);
-                              if (firstDigit >= 0) {
-                                s = s.slice(firstDigit);
-                              } else {
-                                s = String(field.value || '');
-                              }
-                            }
+                            // remove leading non-alphanumeric chars so it starts with a letter or number
+                            s = s.replace(/^[^A-Za-z0-9]+/, '');
                             field.onChange(s);
                             checkEmailDuplicate(s);
                           }}
                           onBlur={(e) => {
                             let s = (e.target.value || '').replace(/\s+/g, '');
-                            s = s.replace(/^\D+/, '');
+                            s = s.replace(/^[^A-Za-z0-9]+/, '');
                             field.onChange(s);
                           }}
                         />
