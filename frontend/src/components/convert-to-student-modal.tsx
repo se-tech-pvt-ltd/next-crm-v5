@@ -757,6 +757,12 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
           <Separator />
         </>
       )}
+      rightWidth="420px"
+      rightContent={(
+        <div className="pt-1">
+          <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
+        </div>
+      )}
     />
   );
 }
