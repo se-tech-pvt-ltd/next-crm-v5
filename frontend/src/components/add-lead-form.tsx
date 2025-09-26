@@ -673,7 +673,22 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Full Name *</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                      <Input
+                        placeholder="Enter full name"
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        value={field.value}
+                        onChange={(e) => {
+                          let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
+                          s = s.replace(/\s+/g, ' ').replace(/^\s+/, '');
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                        onBlur={(e) => {
+                          let s = (e.target.value || '').replace(/\s+/g, ' ').trim();
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -687,7 +702,29 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input type="email" placeholder="name@example.com" className={`transition-all focus:ring-2 focus:ring-primary/20 ${emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`} {...field} onChange={(e) => { field.onChange(e); checkEmailDuplicate(e.target.value); }} />
+                        <Input
+                          type="email"
+                          placeholder="1name@example.com"
+                          className={`transition-all focus:ring-2 focus:ring-primary/20 ${emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
+                          value={field.value}
+                          onChange={(e) => {
+                            let s = (e.target.value || '').replace(/\s+/g, '');
+                            if (s && !/^\d/.test(s)) {
+                              const idx = s.search(/\d/);
+                              s = idx !== -1 ? s.slice(idx) : '';
+                            }
+                            field.onChange(s);
+                            checkEmailDuplicate(s);
+                          }}
+                          onBlur={(e) => {
+                            let s = (e.target.value || '').replace(/\s+/g, '');
+                            if (s && !/^\d/.test(s)) {
+                              const idx = s.search(/\d/);
+                              s = idx !== -1 ? s.slice(idx) : '';
+                            }
+                            field.onChange(s);
+                          }}
+                        />
                         {checkingEmail && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                             <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
@@ -715,7 +752,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input type="tel" placeholder="+1 (555) 123-4567" className={`transition-all focus:ring-2 focus:ring-primary/20 ${phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`} {...field} onChange={(e) => { field.onChange(e); checkPhoneDuplicate(e.target.value); }} />
+                        <Input
+                          type="tel"
+                          inputMode="tel"
+                          placeholder="+12345678901"
+                          className={`transition-all focus:ring-2 focus:ring-primary/20 ${phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
+                          value={field.value}
+                          onFocus={(e) => {
+                            const v = e.target.value || '';
+                            if (!v.startsWith('+')) field.onChange('+' + v.replace(/\D/g, ''));
+                          }}
+                          onChange={(e) => {
+                            const digits = (e.target.value || '').replace(/\D/g, '');
+                            const s = '+' + digits;
+                            field.onChange(s);
+                            checkPhoneDuplicate(s);
+                          }}
+                        />
                         {checkingPhone && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                             <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
@@ -742,7 +795,22 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>City *</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter city" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                      <Input
+                        placeholder="Enter city"
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        value={field.value}
+                        onChange={(e) => {
+                          let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
+                          s = s.replace(/\s+/g, ' ').replace(/^\s+/, '');
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                        onBlur={(e) => {
+                          let s = (e.target.value || '').replace(/\s+/g, ' ').trim();
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -993,7 +1061,21 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <span>Notes & Comments *</span>
                   </FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..." className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                    <Textarea
+                      placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
+                      className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
+                      value={field.value}
+                      onChange={(e) => {
+                        let s = e.target.value || '';
+                        if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
+                        field.onChange(s);
+                      }}
+                      onBlur={(e) => {
+                        let s = e.target.value || '';
+                        if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
+                        field.onChange(s);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
