@@ -113,6 +113,24 @@ export class LeadService {
     const currentLead = await LeadModel.findById(id);
     if (!currentLead) return undefined;
 
+    // Validate email and phone are not equal after update
+    const nextEmail = String((updates as any).email ?? (currentLead as any).email ?? '').trim().toLowerCase();
+    const nextPhone = String((updates as any).phone ?? (currentLead as any).phone ?? '').trim();
+    if (nextEmail && nextPhone) {
+      const emailCompact = nextEmail.replace(/\s+/g, '');
+      const phoneDigits = nextPhone.replace(/\D/g, '');
+      if (
+        emailCompact === nextPhone.replace(/\s+/g, '').toLowerCase() ||
+        emailCompact === ('+' + phoneDigits).toLowerCase() ||
+        emailCompact === phoneDigits.toLowerCase()
+      ) {
+        const err = new Error('EMAIL_PHONE_SAME');
+        // @ts-expect-error tag
+        (err as any).status = 400;
+        throw err;
+      }
+    }
+
     const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
     
     if (lead) {
