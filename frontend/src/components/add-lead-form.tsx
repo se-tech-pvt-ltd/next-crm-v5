@@ -683,8 +683,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="shadow-md border border-gray-200 bg-white">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <User className="w-5 h-5 text-primary" />
                 <span>Personal Details</span>
@@ -701,7 +701,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormControl>
                       <Input
                         placeholder="Enter full name"
-                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20"
                         value={field.value}
                         onChange={(e) => {
                           let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
@@ -819,7 +819,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormControl>
                       <Input
                         placeholder="Enter city"
-                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20"
                         value={field.value}
                         onChange={(e) => {
                           let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
@@ -841,8 +841,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="shadow-md border border-gray-200 bg-white">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 <span>Academic Interests</span>
@@ -857,7 +857,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Interested Countries *</span>
                     </FormLabel>
                     <FormControl>
-                      <MultiSelect value={field.value || []} onValueChange={field.onChange} placeholder="Select countries" searchPlaceholder="Search countries..." options={dropdownData?.['Interested Country']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No countries found" maxDisplayItems={2} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <MultiSelect value={field.value || []} onValueChange={field.onChange} placeholder="Select countries" searchPlaceholder="Search countries..." options={dropdownData?.['Interested Country']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No countries found" maxDisplayItems={2} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -870,7 +870,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Study Level *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study level" searchPlaceholder="Search study levels..." options={dropdownData?.['Study Level']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study levels found" className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study level" searchPlaceholder="Search study levels..." options={dropdownData?.['Study Level']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study levels found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -883,7 +883,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Study Plan *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study plan" searchPlaceholder="Search study plans..." options={dropdownData?.['Study Plan']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study plans found" className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study plan" searchPlaceholder="Search study plans..." options={dropdownData?.['Study Plan']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study plans found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -914,8 +914,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="shadow-md border border-gray-200 bg-white">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <span>Lead Details</span>
@@ -934,7 +934,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                             <SelectValue placeholder="How did they find us?" />
                           </SelectTrigger>
                         </FormControl>
@@ -960,7 +960,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
@@ -986,7 +986,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -1004,8 +1004,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="shadow-md border border-gray-200 bg-white">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <Users className="w-5 h-5 text-primary" />
                 <span>Record Access</span>
@@ -1020,7 +1020,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Region *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
+                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1033,7 +1033,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Branch *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = getNormalizedRole(); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(isRegional ? true : !isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = getNormalizedRole(); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(isRegional ? true : !isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1046,7 +1046,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Counsellor *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1059,7 +1059,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Admission Officer *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1068,8 +1068,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="shadow-md border border-gray-200 bg-white">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <span>Additional Information</span>
