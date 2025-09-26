@@ -45,24 +45,24 @@ import {
 import { z } from 'zod';
 
 const addLeadFormSchema = z.object({
-  type: z.string().optional(),
+  type: z.string().min(1, 'Type is required'),
   status: z.string().min(1, 'Status is required'),
   name: z.string().min(1, 'Name is required'),
-  phone: z.string().optional(),
-  email: z.string().email('Valid email is required'),
-  city: z.string().optional(),
-  source: z.string().optional(),
-  country: z.array(z.string()).optional(),
-  studyLevel: z.string().optional(),
-  studyPlan: z.string().optional(),
-  elt: z.string().optional(),
-  regionId: z.string().optional(),
-  branchId: z.string().optional(),
-  counsellorId: z.string().optional(),
-  admissionOfficerId: z.string().optional(),
+  phone: z.string().min(1, 'Phone is required'),
+  email: z.string().min(1, 'Email is required').email('Valid email is required'),
+  city: z.string().min(1, 'City is required'),
+  source: z.string().min(1, 'Source is required'),
+  country: z.array(z.string()).min(1, 'At least one country is required'),
+  studyLevel: z.string().min(1, 'Study level is required'),
+  studyPlan: z.string().min(1, 'Study plan is required'),
+  elt: z.enum(['yes', 'no'], { required_error: 'English test selection is required' }),
+  regionId: z.string().min(1, 'Region is required'),
+  branchId: z.string().min(1, 'Branch is required'),
+  counsellorId: z.string().min(1, 'Counsellor is required'),
+  admissionOfficerId: z.string().min(1, 'Admission officer is required'),
   // legacy: keep for compatibility
   counselorId: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().min(1, 'Notes are required'),
 });
 
 type AddLeadFormData = z.infer<typeof addLeadFormSchema>;
@@ -163,7 +163,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const selectedRegionId = (form?.watch?.('regionId') || '') as string;
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
 
-  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
@@ -558,12 +558,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
-        setAutoRegionDisabled(true);
+        const roleName = normalizeRole((user as any)?.role);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoRegionDisabled(!isRegional);
       }
 
       if (resolvedBranchId) {
         form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
-        setAutoBranchDisabled(true);
+        const roleName = normalizeRole((user as any)?.role);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoBranchDisabled(!isRegional);
       } else if (resolvedRegionId && !currentBranch) {
         form.setValue('branchId', '');
         setAutoBranchDisabled(false);
@@ -590,7 +594,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         const regionFromBranch = String(b?.regionId ?? b?.region_id ?? '');
         if (regionFromBranch) {
           form.setValue('regionId', regionFromBranch, { shouldDirty: true, shouldValidate: true });
-          setAutoRegionDisabled(true);
+          const roleName = normalizeRole((user as any)?.role);
+          const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+          setAutoRegionDisabled(!isRegional);
         }
       }
     } catch {}
@@ -673,7 +679,22 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Full Name *</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                      <Input
+                        placeholder="Enter full name"
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        value={field.value}
+                        onChange={(e) => {
+                          let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
+                          s = s.replace(/\s+/g, ' ').replace(/^\s+/, '');
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                        onBlur={(e) => {
+                          let s = (e.target.value || '').replace(/\s+/g, ' ').trim();
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -687,7 +708,25 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input type="email" placeholder="name@example.com" className={`transition-all focus:ring-2 focus:ring-primary/20 ${emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`} {...field} onChange={(e) => { field.onChange(e); checkEmailDuplicate(e.target.value); }} />
+                        <Input
+                          type="email"
+                          placeholder="name1@example.com"
+                          className={`transition-all focus:ring-2 focus:ring-primary/20 ${emailDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
+                          value={field.value}
+                          onKeyDown={(e) => { if (e.key === ' ' || e.code === 'Space' || (e as any).keyCode === 32) { e.preventDefault(); } }}
+                          onChange={(e) => {
+                            let s = (e.target.value || '').replace(/\s+/g, '');
+                            // remove leading non-alphanumeric chars so it starts with a letter or number
+                            s = s.replace(/^[^A-Za-z0-9]+/, '');
+                            field.onChange(s);
+                            checkEmailDuplicate(s);
+                          }}
+                          onBlur={(e) => {
+                            let s = (e.target.value || '').replace(/\s+/g, '');
+                            s = s.replace(/^[^A-Za-z0-9]+/, '');
+                            field.onChange(s);
+                          }}
+                        />
                         {checkingEmail && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                             <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
@@ -711,11 +750,27 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Phone className="w-4 h-4" />
-                      <span>Phone Number</span>
+                      <span>Phone Number *</span>
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input type="tel" placeholder="+1 (555) 123-4567" className={`transition-all focus:ring-2 focus:ring-primary/20 ${phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`} {...field} onChange={(e) => { field.onChange(e); checkPhoneDuplicate(e.target.value); }} />
+                        <Input
+                          type="tel"
+                          inputMode="tel"
+                          placeholder="+12345678901"
+                          className={`transition-all focus:ring-2 focus:ring-primary/20 ${phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
+                          value={field.value}
+                          onFocus={(e) => {
+                            const v = e.target.value || '';
+                            if (!v.startsWith('+')) field.onChange('+' + v.replace(/\D/g, ''));
+                          }}
+                          onChange={(e) => {
+                            const digits = (e.target.value || '').replace(/\D/g, '');
+                            const s = '+' + digits;
+                            field.onChange(s);
+                            checkPhoneDuplicate(s);
+                          }}
+                        />
                         {checkingPhone && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                             <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
@@ -739,10 +794,25 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <MapPin className="w-4 h-4" />
-                      <span>City</span>
+                      <span>City *</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter city" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                      <Input
+                        placeholder="Enter city"
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        value={field.value}
+                        onChange={(e) => {
+                          let s = e.target.value.replace(/[^A-Za-z ]+/g, ' ');
+                          s = s.replace(/\s+/g, ' ').replace(/^\s+/, '');
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                        onBlur={(e) => {
+                          let s = (e.target.value || '').replace(/\s+/g, ' ').trim();
+                          s = s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+                          field.onChange(s);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -764,7 +834,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Globe className="w-4 h-4" />
-                      <span>Interested Countries</span>
+                      <span>Interested Countries *</span>
                     </FormLabel>
                     <FormControl>
                       <MultiSelect value={field.value || []} onValueChange={field.onChange} placeholder="Select countries" searchPlaceholder="Search countries..." options={dropdownData?.['Interested Country']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No countries found" maxDisplayItems={2} className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -777,7 +847,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <GraduationCap className="w-4 h-4" />
-                      <span>Study Level</span>
+                      <span>Study Level *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study level" searchPlaceholder="Search study levels..." options={dropdownData?.['Study Level']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study levels found" className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -790,7 +860,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <BookOpen className="w-4 h-4" />
-                      <span>Study Plan</span>
+                      <span>Study Plan *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study plan" searchPlaceholder="Search study plans..." options={dropdownData?.['Study Plan']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study plans found" className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -803,7 +873,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem className="space-y-3">
                     <FormLabel className="flex items-center space-x-2">
                       <FileText className="w-4 h-4" />
-                      <span>English Language Test Completed</span>
+                      <span>English Language Test Completed *</span>
                     </FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-row space-x-6">
@@ -840,7 +910,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4" />
-                        <span>Lead Source</span>
+                        <span>Lead Source *</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -866,7 +936,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <Target className="w-4 h-4" />
-                        <span>Status</span>
+                        <span>Status *</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -892,7 +962,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
-                        <span>Lead Type</span>
+                        <span>Lead Type *</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -927,7 +997,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Region</span>
+                      <span>Region *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
@@ -940,10 +1010,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Branch</span>
+                      <span>Branch *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoBranchDisabled(true); setAutoRegionDisabled(true); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = normalizeRole((user as any)?.role); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(!isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -953,7 +1023,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Counsellor</span>
+                      <span>Counsellor *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -966,7 +1036,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Admission Officer</span>
+                      <span>Admission Officer *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -990,10 +1060,24 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                 <FormItem>
                   <FormLabel className="flex items-center space-x-2">
                     <FileText className="w-4 h-4" />
-                    <span>Notes & Comments</span>
+                    <span>Notes & Comments *</span>
                   </FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..." className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                    <Textarea
+                      placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..."
+                      className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20"
+                      value={field.value}
+                      onChange={(e) => {
+                        let s = e.target.value || '';
+                        if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
+                        field.onChange(s);
+                      }}
+                      onBlur={(e) => {
+                        let s = e.target.value || '';
+                        if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
+                        field.onChange(s);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

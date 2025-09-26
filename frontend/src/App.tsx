@@ -7,7 +7,6 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Leads from "@/pages/leads";
-import AddLead from "@/pages/add-lead";
 import Students from "@/pages/students";
 import Applications from "@/pages/applications";
 import AddApplication from "@/pages/add-application";
@@ -92,7 +91,6 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/leads" component={Leads} />
-      <Route path="/leads/add" component={AddLead} />
       <Route path="/leads/new" component={Leads} />
       <Route path="/leads/:id/edit" component={Leads} />
       <Route path="/leads/:id" component={Leads} />
