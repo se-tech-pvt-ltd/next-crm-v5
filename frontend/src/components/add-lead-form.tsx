@@ -545,7 +545,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       }
 
       // Fallbacks using current user and assignments
-      const roleName = normalizeRole((user as any)?.role);
+      const roleName = getNormalizedRole();
 
       if (!resolvedRegionId) {
         const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
