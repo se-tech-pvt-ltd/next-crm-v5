@@ -866,12 +866,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <Target className="w-4 h-4" />
-                        <span>Priority Level</span>
+                        <span>Status</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                            <SelectValue placeholder="Set priority" />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
