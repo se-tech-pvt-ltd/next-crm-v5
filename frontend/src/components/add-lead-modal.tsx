@@ -4,7 +4,7 @@ console.log('[modal] loaded: frontend/src/components/add-lead-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -215,28 +215,49 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
     createLeadMutation.mutate(data);
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Users className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl">Add New Lead</DialogTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Capture lead information to start the student journey
-                </p>
-              </div>
-            </div>
-          </div>
-        </DialogHeader>
+  const handleSubmitClick = () => {
+    form.handleSubmit(onSubmit)();
+  };
 
+  return (
+    <DetailsDialogLayout
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Add Lead"
+      headerClassName="bg-[#223E7D] text-white"
+      headerLeft={(
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <Users className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New Lead</div>
+            <div className="text-xs opacity-90 truncate">Capture lead information to start the student journey</div>
+          </div>
+        </div>
+      )}
+      headerRight={(
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmitClick}
+            disabled={createLeadMutation.isPending}
+            className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+            title={'Add Lead'}
+          >
+            {createLeadMutation.isPending ? 'Adding…' : 'Add Lead'}
+          </Button>
+        </div>
+      )}
+      leftContent={(
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
@@ -543,37 +564,9 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
 
             <Separator />
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                className="px-6"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createLeadMutation.isPending}
-                className="px-6 bg-primary hover:bg-primary/90"
-              >
-                {createLeadMutation.isPending ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Adding Lead...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-4 h-4" />
-                    <span>Add Lead</span>
-                  </div>
-                )}
-              </Button>
-            </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      )}
+    />
   );
 }
