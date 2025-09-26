@@ -89,7 +89,11 @@ export class LeadService {
       lead.id,
       'created',
       'Lead created',
-      `Lead ${lead.name} was added to the system`
+      `Lead ${lead.name} was added to the system`,
+      undefined,
+      undefined,
+      undefined,
+      currentUserId
     );
 
     return lead;
@@ -129,8 +133,7 @@ export class LeadService {
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
-              undefined,
-              'Next Bot'
+              currentUserId
             );
           } else if (fieldName === 'counselorId') {
             await ActivityService.logActivity(
@@ -142,8 +145,7 @@ export class LeadService {
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
-              undefined,
-              'Next Bot'
+              currentUserId
             );
           }
         }
@@ -158,11 +160,15 @@ export class LeadService {
     
     if (success) {
       await ActivityService.logActivity(
-        'lead', 
-        leadId, 
-        'assigned', 
+        'lead',
+        leadId,
+        'assigned',
         'Lead assigned to counselor',
-        `Lead assigned to counselor ${counselorId}`
+        `Lead assigned to counselor ${counselorId}`,
+        undefined,
+        undefined,
+        undefined,
+        counselorId
       );
     }
     
@@ -175,11 +181,15 @@ export class LeadService {
     
     if (success && lead) {
       await ActivityService.logActivity(
-        'lead', 
-        id, 
-        'deleted', 
+        'lead',
+        id,
+        'deleted',
         'Lead deleted',
-        `Lead ${lead.name} was deleted from the system`
+        `Lead ${lead.name} was deleted from the system`,
+        undefined,
+        undefined,
+        undefined,
+        (lead as any).updatedBy || (lead as any).createdBy || undefined
       );
     }
     
