@@ -201,11 +201,20 @@ export default function ConvertLeadToStudent() {
       const def = list.find((o: any) => o?.is_default === 1 || o?.isDefault === 1 || o?.is_default === '1' || o?.isDefault === '1');
       return def ? (def.key ?? def.id ?? def.value ?? '') : '';
     };
+    const findByLabel = (candidates: string[], label: string) => {
+      const list = findList(candidates);
+      const lname = label.toLowerCase();
+      const item = list.find((o: any) => String(o.value || '').toLowerCase() === lname || String(o.key || o.id || '').toLowerCase() === lname);
+      return item ? (item.key ?? item.id ?? item.value ?? '') : '';
+    };
+
+    const openKey = findByLabel(['Status', 'status'], 'open');
+    const averageKey = findByLabel(['Expectation', 'expectation'], 'average');
 
     setFormData(prev => ({
       ...prev,
-      status: prev.status || pickDefaultFrom(['Status', 'status']),
-      expectation: prev.expectation || pickDefaultFrom(['Expectation', 'expectation']),
+      status: prev.status || openKey || pickDefaultFrom(['Status', 'status']),
+      expectation: prev.expectation || averageKey || pickDefaultFrom(['Expectation', 'expectation']),
       eltTest: prev.eltTest || pickDefaultFrom(['ELT Test', 'ELTTest', 'ELT_Test']),
     }));
   }, [studentDropdowns]);
