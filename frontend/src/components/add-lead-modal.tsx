@@ -225,6 +225,7 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
       onOpenChange={onOpenChange}
       title="Add Lead"
       headerClassName="bg-[#223E7D] text-white"
+      contentClassName="no-not-allowed w-[65vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
       headerLeft={(
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
