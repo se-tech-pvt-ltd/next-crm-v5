@@ -45,24 +45,24 @@ import {
 import { z } from 'zod';
 
 const addLeadFormSchema = z.object({
-  type: z.string().optional(),
+  type: z.string().min(1, 'Type is required'),
   status: z.string().min(1, 'Status is required'),
   name: z.string().min(1, 'Name is required'),
-  phone: z.string().optional(),
-  email: z.string().email('Valid email is required'),
-  city: z.string().optional(),
-  source: z.string().optional(),
-  country: z.array(z.string()).optional(),
-  studyLevel: z.string().optional(),
-  studyPlan: z.string().optional(),
-  elt: z.string().optional(),
-  regionId: z.string().optional(),
-  branchId: z.string().optional(),
-  counsellorId: z.string().optional(),
-  admissionOfficerId: z.string().optional(),
+  phone: z.string().min(1, 'Phone is required'),
+  email: z.string().min(1, 'Email is required').email('Valid email is required'),
+  city: z.string().min(1, 'City is required'),
+  source: z.string().min(1, 'Source is required'),
+  country: z.array(z.string()).min(1, 'At least one country is required'),
+  studyLevel: z.string().min(1, 'Study level is required'),
+  studyPlan: z.string().min(1, 'Study plan is required'),
+  elt: z.enum(['yes', 'no'], { required_error: 'English test selection is required' }),
+  regionId: z.string().min(1, 'Region is required'),
+  branchId: z.string().min(1, 'Branch is required'),
+  counsellorId: z.string().min(1, 'Counsellor is required'),
+  admissionOfficerId: z.string().min(1, 'Admission officer is required'),
   // legacy: keep for compatibility
   counselorId: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().min(1, 'Notes are required'),
 });
 
 type AddLeadFormData = z.infer<typeof addLeadFormSchema>;
@@ -711,7 +711,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Phone className="w-4 h-4" />
-                      <span>Phone Number</span>
+                      <span>Phone Number *</span>
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
@@ -739,7 +739,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <MapPin className="w-4 h-4" />
-                      <span>City</span>
+                      <span>City *</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="Enter city" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
@@ -764,7 +764,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Globe className="w-4 h-4" />
-                      <span>Interested Countries</span>
+                      <span>Interested Countries *</span>
                     </FormLabel>
                     <FormControl>
                       <MultiSelect value={field.value || []} onValueChange={field.onChange} placeholder="Select countries" searchPlaceholder="Search countries..." options={dropdownData?.['Interested Country']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No countries found" maxDisplayItems={2} className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -777,7 +777,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <GraduationCap className="w-4 h-4" />
-                      <span>Study Level</span>
+                      <span>Study Level *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study level" searchPlaceholder="Search study levels..." options={dropdownData?.['Study Level']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study levels found" className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -790,7 +790,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <BookOpen className="w-4 h-4" />
-                      <span>Study Plan</span>
+                      <span>Study Plan *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study plan" searchPlaceholder="Search study plans..." options={dropdownData?.['Study Plan']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study plans found" className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -803,7 +803,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem className="space-y-3">
                     <FormLabel className="flex items-center space-x-2">
                       <FileText className="w-4 h-4" />
-                      <span>English Language Test Completed</span>
+                      <span>English Language Test Completed *</span>
                     </FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-row space-x-6">
@@ -840,7 +840,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4" />
-                        <span>Lead Source</span>
+                        <span>Lead Source *</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -866,7 +866,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <Target className="w-4 h-4" />
-                        <span>Status</span>
+                        <span>Status *</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -892,7 +892,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
-                        <span>Lead Type</span>
+                        <span>Lead Type *</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -927,7 +927,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Region</span>
+                      <span>Region *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
@@ -940,7 +940,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Branch</span>
+                      <span>Branch *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoBranchDisabled(true); setAutoRegionDisabled(true); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="transition-all focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
@@ -953,7 +953,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Counsellor</span>
+                      <span>Counsellor *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -966,7 +966,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   <FormItem>
                     <FormLabel className="flex items-center space-x-2">
                       <Users className="w-4 h-4" />
-                      <span>Admission Officer</span>
+                      <span>Admission Officer *</span>
                     </FormLabel>
                     <FormControl>
                       <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="transition-all focus:ring-2 focus:ring-primary/20" />
@@ -990,7 +990,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                 <FormItem>
                   <FormLabel className="flex items-center space-x-2">
                     <FileText className="w-4 h-4" />
-                    <span>Notes & Comments</span>
+                    <span>Notes & Comments *</span>
                   </FormLabel>
                   <FormControl>
                     <Textarea placeholder="Add any additional information about this lead, their goals, preferences, or special requirements..." className="min-h-20 transition-all focus:ring-2 focus:ring-primary/20" {...field} />
