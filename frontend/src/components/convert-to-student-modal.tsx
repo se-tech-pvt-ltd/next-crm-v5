@@ -9,8 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ActivityTracker } from '@/components/activity-tracker';
-import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/file-upload';
 import { type Lead, type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -756,12 +754,6 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
 
           <Separator />
         </>
-      )}
-      rightWidth="420px"
-      rightContent={(
-        <div className="pt-1">
-          <ActivityTracker entityType="lead" entityId={lead.id} entityName={lead.name} />
-        </div>
       )}
     />
   );
