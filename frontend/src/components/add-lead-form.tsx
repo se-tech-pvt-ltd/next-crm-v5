@@ -658,27 +658,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   return (
     <div className="w-full max-w-none sm:max-w-4xl mx-auto px-2 sm:px-0">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-4">
-          {showBackButton && (
-            <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }} className="sm:order-first">
-              <Button variant="outline" onClick={onCancel} className="flex items-center justify-center space-x-2 w-full sm:w-auto">
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Leads</span>
-              </Button>
-            </motion.div>
-          )}
-          <div className="flex items-center space-x-3 min-w-0 flex-1">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold truncate">Add New Lead</h1>
-              <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1">Capture lead information to start the student journey</p>
-            </div>
-          </div>
+      {showBackButton && (
+        <div className="mb-4">
+          <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="outline" onClick={onCancel} className="flex items-center justify-center space-x-2 w-full sm:w-auto">
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Leads</span>
+            </Button>
+          </motion.div>
         </div>
-      </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
