@@ -268,7 +268,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         email: lead.email || '',
         city: lead.city || '',
         source: mapDropdownToLabels(lead.source, 'Source') || normalizeToText(lead.source),
-        interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
+        interestedCountry: mapDropdownToKeys(lead.country, 'Interested Country') || (Array.isArray(lead.country) ? lead.country : (lead.country ? [lead.country] : [])),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: (lead as any)?.admissionOfficerId || (lead as any)?.admission_officer_id || '',
