@@ -498,7 +498,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div className="space-y-2">
                     <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
-                    <Input value={isEditing ? (editData.student_id || '') : (student?.student_id || student?.id || 'N/A')} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                    <Input value={isEditing ? (editData.student_id || '') : (student?.student_id || student?.id || 'N/A')} disabled={!isEditing} readOnly className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                   </div>
 
                   <div className="space-y-2">
@@ -662,7 +662,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled className="h-7 text-[11px]" />
+                    <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
                 </div>
 
@@ -681,7 +681,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
+                    <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
                 </div>
 
@@ -699,7 +699,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input value={getDropdownLabel('targetCountry', (student as any)?.targetCountry || '')} disabled className="h-7 text-[11px]" />
+                    <Input value={getDropdownLabel('targetCountry', (student as any)?.targetCountry || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
                 </div>
 
