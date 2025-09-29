@@ -251,9 +251,17 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             <Button
               type="button"
               onClick={() => { handleSubmitClick(); }}
+              disabled={createMutation.isPending}
               className="px-3 h-8 text-xs bg-white text-[#223E7D] hover:bg-white/90 border border-white rounded-md"
             >
-              Save
+              {createMutation.isPending ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-[#223E7D] border-t-transparent rounded-full animate-spin"></div>
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                <span>Save</span>
+              )}
             </Button>
             <Button
               type="button"
