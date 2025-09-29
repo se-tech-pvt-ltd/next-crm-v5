@@ -154,19 +154,76 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     if (opts.length > 0) return opts;
     return findIn(leadsData);
   };
-  const getDropdownLabel = (fieldName: string, value?: string | null) => {
-    if (!value) return '';
+  const getDropdownLabel = (fieldName: string, value?: string | string[] | null) => {
+    if (value == null) return '';
     const options = getFieldOptions(fieldName);
-    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
-    return hit?.value || value;
+
+    const mapOne = (v: any) => {
+      const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v || String(opt.id) === String(v) || String(opt.key) === String(v) || String(opt.value) === String(v));
+      return hit?.value || String(v);
+    };
+
+    // If already an array, map and join
+    if (Array.isArray(value)) {
+      const labels = value.map(mapOne).filter(Boolean);
+      return labels.join(', ');
+    }
+
+    // If string, try to parse JSON array, else CSV, else single
+    const s = String(value).trim();
+    if (s.startsWith('[')) {
+      try {
+        const arr = JSON.parse(s);
+        if (Array.isArray(arr)) return arr.map(mapOne).filter(Boolean).join(', ');
+      } catch {}
+    }
+    if (s.includes(',')) {
+      const parts = s.split(',').map(p => p.trim()).filter(Boolean);
+      return parts.map(mapOne).filter(Boolean).join(', ');
+    }
+
+    return mapOne(s);
   };
 
   // Map a stored raw value to the selectable option value (id/key/value) for a given field
-  const mapToOptionValue = (fieldName: string, raw?: string | null) => {
-    if (!raw) return '';
+  const mapToOptionValue = (fieldName: string, raw?: string | string[] | null) => {
+    if (raw == null) return '';
     const options = getFieldOptions(fieldName);
-    const found = options.find((opt: any) => opt.id === raw || opt.key === raw || opt.value === raw || String(opt.id) === String(raw) || String(opt.key) === String(raw) || String(opt.value) === String(raw));
-    return (found && (found.key || found.id || found.value)) || raw;
+    const mapOne = (v: any) => options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v || String(opt.id) === String(v) || String(opt.key) === String(v) || String(opt.value) === String(v));
+
+    // If already array, try first matching option
+    if (Array.isArray(raw)) {
+      for (const v of raw) {
+        const found = mapOne(v);
+        if (found) return (found.key || found.id || found.value) as string;
+      }
+      return String(raw[0] ?? '');
+    }
+
+    const s = String(raw).trim();
+    if (s.startsWith('[')) {
+      try {
+        const arr = JSON.parse(s);
+        if (Array.isArray(arr)) {
+          for (const v of arr) {
+            const found = mapOne(v);
+            if (found) return (found.key || found.id || found.value) as string;
+          }
+          return String(arr[0] ?? '');
+        }
+      } catch {}
+    }
+    if (s.includes(',')) {
+      const parts = s.split(',').map(p => p.trim()).filter(Boolean);
+      for (const v of parts) {
+        const found = mapOne(v);
+        if (found) return (found.key || found.id || found.value) as string;
+      }
+      return String(parts[0] ?? '');
+    }
+
+    const found = mapOne(s);
+    return (found && (found.key || found.id || found.value)) || s;
   };
 
   useEffect(() => {
@@ -441,7 +498,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div className="space-y-2">
                     <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
-                    <Input value={isEditing ? (editData.student_id || '') : (student?.student_id || student?.id || 'N/A')} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                    <Input value={isEditing ? (editData.student_id || '') : (student?.student_id || student?.id || 'N/A')} disabled={!isEditing} readOnly className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                   </div>
 
                   <div className="space-y-2">
@@ -605,7 +662,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled className="h-7 text-[11px]" />
+                    <Input id="englishProficiency" value={getDropdownLabel('englishProficiency', student?.englishProficiency || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
                 </div>
 
@@ -624,7 +681,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled className="h-7 text-[11px]" />
+                    <Input value={getDropdownLabel('expectation', student?.expectation || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
                 </div>
 
@@ -642,7 +699,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input value={getDropdownLabel('targetCountry', (student as any)?.targetCountry || '')} disabled className="h-7 text-[11px]" />
+                    <Input value={getDropdownLabel('targetCountry', (student as any)?.targetCountry || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
                 </div>
 

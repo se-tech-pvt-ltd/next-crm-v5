@@ -15,6 +15,7 @@ import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { Student } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
+import { http } from '@/services/http';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus } from 'lucide-react';
@@ -81,6 +82,16 @@ export default function Students() {
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
+  });
+  // Fallback to Leads module for fields that may live there (e.g., Program/Study Plan)
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+  });
+  // Global fallback: pull all dropdowns to handle mismatched field names
+  const { data: allDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns'],
+    queryFn: async () => http.get<any[]>('/api/dropdowns'),
   });
 
   function getStatusLabel(raw?: string) {
@@ -165,6 +176,35 @@ export default function Students() {
       return found ? found.value : item;
     }).filter(Boolean);
     return mapped.length > 0 ? mapped.join(', ') : (idsOrNames[0] || '-');
+  };
+
+  // Map target program ids to display names using dropdowns (if available)
+  const getTargetProgramDisplay = (student: Student) => {
+    const raw = (student as any).targetProgram ?? (student as any).program ?? null;
+    const values = parseTargetCountries(raw);
+    const dd: any = (studentDropdowns as any) || {};
+    const ld: any = (leadsDropdowns as any) || {};
+    const candidates = ['Target Program', 'Program', 'Study Plan', 'Course', 'TargetProgram', 'Program Name'];
+    let options: any[] = [];
+    for (const k of candidates) {
+      const list = dd[k] || ld[k];
+      if (Array.isArray(list) && list.length > 0) { options = list; break; }
+    }
+    // Global fallback: search all dropdowns by fieldName containing program terms
+    if (options.length === 0 && Array.isArray(allDropdowns)) {
+      const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const terms = ['targetprogram','program','studyplan','course'];
+      const pool = (allDropdowns as any[]).filter((d: any) => terms.some(t => normalize(d.fieldName).includes(t)));
+      options = pool;
+    }
+    if (options.length > 0) {
+      const mapped = values.map((item) => {
+        const found = options.find((o: any) => (o.key === item || o.id === item || o.value === item || String(o.id) === String(item) || String(o.key) === String(item) || String(o.value) === String(item)));
+        return found ? found.value : item;
+      }).filter(Boolean);
+      return mapped.length > 0 ? mapped.join(', ') : (values[0] || '-');
+    }
+    return (values && values.length > 0) ? values.join(', ') : '-';
   };
 
   // Get unique countries for filter dropdown
@@ -505,7 +545,7 @@ export default function Students() {
                           {student.targetProgram && (
                             <div className="flex items-center text-xs text-gray-500">
                               <BookOpen className="w-3 h-3 mr-1" />
-                              {student.targetProgram}
+                              {getTargetProgramDisplay(student)}
                             </div>
                           )}
                         </div>
