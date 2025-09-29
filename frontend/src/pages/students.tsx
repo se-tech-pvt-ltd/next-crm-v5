@@ -505,7 +505,7 @@ export default function Students() {
                           {student.targetProgram && (
                             <div className="flex items-center text-xs text-gray-500">
                               <BookOpen className="w-3 h-3 mr-1" />
-                              {student.targetProgram}
+                              {getTargetProgramDisplay(student)}
                             </div>
                           )}
                         </div>
