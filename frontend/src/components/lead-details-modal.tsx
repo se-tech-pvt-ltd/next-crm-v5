@@ -338,8 +338,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     ) : undefined
   );
 
+  const processedLeadForDisplay = lead ? { ...lead, country: parseFieldValue(lead.country), program: parseFieldValue(lead.program) } : {} as any;
+  const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
+
   const headerLeft = (
-    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{lead.name || 'Lead'}</div>
+    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{(lead && (lead as any).name) || 'Lead'}</div>
   );
 
   const headerRight = (
@@ -454,16 +457,16 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Full Name</span></Label>
-                    <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <Input id="name" value={displayData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center space-x-2"><Mail className="w-4 h-4" /><span>Email Address</span></Label>
-                    <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <Input id="email" type="email" value={displayData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
                     <PhoneInput
-                      value={String(editData.phone || '')}
+                      value={String(displayData.phone || '')}
                       onChange={(val) => setEditData({ ...editData, phone: val })}
                       defaultCountry="in"
                       className="w-full"
@@ -473,7 +476,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
-                    <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <Input id="city" value={displayData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                 </div>
               </CardContent>
@@ -483,7 +486,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
-                  <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.Type || []).map((option: any) => (
@@ -495,7 +498,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Lead Source</span></Label>
-                  <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.Source || []).map((option: any) => (
@@ -507,7 +510,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><GraduationCap className="w-4 h-4" /><span>Study Level</span></Label>
-                  <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study level" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.['Study Level'] || []).map((option: any) => (
@@ -519,7 +522,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Study Plan</span></Label>
-                  <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study plan" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.['Study Plan'] || []).map((option: any) => (
@@ -533,7 +536,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Interested Countries</span></Label>
                   <CommandMultiSelect
                     options={((dropdownData as any)?.['Interested Country'] || []).map((o: any) => ({ label: o.value, value: o.key }))}
-                    value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                    value={Array.isArray((displayData as any).country) ? (displayData as any).country : ((displayData as any).country ? [(displayData as any).country] : [])}
                     onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
                     placeholder="Select countries"
                     searchPlaceholder="Search countries..."
