@@ -82,6 +82,14 @@
     font-family: 'Inter', sans-serif;
   }
 
+  /* Hide caret on non-editable elements (prevents '|' text cursor on labels/static text) */
+  :where(*):not(input):not(textarea):not([contenteditable="true"]):not([role="textbox"]) {
+    caret-color: transparent;
+  }
+  button, [role="button"], label, [role="combobox"], [role="menuitem"], [role="tab"], [role="switch"], [role="checkbox"], [role="radio"] {
+    caret-color: transparent;
+  }
+
   .bg-purple {
     background-color: hsl(var(--purple));
   }
