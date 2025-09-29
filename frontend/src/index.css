@@ -89,6 +89,10 @@
   button, [role="button"], label, [role="combobox"], [role="menuitem"], [role="tab"], [role="switch"], [role="checkbox"], [role="radio"] {
     caret-color: transparent;
   }
+  /* Restore caret visibility on editable fields (caret-color is inherited) */
+  input, textarea, [contenteditable="true"], [role="textbox"] {
+    caret-color: currentColor;
+  }
 
   .bg-purple {
     background-color: hsl(var(--purple));

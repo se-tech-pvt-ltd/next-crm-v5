@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import * as RegService from '@/services/event-registrations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -72,9 +74,10 @@ export interface AddLeadFormProps {
   onSuccess?: () => void;
   showBackButton?: boolean;
   initialData?: Partial<any>;
+  onRegisterSubmit?: (submit: () => void) => void;
 }
 
-export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false, initialData }: AddLeadFormProps) {
+export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false, initialData, onRegisterSubmit }: AddLeadFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -136,6 +139,27 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     queryFn: () => BranchesService.listBranches(),
     staleTime: 30000,
   });
+
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const submitForm = useCallback(() => {
+    try {
+      const el = formRef.current;
+      if (!el) return;
+      if (typeof (el as any).requestSubmit === 'function') {
+        (el as any).requestSubmit();
+      } else {
+        const btn = el.querySelector('#add-lead-form-submit') as HTMLButtonElement | null;
+        if (btn) btn.click();
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (onRegisterSubmit) onRegisterSubmit(submitForm);
+    } catch {}
+  }, [onRegisterSubmit, submitForm]);
 
   const form = useForm<AddLeadFormData>({
     resolver: zodResolver(addLeadFormSchema),
@@ -670,7 +694,11 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+          ref={(el) => { formRef.current = el; }}
+        >
 
           <Card className="shadow-md border border-gray-200 bg-white">
             <CardHeader className="pb-2">
@@ -791,22 +819,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input
-                          type="tel"
-                          inputMode="tel"
-                          placeholder="+12345678901"
-                          className={`transition-all focus:ring-2 focus:ring-primary/20 ${phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
-                          value={field.value}
-                          onFocus={(e) => {
-                            const v = e.target.value || '';
-                            if (!v.startsWith('+')) field.onChange('+' + v.replace(/\D/g, ''));
-                          }}
-                          onChange={(e) => {
-                            const digits = (e.target.value || '').replace(/\D/g, '');
-                            const s = '+' + digits;
-                            field.onChange(s);
-                            checkPhoneDuplicate(s);
-                          }}
+                        <PhoneInput
+                          value={field.value || ''}
+                          onChange={(val) => { field.onChange(val); checkPhoneDuplicate(val); }}
+                          defaultCountry="in"
+                          className="w-full"
+                          inputClassName={`w-full h-9 text-sm ${phoneDuplicateStatus.isDuplicate ? 'ring-1 ring-amber-500 rounded-md' : ''}`}
                         />
                         {checkingPhone && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
