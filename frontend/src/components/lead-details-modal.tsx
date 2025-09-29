@@ -55,16 +55,23 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
       program: parseFieldValue(lead.program),
     };
 
-    const lastId = lastInitializedIdRef.current;
-    const sameId = String(lastId ?? '') === String(lead.id ?? '');
+    // Initialize editData when lead first arrives or when a different lead is opened.
+    // Do not overwrite while user is actively editing.
+    if (isEditing) return;
 
-    if (!sameId || !isEditing) {
-      setEditData(prev => {
-        if (isEditing && sameId) return prev || {};
-        return { ...prev, ...processedLead };
-      });
+    const lastId = lastInitializedIdRef.current;
+    if (String(lastId ?? '') !== String(lead.id ?? '')) {
+      setEditData(processedLead);
       setCurrentStatus(lead.status);
       lastInitializedIdRef.current = lead.id ?? null;
+      return;
+    }
+
+    // If editData is empty for some reason (e.g. direct URL), ensure fields are populated
+    const hasName = !!(editData && (editData as any).name);
+    if (!hasName) {
+      setEditData(prev => ({ ...processedLead, ...prev }));
+      setCurrentStatus(lead.status);
     }
   }, [lead, isEditing]);
 
