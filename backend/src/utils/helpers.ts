@@ -88,7 +88,18 @@ export function mapStudentFromLeadPayload(studentData: any) {
     dateOfBirth: normalizeDate(studentData.dateOfBirth),
     englishProficiency: studentData.englishProficiency || studentData.eltTest || undefined,
     passportNumber: studentData.passport || studentData.passportNumber || undefined,
-    targetCountry: studentData.interestedCountry || studentData.targetCountry || undefined,
+    targetCountry: (() => {
+      const v = studentData.interestedCountry ?? studentData.targetCountry ?? studentData.country;
+      if (Array.isArray(v)) return JSON.stringify(v);
+      if (typeof v === 'string') {
+        const s = v.trim();
+        if (s.startsWith('[')) {
+          try { const parsed = JSON.parse(s); if (Array.isArray(parsed)) return JSON.stringify(parsed); } catch {}
+        }
+        return s || undefined;
+      }
+      return undefined;
+    })(),
     status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
     counsellorId: studentData.counsellor || studentData.counsellorId || studentData.counselorId || undefined,
     admissionOfficerId: studentData.admissionOfficer || studentData.admissionOfficerId || undefined,
