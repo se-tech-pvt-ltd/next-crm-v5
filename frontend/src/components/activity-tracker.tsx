@@ -126,6 +126,20 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryKey: ['/api/dropdowns/module', 'Leads'],
     queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
   });
+  // Global fallback: fetch all dropdowns to build an id->label map
+  const { data: allDropdowns = [] } = useQuery({
+    queryKey: ['/api/dropdowns'],
+    queryFn: async () => DropdownsService.getAllDropdowns(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const globalLabelById = React.useMemo(() => {
+    const map = new Map<string, string>();
+    (allDropdowns as any[]).forEach((d: any) => {
+      const k = String(d.id || d.key || '');
+      if (k) map.set(k, String(d.value ?? ''));
+    });
+    return map;
+  }, [allDropdowns]);
 
   // Generic dropdown label resolution
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -179,13 +193,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     const entries = moduleDropdowns ? Object.entries(moduleDropdowns as Record<string, any[]>) : [];
     const leadsEntries = leadsModuleDropdowns ? Object.entries(leadsModuleDropdowns as Record<string, any[]>) : [];
 
-    // Helper to search a set of entries
     const findIn = (ens: [string, any[]][]) => {
-      // 1) Exact normalized key match
       let entry = ens.find(([k]) => normalize(String(k)) === target);
       if (entry) return entry[1] || [];
-
-      // 2) Heuristics for common multi-selects (e.g., Target Country)
       const isCountryField = /country/.test(target) || target === 'targetcountry';
       if (isCountryField) {
         const candidates = ['target_country','targetcountry','target country','interested country','country'];
@@ -193,18 +203,22 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         entry = ens.find(([k]) => set.has(normalize(String(k))));
         if (entry) return entry[1] || [];
       }
-
-      // 3) Fallback: if only one array matches shape of dropdown options (id/key/value), use it
       const looksLikeOptions = (arr: any[]) => Array.isArray(arr) && arr.some((o) => o && (('id' in o) || ('key' in o)) && ('value' in o));
       const fallback = ens.find(([, v]) => looksLikeOptions(v));
       return (fallback?.[1] as any[]) || [];
     };
 
-    // Prefer current module, then Leads as fallback (for countries, etc.)
     const fromModule = findIn(entries);
     if (fromModule.length) return fromModule;
     const fromLeads = findIn(leadsEntries);
     if (fromLeads.length) return fromLeads;
+
+    // Global fallback for country-like fields using all dropdowns
+    const isCountryField = /country/.test(target) || target === 'targetcountry';
+    if (isCountryField && Array.isArray(allDropdowns) && (allDropdowns as any[]).length) {
+      const options = (allDropdowns as any[]).filter((d: any) => /country/i.test(String(d.fieldName || '')));
+      return options as any[];
+    }
     return [];
   };
   const getLabelForField = (fieldName?: string | null, value?: any) => {
@@ -212,7 +226,6 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     if (value == null || value === '') return '';
     const field = normalize(fieldName);
 
-    // Status special-case
     if (field === 'status') {
       const arr = toArray(value);
       return arr.map((v) => getStatusLabel(v)).join(', ');
@@ -220,16 +233,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
     const options = getOptionsForField(fieldName);
     const arr = toArray(value);
-    if (arr.length > 1) {
-      const labels = arr.map((v) => {
-        const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v);
-        return (hit?.value ?? v) as string;
-      });
-      return labels.join(', ');
-    }
-    const v = arr[0] ?? '';
-    const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v);
-    return (hit?.value ?? v) as string;
+    const mapOne = (v: string) => {
+      const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v);
+      if (hit && hit.value) return String(hit.value);
+      if (globalLabelById.has(v)) return String(globalLabelById.get(v));
+      return v;
+    };
+    if (arr.length > 1) return arr.map(mapOne).join(', ');
+    return mapOne(arr[0] ?? '');
   };
 
   // Create a lookup function for user profile images
