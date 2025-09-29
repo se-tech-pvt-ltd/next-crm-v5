@@ -72,9 +72,10 @@ export interface AddLeadFormProps {
   onSuccess?: () => void;
   showBackButton?: boolean;
   initialData?: Partial<any>;
+  onRegisterSubmit?: (submit: () => void) => void;
 }
 
-export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false, initialData }: AddLeadFormProps) {
+export default function AddLeadForm({ onCancel, onSuccess, showBackButton = false, initialData, onRegisterSubmit }: AddLeadFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -670,7 +671,20 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+          ref={(el) => {
+            try {
+              if (el && onRegisterSubmit) {
+                onRegisterSubmit(() => {
+                  try { if (typeof (el as any).requestSubmit === 'function') { (el as any).requestSubmit(); } else { const btn = el.querySelector('#add-lead-form-submit') as HTMLButtonElement | null; if (btn) btn.click(); }
+                  } catch {}
+                });
+              }
+            } catch {}
+          }}
+        >
 
           <Card className="shadow-md border border-gray-200 bg-white">
             <CardHeader className="pb-2">
