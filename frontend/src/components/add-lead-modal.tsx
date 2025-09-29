@@ -43,6 +43,7 @@ interface AddLeadModalProps {
 }
 
 export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalProps) {
+  const [submitLeadForm, setSubmitLeadForm] = useState<(() => void) | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
@@ -250,7 +251,9 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
           </Button>
           <Button
             type="button"
-            onClick={() => { try { (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {} }}
+            onClick={() => {
+              try { if (submitLeadForm) submitLeadForm(); else (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {}
+            }}
             className="px-3 h-8 text-xs bg-white text-[#223E7D] hover:bg-white/90 border border-white rounded-md"
           >
             Save
@@ -262,6 +265,7 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
           onCancel={() => onOpenChange(false)}
           onSuccess={() => { onOpenChange(false); try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); } catch {} }}
           initialData={initialData}
+          onRegisterSubmit={(fn) => setSubmitLeadForm(() => fn)}
         />
       )}
     />
