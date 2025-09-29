@@ -44,19 +44,36 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
+  const lastInitializedIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
-    if (lead) {
-      const processedLead = {
-        ...lead,
-        country: parseFieldValue(lead.country),
-        program: parseFieldValue(lead.program)
-      };
+    if (!lead) return;
+
+    const processedLead = {
+      ...lead,
+      country: parseFieldValue(lead.country),
+      program: parseFieldValue(lead.program),
+    };
+
+    // Initialize editData when lead first arrives or when a different lead is opened.
+    // Do not overwrite while user is actively editing.
+    if (isEditing) return;
+
+    const lastId = lastInitializedIdRef.current;
+    if (String(lastId ?? '') !== String(lead.id ?? '')) {
       setEditData(processedLead);
-      // Initialize current status on first load of this lead id
+      setCurrentStatus(lead.status);
+      lastInitializedIdRef.current = lead.id ?? null;
+      return;
+    }
+
+    // If editData is empty for some reason (e.g. direct URL), ensure fields are populated
+    const hasName = !!(editData && (editData as any).name);
+    if (!hasName) {
+      setEditData(prev => ({ ...processedLead, ...prev }));
       setCurrentStatus(lead.status);
     }
-  }, [lead?.id]);
+  }, [lead, isEditing]);
 
   useEffect(() => {
     if (open && startInEdit) {
@@ -101,6 +118,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         queryClient.invalidateQueries({ queryKey: key });
         queryClient.refetchQueries({ queryKey: key });
       } catch {}
+      // Sync local status with server response
+      if (updatedLead && (updatedLead as any).status) setCurrentStatus((updatedLead as any).status as string);
       setIsEditing(false);
       onLeadUpdate?.(updatedLead);
       toast({ title: 'Success', description: 'Lead updated successfully.' });
@@ -215,6 +234,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
     const dataToSave = {
       ...editData,
+      // Ensure status is preserved: prefer the status shown in the status bar (currentStatus),
+      // then editData.status, then lead.status
+      status: currentStatus || editData.status || lead?.status,
       country: Array.isArray(editData.country) ? JSON.stringify(editData.country) : editData.country,
       program: Array.isArray(editData.program) ? JSON.stringify(editData.program) : editData.program,
     };
@@ -253,8 +275,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         queryClient.invalidateQueries({ queryKey: key });
         queryClient.refetchQueries({ queryKey: key });
       } catch {}
+      // Ensure currentStatus reflects server value
+      if (updatedLead && (updatedLead as any).status) setCurrentStatus((updatedLead as any).status as string);
       onLeadUpdate?.(updatedLead);
-      toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
+      toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName((updatedLead as any).status)}` });
     },
     onError: (error: any) => {
       // Revert to previous status if API fails
@@ -321,8 +345,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     ) : undefined
   );
 
+  const processedLeadForDisplay = lead ? { ...lead, country: parseFieldValue(lead.country), program: parseFieldValue(lead.program) } : {} as any;
+  const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
+
   const headerLeft = (
-    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{lead.name || 'Lead'}</div>
+    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{(lead && (lead as any).name) || 'Lead'}</div>
   );
 
   const headerRight = (
@@ -437,16 +464,16 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Full Name</span></Label>
-                    <Input id="name" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <Input id="name" value={displayData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center space-x-2"><Mail className="w-4 h-4" /><span>Email Address</span></Label>
-                    <Input id="email" type="email" value={editData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <Input id="email" type="email" value={displayData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
                     <PhoneInput
-                      value={String(editData.phone || '')}
+                      value={String(displayData.phone || '')}
                       onChange={(val) => setEditData({ ...editData, phone: val })}
                       defaultCountry="in"
                       className="w-full"
@@ -456,7 +483,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
-                    <Input id="city" value={editData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <Input id="city" value={displayData.city || ''} onChange={(e) => setEditData({ ...editData, city: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                 </div>
               </CardContent>
@@ -466,7 +493,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
-                  <Select value={editData.type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).type || ''} onValueChange={(value) => setEditData({ ...editData, type: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.Type || []).map((option: any) => (
@@ -478,7 +505,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Lead Source</span></Label>
-                  <Select value={editData.source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).source || ''} onValueChange={(value) => setEditData({ ...editData, source: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.Source || []).map((option: any) => (
@@ -490,7 +517,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><GraduationCap className="w-4 h-4" /><span>Study Level</span></Label>
-                  <Select value={(editData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).studyLevel || ''} onValueChange={(value) => setEditData({ ...editData, studyLevel: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study level" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.['Study Level'] || []).map((option: any) => (
@@ -502,7 +529,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Study Plan</span></Label>
-                  <Select value={(editData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing || updateLeadMutation.isPending}>
+                  <Select value={(displayData as any).studyPlan || ''} onValueChange={(value) => setEditData({ ...editData, studyPlan: value })} disabled={!isEditing || updateLeadMutation.isPending}>
                     <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select study plan" /></SelectTrigger>
                     <SelectContent>
                       {((dropdownData as any)?.['Study Plan'] || []).map((option: any) => (
@@ -516,7 +543,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Interested Countries</span></Label>
                   <CommandMultiSelect
                     options={((dropdownData as any)?.['Interested Country'] || []).map((o: any) => ({ label: o.value, value: o.key }))}
-                    value={Array.isArray(editData.country) ? editData.country : (editData.country ? [editData.country] : [])}
+                    value={Array.isArray((displayData as any).country) ? (displayData as any).country : ((displayData as any).country ? [(displayData as any).country] : [])}
                     onChange={(values) => setEditData(prev => ({ ...prev, country: values }))}
                     placeholder="Select countries"
                     searchPlaceholder="Search countries..."

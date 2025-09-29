@@ -441,7 +441,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div className="space-y-2">
                     <Label className="flex items-center space-x-2"><span>Student ID</span></Label>
-                    <div className="text-sm text-gray-700">{student?.student_id || student?.id || 'N/A'}</div>
+                    <Input value={isEditing ? (editData.student_id || '') : (student?.student_id || student?.id || 'N/A')} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
                   </div>
 
                   <div className="space-y-2">

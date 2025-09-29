@@ -125,7 +125,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     email: '',
     city: '',
     source: '',
-    interestedCountry: '',
+    interestedCountry: [] as string[],
     studyLevel: '',
     studyPlan: '',
     admissionOfficer: '',
@@ -220,6 +220,42 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     }
   }, [dropdownData, normalizeToText]);
 
+  // Map raw lead dropdown values to dropdown keys (ids) so backend receives UUIDs
+  const mapDropdownToKeys = useCallback((raw: unknown, fieldName: string): string[] => {
+    try {
+      const options: any[] = dropdownData?.[fieldName] || [];
+      const byKey = new Map(options.map(o => [String(o.key).toLowerCase(), o.key || o.id || o.value]));
+      const byId = new Map(options.map(o => [String(o.id).toLowerCase(), o.key || o.id || o.value]));
+      const byValue = new Map(options.map(o => [String(o.value).toLowerCase(), o.key || o.id || o.value]));
+
+      const toArray = (v: unknown): string[] => {
+        if (!v) return [];
+        if (Array.isArray(v)) return v.map(String);
+        if (typeof v === 'string') {
+          const t = v.trim();
+          if (t.startsWith('[')) {
+            try {
+              const parsed = JSON.parse(t);
+              if (Array.isArray(parsed)) return parsed.map(String);
+            } catch {}
+          }
+          return t.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        return [String(v)];
+      };
+
+      const items = toArray(raw);
+      const keys = items.map(item => {
+        const li = String(item).toLowerCase();
+        return byKey.get(li) || byId.get(li) || byValue.get(li) || item;
+      }).filter(Boolean);
+      return Array.from(new Set(keys.map(String)));
+    } catch {
+      return Array.isArray(raw) ? raw.map(String) : raw ? [String(raw)] : [];
+    }
+  }, [dropdownData]);
+
+
   // Pre-populate form when lead changes
   useEffect(() => {
     if (lead) {
@@ -232,7 +268,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         email: lead.email || '',
         city: lead.city || '',
         source: mapDropdownToLabels(lead.source, 'Source') || normalizeToText(lead.source),
-        interestedCountry: mapDropdownToLabels(lead.country, 'Interested Country') || normalizeToText(lead.country),
+        interestedCountry: mapDropdownToKeys(lead.country, 'Interested Country') || (Array.isArray(lead.country) ? lead.country : (lead.country ? [lead.country] : [])),
         studyLevel: mapDropdownToLabels(lead.studyLevel, 'Study Level') || normalizeToText(lead.studyLevel),
         studyPlan: mapDropdownToLabels(lead.studyPlan, 'Study Plan') || normalizeToText(lead.studyPlan),
         admissionOfficer: (lead as any)?.admissionOfficerId || (lead as any)?.admission_officer_id || '',
@@ -480,7 +516,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                         <Globe className="w-3 h-3" />
                         <span>Interested Country</span>
                       </Label>
-                      <Input value={formData.interestedCountry} disabled className="bg-background h-8 text-xs" />
+                      <Input value={mapDropdownToLabels(formData.interestedCountry, 'Interested Country') || normalizeToText(formData.interestedCountry)} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
