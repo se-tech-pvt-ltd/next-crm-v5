@@ -121,9 +121,51 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryKey: ['/api/dropdowns/module', moduleName],
     queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
   });
+  // Fallback: some shared options (like Country) may live under Leads module
+  const { data: leadsModuleDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module', 'Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+  });
+  // Global fallback: fetch all dropdowns to build an id->label map
+  const { data: allDropdowns = [] } = useQuery({
+    queryKey: ['/api/dropdowns'],
+    queryFn: async () => DropdownsService.getAllDropdowns(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const globalLabelById = React.useMemo(() => {
+    const map = new Map<string, string>();
+    (allDropdowns as any[]).forEach((d: any) => {
+      const k = String(d.id || d.key || '');
+      if (k) map.set(k, String(d.value ?? ''));
+    });
+    return map;
+  }, [allDropdowns]);
 
   // Generic dropdown label resolution
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  // Convert a value that may be an array, JSON stringified array, comma-separated string, or scalar into an array of strings
+  const toArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val.map((v) => String(v));
+    if (val == null) return [];
+    const s = String(val).trim();
+    if (!s) return [];
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) return parsed.map((v) => String(v));
+    } catch {
+      // not JSON; continue
+    }
+    if (s.startsWith('[') && s.endsWith(']')) {
+      const inner = s.slice(1, -1);
+      return inner
+        .split(',')
+        .map((t) => t.trim().replace(/^\"|\"$/g, '').replace(/^'|'$/g, ''))
+        .filter(Boolean);
+    }
+    if (s.includes(',')) return s.split(',').map((t) => t.trim()).filter(Boolean);
+    return [s];
+  };
 
   // Normalize activity object keys (accept snake_case from backend)
   const normalizeActivity = (a: any) => {
@@ -146,18 +188,59 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     } as any;
   };
   const getOptionsForField = (fieldName?: string): any[] => {
-    if (!fieldName || !moduleDropdowns) return [];
+    if (!fieldName) return [];
     const target = normalize(fieldName);
-    const entry = Object.entries(moduleDropdowns as any).find(([k]) => normalize(String(k)) === target);
-    return (entry?.[1] as any[]) || [];
+    const entries = moduleDropdowns ? Object.entries(moduleDropdowns as Record<string, any[]>) : [];
+    const leadsEntries = leadsModuleDropdowns ? Object.entries(leadsModuleDropdowns as Record<string, any[]>) : [];
+
+    const findIn = (ens: [string, any[]][]) => {
+      let entry = ens.find(([k]) => normalize(String(k)) === target);
+      if (entry) return entry[1] || [];
+      const isCountryField = /country/.test(target) || target === 'targetcountry';
+      if (isCountryField) {
+        const candidates = ['target_country','targetcountry','target country','interested country','country'];
+        const set = new Set(candidates.map(normalize));
+        entry = ens.find(([k]) => set.has(normalize(String(k))));
+        if (entry) return entry[1] || [];
+      }
+      const looksLikeOptions = (arr: any[]) => Array.isArray(arr) && arr.some((o) => o && (('id' in o) || ('key' in o)) && ('value' in o));
+      const fallback = ens.find(([, v]) => looksLikeOptions(v));
+      return (fallback?.[1] as any[]) || [];
+    };
+
+    const fromModule = findIn(entries);
+    if (fromModule.length) return fromModule;
+    const fromLeads = findIn(leadsEntries);
+    if (fromLeads.length) return fromLeads;
+
+    // Global fallback for country-like fields using all dropdowns
+    const isCountryField = /country/.test(target) || target === 'targetcountry';
+    if (isCountryField && Array.isArray(allDropdowns) && (allDropdowns as any[]).length) {
+      const options = (allDropdowns as any[]).filter((d: any) => /country/i.test(String(d.fieldName || '')));
+      return options as any[];
+    }
+    return [];
   };
-  const getLabelForField = (fieldName?: string | null, value?: string | null) => {
-    if (!fieldName) return value || '';
-    if (!value) return '';
-    if (normalize(fieldName) === 'status') return getStatusLabel(value);
+  const getLabelForField = (fieldName?: string | null, value?: any) => {
+    if (!fieldName) return value ?? '';
+    if (value == null || value === '') return '';
+    const field = normalize(fieldName);
+
+    if (field === 'status') {
+      const arr = toArray(value);
+      return arr.map((v) => getStatusLabel(v)).join(', ');
+    }
+
     const options = getOptionsForField(fieldName);
-    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
-    return hit?.value || value;
+    const arr = toArray(value);
+    const mapOne = (v: string) => {
+      const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v);
+      if (hit && hit.value) return String(hit.value);
+      if (globalLabelById.has(v)) return String(globalLabelById.get(v));
+      return v;
+    };
+    if (arr.length > 1) return arr.map(mapOne).join(', ');
+    return mapOne(arr[0] ?? '');
   };
 
   // Create a lookup function for user profile images

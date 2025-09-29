@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-application-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -234,20 +235,37 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (<>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-4" style={{ touchAction: 'pan-y' }}>
+      <DialogContent className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
-          <div className="px-4 py-3 flex items-center justify-between">
+          <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <PlusCircle className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <PlusCircle className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold">Add New Application</h2>
                 <p className="text-xs text-gray-500">Create a university application for a student</p>
               </div>
             </div>
-            <div className="flex items-center gap-2" />
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => form.handleSubmit(onSubmit)()}
+                disabled={createApplicationMutation.isPending}
+                className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+              >
+                {createApplicationMutation.isPending ? 'Creating…' : 'Create'}
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
@@ -564,31 +582,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
                   </div>
                 </div>
-                <div className="flex justify-end space-x-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    className="px-4 h-8 text-xs"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createApplicationMutation.isPending}
-                    className="px-4 h-8 text-xs bg-primary hover:bg-primary/90"
-                  >
-                    {createApplicationMutation.isPending ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Saving...</span>
-                      </div>
-                    ) : (
-                      <span>Save</span>
-                    )}
-                  </Button>
-                </div>
-              </form>
+                              </form>
             </Form>
       </DialogContent>
     </Dialog>
