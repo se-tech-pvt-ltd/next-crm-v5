@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-lead-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import AddLeadForm from '@/components/add-lead-form';
@@ -44,6 +44,9 @@ interface AddLeadModalProps {
 
 export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalProps) {
   const [submitLeadForm, setSubmitLeadForm] = useState<(() => void) | null>(null);
+  const handleRegisterSubmit = useCallback((fn: () => void) => {
+    try { setSubmitLeadForm(() => fn); } catch {}
+  }, []);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
@@ -265,7 +268,7 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
           onCancel={() => onOpenChange(false)}
           onSuccess={() => { onOpenChange(false); try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); } catch {} }}
           initialData={initialData}
-          onRegisterSubmit={(fn) => setSubmitLeadForm(() => fn)}
+          onRegisterSubmit={handleRegisterSubmit}
         />
       )}
     />
