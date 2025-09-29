@@ -167,10 +167,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => {
-      const res = await (await fetch('/api/dropdowns/module/Admissions')).json();
-      return res;
-    },
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
     enabled: open,
   });
 
