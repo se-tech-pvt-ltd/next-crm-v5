@@ -322,7 +322,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                     variant="outline"
                     size="xs"
                     className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                    onClick={() => { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); }}
+                    onClick={() => { onOpenChange(false); try { setLocation(`/applications/${currentApp?.id}/admission`); } catch {} }}
                     title="Add Admission"
                   >
                     <Plus />
