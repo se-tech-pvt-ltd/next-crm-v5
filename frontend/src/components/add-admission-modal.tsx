@@ -16,7 +16,7 @@ import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
-import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle, Users } from 'lucide-react';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { StudentProfileModal } from './student-profile-modal-new';
 import { cn } from '@/lib/utils';
