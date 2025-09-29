@@ -125,6 +125,29 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   // Generic dropdown label resolution
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
 
+  // Convert a value that may be an array, JSON stringified array, comma-separated string, or scalar into an array of strings
+  const toArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val.map((v) => String(v));
+    if (val == null) return [];
+    const s = String(val).trim();
+    if (!s) return [];
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) return parsed.map((v) => String(v));
+    } catch {
+      // not JSON; continue
+    }
+    if (s.startsWith('[') && s.endsWith(']')) {
+      const inner = s.slice(1, -1);
+      return inner
+        .split(',')
+        .map((t) => t.trim().replace(/^\"|\"$/g, '').replace(/^'|'$/g, ''))
+        .filter(Boolean);
+    }
+    if (s.includes(',')) return s.split(',').map((t) => t.trim()).filter(Boolean);
+    return [s];
+  };
+
   // Normalize activity object keys (accept snake_case from backend)
   const normalizeActivity = (a: any) => {
     if (!a || typeof a !== 'object') return a;
@@ -148,16 +171,49 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const getOptionsForField = (fieldName?: string): any[] => {
     if (!fieldName || !moduleDropdowns) return [];
     const target = normalize(fieldName);
-    const entry = Object.entries(moduleDropdowns as any).find(([k]) => normalize(String(k)) === target);
-    return (entry?.[1] as any[]) || [];
+    const entries = Object.entries(moduleDropdowns as Record<string, any[]>);
+
+    // 1) Exact normalized key match
+    let entry = entries.find(([k]) => normalize(String(k)) === target);
+    if (entry) return entry[1] || [];
+
+    // 2) Heuristics for common multi-selects (e.g., Target Country)
+    const isCountryField = /country/.test(target) || target === 'targetcountry';
+    if (isCountryField) {
+      const candidates = ['target_country','targetcountry','target country','interested country','country'];
+      const set = new Set(candidates.map(normalize));
+      entry = entries.find(([k]) => set.has(normalize(String(k))));
+      if (entry) return entry[1] || [];
+    }
+
+    // 3) Fallback: if only one array matches shape of dropdown options (id/key/value), use it
+    const looksLikeOptions = (arr: any[]) => Array.isArray(arr) && arr.some((o) => o && (('id' in o) || ('key' in o)) && ('value' in o));
+    const fallback = entries.find(([, v]) => looksLikeOptions(v));
+    return (fallback?.[1] as any[]) || [];
   };
-  const getLabelForField = (fieldName?: string | null, value?: string | null) => {
-    if (!fieldName) return value || '';
-    if (!value) return '';
-    if (normalize(fieldName) === 'status') return getStatusLabel(value);
+  const getLabelForField = (fieldName?: string | null, value?: any) => {
+    if (!fieldName) return value ?? '';
+    if (value == null || value === '') return '';
+    const field = normalize(fieldName);
+
+    // Status special-case
+    if (field === 'status') {
+      const arr = toArray(value);
+      return arr.map((v) => getStatusLabel(v)).join(', ');
+    }
+
     const options = getOptionsForField(fieldName);
-    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
-    return hit?.value || value;
+    const arr = toArray(value);
+    if (arr.length > 1) {
+      const labels = arr.map((v) => {
+        const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v);
+        return (hit?.value ?? v) as string;
+      });
+      return labels.join(', ');
+    }
+    const v = arr[0] ?? '';
+    const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v);
+    return (hit?.value ?? v) as string;
   };
 
   // Create a lookup function for user profile images
