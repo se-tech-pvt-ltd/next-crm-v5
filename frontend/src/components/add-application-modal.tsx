@@ -150,13 +150,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       notes: '',
       counsellorId: '',
       admissionOfficerId: '',
+      regionId: '',
+      branchId: '',
     },
   });
 
   // Determine selected student's branch (depends on form)
   const selectedStudentId = form.watch('studentId');
   const selectedStudent = (Array.isArray(students) ? students.find((s) => s.id === selectedStudentId) : null) || presetStudent;
-  const selectedBranchId = (selectedStudent as any)?.branchId || null;
+  const selectedBranchId = (selectedStudent as any)?.branchId ?? (selectedStudent as any)?.branch_id ?? null;
 
   // Resolve assigned counsellor/officer from student record (support legacy keys)
   const studentCounsellorId = useMemo(() => {
@@ -174,7 +176,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   useEffect(() => {
     form.setValue('counsellorId', studentCounsellorId || '');
     form.setValue('admissionOfficerId', studentAdmissionOfficerId || '');
-  }, [selectedBranchId, studentCounsellorId, studentAdmissionOfficerId]);
+    try {
+      const s: any = selectedStudent || {};
+      const rid = String(s.regionId ?? s.region_id ?? '') || '';
+      const bid = String(s.branchId ?? s.branch_id ?? '') || '';
+      if (rid) form.setValue('regionId', rid);
+      if (bid) form.setValue('branchId', bid);
+    } catch {}
+  }, [selectedBranchId, studentCounsellorId, studentAdmissionOfficerId, selectedStudent]);
 
   // Also auto-fill once when student changes if fields are empty
   useEffect(() => {
@@ -182,7 +191,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     const curA = String(form.getValues('admissionOfficerId') || '');
     if (!curC && studentCounsellorId) form.setValue('counsellorId', studentCounsellorId);
     if (!curA && studentAdmissionOfficerId) form.setValue('admissionOfficerId', studentAdmissionOfficerId);
-  }, [studentCounsellorId, studentAdmissionOfficerId]);
+    const curR = String(form.getValues('regionId') || '');
+    const curB = String(form.getValues('branchId') || '');
+    const s: any = selectedStudent || {};
+    const rid = String(s.regionId ?? s.region_id ?? '') || '';
+    const bid = String(s.branchId ?? s.branch_id ?? '') || '';
+    if (!curR && rid) form.setValue('regionId', rid);
+    if (!curB && bid) form.setValue('branchId', bid);
+  }, [studentCounsellorId, studentAdmissionOfficerId, selectedStudent]);
 
   const counsellorOptions = Array.isArray(users) && selectedBranchId
     ? users
@@ -364,6 +380,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input type="hidden" {...form.register('studentId')} />
+                  <input type="hidden" {...form.register('regionId')} />
+                  <input type="hidden" {...form.register('branchId')} />
 
                   <FormField
                     control={form.control}
