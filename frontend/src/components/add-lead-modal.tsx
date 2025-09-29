@@ -257,7 +257,7 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
               try { if (submitLeadForm) submitLeadForm(); else (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {}
             }}
             disabled={createLeadMutation.isPending}
-            className="px-3 h-8 text-xs bg-[#223E7D] text-white hover:bg-[#1b3560] border border-[#223E7D] rounded-md"
+            className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
           >
             {createLeadMutation.isPending ? (
               <div className="flex items-center space-x-2">
