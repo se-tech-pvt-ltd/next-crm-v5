@@ -97,6 +97,7 @@ function Router() {
       <Route path="/leads/:id/student" component={Leads} />
       <Route path="/leads/:id/convert" component={Leads} />
       <Route path="/students" component={Students} />
+      <Route path="/students/new" component={Students} />
       <Route path="/students/:id/edit" component={Students} />
       <Route path="/students/:id" component={Students} />
       <Route path="/students/:id/application" component={Students} />
