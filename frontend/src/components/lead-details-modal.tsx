@@ -118,6 +118,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         queryClient.invalidateQueries({ queryKey: key });
         queryClient.refetchQueries({ queryKey: key });
       } catch {}
+      // Sync local status with server response
+      if (updatedLead && (updatedLead as any).status) setCurrentStatus((updatedLead as any).status as string);
       setIsEditing(false);
       onLeadUpdate?.(updatedLead);
       toast({ title: 'Success', description: 'Lead updated successfully.' });
@@ -232,6 +234,9 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
     const dataToSave = {
       ...editData,
+      // Ensure status is preserved: prefer the status shown in the status bar (currentStatus),
+      // then editData.status, then lead.status
+      status: currentStatus || editData.status || lead?.status,
       country: Array.isArray(editData.country) ? JSON.stringify(editData.country) : editData.country,
       program: Array.isArray(editData.program) ? JSON.stringify(editData.program) : editData.program,
     };
@@ -270,8 +275,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
         queryClient.invalidateQueries({ queryKey: key });
         queryClient.refetchQueries({ queryKey: key });
       } catch {}
+      // Ensure currentStatus reflects server value
+      if (updatedLead && (updatedLead as any).status) setCurrentStatus((updatedLead as any).status as string);
       onLeadUpdate?.(updatedLead);
-      toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName(updatedLead.status)}` });
+      toast({ title: 'Status updated', description: `Lead status set to ${getStatusDisplayName((updatedLead as any).status)}` });
     },
     onError: (error: any) => {
       // Revert to previous status if API fails
