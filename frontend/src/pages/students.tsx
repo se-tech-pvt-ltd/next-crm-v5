@@ -133,11 +133,46 @@ export default function Students() {
 
 
 
+  // Utility to parse targetCountry value into array of ids or names
+  const parseTargetCountries = (value: any): string[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      const s = value.trim();
+      // If JSON array string
+      if (s.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(s);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {}
+      }
+      // If comma separated values
+      if (s.includes(',')) return s.split(',').map(p => p.trim()).filter(Boolean);
+      // Single value
+      return [s];
+    }
+    return [String(value)];
+  };
+
+  // Map target country ids to display names using dropdowns (if available)
+  const getTargetCountryDisplay = (student: Student) => {
+    const raw = (student as any).targetCountry ?? (student as any).country ?? null;
+    const idsOrNames = parseTargetCountries(raw);
+    const moduleDropdown = (studentDropdowns as any) || {};
+    const options = moduleDropdown['Target Country'] || moduleDropdown['Interested Country'] || moduleDropdown['Country'] || [];
+    const mapped = idsOrNames.map((item: any) => {
+      const found = options.find((o: any) => (o.key === item || o.id === item || o.value === item));
+      return found ? found.value : item;
+    }).filter(Boolean);
+    return mapped.length > 0 ? mapped.join(', ') : (idsOrNames[0] || '-');
+  };
+
   // Get unique countries for filter dropdown
   const uniqueCountries = studentsArray ?
     studentsArray.reduce((countries: string[], student) => {
-      if (student.targetCountry && !countries.includes(student.targetCountry)) {
-        countries.push(student.targetCountry);
+      const display = getTargetCountryDisplay(student);
+      if (display && !countries.includes(display)) {
+        countries.push(display);
       }
       return countries;
     }, []) : [];
@@ -464,7 +499,7 @@ export default function Students() {
                           {student.targetCountry && (
                             <div className="flex items-center text-xs">
                               <Globe className="w-3 h-3 mr-1" />
-                              {student.targetCountry}
+                              {getTargetCountryDisplay(student)}
                             </div>
                           )}
                           {student.targetProgram && (
