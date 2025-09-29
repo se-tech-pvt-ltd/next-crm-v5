@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import * as RegService from '@/services/event-registrations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhoneNumberInput } from '@/components/ui/phone-number-input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchab
 import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
