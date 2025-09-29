@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-lead-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
