@@ -27,12 +27,15 @@ export default function Applications() {
   const [location, setLocation] = useLocation();
   const [matchApp, appParams] = useRoute('/applications/:id');
   const [matchEdit, editParams] = useRoute('/applications/:id/edit');
+  const [matchAddAdm, addAdmParams] = useRoute('/applications/:id/admission');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [addApplicationStudentId, setAddApplicationStudentId] = useState<string | undefined>(undefined);
+  const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
+  const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
