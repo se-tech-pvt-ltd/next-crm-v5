@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { ActivityTracker } from './activity-tracker';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { type Student, type Application } from '@/lib/types';
@@ -55,12 +56,14 @@ interface StudentProfileModalProps {
   startInEdit?: boolean;
 }
 
+type StudentEditState = Partial<Student> & { targetCountry?: string[] | string | null };
+
 export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication, onOpenAddApplication, startInEdit }: StudentProfileModalProps) {
   const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<Partial<Student>>({});
+  const [editData, setEditData] = useState<StudentEditState>({});
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [location, setLocation] = useLocation();
@@ -226,18 +229,74 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     return (found && (found.key || found.id || found.value)) || s;
   };
 
+  const mapToOptionValues = (fieldName: string, raw?: string | string[] | null): string[] => {
+    if (raw == null) return [];
+    const options = getFieldOptions(fieldName);
+    const resolveValue = (input: any) => {
+      const str = String(input ?? '').trim();
+      if (!str) return null;
+      const hit = options.find((opt: any) => (
+        opt.id === input ||
+        opt.key === input ||
+        opt.value === input ||
+        String(opt.id) === str ||
+        String(opt.key) === str ||
+        String(opt.value) === str
+      ));
+      const candidate = hit ? (hit.key ?? hit.id ?? hit.value) : str;
+      return candidate ? String(candidate) : null;
+    };
+
+    const values: string[] = [];
+    const pushValue = (value: any) => {
+      const mapped = resolveValue(value);
+      if (mapped) values.push(mapped);
+    };
+
+    if (Array.isArray(raw)) {
+      raw.forEach(pushValue);
+    } else {
+      const text = String(raw).trim();
+      if (!text) return [];
+      if (text.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(pushValue);
+          } else {
+            pushValue(parsed);
+          }
+        } catch {
+          pushValue(text);
+        }
+      } else if (text.includes(',')) {
+        text.split(',').map(part => part.trim()).filter(Boolean).forEach(pushValue);
+      } else {
+        pushValue(text);
+      }
+    }
+
+    return Array.from(new Set(values));
+  };
+
+  const buildEditState = (base?: Student | null): StudentEditState => {
+    if (!base) return {};
+    return {
+      ...base,
+      expectation: mapToOptionValue('expectation', base.expectation),
+      englishProficiency: mapToOptionValue('englishProficiency', (base as any).englishProficiency),
+      targetCountry: mapToOptionValues('targetCountry', (base as any).targetCountry),
+    };
+  };
+
   useEffect(() => {
     if (student) {
-      setEditData({
-        ...student,
-        // Normalize dropdown-backed fields to option keys for proper Select pre-selection
-        expectation: mapToOptionValue('expectation', student.expectation),
-        englishProficiency: mapToOptionValue('englishProficiency', (student as any).englishProficiency),
-        targetCountry: mapToOptionValue('targetCountry', (student as any).targetCountry),
-      });
       setCurrentStatus(student.status);
+      if (!isEditing) {
+        setEditData(buildEditState(student));
+      }
     }
-  }, [student]);
+  }, [student, dropdownData, leadsDropdowns, isEditing]);
 
   useEffect(() => {
     if (open && startInEdit) {
@@ -315,6 +374,35 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     },
   });
 
+  const targetCountrySelection = useMemo(() => {
+    if (Array.isArray(editData.targetCountry)) {
+      return editData.targetCountry;
+    }
+    return mapToOptionValues('targetCountry', editData.targetCountry ?? null);
+  }, [editData.targetCountry, dropdownData, leadsDropdowns]);
+
+  const targetCountryOptions = useMemo(() => {
+    const rawOptions = getFieldOptions('targetCountry');
+    const seen = new Set<string>();
+    const normalized = rawOptions.reduce<{ value: string; label: string }[]>((acc, opt: any) => {
+      const value = String(opt.key ?? opt.id ?? opt.value ?? '').trim();
+      if (!value || seen.has(value)) return acc;
+      seen.add(value);
+      const label = String(opt.value ?? opt.label ?? value);
+      acc.push({ value, label });
+      return acc;
+    }, []);
+    if (normalized.length === 0 && targetCountrySelection.length > 0) {
+      targetCountrySelection.forEach((value) => {
+        if (!seen.has(value)) {
+          seen.add(value);
+          normalized.push({ value, label: value });
+        }
+      });
+    }
+    return normalized;
+  }, [dropdownData, leadsDropdowns, targetCountrySelection]);
+
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatusKey: string) => StudentsService.updateStudent(student?.id, { status: newStatusKey }),
     onMutate: async (newStatusKey: string) => {
@@ -349,7 +437,20 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   };
 
   const handleSaveChanges = () => {
-    updateStudentMutation.mutate(editData);
+    const tc = editData.targetCountry;
+    const normalizedTargetCountry = Array.isArray(tc)
+      ? (() => {
+          const cleaned = tc.map((item) => String(item).trim()).filter(Boolean);
+          return cleaned.length > 0 ? JSON.stringify(cleaned) : null;
+        })()
+      : (tc ?? null);
+
+    const payload: Partial<Student> = {
+      ...editData,
+      targetCountry: normalizedTargetCountry,
+    };
+
+    updateStudentMutation.mutate(payload);
   };
 
   const StatusProgressBar = () => {
@@ -473,7 +574,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Save className="w-3.5 h-3.5 mr-1" />
                   <span>Save Changes</span>
                 </Button>
-                <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(student); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel" className="bg-white text-[#223E7D] hover:bg-white/90 border border-white">
+                <Button variant="outline" size="xs" onClick={() => { setIsEditing(false); setEditData(buildEditState(student)); try { setLocation(`/students/${student?.id}`); } catch {} }} title="Cancel" className="bg-white text-[#223E7D] hover:bg-white/90 border border-white">
                   <X className="w-3.5 h-3.5 mr-1" />
                   <span>Cancel</span>
                 </Button>
@@ -688,16 +789,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><Globe className="w-4 h-4" /><span>Target Country</span></Label>
                   {isEditing ? (
-                    <Select value={(editData as any).targetCountry || ''} onValueChange={(v) => setEditData({ ...editData, targetCountry: v })}>
-                      <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Select country" /></SelectTrigger>
-                      <SelectContent>
-                        {getFieldOptions('targetCountry').map((opt: any) => (
-                          <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
-                            {opt.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <MultiSelect
+                      value={targetCountrySelection}
+                      onValueChange={(values) => setEditData({ ...editData, targetCountry: values })}
+                      placeholder="Select countries"
+                      searchPlaceholder="Search countries..."
+                      options={targetCountryOptions}
+                      emptyMessage="No countries found"
+                      maxDisplayItems={3}
+                      className="text-[11px] shadow-sm border border-gray-300 bg-white"
+                      disabled={updateStudentMutation.isPending}
+                    />
                   ) : (
                     <Input value={getDropdownLabel('targetCountry', (student as any)?.targetCountry || '')} disabled readOnly className="h-7 text-[11px]" />
                   )}
