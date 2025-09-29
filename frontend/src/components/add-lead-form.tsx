@@ -138,6 +138,27 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     staleTime: 30000,
   });
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const submitForm = useCallback(() => {
+    try {
+      const el = formRef.current;
+      if (!el) return;
+      if (typeof (el as any).requestSubmit === 'function') {
+        (el as any).requestSubmit();
+      } else {
+        const btn = el.querySelector('#add-lead-form-submit') as HTMLButtonElement | null;
+        if (btn) btn.click();
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (onRegisterSubmit) onRegisterSubmit(submitForm);
+    } catch {}
+  }, [onRegisterSubmit, submitForm]);
+
   const form = useForm<AddLeadFormData>({
     resolver: zodResolver(addLeadFormSchema),
     defaultValues: {
@@ -674,16 +695,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6"
-          ref={(el) => {
-            try {
-              if (el && onRegisterSubmit) {
-                onRegisterSubmit(() => {
-                  try { if (typeof (el as any).requestSubmit === 'function') { (el as any).requestSubmit(); } else { const btn = el.querySelector('#add-lead-form-submit') as HTMLButtonElement | null; if (btn) btn.click(); }
-                  } catch {}
-                });
-              }
-            } catch {}
-          }}
+          ref={(el) => { formRef.current = el; }}
         >
 
           <Card className="shadow-md border border-gray-200 bg-white">
