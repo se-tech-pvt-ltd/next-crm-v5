@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import * as RegService from '@/services/event-registrations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PhoneNumberInput } from '@/components/ui/phone-number-input';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -14,7 +15,6 @@ import { SearchableSelectV2 as SearchableSelect } from '@/components/ui/searchab
 import { SearchableComboboxV3 as SearchableCombobox } from '@/components/ui/searchable-combobox-v3';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -819,10 +819,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <PhoneNumberInput
+                        <PhoneInput
                           value={field.value || ''}
                           onChange={(val) => { field.onChange(val); checkPhoneDuplicate(val); }}
-                          className={cn(`${phoneDuplicateStatus.isDuplicate ? 'ring-1 ring-amber-500' : ''}`)}
+                          defaultCountry="in"
+                          className="w-full"
+                          inputClassName={`w-full h-9 text-sm ${phoneDuplicateStatus.isDuplicate ? 'ring-1 ring-amber-500 rounded-md' : ''}`}
                         />
                         {checkingPhone && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
