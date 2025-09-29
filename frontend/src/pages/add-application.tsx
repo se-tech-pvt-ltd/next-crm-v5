@@ -41,18 +41,35 @@ export default function AddApplication() {
     queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
   });
 
+  const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const makeOptions = (dd: any, candidates: string[]) => {
+    if (!dd || typeof dd !== 'object') return [];
+    const keyMap: Record<string, string> = {};
+    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
     let list: any[] = [];
-    for (const k of candidates) {
-      if (dd && Array.isArray(dd[k])) { list = dd[k]; break; }
+    for (const raw of candidates) {
+      const foundKey = keyMap[normalizeKey(raw)];
+      if (foundKey && Array.isArray(dd[foundKey]) && dd[foundKey].length) { list = dd[foundKey]; break; }
+    }
+    if (!Array.isArray(list) || list.length === 0) {
+      // relaxed fallback: try to match any key that includes candidate words
+      for (const k of Object.keys(dd || {})) {
+        const nk = normalizeKey(k);
+        for (const raw of candidates) {
+          if (nk.includes(normalizeKey(raw))) {
+            if (Array.isArray(dd[k]) && dd[k].length) { list = dd[k]; break; }
+          }
+        }
+        if (Array.isArray(list) && list.length) break;
+      }
     }
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   };
 
-  const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Status', 'status', 'AppStatus', 'Application Status']), [applicationsDropdowns]);
-  const caseStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Case Status', 'caseStatus', 'CaseStatus', 'case_status']), [applicationsDropdowns]);
+  const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['App Status','Application Status','AppStatus','Status','status','appstatus']), [applicationsDropdowns]);
+  const caseStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status','case status']), [applicationsDropdowns]);
   const courseTypeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']), [applicationsDropdowns]);
   const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns]);
   const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns]);
