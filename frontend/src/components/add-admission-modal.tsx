@@ -194,7 +194,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       const foundKey = Object.keys(dd).find(k => normalize(k) === normalize(name) || normalize(k).replace(/\s+/g,'') === normalize(name).replace(/\s+/g,''));
       if (foundKey) {
         const list = Array.isArray((dd as any)[foundKey]) ? [...(dd as any)[foundKey]] : [];
-        return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value }));
+        return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
       }
     }
 
