@@ -154,11 +154,35 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     if (opts.length > 0) return opts;
     return findIn(leadsData);
   };
-  const getDropdownLabel = (fieldName: string, value?: string | null) => {
-    if (!value) return '';
+  const getDropdownLabel = (fieldName: string, value?: string | string[] | null) => {
+    if (value == null) return '';
     const options = getFieldOptions(fieldName);
-    const hit = options.find((opt: any) => opt.id === value || opt.key === value || opt.value === value);
-    return hit?.value || value;
+
+    const mapOne = (v: any) => {
+      const hit = options.find((opt: any) => opt.id === v || opt.key === v || opt.value === v || String(opt.id) === String(v) || String(opt.key) === String(v) || String(opt.value) === String(v));
+      return hit?.value || String(v);
+    };
+
+    // If already an array, map and join
+    if (Array.isArray(value)) {
+      const labels = value.map(mapOne).filter(Boolean);
+      return labels.join(', ');
+    }
+
+    // If string, try to parse JSON array, else CSV, else single
+    const s = String(value).trim();
+    if (s.startsWith('[')) {
+      try {
+        const arr = JSON.parse(s);
+        if (Array.isArray(arr)) return arr.map(mapOne).filter(Boolean).join(', ');
+      } catch {}
+    }
+    if (s.includes(',')) {
+      const parts = s.split(',').map(p => p.trim()).filter(Boolean);
+      return parts.map(mapOne).filter(Boolean).join(', ');
+    }
+
+    return mapOne(s);
   };
 
   // Map a stored raw value to the selectable option value (id/key/value) for a given field
