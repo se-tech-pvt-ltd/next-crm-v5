@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
@@ -203,12 +203,51 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const disabled = createStudentMutation.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><UserPlus className="w-4 h-4" /> Create Student</DialogTitle>
-        </DialogHeader>
-
+    <DetailsDialogLayout
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Add Student"
+      headerClassName="bg-[#223E7D] text-white"
+      contentClassName="no-not-allowed w-[65vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
+      headerLeft={(
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <GraduationCap className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New Student</div>
+            <div className="text-xs opacity-90 truncate">Create a new student profile to begin the application process</div>
+          </div>
+        </div>
+      )}
+      headerRight={(
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleCreate}
+            disabled={disabled}
+            className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+          >
+            {disabled ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Saving...</span>
+              </div>
+            ) : (
+              <span>Save</span>
+            )}
+          </Button>
+        </div>
+      )}
+      leftContent={(
         <div className="space-y-3">
           <Card>
             <CardHeader className="py-2">
@@ -404,27 +443,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <Textarea placeholder="Additional notes..." value={(formData as any).notes || ''} onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value as any }))} disabled={disabled} />
             </CardContent>
           </Card>
-
-          <div className="flex justify-end space-x-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-4 h-8 text-xs">
-              Cancel
-            </Button>
-            <Button onClick={handleCreate} disabled={disabled} className="px-4 h-8 text-xs bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed" title={'Create Student'}>
-              {disabled ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Creating...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <UserPlus className="w-4 h-4" />
-                  <span>Create Student</span>
-                </div>
-              )}
-            </Button>
-          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    />
   );
 }
