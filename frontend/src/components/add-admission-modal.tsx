@@ -159,20 +159,50 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
   }, [applicationId, studentId, linkedApp, form]);
 
-  const getOptions = (name: string, admissionDropdowns: Record<string, any[]> | undefined) => {
-    const src = (admissionDropdowns as any) || {};
-    const found = Object.entries(src).find(([k]) => k.toLowerCase().trim() === name.toLowerCase());
-    return (found?.[1] as any[]) || [];
-  };
-
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
     queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
     enabled: open,
   });
 
-  const statusOptions = getOptions('Status', admissionDropdowns);
-  const caseStatusOptions = getOptions('Case Status', admissionDropdowns);
+  const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Applications'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
+    enabled: open,
+  });
+
+  const getOptions = (name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
+    const normalize = (s: string) => String(s || '').toLowerCase().trim();
+    const variants = (n: string) => [n, n.toLowerCase(), n.replace(/\s+/g, ''), n.replace(/\s+/g, '').toLowerCase(), n.replace(/\s+/g, '_'), n.replace(/\s+/g, '').replace(/_/g,'')];
+
+    const moduleMap: Record<string, Record<string, any[]>|undefined> = {
+      'Admissions': admissionDropdowns as any,
+      'Applications': applicationsDropdowns as any,
+    };
+
+    for (const mod of preferredModules) {
+      const dd = moduleMap[mod];
+      if (!dd || typeof dd !== 'object') continue;
+      // try exact key matches with variants
+      for (const v of variants(name)) {
+        if (Object.prototype.hasOwnProperty.call(dd, v)) {
+          const list = Array.isArray((dd as any)[v]) ? [...(dd as any)[v]] : [];
+          return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value }));
+        }
+      }
+      // try case-insensitive match on keys
+      const foundKey = Object.keys(dd).find(k => normalize(k) === normalize(name) || normalize(k).replace(/\s+/g,'') === normalize(name).replace(/\s+/g,''));
+      if (foundKey) {
+        const list = Array.isArray((dd as any)[foundKey]) ? [...(dd as any)[foundKey]] : [];
+        return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value }));
+      }
+    }
+
+    return [] as {label:string;value:string}[];
+  };
+
+  const statusOptions = getOptions('Status', ['Admissions']);
+  const caseStatusOptions = getOptions('Case Status', ['Applications','Admissions']);
 
   // Users for access assignment
   const { data: users = [] } = useQuery<any[]>({
