@@ -414,7 +414,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                             </SelectTrigger>
                             <SelectContent>
                               {statusOptions?.map((opt: any) => (
-                                <SelectItem key={opt.key || opt.id} value={opt.value}>{opt.value}</SelectItem>
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label || opt.value}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
