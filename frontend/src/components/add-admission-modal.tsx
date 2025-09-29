@@ -260,7 +260,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
               type="button"
               onClick={() => { handleSubmitClick(); }}
               disabled={createMutation.isPending}
-              className="px-3 h-8 text-xs bg-[#223E7D] text-white hover:bg-[#1b3560] border border-[#223E7D] rounded-md"
+              className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
             >
               {createMutation.isPending ? (
                 <div className="flex items-center space-x-2">
