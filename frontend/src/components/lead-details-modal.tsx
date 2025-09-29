@@ -44,19 +44,29 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const [showMarkAsLostModal, setShowMarkAsLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
+  const lastInitializedIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
-    if (lead) {
-      const processedLead = {
-        ...lead,
-        country: parseFieldValue(lead.country),
-        program: parseFieldValue(lead.program)
-      };
-      setEditData(processedLead);
-      // Initialize current status on first load of this lead id
+    if (!lead) return;
+
+    const processedLead = {
+      ...lead,
+      country: parseFieldValue(lead.country),
+      program: parseFieldValue(lead.program),
+    };
+
+    const lastId = lastInitializedIdRef.current;
+    const sameId = String(lastId ?? '') === String(lead.id ?? '');
+
+    if (!sameId || !isEditing) {
+      setEditData(prev => {
+        if (isEditing && sameId) return prev || {};
+        return { ...prev, ...processedLead };
+      });
       setCurrentStatus(lead.status);
+      lastInitializedIdRef.current = lead.id ?? null;
     }
-  }, [lead?.id]);
+  }, [lead, isEditing]);
 
   useEffect(() => {
     if (open && startInEdit) {
