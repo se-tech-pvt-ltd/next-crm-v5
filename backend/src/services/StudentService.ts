@@ -259,7 +259,28 @@ export class StudentService {
     } as any;
     console.log('[StudentService.convertFromLead] payload:', JSON.stringify(payload));
 
-    const student = await StudentModel.create(payload);
+    // Ensure targetCountry stored as JSON array of UUIDs: prefer payload.targetCountry if already an array/JSON, otherwise fall back to lead.country
+    let finalTargetCountry: string | undefined = undefined;
+    try {
+      const p = (payload as any).targetCountry ?? (payload as any).interestedCountry ?? (payload as any).country;
+      if (Array.isArray(p)) finalTargetCountry = JSON.stringify(p);
+      else if (typeof p === 'string') {
+        const t = p.trim();
+        if (t.startsWith('[')) {
+          try { const parsed = JSON.parse(t); if (Array.isArray(parsed)) finalTargetCountry = JSON.stringify(parsed); } catch {}
+        }
+      }
+    } catch {}
+    if (!finalTargetCountry && lead) {
+      const lc = (lead as any).country;
+      if (Array.isArray(lc)) finalTargetCountry = JSON.stringify(lc);
+      else if (typeof lc === 'string') {
+        try { const parsed = JSON.parse(lc); if (Array.isArray(parsed)) finalTargetCountry = JSON.stringify(parsed); } catch {}
+      }
+    }
+
+    const payload2 = { ...payload, targetCountry: finalTargetCountry ?? (payload as any).targetCountry };
+    const student = await StudentModel.create(payload2);
 
     // Transfer activities from lead to student
     await ActivityService.transferActivities('lead', leadId, 'student', student.id);
