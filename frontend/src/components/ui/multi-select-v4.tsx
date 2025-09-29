@@ -111,17 +111,18 @@ export function MultiSelectV4({
       <Button
         type="button"
         variant="outline"
+        size="xs"
         role="combobox"
         aria-expanded={isOpen}
         disabled={disabled}
         onClick={handleToggle}
         className={cn(
-          "w-full justify-between h-auto min-h-10 text-left font-normal disabled:border-transparent disabled:bg-transparent",
+          "w-full justify-between h-auto min-h-[28px] text-left font-normal text-[11px] disabled:border-transparent disabled:bg-transparent",
           selectedOptions.length === 0 && "text-muted-foreground",
           className
         )}
       >
-        <div className="flex items-center flex-1 min-w-0 py-1">
+        <div className="flex items-center flex-1 min-w-0 py-0">
           {selectedOptions.length === 0 ? (
             <span>{placeholder}</span>
           ) : (
