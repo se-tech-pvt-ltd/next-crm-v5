@@ -235,7 +235,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (<>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
+      <DialogContent hideClose className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
@@ -268,6 +268,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             </div>
           </div>
         </DialogHeader>
+
+        <div className="flex-1 min-h-0 overflow-y-auto">
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -584,6 +586,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 </div>
                               </form>
             </Form>
+        </div>
       </DialogContent>
     </Dialog>
     <StudentProfileModal
