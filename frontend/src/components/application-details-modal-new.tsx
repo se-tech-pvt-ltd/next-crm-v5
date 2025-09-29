@@ -419,96 +419,6 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
               <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center"><Users className="w-5 h-5 mr-2" />Access</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const rid = (currentApp as any)?.regionId || (student as any)?.regionId;
-                          const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(rid)) : null;
-                          if (!r) return '—';
-                          const regionName = (r as any).regionName || (r as any).name || (r as any).id;
-                          const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String((r as any).regionHeadId || '')) : null;
-                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
-                          const headEmail = head?.email || '';
-                          return (
-                            <div>
-                              <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Branch</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const bid = (currentApp as any)?.branchId || (student as any)?.branchId;
-                          const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(bid)) : null;
-                          if (!b) return '—';
-                          const branchName = (b as any).branchName || (b as any).name || (b as any).code || (b as any).id;
-                          const headId = (b as any).branchHeadId || (b as any).managerId || null;
-                          const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
-                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
-                          const headEmail = head?.email || '';
-                          return (
-                            <div>
-                              <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Admission Officer</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const officerId = (currentApp as any)?.admissionOfficerId || (student as any)?.admissionOfficerId || (student as any)?.admission_officer_id || '';
-                          const officer = officerId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(officerId)) : null;
-                          if (!officer) return '—';
-                          const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
-                          const email = officer.email || '';
-                          return (
-                            <div>
-                              <div className="font-medium text-xs">{fullName || email || officer.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const cid = (currentApp as any)?.counsellorId || (currentApp as any)?.counselorId || (student as any)?.counselorId || (student as any)?.counsellorId;
-                          const c = cid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(cid)) : null;
-                          if (!c) return '—';
-                          const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
-                          const email = c.email || '';
-                          return (
-                            <div>
-                              <div className="font-medium text-xs">{fullName || email || c.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
                   <CardTitle className="flex items-center"><BookOpen className="w-5 h-5 mr-2" />Program Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -612,6 +522,97 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                   </div>
                 </CardContent>
               </Card>
+
+              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center"><Users className="w-5 h-5 mr-2" />Access</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const rid = (currentApp as any)?.regionId || (student as any)?.regionId;
+                          const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(rid)) : null;
+                          if (!r) return '—';
+                          const regionName = (r as any).regionName || (r as any).name || (r as any).id;
+                          const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String((r as any).regionHeadId || '')) : null;
+                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                          const headEmail = head?.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Branch</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const bid = (currentApp as any)?.branchId || (student as any)?.branchId;
+                          const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(bid)) : null;
+                          if (!b) return '—';
+                          const branchName = (b as any).branchName || (b as any).name || (b as any).code || (b as any).id;
+                          const headId = (b as any).branchHeadId || (b as any).managerId || null;
+                          const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
+                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                          const headEmail = head?.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Admission Officer</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const officerId = (currentApp as any)?.admissionOfficerId || (student as any)?.admissionOfficerId || (student as any)?.admission_officer_id || '';
+                          const officer = officerId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(officerId)) : null;
+                          if (!officer) return '—';
+                          const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
+                          const email = officer.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{fullName || email || officer.id}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Counselor</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const cid = (currentApp as any)?.counsellorId || (currentApp as any)?.counselorId || (student as any)?.counselorId || (student as any)?.counsellorId;
+                          const c = cid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(cid)) : null;
+                          if (!c) return '—';
+                          const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
+                          const email = c.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{fullName || email || c.id}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
             </div>
           </div>
         )}
