@@ -187,7 +187,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       for (const v of variants(name)) {
         if (Object.prototype.hasOwnProperty.call(dd, v)) {
           const list = Array.isArray((dd as any)[v]) ? [...(dd as any)[v]] : [];
-          return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value }));
+          return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
         }
       }
       // try case-insensitive match on keys
