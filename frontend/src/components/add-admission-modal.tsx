@@ -172,6 +172,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   });
 
   const getOptions = (name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
+  // Debug: inspect loaded dropdown payloads when modal open
+  try { if (open) { console.log('[AddAdmissionModal] admissionDropdowns =', admissionDropdowns); console.log('[AddAdmissionModal] applicationsDropdowns =', applicationsDropdowns); } } catch {}
     const normalize = (s: string) => String(s || '').toLowerCase().trim();
     const variants = (n: string) => [n, n.toLowerCase(), n.replace(/\s+/g, ''), n.replace(/\s+/g, '').toLowerCase(), n.replace(/\s+/g, '_'), n.replace(/\s+/g, '').replace(/_/g,'')];
 
