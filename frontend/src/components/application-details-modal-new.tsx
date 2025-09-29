@@ -82,9 +82,19 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     enabled: open,
   });
 
+  const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
   const caseStatusOptions = useMemo(() => {
     const dd: any = applicationsDropdowns as any;
-    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || [];
+    if (!dd || typeof dd !== 'object') return [];
+    const keyMap: Record<string, string> = {};
+    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
+    const candidates = ['Case Status','caseStatus','CaseStatus','case_status','Case status'];
+    let list: any[] = [];
+    for (const raw of candidates) {
+      const foundKey = keyMap[normalizeKey(raw)];
+      if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
+    }
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
@@ -92,13 +102,16 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   const makeOptions = useCallback((keys: string[]) => {
     const dd: any = applicationsDropdowns as any;
-    for (const k of keys) {
-      const list = dd?.[k] || dd?.[k.toLowerCase()] || dd?.[k.replace(/ /g, '')] || dd?.[k.replace(/ /g, '')?.toLowerCase()];
-      if (Array.isArray(list)) {
-        return [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0))).map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
-      }
+    if (!dd || typeof dd !== 'object') return [] as {label:string;value:string}[];
+    const keyMap: Record<string, string> = {};
+    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
+    let list: any[] = [];
+    for (const raw of keys) {
+      const foundKey = keyMap[normalizeKey(raw)];
+      if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
     }
-    return [] as {label:string;value:string}[];
+    if (!Array.isArray(list)) list = [];
+    return [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0))).map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
   }, [applicationsDropdowns]);
 
   const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
@@ -322,7 +335,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                     variant="outline"
                     size="xs"
                     className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                    onClick={() => { onOpenChange(false); setTimeout(() => window.dispatchEvent(new CustomEvent('openAddAdmission', { detail: { applicationId: currentApp?.id, studentId: currentApp?.studentId } })), 160); }}
+                    onClick={() => { onOpenChange(false); try { setLocation(`/applications/${currentApp?.id}/admission`); } catch {} }}
                     title="Add Admission"
                   >
                     <Plus />

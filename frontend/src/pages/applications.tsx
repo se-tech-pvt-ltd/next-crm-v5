@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { AddApplicationModal } from '@/components/add-application-modal';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import * as DropdownsService from '@/services/dropdowns';
@@ -27,12 +28,15 @@ export default function Applications() {
   const [location, setLocation] = useLocation();
   const [matchApp, appParams] = useRoute('/applications/:id');
   const [matchEdit, editParams] = useRoute('/applications/:id/edit');
+  const [matchAddAdm, addAdmParams] = useRoute('/applications/:id/admission');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
   const [addApplicationStudentId, setAddApplicationStudentId] = useState<string | undefined>(undefined);
+  const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
+  const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -56,7 +60,16 @@ export default function Applications() {
 
   const statusOptions = useMemo(() => {
     const dd: any = applicationsDropdowns as any;
-    let list: any[] = dd?.Status || dd?.status || dd?.AppStatus || [];
+    if (!dd || typeof dd !== 'object') return [];
+    const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const keyMap: Record<string, string> = {};
+    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
+    const candidates = ['App Status','Application Status','Status','AppStatus','app status','App status'];
+    let list: any[] = [];
+    for (const raw of candidates) {
+      const foundKey = keyMap[normalizeKey(raw)];
+      if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
+    }
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
     // Use the human label as the filter value to match enriched appStatus values
@@ -167,6 +180,18 @@ export default function Applications() {
       setIsDetailsOpen(true);
     }
   }, [matchApp, matchEdit, appParams?.id, editParams?.id, applicationsArray]);
+
+  // Open Add Admission modal when route matches /applications/:id/admission
+  useEffect(() => {
+    const aid = addAdmParams?.id;
+    if (matchAddAdm && aid) {
+      setAddAdmissionAppId(aid);
+      setIsAddAdmissionModalOpen(true);
+    } else if (!matchAddAdm) {
+      setIsAddAdmissionModalOpen(false);
+      setAddAdmissionAppId(undefined);
+    }
+  }, [matchAddAdm, addAdmParams?.id]);
 
   return (
     <Layout 
@@ -471,6 +496,22 @@ export default function Applications() {
     open={isAddApplicationModalOpen}
     onOpenChange={(o) => { setIsAddApplicationModalOpen(o); if (!o) setAddApplicationStudentId(undefined); }}
     studentId={addApplicationStudentId}
+  />
+
+  <AddAdmissionModal
+    open={isAddAdmissionModalOpen}
+    onOpenChange={(o) => {
+      setIsAddAdmissionModalOpen(o);
+      if (!o) {
+        try {
+          if (addAdmissionAppId) setLocation(`/applications/${addAdmissionAppId}`);
+          else setLocation('/applications');
+        } catch {}
+        setAddAdmissionAppId(undefined);
+      }
+    }}
+    applicationId={addAdmissionAppId}
+    studentId={undefined}
   />
 </Layout>
   );
