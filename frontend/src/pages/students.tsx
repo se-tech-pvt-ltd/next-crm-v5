@@ -167,6 +167,27 @@ export default function Students() {
     return mapped.length > 0 ? mapped.join(', ') : (idsOrNames[0] || '-');
   };
 
+  // Map target program ids to display names using dropdowns (if available)
+  const getTargetProgramDisplay = (student: Student) => {
+    const raw = (student as any).targetProgram ?? (student as any).program ?? null;
+    const values = parseTargetCountries(raw);
+    const dd: any = (studentDropdowns as any) || {};
+    const candidates = ['Target Program', 'Program', 'Study Plan', 'Course', 'TargetProgram', 'Program Name'];
+    let options: any[] = [];
+    for (const k of candidates) {
+      const list = dd[k];
+      if (Array.isArray(list) && list.length > 0) { options = list; break; }
+    }
+    if (options.length > 0) {
+      const mapped = values.map((item) => {
+        const found = options.find((o: any) => (o.key === item || o.id === item || o.value === item));
+        return found ? found.value : item;
+      }).filter(Boolean);
+      return mapped.length > 0 ? mapped.join(', ') : (values[0] || '-');
+    }
+    return (values && values.length > 0) ? values.join(', ') : '-';
+  };
+
   // Get unique countries for filter dropdown
   const uniqueCountries = studentsArray ?
     studentsArray.reduce((countries: string[], student) => {
