@@ -5,6 +5,8 @@ import * as DropdownsService from '@/services/dropdowns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
@@ -212,7 +214,16 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
-                  <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing || updateStudentMutation.isPending} className="h-8 text-xs shadow-sm border border-gray-300 bg-white" />
+                  <div className="relative">
+                    <PhoneInput
+                      value={String(editData.phone || student.phone || '')}
+                      onChange={(val) => setEditData({ ...editData, phone: val })}
+                      defaultCountry="in"
+                      className="w-full"
+                      inputClassName="w-full h-9 text-sm"
+                      disabled={!isEditing || updateStudentMutation.isPending}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dateOfBirth" className="flex items-center space-x-2"><CalendarIcon className="w-4 h-4" /><span>Date of Birth</span></Label>
