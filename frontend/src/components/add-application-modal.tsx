@@ -18,7 +18,7 @@ import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle, Link2, BookOpen, UserSquare, ExternalLink, StickyNote } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { StudentProfileModal } from './student-profile-modal-new';
@@ -237,7 +237,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
-        <div className="flex flex-col h-[90vh] min-h-0">
+        <div className="flex flex-col h-[90vh] min-h-0 bg-[#EDEDED]">
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
             <div className="flex items-center gap-3">
@@ -278,7 +278,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Linked Entities</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><Link2 className="w-4 h-4 mr-2" />Linked Entities</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -308,7 +308,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Program Details</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><BookOpen className="w-4 h-4 mr-2" />Program Details</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input type="hidden" {...form.register('studentId')} />
@@ -439,7 +439,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               {/* Access */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Access</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><UserSquare className="w-4 h-4 mr-2" />Access</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -496,7 +496,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Status & Links</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><ExternalLink className="w-4 h-4 mr-2" />Status & Links</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
@@ -564,7 +564,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Notes</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><StickyNote className="w-4 h-4 mr-2" />Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <FormField
