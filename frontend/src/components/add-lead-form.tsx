@@ -817,22 +817,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input
-                          type="tel"
-                          inputMode="tel"
-                          placeholder="+12345678901"
-                          className={`transition-all focus:ring-2 focus:ring-primary/20 ${phoneDuplicateStatus.isDuplicate ? 'border-amber-500 focus:ring-amber-200' : ''}`}
-                          value={field.value}
-                          onFocus={(e) => {
-                            const v = e.target.value || '';
-                            if (!v.startsWith('+')) field.onChange('+' + v.replace(/\D/g, ''));
-                          }}
-                          onChange={(e) => {
-                            const digits = (e.target.value || '').replace(/\D/g, '');
-                            const s = '+' + digits;
-                            field.onChange(s);
-                            checkPhoneDuplicate(s);
-                          }}
+                        <PhoneNumberInput
+                          value={field.value || ''}
+                          onChange={(val) => { field.onChange(val); checkPhoneDuplicate(val); }}
+                          className={cn(`${phoneDuplicateStatus.isDuplicate ? 'ring-1 ring-amber-500' : ''}`)}
                         />
                         {checkingPhone && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
