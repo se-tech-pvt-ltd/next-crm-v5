@@ -147,11 +147,31 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const selectedStudent = (Array.isArray(students) ? students.find((s) => s.id === selectedStudentId) : null) || presetStudent;
   const selectedBranchId = (selectedStudent as any)?.branchId || null;
 
-  // Reset access selections when branch context changes
+  // Resolve assigned counsellor/officer from student record (support legacy keys)
+  const studentCounsellorId = React.useMemo(() => {
+    const s: any = selectedStudent || {};
+    const id = s.counsellorId ?? s.counselorId ?? s.counsellor ?? s.counselor ?? '';
+    return id ? String(id) : '';
+  }, [selectedStudent]);
+  const studentAdmissionOfficerId = React.useMemo(() => {
+    const s: any = selectedStudent || {};
+    const id = s.admissionOfficerId ?? s.admission_officer_id ?? s.admissionOfficer ?? s.admission_officer ?? '';
+    return id ? String(id) : '';
+  }, [selectedStudent]);
+
+  // Reset and auto-fill access selections when branch context changes
   useEffect(() => {
-    form.setValue('counsellorId', '');
-    form.setValue('admissionOfficerId', '');
-  }, [selectedBranchId]);
+    form.setValue('counsellorId', studentCounsellorId || '');
+    form.setValue('admissionOfficerId', studentAdmissionOfficerId || '');
+  }, [selectedBranchId, studentCounsellorId, studentAdmissionOfficerId]);
+
+  // Also auto-fill once when student changes if fields are empty
+  useEffect(() => {
+    const curC = String(form.getValues('counsellorId') || '');
+    const curA = String(form.getValues('admissionOfficerId') || '');
+    if (!curC && studentCounsellorId) form.setValue('counsellorId', studentCounsellorId);
+    if (!curA && studentAdmissionOfficerId) form.setValue('admissionOfficerId', studentAdmissionOfficerId);
+  }, [studentCounsellorId, studentAdmissionOfficerId]);
 
   const counsellorOptions = Array.isArray(users) && selectedBranchId
     ? users
@@ -175,6 +195,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         })
         .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
     : [];
+
+  // Ensure options include student's assigned users even if filtered out
+  const counsellorOptionsRender = React.useMemo(() => {
+    let list = Array.isArray(counsellorOptions) ? counsellorOptions.slice() : [];
+    const sel = studentCounsellorId;
+    if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
+      const u = (users as any[]).find((x: any) => String(x.id) === sel);
+      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }, ...list];
+    }
+    return list;
+  }, [counsellorOptions, users, studentCounsellorId]);
+
+  const officerOptionsRender = React.useMemo(() => {
+    let list = Array.isArray(officerOptions) ? officerOptions.slice() : [];
+    const sel = studentAdmissionOfficerId;
+    if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
+      const u = (users as any[]).find((x: any) => String(x.id) === sel);
+      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }, ...list];
+    }
+    return list;
+  }, [officerOptions, users, studentAdmissionOfficerId]);
 
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
@@ -456,7 +497,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {counsellorOptions.map((opt) => (
+                              {counsellorOptionsRender.map((opt) => (
                                 <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
@@ -481,7 +522,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {officerOptions.map((opt) => (
+                              {officerOptionsRender.map((opt) => (
                                 <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
