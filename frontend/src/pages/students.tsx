@@ -105,7 +105,8 @@ export default function Students() {
   const filteredAll = studentsArray?.filter(student => {
     const label = getStatusLabel(student.status).toLowerCase();
     const statusMatch = statusFilter === 'all' || label === statusFilter;
-    const countryMatch = countryFilter === 'all' || student.targetCountry === countryFilter;
+    const countryDisplay = getTargetCountryDisplay(student);
+    const countryMatch = countryFilter === 'all' || countryDisplay === countryFilter;
     return statusMatch && countryMatch;
   }) || [];
 
@@ -165,46 +166,87 @@ export default function Students() {
     return [String(value)];
   };
 
-  // Map target country ids to display names using dropdowns (if available)
+  // Map target country ids to display names using dropdowns (robust to ids/keys/values and multiple values)
   const getTargetCountryDisplay = (student: Student) => {
     const raw = (student as any).targetCountry ?? (student as any).country ?? null;
-    const idsOrNames = parseTargetCountries(raw);
-    const moduleDropdown = (studentDropdowns as any) || {};
-    const options = moduleDropdown['Target Country'] || moduleDropdown['Interested Country'] || moduleDropdown['Country'] || [];
-    const mapped = idsOrNames.map((item: any) => {
-      const found = options.find((o: any) => (o.key === item || o.id === item || o.value === item));
+    const values = parseTargetCountries(raw);
+    if (!values.length) return '-';
+
+    const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const dd: any = (studentDropdowns as any) || {};
+
+    // Build a normalized map of fieldName -> options[]
+    const ddMap: Record<string, any[]> = Object.keys(dd).reduce((acc: Record<string, any[]>, k) => {
+      acc[normalize(k)] = dd[k];
+      return acc;
+    }, {});
+
+    const candidatesNorm = ['target_country','targetcountry','target country','interested country','country'].map(normalize);
+    let options: any[] = [];
+    for (const c of candidatesNorm) {
+      if (Array.isArray(ddMap[c]) && ddMap[c].length > 0) { options = ddMap[c]; break; }
+    }
+
+    // Fallback: search all dropdowns for country-like fields
+    if (options.length === 0 && Array.isArray(allDropdowns)) {
+      const terms = ['targetcountry','country','interestedcountry'];
+      const pool = (allDropdowns as any[]).filter((d: any) => terms.some(t => normalize(d.fieldName).includes(t)));
+      options = pool;
+    }
+
+    if (options.length === 0) return values.join(', ');
+
+    const mapped = values.map((item) => {
+      const str = String(item);
+      const found = options.find((o: any) => (
+        String(o.id) === str || String(o.key) === str || String(o.value) === str
+      ));
       return found ? found.value : item;
     }).filter(Boolean);
-    return mapped.length > 0 ? mapped.join(', ') : (idsOrNames[0] || '-');
+
+    return mapped.length > 0 ? mapped.join(', ') : values.join(', ');
   };
 
-  // Map target program ids to display names using dropdowns (if available)
+  // Map target program ids to display names using dropdowns (robust mapping; supports multiple values)
   const getTargetProgramDisplay = (student: Student) => {
     const raw = (student as any).targetProgram ?? (student as any).program ?? null;
     const values = parseTargetCountries(raw);
+    if (!values.length) return '-';
+
+    const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
     const dd: any = (studentDropdowns as any) || {};
     const ld: any = (leadsDropdowns as any) || {};
-    const candidates = ['Target Program', 'Program', 'Study Plan', 'Course', 'TargetProgram', 'Program Name'];
+
+    // Build normalized maps for field lookup from both Students and Leads modules
+    const buildMap = (src: any) => Object.keys(src || {}).reduce((acc: Record<string, any[]>, k) => { acc[normalize(k)] = src[k]; return acc; }, {} as Record<string, any[]>);
+    const ddMap = buildMap(dd);
+    const ldMap = buildMap(ld);
+
+    const candidates = ['target_program','target program','targetprogram','program','study plan','studyplan','course','program name'];
     let options: any[] = [];
-    for (const k of candidates) {
-      const list = dd[k] || ld[k];
+    for (const c of candidates.map(normalize)) {
+      const list = ddMap[c] || ldMap[c];
       if (Array.isArray(list) && list.length > 0) { options = list; break; }
     }
+
     // Global fallback: search all dropdowns by fieldName containing program terms
     if (options.length === 0 && Array.isArray(allDropdowns)) {
-      const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
       const terms = ['targetprogram','program','studyplan','course'];
       const pool = (allDropdowns as any[]).filter((d: any) => terms.some(t => normalize(d.fieldName).includes(t)));
       options = pool;
     }
-    if (options.length > 0) {
-      const mapped = values.map((item) => {
-        const found = options.find((o: any) => (o.key === item || o.id === item || o.value === item || String(o.id) === String(item) || String(o.key) === String(item) || String(o.value) === String(item)));
-        return found ? found.value : item;
-      }).filter(Boolean);
-      return mapped.length > 0 ? mapped.join(', ') : (values[0] || '-');
-    }
-    return (values && values.length > 0) ? values.join(', ') : '-';
+
+    if (options.length === 0) return values.join(', ');
+
+    const mapped = values.map((item) => {
+      const str = String(item);
+      const found = options.find((o: any) => (
+        String(o.id) === str || String(o.key) === str || String(o.value) === str
+      ));
+      return found ? found.value : item;
+    }).filter(Boolean);
+
+    return mapped.length > 0 ? mapped.join(', ') : values.join(', ');
   };
 
   // Get unique countries for filter dropdown
