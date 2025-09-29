@@ -245,20 +245,28 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            onClick={() => {
-              try { if (submitLeadForm) submitLeadForm(); else (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {}
-            }}
-            className="px-3 h-8 text-xs bg-white text-[#223E7D] hover:bg-white/90 border border-white rounded-md"
-          >
-            Save
-          </Button>
-          <Button
-            type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
           >
             Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              try { if (submitLeadForm) submitLeadForm(); else (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {}
+            }}
+            disabled={createLeadMutation.isPending}
+            className="px-3 h-8 text-xs bg-[#223E7D] text-white hover:bg-[#1b3560] border border-[#223E7D] rounded-md"
+          >
+            {createLeadMutation.isPending ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Saving...</span>
+              </div>
+            ) : (
+              <span>Save</span>
+            )}
           </Button>
         </div>
       )}
