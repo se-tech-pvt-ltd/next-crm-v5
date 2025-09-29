@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { AddApplicationModal } from '@/components/add-application-modal';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import * as DropdownsService from '@/services/dropdowns';
@@ -170,6 +171,18 @@ export default function Applications() {
       setIsDetailsOpen(true);
     }
   }, [matchApp, matchEdit, appParams?.id, editParams?.id, applicationsArray]);
+
+  // Open Add Admission modal when route matches /applications/:id/admission
+  useEffect(() => {
+    const aid = addAdmParams?.id;
+    if (matchAddAdm && aid) {
+      setAddAdmissionAppId(aid);
+      setIsAddAdmissionModalOpen(true);
+    } else if (!matchAddAdm) {
+      setIsAddAdmissionModalOpen(false);
+      setAddAdmissionAppId(undefined);
+    }
+  }, [matchAddAdm, addAdmParams?.id]);
 
   return (
     <Layout 
@@ -474,6 +487,22 @@ export default function Applications() {
     open={isAddApplicationModalOpen}
     onOpenChange={(o) => { setIsAddApplicationModalOpen(o); if (!o) setAddApplicationStudentId(undefined); }}
     studentId={addApplicationStudentId}
+  />
+
+  <AddAdmissionModal
+    open={isAddAdmissionModalOpen}
+    onOpenChange={(o) => {
+      setIsAddAdmissionModalOpen(o);
+      if (!o) {
+        try {
+          if (addAdmissionAppId) setLocation(`/applications/${addAdmissionAppId}`);
+          else setLocation('/applications');
+        } catch {}
+        setAddAdmissionAppId(undefined);
+      }
+    }}
+    applicationId={addAdmissionAppId}
+    studentId={undefined}
   />
 </Layout>
   );
