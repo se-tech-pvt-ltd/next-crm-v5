@@ -497,19 +497,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     </CardContent>
                   </Card>
 
-                  <div className="flex justify-end space-x-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-4 h-8 text-xs">Cancel</Button>
-                    <Button type="submit" disabled={createMutation.isPending} className="px-4 h-8 text-xs bg-primary hover:bg-primary/90">
-                      {createMutation.isPending ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Saving...</span>
-                        </div>
-                      ) : (
-                        <span>Save</span>
-                      )}
-                    </Button>
-                  </div>
                 </form>
               </Form>
             </div>
