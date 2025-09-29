@@ -125,7 +125,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     email: '',
     city: '',
     source: '',
-    interestedCountry: '',
+    interestedCountry: [] as string[],
     studyLevel: '',
     studyPlan: '',
     admissionOfficer: '',
