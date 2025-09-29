@@ -43,41 +43,43 @@ export default function AddApplication() {
   });
 
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const { data: allDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/all'],
+    queryFn: async () => http.get<any[]>('/api/dropdowns'),
+    enabled: true
+  });
+
+  const groupedFromAll = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    if (!Array.isArray(allDropdowns)) return map;
+    for (const d of allDropdowns) {
+      const key = d.fieldName || d.field_name || d.field || d.fieldname || 'unknown';
+      if (!map[key]) map[key] = [];
+      map[key].push(d);
+    }
+    return map;
+  }, [allDropdowns]);
+
   const makeOptions = (dd: any, candidates: string[]) => {
-    if (!dd || typeof dd !== 'object') return [];
+    const source = dd && Object.keys(dd || {}).length ? dd : groupedFromAll;
+    if (!source || typeof source !== 'object') return [];
     const keyMap: Record<string, string> = {};
-    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
+    for (const k of Object.keys(source || {})) keyMap[normalizeKey(k)] = k;
     let list: any[] = [];
     for (const raw of candidates) {
       const foundKey = keyMap[normalizeKey(raw)];
-      if (foundKey && Array.isArray(dd[foundKey]) && dd[foundKey].length) { list = dd[foundKey]; break; }
+      if (foundKey && Array.isArray(source[foundKey]) && source[foundKey].length) { list = source[foundKey]; break; }
     }
     if (!Array.isArray(list) || list.length === 0) {
       // relaxed fallback: try to match any key that includes candidate words
-      for (const k of Object.keys(dd || {})) {
+      for (const k of Object.keys(source || {})) {
         const nk = normalizeKey(k);
         for (const raw of candidates) {
           if (nk.includes(normalizeKey(raw))) {
-            if (Array.isArray(dd[k]) && dd[k].length) { list = dd[k]; break; }
+            if (Array.isArray(source[k]) && source[k].length) { list = source[k]; break; }
           }
         }
         if (Array.isArray(list) && list.length) break;
-      }
-    }
-
-    // If still empty, try backend endpoint for module+field for each candidate
-    if ((!Array.isArray(list) || list.length === 0) && typeof window !== 'undefined') {
-      for (const raw of candidates) {
-        try {
-          const field = String(raw || '');
-          const res = await (http.get<any[]>(`/api/dropdowns/module/Applications/field/${encodeURIComponent(field)}`) as Promise<any[]>);
-          if (Array.isArray(res) && res.length) {
-            list = res;
-            break;
-          }
-        } catch (e) {
-          // ignore and continue
-        }
       }
     }
     if (!Array.isArray(list)) list = [];
@@ -85,12 +87,12 @@ export default function AddApplication() {
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   };
 
-  const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['App Status','Application Status','AppStatus','Status','status','appstatus']), [applicationsDropdowns]);
-  const caseStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status','case status']), [applicationsDropdowns]);
-  const courseTypeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']), [applicationsDropdowns]);
-  const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns]);
-  const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns]);
-  const intakeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']), [applicationsDropdowns]);
+  const appStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['App Status','Application Status','AppStatus','Status','status','appstatus']), [applicationsDropdowns, groupedFromAll]);
+  const caseStatusOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status','case status']), [applicationsDropdowns, groupedFromAll]);
+  const courseTypeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']), [applicationsDropdowns, groupedFromAll]);
+  const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns, groupedFromAll]);
+  const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns, groupedFromAll]);
+  const intakeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']), [applicationsDropdowns, groupedFromAll]);
 
   useEffect(() => {
     // Pre-select defaults for application form when dropdowns load
