@@ -204,26 +204,6 @@ export default function Students() {
 
 
 
-  // Utility to parse targetCountry value into array of ids or names
-  const parseTargetCountries = (value: any): string[] => {
-    if (!value) return [];
-    if (Array.isArray(value)) return value;
-    if (typeof value === 'string') {
-      const s = value.trim();
-      // If JSON array string
-      if (s.startsWith('[')) {
-        try {
-          const parsed = JSON.parse(s);
-          if (Array.isArray(parsed)) return parsed;
-        } catch {}
-      }
-      // If comma separated values
-      if (s.includes(',')) return s.split(',').map(p => p.trim()).filter(Boolean);
-      // Single value
-      return [s];
-    }
-    return [String(value)];
-  };
 
   // Map target program ids to display names using dropdowns (robust mapping; supports multiple values)
   const getTargetProgramDisplay = (student: Student) => {
