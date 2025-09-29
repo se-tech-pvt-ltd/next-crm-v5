@@ -101,6 +101,65 @@ export default function Students() {
     return (match?.value || s || '').toString();
   }
 
+  // Utility to parse targetCountry value into array of ids or names
+  const parseTargetCountries = (value: any): string[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      const s = value.trim();
+      if (s.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(s);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {}
+      }
+      if (s.includes(',')) return s.split(',').map(p => p.trim()).filter(Boolean);
+      return [s];
+    }
+    return [String(value)];
+  };
+
+  // Map target country ids to display names using dropdowns (robust to ids/keys/values and multiple values)
+  const getTargetCountryDisplay = (student: Student) => {
+    const raw = (student as any).targetCountry ?? (student as any).country ?? null;
+    const values = parseTargetCountries(raw);
+    if (!values.length) return '-';
+
+    const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const dd: any = (studentDropdowns as any) || {};
+
+    // Build a normalized map of fieldName -> options[]
+    const ddMap: Record<string, any[]> = Object.keys(dd).reduce((acc: Record<string, any[]>, k) => {
+      acc[normalize(k)] = dd[k];
+      return acc;
+    }, {});
+
+    const candidatesNorm = ['target_country','targetcountry','target country','interested country','country'].map(normalize);
+    let options: any[] = [];
+    for (const c of candidatesNorm) {
+      if (Array.isArray(ddMap[c]) && ddMap[c].length > 0) { options = ddMap[c]; break; }
+    }
+
+    // Fallback: search all dropdowns for country-like fields
+    if (options.length === 0 && Array.isArray(allDropdowns)) {
+      const terms = ['targetcountry','country','interestedcountry'];
+      const pool = (allDropdowns as any[]).filter((d: any) => terms.some(t => normalize(d.fieldName).includes(t)));
+      options = pool;
+    }
+
+    if (options.length === 0) return values.join(', ');
+
+    const mapped = values.map((item) => {
+      const str = String(item);
+      const found = options.find((o: any) => (
+        String(o.id) === str || String(o.key) === str || String(o.value) === str
+      ));
+      return found ? found.value : item;
+    }).filter(Boolean);
+
+    return mapped.length > 0 ? mapped.join(', ') : values.join(', ');
+  };
+
   // Apply filters across the full students array
   const filteredAll = studentsArray?.filter(student => {
     const label = getStatusLabel(student.status).toLowerCase();
