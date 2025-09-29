@@ -204,6 +204,22 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const statusOptions = getOptions('Status', ['Admissions']);
   const caseStatusOptions = getOptions('Case Status', ['Applications','Admissions']);
 
+  useEffect(() => {
+    if (!open) return;
+    try {
+      if ((!form.getValues('status') || form.getValues('status') === '') && Array.isArray(statusOptions) && statusOptions.length > 0) {
+        const def = statusOptions.find((o:any) => o.isDefault || o.is_default || o.default) || statusOptions[0];
+        if (def) form.setValue('status', def.value as any);
+      }
+    } catch {}
+    try {
+      if ((!form.getValues('caseStatus') || form.getValues('caseStatus') === '') && Array.isArray(caseStatusOptions) && caseStatusOptions.length > 0) {
+        const def = (caseStatusOptions as any).find((o:any) => o.isDefault || o.is_default || o.default) || (caseStatusOptions as any)[0];
+        if (def) form.setValue('caseStatus', def.value as any);
+      }
+    } catch {}
+  }, [open, statusOptions, caseStatusOptions]);
+
   // Users for access assignment
   const { data: users = [] } = useQuery<any[]>({
     queryKey: ['/api/users'],
