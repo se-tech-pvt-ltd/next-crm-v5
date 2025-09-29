@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityTracker } from './activity-tracker';
@@ -443,7 +445,14 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
-                    <Input id="phone" type="tel" value={editData.phone || ''} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    <PhoneInput
+                      value={String(editData.phone || '')}
+                      onChange={(val) => setEditData({ ...editData, phone: val })}
+                      defaultCountry="in"
+                      className="w-full"
+                      inputClassName="w-full h-9 text-sm"
+                      disabled={!isEditing || updateLeadMutation.isPending}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
