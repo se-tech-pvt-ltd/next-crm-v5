@@ -64,6 +64,22 @@ export default function AddApplication() {
         if (Array.isArray(list) && list.length) break;
       }
     }
+
+    // If still empty, try backend endpoint for module+field for each candidate
+    if ((!Array.isArray(list) || list.length === 0) && typeof window !== 'undefined') {
+      for (const raw of candidates) {
+        try {
+          const field = String(raw || '');
+          const res = await (http.get<any[]>(`/api/dropdowns/module/Applications/field/${encodeURIComponent(field)}`) as Promise<any[]>);
+          if (Array.isArray(res) && res.length) {
+            list = res;
+            break;
+          }
+        } catch (e) {
+          // ignore and continue
+        }
+      }
+    }
     if (!Array.isArray(list)) list = [];
     list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
     return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
