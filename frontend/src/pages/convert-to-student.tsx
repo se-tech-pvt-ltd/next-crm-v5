@@ -176,7 +176,7 @@ export default function ConvertLeadToStudent() {
     email: '',
     city: '',
     source: '',
-    interestedCountry: '',
+    interestedCountry: [] as string[],
     studyLevel: '',
     studyPlan: '',
     admissionOfficer: '',
