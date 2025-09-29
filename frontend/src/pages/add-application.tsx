@@ -16,6 +16,7 @@ import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simp
 import * as UsersService from '@/services/users';
 import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users } from 'lucide-react';
 import * as DropdownsService from '@/services/dropdowns';
+import { http } from '@/services/http';
 import { useMemo, useEffect } from 'react';
 
 export default function AddApplication() {
