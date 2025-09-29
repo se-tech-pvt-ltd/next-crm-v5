@@ -68,14 +68,38 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   });
 
   const makeOptions = (dd: any, candidates: string[]) => {
+    if (!dd || typeof dd !== 'object') return [];
+    const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // Build a map of normalized keys -> original key
+    const keyMap: Record<string, string> = {};
+    for (const k of Object.keys(dd || {})) {
+      keyMap[normalizeKey(k)] = k;
+    }
+
     let list: any[] = [];
     for (const raw of candidates) {
-      const keys = [raw, raw.toLowerCase(), raw.replace(/\s+/g, ''), raw.replace(/\s+/g, '').toLowerCase()];
-      for (const k of keys) {
-        if (dd && Array.isArray(dd?.[k])) { list = dd[k]; break; }
+      const nk = normalizeKey(raw);
+      const foundKey = keyMap[nk];
+      if (foundKey && Array.isArray(dd[foundKey]) && dd[foundKey].length) {
+        list = dd[foundKey];
+        break;
       }
-      if (Array.isArray(list) && list.length) break;
     }
+
+    // Fallback: try to find any candidate by more relaxed matching
+    if ((!Array.isArray(list) || list.length === 0)) {
+      for (const k of Object.keys(dd || {})) {
+        const nk = normalizeKey(k);
+        for (const raw of candidates) {
+          if (nk === normalizeKey(raw)) {
+            if (Array.isArray(dd[k]) && dd[k].length) { list = dd[k]; break; }
+          }
+        }
+        if (Array.isArray(list) && list.length) break;
+      }
+    }
+
     if (!Array.isArray(list)) list = [];
     const sorted = [...list].sort((a: any, b: any) => {
       const sa = Number(a.sequence ?? Infinity);
