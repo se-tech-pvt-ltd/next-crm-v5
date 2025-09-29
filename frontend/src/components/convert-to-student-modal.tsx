@@ -516,7 +516,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                         <Globe className="w-3 h-3" />
                         <span>Interested Country</span>
                       </Label>
-                      <Input value={formData.interestedCountry} disabled className="bg-background h-8 text-xs" />
+                      <Input value={mapDropdownToLabels(formData.interestedCountry, 'Interested Country') || normalizeToText(formData.interestedCountry)} disabled className="bg-background h-8 text-xs" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground flex items-center space-x-1">
