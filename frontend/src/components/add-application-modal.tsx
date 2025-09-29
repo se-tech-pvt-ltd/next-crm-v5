@@ -88,8 +88,10 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     return sorted.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   };
 
-  const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
-  const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
+  const __appStatusRaw = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
+  const appStatusOptions = __appStatusRaw.map((o: any) => ({ label: o.label, value: o.label, isDefault: o.isDefault }));
+  const __caseStatusRaw = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
+  const caseStatusOptions = __caseStatusRaw.map((o: any) => ({ label: o.label, value: o.label, isDefault: o.isDefault }));
   const courseTypeOptions = makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']);
   const countryOptions = makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
