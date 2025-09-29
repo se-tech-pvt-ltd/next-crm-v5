@@ -247,6 +247,7 @@ export class StudentService {
     const { LeadModel } = await import('../models/Lead.js');
     const lead = await LeadModel.findById(leadId);
 
+    // build payload (targetCountry normalized below)
     const payload = {
       ...(studentData as any),
       leadId,
