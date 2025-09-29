@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-application-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -148,12 +148,12 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const selectedBranchId = (selectedStudent as any)?.branchId || null;
 
   // Resolve assigned counsellor/officer from student record (support legacy keys)
-  const studentCounsellorId = React.useMemo(() => {
+  const studentCounsellorId = useMemo(() => {
     const s: any = selectedStudent || {};
     const id = s.counsellorId ?? s.counselorId ?? s.counsellor ?? s.counselor ?? '';
     return id ? String(id) : '';
   }, [selectedStudent]);
-  const studentAdmissionOfficerId = React.useMemo(() => {
+  const studentAdmissionOfficerId = useMemo(() => {
     const s: any = selectedStudent || {};
     const id = s.admissionOfficerId ?? s.admission_officer_id ?? s.admissionOfficer ?? s.admission_officer ?? '';
     return id ? String(id) : '';
@@ -197,7 +197,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     : [];
 
   // Ensure options include student's assigned users even if filtered out
-  const counsellorOptionsRender = React.useMemo(() => {
+  const counsellorOptionsRender = useMemo(() => {
     let list = Array.isArray(counsellorOptions) ? counsellorOptions.slice() : [];
     const sel = studentCounsellorId;
     if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
@@ -207,7 +207,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     return list;
   }, [counsellorOptions, users, studentCounsellorId]);
 
-  const officerOptionsRender = React.useMemo(() => {
+  const officerOptionsRender = useMemo(() => {
     let list = Array.isArray(officerOptions) ? officerOptions.slice() : [];
     const sel = studentAdmissionOfficerId;
     if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
