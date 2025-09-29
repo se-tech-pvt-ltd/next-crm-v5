@@ -103,6 +103,7 @@ function Router() {
       <Route path="/applications/add" component={AddApplication} />
       <Route path="/applications/new" component={AddApplication} />
       <Route path="/applications/:id/edit" component={Applications} />
+      <Route path="/applications/:id/admission" component={Applications} />
       <Route path="/applications/:id" component={Applications} />
       <Route path="/applications" component={Applications} />
       <Route path="/admissions/add" component={AddAdmissionPage} />
