@@ -69,16 +69,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const makeOptions = (dd: any, candidates: string[]) => {
     let list: any[] = [];
-    for (const k of candidates) {
-      if (dd && Array.isArray(dd[k])) { list = dd[k]; break; }
+    for (const raw of candidates) {
+      const keys = [raw, raw.toLowerCase(), raw.replace(/\s+/g, ''), raw.replace(/\s+/g, '').toLowerCase()];
+      for (const k of keys) {
+        if (dd && Array.isArray(dd?.[k])) { list = dd[k]; break; }
+      }
+      if (Array.isArray(list) && list.length) break;
     }
     if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
+    const sorted = [...list].sort((a: any, b: any) => {
+      const sa = Number(a.sequence ?? Infinity);
+      const sb = Number(b.sequence ?? Infinity);
+      if (sa !== sb) return sa - sb;
+      const da = (a.isDefault || a.is_default) ? 0 : 1;
+      const db = (b.isDefault || b.is_default) ? 0 : 1;
+      return da - db;
+    });
+    return sorted.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   };
 
-  const appStatusOptions = makeOptions(applicationsDropdowns, ['Status', 'status', 'AppStatus', 'Application Status']);
-  const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status', 'caseStatus', 'CaseStatus', 'case_status']);
+  const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
+  const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
   const courseTypeOptions = makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']);
   const countryOptions = makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
@@ -546,7 +557,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Application Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || 'Open'}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
@@ -569,7 +580,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Case Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || 'Raw'}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select case status" />
