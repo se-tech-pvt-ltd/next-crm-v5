@@ -82,6 +82,11 @@ export default function Students() {
     queryKey: ['/api/dropdowns/module/students'],
     queryFn: async () => DropdownsService.getModuleDropdowns('students'),
   });
+  // Fallback to Leads module for fields that may live there (e.g., Program/Study Plan)
+  const { data: leadsDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+  });
 
   function getStatusLabel(raw?: string) {
     const list: any[] = (studentDropdowns as any)?.Status || [];
@@ -172,10 +177,11 @@ export default function Students() {
     const raw = (student as any).targetProgram ?? (student as any).program ?? null;
     const values = parseTargetCountries(raw);
     const dd: any = (studentDropdowns as any) || {};
+    const ld: any = (leadsDropdowns as any) || {};
     const candidates = ['Target Program', 'Program', 'Study Plan', 'Course', 'TargetProgram', 'Program Name'];
     let options: any[] = [];
     for (const k of candidates) {
-      const list = dd[k];
+      const list = dd[k] || ld[k];
       if (Array.isArray(list) && list.length > 0) { options = list; break; }
     }
     if (options.length > 0) {
