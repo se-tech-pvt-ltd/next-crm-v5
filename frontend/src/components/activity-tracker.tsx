@@ -121,6 +121,11 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryKey: ['/api/dropdowns/module', moduleName],
     queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
   });
+  // Fallback: some shared options (like Country) may live under Leads module
+  const { data: leadsModuleDropdowns } = useQuery({
+    queryKey: ['/api/dropdowns/module', 'Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+  });
 
   // Generic dropdown label resolution
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -169,27 +174,38 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     } as any;
   };
   const getOptionsForField = (fieldName?: string): any[] => {
-    if (!fieldName || !moduleDropdowns) return [];
+    if (!fieldName) return [];
     const target = normalize(fieldName);
-    const entries = Object.entries(moduleDropdowns as Record<string, any[]>);
+    const entries = moduleDropdowns ? Object.entries(moduleDropdowns as Record<string, any[]>) : [];
+    const leadsEntries = leadsModuleDropdowns ? Object.entries(leadsModuleDropdowns as Record<string, any[]>) : [];
 
-    // 1) Exact normalized key match
-    let entry = entries.find(([k]) => normalize(String(k)) === target);
-    if (entry) return entry[1] || [];
-
-    // 2) Heuristics for common multi-selects (e.g., Target Country)
-    const isCountryField = /country/.test(target) || target === 'targetcountry';
-    if (isCountryField) {
-      const candidates = ['target_country','targetcountry','target country','interested country','country'];
-      const set = new Set(candidates.map(normalize));
-      entry = entries.find(([k]) => set.has(normalize(String(k))));
+    // Helper to search a set of entries
+    const findIn = (ens: [string, any[]][]) => {
+      // 1) Exact normalized key match
+      let entry = ens.find(([k]) => normalize(String(k)) === target);
       if (entry) return entry[1] || [];
-    }
 
-    // 3) Fallback: if only one array matches shape of dropdown options (id/key/value), use it
-    const looksLikeOptions = (arr: any[]) => Array.isArray(arr) && arr.some((o) => o && (('id' in o) || ('key' in o)) && ('value' in o));
-    const fallback = entries.find(([, v]) => looksLikeOptions(v));
-    return (fallback?.[1] as any[]) || [];
+      // 2) Heuristics for common multi-selects (e.g., Target Country)
+      const isCountryField = /country/.test(target) || target === 'targetcountry';
+      if (isCountryField) {
+        const candidates = ['target_country','targetcountry','target country','interested country','country'];
+        const set = new Set(candidates.map(normalize));
+        entry = ens.find(([k]) => set.has(normalize(String(k))));
+        if (entry) return entry[1] || [];
+      }
+
+      // 3) Fallback: if only one array matches shape of dropdown options (id/key/value), use it
+      const looksLikeOptions = (arr: any[]) => Array.isArray(arr) && arr.some((o) => o && (('id' in o) || ('key' in o)) && ('value' in o));
+      const fallback = ens.find(([, v]) => looksLikeOptions(v));
+      return (fallback?.[1] as any[]) || [];
+    };
+
+    // Prefer current module, then Leads as fallback (for countries, etc.)
+    const fromModule = findIn(entries);
+    if (fromModule.length) return fromModule;
+    const fromLeads = findIn(leadsEntries);
+    if (fromLeads.length) return fromLeads;
+    return [];
   };
   const getLabelForField = (fieldName?: string | null, value?: any) => {
     if (!fieldName) return value ?? '';
