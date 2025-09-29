@@ -204,7 +204,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   };
 
   const statusOptions = getOptions('Status', ['Admissions']);
-  const caseStatusOptions = getOptions('Case Status', ['Applications','Admissions']);
+  const caseStatusOptions = getOptions('Case Status', ['Admissions']);
 
   useEffect(() => {
     if (!open) return;
