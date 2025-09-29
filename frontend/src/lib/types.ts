@@ -194,10 +194,8 @@ export const insertApplicationSchema = z.object({
   university: z.string().min(1, "University is required"),
   program: z.string().min(1, "Program is required"),
   courseType: z.string().optional(),
-  appStatus: z.enum(["Open","Needs Attention","Closed"]).default("Open"),
-  caseStatus: z.enum([
-    "Raw","Not Eligible","Documents Pending","Supervisor","Ready to Apply","Submitted","Rejected","COL Received","UOL Requested","UOL Received","Interview Outcome Awaiting","Deposit","Deferred"
-  ]).optional(),
+  appStatus: z.string().optional(),
+  caseStatus: z.string().optional(),
   country: z.string().optional(),
   channelPartner: z.string().optional(),
   intake: z.string().optional(),
