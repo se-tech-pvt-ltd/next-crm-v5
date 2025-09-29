@@ -237,6 +237,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
+        <div className="flex flex-col h-[90vh] min-h-0">
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
             <div className="flex items-center gap-3">
@@ -587,6 +588,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               </form>
             </Form>
         </div>
+      </div>
       </DialogContent>
     </Dialog>
     <StudentProfileModal
