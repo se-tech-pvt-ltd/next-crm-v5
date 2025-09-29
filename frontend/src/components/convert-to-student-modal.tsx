@@ -220,6 +220,42 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     }
   }, [dropdownData, normalizeToText]);
 
+  // Map raw lead dropdown values to dropdown keys (ids) so backend receives UUIDs
+  const mapDropdownToKeys = useCallback((raw: unknown, fieldName: string): string[] => {
+    try {
+      const options: any[] = dropdownData?.[fieldName] || [];
+      const byKey = new Map(options.map(o => [String(o.key).toLowerCase(), o.key || o.id || o.value]));
+      const byId = new Map(options.map(o => [String(o.id).toLowerCase(), o.key || o.id || o.value]));
+      const byValue = new Map(options.map(o => [String(o.value).toLowerCase(), o.key || o.id || o.value]));
+
+      const toArray = (v: unknown): string[] => {
+        if (!v) return [];
+        if (Array.isArray(v)) return v.map(String);
+        if (typeof v === 'string') {
+          const t = v.trim();
+          if (t.startsWith('[')) {
+            try {
+              const parsed = JSON.parse(t);
+              if (Array.isArray(parsed)) return parsed.map(String);
+            } catch {}
+          }
+          return t.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        return [String(v)];
+      };
+
+      const items = toArray(raw);
+      const keys = items.map(item => {
+        const li = String(item).toLowerCase();
+        return byKey.get(li) || byId.get(li) || byValue.get(li) || item;
+      }).filter(Boolean);
+      return Array.from(new Set(keys.map(String)));
+    } catch {
+      return Array.isArray(raw) ? raw.map(String) : raw ? [String(raw)] : [];
+    }
+  }, [dropdownData]);
+
+
   // Pre-populate form when lead changes
   useEffect(() => {
     if (lead) {
