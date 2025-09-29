@@ -511,6 +511,29 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
               return db - da;
             });
 
+            // If this entity is a student converted from a lead, the backend copies all lead activities
+            // to the student record. To avoid showing those historical lead activities in the student's
+            // activity feed, detect the conversion activity and hide any activities that occurred
+            // before the conversion event (these are the copied lead activities).
+            try {
+              const convertedAct = list.find((a: any) => String((a.activityType || '').toLowerCase()) === 'converted');
+              if (convertedAct) {
+                const parsed = parseConversionDescription(convertedAct.description || convertedAct.title || '');
+                if (parsed.fromType === 'lead') {
+                  const cutoff = new Date(convertedAct.createdAt).getTime();
+                  list = list.filter((a: any) => {
+                    // Always keep the conversion activity itself
+                    if (String((a.activityType || '').toLowerCase()) === 'converted' && a.id === convertedAct.id) return true;
+                    const t = new Date(a.createdAt).getTime();
+                    // Keep activities that occurred at or after conversion
+                    return t >= cutoff;
+                  });
+                }
+              }
+            } catch (err) {
+              // ignore parsing errors and fall back to showing all activities
+            }
+
             if (list.length === 0) {
               return (
                 <div className="text-center py-8 text-gray-500">
