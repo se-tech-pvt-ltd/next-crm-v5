@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-application-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +18,7 @@ import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle, Link2, BookOpen, UserSquare, ExternalLink, StickyNote } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { StudentProfileModal } from './student-profile-modal-new';
@@ -69,16 +69,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const makeOptions = (dd: any, candidates: string[]) => {
     let list: any[] = [];
-    for (const k of candidates) {
-      if (dd && Array.isArray(dd[k])) { list = dd[k]; break; }
+    for (const raw of candidates) {
+      const keys = [raw, raw.toLowerCase(), raw.replace(/\s+/g, ''), raw.replace(/\s+/g, '').toLowerCase()];
+      for (const k of keys) {
+        if (dd && Array.isArray(dd?.[k])) { list = dd[k]; break; }
+      }
+      if (Array.isArray(list) && list.length) break;
     }
     if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
+    const sorted = [...list].sort((a: any, b: any) => {
+      const sa = Number(a.sequence ?? Infinity);
+      const sb = Number(b.sequence ?? Infinity);
+      if (sa !== sb) return sa - sb;
+      const da = (a.isDefault || a.is_default) ? 0 : 1;
+      const db = (b.isDefault || b.is_default) ? 0 : 1;
+      return da - db;
+    });
+    return sorted.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
   };
 
-  const appStatusOptions = makeOptions(applicationsDropdowns, ['Status', 'status', 'AppStatus', 'Application Status']);
-  const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status', 'caseStatus', 'CaseStatus', 'case_status']);
+  const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
+  const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
   const courseTypeOptions = makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']);
   const countryOptions = makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
@@ -139,19 +150,55 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       notes: '',
       counsellorId: '',
       admissionOfficerId: '',
+      regionId: '',
+      branchId: '',
     },
   });
 
   // Determine selected student's branch (depends on form)
   const selectedStudentId = form.watch('studentId');
   const selectedStudent = (Array.isArray(students) ? students.find((s) => s.id === selectedStudentId) : null) || presetStudent;
-  const selectedBranchId = (selectedStudent as any)?.branchId || null;
+  const selectedBranchId = (selectedStudent as any)?.branchId ?? (selectedStudent as any)?.branch_id ?? null;
 
-  // Reset access selections when branch context changes
+  // Resolve assigned counsellor/officer from student record (support legacy keys)
+  const studentCounsellorId = useMemo(() => {
+    const s: any = selectedStudent || {};
+    const id = s.counsellorId ?? s.counselorId ?? s.counsellor ?? s.counselor ?? '';
+    return id ? String(id) : '';
+  }, [selectedStudent]);
+  const studentAdmissionOfficerId = useMemo(() => {
+    const s: any = selectedStudent || {};
+    const id = s.admissionOfficerId ?? s.admission_officer_id ?? s.admissionOfficer ?? s.admission_officer ?? '';
+    return id ? String(id) : '';
+  }, [selectedStudent]);
+
+  // Reset and auto-fill access selections when branch context changes
   useEffect(() => {
-    form.setValue('counsellorId', '');
-    form.setValue('admissionOfficerId', '');
-  }, [selectedBranchId]);
+    form.setValue('counsellorId', studentCounsellorId || '');
+    form.setValue('admissionOfficerId', studentAdmissionOfficerId || '');
+    try {
+      const s: any = selectedStudent || {};
+      const rid = String(s.regionId ?? s.region_id ?? '') || '';
+      const bid = String(s.branchId ?? s.branch_id ?? '') || '';
+      if (rid) form.setValue('regionId', rid);
+      if (bid) form.setValue('branchId', bid);
+    } catch {}
+  }, [selectedBranchId, studentCounsellorId, studentAdmissionOfficerId, selectedStudent]);
+
+  // Also auto-fill once when student changes if fields are empty
+  useEffect(() => {
+    const curC = String(form.getValues('counsellorId') || '');
+    const curA = String(form.getValues('admissionOfficerId') || '');
+    if (!curC && studentCounsellorId) form.setValue('counsellorId', studentCounsellorId);
+    if (!curA && studentAdmissionOfficerId) form.setValue('admissionOfficerId', studentAdmissionOfficerId);
+    const curR = String(form.getValues('regionId') || '');
+    const curB = String(form.getValues('branchId') || '');
+    const s: any = selectedStudent || {};
+    const rid = String(s.regionId ?? s.region_id ?? '') || '';
+    const bid = String(s.branchId ?? s.branch_id ?? '') || '';
+    if (!curR && rid) form.setValue('regionId', rid);
+    if (!curB && bid) form.setValue('branchId', bid);
+  }, [studentCounsellorId, studentAdmissionOfficerId, selectedStudent]);
 
   const counsellorOptions = Array.isArray(users) && selectedBranchId
     ? users
@@ -175,6 +222,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         })
         .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
     : [];
+
+  // Ensure options include student's assigned users even if filtered out
+  const counsellorOptionsRender = useMemo(() => {
+    let list = Array.isArray(counsellorOptions) ? counsellorOptions.slice() : [];
+    const sel = studentCounsellorId;
+    if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
+      const u = (users as any[]).find((x: any) => String(x.id) === sel);
+      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }, ...list];
+    }
+    return list;
+  }, [counsellorOptions, users, studentCounsellorId]);
+
+  const officerOptionsRender = useMemo(() => {
+    let list = Array.isArray(officerOptions) ? officerOptions.slice() : [];
+    const sel = studentAdmissionOfficerId;
+    if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
+      const u = (users as any[]).find((x: any) => String(x.id) === sel);
+      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }, ...list];
+    }
+    return list;
+  }, [officerOptions, users, studentAdmissionOfficerId]);
 
   const createApplicationMutation = useMutation({
     mutationFn: async (data: any) => ApplicationsService.createApplication(data),
@@ -235,8 +303,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   return (<>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
+      <DialogContent hideClose className="no-not-allowed w-[62.5vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl" style={{ touchAction: 'pan-y' }}>
         <DialogTitle className="sr-only">Add Application</DialogTitle>
+        <div className="flex flex-col h-[90vh] min-h-0 bg-[#EDEDED]">
         <DialogHeader>
           <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
             <div className="flex items-center gap-3">
@@ -269,13 +338,15 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
           </div>
         </DialogHeader>
 
+        <div className="flex-1 min-h-0 overflow-y-auto">
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="p-6 pt-2">
                   <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Linked Entities</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><Link2 className="w-4 h-4 mr-2" />Linked Entities</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -305,10 +376,12 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             <div className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Program Details</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><BookOpen className="w-4 h-4 mr-2" />Program Details</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input type="hidden" {...form.register('studentId')} />
+                  <input type="hidden" {...form.register('regionId')} />
+                  <input type="hidden" {...form.register('branchId')} />
 
                   <FormField
                     control={form.control}
@@ -436,7 +509,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               {/* Access */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Access</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><UserSquare className="w-4 h-4 mr-2" />Access</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -453,7 +526,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {counsellorOptions.map((opt) => (
+                              {counsellorOptionsRender.map((opt) => (
                                 <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
@@ -478,7 +551,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {officerOptions.map((opt) => (
+                              {officerOptionsRender.map((opt) => (
                                 <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                               ))}
                             </SelectContent>
@@ -493,7 +566,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Status & Links</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><ExternalLink className="w-4 h-4 mr-2" />Status & Links</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
@@ -502,7 +575,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Application Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || 'Open'}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
@@ -525,7 +598,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Case Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || 'Raw'}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select case status" />
@@ -561,7 +634,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Notes</CardTitle>
+                  <CardTitle className="text-sm flex items-center"><StickyNote className="w-4 h-4 mr-2" />Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <FormField
@@ -584,6 +657,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 </div>
                               </form>
             </Form>
+        </div>
+      </div>
       </DialogContent>
     </Dialog>
     <StudentProfileModal
