@@ -155,6 +155,14 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         const anyApp: any = linkedApp as any;
         if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
         if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
+        // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
+        if (!form.getValues('caseStatus') && (anyApp.caseStatus || anyApp.case_status)) {
+          form.setValue('caseStatus', String(anyApp.caseStatus ?? anyApp.case_status));
+        }
+        if (!form.getValues('status') && (anyApp.status || anyApp.appStatus || anyApp.app_status)) {
+          // Prefer application-level status if present
+          form.setValue('status', String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status));
+        }
       } catch {}
     }
   }, [applicationId, studentId, linkedApp, form]);
