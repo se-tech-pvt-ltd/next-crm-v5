@@ -187,7 +187,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 </div>
                 <div>
                   <Label>Tuition Fee</Label>
-                  <p className="text-xs">{admission.tuitionFee || 'Not specified'}</p>
+                  <p className="text-xs">{admission.fullTuitionFee || 'Not specified'}</p>
                 </div>
                 <div>
                   <Label>Scholarship Amount</Label>
@@ -229,16 +229,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                   </div>
                 </div>
                 <div>
-                  <Label>Visa Application Date</Label>
-                  <p className="text-xs">{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
-                </div>
-                <div>
-                  <Label>Visa Interview Date</Label>
-                  <p className="text-xs">{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
-                </div>
-                <div>
-                  <Label>Visa Approval Date</Label>
-                  <p className="text-xs">{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
+                  <Label>Visa Date</Label>
+                  <p className="text-xs">{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
                 </div>
               </div>
             </CardContent>

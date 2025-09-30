@@ -212,9 +212,9 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       <div>
                         <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
                         {isEditing ? (
-                          <Input value={editData.tuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, tuitionFee: e.target.value }))} />
+                          <Input value={editData.fullTuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, fullTuitionFee: e.target.value }))} />
                         ) : (
-                          <p>{admission.tuitionFee || 'Not specified'}</p>
+                          <p>{admission.fullTuitionFee || 'Not specified'}</p>
                         )}
                       </div>
                       <div>
@@ -275,16 +275,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Visa Application Date</label>
-                        <p>{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Visa Interview Date</label>
-                        <p>{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Visa Approval Date</label>
-                        <p>{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
+                        <label className="text-sm font-medium text-gray-600">Visa Date</label>
+                        <p>{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
                       </div>
                     </div>
                   </CardContent>

@@ -68,6 +68,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       applicationId: applicationId || '',
       studentId: studentId || '',
@@ -97,6 +99,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
   });
 
+  // Trigger validation when modal opens to compute initial validity
+  useEffect(() => {
+    if (!open) return;
+    // small timeout to let default values propagate
+    const t = setTimeout(() => {
+      try { form.trigger(); } catch {};
+    }, 50);
+    return () => clearTimeout(t);
+  }, [open]);
+
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
   const watchedAppId = form.watch('applicationId');
@@ -115,6 +127,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log('[AddAdmissionModal] mutationFn called with data:', data);
       const payload: InsertAdmission = {
         applicationId: String(data.applicationId),
         studentId: data.studentId,
@@ -129,7 +142,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         scholarshipAmount: data.scholarshipAmount || null,
         netTuitionFee: data.netTuitionFee || null,
         depositRequired: Boolean(data.depositRequired) || false,
-        depositAmount: data.depositAmount || data.initialDeposit || null,
+        depositAmount: data.depositAmount || data.initialDeposit || data.initialDeposit || null,
         depositDate: data.depositDate ? new Date(data.depositDate) : null,
         depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : null,
         visaDate: data.visaDate ? new Date(data.visaDate) : null,
@@ -140,31 +153,42 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
-      const created = await AdmissionsService.createAdmission(payload as any);
+      console.log('[AddAdmissionModal] payload prepared:', payload);
       try {
-        if (data.caseStatus && data.applicationId) {
-          await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
-          queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-        }
-        if (data.googleDriveLink && data.applicationId) {
-          await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
-          queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-        }
-      } catch {}
-      return created;
+        const created = await AdmissionsService.createAdmission(payload as any);
+        try {
+          if (data.caseStatus && data.applicationId) {
+            await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
+            queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+          }
+          if (data.googleDriveLink && data.applicationId) {
+            await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
+            queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+          }
+        } catch (e) { console.warn('[AddAdmissionModal] failed to update application:', e); }
+        return created;
+      } catch (err) {
+        console.error('[AddAdmissionModal] createAdmission error:', err);
+        throw err;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (created) => {
+      console.log('[AddAdmissionModal] create success:', created);
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       toast({ title: 'Success', description: 'Admission created.' });
       onOpenChange(false);
       form.reset();
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to create admission.', variant: 'destructive' });
+    onError: (err: any) => {
+      console.error('[AddAdmissionModal] create error:', err);
+      toast({ title: 'Error', description: err?.message || 'Failed to create admission.', variant: 'destructive' });
     }
   });
 
-  const onSubmit = (data: any) => createMutation.mutate(data);
+  const onSubmit = (data: any) => {
+    console.log('[AddAdmissionModal] onSubmit called with', data);
+    createMutation.mutate(data);
+  };
 
   useEffect(() => {
     if (applicationId) {
@@ -474,7 +498,20 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [branchId, branchEmps, users]);
 
-  const handleSubmitClick = () => { try { form.handleSubmit(onSubmit)(); } catch {} };
+  const handleSubmitClick = () => {
+    try {
+      form.handleSubmit((data) => {
+        console.log('[AddAdmissionModal] onSubmit called with', data);
+        createMutation.mutate(data);
+      }, (errors) => {
+        const missing = Object.keys(errors || {});
+        console.error('[AddAdmissionModal] Missing required fields:', missing);
+        try { toast({ title: 'Validation', description: `Missing fields: ${missing.join(', ')}`, variant: 'destructive' }); } catch {}
+      })();
+    } catch (e) {
+      console.error('[AddAdmissionModal] handleSubmitClick error:', e);
+    }
+  };
 
   return (
     <>
@@ -505,28 +542,30 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             >
               Cancel
             </Button>
-            <Button
-              type="button"
-              onClick={() => { handleSubmitClick(); }}
-              disabled={createMutation.isPending}
-              className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
-            >
-              {createMutation.isPending ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Saving...</span>
-                </div>
-              ) : (
-                <span>Save</span>
-              )}
-            </Button>
+            <div className="flex flex-col items-end">
+              <Button
+                type="button"
+                onClick={() => { handleSubmitClick(); }}
+                disabled={createMutation.isPending}
+                className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md disabled:opacity-50"
+              >
+                {createMutation.isPending ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <span>Save</span>
+                )}
+              </Button>
+            </div>
           </div>
         )}
         leftContent={(
           <div className="flex h-full">
             <div className="flex-1 overflow-y-auto p-6 pt-2">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(onSubmit, (errors) => { console.warn('[AddAdmissionModal] validation errors on form submit:', errors); })(); }} className="space-y-6">
                   {/* Linked Entities Panel */}
                   <Card>
                     <CardHeader>
