@@ -59,6 +59,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     enabled: !!applicationId
   });
 
+  const { user } = useAuth() as any;
+  const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
+  const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
+
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
+
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
     defaultValues: {
