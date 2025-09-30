@@ -261,31 +261,27 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const counsellorOptions = React.useMemo(() => {
+    const bid = String(form.getValues('branchId') || '');
+    if (!bid) return [];
     const base = Array.isArray(users) ? users.filter((u: any) => {
       const role = normalizeRole(u.role || u.role_name || u.roleName);
       return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
     }) : [];
-    const bid = String(form.getValues('branchId') || '');
-    if (bid) {
-      const links = Array.isArray(branchEmps) ? branchEmps : [];
-      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-      return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
-    }
-    return base.map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    const links = Array.isArray(branchEmps) ? branchEmps : [];
+    const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
   }, [users, branchEmps, form]);
 
   const officerOptions = React.useMemo(() => {
+    const bid = String(form.getValues('branchId') || '');
+    if (!bid) return [];
     const base = Array.isArray(users) ? users.filter((u: any) => {
       const role = normalizeRole(u.role || u.role_name || u.roleName);
       return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
     }) : [];
-    const bid = String(form.getValues('branchId') || '');
-    if (bid) {
-      const links = Array.isArray(branchEmps) ? branchEmps : [];
-      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-      return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
-    }
-    return base.map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    const links = Array.isArray(branchEmps) ? branchEmps : [];
+    const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
   }, [users, branchEmps, form]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
