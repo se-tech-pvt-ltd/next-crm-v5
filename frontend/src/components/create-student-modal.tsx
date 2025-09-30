@@ -322,6 +322,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <div className="space-y-1">
                 <Label>Date of Birth</Label>
                 <DobPicker value={formData.dateOfBirth} onChange={(v) => handleChange('dateOfBirth', v)} disabled={disabled} />
+                {errors.dateOfBirth && <p className="text-[11px] text-red-600">{errors.dateOfBirth}</p>}
               </div>
               <div className="space-y-1 md:col-span-2 lg:col-span-1">
                 <Label>Address</Label>
