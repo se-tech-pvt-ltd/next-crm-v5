@@ -43,6 +43,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
   };
 
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const toStringValue = (value: unknown) => (value == null ? '' : String(value));
   const getFieldOptions = (fieldName: string): any[] => {
     const data = dropdownData as any;
     if (!data) return [];
