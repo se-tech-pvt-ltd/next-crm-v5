@@ -4,6 +4,7 @@ console.log('[modal] loaded: frontend/src/components/admission-details-modal-new
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTracker } from "./activity-tracker";
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Award, X, Plane } from "lucide-react";
 import { Label } from '@/components/ui/label';
 import { Admission } from "@/lib/types";
