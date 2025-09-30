@@ -105,7 +105,16 @@ export interface Admission {
   depositRequired: boolean | null;
   depositAmount: string | null;
   depositDeadline: Date | null;
+  // Financials and dates
+  fullTuitionFee?: string | null;
+  netTuitionFee?: string | null;
+  depositDate?: Date | null;
+  visaDate?: Date | null;
   visaStatus: string | null;
+  // Misc/metadata
+  status?: string | null;
+  caseStatus?: string | null;
+  googleDriveLink?: string | null;
   admissionId?: string | null;
   // Access fields
   branchId?: string | null;
@@ -215,12 +224,21 @@ export const insertAdmissionSchema = z.object({
   program: z.string().min(1, "Program is required"),
   decision: z.string().min(1, "Decision is required"),
   decisionDate: z.date().optional(),
+  // Financials
+  fullTuitionFee: z.string().optional(),
   scholarshipAmount: z.string().optional(),
-  conditions: z.string().optional(),
+  netTuitionFee: z.string().optional(),
   depositRequired: z.boolean().default(false),
   depositAmount: z.string().optional(),
   depositDeadline: z.date().optional(),
+  depositDate: z.date().optional(),
+  // Visa
+  visaDate: z.date().optional(),
   visaStatus: z.string().default("pending"),
+  // Misc/metadata
+  status: z.string().optional(),
+  caseStatus: z.string().optional(),
+  googleDriveLink: z.string().url().optional().transform((v) => (v && v.trim().length === 0 ? undefined : v)),
   admissionId: z.string().optional(),
   // Access fields (optional)
   branchId: z.string().optional(),
