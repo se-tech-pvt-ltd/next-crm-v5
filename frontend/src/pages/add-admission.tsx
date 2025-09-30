@@ -92,6 +92,7 @@ export default function AddAdmissionPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log('[AddAdmission] mutationFn called with data:', data);
       const payload: InsertAdmission = {
         applicationId: String(data.applicationId),
         studentId: data.studentId,
@@ -116,31 +117,44 @@ export default function AddAdmissionPage() {
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
-      const created = await AdmissionsService.createAdmission(payload as any);
+      console.log('[AddAdmission] payload prepared:', payload);
       try {
-        if (data.caseStatus && data.applicationId) {
-          await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
-          queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        const created = await AdmissionsService.createAdmission(payload as any);
+        try {
+          if (data.caseStatus && data.applicationId) {
+            await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
+            queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+          }
+          if (data.googleDriveLink && data.applicationId) {
+            await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
+            queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+          }
+        } catch (e) {
+          console.warn('[AddAdmission] failed to update application details:', e);
         }
-        if (data.googleDriveLink && data.applicationId) {
-          await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
-          queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-        }
-      } catch {}
-      return created;
+        return created;
+      } catch (err) {
+        console.error('[AddAdmission] createAdmission error:', err);
+        throw err;
+      }
     },
     onSuccess: (created) => {
+      console.log('[AddAdmission] create success:', created);
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       toast({ title: 'Success', description: 'Admission created.' });
       const target = from || (presetApplicationId ? `/applications/${presetApplicationId}` : '/admissions');
       setLocation(target);
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to create admission.', variant: 'destructive' });
+    onError: (err: any) => {
+      console.error('[AddAdmission] create error:', err);
+      toast({ title: 'Error', description: err?.message || 'Failed to create admission.', variant: 'destructive' });
     },
   });
 
-  const onSubmit = (data: any) => createMutation.mutate(data);
+  const onSubmit = (data: any) => {
+    console.log('[AddAdmission] onSubmit called with', data);
+    createMutation.mutate(data);
+  };
 
   const goBack = () => setLocation(from || (presetApplicationId ? `/applications/${presetApplicationId}` : '/admissions'));
 
