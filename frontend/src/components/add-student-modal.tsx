@@ -43,6 +43,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
   };
 
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const toStringValue = (value: unknown) => (value == null ? '' : String(value));
   const getFieldOptions = (fieldName: string): any[] => {
     const data = dropdownData as any;
     if (!data) return [];
@@ -69,7 +70,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
       status: 'active',
       notes: selectedLead?.notes || '',
       expectation: selectedLead?.expectation || '',
-      counselorId: selectedLead?.counselorId || selectedLead?.counsellor || '',
+      counselorId: toStringValue((selectedLead?.counselorId ?? selectedLead?.counsellor) ?? ''),
       consultancyFree: false,
       scholarship: false,
     },
@@ -119,7 +120,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Full Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" {...field} />
+                      <Input placeholder="Enter full name" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,7 +134,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Email Address *</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Enter email address" {...field} />
+                      <Input type="email" placeholder="Enter email address" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -145,9 +146,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Phone Number *</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Enter phone number" {...field} />
+                      <Input type="tel" placeholder="Enter phone number" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -159,9 +160,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="dateOfBirth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
+                    <FormLabel>Date of Birth *</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,9 +174,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="nationality"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nationality</FormLabel>
+                    <FormLabel>Nationality *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter nationality" {...field} />
+                      <Input placeholder="Enter nationality" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,9 +188,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="passportNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Passport Number</FormLabel>
+                    <FormLabel>Passport Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter passport number" {...field} />
+                      <Input placeholder="Enter passport number" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -201,18 +202,21 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="expectation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expectation</FormLabel>
+                    <FormLabel>Expectation *</FormLabel>
                     <FormControl>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select expectation" />
                         </SelectTrigger>
                         <SelectContent>
-                          {getFieldOptions('expectation').map((opt: any) => (
-                            <SelectItem key={opt.key || opt.id || opt.value} value={(opt.key || opt.id || opt.value) as string}>
-                              {opt.value}
-                            </SelectItem>
-                          ))}
+                          {getFieldOptions('expectation').map((opt: any) => {
+                            const optionValue = String(opt?.key ?? opt?.id ?? opt?.value ?? '');
+                            return (
+                              <SelectItem key={optionValue} value={optionValue}>
+                                {opt.value}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -226,16 +230,21 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="counselorId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Counsellor</FormLabel>
+                    <FormLabel>Counsellor *</FormLabel>
                     <FormControl>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select counsellor" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(dropdownsForStudents() || []).map((opt: any) => (
-                            <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
-                          ))}
+                          {(dropdownsForStudents() || []).map((opt: any) => {
+                            const optionValue = String(opt?.key ?? opt?.id ?? opt?.value ?? '');
+                            return (
+                              <SelectItem key={optionValue} value={optionValue}>
+                                {opt.value}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -277,10 +286,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="targetCountry"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Country</FormLabel>
+                    <FormLabel>Target Country *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select country" />
                         </SelectTrigger>
                       </FormControl>
@@ -305,9 +314,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="targetProgram"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Program</FormLabel>
+                    <FormLabel>Target Program *</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Computer Science, Business, Medicine" {...field} />
+                      <Input placeholder="e.g., Computer Science, Business, Medicine" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -319,10 +328,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="englishProficiency"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>English Proficiency</FormLabel>
+                    <FormLabel>English Proficiency *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select proficiency level" />
                         </SelectTrigger>
                       </FormControl>
@@ -350,10 +359,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="budget"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Budget Range</FormLabel>
+                    <FormLabel>Budget Range *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select budget range" />
                         </SelectTrigger>
                       </FormControl>
@@ -376,10 +385,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>Status *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -402,11 +411,12 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
               name="academicBackground"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Academic Background</FormLabel>
+                  <FormLabel>Academic Background *</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Enter academic qualifications, degrees, institutions..."
                       rows={3}
+                      required
                       {...field}
                     />
                   </FormControl>

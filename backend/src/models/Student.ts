@@ -33,6 +33,20 @@ export class StudentModel {
       .orderBy(desc(students.createdAt));
   }
 
+  static async findByEmail(email: string): Promise<Student | undefined> {
+    const [student] = await db.select().from(students)
+      .where(eq(students.email, email))
+      .limit(1);
+    return student as any;
+  }
+
+  static async findByPhone(phone: string): Promise<Student | undefined> {
+    const [student] = await db.select().from(students)
+      .where(eq(students.phone, phone))
+      .limit(1);
+    return student as any;
+  }
+
   static async create(studentData: InsertStudent): Promise<Student> {
     const newId = uuidv4();
 
