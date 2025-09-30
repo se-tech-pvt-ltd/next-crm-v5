@@ -188,9 +188,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="passportNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Passport Number</FormLabel>
+                    <FormLabel>Passport Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter passport number" {...field} />
+                      <Input placeholder="Enter passport number" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
