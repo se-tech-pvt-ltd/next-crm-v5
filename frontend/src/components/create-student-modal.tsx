@@ -386,34 +386,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
           <Card>
             <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Award className="w-4 h-4" /> Fees & Scholarships</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label>Consultancy Fee</Label>
-                <Select value={formData.consultancyFee} onValueChange={(v) => handleChange('consultancyFee', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="No">No</SelectItem>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Scholarship</Label>
-                <Select value={formData.scholarship} onValueChange={(v) => handleChange('scholarship', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="No">No</SelectItem>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="py-2">
               <CardTitle className="text-sm flex items-center gap-2"><FileText className="w-4 h-4" /> Notes</CardTitle>
             </CardHeader>
             <CardContent>
