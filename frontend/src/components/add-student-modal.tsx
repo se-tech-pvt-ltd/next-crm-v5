@@ -160,9 +160,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="dateOfBirth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
+                    <FormLabel>Date of Birth *</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
