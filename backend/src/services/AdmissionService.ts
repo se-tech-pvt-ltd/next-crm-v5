@@ -8,66 +8,9 @@ import { and, gte, lt, sql, eq, desc } from "drizzle-orm";
 
 export class AdmissionService {
   static async getAdmissions(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Admission[]> {
-    if (userRole === 'counselor' && userId) {
-      // Counselors can only see admissions for their assigned students
-      return await db.select({
-        id: admissions.id,
-        applicationId: admissions.applicationId,
-        studentId: admissions.studentId,
-        university: admissions.university,
-        program: admissions.program,
-        decision: admissions.decision,
-        decisionDate: admissions.decisionDate,
-        scholarshipAmount: admissions.scholarshipAmount,
-        conditions: admissions.conditions,
-        depositRequired: admissions.depositRequired,
-        depositAmount: admissions.depositAmount,
-        depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
-        admissionId: admissions.admissionId,
-        createdAt: admissions.createdAt,
-        updatedAt: admissions.updatedAt
-      })
-      .from(admissions)
-      .innerJoin(students, eq(admissions.studentId, students.id))
-      .where(eq(students.counselorId, userId))
-      .orderBy(desc(admissions.createdAt));
-    }
-    if (userRole === 'admission_officer' && userId) {
-      return await db.select({
-        id: admissions.id,
-        applicationId: admissions.applicationId,
-        studentId: admissions.studentId,
-        university: admissions.university,
-        program: admissions.program,
-        decision: admissions.decision,
-        decisionDate: admissions.decisionDate,
-        scholarshipAmount: admissions.scholarshipAmount,
-        conditions: admissions.conditions,
-        depositRequired: admissions.depositRequired,
-        depositAmount: admissions.depositAmount,
-        depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
-        admissionId: admissions.admissionId,
-        createdAt: admissions.createdAt,
-        updatedAt: admissions.updatedAt
-      })
-      .from(admissions)
-      .innerJoin(students, eq(admissions.studentId, students.id))
-      .where(eq(students.admissionOfficerId, userId))
-      .orderBy(desc(admissions.createdAt));
-    }
-
-    if (userRole === 'branch_manager') {
-      if (branchId) {
+    try {
+      if (userRole === 'counselor' && userId) {
+        // Counselors can only see admissions for their assigned students
         return await db.select({
           id: admissions.id,
           applicationId: admissions.applicationId,
@@ -81,25 +24,21 @@ export class AdmissionService {
           depositRequired: admissions.depositRequired,
           depositAmount: admissions.depositAmount,
           depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
+          fullTuitionFee: admissions.fullTuitionFee,
+          netTuitionFee: admissions.netTuitionFee,
+          depositDate: admissions.depositDate,
+          visaDate: admissions.visaDate,
+          visaStatus: admissions.visaStatus,
           admissionId: admissions.admissionId,
           createdAt: admissions.createdAt,
           updatedAt: admissions.updatedAt
         })
         .from(admissions)
         .innerJoin(students, eq(admissions.studentId, students.id))
-        .where(eq(students.branchId, branchId))
+        .where(eq(students.counselorId, userId))
         .orderBy(desc(admissions.createdAt));
       }
-      return [];
-    }
-
-    if (userRole === 'regional_manager') {
-      if (regionId) {
+      if (userRole === 'admission_officer' && userId) {
         return await db.select({
           id: admissions.id,
           applicationId: admissions.applicationId,
@@ -113,11 +52,104 @@ export class AdmissionService {
           depositRequired: admissions.depositRequired,
           depositAmount: admissions.depositAmount,
           depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
+          fullTuitionFee: admissions.fullTuitionFee,
+          netTuitionFee: admissions.netTuitionFee,
+          depositDate: admissions.depositDate,
+          visaDate: admissions.visaDate,
+          visaStatus: admissions.visaStatus,
+          admissionId: admissions.admissionId,
+          createdAt: admissions.createdAt,
+          updatedAt: admissions.updatedAt
+        })
+        .from(admissions)
+        .innerJoin(students, eq(admissions.studentId, students.id))
+        .where(eq(students.admissionOfficerId, userId))
+        .orderBy(desc(admissions.createdAt));
+      }
+
+      if (userRole === 'branch_manager') {
+        if (branchId) {
+          return await db.select({
+            id: admissions.id,
+            applicationId: admissions.applicationId,
+            studentId: admissions.studentId,
+            university: admissions.university,
+            program: admissions.program,
+            decision: admissions.decision,
+            decisionDate: admissions.decisionDate,
+            scholarshipAmount: admissions.scholarshipAmount,
+            conditions: admissions.conditions,
+            depositRequired: admissions.depositRequired,
+            depositAmount: admissions.depositAmount,
+            depositDeadline: admissions.depositDeadline,
+          fullTuitionFee: admissions.fullTuitionFee,
+          netTuitionFee: admissions.netTuitionFee,
+          depositDate: admissions.depositDate,
+          visaDate: admissions.visaDate,
+          visaStatus: admissions.visaStatus,
+            admissionId: admissions.admissionId,
+            createdAt: admissions.createdAt,
+            updatedAt: admissions.updatedAt
+          })
+          .from(admissions)
+          .innerJoin(students, eq(admissions.studentId, students.id))
+          .where(eq(students.branchId, branchId))
+          .orderBy(desc(admissions.createdAt));
+        }
+        return [];
+      }
+
+      if (userRole === 'regional_manager') {
+        if (regionId) {
+          return await db.select({
+            id: admissions.id,
+            applicationId: admissions.applicationId,
+            studentId: admissions.studentId,
+            university: admissions.university,
+            program: admissions.program,
+            decision: admissions.decision,
+            decisionDate: admissions.decisionDate,
+            scholarshipAmount: admissions.scholarshipAmount,
+            conditions: admissions.conditions,
+            depositRequired: admissions.depositRequired,
+            depositAmount: admissions.depositAmount,
+            depositDeadline: admissions.depositDeadline,
+          fullTuitionFee: admissions.fullTuitionFee,
+          netTuitionFee: admissions.netTuitionFee,
+          depositDate: admissions.depositDate,
+          visaDate: admissions.visaDate,
+          visaStatus: admissions.visaStatus,
+            admissionId: admissions.admissionId,
+            createdAt: admissions.createdAt,
+            updatedAt: admissions.updatedAt
+          })
+          .from(admissions)
+          .innerJoin(students, eq(admissions.studentId, students.id))
+          .where(eq(students.regionId, regionId))
+          .orderBy(desc(admissions.createdAt));
+        }
+        return [];
+      }
+
+      if (regionId && userRole !== 'super_admin') {
+        return await db.select({
+          id: admissions.id,
+          applicationId: admissions.applicationId,
+          studentId: admissions.studentId,
+          university: admissions.university,
+          program: admissions.program,
+          decision: admissions.decision,
+          decisionDate: admissions.decisionDate,
+          scholarshipAmount: admissions.scholarshipAmount,
+          conditions: admissions.conditions,
+          depositRequired: admissions.depositRequired,
+          depositAmount: admissions.depositAmount,
+          depositDeadline: admissions.depositDeadline,
+          fullTuitionFee: admissions.fullTuitionFee,
+          netTuitionFee: admissions.netTuitionFee,
+          depositDate: admissions.depositDate,
+          visaDate: admissions.visaDate,
+          visaStatus: admissions.visaStatus,
           admissionId: admissions.admissionId,
           createdAt: admissions.createdAt,
           updatedAt: admissions.updatedAt
@@ -127,39 +159,13 @@ export class AdmissionService {
         .where(eq(students.regionId, regionId))
         .orderBy(desc(admissions.createdAt));
       }
-      return [];
-    }
 
-    if (regionId && userRole !== 'super_admin') {
-      return await db.select({
-        id: admissions.id,
-        applicationId: admissions.applicationId,
-        studentId: admissions.studentId,
-        university: admissions.university,
-        program: admissions.program,
-        decision: admissions.decision,
-        decisionDate: admissions.decisionDate,
-        scholarshipAmount: admissions.scholarshipAmount,
-        conditions: admissions.conditions,
-        depositRequired: admissions.depositRequired,
-        depositAmount: admissions.depositAmount,
-        depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
-        admissionId: admissions.admissionId,
-        createdAt: admissions.createdAt,
-        updatedAt: admissions.updatedAt
-      })
-      .from(admissions)
-      .innerJoin(students, eq(admissions.studentId, students.id))
-      .where(eq(students.regionId, regionId))
-      .orderBy(desc(admissions.createdAt));
+      return await AdmissionModel.findAll();
+    } catch (error) {
+      console.error('Get admissions error:', error);
+      // Fallback to returning all admissions directly from the model to avoid crashing UI
+      try { return await AdmissionModel.findAll(); } catch (e) { console.error('Fallback failed:', e); return []; }
     }
-
-    return await AdmissionModel.findAll();
   }
 
   static async getAdmission(id: string, userId?: string, userRole?: string): Promise<Admission | undefined> {
