@@ -60,34 +60,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
 
-  // Without a lead context, allow choosing from all users by role
-  const counsellorList = React.useMemo(() => {
-    const base = Array.isArray(users) ? users.filter((u: any) => {
-      const role = normalizeRole(u.role || u.role_name || u.roleName);
-      return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
-    }) : [];
-    const bid = String(formData.branchId || '');
-    if (bid) {
-      const links = Array.isArray(branchEmps) ? branchEmps : [];
-      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-      return base.filter((u: any) => allowed.has(String(u.id)));
-    }
-    return base;
-  }, [users, branchEmps, formData.branchId]);
-
-  const admissionOfficerList = React.useMemo(() => {
-    const base = Array.isArray(users) ? users.filter((u: any) => {
-      const role = normalizeRole(u.role || u.role_name || u.roleName);
-      return role === 'admission_officer' || role === 'admission officer' || role === 'admissionofficer';
-    }) : [];
-    const bid = String(formData.branchId || '');
-    if (bid) {
-      const links = Array.isArray(branchEmps) ? branchEmps : [];
-      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-      return base.filter((u: any) => allowed.has(String(u.id)));
-    }
-    return base;
-  }, [users, branchEmps, formData.branchId]);
 
   const initialFormData = {
     status: '',
@@ -115,6 +87,35 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
   const [formData, setFormData] = React.useState(initialFormData);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  // Without a lead context, allow choosing from all users by role (depends on formData)
+  const counsellorList = React.useMemo(() => {
+    const base = Array.isArray(users) ? users.filter((u: any) => {
+      const role = normalizeRole(u.role || u.role_name || u.roleName);
+      return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+    }) : [];
+    const bid = String(formData.branchId || '');
+    if (bid) {
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+      return base.filter((u: any) => allowed.has(String(u.id)));
+    }
+    return base;
+  }, [users, branchEmps, formData.branchId]);
+
+  const admissionOfficerList = React.useMemo(() => {
+    const base = Array.isArray(users) ? users.filter((u: any) => {
+      const role = normalizeRole(u.role || u.role_name || u.roleName);
+      return role === 'admission_officer' || role === 'admission officer' || role === 'admissionofficer';
+    }) : [];
+    const bid = String(formData.branchId || '');
+    if (bid) {
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+      return base.filter((u: any) => allowed.has(String(u.id)));
+    }
+    return base;
+  }, [users, branchEmps, formData.branchId]);
 
   const handleChange = (key: FormFieldKey, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
