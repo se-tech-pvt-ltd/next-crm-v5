@@ -1,15 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { FileUpload } from '@/components/ui/file-upload';
 import { type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
@@ -76,21 +76,16 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const initialFormData = {
     status: '',
     expectation: '',
-    type: '',
     name: '',
     phone: '',
     email: '',
-    city: '',
-    source: '',
-    interestedCountry: '',
-    studyLevel: '',
-    studyPlan: '',
     admissionOfficer: '',
     counsellor: '',
     passport: '',
     dateOfBirth: '',
     address: '',
-    eltTest: '',
+    englishProficiency: '',
+    targetCountries: [] as string[],
     consultancyFee: 'No',
     consultancyFeeAttachment: '',
     scholarship: 'No',
@@ -147,6 +142,10 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         }
       }
 
+      const normalizedTargetCountry = Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0
+        ? JSON.stringify(formData.targetCountries.map((v) => String(v)))
+        : undefined;
+
       const payload: any = {
         name: formData.name,
         email: formData.email,
@@ -155,11 +154,12 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         address: formData.address || undefined,
         expectation: formData.expectation || undefined,
         status: formData.status || 'active',
-        targetCountry: formData.interestedCountry || undefined,
-        targetProgram: formData.studyPlan || undefined,
+        targetCountry: normalizedTargetCountry,
         passportNumber: formData.passport || undefined,
-        englishProficiency: formData.eltTest || undefined,
+        englishProficiency: formData.englishProficiency || undefined,
+        counsellorId: formData.counsellor || undefined,
         counselorId: formData.counsellor || undefined,
+        admissionOfficerId: formData.admissionOfficer || undefined,
         consultancyFree: formData.consultancyFee === 'Yes',
         scholarship: formData.scholarship === 'Yes',
       };
@@ -175,14 +175,15 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         address: formData.address || undefined,
         expectation: formData.expectation || undefined,
         status: formData.status || 'active',
-        targetCountry: formData.interestedCountry || undefined,
-        targetProgram: formData.studyPlan || undefined,
+        targetCountry: (Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0) ? JSON.stringify(formData.targetCountries.map(String)) : undefined,
         passportNumber: formData.passport || undefined,
-        englishProficiency: formData.eltTest || undefined,
+        englishProficiency: formData.englishProficiency || undefined,
+        counsellorId: formData.counsellor || undefined,
         counselorId: formData.counsellor || undefined,
+        admissionOfficerId: formData.admissionOfficer || undefined,
         consultancyFree: formData.consultancyFee === 'Yes',
         scholarship: formData.scholarship === 'Yes',
-      }); } catch {}
+      } as any); } catch {}
     }
   };
 
@@ -203,33 +204,72 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const disabled = createStudentMutation.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><UserPlus className="w-4 h-4" /> Create Student</DialogTitle>
-        </DialogHeader>
-
+    <DetailsDialogLayout
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Add Student"
+      headerClassName="bg-[#223E7D] text-white"
+      contentClassName="no-not-allowed w-[65vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
+      headerLeft={(
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <GraduationCap className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New Student</div>
+            <div className="text-xs opacity-90 truncate">Create a new student profile to begin the application process</div>
+          </div>
+        </div>
+      )}
+      headerRight={(
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleCreate}
+            disabled={disabled}
+            className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+          >
+            {disabled ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Saving...</span>
+              </div>
+            ) : (
+              <span>Save</span>
+            )}
+          </Button>
+        </div>
+      )}
+      leftContent={(
         <div className="space-y-3">
           <Card>
             <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><User className="w-4 h-4" /> Personal Details</CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2"><User className="w-4 h-4" /> Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label>Name</Label>
-                <Input value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
+                <Label>Full Name</Label>
+                <Input placeholder="Enter full name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Email</Label>
-                <Input type="email" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} disabled={disabled} />
+                <Input type="email" placeholder="Enter email address" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Phone</Label>
-                <Input type="tel" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
+                <Input type="tel" placeholder="Enter phone number" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
-                <Label>City</Label>
-                <Input value={formData.city} onChange={(e) => handleChange('city', e.target.value)} disabled={disabled} />
+                <Label>Passport Number</Label>
+                <Input placeholder="Enter passport number" value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Date of Birth</Label>
@@ -237,60 +277,58 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1 md:col-span-2 lg:col-span-1">
                 <Label>Address</Label>
-                <Input value={formData.address} onChange={(e) => handleChange('address', e.target.value)} disabled={disabled} />
+                <Input placeholder="Enter address" value={formData.address} onChange={(e) => handleChange('address', e.target.value)} disabled={disabled} />
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Target className="w-4 h-4" /> Lead Information</CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Academic Information</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label>Lead Type</Label>
-                <Select value={formData.type} onValueChange={(v) => handleChange('type', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select type" /></SelectTrigger>
+                <Label>English Proficiency</Label>
+                <Select value={formData.englishProficiency} onValueChange={(v) => handleChange('englishProficiency', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
                   <SelectContent>
-                    {getList('Type').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
+                    {(getStudentList('English Proficiency').length ? getStudentList('English Proficiency') : getStudentList('ELT Test')).map((o: any) => (
+                      <SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Lead Source</Label>
-                <Select value={formData.source} onValueChange={(v) => handleChange('source', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select source" /></SelectTrigger>
+                <Label>Expectation</Label>
+                <Select value={formData.expectation} onValueChange={(v) => handleChange('expectation', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select expectation" /></SelectTrigger>
                   <SelectContent>
-                    {getList('Source').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
+                    {getStudentList('Expectation').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Study Level</Label>
-                <Select value={formData.studyLevel} onValueChange={(v) => handleChange('studyLevel', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select level" /></SelectTrigger>
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
                   <SelectContent>
-                    {getList('Study Level').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Study Plan</Label>
-                <Select value={formData.studyPlan} onValueChange={(v) => handleChange('studyPlan', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select plan" /></SelectTrigger>
-                  <SelectContent>
-                    {getList('Study Plan').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
+                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1 md:col-span-2">
-                <Label>Interested Country</Label>
-                <Select value={formData.interestedCountry} onValueChange={(v) => handleChange('interestedCountry', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select country" /></SelectTrigger>
-                  <SelectContent>
-                    {getList('Interested Country').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
+                <Label>Target Country</Label>
+                <MultiSelect
+                  value={formData.targetCountries}
+                  onValueChange={(vals) => handleChange('targetCountries', vals)}
+                  placeholder="Select countries"
+                  searchPlaceholder="Search countries..."
+                  options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
+                  emptyMessage="No countries found"
+                  maxDisplayItems={3}
+                  className="text-[11px] shadow-sm border border-gray-300 bg-white"
+                  disabled={disabled}
+                />
               </div>
             </CardContent>
           </Card>
@@ -321,44 +359,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Student Details</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Expectation</Label>
-                <Select value={formData.expectation} onValueChange={(v) => handleChange('expectation', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select expectation" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('Expectation').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>ELT Test</Label>
-                <Select value={formData.eltTest} onValueChange={(v) => handleChange('eltTest', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select ELT test" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('ELT Test').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Passport Number</Label>
-                <Input value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="py-2">
@@ -376,10 +376,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Consultancy Fee Attachment</Label>
-                <FileUpload value={formData.consultancyFeeAttachment} onChange={(v) => handleChange('consultancyFeeAttachment', v)} disabled={disabled} />
-              </div>
-              <div className="space-y-1">
                 <Label>Scholarship</Label>
                 <Select value={formData.scholarship} onValueChange={(v) => handleChange('scholarship', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
@@ -388,10 +384,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     <SelectItem value="Yes">Yes</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <Label>Scholarship Attachment</Label>
-                <FileUpload value={formData.scholarshipAttachment} onChange={(v) => handleChange('scholarshipAttachment', v)} disabled={disabled} />
               </div>
             </CardContent>
           </Card>
@@ -404,27 +396,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <Textarea placeholder="Additional notes..." value={(formData as any).notes || ''} onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value as any }))} disabled={disabled} />
             </CardContent>
           </Card>
-
-          <div className="flex justify-end space-x-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-4 h-8 text-xs">
-              Cancel
-            </Button>
-            <Button onClick={handleCreate} disabled={disabled} className="px-4 h-8 text-xs bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed" title={'Create Student'}>
-              {disabled ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Creating...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <UserPlus className="w-4 h-4" />
-                  <span>Create Student</span>
-                </div>
-              )}
-            </Button>
-          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    />
   );
 }
