@@ -120,7 +120,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Full Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter full name" {...field} />
+                      <Input placeholder="Enter full name" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
