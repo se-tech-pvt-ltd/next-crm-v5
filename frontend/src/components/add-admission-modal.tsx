@@ -302,6 +302,125 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
   const [currentStudentIdLocal, setCurrentStudentIdLocal] = useState<string | null>(null);
 
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const getNormalizedRole = () => {
+    try {
+      const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
+      if (rawRole) return normalizeRole(String(rawRole));
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          return normalizeRole(String(tokenRole || ''));
+        }
+      }
+    } catch {}
+    return '';
+  };
+
+  // Auto-select region/branch based on role
+  React.useEffect(() => {
+    try {
+      if (!open) return;
+      const currentRegion = String(form.getValues('regionId') || '');
+      const currentBranch = String(form.getValues('branchId') || '');
+      if (currentRegion && currentBranch) return;
+
+      const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
+      const token = safeGetToken();
+      let resolvedRegionId = '' as string;
+      let resolvedBranchId = '' as string;
+
+      if (token) {
+        try {
+          const parts = String(token).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            const rd = payload?.role_details || payload?.roleDetails || {};
+            const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+            const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.branch?.id ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+            if (candidateRegion) resolvedRegionId = String(candidateRegion);
+            if (candidateBranch) resolvedBranchId = String(candidateBranch);
+          }
+        } catch {}
+      }
+
+      const roleName = getNormalizedRole();
+
+      if (!resolvedRegionId) {
+        const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+        if (userRegionId) {
+          resolvedRegionId = userRegionId;
+        } else if (roleName === 'regional_manager' || roleName === 'regional_head') {
+          // derive region from RegionsService list
+          const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+          if (r?.id) resolvedRegionId = String(r.id);
+        }
+      }
+
+      if (!resolvedBranchId && (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer')) {
+        const branchesArr = Array.isArray(branches) ? branches : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '' as string;
+        const headBranch = branchesArr.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          resolvedBranchId = userBranchId;
+          if (!resolvedRegionId) {
+            const b = branchesArr.find((bb: any) => String(bb.id) === String(userBranchId));
+            if (b) resolvedRegionId = String(b.regionId ?? b.region_id ?? '');
+          }
+        }
+      }
+
+      if (resolvedRegionId) {
+        form.setValue('regionId', resolvedRegionId as any);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoRegionDisabled(isRegional ? true : !isRegional);
+      }
+
+      if (resolvedBranchId) {
+        form.setValue('branchId', resolvedBranchId as any);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoBranchDisabled(!isRegional);
+
+        // populate counsellor/admission officer based on branch employees
+        try {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          const userIds = (links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === String(resolvedBranchId)).map((be:any)=>String(be.userId ?? be.user_id));
+          if (userIds.length > 0) {
+            const counsellor = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('counsel'));
+            const officer = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('admission'));
+            if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
+            if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
+          }
+        } catch {}
+      } else if (resolvedRegionId && !form.getValues('branchId')) {
+        form.setValue('branchId', '');
+        setAutoBranchDisabled(false);
+      }
+
+      if (!(resolvedRegionId || resolvedBranchId)) {
+        setAutoRegionDisabled(false);
+        setAutoBranchDisabled(false);
+      }
+    } catch {}
+  }, [open, user, regions, branches, branchEmps, users, form]);
+
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
     if (selectedApp) {
