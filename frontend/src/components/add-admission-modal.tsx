@@ -351,6 +351,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
 
       const roleName = getNormalizedRole();
+      const shouldDisableRegion = ['regional_manager','regional_head','branch_manager','counselor','counsellor','admission_officer'].includes(roleName);
 
       if (!resolvedRegionId) {
         const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
@@ -384,14 +385,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId as any);
-        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
-        setAutoRegionDisabled(isRegional ? true : !isRegional);
+        setAutoRegionDisabled(shouldDisableRegion);
       }
 
       if (resolvedBranchId) {
         form.setValue('branchId', resolvedBranchId as any);
-        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
-        setAutoBranchDisabled(!isRegional);
+        setAutoBranchDisabled(!shouldDisableRegion);
 
         // populate counsellor/admission officer based on branch employees
         try {
