@@ -253,11 +253,11 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         <div className="space-y-3">
           <Card>
             <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><User className="w-4 h-4" /> Personal Details</CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2"><User className="w-4 h-4" /> Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label>Name</Label>
+                <Label>Full Name</Label>
                 <Input value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
