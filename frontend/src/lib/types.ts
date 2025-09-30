@@ -208,7 +208,7 @@ export const insertApplicationSchema = z.object({
   country: z.string().optional(),
   channelPartner: z.string().optional(),
   intake: z.string().optional(),
-  googleDriveLink: z.string().url().optional().transform((v) => (v && v.trim().length === 0 ? undefined : v)),
+  googleDriveLink: z.preprocess((v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v), z.string().url().optional()),
   notes: z.string().optional(),
   // Access fields (optional)
   branchId: z.string().optional(),
