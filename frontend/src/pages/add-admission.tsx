@@ -206,6 +206,8 @@ export default function AddAdmissionPage() {
       form.setValue('program', linkedApp.program || '');
       try {
         const anyApp: any = linkedApp as any;
+        if (anyApp.regionId && !form.getValues('regionId')) form.setValue('regionId', String(anyApp.regionId));
+        if (anyApp.branchId && !form.getValues('branchId')) form.setValue('branchId', String(anyApp.branchId));
         if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
         if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
       } catch {}
