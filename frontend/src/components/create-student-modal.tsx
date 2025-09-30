@@ -307,6 +307,15 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>
+                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1 md:col-span-2">
                 <Label>Target Country</Label>
                 <MultiSelect
@@ -320,15 +329,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   className="text-[11px] shadow-sm border border-gray-300 bg-white"
                   disabled={disabled}
                 />
-              </div>
-              <div className="space-y-1">
-                <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
               </div>
             </CardContent>
           </Card>
