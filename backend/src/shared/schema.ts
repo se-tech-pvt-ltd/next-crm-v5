@@ -275,6 +275,35 @@ export const insertAdmissionSchema = createInsertSchema(admissions).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  decisionDate: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) throw new Error('Invalid date format');
+    return d;
+  }),
+  depositDeadline: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) throw new Error('Invalid date format');
+    return d;
+  }),
+  depositDate: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) throw new Error('Invalid date format');
+    return d;
+  }),
+  visaDate: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) throw new Error('Invalid date format');
+    return d;
+  }),
 });
 
 export const insertEventSchema = createInsertSchema(events).omit({
