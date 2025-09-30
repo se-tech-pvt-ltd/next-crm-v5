@@ -99,12 +99,18 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
   const watchedAppId = form.watch('applicationId');
+  const branchId = form.watch('branchId');
+  const regionId = form.watch('regionId');
+
   useEffect(() => {
     const full = Number(watchedFull) || 0;
     const scholarship = Number(watchedScholarship) || 0;
     const net = full > 0 ? Math.max(full - scholarship, 0) : 0;
-    if (!Number.isNaN(net)) form.setValue('netTuitionFee', String(net));
-  }, [watchedFull, watchedScholarship, form]);
+    if (!Number.isNaN(net)) {
+      const curr = form.getValues('netTuitionFee');
+      if (String(curr) !== String(net)) form.setValue('netTuitionFee', String(net));
+    }
+  }, [watchedFull, watchedScholarship]);
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
