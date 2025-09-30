@@ -538,7 +538,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           <div className="flex h-full">
             <div className="flex-1 overflow-y-auto p-6 pt-2">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(onSubmit, (errors) => { console.warn('[AddAdmissionModal] validation errors on form submit:', errors); })(); }} className="space-y-6">
                   {/* Linked Entities Panel */}
                   <Card>
                     <CardHeader>
