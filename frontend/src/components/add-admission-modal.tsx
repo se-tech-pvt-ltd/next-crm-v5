@@ -529,21 +529,32 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             >
               Cancel
             </Button>
-            <Button
-              type="button"
-              onClick={() => { handleSubmitClick(); }}
-              disabled={createMutation.isPending}
-              className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
-            >
-              {createMutation.isPending ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Saving...</span>
+            <div className="flex flex-col items-end">
+              <Button
+                type="button"
+                onClick={() => { handleSubmitClick(); }}
+                disabled={createMutation.isPending || !form.formState.isValid}
+                className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md disabled:opacity-50"
+              >
+                {createMutation.isPending ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <span>Save</span>
+                )}
+              </Button>
+              {!form.formState.isValid && (
+                <div className="mt-1 text-xs text-red-600 text-right">
+                  {Object.keys(form.formState.errors).length === 0 ? 'Please fill required fields' : (
+                    <>
+                      Please fix: {Object.keys(form.formState.errors).slice(0,5).join(', ')}{Object.keys(form.formState.errors).length > 5 ? '...' : ''}
+                    </>
+                  )}
                 </div>
-              ) : (
-                <span>Save</span>
               )}
-            </Button>
+            </div>
           </div>
         )}
         leftContent={(
