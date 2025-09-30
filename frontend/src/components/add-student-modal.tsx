@@ -385,10 +385,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>Status *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
