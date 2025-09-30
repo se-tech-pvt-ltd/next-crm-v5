@@ -92,7 +92,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const [autoRegionDisabled, setAutoRegionDisabled] = React.useState(false);
   const [autoBranchDisabled, setAutoBranchDisabled] = React.useState(false);
 
-  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
   const getNormalizedRole = () => {
     try {
       const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
