@@ -317,6 +317,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <div className="space-y-1">
                 <Label>Passport Number</Label>
                 <Input placeholder="Enter passport number" value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
+                {errors.passport && <p className="text-[11px] text-red-600">{errors.passport}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Date of Birth</Label>
