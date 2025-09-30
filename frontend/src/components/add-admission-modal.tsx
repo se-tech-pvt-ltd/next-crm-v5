@@ -546,7 +546,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
               <Button
                 type="button"
                 onClick={() => { handleSubmitClick(); }}
-                disabled={createMutation.isPending || !form.formState.isValid}
+                disabled={createMutation.isPending}
                 className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md disabled:opacity-50"
               >
                 {createMutation.isPending ? (
@@ -558,15 +558,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                   <span>Save</span>
                 )}
               </Button>
-              {!form.formState.isValid && (
-                <div className="mt-1 text-xs text-red-600 text-right">
-                  {Object.keys(form.formState.errors).length === 0 ? 'Please fill required fields' : (
-                    <>
-                      Please fix: {Object.keys(form.formState.errors).slice(0,5).join(', ')}{Object.keys(form.formState.errors).length > 5 ? '...' : ''}
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         )}
