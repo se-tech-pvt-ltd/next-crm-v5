@@ -312,6 +312,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <div className="space-y-1">
                 <Label>Phone</Label>
                 <Input type="tel" placeholder="Enter phone number" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
+                {errors.phone && <p className="text-[11px] text-red-600">{errors.phone}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Passport Number</Label>
