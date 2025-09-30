@@ -126,74 +126,101 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   });
 
   const handleCreate = async () => {
-    // Check duplicates for email and phone
+    const trimmedName = (formData.name || '').trim();
+    const normalizedEmail = (formData.email || '').trim().toLowerCase();
+    const normalizedPhone = (formData.phone || '').trim();
+    const normalizedPhoneDigits = normalizedPhone.replace(/\D/g, '');
+    const passportNumber = (formData.passport || '').trim();
+    const dateOfBirth = (formData.dateOfBirth || '').trim();
+    const address = (formData.address || '').trim();
+    const englishProficiency = (formData.englishProficiency || '').trim();
+    const expectation = (formData.expectation || '').trim();
+    const status = (formData.status || '').trim();
+    const counsellorId = (formData.counsellor || '').trim();
+    const admissionOfficerId = (formData.admissionOfficer || '').trim();
+    const notes = (formData.notes || '').trim();
+
+    const validationErrors: Record<string, string> = {};
+
+    if (!trimmedName) validationErrors.name = 'Full Name is required';
+    if (!normalizedEmail) validationErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) validationErrors.email = 'Enter a valid email address';
+    if (!normalizedPhone) validationErrors.phone = 'Phone is required';
+    else if (normalizedPhoneDigits.length < 6) validationErrors.phone = 'Enter a valid phone number';
+    if (!passportNumber) validationErrors.passport = 'Passport number is required';
+    if (!dateOfBirth) validationErrors.dateOfBirth = 'Date of birth is required';
+    if (!address) validationErrors.address = 'Address is required';
+    if (!englishProficiency) validationErrors.englishProficiency = 'English proficiency is required';
+    if (!expectation) validationErrors.expectation = 'Expectation is required';
+    if (!status) validationErrors.status = 'Status is required';
+    if (!Array.isArray(formData.targetCountries) || formData.targetCountries.length === 0) validationErrors.targetCountries = 'Select at least one target country';
+    if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
+    if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
+    if (!formData.consultancyFee) validationErrors.consultancyFee = 'Consultancy fee selection is required';
+    if (!formData.scholarship) validationErrors.scholarship = 'Scholarship selection is required';
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast({ title: 'Missing information', description: 'Please fill in all required fields.', variant: 'destructive' });
+      return;
+    }
+
+    const normalizedTargetCountry = JSON.stringify(formData.targetCountries.map((value) => String(value)));
+
+    const payload: any = {
+      name: trimmedName,
+      email: normalizedEmail,
+      phone: normalizedPhone,
+      dateOfBirth,
+      address,
+      expectation,
+      status,
+      targetCountry: normalizedTargetCountry,
+      passportNumber,
+      englishProficiency,
+      counsellorId,
+      counselorId: counsellorId,
+      admissionOfficerId,
+      consultancyFree: formData.consultancyFee === 'Yes',
+      scholarship: formData.scholarship === 'Yes',
+    };
+
+    if (notes) payload.notes = notes;
+
     try {
       const res = await StudentsService.getStudents();
       let list: any[] = [];
       if (Array.isArray(res)) list = res as any[];
       else if (res && typeof res === 'object') list = (res as any).data || [];
 
-      const email = (formData.email || '').trim().toLowerCase();
-      const phone = String(formData.phone || '').replace(/\D/g, '');
-
-      if (email) {
-        const found = list.find(s => s && s.email && String(s.email).trim().toLowerCase() === email);
-        if (found) {
-          toast({ title: 'Duplicate email', description: 'A student with this email already exists.', variant: 'destructive' });
+      if (normalizedEmail) {
+        const duplicateEmail = list.find(s => s && s.email && String(s.email).trim().toLowerCase() === normalizedEmail);
+        if (duplicateEmail) {
+          const duplicateError = 'A student with this email already exists.';
+          setErrors(prev => ({ ...prev, email: duplicateError }));
+          toast({ title: 'Duplicate email', description: duplicateError, variant: 'destructive' });
           return;
         }
       }
 
-      if (phone) {
-        const found = list.find(s => s && s.phone && String(s.phone).replace(/\D/g, '') === phone);
-        if (found) {
-          toast({ title: 'Duplicate phone', description: 'A student with this phone number already exists.', variant: 'destructive' });
+      if (normalizedPhoneDigits) {
+        const duplicatePhone = list.find(s => s && s.phone && String(s.phone).replace(/\D/g, '') === normalizedPhoneDigits);
+        if (duplicatePhone) {
+          const duplicateError = 'A student with this phone number already exists.';
+          setErrors(prev => ({ ...prev, phone: duplicateError }));
+          toast({ title: 'Duplicate phone', description: duplicateError, variant: 'destructive' });
           return;
         }
       }
 
-      const normalizedTargetCountry = Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0
-        ? JSON.stringify(formData.targetCountries.map((v) => String(v)))
-        : undefined;
-
-      const payload: any = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth || undefined,
-        address: formData.address || undefined,
-        expectation: formData.expectation || undefined,
-        status: formData.status || 'active',
-        targetCountry: normalizedTargetCountry,
-        passportNumber: formData.passport || undefined,
-        englishProficiency: formData.englishProficiency || undefined,
-        counsellorId: formData.counsellor || undefined,
-        counselorId: formData.counsellor || undefined,
-        admissionOfficerId: formData.admissionOfficer || undefined,
-        consultancyFree: formData.consultancyFee === 'Yes',
-        scholarship: formData.scholarship === 'Yes',
-      };
-
+      setErrors({});
       createStudentMutation.mutate(payload);
+      return;
     } catch (err: any) {
-      // If fetching list fails, still attempt to create but warn
-      try { createStudentMutation.mutate({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth || undefined,
-        address: formData.address || undefined,
-        expectation: formData.expectation || undefined,
-        status: formData.status || 'active',
-        targetCountry: (Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0) ? JSON.stringify(formData.targetCountries.map(String)) : undefined,
-        passportNumber: formData.passport || undefined,
-        englishProficiency: formData.englishProficiency || undefined,
-        counsellorId: formData.counsellor || undefined,
-        counselorId: formData.counsellor || undefined,
-        admissionOfficerId: formData.admissionOfficer || undefined,
-        consultancyFree: formData.consultancyFee === 'Yes',
-        scholarship: formData.scholarship === 'Yes',
-      } as any); } catch {}
+      setErrors({});
+      try {
+        createStudentMutation.mutate(payload as any);
+      } catch {}
     }
   };
 
