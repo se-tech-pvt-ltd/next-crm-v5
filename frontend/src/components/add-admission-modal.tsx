@@ -498,7 +498,20 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [branchId, branchEmps, users]);
 
-  const handleSubmitClick = () => { try { form.handleSubmit(onSubmit, (errors) => { console.warn('[AddAdmissionModal] validation errors:', errors); })(); } catch (e) { console.error('[AddAdmissionModal] handleSubmitClick error:', e); } };
+  const handleSubmitClick = () => {
+    try {
+      form.handleSubmit((data) => {
+        console.log('[AddAdmissionModal] onSubmit called with', data);
+        createMutation.mutate(data);
+      }, (errors) => {
+        const missing = Object.keys(errors || {});
+        console.error('[AddAdmissionModal] Missing required fields:', missing);
+        try { toast({ title: 'Validation', description: `Missing fields: ${missing.join(', ')}`, variant: 'destructive' }); } catch {}
+      })();
+    } catch (e) {
+      console.error('[AddAdmissionModal] handleSubmitClick error:', e);
+    }
+  };
 
   return (
     <>
