@@ -230,16 +230,21 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="counselorId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Counsellor</FormLabel>
+                    <FormLabel>Counsellor *</FormLabel>
                     <FormControl>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select counsellor" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(dropdownsForStudents() || []).map((opt: any) => (
-                            <SelectItem key={opt.key || opt.id} value={opt.key || opt.id}>{opt.value}</SelectItem>
-                          ))}
+                          {(dropdownsForStudents() || []).map((opt: any) => {
+                            const optionValue = String(opt?.key ?? opt?.id ?? opt?.value ?? '');
+                            return (
+                              <SelectItem key={optionValue} value={optionValue}>
+                                {opt.value}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </FormControl>
