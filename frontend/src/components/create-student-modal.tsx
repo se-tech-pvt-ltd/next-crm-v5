@@ -247,6 +247,13 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
   const disabled = createStudentMutation.isPending;
 
+  React.useEffect(() => {
+    if (!open) {
+      setFormData(initialFormData);
+      setErrors({});
+    }
+  }, [open]);
+
   return (
     <DetailsDialogLayout
       open={open}
