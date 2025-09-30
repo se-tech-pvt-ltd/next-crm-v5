@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -76,21 +77,16 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const initialFormData = {
     status: '',
     expectation: '',
-    type: '',
     name: '',
     phone: '',
     email: '',
-    city: '',
-    source: '',
-    interestedCountry: '',
-    studyLevel: '',
-    studyPlan: '',
     admissionOfficer: '',
     counsellor: '',
     passport: '',
     dateOfBirth: '',
     address: '',
-    eltTest: '',
+    englishProficiency: '',
+    targetCountries: [] as string[],
     consultancyFee: 'No',
     consultancyFeeAttachment: '',
     scholarship: 'No',
@@ -147,6 +143,10 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         }
       }
 
+      const normalizedTargetCountry = Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0
+        ? JSON.stringify(formData.targetCountries.map((v) => String(v)))
+        : undefined;
+
       const payload: any = {
         name: formData.name,
         email: formData.email,
@@ -155,11 +155,12 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         address: formData.address || undefined,
         expectation: formData.expectation || undefined,
         status: formData.status || 'active',
-        targetCountry: formData.interestedCountry || undefined,
-        targetProgram: formData.studyPlan || undefined,
+        targetCountry: normalizedTargetCountry,
         passportNumber: formData.passport || undefined,
-        englishProficiency: formData.eltTest || undefined,
+        englishProficiency: formData.englishProficiency || undefined,
+        counsellorId: formData.counsellor || undefined,
         counselorId: formData.counsellor || undefined,
+        admissionOfficerId: formData.admissionOfficer || undefined,
         consultancyFree: formData.consultancyFee === 'Yes',
         scholarship: formData.scholarship === 'Yes',
       };
@@ -175,14 +176,15 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         address: formData.address || undefined,
         expectation: formData.expectation || undefined,
         status: formData.status || 'active',
-        targetCountry: formData.interestedCountry || undefined,
-        targetProgram: formData.studyPlan || undefined,
+        targetCountry: (Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0) ? JSON.stringify(formData.targetCountries.map(String)) : undefined,
         passportNumber: formData.passport || undefined,
-        englishProficiency: formData.eltTest || undefined,
+        englishProficiency: formData.englishProficiency || undefined,
+        counsellorId: formData.counsellor || undefined,
         counselorId: formData.counsellor || undefined,
+        admissionOfficerId: formData.admissionOfficer || undefined,
         consultancyFree: formData.consultancyFee === 'Yes',
         scholarship: formData.scholarship === 'Yes',
-      }); } catch {}
+      } as any); } catch {}
     }
   };
 
@@ -267,8 +269,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Input type="tel" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
-                <Label>City</Label>
-                <Input value={formData.city} onChange={(e) => handleChange('city', e.target.value)} disabled={disabled} />
+                <Label>Passport Number</Label>
+                <Input value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Date of Birth</Label>
@@ -283,53 +285,42 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
           <Card>
             <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Target className="w-4 h-4" /> Lead Information</CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Academic Information</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label>Lead Type</Label>
-                <Select value={formData.type} onValueChange={(v) => handleChange('type', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select type" /></SelectTrigger>
+                <Label>English Proficiency</Label>
+                <Select value={formData.englishProficiency} onValueChange={(v) => handleChange('englishProficiency', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
                   <SelectContent>
-                    {getList('Type').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
+                    {(getStudentList('English Proficiency').length ? getStudentList('English Proficiency') : getStudentList('ELT Test')).map((o: any) => (
+                      <SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Lead Source</Label>
-                <Select value={formData.source} onValueChange={(v) => handleChange('source', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select source" /></SelectTrigger>
+                <Label>Expectation</Label>
+                <Select value={formData.expectation} onValueChange={(v) => handleChange('expectation', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select expectation" /></SelectTrigger>
                   <SelectContent>
-                    {getList('Source').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Study Level</Label>
-                <Select value={formData.studyLevel} onValueChange={(v) => handleChange('studyLevel', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select level" /></SelectTrigger>
-                  <SelectContent>
-                    {getList('Study Level').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Study Plan</Label>
-                <Select value={formData.studyPlan} onValueChange={(v) => handleChange('studyPlan', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select plan" /></SelectTrigger>
-                  <SelectContent>
-                    {getList('Study Plan').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
+                    {getStudentList('Expectation').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1 md:col-span-2">
-                <Label>Interested Country</Label>
-                <Select value={formData.interestedCountry} onValueChange={(v) => handleChange('interestedCountry', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select country" /></SelectTrigger>
-                  <SelectContent>
-                    {getList('Interested Country').map((o: any) => (<SelectItem key={o.key} value={o.key}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
+                <Label>Target Country</Label>
+                <MultiSelect
+                  value={formData.targetCountries}
+                  onValueChange={(vals) => handleChange('targetCountries', vals)}
+                  placeholder="Select countries"
+                  searchPlaceholder="Search countries..."
+                  options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
+                  emptyMessage="No countries found"
+                  maxDisplayItems={3}
+                  className="text-[11px] shadow-sm border border-gray-300 bg-white"
+                  disabled={disabled}
+                />
               </div>
             </CardContent>
           </Card>
@@ -373,28 +364,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Expectation</Label>
-                <Select value={formData.expectation} onValueChange={(v) => handleChange('expectation', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select expectation" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('Expectation').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>ELT Test</Label>
-                <Select value={formData.eltTest} onValueChange={(v) => handleChange('eltTest', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select ELT test" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('ELT Test').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Passport Number</Label>
-                <Input value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
               </div>
             </CardContent>
           </Card>
