@@ -146,9 +146,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Phone Number *</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Enter phone number" {...field} />
+                      <Input type="tel" placeholder="Enter phone number" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
