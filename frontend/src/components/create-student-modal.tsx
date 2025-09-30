@@ -316,19 +316,43 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1 md:col-span-2">
-                <Label>Target Country</Label>
-                <MultiSelect
-                  value={formData.targetCountries}
-                  onValueChange={(vals) => handleChange('targetCountries', vals)}
-                  placeholder="Select countries"
-                  searchPlaceholder="Search countries..."
-                  options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
-                  emptyMessage="No countries found"
-                  maxDisplayItems={3}
-                  className="text-[11px] shadow-sm border border-gray-300 bg-white"
-                  disabled={disabled}
-                />
+              <div className="md:col-span-2 lg:col-span-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label>Target Country</Label>
+                    <MultiSelect
+                      value={formData.targetCountries}
+                      onValueChange={(vals) => handleChange('targetCountries', vals)}
+                      placeholder="Select countries"
+                      searchPlaceholder="Search countries..."
+                      options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
+                      emptyMessage="No countries found"
+                      maxDisplayItems={3}
+                      className="text-[11px] shadow-sm border border-gray-300 bg-white"
+                      disabled={disabled}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Consultancy Fee</Label>
+                    <Select value={formData.consultancyFee} onValueChange={(v) => handleChange('consultancyFee', v)} disabled={disabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Scholarship</Label>
+                    <Select value={formData.scholarship} onValueChange={(v) => handleChange('scholarship', v)} disabled={disabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
