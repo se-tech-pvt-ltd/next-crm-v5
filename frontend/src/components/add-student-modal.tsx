@@ -411,11 +411,12 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
               name="academicBackground"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Academic Background</FormLabel>
+                  <FormLabel>Academic Background *</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Enter academic qualifications, degrees, institutions..."
                       rows={3}
+                      required
                       {...field}
                     />
                   </FormControl>
