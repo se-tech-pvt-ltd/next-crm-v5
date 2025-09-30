@@ -125,7 +125,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
       return base.filter((u: any) => allowed.has(String(u.id)));
     }
-    return base;
+    return [];
   }, [users, branchEmps, formData.branchId]);
 
   const admissionOfficerList = React.useMemo(() => {
@@ -139,7 +139,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
       return base.filter((u: any) => allowed.has(String(u.id)));
     }
-    return base;
+    return [];
   }, [users, branchEmps, formData.branchId]);
 
   const handleChange = (key: FormFieldKey, value: any) => {
@@ -605,7 +605,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1">
                 <Label>Counsellor</Label>
-                <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled}>
+                <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled || !formData.branchId}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                   <SelectContent>
                     {counsellorList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
@@ -614,7 +614,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1">
                 <Label>Admission Officer</Label>
-                <Select value={formData.admissionOfficer} onValueChange={(v) => handleChange('admissionOfficer', v)} disabled={disabled}>
+                <Select value={formData.admissionOfficer} onValueChange={(v) => handleChange('admissionOfficer', v)} disabled={disabled || !formData.branchId}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select officer" /></SelectTrigger>
                   <SelectContent>
                     {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
