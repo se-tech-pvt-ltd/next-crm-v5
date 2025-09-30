@@ -10,7 +10,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { FileUpload } from '@/components/ui/file-upload';
 import { type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
@@ -258,19 +257,19 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label>Full Name</Label>
-                <Input value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
+                <Input placeholder="Enter full name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Email</Label>
-                <Input type="email" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} disabled={disabled} />
+                <Input type="email" placeholder="Enter email address" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Phone</Label>
-                <Input type="tel" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
+                <Input type="tel" placeholder="Enter phone number" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Passport Number</Label>
-                <Input value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
+                <Input placeholder="Enter passport number" value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
               </div>
               <div className="space-y-1">
                 <Label>Date of Birth</Label>
@@ -278,7 +277,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1 md:col-span-2 lg:col-span-1">
                 <Label>Address</Label>
-                <Input value={formData.address} onChange={(e) => handleChange('address', e.target.value)} disabled={disabled} />
+                <Input placeholder="Enter address" value={formData.address} onChange={(e) => handleChange('address', e.target.value)} disabled={disabled} />
               </div>
             </CardContent>
           </Card>
@@ -322,6 +321,15 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   disabled={disabled}
                 />
               </div>
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>
+                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
 
@@ -351,22 +359,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Student Details</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
-                  <SelectContent>
-                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="py-2">
@@ -384,10 +376,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Consultancy Fee Attachment</Label>
-                <FileUpload value={formData.consultancyFeeAttachment} onChange={(v) => handleChange('consultancyFeeAttachment', v)} disabled={disabled} />
-              </div>
-              <div className="space-y-1">
                 <Label>Scholarship</Label>
                 <Select value={formData.scholarship} onValueChange={(v) => handleChange('scholarship', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
@@ -396,10 +384,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     <SelectItem value="Yes">Yes</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <Label>Scholarship Attachment</Label>
-                <FileUpload value={formData.scholarshipAttachment} onChange={(v) => handleChange('scholarshipAttachment', v)} disabled={disabled} />
               </div>
             </CardContent>
           </Card>
