@@ -436,6 +436,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
   };
 
+  // Populate counsellor/admission officer only after branch is selected
+  React.useEffect(() => {
+    try {
+      const bid = String(form.getValues('branchId') || '');
+      if (!bid) {
+        // clear selections when branch cleared
+        form.setValue('counsellorId', '');
+        form.setValue('admissionOfficerId', '');
+        return;
+      }
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const userIds = (links as any[]).filter((be:any)=>String(be.branchId ?? be.branch_id) === bid).map((be:any)=>String(be.userId ?? be.user_id));
+      if (userIds.length === 0) return;
+      const counsellor = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('counsel'));
+      const officer = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('admission'));
+      if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
+      if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
+    } catch {}
+  }, [form.watch('branchId'), branchEmps, users]);
+
   const handleSubmitClick = () => { try { form.handleSubmit(onSubmit)(); } catch {} };
 
   return (
