@@ -9,6 +9,7 @@ export class AdmissionController {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const admissions = await AdmissionService.getAdmissions(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
+      try { console.log('[AdmissionController] getAdmissions', { user: currentUser, count: Array.isArray(admissions) ? admissions.length : 'unknown', sample: Array.isArray(admissions) ? (admissions as any[]).slice(0,5).map(a=>({id:a.id, studentId:a.studentId, regionId:(a as any).regionId})) : null }); } catch(e){}
       res.json(admissions);
     } catch (error) {
       console.error("Get admissions error:", error);
