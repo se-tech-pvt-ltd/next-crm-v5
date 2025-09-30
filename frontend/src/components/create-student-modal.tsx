@@ -90,12 +90,22 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     consultancyFeeAttachment: '',
     scholarship: 'No',
     scholarshipAttachment: '',
+    notes: '',
   };
 
-  const [formData, setFormData] = React.useState(initialFormData);
+  type FormFieldKey = keyof typeof initialFormData;
 
-  const handleChange = (key: keyof typeof initialFormData, value: any) => {
+  const [formData, setFormData] = React.useState(initialFormData);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  const handleChange = (key: FormFieldKey, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
+    setErrors(prev => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
   const createStudentMutation = useMutation({
