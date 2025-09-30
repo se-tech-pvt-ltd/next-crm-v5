@@ -167,10 +167,11 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
     // If we have a linked application (when modal opened with applicationId), populate university and program
     if (linkedApp) {
-      form.setValue('applicationId', String(linkedApp.id));
-      if (!form.getValues('studentId')) form.setValue('studentId', linkedApp.studentId);
-      form.setValue('university', linkedApp.university || '');
-      form.setValue('program', linkedApp.program || '');
+      const linkedIdStr = String(linkedApp.id);
+      if (form.getValues('applicationId') !== linkedIdStr) form.setValue('applicationId', linkedIdStr);
+      if (form.getValues('studentId') !== (linkedApp.studentId || '')) form.setValue('studentId', linkedApp.studentId || '');
+      if (form.getValues('university') !== (linkedApp.university || '')) form.setValue('university', linkedApp.university || '');
+      if (form.getValues('program') !== (linkedApp.program || '')) form.setValue('program', linkedApp.program || '');
       try {
         const anyApp: any = linkedApp as any;
         if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
@@ -392,15 +393,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       const currRegion = form.getValues('regionId');
       if (resolvedRegionId && String(currRegion) !== String(resolvedRegionId)) {
         form.setValue('regionId', resolvedRegionId as any);
-        setAutoRegionDisabled(shouldDisableRegion);
+        if (autoRegionDisabled !== shouldDisableRegion) setAutoRegionDisabled(shouldDisableRegion);
       } else if (!resolvedRegionId) {
-        setAutoRegionDisabled(false);
+        if (autoRegionDisabled !== false) setAutoRegionDisabled(false);
       }
 
       const currBranch = form.getValues('branchId');
       if (resolvedBranchId && String(currBranch) !== String(resolvedBranchId)) {
         form.setValue('branchId', resolvedBranchId as any);
-        setAutoBranchDisabled(!shouldDisableRegion);
+        if (autoBranchDisabled !== !shouldDisableRegion) setAutoBranchDisabled(!shouldDisableRegion);
 
         // populate counsellor/admission officer based on branch employees
         try {
@@ -414,13 +415,13 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           }
         } catch {}
       } else if (!resolvedBranchId && resolvedRegionId && !form.getValues('branchId')) {
-        form.setValue('branchId', '');
-        setAutoBranchDisabled(false);
+        if (form.getValues('branchId') !== '') form.setValue('branchId', '');
+        if (autoBranchDisabled !== false) setAutoBranchDisabled(false);
       }
 
       if (!(resolvedRegionId || resolvedBranchId)) {
-        setAutoRegionDisabled(false);
-        setAutoBranchDisabled(false);
+        if (autoRegionDisabled !== false) setAutoRegionDisabled(false);
+        if (autoBranchDisabled !== false) setAutoBranchDisabled(false);
       }
     } catch {}
   }, [open, (user as any)?.id, (user as any)?.role, regions, branches, branchEmps, users]);
@@ -451,8 +452,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       const bid = String(form.getValues('branchId') || '');
       if (!bid) {
         // clear selections when branch cleared
-        form.setValue('counsellorId', '');
-        form.setValue('admissionOfficerId', '');
+        if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+        if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
         return;
       }
       const links = Array.isArray(branchEmps) ? branchEmps : [];
