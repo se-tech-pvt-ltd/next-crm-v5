@@ -296,8 +296,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const regionOptions = Array.isArray(regions) ? regions.map((r: any) => ({ value: String(r.id), label: String(r.regionName || r.name || r.id) })) : [];
   const branchOptions = React.useMemo(() => (Array.isArray(branches) ? branches : [])
-    .filter((b: any) => !form.getValues('regionId') || String(b.regionId ?? b.region_id ?? '') === String(form.getValues('regionId')))
-    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') })), [branches, form]);
+    .filter((b: any) => !regionId || String(b.regionId ?? b.region_id ?? '') === String(regionId))
+    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') })), [branches, regionId]);
 
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
