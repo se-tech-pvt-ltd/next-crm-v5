@@ -92,14 +92,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
   }
 
   if (!student) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogTitle className="sr-only">Student Not Found</DialogTitle>
-          <div className="text-center py-8">Student not found</div>
-        </DialogContent>
-      </Dialog>
-    );
+    return null;
   }
 
   return (
