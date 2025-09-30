@@ -171,32 +171,29 @@ export const admissions = mysqlTable("admissions", {
   studentId: varchar("student_id", { length: 255 }).notNull(),
   university: text("university").notNull(),
   program: text("program").notNull(),
-  decision: text("decision").notNull(),
-  decisionDate: timestamp("decision_date"),
   scholarshipAmount: text("scholarship_amount"),
-  conditions: text("conditions"),
-  depositRequired: boolean("deposit_required").default(false),
-  depositAmount: text("deposit_amount"),
-  depositDeadline: timestamp("deposit_deadline"),
-  // Tuition and important dates
-  fullTuitionFee: text("full_tuition_fee"),
-  netTuitionFee: text("net_tuition_fee"),
-  depositDate: timestamp("deposit_date"),
-  visaDate: timestamp("visa_date"),
-  visaStatus: text("visa_status").default("pending"),
   admissionId: varchar("admission_id", { length: 255 }),
   branchId: varchar("branch_id", { length: 255 }),
   regionId: varchar("region_id", { length: 50 }),
   counsellorId: varchar("counsellor_id", { length: 50 }),
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 
-  // Missing fields added
+  // Tuition and important dates
+  fullTuitionFee: text("full_tuition_fee"),
+  netTuitionFee: text("net_tuition_fee"),
+  initialDeposit: text("initial_deposit"),
+  depositDate: timestamp("deposit_date"),
+  visaDate: timestamp("visa_date"),
+
+  // Extra fields
   status: text("status"),
   caseStatus: text("case_status"),
   googleDriveLink: text("google_drive_link"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
+
 
 
 // Events module

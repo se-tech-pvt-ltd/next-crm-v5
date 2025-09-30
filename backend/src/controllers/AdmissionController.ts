@@ -9,6 +9,7 @@ export class AdmissionController {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const admissions = await AdmissionService.getAdmissions(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
+      try { console.log('[AdmissionController] getAdmissions', { user: currentUser, count: Array.isArray(admissions) ? admissions.length : 'unknown', sample: Array.isArray(admissions) ? (admissions as any[]).slice(0,5).map(a=>({id:a.id, studentId:a.studentId, regionId:(a as any).regionId})) : null }); } catch(e){}
       res.json(admissions);
     } catch (error) {
       console.error("Get admissions error:", error);
@@ -40,7 +41,9 @@ export class AdmissionController {
         }
       }
 
-      console.log('[AdmissionController] request body date fields:', dateFields.reduce((acc:any, f) => { acc[f] = { value: body[f], type: typeof body[f] }; return acc; }, {}));
+      // Remove undefined or null date fields and avoid logging raw values
+      dateFields.forEach((f) => { if (body[f] === undefined || body[f] === null) delete body[f]; });
+      console.log('[AdmissionController] request body date fields types:', dateFields.reduce((acc:any, f) => { acc[f] = typeof body[f]; return acc; }, {}));
       const validatedData = insertAdmissionSchema.parse(body);
       const admission = await AdmissionService.createAdmission(validatedData);
       res.status(201).json(admission);

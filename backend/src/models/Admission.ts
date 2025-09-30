@@ -7,88 +7,27 @@ import { eq, desc } from "drizzle-orm";
 export class AdmissionModel {
   static async findById(id: string): Promise<Admission | undefined> {
     const [admission] = await db
-      .select({
-        id: admissions.id,
-        applicationId: admissions.applicationId,
-        studentId: admissions.studentId,
-        university: admissions.university,
-        program: admissions.program,
-        decision: admissions.decision,
-        decisionDate: admissions.decisionDate,
-        scholarshipAmount: admissions.scholarshipAmount,
-        conditions: admissions.conditions,
-        depositRequired: admissions.depositRequired,
-        depositAmount: admissions.depositAmount,
-        depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
-        admissionId: admissions.admissionId,
-        createdAt: admissions.createdAt,
-        updatedAt: admissions.updatedAt,
-      })
+      .select()
       .from(admissions)
       .where(eq(admissions.id, id));
-    return admission;
+    return admission as Admission | undefined;
   }
 
   static async findAll(): Promise<Admission[]> {
-    return await db
-      .select({
-        id: admissions.id,
-        applicationId: admissions.applicationId,
-        studentId: admissions.studentId,
-        university: admissions.university,
-        program: admissions.program,
-        decision: admissions.decision,
-        decisionDate: admissions.decisionDate,
-        scholarshipAmount: admissions.scholarshipAmount,
-        conditions: admissions.conditions,
-        depositRequired: admissions.depositRequired,
-        depositAmount: admissions.depositAmount,
-        depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
-        admissionId: admissions.admissionId,
-        createdAt: admissions.createdAt,
-        updatedAt: admissions.updatedAt,
-      })
+    const rows = await db
+      .select()
       .from(admissions)
       .orderBy(desc(admissions.createdAt));
+    return rows as Admission[];
   }
 
   static async findByStudent(studentId: string): Promise<Admission[]> {
-    return await db
-      .select({
-        id: admissions.id,
-        applicationId: admissions.applicationId,
-        studentId: admissions.studentId,
-        university: admissions.university,
-        program: admissions.program,
-        decision: admissions.decision,
-        decisionDate: admissions.decisionDate,
-        scholarshipAmount: admissions.scholarshipAmount,
-        conditions: admissions.conditions,
-        depositRequired: admissions.depositRequired,
-        depositAmount: admissions.depositAmount,
-        depositDeadline: admissions.depositDeadline,
-        fullTuitionFee: admissions.fullTuitionFee,
-        netTuitionFee: admissions.netTuitionFee,
-        depositDate: admissions.depositDate,
-        visaDate: admissions.visaDate,
-        visaStatus: admissions.visaStatus,
-        admissionId: admissions.admissionId,
-        createdAt: admissions.createdAt,
-        updatedAt: admissions.updatedAt,
-      })
+    const rows = await db
+      .select()
       .from(admissions)
       .where(eq(admissions.studentId, studentId))
       .orderBy(desc(admissions.createdAt));
+    return rows as Admission[];
   }
 
   static async create(admissionData: InsertAdmission): Promise<Admission> {

@@ -72,8 +72,8 @@ export default function AddAdmissionPage() {
       fullTuitionFee: '',
       netTuitionFee: '',
       initialDeposit: '',
-      depositDate: null as any,
-      visaDate: null as any,
+      depositDate: undefined,
+      visaDate: undefined,
       googleDriveLink: '',
       // Access
       counsellorId: '',
@@ -100,7 +100,7 @@ export default function AddAdmissionPage() {
         program: data.program,
         // admission decision (e.g., accepted/rejected) remains separate from UI 'Status'
         decision: data.decision || 'pending',
-        decisionDate: data.decisionDate ? new Date(data.decisionDate) : (data.visaDate ? new Date(data.visaDate) : null),
+        decisionDate: data.decisionDate ? new Date(data.decisionDate) : undefined,
         // Map UI fields to ORM fields
         status: data.status || null,
         caseStatus: data.caseStatus || null,
@@ -108,16 +108,18 @@ export default function AddAdmissionPage() {
         scholarshipAmount: data.scholarshipAmount || null,
         netTuitionFee: data.netTuitionFee || null,
         depositRequired: Boolean(data.depositRequired) || false,
-        depositAmount: data.depositAmount || data.initialDeposit || null,
-        depositDate: data.depositDate ? new Date(data.depositDate) : null,
-        depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : null,
-        visaDate: data.visaDate ? new Date(data.visaDate) : null,
+        depositAmount: data.depositAmount || data.initialDeposit || undefined,
+        depositDate: data.depositDate ? new Date(data.depositDate) : undefined,
+        depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : undefined,
+        visaDate: data.visaDate ? new Date(data.visaDate) : undefined,
         visaStatus: data.visaStatus || 'pending',
         googleDriveLink: data.googleDriveLink || null,
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
       console.log('[AddAdmission] payload prepared:', payload);
+      // Remove undefined fields (especially optional dates) so backend doesn't receive null/undefined
+      Object.keys(payload).forEach((k) => { if ((payload as any)[k] === undefined) delete (payload as any)[k]; });
       try {
         const created = await AdmissionsService.createAdmission(payload as any);
         try {
@@ -204,8 +206,25 @@ export default function AddAdmissionPage() {
       form.setValue('program', linkedApp.program || '');
       try {
         const anyApp: any = linkedApp as any;
-        if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
-        if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
+        if (anyApp.regionId && !form.getValues('regionId')) form.setValue('regionId', String(anyApp.regionId));
+        if (anyApp.branchId && !form.getValues('branchId')) form.setValue('branchId', String(anyApp.branchId));
+        const resolveUserIdFromApp = (appId:any) => {
+          if (!appId) return undefined;
+          const idStr = String(appId);
+          const u = (users || []).find((x:any) => String(x.id) === idStr);
+          if (u) return String(u.id);
+          const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
+          if (be) return String(be.userId ?? be.user_id);
+          return undefined;
+        };
+        if (!form.getValues('counsellorId')) {
+          const resolved = resolveUserIdFromApp(anyApp.counsellorId);
+          if (resolved) form.setValue('counsellorId', resolved);
+        }
+        if (!form.getValues('admissionOfficerId')) {
+          const resolved = resolveUserIdFromApp(anyApp.admissionOfficerId);
+          if (resolved) form.setValue('admissionOfficerId', resolved);
+        }
       } catch {}
     }
   }, [linkedApp, form]);
