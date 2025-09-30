@@ -211,8 +211,23 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         // Auto-fill region and branch first (so branch-based dropdowns can react)
         if (anyApp.regionId && !form.getValues('regionId')) form.setValue('regionId', String(anyApp.regionId));
         if (anyApp.branchId && !form.getValues('branchId')) form.setValue('branchId', String(anyApp.branchId));
-        if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
-        if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
+        const resolveUserIdFromApp = (appId:any) => {
+          if (!appId) return undefined;
+          const idStr = String(appId);
+          const u = (users || []).find((x:any) => String(x.id) === idStr);
+          if (u) return String(u.id);
+          const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
+          if (be) return String(be.userId ?? be.user_id);
+          return undefined;
+        };
+        if (!form.getValues('counsellorId')) {
+          const resolved = resolveUserIdFromApp(anyApp.counsellorId);
+          if (resolved) form.setValue('counsellorId', resolved);
+        }
+        if (!form.getValues('admissionOfficerId')) {
+          const resolved = resolveUserIdFromApp(anyApp.admissionOfficerId);
+          if (resolved) form.setValue('admissionOfficerId', resolved);
+        }
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
         const localCaseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
         const localStatusOptions = getOptions('Status', ['Admissions','Applications']);
