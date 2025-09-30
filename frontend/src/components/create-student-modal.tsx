@@ -218,9 +218,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       return;
     } catch (err: any) {
       setErrors({});
-      try {
-        createStudentMutation.mutate(payload as any);
-      } catch {}
+      createStudentMutation.mutate(payload);
     }
   };
 
