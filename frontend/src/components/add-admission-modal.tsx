@@ -208,6 +208,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (form.getValues('program') !== (linkedApp.program || '')) form.setValue('program', linkedApp.program || '');
       try {
         const anyApp: any = linkedApp as any;
+        // Auto-fill region and branch first (so branch-based dropdowns can react)
+        if (anyApp.regionId && !form.getValues('regionId')) form.setValue('regionId', String(anyApp.regionId));
+        if (anyApp.branchId && !form.getValues('branchId')) form.setValue('branchId', String(anyApp.branchId));
         if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
         if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
