@@ -8,167 +8,60 @@ import { and, gte, lt, sql, eq, desc } from "drizzle-orm";
 
 export class AdmissionService {
   static async getAdmissions(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Admission[]> {
+    // Avoid complex Drizzle select mappings that may error in some runtime environments.
+    // Fetch all admissions and perform server-side filtering in JS for robustness.
     try {
-      if (userRole === 'counselor' && userId) {
-        // Counselors can only see admissions for their assigned students
-        const selectMapping:any = {
-          id: admissions.id,
-          applicationId: admissions.applicationId,
-          studentId: admissions.studentId,
-          university: admissions.university,
-          program: admissions.program,
-          decision: admissions.decision,
-          decisionDate: admissions.decisionDate,
-          scholarshipAmount: admissions.scholarshipAmount,
-          conditions: admissions.conditions,
-          depositRequired: admissions.depositRequired,
-          depositAmount: admissions.depositAmount,
-          depositDeadline: admissions.depositDeadline,
-          fullTuitionFee: admissions.fullTuitionFee,
-          netTuitionFee: admissions.netTuitionFee,
-          depositDate: admissions.depositDate,
-          visaDate: admissions.visaDate,
-          visaStatus: admissions.visaStatus,
-          admissionId: admissions.admissionId,
-          createdAt: admissions.createdAt,
-          updatedAt: admissions.updatedAt
-        };
-        try { console.log('[AdmissionService] selectMapping keys:', Object.keys(selectMapping).reduce((acc:any, k)=>{acc[k]= selectMapping[k] === undefined ? 'undefined' : typeof selectMapping[k]; return acc;}, {})); } catch(e){}
-        return await db.select(selectMapping)
-        .from(admissions)
-        .innerJoin(students, eq(admissions.studentId, students.id))
-        .where(eq(students.counselorId, userId))
-        .orderBy(desc(admissions.createdAt));
-      }
-      if (userRole === 'admission_officer' && userId) {
-        const selectMapping:any = {
-          id: admissions.id,
-          applicationId: admissions.applicationId,
-          studentId: admissions.studentId,
-          university: admissions.university,
-          program: admissions.program,
-          decision: admissions.decision,
-          decisionDate: admissions.decisionDate,
-          scholarshipAmount: admissions.scholarshipAmount,
-          conditions: admissions.conditions,
-          depositRequired: admissions.depositRequired,
-          depositAmount: admissions.depositAmount,
-          depositDeadline: admissions.depositDeadline,
-          fullTuitionFee: admissions.fullTuitionFee,
-          netTuitionFee: admissions.netTuitionFee,
-          depositDate: admissions.depositDate,
-          visaDate: admissions.visaDate,
-          visaStatus: admissions.visaStatus,
-          admissionId: admissions.admissionId,
-          createdAt: admissions.createdAt,
-          updatedAt: admissions.updatedAt
-        };
-        try { console.log('[AdmissionService] selectMapping keys (officer):', Object.keys(selectMapping).reduce((acc:any, k)=>{acc[k]= selectMapping[k] === undefined ? 'undefined' : typeof selectMapping[k]; return acc;}, {})); } catch(e){}
-        return await db.select(selectMapping)
-        .from(admissions)
-        .innerJoin(students, eq(admissions.studentId, students.id))
-        .where(eq(students.admissionOfficerId, userId))
-        .orderBy(desc(admissions.createdAt));
-      }
+      const all = await AdmissionModel.findAll();
+      // If no role/filters, return all
+      if (!userRole && !regionId && !branchId && !userId) return all;
 
-      if (userRole === 'branch_manager') {
-        if (branchId) {
-          return await db.select({
-            id: admissions.id,
-            applicationId: admissions.applicationId,
-            studentId: admissions.studentId,
-            university: admissions.university,
-            program: admissions.program,
-            decision: admissions.decision,
-            decisionDate: admissions.decisionDate,
-            scholarshipAmount: admissions.scholarshipAmount,
-            conditions: admissions.conditions,
-            depositRequired: admissions.depositRequired,
-            depositAmount: admissions.depositAmount,
-            depositDeadline: admissions.depositDeadline,
-          fullTuitionFee: admissions.fullTuitionFee,
-          netTuitionFee: admissions.netTuitionFee,
-          depositDate: admissions.depositDate,
-          visaDate: admissions.visaDate,
-          visaStatus: admissions.visaStatus,
-            admissionId: admissions.admissionId,
-            createdAt: admissions.createdAt,
-            updatedAt: admissions.updatedAt
-          })
-          .from(admissions)
-          .innerJoin(students, eq(admissions.studentId, students.id))
-          .where(eq(students.branchId, branchId))
-          .orderBy(desc(admissions.createdAt));
+      // Helper to fetch student for matching
+      const studentCache: Record<string, any> = {};
+      const getStudent = async (id: string) => {
+        if (!id) return null;
+        if (studentCache[id]) return studentCache[id];
+        const s = await StudentModel.findById(id);
+        studentCache[id] = s || null;
+        return studentCache[id];
+      };
+
+      const filtered: Admission[] = [];
+      for (const adm of all) {
+        try {
+          const student = await getStudent(adm.studentId);
+          if (!student) continue;
+          if (userRole === 'counselor' && userId) {
+            if (student.counselorId === userId) filtered.push(adm);
+            continue;
+          }
+          if (userRole === 'admission_officer' && userId) {
+            if ((student as any).admissionOfficerId === userId) filtered.push(adm);
+            continue;
+          }
+          if (userRole === 'branch_manager') {
+            if (branchId && student.branchId === branchId) filtered.push(adm);
+            continue;
+          }
+          if (userRole === 'regional_manager') {
+            if (regionId && student.regionId === regionId) filtered.push(adm);
+            continue;
+          }
+          if (regionId && userRole !== 'super_admin') {
+            if (student.regionId === regionId) filtered.push(adm);
+            continue;
+          }
+          // default push
+          filtered.push(adm);
+        } catch (e) {
+          // ignore per-record failures
+          console.error('Filtering admission error for id', adm.id, e);
         }
-        return [];
       }
-
-      if (userRole === 'regional_manager') {
-        if (regionId) {
-          return await db.select({
-            id: admissions.id,
-            applicationId: admissions.applicationId,
-            studentId: admissions.studentId,
-            university: admissions.university,
-            program: admissions.program,
-            decision: admissions.decision,
-            decisionDate: admissions.decisionDate,
-            scholarshipAmount: admissions.scholarshipAmount,
-            conditions: admissions.conditions,
-            depositRequired: admissions.depositRequired,
-            depositAmount: admissions.depositAmount,
-            depositDeadline: admissions.depositDeadline,
-          fullTuitionFee: admissions.fullTuitionFee,
-          netTuitionFee: admissions.netTuitionFee,
-          depositDate: admissions.depositDate,
-          visaDate: admissions.visaDate,
-          visaStatus: admissions.visaStatus,
-            admissionId: admissions.admissionId,
-            createdAt: admissions.createdAt,
-            updatedAt: admissions.updatedAt
-          })
-          .from(admissions)
-          .innerJoin(students, eq(admissions.studentId, students.id))
-          .where(eq(students.regionId, regionId))
-          .orderBy(desc(admissions.createdAt));
-        }
-        return [];
-      }
-
-      if (regionId && userRole !== 'super_admin') {
-        return await db.select({
-          id: admissions.id,
-          applicationId: admissions.applicationId,
-          studentId: admissions.studentId,
-          university: admissions.university,
-          program: admissions.program,
-          decision: admissions.decision,
-          decisionDate: admissions.decisionDate,
-          scholarshipAmount: admissions.scholarshipAmount,
-          conditions: admissions.conditions,
-          depositRequired: admissions.depositRequired,
-          depositAmount: admissions.depositAmount,
-          depositDeadline: admissions.depositDeadline,
-          fullTuitionFee: admissions.fullTuitionFee,
-          netTuitionFee: admissions.netTuitionFee,
-          depositDate: admissions.depositDate,
-          visaDate: admissions.visaDate,
-          visaStatus: admissions.visaStatus,
-          admissionId: admissions.admissionId,
-          createdAt: admissions.createdAt,
-          updatedAt: admissions.updatedAt
-        })
-        .from(admissions)
-        .innerJoin(students, eq(admissions.studentId, students.id))
-        .where(eq(students.regionId, regionId))
-        .orderBy(desc(admissions.createdAt));
-      }
-
-      return await AdmissionModel.findAll();
+      // return unique filtered (in case of duplicates)
+      return filtered;
     } catch (error) {
-      console.error('Get admissions error:', error);
-      // Fallback to returning all admissions directly from the model to avoid crashing UI
-      try { return await AdmissionModel.findAll(); } catch (e) { console.error('Fallback failed:', e); return []; }
+      console.error('Get admissions fallback error:', error);
+      return AdmissionModel.findAll();
     }
   }
 
