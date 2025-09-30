@@ -275,20 +275,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     .filter((b: any) => !formData.regionId || String(b.regionId ?? b.region_id ?? '') === String(formData.regionId))
     .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') , headId: String(b.branchHeadId || b.managerId || '') })), [branches, formData.regionId]);
 
-  const selectedRegion = React.useMemo(() => regionOptions.find(r => String(r.value) === String(formData.regionId)) || null, [regionOptions, formData.regionId]);
-  const selectedBranch = React.useMemo(() => branchOptions.find(b => String(b.value) === String(formData.branchId)) || null, [branchOptions, formData.branchId]);
-  const regionHeadName = React.useMemo(() => {
-    const headId = selectedRegion?.headId || '';
-    if (!headId || !Array.isArray(users)) return '';
-    const u = (users as any[]).find((x: any) => String(x.id) === String(headId));
-    return u ? ([u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ').trim() || u.email || String(u.id)) : '';
-  }, [selectedRegion, users]);
-  const branchManagerName = React.useMemo(() => {
-    const headId = selectedBranch?.headId || '';
-    if (!headId || !Array.isArray(users)) return '';
-    const u = (users as any[]).find((x: any) => String(x.id) === String(headId));
-    return u ? ([u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ').trim() || u.email || String(u.id)) : '';
-  }, [selectedBranch, users]);
 
   React.useEffect(() => {
     if (!open) {
@@ -501,14 +487,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Region Head</Label>
-                <Input value={regionHeadName || '—'} disabled className="h-8 text-xs" />
-              </div>
-              <div className="space-y-1">
-                <Label>Branch Manager</Label>
-                <Input value={branchManagerName || '—'} disabled className="h-8 text-xs" />
               </div>
             </CardContent>
           </Card>
