@@ -89,10 +89,22 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
         variant="outline"
         size="xs"
         className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-        onClick={() => { onOpenChange(false); setLocation(`/students?studentId=${admission.studentId}`); }}
-        title="View Student"
+        onClick={() => {
+          try { setLocation(`/admissions/${admission.id}/edit`); } catch { }
+        }}
+        title="Edit Admission"
       >
-        View Student
+        Edit
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
+        onClick={() => onOpenChange(false)}
+        aria-label="Close"
+      >
+        <X className="w-4 h-4" />
       </Button>
     </div>
   );
