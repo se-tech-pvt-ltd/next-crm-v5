@@ -474,6 +474,40 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
+                          <FormLabel>Region</FormLabel>
+                          <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {regionOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <FormLabel>Branch</FormLabel>
+                          <Select value={form.watch('branchId') || ''} onValueChange={(v) => {
+                            const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
+                            form.setValue('branchId', v);
+                            form.setValue('counsellorId', '');
+                            form.setValue('admissionOfficerId', '');
+                            if (!form.getValues('regionId') && b) form.setValue('regionId', String(b.regionId || ''));
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select branch" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {branchOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
                           <FormLabel>Counsellor</FormLabel>
                           <Select value={form.watch('counsellorId') || ''} onValueChange={(v) => form.setValue('counsellorId', v)}>
                             <SelectTrigger>
