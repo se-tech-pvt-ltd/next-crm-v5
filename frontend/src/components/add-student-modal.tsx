@@ -328,10 +328,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="englishProficiency"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>English Proficiency</FormLabel>
+                    <FormLabel>English Proficiency *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select proficiency level" />
                         </SelectTrigger>
                       </FormControl>
