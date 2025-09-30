@@ -302,11 +302,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
   const [currentStudentIdLocal, setCurrentStudentIdLocal] = useState<string | null>(null);
 
-  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const getNormalizedRole = () => {
     try {
       const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
-      if (rawRole) return normalizeRole(String(rawRole));
+      if (rawRole) return String(rawRole).trim().toLowerCase().replace(/\s+/g, '_');
       const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
       if (token) {
         const parts = String(token).split('.');
@@ -317,7 +316,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
           const payload = JSON.parse(json) as any;
           const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
-          return normalizeRole(String(tokenRole || ''));
+          return String(tokenRole).trim().toLowerCase().replace(/\s+/g, '_');
         }
       }
     } catch {}
@@ -403,8 +402,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           const links = Array.isArray(branchEmps) ? branchEmps : [];
           const userIds = (links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === String(resolvedBranchId)).map((be:any)=>String(be.userId ?? be.user_id));
           if (userIds.length > 0) {
-            const counsellor = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('counsel'));
-            const officer = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('admission'));
+            const counsellor = (users || []).find((u:any)=>userIds.includes(String(u.id)) && String(u.role || u.role_name || u.roleName).toLowerCase().includes('counsel'));
+            const officer = (users || []).find((u:any)=>userIds.includes(String(u.id)) && String(u.role || u.role_name || u.roleName).toLowerCase().includes('admission'));
             if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
             if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
           }
