@@ -181,6 +181,7 @@ export const admissions = mysqlTable("admissions", {
   // Tuition and important dates
   fullTuitionFee: text("full_tuition_fee"),
   netTuitionFee: text("net_tuition_fee"),
+  initialDeposit: text("initial_deposit"),
   depositDate: timestamp("deposit_date"),
   visaDate: timestamp("visa_date"),
 
