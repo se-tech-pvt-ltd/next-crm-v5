@@ -157,11 +157,17 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
         if (!form.getValues('caseStatus') && (anyApp.caseStatus || anyApp.case_status)) {
-          form.setValue('caseStatus', String(anyApp.caseStatus ?? anyApp.case_status));
+          const raw = String(anyApp.caseStatus ?? anyApp.case_status);
+          // Try to map to caseStatusOptions value (match by label or value)
+          const match = (caseStatusOptions || []).find((o: any) => String(o.value) === raw || String(o.label).toLowerCase() === raw.toLowerCase());
+          if (match) form.setValue('caseStatus', match.value);
+          else form.setValue('caseStatus', raw);
         }
         if (!form.getValues('status') && (anyApp.status || anyApp.appStatus || anyApp.app_status)) {
-          // Prefer application-level status if present
-          form.setValue('status', String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status));
+          const raw = String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status);
+          const match = (statusOptions || []).find((o: any) => String(o.value) === raw || String(o.label).toLowerCase() === raw.toLowerCase());
+          if (match) form.setValue('status', match.value);
+          else form.setValue('status', raw);
         }
       } catch {}
     }
