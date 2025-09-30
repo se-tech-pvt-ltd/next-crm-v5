@@ -16,6 +16,8 @@ import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import {
@@ -51,6 +53,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   // Data needed for selects
   const { data: users } = useQuery({ queryKey: ['/api/users'] });
   const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), staleTime: 60_000 });
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
+  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30_000 });
   const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
   const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
 
@@ -58,20 +62,32 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
   // Without a lead context, allow choosing from all users by role
   const counsellorList = React.useMemo(() => {
-    const list = Array.isArray(users) ? users.filter((u: any) => {
+    const base = Array.isArray(users) ? users.filter((u: any) => {
       const role = normalizeRole(u.role || u.role_name || u.roleName);
       return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
     }) : [];
-    return list;
-  }, [users]);
+    const bid = String(formData.branchId || '');
+    if (bid) {
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+      return base.filter((u: any) => allowed.has(String(u.id)));
+    }
+    return base;
+  }, [users, branchEmps, formData.branchId]);
 
   const admissionOfficerList = React.useMemo(() => {
-    const list = Array.isArray(users) ? users.filter((u: any) => {
+    const base = Array.isArray(users) ? users.filter((u: any) => {
       const role = normalizeRole(u.role || u.role_name || u.roleName);
       return role === 'admission_officer' || role === 'admission officer' || role === 'admissionofficer';
     }) : [];
-    return list;
-  }, [users]);
+    const bid = String(formData.branchId || '');
+    if (bid) {
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+      return base.filter((u: any) => allowed.has(String(u.id)));
+    }
+    return base;
+  }, [users, branchEmps, formData.branchId]);
 
   const initialFormData = {
     status: '',
@@ -91,6 +107,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     scholarship: 'No',
     scholarshipAttachment: '',
     notes: '',
+    regionId: '',
+    branchId: '',
   };
 
   type FormFieldKey = keyof typeof initialFormData;
@@ -148,6 +166,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     const counsellorId = (formData.counsellor || '').trim();
     const admissionOfficerId = (formData.admissionOfficer || '').trim();
     const notes = (formData.notes || '').trim();
+    const regionId = (formData.regionId || '').trim();
+    const branchId = (formData.branchId || '').trim();
 
     const validationErrors: Record<string, string> = {};
 
@@ -195,6 +215,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     };
 
     if (notes) payload.notes = notes;
+    if (regionId) payload.regionId = regionId;
+    if (branchId) payload.branchId = branchId;
 
     try {
       const res = await StudentsService.getStudents();
@@ -246,6 +268,26 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   };
 
   const disabled = createStudentMutation.isPending;
+
+  const regionOptions = React.useMemo(() => (Array.isArray(regions) ? regions : []).map((r: any) => ({ value: String(r.id), label: String(r.regionName || r.name || r.id), headId: String(r.regionHeadId || '') })), [regions]);
+  const branchOptions = React.useMemo(() => (Array.isArray(branches) ? branches : [])
+    .filter((b: any) => !formData.regionId || String(b.regionId ?? b.region_id ?? '') === String(formData.regionId))
+    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') , headId: String(b.branchHeadId || b.managerId || '') })), [branches, formData.regionId]);
+
+  const selectedRegion = React.useMemo(() => regionOptions.find(r => String(r.value) === String(formData.regionId)) || null, [regionOptions, formData.regionId]);
+  const selectedBranch = React.useMemo(() => branchOptions.find(b => String(b.value) === String(formData.branchId)) || null, [branchOptions, formData.branchId]);
+  const regionHeadName = React.useMemo(() => {
+    const headId = selectedRegion?.headId || '';
+    if (!headId || !Array.isArray(users)) return '';
+    const u = (users as any[]).find((x: any) => String(x.id) === String(headId));
+    return u ? ([u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ').trim() || u.email || String(u.id)) : '';
+  }, [selectedRegion, users]);
+  const branchManagerName = React.useMemo(() => {
+    const headId = selectedBranch?.headId || '';
+    if (!headId || !Array.isArray(users)) return '';
+    const u = (users as any[]).find((x: any) => String(x.id) === String(headId));
+    return u ? ([u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ').trim() || u.email || String(u.id)) : '';
+  }, [selectedBranch, users]);
 
   React.useEffect(() => {
     if (!open) {
@@ -415,9 +457,32 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
           <Card>
             <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Users className="w-4 h-4" /> Roles</CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2"><Users className="w-4 h-4" /> Access</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Region</Label>
+                <Select value={formData.regionId} onValueChange={(v) => {
+                  setFormData(prev => ({ ...prev, regionId: v, branchId: '', counsellor: '', admissionOfficer: '' }));
+                }} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select region" /></SelectTrigger>
+                  <SelectContent>
+                    {regionOptions.map((r: any) => (<SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Branch</Label>
+                <Select value={formData.branchId} onValueChange={(v) => {
+                  const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
+                  setFormData(prev => ({ ...prev, branchId: v, counsellor: '', admissionOfficer: '', regionId: prev.regionId || String(b?.regionId || '') }));
+                }} disabled={disabled}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                  <SelectContent>
+                    {branchOptions.map((b: any) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1">
                 <Label>Counsellor</Label>
                 <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled}>
@@ -435,6 +500,14 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Region Head</Label>
+                <Input value={regionHeadName || '—'} disabled className="h-8 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <Label>Branch Manager</Label>
+                <Input value={branchManagerName || '—'} disabled className="h-8 text-xs" />
               </div>
             </CardContent>
           </Card>
