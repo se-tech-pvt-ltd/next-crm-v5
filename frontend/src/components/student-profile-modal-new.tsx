@@ -78,16 +78,13 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     enabled: !!studentId,
   });
 
-  // If the studentId is provided but query returned no student (not found) or error, navigate back to students list
+  // If the studentId is provided but query returned no student (not found) or error, close modal and navigate back to students list
   useEffect(() => {
     if (studentId && !isLoading && (isError || !student)) {
-      try {
-        setLocation('/students');
-      } catch (e) {
-        console.error('redirect to /students failed', e);
-      }
+      try { onOpenChange(false); } catch {}
+      try { setLocation('/students'); } catch (e) { console.error('redirect to /students failed', e); }
     }
-  }, [studentId, isLoading, isError, student, setLocation]);
+  }, [studentId, isLoading, isError, student, setLocation, onOpenChange]);
 
 
   // On mount, ensure any other registered modals are closed so this modal appears on top
@@ -513,16 +510,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   }
 
   if (!student) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
-          <DialogTitle className="sr-only">Student Not Found</DialogTitle>
-          <div className="text-center py-8">
-            <p>Student not found</p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
+    return null;
   }
 
   return (

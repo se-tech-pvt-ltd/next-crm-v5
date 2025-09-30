@@ -178,6 +178,11 @@ export const admissions = mysqlTable("admissions", {
   depositRequired: boolean("deposit_required").default(false),
   depositAmount: text("deposit_amount"),
   depositDeadline: timestamp("deposit_deadline"),
+  // Tuition and important dates
+  fullTuitionFee: text("full_tuition_fee"),
+  netTuitionFee: text("net_tuition_fee"),
+  depositDate: timestamp("deposit_date"),
+  visaDate: timestamp("visa_date"),
   visaStatus: text("visa_status").default("pending"),
   admissionId: varchar("admission_id", { length: 255 }),
   branchId: varchar("branch_id", { length: 255 }),
@@ -186,7 +191,13 @@ export const admissions = mysqlTable("admissions", {
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+
+  // Missing fields added
+  status: text("status"),
+  caseStatus: text("case_status"),
+  googleDriveLink: text("google_drive_link"),
 });
+
 
 // Events module
 export const events = mysqlTable("events", {
