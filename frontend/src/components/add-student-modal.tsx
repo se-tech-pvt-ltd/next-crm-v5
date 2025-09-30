@@ -286,10 +286,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="targetCountry"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Country</FormLabel>
+                    <FormLabel>Target Country *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select country" />
                         </SelectTrigger>
                       </FormControl>
