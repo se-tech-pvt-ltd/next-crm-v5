@@ -81,6 +81,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       notes: '',
       counsellorId: '',
       admissionOfficerId: '',
+      regionId: '',
+      branchId: '',
     }
   });
 
