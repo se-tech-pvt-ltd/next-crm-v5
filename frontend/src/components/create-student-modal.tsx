@@ -307,6 +307,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <div className="space-y-1">
                 <Label>Email</Label>
                 <Input type="email" placeholder="Enter email address" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} disabled={disabled} />
+                {errors.email && <p className="text-[11px] text-red-600">{errors.email}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Phone</Label>
