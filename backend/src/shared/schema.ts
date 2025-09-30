@@ -191,7 +191,13 @@ export const admissions = mysqlTable("admissions", {
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+
+  // Missing fields added
+  status: text("status"),
+  caseStatus: text("case_status"),
+  googleDriveLink: text("google_drive_link"),
 });
+
 
 // Events module
 export const events = mysqlTable("events", {
