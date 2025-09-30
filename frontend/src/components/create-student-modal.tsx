@@ -19,6 +19,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
 import {
   ChevronDown,
@@ -48,6 +49,7 @@ interface CreateStudentModalProps {
 export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStudentModalProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user } = useAuth() as any;
   const [isLeadDetailsOpen, setIsLeadDetailsOpen] = React.useState(false);
 
   // Data needed for selects
@@ -87,6 +89,30 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
   const [formData, setFormData] = React.useState(initialFormData);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [autoRegionDisabled, setAutoRegionDisabled] = React.useState(false);
+  const [autoBranchDisabled, setAutoBranchDisabled] = React.useState(false);
+
+  const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const getNormalizedRole = () => {
+    try {
+      const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
+      if (rawRole) return normalizeRole(String(rawRole));
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          return normalizeRole(String(tokenRole || ''));
+        }
+      }
+    } catch {}
+    return '';
+  };
 
   // Without a lead context, allow choosing from all users by role (depends on formData)
   const counsellorList = React.useMemo(() => {
@@ -270,6 +296,108 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
   const disabled = createStudentMutation.isPending;
 
+  // Auto-select region/branch based on role (mirrors /leads/new)
+  React.useEffect(() => {
+    try {
+      const currentRegion = String(formData.regionId || '');
+      const currentBranch = String(formData.branchId || '');
+      if (currentRegion && currentBranch) return;
+
+      const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
+      const token = safeGetToken();
+      let resolvedRegionId = '' as string;
+      let resolvedBranchId = '' as string;
+
+      if (token) {
+        try {
+          const parts = String(token).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            const rd = payload?.role_details || payload?.roleDetails || {};
+            const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+            const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.branch?.id ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+            if (candidateRegion) resolvedRegionId = String(candidateRegion);
+            if (candidateBranch) resolvedBranchId = String(candidateBranch);
+          }
+        } catch {}
+      }
+
+      const roleName = getNormalizedRole();
+
+      if (!resolvedRegionId) {
+        const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+        if (userRegionId) {
+          resolvedRegionId = userRegionId;
+        } else if (roleName === 'regional_manager' || roleName === 'regional_head') {
+          const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+          if (r?.id) resolvedRegionId = String(r.id);
+        }
+      }
+
+      if (!resolvedBranchId && (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer')) {
+        const branchesArr = Array.isArray(branches) ? branches : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '' as string;
+        const headBranch = branchesArr.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          resolvedBranchId = userBranchId;
+          if (!resolvedRegionId) {
+            const b = branchesArr.find((bb: any) => String(bb.id) === String(userBranchId));
+            if (b) resolvedRegionId = String(b.regionId ?? b.region_id ?? '');
+          }
+        }
+      }
+
+      if (resolvedRegionId) {
+        setFormData(prev => ({ ...prev, regionId: resolvedRegionId }));
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoRegionDisabled(isRegional ? true : !isRegional);
+      }
+
+      if (resolvedBranchId) {
+        setFormData(prev => ({ ...prev, branchId: resolvedBranchId }));
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoBranchDisabled(!isRegional);
+      } else if (resolvedRegionId && !currentBranch) {
+        setFormData(prev => ({ ...prev, branchId: '' }));
+        setAutoBranchDisabled(false);
+      }
+
+      if (!(resolvedRegionId || resolvedBranchId)) {
+        setAutoRegionDisabled(false);
+        setAutoBranchDisabled(false);
+      }
+    } catch {}
+  }, [user, regions, branches, branchEmps, open]);
+
+  // Ensure region derives from selected branch if missing
+  React.useEffect(() => {
+    try {
+      const rid = String(formData.regionId || '');
+      const bid = String(formData.branchId || '');
+      if (!rid && bid) {
+        const branchesArr = Array.isArray(branches) ? branches : [];
+        const b = branchesArr.find((x: any) => String(x.id) === String(bid));
+        const regionFromBranch = String(b?.regionId ?? b?.region_id ?? '');
+        if (regionFromBranch) {
+          setFormData(prev => ({ ...prev, regionId: regionFromBranch }));
+          const roleName = getNormalizedRole();
+          const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+          setAutoRegionDisabled(isRegional ? true : !isRegional);
+        }
+      }
+    } catch {}
+  }, [branches, formData.branchId]);
+
   const regionOptions = React.useMemo(() => (Array.isArray(regions) ? regions : []).map((r: any) => ({ value: String(r.id), label: String(r.regionName || r.name || r.id), headId: String(r.regionHeadId || '') })), [regions]);
   const branchOptions = React.useMemo(() => (Array.isArray(branches) ? branches : [])
     .filter((b: any) => !formData.regionId || String(b.regionId ?? b.region_id ?? '') === String(formData.regionId))
@@ -451,7 +579,9 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Label>Region</Label>
                 <Select value={formData.regionId} onValueChange={(v) => {
                   setFormData(prev => ({ ...prev, regionId: v, branchId: '', counsellor: '', admissionOfficer: '' }));
-                }} disabled={disabled}>
+                  setAutoRegionDisabled(false);
+                  setAutoBranchDisabled(false);
+                }} disabled={disabled || autoRegionDisabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select region" /></SelectTrigger>
                   <SelectContent>
                     {regionOptions.map((r: any) => (<SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>))}
@@ -463,7 +593,11 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.branchId} onValueChange={(v) => {
                   const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
                   setFormData(prev => ({ ...prev, branchId: v, counsellor: '', admissionOfficer: '', regionId: prev.regionId || String(b?.regionId || '') }));
-                }} disabled={disabled}>
+                  const roleName = getNormalizedRole();
+                  const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+                  setAutoBranchDisabled(!isRegional);
+                  setAutoRegionDisabled(isRegional ? true : !isRegional);
+                }} disabled={disabled || autoBranchDisabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select branch" /></SelectTrigger>
                   <SelectContent>
                     {branchOptions.map((b: any) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
