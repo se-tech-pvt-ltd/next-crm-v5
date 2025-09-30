@@ -11,7 +11,7 @@ export class AdmissionService {
     try {
       if (userRole === 'counselor' && userId) {
         // Counselors can only see admissions for their assigned students
-        return await db.select({
+        const selectMapping:any = {
           id: admissions.id,
           applicationId: admissions.applicationId,
           studentId: admissions.studentId,
@@ -32,7 +32,9 @@ export class AdmissionService {
           admissionId: admissions.admissionId,
           createdAt: admissions.createdAt,
           updatedAt: admissions.updatedAt
-        })
+        };
+        try { console.log('[AdmissionService] selectMapping keys:', Object.keys(selectMapping).reduce((acc:any, k)=>{acc[k]= selectMapping[k] === undefined ? 'undefined' : typeof selectMapping[k]; return acc;}, {})); } catch(e){}
+        return await db.select(selectMapping)
         .from(admissions)
         .innerJoin(students, eq(admissions.studentId, students.id))
         .where(eq(students.counselorId, userId))
