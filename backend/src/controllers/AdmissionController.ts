@@ -30,7 +30,17 @@ export class AdmissionController {
 
   static async createAdmission(req: AuthenticatedRequest, res: Response) {
     try {
-      const validatedData = insertAdmissionSchema.parse(req.body);
+      // Coerce string date fields to Date objects before zod validation
+      const body = { ...req.body } as any;
+      const dateFields = ['decisionDate','depositDate','depositDeadline','visaDate'];
+      for (const f of dateFields) {
+        if (typeof body[f] === 'string' && body[f].trim() !== '') {
+          const d = new Date(body[f]);
+          if (!Number.isNaN(d.getTime())) body[f] = d;
+        }
+      }
+
+      const validatedData = insertAdmissionSchema.parse(body);
       const admission = await AdmissionService.createAdmission(validatedData);
       res.status(201).json(admission);
     } catch (error) {
@@ -45,7 +55,15 @@ export class AdmissionController {
   static async updateAdmission(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.params.id;
-      const validatedData = insertAdmissionSchema.partial().parse(req.body);
+      const body = { ...req.body } as any;
+      const dateFields = ['decisionDate','depositDate','depositDeadline','visaDate'];
+      for (const f of dateFields) {
+        if (typeof body[f] === 'string' && body[f].trim() !== '') {
+          const d = new Date(body[f]);
+          if (!Number.isNaN(d.getTime())) body[f] = d;
+        }
+      }
+      const validatedData = insertAdmissionSchema.partial().parse(body);
       const admission = await AdmissionService.updateAdmission(id, validatedData);
       if (!admission) {
         return res.status(404).json({ message: "Admission not found" });
