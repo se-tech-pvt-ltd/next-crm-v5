@@ -261,6 +261,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
     : [];
 
+  // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => (RegionsService.listRegions ? RegionsService.listRegions() : RegionsService.getRegions ? RegionsService.getRegions() : Promise.resolve([])), enabled: open });
+  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => (BranchesService.listBranches ? BranchesService.listBranches() : BranchesService.getBranches ? BranchesService.getBranches() : Promise.resolve([])), enabled: open });
+
+  const regionOptions = Array.isArray(regions) ? regions.map((r: any) => ({ value: String(r.id), label: String(r.regionName || r.name || r.id) })) : [];
+  const branchOptions = React.useMemo(() => (Array.isArray(branches) ? branches : [])
+    .filter((b: any) => !form.getValues('regionId') || String(b.regionId ?? b.region_id ?? '') === String(form.getValues('regionId')))
+    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') })), [branches, form]);
+
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
