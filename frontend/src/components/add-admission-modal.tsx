@@ -114,6 +114,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         depositAmount: data.depositAmount || data.initialDeposit || null,
         depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
         visaStatus: data.visaStatus || 'pending',
+        branchId: data.branchId || undefined,
+        regionId: data.regionId || undefined,
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
