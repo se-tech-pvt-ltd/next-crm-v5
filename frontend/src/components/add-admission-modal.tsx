@@ -276,7 +276,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
     return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
-  }, [users, branchEmps, form]);
+  }, [users, branchEmps, branchId]);
 
   const officerOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -288,7 +288,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
     return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
-  }, [users, branchEmps, form]);
+  }, [users, branchEmps, branchId]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => (RegionsService.listRegions ? RegionsService.listRegions() : RegionsService.getRegions ? RegionsService.getRegions() : Promise.resolve([])), enabled: open });
