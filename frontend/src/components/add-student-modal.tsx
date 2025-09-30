@@ -359,10 +359,10 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="budget"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Budget Range</FormLabel>
+                    <FormLabel>Budget Range *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger aria-required="true">
                           <SelectValue placeholder="Select budget range" />
                         </SelectTrigger>
                       </FormControl>
