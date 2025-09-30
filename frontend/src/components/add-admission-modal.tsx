@@ -154,6 +154,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
       console.log('[AddAdmissionModal] payload prepared:', payload);
+      // Remove undefined fields (especially optional dates) so backend doesn't receive null/undefined
+      Object.keys(payload).forEach((k) => { if (payload[k] === undefined) delete (payload as any)[k]; });
       try {
         const created = await AdmissionsService.createAdmission(payload as any);
         try {
