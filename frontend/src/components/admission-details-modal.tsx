@@ -212,9 +212,9 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       <div>
                         <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
                         {isEditing ? (
-                          <Input value={(editData as any).fullTuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, fullTuitionFee: e.target.value as any }))} />
+                          <Input value={editData.fullTuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, fullTuitionFee: e.target.value }))} />
                         ) : (
-                          <p>{(admission as any).fullTuitionFee || 'Not specified'}</p>
+                          <p>{admission.fullTuitionFee || 'Not specified'}</p>
                         )}
                       </div>
                       <div>
@@ -276,7 +276,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Visa Date</label>
-                        <p>{(admission as any).visaDate ? new Date((admission as any).visaDate as any).toLocaleDateString() : 'Not specified'}</p>
+                        <p>{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
                       </div>
                     </div>
                   </CardContent>
