@@ -270,7 +270,7 @@ export const insertAdmissionSchema = z.object({
   // Misc/metadata
   status: z.string().optional(),
   caseStatus: z.string().optional(),
-  googleDriveLink: z.string().url().optional().transform((v) => (v && v.trim().length === 0 ? undefined : v)),
+  googleDriveLink: z.preprocess((v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v), z.string().url().optional()),
   admissionId: z.string().optional(),
   // Access fields (optional)
   branchId: z.string().optional(),
