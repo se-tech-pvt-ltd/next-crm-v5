@@ -223,17 +223,49 @@ export const insertAdmissionSchema = z.object({
   university: z.string().min(1, "University is required"),
   program: z.string().min(1, "Program is required"),
   decision: z.string().min(1, "Decision is required"),
-  decisionDate: z.date().optional(),
+  decisionDate: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return d;
+  }),
   // Financials
   fullTuitionFee: z.string().optional(),
   scholarshipAmount: z.string().optional(),
   netTuitionFee: z.string().optional(),
   depositRequired: z.boolean().default(false),
   depositAmount: z.string().optional(),
-  depositDeadline: z.date().optional(),
-  depositDate: z.date().optional(),
+  depositDeadline: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return d;
+  }),
+  depositDate: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return d;
+  }),
   // Visa
-  visaDate: z.date().optional(),
+  visaDate: z.union([z.string(), z.date()]).optional().transform((v) => {
+    if (v instanceof Date) return v;
+    if (!v) return undefined;
+    const d = new Date(v as string);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return d;
+  }),
   visaStatus: z.string().default("pending"),
   // Misc/metadata
   status: z.string().optional(),
