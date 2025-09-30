@@ -142,58 +142,6 @@ export class StudentService {
     return this.mapStudentForApi(enriched) as any;
   }
 
-  static async createStudent(studentData: InsertStudent): Promise<Student> {
-    const student = await StudentModel.create(studentData);
-
-    // Log activity
-    await ActivityService.logActivity(
-      'student',
-      student.id,
-      'created',
-      'Student record created',
-      `Student ${student.name} was added to the system`
-    );
-
-    return this.mapStudentForApi(student) as any;
-  }
-
-  static async updateStudent(id: string, updates: Partial<InsertStudent>): Promise<Student | undefined> {
-    // Get the current student to track changes
-    const currentStudent = await StudentModel.findById(id);
-    if (!currentStudent) return undefined;
-
-    const student = await StudentModel.update(id, updates);
-
-    if (student) {
-      // Log changes for each updated field
-      for (const [fieldName, newValue] of Object.entries(updates)) {
-        if (fieldName === 'updatedAt') continue;
-
-        const oldValue = (currentStudent as any)[fieldName];
-        if (oldValue !== newValue) {
-          const fieldDisplayName = fieldName
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase());
-
-          await ActivityService.logActivity(
-            'student',
-            id,
-            'updated',
-            `${fieldDisplayName} updated`,
-            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
-            fieldName,
-            String(oldValue || ''),
-            String(newValue || ''),
-            undefined,
-            "Next Bot"
-          );
-        }
-      }
-    }
-
-    return student ? (this.mapStudentForApi(student) as any) : undefined;
-  }
-
   static async deleteStudent(id: string): Promise<boolean> {
     const student = await StudentModel.findById(id);
     const success = await StudentModel.delete(id);
