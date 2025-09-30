@@ -486,7 +486,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [branchId, branchEmps, users]);
 
-  const handleSubmitClick = () => { try { form.handleSubmit(onSubmit)(); } catch {} };
+  const handleSubmitClick = () => { try { form.handleSubmit(onSubmit, (errors) => { console.warn('[AddAdmissionModal] validation errors:', errors); })(); } catch (e) { console.error('[AddAdmissionModal] handleSubmitClick error:', e); } };
 
   return (
     <>
