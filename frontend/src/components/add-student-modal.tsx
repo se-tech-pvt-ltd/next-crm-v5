@@ -314,9 +314,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="targetProgram"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Program</FormLabel>
+                    <FormLabel>Target Program *</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Computer Science, Business, Medicine" {...field} />
+                      <Input placeholder="e.g., Computer Science, Business, Medicine" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
