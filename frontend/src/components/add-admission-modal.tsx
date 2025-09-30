@@ -614,7 +614,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <FormLabel>Region</FormLabel>
-                          <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }}>
+                          <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} disabled={true}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select region" />
                             </SelectTrigger>
