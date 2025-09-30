@@ -174,9 +174,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                 name="nationality"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nationality</FormLabel>
+                    <FormLabel>Nationality *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter nationality" {...field} />
+                      <Input placeholder="Enter nationality" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
