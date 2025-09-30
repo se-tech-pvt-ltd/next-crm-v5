@@ -302,6 +302,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <div className="space-y-1">
                 <Label>Full Name</Label>
                 <Input placeholder="Enter full name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
+                {errors.name && <p className="text-[11px] text-red-600">{errors.name}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Email</Label>
