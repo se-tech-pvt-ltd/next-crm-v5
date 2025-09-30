@@ -358,7 +358,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (userRegionId) {
           resolvedRegionId = userRegionId;
         } else if (roleName === 'regional_manager' || roleName === 'regional_head') {
-          // derive region from RegionsService list
           const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
           if (r?.id) resolvedRegionId = String(r.id);
         }
@@ -383,12 +382,17 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         }
       }
 
-      if (resolvedRegionId) {
+      // Only set values if different to avoid triggering re-renders unnecessarily
+      const currRegion = form.getValues('regionId');
+      if (resolvedRegionId && String(currRegion) !== String(resolvedRegionId)) {
         form.setValue('regionId', resolvedRegionId as any);
         setAutoRegionDisabled(shouldDisableRegion);
+      } else if (!resolvedRegionId) {
+        setAutoRegionDisabled(false);
       }
 
-      if (resolvedBranchId) {
+      const currBranch = form.getValues('branchId');
+      if (resolvedBranchId && String(currBranch) !== String(resolvedBranchId)) {
         form.setValue('branchId', resolvedBranchId as any);
         setAutoBranchDisabled(!shouldDisableRegion);
 
@@ -403,7 +407,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
           }
         } catch {}
-      } else if (resolvedRegionId && !form.getValues('branchId')) {
+      } else if (!resolvedBranchId && resolvedRegionId && !form.getValues('branchId')) {
         form.setValue('branchId', '');
         setAutoBranchDisabled(false);
       }
@@ -413,7 +417,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         setAutoBranchDisabled(false);
       }
     } catch {}
-  }, [open, user, regions, branches, branchEmps, users, form]);
+  }, [open, (user as any)?.id, (user as any)?.role, regions, branches, branchEmps, users]);
 
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
