@@ -68,6 +68,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       applicationId: applicationId || '',
       studentId: studentId || '',
@@ -96,6 +98,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       branchId: '',
     }
   });
+
+  // Trigger validation when modal opens to compute initial validity
+  useEffect(() => {
+    if (!open) return;
+    // small timeout to let default values propagate
+    const t = setTimeout(() => {
+      try { form.trigger(); } catch {};
+    }, 50);
+    return () => clearTimeout(t);
+  }, [open]);
 
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
