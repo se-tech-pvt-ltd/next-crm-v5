@@ -134,7 +134,7 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Email Address *</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Enter email address" {...field} />
+                      <Input type="email" placeholder="Enter email address" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
