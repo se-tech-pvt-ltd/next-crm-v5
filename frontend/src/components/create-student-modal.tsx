@@ -121,7 +121,16 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       onOpenChange(false);
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error?.message || 'Failed to create student.', variant: 'destructive' });
+      const message = error?.message || 'Failed to create student.';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+      setErrors(prev => {
+        if (!message) return prev;
+        const lower = message.toLowerCase();
+        const next = { ...prev };
+        if (lower.includes('email')) next.email = message;
+        if (lower.includes('phone')) next.phone = message;
+        return next;
+      });
     }
   });
 
