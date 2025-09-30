@@ -4,6 +4,7 @@ console.log('[modal] loaded: frontend/src/components/admission-details-modal-new
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityTracker } from "./activity-tracker";
+import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Award, X, Plane } from "lucide-react";
 import { Label } from '@/components/ui/label';
 import { Admission } from "@/lib/types";
@@ -78,166 +79,186 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
 
   if (!admission) return null;
 
+  const headerLeft = (
+    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || `Admission ${admission.admissionId || admission.id}`}</div>
+  );
+
+  const headerRight = (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="xs"
+        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+        onClick={() => {
+          try { setLocation(`/admissions/${admission.id}/edit`); } catch { }
+        }}
+        title="Edit Admission"
+      >
+        Edit
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
+        onClick={() => onOpenChange(false)}
+        aria-label="Close"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0">
-        <DialogTitle className="sr-only">Admission Details</DialogTitle>
+    <DetailsDialogLayout
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Admission Details"
+      headerClassName="bg-[#223E7D] text-white"
+      statusBarWrapperClassName="px-4 py-2 bg-[#223E7D] text-white -mt-px"
+      headerLeft={headerLeft}
+      headerRight={headerRight}
+      statusBar={<AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />}
+      rightWidth="360px"
+      leftContent={(
+        <>
+          <div className="px-2 pb-1" />
 
-        <div className="grid grid-cols-[1fr_360px] h-[90vh] min-h-0">
-          {/* Left: Content */}
-          <div className="flex flex-col min-h-0">
-            <div className="relative">
-              <div className="absolute top-3 right-3 z-20">
-                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                  <X className="w-4 h-4" />
-                </Button>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                Linked Entities
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Student</Label>
+                  <div className="mt-[-3px]">
+                    <Button type="button" variant="link" className="p-0 h-6 text-xs mt-[-2px]" onClick={() => {
+                      onOpenChange(false);
+                      setTimeout(() => {
+                        try { setLocation(`/students/${admission.studentId}`); }
+                        catch { try { window.location.hash = `#/students/${admission.studentId}`; } catch {} }
+                      }, 160);
+                    }}>
+                      {student ? student.name : admission.studentId}
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label>Application Code</Label>
+                  <div className="mt-[-2px]">
+                    <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono mt-[-1px]" onClick={() => {
+                      onOpenChange(false);
+                      setTimeout(() => {
+                        try { setLocation(`/applications/${admission.applicationId}`); }
+                        catch { try { window.location.hash = `#/applications/${admission.applicationId}`; } catch {} }
+                      }, 160);
+                    }}>
+                      {application?.applicationCode || admission.applicationId}
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label>Admission ID</Label>
+                  <p className="text-xs font-mono mt-1">{admission.admissionId || admission.id}</p>
+                </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-              <div className="px-2 pb-1">
-                <AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Award className="w-5 h-5 mr-2" />
+                Admission Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Program</Label>
+                  <p className="text-xs font-semibold">{admission.program}</p>
+                </div>
+                <div>
+                  <Label>Decision Date</Label>
+                  <p className="text-xs">{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                </div>
+                <div>
+                  <Label>Tuition Fee</Label>
+                  <p className="text-xs">{admission.tuitionFee || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Scholarship Amount</Label>
+                  <p className="text-xs">{admission.scholarshipAmount || 'No scholarship'}</p>
+                </div>
+                <div>
+                  <Label>Start Date</Label>
+                  <p className="text-xs">{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <p className="text-xs">{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
+                </div>
               </div>
+              {admission.notes && (
+                <div className="mt-4">
+                  <Label>Notes</Label>
+                  <p className="mt-1 text-xs text-gray-800">{admission.notes}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    Linked Entities
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Student</Label>
-                      <div className="mt-[-3px]">
-                        <Button type="button" variant="link" className="p-0 h-6 text-xs mt-[-2px]" onClick={() => {
-                          onOpenChange(false);
-                          setTimeout(() => {
-                            try { setLocation(`/students/${admission.studentId}`); }
-                            catch { try { window.location.hash = `#/students/${admission.studentId}`; } catch {} }
-                          }, 160);
-                        }}>
-                          {student ? student.name : admission.studentId}
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Application Code</Label>
-                      <div className="mt-[-2px]">
-                        <Button type="button" variant="link" className="p-0 h-6 text-xs font-mono mt-[-1px]" onClick={() => {
-                          onOpenChange(false);
-                          setTimeout(() => {
-                            try { setLocation(`/applications/${admission.applicationId}`); }
-                            catch { try { window.location.hash = `#/applications/${admission.applicationId}`; } catch {} }
-                          }, 160);
-                        }}>
-                          {application?.applicationCode || admission.applicationId}
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Admission ID</Label>
-                      <p className="text-xs font-mono mt-1">{admission.admissionId || admission.id}</p>
-                    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Plane className="w-5 h-5 mr-2" />
+                Visa Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Visa Status</Label>
+                  <div className="mt-1">
+                    <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>
+                      <span className="text-xs">{currentVisaStatus.replace('_', ' ').toUpperCase()}</span>
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Award className="w-5 h-5 mr-2" />
-                    Admission Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Program</Label>
-                      <p className="text-xs font-semibold">{admission.program}</p>
-                    </div>
-                    <div>
-                      <Label>Decision Date</Label>
-                      <p className="text-xs">{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
-                    </div>
-                    <div>
-                      <Label>Tuition Fee</Label>
-                      <p className="text-xs">{admission.tuitionFee || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <Label>Scholarship Amount</Label>
-                      <p className="text-xs">{admission.scholarshipAmount || 'No scholarship'}</p>
-                    </div>
-                    <div>
-                      <Label>Start Date</Label>
-                      <p className="text-xs">{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <Label>End Date</Label>
-                      <p className="text-xs">{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
-                    </div>
-                  </div>
-                  {admission.notes && (
-                    <div className="mt-4">
-                      <Label>Notes</Label>
-                      <p className="mt-1 text-xs text-gray-800">{admission.notes}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Plane className="w-5 h-5 mr-2" />
-                    Visa Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Visa Status</Label>
-                      <div className="mt-1">
-                        <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>
-                          <span className="text-xs">{currentVisaStatus.replace('_', ' ').toUpperCase()}</span>
-                        </Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Visa Application Date</Label>
-                      <p className="text-xs">{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
-                    </div>
-                    <div>
-                      <Label>Visa Interview Date</Label>
-                      <p className="text-xs">{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
-                    </div>
-                    <div>
-                      <Label>Visa Approval Date</Label>
-                      <p className="text-xs">{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-            </div>
+                </div>
+                <div>
+                  <Label>Visa Application Date</Label>
+                  <p className="text-xs">{admission.visaApplicationDate ? new Date(admission.visaApplicationDate).toLocaleDateString() : 'Not applied'}</p>
+                </div>
+                <div>
+                  <Label>Visa Interview Date</Label>
+                  <p className="text-xs">{admission.visaInterviewDate ? new Date(admission.visaInterviewDate).toLocaleDateString() : 'Not scheduled'}</p>
+                </div>
+                <div>
+                  <Label>Visa Approval Date</Label>
+                  <p className="text-xs">{admission.visaApprovalDate ? new Date(admission.visaApprovalDate).toLocaleDateString() : 'Pending'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+      rightContent={(
+        <>
+          <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
+            <h3 className="text-sm font-semibold">Activity Timeline</h3>
           </div>
-
-          {/* Right: Timeline */}
-          <div className="border-l bg-white flex flex-col min-h-0">
-            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-              <h3 className="text-sm font-semibold">Activity Timeline</h3>
-            </div>
-            <div className="flex-1 overflow-y-auto pt-1 min-h-0">
-              <ActivityTracker
-                entityType="admission"
-                entityId={admission.id}
-                entityName={admission.program}
-              />
-            </div>
+          <div className="flex-1 overflow-y-auto pt-1 min-h-0">
+            <ActivityTracker
+              entityType="admission"
+              entityId={admission.id}
+              entityName={admission.program}
+            />
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </>
+      )}
+    />
   );
 }

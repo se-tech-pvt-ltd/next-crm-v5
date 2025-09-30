@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 console.log('[modal] loaded: frontend/src/components/add-admission-modal.tsx');
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,7 +15,12 @@ import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
+import * as BranchEmpsService from '@/services/branchEmps';
+import * as DropdownsService from '@/services/dropdowns';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Check, ChevronsUpDown, PlusCircle, Users } from 'lucide-react';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { StudentProfileModal } from './student-profile-modal-new';
@@ -55,6 +60,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     enabled: !!applicationId
   });
 
+  const { user } = useAuth() as any;
+  const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
+  const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
+
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
+
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
     defaultValues: {
@@ -81,18 +92,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       notes: '',
       counsellorId: '',
       admissionOfficerId: '',
+      regionId: '',
+      branchId: '',
     }
   });
 
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
   const watchedAppId = form.watch('applicationId');
+  const branchId = form.watch('branchId');
+  const regionId = form.watch('regionId');
+
   useEffect(() => {
     const full = Number(watchedFull) || 0;
     const scholarship = Number(watchedScholarship) || 0;
     const net = full > 0 ? Math.max(full - scholarship, 0) : 0;
-    if (!Number.isNaN(net)) form.setValue('netTuitionFee', String(net));
-  }, [watchedFull, watchedScholarship, form]);
+    if (!Number.isNaN(net)) {
+      const curr = form.getValues('netTuitionFee');
+      if (String(curr) !== String(net)) form.setValue('netTuitionFee', String(net));
+    }
+  }, [watchedFull, watchedScholarship]);
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -109,6 +128,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         depositAmount: data.depositAmount || data.initialDeposit || null,
         depositDeadline: data.depositDate ? new Date(data.depositDate) : (data.depositDeadline ? new Date(data.depositDeadline) : null),
         visaStatus: data.visaStatus || 'pending',
+        branchId: data.branchId || undefined,
+        regionId: data.regionId || undefined,
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
@@ -147,17 +168,34 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
     // If we have a linked application (when modal opened with applicationId), populate university and program
     if (linkedApp) {
-      form.setValue('applicationId', String(linkedApp.id));
-      if (!form.getValues('studentId')) form.setValue('studentId', linkedApp.studentId);
-      form.setValue('university', linkedApp.university || '');
-      form.setValue('program', linkedApp.program || '');
+      const linkedIdStr = String(linkedApp.id);
+      if (form.getValues('applicationId') !== linkedIdStr) form.setValue('applicationId', linkedIdStr);
+      if (form.getValues('studentId') !== (linkedApp.studentId || '')) form.setValue('studentId', linkedApp.studentId || '');
+      if (form.getValues('university') !== (linkedApp.university || '')) form.setValue('university', linkedApp.university || '');
+      if (form.getValues('program') !== (linkedApp.program || '')) form.setValue('program', linkedApp.program || '');
       try {
         const anyApp: any = linkedApp as any;
         if (!form.getValues('counsellorId') && anyApp.counsellorId) form.setValue('counsellorId', String(anyApp.counsellorId));
         if (!form.getValues('admissionOfficerId') && anyApp.admissionOfficerId) form.setValue('admissionOfficerId', String(anyApp.admissionOfficerId));
+        // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
+        const localCaseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
+        const localStatusOptions = getOptions('Status', ['Admissions','Applications']);
+        if (!form.getValues('caseStatus') && (anyApp.caseStatus || anyApp.case_status)) {
+          const raw = String(anyApp.caseStatus ?? anyApp.case_status);
+          // Try to map to caseStatusOptions value (match by label or value)
+          const match = (localCaseStatusOptions || []).find((o: any) => String(o.value) === raw || String(o.label).toLowerCase() === raw.toLowerCase());
+          if (match) form.setValue('caseStatus', match.value);
+          else form.setValue('caseStatus', raw);
+        }
+        if (!form.getValues('status') && (anyApp.status || anyApp.appStatus || anyApp.app_status)) {
+          const raw = String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status);
+          const match = (localStatusOptions || []).find((o: any) => String(o.value) === raw || String(o.label).toLowerCase() === raw.toLowerCase());
+          if (match) form.setValue('status', match.value);
+          else form.setValue('status', raw);
+        }
       } catch {}
     }
-  }, [applicationId, studentId, linkedApp, form]);
+  }, [applicationId, studentId, linkedApp]);
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -203,8 +241,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     return [] as {label:string;value:string}[];
   };
 
-  const statusOptions = getOptions('Status', ['Admissions']);
-  const caseStatusOptions = getOptions('Case Status', ['Admissions']);
+  const statusOptions = getOptions('Status', ['Admissions','Applications']);
+  const caseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
 
   useEffect(() => {
     if (!open) return;
@@ -230,25 +268,164 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     staleTime: 5 * 60 * 1000,
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const counsellorOptions = Array.isArray(users)
-    ? users.filter((u: any) => {
-        const role = normalizeRole(u.role || u.role_name || u.roleName);
-        return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
-      })
-      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
-    : [];
-  const officerOptions = Array.isArray(users)
-    ? users.filter((u: any) => {
-        const role = normalizeRole(u.role || u.role_name || u.roleName);
-        return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
-      })
-      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
-    : [];
+  const counsellorOptions = React.useMemo(() => {
+    const bid = String(form.getValues('branchId') || '');
+    if (!bid) return [];
+    const base = Array.isArray(users) ? users.filter((u: any) => {
+      const role = normalizeRole(u.role || u.role_name || u.roleName);
+      return role === 'counselor' || role === 'counsellor' || role === 'admin_staff';
+    }) : [];
+    const links = Array.isArray(branchEmps) ? branchEmps : [];
+    const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+  }, [users, branchEmps, branchId]);
+
+  const officerOptions = React.useMemo(() => {
+    const bid = String(form.getValues('branchId') || '');
+    if (!bid) return [];
+    const base = Array.isArray(users) ? users.filter((u: any) => {
+      const role = normalizeRole(u.role || u.role_name || u.roleName);
+      return role === 'admission_officer' || role === 'admission' || role === 'admissionofficer' || role === 'admission officer';
+    }) : [];
+    const links = Array.isArray(branchEmps) ? branchEmps : [];
+    const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
+    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+  }, [users, branchEmps, branchId]);
+
+  // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => (RegionsService.listRegions ? RegionsService.listRegions() : RegionsService.getRegions ? RegionsService.getRegions() : Promise.resolve([])), enabled: open });
+  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => (BranchesService.listBranches ? BranchesService.listBranches() : BranchesService.getBranches ? BranchesService.getBranches() : Promise.resolve([])), enabled: open });
+
+  const regionOptions = Array.isArray(regions) ? regions.map((r: any) => ({ value: String(r.id), label: String(r.regionName || r.name || r.id) })) : [];
+  const branchOptions = React.useMemo(() => (Array.isArray(branches) ? branches : [])
+    .filter((b: any) => !regionId || String(b.regionId ?? b.region_id ?? '') === String(regionId))
+    .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') })), [branches, regionId]);
 
   const [isAppDetailsOpen, setIsAppDetailsOpen] = useState(false);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
   const [currentStudentIdLocal, setCurrentStudentIdLocal] = useState<string | null>(null);
+
+  const getNormalizedRole = () => {
+    try {
+      const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
+      if (rawRole) return String(rawRole).trim().toLowerCase().replace(/\s+/g, '_');
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          return String(tokenRole).trim().toLowerCase().replace(/\s+/g, '_');
+        }
+      }
+    } catch {}
+    return '';
+  };
+
+  // Auto-select region/branch based on role
+  React.useEffect(() => {
+    try {
+      if (!open) return;
+      const currentRegion = String(form.getValues('regionId') || '');
+      const currentBranch = String(form.getValues('branchId') || '');
+      if (currentRegion && currentBranch) return;
+
+      const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
+      const token = safeGetToken();
+      let resolvedRegionId = '' as string;
+      let resolvedBranchId = '' as string;
+
+      if (token) {
+        try {
+          const parts = String(token).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            const rd = payload?.role_details || payload?.roleDetails || {};
+            const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+            const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.branch?.id ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+            if (candidateRegion) resolvedRegionId = String(candidateRegion);
+            if (candidateBranch) resolvedBranchId = String(candidateBranch);
+          }
+        } catch {}
+      }
+
+      const roleName = getNormalizedRole();
+      const shouldDisableRegion = ['regional_manager','regional_head','branch_manager','counselor','counsellor','admission_officer'].includes(roleName);
+
+      if (!resolvedRegionId) {
+        const userRegionId = String((user as any)?.regionId ?? (user as any)?.region_id ?? '');
+        if (userRegionId) {
+          resolvedRegionId = userRegionId;
+        } else if (roleName === 'regional_manager' || roleName === 'regional_head') {
+          const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String((user as any)?.id));
+          if (r?.id) resolvedRegionId = String(r.id);
+        }
+      }
+
+      if (!resolvedBranchId && (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer')) {
+        const branchesArr = Array.isArray(branches) ? branches : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '' as string;
+        const headBranch = branchesArr.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String((user as any)?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String((user as any)?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          resolvedBranchId = userBranchId;
+          if (!resolvedRegionId) {
+            const b = branchesArr.find((bb: any) => String(bb.id) === String(userBranchId));
+            if (b) resolvedRegionId = String(b.regionId ?? b.region_id ?? '');
+          }
+        }
+      }
+
+      // Only set values if different to avoid triggering re-renders unnecessarily
+      const currRegion = form.getValues('regionId');
+      if (resolvedRegionId && String(currRegion) !== String(resolvedRegionId)) {
+        form.setValue('regionId', resolvedRegionId as any);
+        if (autoRegionDisabled !== shouldDisableRegion) setAutoRegionDisabled(shouldDisableRegion);
+      } else if (!resolvedRegionId) {
+        if (autoRegionDisabled !== false) setAutoRegionDisabled(false);
+      }
+
+      const currBranch = form.getValues('branchId');
+      if (resolvedBranchId && String(currBranch) !== String(resolvedBranchId)) {
+        form.setValue('branchId', resolvedBranchId as any);
+        if (autoBranchDisabled !== !shouldDisableRegion) setAutoBranchDisabled(!shouldDisableRegion);
+
+        // populate counsellor/admission officer based on branch employees
+        try {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          const userIds = (links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === String(resolvedBranchId)).map((be:any)=>String(be.userId ?? be.user_id));
+          if (userIds.length > 0) {
+            const counsellor = (users || []).find((u:any)=>userIds.includes(String(u.id)) && String(u.role || u.role_name || u.roleName).toLowerCase().includes('counsel'));
+            const officer = (users || []).find((u:any)=>userIds.includes(String(u.id)) && String(u.role || u.role_name || u.roleName).toLowerCase().includes('admission'));
+            if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
+            if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
+          }
+        } catch {}
+      } else if (!resolvedBranchId && resolvedRegionId && !form.getValues('branchId')) {
+        if (form.getValues('branchId') !== '') form.setValue('branchId', '');
+        if (autoBranchDisabled !== false) setAutoBranchDisabled(false);
+      }
+
+      if (!(resolvedRegionId || resolvedBranchId)) {
+        if (autoRegionDisabled !== false) setAutoRegionDisabled(false);
+        if (autoBranchDisabled !== false) setAutoBranchDisabled(false);
+      }
+    } catch {}
+  }, [open, (user as any)?.id, (user as any)?.role, regions, branches, branchEmps, users]);
 
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
@@ -269,6 +446,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     setCurrentStudentIdLocal(sid);
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
   };
+
+  // Populate counsellor/admission officer only after branch is selected
+  React.useEffect(() => {
+    try {
+      const bid = String(form.getValues('branchId') || '');
+      if (!bid) {
+        // clear selections when branch cleared
+        if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+        if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
+        return;
+      }
+      const links = Array.isArray(branchEmps) ? branchEmps : [];
+      const userIds = (links as any[]).filter((be:any)=>String(be.branchId ?? be.branch_id) === bid).map((be:any)=>String(be.userId ?? be.user_id));
+      if (userIds.length === 0) return;
+      const counsellor = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('counsel'));
+      const officer = (users || []).find((u:any)=>userIds.includes(String(u.id)) && normalizeRole(u.role||u.role_name||u.roleName).includes('admission'));
+      if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
+      if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
+    } catch {}
+  }, [branchId, branchEmps, users]);
 
   const handleSubmitClick = () => { try { form.handleSubmit(onSubmit)(); } catch {} };
 
@@ -446,6 +643,40 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <FormLabel>Region</FormLabel>
+                          <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {regionOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <FormLabel>Branch</FormLabel>
+                          <Select value={form.watch('branchId') || ''} onValueChange={(v) => {
+                            const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
+                            form.setValue('branchId', v);
+                            form.setValue('counsellorId', '');
+                            form.setValue('admissionOfficerId', '');
+                            if (!form.getValues('regionId') && b) form.setValue('regionId', String(b.regionId || ''));
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select branch" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {branchOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
                         <div>
                           <FormLabel>Counsellor</FormLabel>
                           <Select value={form.watch('counsellorId') || ''} onValueChange={(v) => form.setValue('counsellorId', v)}>

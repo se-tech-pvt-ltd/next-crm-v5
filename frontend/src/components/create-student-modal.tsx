@@ -298,6 +298,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   // Auto-select region/branch based on role (mirrors /leads/new)
   React.useEffect(() => {
     try {
+      if (!open) return;
       const currentRegion = String(formData.regionId || '');
       const currentBranch = String(formData.branchId || '');
       if (currentRegion && currentBranch) return;
@@ -376,7 +377,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
         setAutoBranchDisabled(false);
       }
     } catch {}
-  }, [user, regions, branches, branchEmps, open]);
+  }, [open]);
+
 
   // Ensure region derives from selected branch if missing
   React.useEffect(() => {
