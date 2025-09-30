@@ -15,6 +15,8 @@ import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
 import { Check, ChevronsUpDown, PlusCircle, Users } from 'lucide-react';
 import { ApplicationDetailsModal } from './application-details-modal-new';
