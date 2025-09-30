@@ -90,12 +90,22 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     consultancyFeeAttachment: '',
     scholarship: 'No',
     scholarshipAttachment: '',
+    notes: '',
   };
 
-  const [formData, setFormData] = React.useState(initialFormData);
+  type FormFieldKey = keyof typeof initialFormData;
 
-  const handleChange = (key: keyof typeof initialFormData, value: any) => {
+  const [formData, setFormData] = React.useState(initialFormData);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  const handleChange = (key: FormFieldKey, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
+    setErrors(prev => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
   const createStudentMutation = useMutation({
@@ -111,79 +121,113 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       onOpenChange(false);
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error?.message || 'Failed to create student.', variant: 'destructive' });
+      const message = error?.message || 'Failed to create student.';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+      setErrors(prev => {
+        if (!message) return prev;
+        const lower = message.toLowerCase();
+        const next = { ...prev };
+        if (lower.includes('email')) next.email = message;
+        if (lower.includes('phone')) next.phone = message;
+        return next;
+      });
     }
   });
 
   const handleCreate = async () => {
-    // Check duplicates for email and phone
+    const trimmedName = (formData.name || '').trim();
+    const normalizedEmail = (formData.email || '').trim().toLowerCase();
+    const normalizedPhone = (formData.phone || '').trim();
+    const normalizedPhoneDigits = normalizedPhone.replace(/\D/g, '');
+    const passportNumber = (formData.passport || '').trim();
+    const dateOfBirth = (formData.dateOfBirth || '').trim();
+    const address = (formData.address || '').trim();
+    const englishProficiency = (formData.englishProficiency || '').trim();
+    const expectation = (formData.expectation || '').trim();
+    const status = (formData.status || '').trim();
+    const counsellorId = (formData.counsellor || '').trim();
+    const admissionOfficerId = (formData.admissionOfficer || '').trim();
+    const notes = (formData.notes || '').trim();
+
+    const validationErrors: Record<string, string> = {};
+
+    if (!trimmedName) validationErrors.name = 'Full Name is required';
+    if (!normalizedEmail) validationErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) validationErrors.email = 'Enter a valid email address';
+    if (!normalizedPhone) validationErrors.phone = 'Phone is required';
+    else if (normalizedPhoneDigits.length < 6) validationErrors.phone = 'Enter a valid phone number';
+    if (!passportNumber) validationErrors.passport = 'Passport number is required';
+    if (!dateOfBirth) validationErrors.dateOfBirth = 'Date of birth is required';
+    if (!address) validationErrors.address = 'Address is required';
+    if (!englishProficiency) validationErrors.englishProficiency = 'English proficiency is required';
+    if (!expectation) validationErrors.expectation = 'Expectation is required';
+    if (!status) validationErrors.status = 'Status is required';
+    if (!Array.isArray(formData.targetCountries) || formData.targetCountries.length === 0) validationErrors.targetCountries = 'Select at least one target country';
+    if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
+    if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
+    if (!formData.consultancyFee) validationErrors.consultancyFee = 'Consultancy fee selection is required';
+    if (!formData.scholarship) validationErrors.scholarship = 'Scholarship selection is required';
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast({ title: 'Missing information', description: 'Please fill in all required fields.', variant: 'destructive' });
+      return;
+    }
+
+    const normalizedTargetCountry = JSON.stringify(formData.targetCountries.map((value) => String(value)));
+
+    const payload: any = {
+      name: trimmedName,
+      email: normalizedEmail,
+      phone: normalizedPhone,
+      dateOfBirth,
+      address,
+      expectation,
+      status,
+      targetCountry: normalizedTargetCountry,
+      passportNumber,
+      englishProficiency,
+      counsellorId,
+      counselorId: counsellorId,
+      admissionOfficerId,
+      consultancyFree: formData.consultancyFee === 'Yes',
+      scholarship: formData.scholarship === 'Yes',
+    };
+
+    if (notes) payload.notes = notes;
+
     try {
       const res = await StudentsService.getStudents();
       let list: any[] = [];
       if (Array.isArray(res)) list = res as any[];
       else if (res && typeof res === 'object') list = (res as any).data || [];
 
-      const email = (formData.email || '').trim().toLowerCase();
-      const phone = String(formData.phone || '').replace(/\D/g, '');
-
-      if (email) {
-        const found = list.find(s => s && s.email && String(s.email).trim().toLowerCase() === email);
-        if (found) {
-          toast({ title: 'Duplicate email', description: 'A student with this email already exists.', variant: 'destructive' });
+      if (normalizedEmail) {
+        const duplicateEmail = list.find(s => s && s.email && String(s.email).trim().toLowerCase() === normalizedEmail);
+        if (duplicateEmail) {
+          const duplicateError = 'A student with this email already exists.';
+          setErrors(prev => ({ ...prev, email: duplicateError }));
+          toast({ title: 'Duplicate email', description: duplicateError, variant: 'destructive' });
           return;
         }
       }
 
-      if (phone) {
-        const found = list.find(s => s && s.phone && String(s.phone).replace(/\D/g, '') === phone);
-        if (found) {
-          toast({ title: 'Duplicate phone', description: 'A student with this phone number already exists.', variant: 'destructive' });
+      if (normalizedPhoneDigits) {
+        const duplicatePhone = list.find(s => s && s.phone && String(s.phone).replace(/\D/g, '') === normalizedPhoneDigits);
+        if (duplicatePhone) {
+          const duplicateError = 'A student with this phone number already exists.';
+          setErrors(prev => ({ ...prev, phone: duplicateError }));
+          toast({ title: 'Duplicate phone', description: duplicateError, variant: 'destructive' });
           return;
         }
       }
 
-      const normalizedTargetCountry = Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0
-        ? JSON.stringify(formData.targetCountries.map((v) => String(v)))
-        : undefined;
-
-      const payload: any = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth || undefined,
-        address: formData.address || undefined,
-        expectation: formData.expectation || undefined,
-        status: formData.status || 'active',
-        targetCountry: normalizedTargetCountry,
-        passportNumber: formData.passport || undefined,
-        englishProficiency: formData.englishProficiency || undefined,
-        counsellorId: formData.counsellor || undefined,
-        counselorId: formData.counsellor || undefined,
-        admissionOfficerId: formData.admissionOfficer || undefined,
-        consultancyFree: formData.consultancyFee === 'Yes',
-        scholarship: formData.scholarship === 'Yes',
-      };
-
+      setErrors({});
       createStudentMutation.mutate(payload);
+      return;
     } catch (err: any) {
-      // If fetching list fails, still attempt to create but warn
-      try { createStudentMutation.mutate({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth || undefined,
-        address: formData.address || undefined,
-        expectation: formData.expectation || undefined,
-        status: formData.status || 'active',
-        targetCountry: (Array.isArray(formData.targetCountries) && formData.targetCountries.length > 0) ? JSON.stringify(formData.targetCountries.map(String)) : undefined,
-        passportNumber: formData.passport || undefined,
-        englishProficiency: formData.englishProficiency || undefined,
-        counsellorId: formData.counsellor || undefined,
-        counselorId: formData.counsellor || undefined,
-        admissionOfficerId: formData.admissionOfficer || undefined,
-        consultancyFree: formData.consultancyFee === 'Yes',
-        scholarship: formData.scholarship === 'Yes',
-      } as any); } catch {}
+      setErrors({});
+      createStudentMutation.mutate(payload);
     }
   };
 
@@ -258,22 +302,27 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               <div className="space-y-1">
                 <Label>Full Name</Label>
                 <Input placeholder="Enter full name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} disabled={disabled} />
+                {errors.name && <p className="text-[11px] text-red-600">{errors.name}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Email</Label>
                 <Input type="email" placeholder="Enter email address" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} disabled={disabled} />
+                {errors.email && <p className="text-[11px] text-red-600">{errors.email}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Phone</Label>
                 <Input type="tel" placeholder="Enter phone number" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
+                {errors.phone && <p className="text-[11px] text-red-600">{errors.phone}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Passport Number</Label>
                 <Input placeholder="Enter passport number" value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
+                {errors.passport && <p className="text-[11px] text-red-600">{errors.passport}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Date of Birth</Label>
                 <DobPicker value={formData.dateOfBirth} onChange={(v) => handleChange('dateOfBirth', v)} disabled={disabled} />
+                {errors.dateOfBirth && <p className="text-[11px] text-red-600">{errors.dateOfBirth}</p>}
               </div>
               <div className="space-y-1 md:col-span-2 lg:col-span-1">
                 <Label>Address</Label>
@@ -316,19 +365,43 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1 md:col-span-2">
-                <Label>Target Country</Label>
-                <MultiSelect
-                  value={formData.targetCountries}
-                  onValueChange={(vals) => handleChange('targetCountries', vals)}
-                  placeholder="Select countries"
-                  searchPlaceholder="Search countries..."
-                  options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
-                  emptyMessage="No countries found"
-                  maxDisplayItems={3}
-                  className="text-[11px] shadow-sm border border-gray-300 bg-white"
-                  disabled={disabled}
-                />
+              <div className="md:col-span-2 lg:col-span-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label>Target Country</Label>
+                    <MultiSelect
+                      value={formData.targetCountries}
+                      onValueChange={(vals) => handleChange('targetCountries', vals)}
+                      placeholder="Select countries"
+                      searchPlaceholder="Search countries..."
+                      options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
+                      emptyMessage="No countries found"
+                      maxDisplayItems={3}
+                      className="text-[11px] shadow-sm border border-gray-300 bg-white"
+                      disabled={disabled}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Consultancy Fee</Label>
+                    <Select value={formData.consultancyFee} onValueChange={(v) => handleChange('consultancyFee', v)} disabled={disabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Scholarship</Label>
+                    <Select value={formData.scholarship} onValueChange={(v) => handleChange('scholarship', v)} disabled={disabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -359,34 +432,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             </CardContent>
           </Card>
 
-
-          <Card>
-            <CardHeader className="py-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Award className="w-4 h-4" /> Fees & Scholarships</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label>Consultancy Fee</Label>
-                <Select value={formData.consultancyFee} onValueChange={(v) => handleChange('consultancyFee', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="No">No</SelectItem>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Scholarship</Label>
-                <Select value={formData.scholarship} onValueChange={(v) => handleChange('scholarship', v)} disabled={disabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select option" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="No">No</SelectItem>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="py-2">
