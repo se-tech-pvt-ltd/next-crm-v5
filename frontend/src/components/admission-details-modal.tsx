@@ -9,7 +9,7 @@ import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as DropdownsService from '@/services/dropdowns';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from '@/hooks/use-toast';
 
 interface AdmissionDetailsModalProps {
@@ -42,12 +42,33 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     setCaseStatus(admission?.caseStatus || '');
   }, [admission]);
 
-  const getCaseStatusOptions = () => {
-    const dd = admissionDropdowns || {};
-    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
-    if (!Array.isArray(list)) list = [];
-    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
+  const statusSequence = useMemo<string[]>(() => {
+    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','on_hold','rejected'];
+    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
+  }, [admissionDropdowns]);
+
+  const getStatusDisplayName = (statusId: string) => {
+    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+    const byId = list.find((o: any) => o.id === statusId || o.key === statusId || o.value === statusId);
+    if (byId?.value) return byId.value;
+    return statusId;
   };
+
+  const formatDateOrdinal = (d: any) => {
+    if (!d) return '';
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return '';
+    const day = date.getDate();
+    const j = day % 10;
+    const k = day % 100;
+    const suffix = (k >= 11 && k <= 13) ? 'th' : (j === 1 ? 'st' : j === 2 ? 'nd' : j === 3 ? 'rd' : 'th');
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${day}${suffix} ${month}, ${year}`;
+  };
+
+  if (!admission) return null;
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -81,20 +102,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     updateCaseStatusMutation.mutate(newCase);
   };
 
-  const formatDateOrdinal = (d: any) => {
-    if (!d) return '';
-    const date = new Date(d);
-    if (Number.isNaN(date.getTime())) return '';
-    const day = date.getDate();
-    const j = day % 10;
-    const k = day % 100;
-    const suffix = (k >= 11 && k <= 13) ? 'th' : (j === 1 ? 'st' : j === 2 ? 'nd' : j === 3 ? 'rd' : 'th');
-    const month = date.toLocaleString('en-US', { month: 'long' });
-    const year = date.getFullYear();
-    return `${day}${suffix} ${month}, ${year}`;
+  const getCaseStatusOptions = () => {
+    const dd = admissionDropdowns || {};
+    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
+    if (!Array.isArray(list)) list = [];
+    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
   };
-
-  if (!admission) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -126,8 +139,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {/* If dropdown config exists, try to render options; otherwise fall back to common statuses */}
-                          {getCaseStatusOptions().length === 0 ? (
+                          {statusSequence.length === 0 ? (
                             <>
                               <SelectItem value="not_applied">Not Applied</SelectItem>
                               <SelectItem value="applied">Applied</SelectItem>
@@ -137,8 +149,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                               <SelectItem value="on_hold">On Hold</SelectItem>
                             </>
                           ) : (
-                            // reuse caseStatus options as a simple fallback for status options when configured
-                            getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)
+                            statusSequence.map(s => <SelectItem key={s} value={s}>{getStatusDisplayName(s)}</SelectItem>)
                           )}
                         </SelectContent>
                       </Select>
@@ -161,10 +172,10 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   <div className="px-4 pb-3">
                     <div className="w-full bg-gray-100 rounded-md p-1.5">
                       <div className="flex items-center justify-between relative">
-                        {['not_applied','applied','interview_scheduled','approved','on_hold','rejected'].map((s, index, arr) => {
+                        {statusSequence.map((s, index, arr) => {
                           const currentIndex = arr.indexOf(currentStatus || '');
                           const isCompleted = currentIndex >= 0 && index <= currentIndex;
-                          const label = s.charAt(0).toUpperCase() + s.slice(1).replace('_',' ');
+                          const label = getStatusDisplayName(s);
                           const handleClick = () => {
                             if (s === currentStatus) return;
                             handleStatusChange(s);
@@ -234,7 +245,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Status</label>
-                        <p>{(admission.status || '').toString() || 'Not specified'}</p>
+                        <p>{getStatusDisplayName(admission.status || '') || (admission.status || 'Not specified')}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Case Status</label>
