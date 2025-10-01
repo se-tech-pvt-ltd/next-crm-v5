@@ -10,7 +10,9 @@ import { Admission } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
-import { useState } from "react";
+import * as DropdownsService from '@/services/dropdowns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect } from "react";
 import { useLocation } from 'wouter';
 
 interface AdmissionDetailsModalProps {
@@ -21,6 +23,7 @@ interface AdmissionDetailsModalProps {
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
   const [, setLocation] = useLocation();
+
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
     const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
     const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
@@ -46,7 +49,15 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       </div>
     );
   };
-  const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
+
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || 'not_applied');
+  const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
+
+  useEffect(() => {
+    setCurrentStatus(admission?.status || 'not_applied');
+    setCaseStatus(admission?.caseStatus || '');
+  }, [admission]);
+
   const queryClient = useQueryClient();
 
   const { data: student } = useQuery({
@@ -60,10 +71,24 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     enabled: !!admission?.applicationId,
   });
 
-  const updateVisaStatusMutation = useMutation({
+  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
+    enabled: !!admission,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const getCaseStatusOptions = () => {
+    const dd = admissionDropdowns || {};
+    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
+    if (!Array.isArray(list)) list = [];
+    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
+  };
+
+  const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!admission) return;
-      return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
+      return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
@@ -71,9 +96,25 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     },
   });
 
-  const handleVisaStatusChange = (newStatus: string) => {
-    setCurrentVisaStatus(newStatus);
-    updateVisaStatusMutation.mutate(newStatus);
+  const updateCaseStatusMutation = useMutation({
+    mutationFn: async (newCaseStatus: string) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, { caseStatus: newCaseStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+    },
+  });
+
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateStatusMutation.mutate(newStatus);
+  };
+
+  const handleCaseStatusChange = (newCase: string) => {
+    setCaseStatus(newCase);
+    updateCaseStatusMutation.mutate(newCase);
   };
 
   if (!admission) return null;
@@ -130,7 +171,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       statusBarWrapperClassName="px-4 py-2 bg-[#223E7D] text-white -mt-px"
       headerLeft={headerLeft}
       headerRight={headerRight}
-      statusBar={<AdmissionStatusBar currentStatus={currentVisaStatus} onChange={handleVisaStatusChange} />}
+      statusBar={<AdmissionStatusBar currentStatus={currentStatus} onChange={handleStatusChange} />}
       rightWidth="360px"
       leftContent={(
         <>
@@ -227,7 +268,18 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 </div>
                 <div>
                   <Label>Case Status</Label>
-                  <p className="text-xs">{(admission.caseStatus || '').toString() || 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Select case status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                          <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </CardContent>
