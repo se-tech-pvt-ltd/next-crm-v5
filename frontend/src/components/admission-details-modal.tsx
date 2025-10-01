@@ -48,6 +48,19 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     setCurrentVisaStatus(admission?.visaStatus || 'not_applied');
   }, [admission]);
 
+  const formatDateOrdinal = (d: any) => {
+    if (!d) return '';
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return '';
+    const day = date.getDate();
+    const j = day % 10;
+    const k = day % 100;
+    const suffix = (k >= 11 && k <= 13) ? 'th' : (j === 1 ? 'st' : j === 2 ? 'nd' : j === 3 ? 'rd' : 'th');
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${day}${suffix} ${month}, ${year}`;
+  };
+
   if (!admission) return null;
 
   return (
