@@ -142,7 +142,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         scholarshipAmount: data.scholarshipAmount || null,
         netTuitionFee: data.netTuitionFee || null,
         depositRequired: Boolean(data.depositRequired) || false,
-        depositAmount: data.depositAmount || data.initialDeposit || undefined,
+        // Persist initialDeposit (frontend field) into DB column initial_deposit
+        initialDeposit: data.initialDeposit ?? data.depositAmount ?? undefined,
+        // keep depositAmount for compatibility but not required
+        depositAmount: data.depositAmount ?? undefined,
         depositDate: data.depositDate ? new Date(data.depositDate) : undefined,
         depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : undefined,
         visaDate: data.visaDate ? new Date(data.visaDate) : undefined,
