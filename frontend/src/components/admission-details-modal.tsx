@@ -1,13 +1,10 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 console.log('[modal] loaded: frontend/src/components/admission-details-modal.tsx');
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { Award, User, X, ExternalLink, Plane, Edit, Save } from "lucide-react";
+import { Award, X, ExternalLink } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
@@ -23,11 +20,8 @@ interface AdmissionDetailsModalProps {
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
   const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<Partial<Admission>>({});
 
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const { data: student } = useQuery({
     queryKey: [`/api/students/${admission?.studentId}`],
@@ -45,22 +39,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     },
   });
 
-  const updateAdmissionMutation = useMutation({
-    mutationFn: async (data: Partial<Admission>) => {
-      if (!admission) return;
-      return AdmissionsService.updateAdmission(admission.id, data);
-    },
-    onSuccess: () => {
-      toast({ title: 'Success', description: 'Admission updated.' });
-      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
-      setIsEditing(false);
-    },
-    onError: (err: any) => {
-      toast({ title: 'Error', description: err?.message || 'Failed to update admission.', variant: 'destructive' });
-    },
-  });
-
   const handleVisaStatusChange = (newStatus: string) => {
     setCurrentVisaStatus(newStatus);
     updateVisaStatusMutation.mutate(newStatus);
@@ -68,12 +46,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
 
   useEffect(() => {
     setCurrentVisaStatus(admission?.visaStatus || 'not_applied');
-    setEditData(admission || {});
   }, [admission]);
-
-  const handleSaveChanges = () => {
-    updateAdmissionMutation.mutate(editData);
-  };
 
   if (!admission) return null;
 
@@ -118,30 +91,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {isEditing ? (
-                        <>
-                          <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateAdmissionMutation.isPending}>
-                            <Save />
-                            <span className="hidden lg:inline">{updateAdmissionMutation.isPending ? 'Saving…' : 'Save'}</span>
-                          </Button>
-                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(admission); }} title="Cancel" disabled={updateAdmissionMutation.isPending}>
-                            <X />
-                            <span className="hidden lg:inline">Cancel</span>
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
-                            <Edit />
-                            <span className="hidden lg:inline">Edit</span>
-                          </Button>
-                          {student && (
-                            <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
-                              <ExternalLink />
-                              <span className="hidden lg:inline">View Student</span>
-                            </Button>
-                          )}
-                        </>
+                      {student && (
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
+                          <ExternalLink />
+                          <span className="hidden lg:inline">View Student</span>
+                        </Button>
                       )}
 
                       <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
