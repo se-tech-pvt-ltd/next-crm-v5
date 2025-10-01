@@ -221,6 +221,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           return undefined;
         };
         {
+          // Clear to avoid showing stale values while async lookups complete
+          form.setValue('counsellorId', '');
+          form.setValue('admissionOfficerId', '');
           const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
           const resolvedC = resolveUserIdFromApp(sourceCounsellor);
           console.log('[AddAdmissionModal] linkedApp counsellor source:', { sourceCounsellor, resolvedC, usersCount: Array.isArray(users) ? users.length : 0, branchEmpsCount: Array.isArray(branchEmps) ? branchEmps.length : 0 });
