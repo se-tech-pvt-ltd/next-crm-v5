@@ -341,7 +341,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }) : [];
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    // Ensure selected value is present in options so Select shows correct label
+    try {
+      const sel = String(form.getValues('counsellorId') || '');
+      if (sel && !opts.some((o:any) => String(o.value) === sel) && Array.isArray(users)) {
+        const su = users.find((x:any) => String(x.id) === sel);
+        if (su) opts.unshift({ value: String(su.id), label: `${su.firstName || ''} ${su.lastName || ''}`.trim() || (su.email || 'User') });
+      }
+    } catch {}
+    return opts;
   }, [users, branchEmps, branchId]);
 
   const officerOptions = React.useMemo(() => {
@@ -353,7 +362,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }) : [];
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    try {
+      const sel = String(form.getValues('admissionOfficerId') || '');
+      if (sel && !opts.some((o:any) => String(o.value) === sel) && Array.isArray(users)) {
+        const su = users.find((x:any) => String(x.id) === sel);
+        if (su) opts.unshift({ value: String(su.id), label: `${su.firstName || ''} ${su.lastName || ''}`.trim() || (su.email || 'User') });
+      }
+    } catch {}
+    return opts;
   }, [users, branchEmps, branchId]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
