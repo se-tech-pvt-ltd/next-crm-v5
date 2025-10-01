@@ -238,6 +238,7 @@ export const insertAdmissionSchema = z.object({
   netTuitionFee: z.string().optional(),
   depositRequired: z.boolean().default(false),
   depositAmount: z.string().optional(),
+  initialDeposit: z.string().optional(),
   depositDeadline: z.union([z.string(), z.date()]).optional().transform((v) => {
     if (v instanceof Date) return v;
     if (!v) return undefined;
