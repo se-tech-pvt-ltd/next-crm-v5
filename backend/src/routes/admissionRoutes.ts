@@ -6,5 +6,6 @@ export const admissionRoutes = Router();
 
 admissionRoutes.get("/", requireAuth, AdmissionController.getAdmissions);
 admissionRoutes.get("/student/:studentId", requireAuth, AdmissionController.getAdmissionsByStudent);
+admissionRoutes.get("/:id", requireAuth, AdmissionController.getAdmission);
 admissionRoutes.post("/", requireAuth, AdmissionController.createAdmission);
 admissionRoutes.put("/:id", requireAuth, AdmissionController.updateAdmission);
