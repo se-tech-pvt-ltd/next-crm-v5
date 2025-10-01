@@ -223,12 +223,20 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         {
           const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
           const resolvedC = resolveUserIdFromApp(sourceCounsellor);
-          if (resolvedC) form.setValue('counsellorId', resolvedC);
+          console.log('[AddAdmissionModal] linkedApp counsellor source:', { sourceCounsellor, resolvedC, usersCount: Array.isArray(users) ? users.length : 0, branchEmpsCount: Array.isArray(branchEmps) ? branchEmps.length : 0 });
+          if (resolvedC) {
+            form.setValue('counsellorId', resolvedC);
+            console.log('[AddAdmissionModal] set counsellorId to', resolvedC);
+          }
         }
         {
           const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
           const resolvedO = resolveUserIdFromApp(sourceOfficer);
-          if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+          console.log('[AddAdmissionModal] linkedApp admissionOfficer source:', { sourceOfficer, resolvedO });
+          if (resolvedO) {
+            form.setValue('admissionOfficerId', resolvedO);
+            console.log('[AddAdmissionModal] set admissionOfficerId to', resolvedO);
+          }
         }
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
         const localCaseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
