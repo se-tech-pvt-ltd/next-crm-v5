@@ -180,10 +180,9 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
               </div>
             </div>
 
-            {/* Scrollable body */}
+            {/* Scrollable body: simplified Admission Information only */}
             <div className="flex-1 overflow-y-auto p-6 pt-28">
               <div className="space-y-6">
-                {/* Admission Information */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -194,133 +193,48 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
+                        <label className="text-sm font-medium text-gray-600">University</label>
+                        <p className="text-lg font-semibold">{admission.university || 'Not specified'}</p>
+                      </div>
+                      <div>
                         <label className="text-sm font-medium text-gray-600">Program</label>
-                        {isEditing ? (
-                          <Input value={editData.program || ''} onChange={(e) => setEditData(prev => ({ ...prev, program: e.target.value }))} />
-                        ) : (
-                          <p className="text-lg font-semibold">{admission.program}</p>
-                        )}
+                        <p className="text-lg font-semibold">{admission.program || 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Decision Date</label>
-                        {isEditing ? (
-                          <Input value={editData.decisionDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, decisionDate: e.target.value }))} />
-                        ) : (
-                          <p>{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
-                        )}
+                        <label className="text-sm font-medium text-gray-600">Initial Deposit</label>
+                        <p>{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
-                        {isEditing ? (
-                          <Input value={editData.fullTuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, fullTuitionFee: e.target.value }))} />
-                        ) : (
-                          <p>{admission.fullTuitionFee || 'Not specified'}</p>
-                        )}
+                        <label className="text-sm font-medium text-gray-600">Full Tuition Fee</label>
+                        <p>{admission.fullTuitionFee || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Net Tuition Fee</label>
+                        <p>{admission.netTuitionFee || 'Not specified'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Scholarship Amount</label>
-                        {isEditing ? (
-                          <Input value={editData.scholarshipAmount || ''} onChange={(e) => setEditData(prev => ({ ...prev, scholarshipAmount: e.target.value }))} />
-                        ) : (
-                          <p>{admission.scholarshipAmount || 'No scholarship'}</p>
-                        )}
+                        <p>{admission.scholarshipAmount || 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Start Date</label>
-                        {isEditing ? (
-                          <Input value={editData.startDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, startDate: e.target.value }))} />
-                        ) : (
-                          <p>{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">End Date</label>
-                        {isEditing ? (
-                          <Input value={editData.endDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, endDate: e.target.value }))} />
-                        ) : (
-                          <p>{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
-                        )}
-                      </div>
-                    </div>
-                    {isEditing ? (
-                      <div className="mt-4">
-                        <label className="text-sm font-medium text-gray-600">Notes</label>
-                        <Textarea value={editData.notes || ''} onChange={(e) => setEditData(prev => ({ ...prev, notes: e.target.value }))} rows={3} />
-                      </div>
-                    ) : (
-                      admission.notes && (
-                        <div className="mt-4">
-                          <label className="text-sm font-medium text-gray-600">Notes</label>
-                          <p className="mt-1 text-gray-800">{admission.notes}</p>
-                        </div>
-                      )
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Visa Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Plane className="w-5 h-5 mr-2" />
-                      Visa Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Visa Status</label>
-                        <div className="mt-1">
-                          <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>{currentVisaStatus.replace('_', ' ').toUpperCase()}</Badge>
-                        </div>
+                        <label className="text-sm font-medium text-gray-600">Deposit Date</label>
+                        <p>{admission.depositDate ? new Date(admission.depositDate).toLocaleDateString() : 'Not specified'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Visa Date</label>
                         <p>{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
                       </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Status</label>
+                        <p>{(admission.status || '').toString() || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Case Status</label>
+                        <p>{(admission.caseStatus || '').toString() || 'Not specified'}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Student Information */}
-                {student && (
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          Student Information
-                        </CardTitle>
-                        {onOpenStudentProfile && (
-                          <Button variant="outline" size="sm" onClick={() => onOpenStudentProfile(student.id)}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View Profile
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Name</label>
-                          <p className="font-medium">{student.name}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Email</label>
-                          <p>{student.email}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Phone</label>
-                          <p>{student.phone || 'Not provided'}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Status</label>
-                          <Badge variant="outline">{student.status}</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </div>
             </div>
           </div>
