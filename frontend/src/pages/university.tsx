@@ -458,8 +458,7 @@ export default function UniversityPage() {
             </div>
             <div className="grid flex-1 min-h-0 overflow-hidden" style={{ gridTemplateColumns: '240px 1fr' }}>
               <aside className="bg-white border-r p-4 space-y-2 overflow-y-auto">
-                <div className="px-2 pb-2 text-xs font-semibold text-[#1e3a8a]">Panels</div>
-                <NavItem k="overview" label="Overview" />
+                                <NavItem k="overview" label="Overview" />
                 <NavItem k="fees" label="Fees and Funding" />
                 <NavItem k="admissions" label="Admission Requirements" />
                 <NavItem k="resources" label="Resources" />
