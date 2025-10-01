@@ -12,7 +12,7 @@ import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
 import * as DropdownsService from '@/services/dropdowns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from 'wouter';
 
 interface AdmissionDetailsModalProps {
@@ -24,22 +24,41 @@ interface AdmissionDetailsModalProps {
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
   const [, setLocation] = useLocation();
 
+  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
+    enabled: !!admission,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const statusSequence = useMemo(() => {
+    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
+    return list.map((o: any) => (o.key || o.id || o.value)).filter(Boolean);
+  }, [admissionDropdowns]);
+
+  const getStatusDisplayName = (statusId: string) => {
+    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+    const byId = list.find((o: any) => o.id === statusId || o.key === statusId || o.value === statusId);
+    if (byId && byId.value) return byId.value;
+    return statusId;
+  };
+
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
-    const steps = ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
-    const labels: Record<string,string> = { not_applied:'Not Applied', applied:'Applied', interview_scheduled:'Interview Scheduled', approved:'Approved', rejected:'Rejected', on_hold:'On Hold' };
-    const idx = steps.findIndex((s) => s === currentStatus);
+    const idx = statusSequence.findIndex((s) => s === currentStatus);
     return (
       <div className="w-full bg-gray-100 rounded-md p-1.5">
         <div className="flex items-center justify-between relative">
-          {steps.map((s, i) => {
+          {statusSequence.map((s, i) => {
             const isCompleted = i <= idx && idx !== -1;
+            const label = getStatusDisplayName(s);
             return (
               <div key={s} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={() => onChange(s)}>
                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${isCompleted ? 'bg-white' : 'bg-gray-300'}`} />
                 </div>
-                <span className={`mt-1 text-[10px] font-medium ${isCompleted ? 'text-blue-600' : 'text-gray-600'}`}>{labels[s]}</span>
-                {i < steps.length - 1 && (
+                <span className={`mt-1 text-[10px] font-medium ${isCompleted ? 'text-blue-600' : 'text-gray-600'}`}>{label}</span>
+                {i < statusSequence.length - 1 && (
                   <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${i < idx ? 'bg-blue-600' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
@@ -50,13 +69,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     );
   };
 
-  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || 'not_applied');
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || (statusSequence.length>0?statusSequence[0]:'not_applied'));
   const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
 
   useEffect(() => {
-    setCurrentStatus(admission?.status || 'not_applied');
+    setCurrentStatus(admission?.status || (statusSequence.length>0?statusSequence[0]:'not_applied'));
     setCaseStatus(admission?.caseStatus || '');
-  }, [admission]);
+  }, [admission, statusSequence]);
 
   const queryClient = useQueryClient();
 
@@ -69,13 +88,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     queryKey: [`/api/applications/${admission?.applicationId}`],
     queryFn: async () => ApplicationsService.getApplication(admission?.applicationId as string),
     enabled: !!admission?.applicationId,
-  });
-
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
-    enabled: !!admission,
-    staleTime: 5 * 60 * 1000,
   });
 
   const getCaseStatusOptions = () => {
@@ -264,7 +276,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 </div>
                 <div>
                   <Label>Status</Label>
-                  <p className="text-xs">{(admission.status || '').toString() || 'Not specified'}</p>
+                  <p className="text-xs">{getStatusDisplayName(admission.status || '') || (admission.status || 'Not specified')}</p>
                 </div>
                 <div>
                   <Label>Case Status</Label>
