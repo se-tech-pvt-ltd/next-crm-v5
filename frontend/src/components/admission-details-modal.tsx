@@ -270,10 +270,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                         <p>{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Status</label>
-                        <p>{getStatusDisplayName(admission.status || '') || (admission.status || 'Not specified')}</p>
-                      </div>
-                      <div>
                         <label className="text-sm font-medium text-gray-600">Case Status</label>
                         <div className="mt-1">
                           <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
