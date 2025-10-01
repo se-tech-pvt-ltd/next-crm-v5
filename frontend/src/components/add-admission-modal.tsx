@@ -510,10 +510,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         };
         const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
         const resolvedC = resolveUserIdFromApp(sourceCounsellor);
-        if (resolvedC) form.setValue('counsellorId', resolvedC);
+        console.log('[AddAdmissionModal] handleApplicationChange counsellor source:', { sourceCounsellor, resolvedC });
+        if (resolvedC) { form.setValue('counsellorId', resolvedC); console.log('[AddAdmissionModal] handleApplicationChange set counsellorId to', resolvedC); }
         const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
         const resolvedO = resolveUserIdFromApp(sourceOfficer);
-        if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+        console.log('[AddAdmissionModal] handleApplicationChange officer source:', { sourceOfficer, resolvedO });
+        if (resolvedO) { form.setValue('admissionOfficerId', resolvedO); console.log('[AddAdmissionModal] handleApplicationChange set admissionOfficerId to', resolvedO); }
       } catch {}
     }
   };
