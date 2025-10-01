@@ -325,12 +325,50 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   }, [open, statusOptions, caseStatusOptions]);
 
   // Users for access assignment
-  const { data: users = [] } = useQuery<any[]>({
+  const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
     enabled: open,
     staleTime: 5 * 60 * 1000,
   });
+
+  // When modal is opened for a specific application, only populate access fields after users & branch mappings are fetched
+  useEffect(() => {
+    if (!open) return;
+    if (!linkedApp) return;
+    if (!usersFetched || !branchEmpsFetched) return;
+    try {
+      // reset to avoid stale values
+      form.setValue('counsellorId', '');
+      form.setValue('admissionOfficerId', '');
+      if (linkedApp.regionId) form.setValue('regionId', String(linkedApp.regionId));
+      if (linkedApp.branchId) form.setValue('branchId', String(linkedApp.branchId));
+
+      const resolveUserIdFromApp = (appId:any) => {
+        if (!appId) return undefined;
+        const idStr = String(appId);
+        const u = (users || []).find((x:any) => String(x.id) === idStr);
+        if (u) return String(u.id);
+        const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
+        if (be) return String(be.userId ?? be.user_id);
+        return undefined;
+      };
+
+      const sourceCounsellor = (linkedApp as any).counsellorId ?? (linkedApp as any).counselorId ?? (linkedApp as any).counsellor_id ?? (linkedApp as any).counselor_id;
+      const sourceOfficer = (linkedApp as any).admissionOfficerId ?? (linkedApp as any).admission_officer_id ?? (linkedApp as any).officerId ?? (linkedApp as any).officer_id;
+      const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+      const resolvedO = resolveUserIdFromApp(sourceOfficer);
+
+      // set after a tick so Select options that depend on branchId recompute first
+      setTimeout(() => {
+        if (resolvedC) form.setValue('counsellorId', resolvedC);
+        if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+      }, 20);
+
+    } catch (e) {
+      console.error('[AddAdmissionModal] linkedApp sync error', e);
+    }
+  }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps]);
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const counsellorOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
