@@ -9,6 +9,9 @@ import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from '@/hooks/use-toast';
 
@@ -35,6 +38,24 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
     enabled: !!admission,
     staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    enabled: !!admission,
+  });
+  const { data: regions = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: async () => RegionsService.listRegions(),
+    enabled: !!admission,
+    staleTime: 60_000,
+  });
+  const { data: branches = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: async () => BranchesService.listBranches(),
+    enabled: !!admission,
+    staleTime: 60_000,
   });
 
   useEffect(() => {
@@ -163,126 +184,4 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                         </Button>
                       )}
 
-                      <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="px-4 pb-3">
-                    <div className="w-full bg-gray-100 rounded-md p-1.5">
-                      <div className="flex items-center justify-between relative">
-                        {statusSequence.map((s, index, arr) => {
-                          const currentIndex = arr.indexOf(currentStatus || '');
-                          const isCompleted = currentIndex >= 0 && index <= currentIndex;
-                          const label = getStatusDisplayName(s);
-                          const handleClick = () => {
-                            if (s === currentStatus) return;
-                            handleStatusChange(s);
-                          };
-                          return (
-                            <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
-                              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'}`}>
-                                {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
-                              </div>
-                              <span className={`mt-1 text-[11px] font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>{label}</span>
-                              {index < arr.length - 1 && (
-                                <div className={`absolute top-2.5 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Scrollable body: simplified Admission Information only */}
-            <div className="flex-1 overflow-y-auto p-6 pt-28">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Award className="w-5 h-5 mr-2" />
-                      Admission Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">University</label>
-                        <p className="text-lg font-semibold">{admission.university || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Program</label>
-                        <p className="text-lg font-semibold">{admission.program || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Initial Deposit</label>
-                        <p>{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Full Tuition Fee</label>
-                        <p>{admission.fullTuitionFee || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Net Tuition Fee</label>
-                        <p>{admission.netTuitionFee || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Scholarship Amount</label>
-                        <p>{admission.scholarshipAmount || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Deposit Date</label>
-                        <p>{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Visa Date</label>
-                        <p>{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Status</label>
-                        <p>{getStatusDisplayName(admission.status || '') || (admission.status || 'Not specified')}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Case Status</label>
-                        <div className="mt-1">
-                          <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
-                            <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select case status" /></SelectTrigger>
-                            <SelectContent>
-                              {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
-                                <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Sidebar - Activity Timeline */}
-          <div className="w-[420px] border-l bg-white flex flex-col min-h-0 pt-5 lg:pt-0 max-[991px]:pt-5">
-            <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 4h1M7 20h1M16 4h1M16 20h1" />
-                </svg>
-                <h2 className="text-sm font-semibold">Activity Timeline</h2>
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto pt-2 min-h-0">
-              <ActivityTracker entityType="admission" entityId={admission.id} entityName={admission.program} />
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+                    <div className="px-4 pb-3">...
