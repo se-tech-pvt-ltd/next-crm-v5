@@ -511,6 +511,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           if (be) return String(be.userId ?? be.user_id);
           return undefined;
         };
+        // Clear to avoid stale selections while lookups happen
+        form.setValue('counsellorId', '');
+        form.setValue('admissionOfficerId', '');
         const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
         const resolvedC = resolveUserIdFromApp(sourceCounsellor);
         console.log('[AddAdmissionModal] handleApplicationChange counsellor source:', { sourceCounsellor, resolvedC });
