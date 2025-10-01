@@ -178,59 +178,44 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                  <Label>University</Label>
+                  <p className="text-xs font-semibold">{admission.university || 'Not specified'}</p>
+                </div>
+                <div>
                   <Label>Program</Label>
-                  <p className="text-xs font-semibold">{admission.program}</p>
+                  <p className="text-xs font-semibold">{admission.program || 'Not specified'}</p>
                 </div>
                 <div>
-                  <Label>Decision Date</Label>
-                  <p className="text-xs">{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
+                  <Label>Initial Deposit</Label>
+                  <p className="text-xs">{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
                 </div>
                 <div>
-                  <Label>Tuition Fee</Label>
+                  <Label>Full Tuition Fee</Label>
                   <p className="text-xs">{admission.fullTuitionFee || 'Not specified'}</p>
                 </div>
                 <div>
+                  <Label>Net Tuition Fee</Label>
+                  <p className="text-xs">{admission.netTuitionFee || 'Not specified'}</p>
+                </div>
+                <div>
                   <Label>Scholarship Amount</Label>
-                  <p className="text-xs">{admission.scholarshipAmount || 'No scholarship'}</p>
+                  <p className="text-xs">{admission.scholarshipAmount || 'Not specified'}</p>
                 </div>
                 <div>
-                  <Label>Start Date</Label>
-                  <p className="text-xs">{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>End Date</Label>
-                  <p className="text-xs">{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
-                </div>
-              </div>
-              {admission.notes && (
-                <div className="mt-4">
-                  <Label>Notes</Label>
-                  <p className="mt-1 text-xs text-gray-800">{admission.notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Plane className="w-5 h-5 mr-2" />
-                Visa Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Visa Status</Label>
-                  <div className="mt-1">
-                    <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>
-                      <span className="text-xs">{currentVisaStatus.replace('_', ' ').toUpperCase()}</span>
-                    </Badge>
-                  </div>
+                  <Label>Deposit Date</Label>
+                  <p className="text-xs">{admission.depositDate ? new Date(admission.depositDate).toLocaleDateString() : 'Not specified'}</p>
                 </div>
                 <div>
                   <Label>Visa Date</Label>
                   <p className="text-xs">{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <p className="text-xs">{(admission.status || '').toString() || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Case Status</Label>
+                  <p className="text-xs">{(admission.caseStatus || '').toString() || 'Not specified'}</p>
                 </div>
               </div>
             </CardContent>
