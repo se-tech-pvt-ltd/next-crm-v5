@@ -1,17 +1,18 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 console.log('[modal] loaded: frontend/src/components/admission-details-modal.tsx');
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ActivityTracker } from "./activity-tracker";
-import { Award, User, X, ExternalLink, Plane, Edit, Save } from "lucide-react";
+import { Award, X, ExternalLink } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
-import { useState, useEffect } from "react";
+import * as DropdownsService from '@/services/dropdowns';
+import * as UsersService from '@/services/users';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from '@/hooks/use-toast';
 
 interface AdmissionDetailsModalProps {
@@ -22,57 +23,114 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
-  const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<Partial<Admission>>({});
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || 'not_applied');
+  const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
+  const { toast } = useToast();
 
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const { data: student } = useQuery({
     queryKey: [`/api/students/${admission?.studentId}`],
     enabled: !!admission?.studentId,
   });
 
-  const updateVisaStatusMutation = useMutation({
-    mutationFn: async (newStatus: string) => {
-      if (!admission) return;
-      return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
-    },
+  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
+    enabled: !!admission,
+    staleTime: 5 * 60 * 1000,
   });
 
-  const updateAdmissionMutation = useMutation({
-    mutationFn: async (data: Partial<Admission>) => {
-      if (!admission) return;
-      return AdmissionsService.updateAdmission(admission.id, data);
-    },
-    onSuccess: () => {
-      toast({ title: 'Success', description: 'Admission updated.' });
-      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
-      setIsEditing(false);
-    },
-    onError: (err: any) => {
-      toast({ title: 'Error', description: err?.message || 'Failed to update admission.', variant: 'destructive' });
-    },
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    enabled: !!admission,
   });
-
-  const handleVisaStatusChange = (newStatus: string) => {
-    setCurrentVisaStatus(newStatus);
-    updateVisaStatusMutation.mutate(newStatus);
-  };
+  const { data: regions = [] } = useQuery({
+    queryKey: ['/api/regions'],
+    queryFn: async () => RegionsService.listRegions(),
+    enabled: !!admission,
+    staleTime: 60_000,
+  });
+  const { data: branches = [] } = useQuery({
+    queryKey: ['/api/branches'],
+    queryFn: async () => BranchesService.listBranches(),
+    enabled: !!admission,
+    staleTime: 60_000,
+  });
 
   useEffect(() => {
-    setCurrentVisaStatus(admission?.visaStatus || 'not_applied');
-    setEditData(admission || {});
+    setCurrentStatus(admission?.status || 'not_applied');
+    setCaseStatus(admission?.caseStatus || '');
   }, [admission]);
 
-  const handleSaveChanges = () => {
-    updateAdmissionMutation.mutate(editData);
+  const statusSequence = useMemo<string[]>(() => {
+    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','on_hold','rejected'];
+    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
+  }, [admissionDropdowns]);
+
+  const getStatusDisplayName = (statusId: string) => {
+    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
+    const byId = list.find((o: any) => o.id === statusId || o.key === statusId || o.value === statusId);
+    if (byId?.value) return byId.value;
+    return statusId;
+  };
+
+  const formatDateOrdinal = (d: any) => {
+    if (!d) return '';
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return '';
+    const day = date.getDate();
+    const j = day % 10;
+    const k = day % 100;
+    const suffix = (k >= 11 && k <= 13) ? 'th' : (j === 1 ? 'st' : j === 2 ? 'nd' : j === 3 ? 'rd' : 'th');
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${day}${suffix} ${month}, ${year}`;
+  };
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      toast({ title: 'Status updated' });
+    },
+    onError: (e: any) => toast({ title: 'Error', description: e?.message || 'Failed to update status', variant: 'destructive' }),
+  });
+
+  const updateCaseStatusMutation = useMutation({
+    mutationFn: async (newCaseStatus: string) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, { caseStatus: newCaseStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      toast({ title: 'Case status updated' });
+    },
+    onError: (e: any) => toast({ title: 'Error', description: e?.message || 'Failed to update case status', variant: 'destructive' }),
+  });
+
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateStatusMutation.mutate(newStatus);
+  };
+
+  const handleCaseStatusChange = (newCase: string) => {
+    setCaseStatus(newCase);
+    updateCaseStatusMutation.mutate(newCase);
+  };
+
+  const getCaseStatusOptions = () => {
+    const dd = admissionDropdowns || {};
+    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
+    if (!Array.isArray(list)) list = [];
+    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
   };
 
   if (!admission) return null;
@@ -101,47 +159,34 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                     </div>
 
                     <div className="hidden md:block">
-                      <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
-                      <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
+                      <label htmlFor="header-status" className="text-[11px] text-gray-500">Status</label>
+                      <Select value={currentStatus} onValueChange={handleStatusChange}>
                         <SelectTrigger className="h-8 text-xs w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not_applied">Not Applied</SelectItem>
-                          <SelectItem value="applied">Applied</SelectItem>
-                          <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                          <SelectItem value="on_hold">On Hold</SelectItem>
+                          {statusSequence.length === 0 ? (
+                            <>
+                              <SelectItem value="not_applied">Not Applied</SelectItem>
+                              <SelectItem value="applied">Applied</SelectItem>
+                              <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                              <SelectItem value="on_hold">On Hold</SelectItem>
+                            </>
+                          ) : (
+                            statusSequence.map(s => <SelectItem key={s} value={s}>{getStatusDisplayName(s)}</SelectItem>)
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {isEditing ? (
-                        <>
-                          <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveChanges} title="Save" disabled={updateAdmissionMutation.isPending}>
-                            <Save />
-                            <span className="hidden lg:inline">{updateAdmissionMutation.isPending ? 'Saving…' : 'Save'}</span>
-                          </Button>
-                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => { setIsEditing(false); setEditData(admission); }} title="Cancel" disabled={updateAdmissionMutation.isPending}>
-                            <X />
-                            <span className="hidden lg:inline">Cancel</span>
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button variant="outline" size="xs" className="rounded-full px-2 [&_svg]:size-3" onClick={() => setIsEditing(true)} title="Edit">
-                            <Edit />
-                            <span className="hidden lg:inline">Edit</span>
-                          </Button>
-                          {student && (
-                            <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
-                              <ExternalLink />
-                              <span className="hidden lg:inline">View Student</span>
-                            </Button>
-                          )}
-                        </>
+                      {student && (
+                        <Button variant="default" size="xs" className="rounded-full px-2 [&_svg]:size-3 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => onOpenStudentProfile?.(student.id)} title="View Student">
+                          <ExternalLink />
+                          <span className="hidden lg:inline">View Student</span>
+                        </Button>
                       )}
 
                       <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" onClick={() => onOpenChange(false)}>
@@ -153,13 +198,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   <div className="px-4 pb-3">
                     <div className="w-full bg-gray-100 rounded-md p-1.5">
                       <div className="flex items-center justify-between relative">
-                        {['not_applied','applied','interview_scheduled','approved','on_hold','rejected'].map((s, index, arr) => {
-                          const currentIndex = arr.indexOf(currentVisaStatus || '');
+                        {statusSequence.map((s, index, arr) => {
+                          const currentIndex = arr.indexOf(currentStatus || '');
                           const isCompleted = currentIndex >= 0 && index <= currentIndex;
-                          const label = s.charAt(0).toUpperCase() + s.slice(1).replace('_',' ');
+                          const label = getStatusDisplayName(s);
                           const handleClick = () => {
-                            if (s === currentVisaStatus) return;
-                            handleVisaStatusChange(s);
+                            if (s === currentStatus) return;
+                            handleStatusChange(s);
                           };
                           return (
                             <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
@@ -180,10 +225,9 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
               </div>
             </div>
 
-            {/* Scrollable body */}
+            {/* Scrollable body: simplified Admission Information only */}
             <div className="flex-1 overflow-y-auto p-6 pt-28">
               <div className="space-y-6">
-                {/* Admission Information */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -194,133 +238,144 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
+                        <label className="text-sm font-medium text-gray-600">University</label>
+                        <p className="text-lg font-semibold">{admission.university || 'Not specified'}</p>
+                      </div>
+                      <div>
                         <label className="text-sm font-medium text-gray-600">Program</label>
-                        {isEditing ? (
-                          <Input value={editData.program || ''} onChange={(e) => setEditData(prev => ({ ...prev, program: e.target.value }))} />
-                        ) : (
-                          <p className="text-lg font-semibold">{admission.program}</p>
-                        )}
+                        <p className="text-lg font-semibold">{admission.program || 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Decision Date</label>
-                        {isEditing ? (
-                          <Input value={editData.decisionDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, decisionDate: e.target.value }))} />
-                        ) : (
-                          <p>{admission.decisionDate ? new Date(admission.decisionDate).toLocaleDateString() : 'Pending'}</p>
-                        )}
+                        <label className="text-sm font-medium text-gray-600">Initial Deposit</label>
+                        <p>{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Tuition Fee</label>
-                        {isEditing ? (
-                          <Input value={editData.fullTuitionFee || ''} onChange={(e) => setEditData(prev => ({ ...prev, fullTuitionFee: e.target.value }))} />
-                        ) : (
-                          <p>{admission.fullTuitionFee || 'Not specified'}</p>
-                        )}
+                        <label className="text-sm font-medium text-gray-600">Full Tuition Fee</label>
+                        <p>{admission.fullTuitionFee || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Net Tuition Fee</label>
+                        <p>{admission.netTuitionFee || 'Not specified'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Scholarship Amount</label>
-                        {isEditing ? (
-                          <Input value={editData.scholarshipAmount || ''} onChange={(e) => setEditData(prev => ({ ...prev, scholarshipAmount: e.target.value }))} />
-                        ) : (
-                          <p>{admission.scholarshipAmount || 'No scholarship'}</p>
-                        )}
+                        <p>{admission.scholarshipAmount || 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Start Date</label>
-                        {isEditing ? (
-                          <Input value={editData.startDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, startDate: e.target.value }))} />
-                        ) : (
-                          <p>{admission.startDate ? new Date(admission.startDate).toLocaleDateString() : 'Not specified'}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">End Date</label>
-                        {isEditing ? (
-                          <Input value={editData.endDate || ''} onChange={(e) => setEditData(prev => ({ ...prev, endDate: e.target.value }))} />
-                        ) : (
-                          <p>{admission.endDate ? new Date(admission.endDate).toLocaleDateString() : 'Not specified'}</p>
-                        )}
-                      </div>
-                    </div>
-                    {isEditing ? (
-                      <div className="mt-4">
-                        <label className="text-sm font-medium text-gray-600">Notes</label>
-                        <Textarea value={editData.notes || ''} onChange={(e) => setEditData(prev => ({ ...prev, notes: e.target.value }))} rows={3} />
-                      </div>
-                    ) : (
-                      admission.notes && (
-                        <div className="mt-4">
-                          <label className="text-sm font-medium text-gray-600">Notes</label>
-                          <p className="mt-1 text-gray-800">{admission.notes}</p>
-                        </div>
-                      )
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Visa Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Plane className="w-5 h-5 mr-2" />
-                      Visa Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Visa Status</label>
-                        <div className="mt-1">
-                          <Badge variant={currentVisaStatus === 'approved' ? 'default' : 'secondary'}>{currentVisaStatus.replace('_', ' ').toUpperCase()}</Badge>
-                        </div>
+                        <label className="text-sm font-medium text-gray-600">Deposit Date</label>
+                        <p>{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Visa Date</label>
-                        <p>{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
+                        <p>{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Case Status</label>
+                        <div className="mt-1">
+                          <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
+                            <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select case status" /></SelectTrigger>
+                            <SelectContent>
+                              {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                                <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Student Information */}
-                {student && (
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          Student Information
-                        </CardTitle>
-                        {onOpenStudentProfile && (
-                          <Button variant="outline" size="sm" onClick={() => onOpenStudentProfile(student.id)}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View Profile
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Name</label>
-                          <p className="font-medium">{student.name}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Email</label>
-                          <p>{student.email}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Phone</label>
-                          <p>{student.phone || 'Not provided'}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Status</label>
-                          <Badge variant="outline">{student.status}</Badge>
+                <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center">Access</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center space-x-2"><span>Region</span></Label>
+                        <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                          {(() => {
+                            const rid = (admission as any)?.regionId || (student as any)?.regionId;
+                            const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(rid)) : null;
+                            if (!r) return '—';
+                            const regionName = (r as any).regionName || (r as any).name || (r as any).id;
+                            const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String((r as any).regionHeadId || '')) : null;
+                            const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                            const headEmail = head?.email || '';
+                            return (
+                              <div>
+                                <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                                {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center space-x-2"><span>Branch</span></Label>
+                        <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                          {(() => {
+                            const bid = (admission as any)?.branchId || (student as any)?.branchId;
+                            const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(bid)) : null;
+                            if (!b) return '—';
+                            const branchName = (b as any).branchName || (b as any).name || (b as any).code || (b as any).id;
+                            const headId = (b as any).branchHeadId || (b as any).managerId || null;
+                            const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
+                            const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
+                            const headEmail = head?.email || '';
+                            return (
+                              <div>
+                                <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
+                                {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center space-x-2"><span>Admission Officer</span></Label>
+                        <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                          {(() => {
+                            const officerId = (admission as any)?.admissionOfficerId || (student as any)?.admissionOfficerId || (student as any)?.admission_officer_id || '';
+                            const officer = officerId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(officerId)) : null;
+                            if (!officer) return '—';
+                            const fullName = [officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim();
+                            const email = officer.email || '';
+                            return (
+                              <div>
+                                <div className="font-medium text-xs">{fullName || email || officer.id}</div>
+                                {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center space-x-2"><span>Counselor</span></Label>
+                        <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                          {(() => {
+                            const cid = (admission as any)?.counsellorId || (admission as any)?.counselorId || (student as any)?.counselorId || (student as any)?.counsellorId;
+                            const c = cid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(cid)) : null;
+                            if (!c) return '—';
+                            const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
+                            const email = c.email || '';
+                            return (
+                              <div>
+                                <div className="font-medium text-xs">{fullName || email || c.id}</div>
+                                {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
               </div>
             </div>
           </div>

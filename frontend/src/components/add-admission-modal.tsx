@@ -64,7 +64,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
   const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
 
-  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
+  const { data: branchEmps = [], isFetched: branchEmpsFetched = false } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
 
   const form = useForm<any>({
     resolver: zodResolver(insertAdmissionSchema as any),
@@ -142,7 +142,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         scholarshipAmount: data.scholarshipAmount || null,
         netTuitionFee: data.netTuitionFee || null,
         depositRequired: Boolean(data.depositRequired) || false,
-        depositAmount: data.depositAmount || data.initialDeposit || undefined,
+        // Persist initialDeposit (frontend field) into DB column initial_deposit
+        initialDeposit: data.initialDeposit ?? data.depositAmount ?? undefined,
+        // keep depositAmount for compatibility but not required
+        depositAmount: data.depositAmount ?? undefined,
         depositDate: data.depositDate ? new Date(data.depositDate) : undefined,
         depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : undefined,
         visaDate: data.visaDate ? new Date(data.visaDate) : undefined,
@@ -220,13 +223,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           if (be) return String(be.userId ?? be.user_id);
           return undefined;
         };
-        if (!form.getValues('counsellorId')) {
-          const resolved = resolveUserIdFromApp(anyApp.counsellorId);
-          if (resolved) form.setValue('counsellorId', resolved);
+        {
+          // Clear to avoid showing stale values while async lookups complete
+          form.setValue('counsellorId', '');
+          form.setValue('admissionOfficerId', '');
+          const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
+          const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+          console.log('[AddAdmissionModal] linkedApp counsellor source:', { sourceCounsellor, resolvedC, usersCount: Array.isArray(users) ? users.length : 0, branchEmpsCount: Array.isArray(branchEmps) ? branchEmps.length : 0 });
+          if (resolvedC) {
+            form.setValue('counsellorId', resolvedC);
+            console.log('[AddAdmissionModal] set counsellorId to', resolvedC);
+          }
         }
-        if (!form.getValues('admissionOfficerId')) {
-          const resolved = resolveUserIdFromApp(anyApp.admissionOfficerId);
-          if (resolved) form.setValue('admissionOfficerId', resolved);
+        {
+          const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
+          const resolvedO = resolveUserIdFromApp(sourceOfficer);
+          console.log('[AddAdmissionModal] linkedApp admissionOfficer source:', { sourceOfficer, resolvedO });
+          if (resolvedO) {
+            form.setValue('admissionOfficerId', resolvedO);
+            console.log('[AddAdmissionModal] set admissionOfficerId to', resolvedO);
+          }
         }
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
         const localCaseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
@@ -312,12 +328,50 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   }, [open, statusOptions, caseStatusOptions]);
 
   // Users for access assignment
-  const { data: users = [] } = useQuery<any[]>({
+  const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
     queryKey: ['/api/users'],
     queryFn: async () => UsersService.getUsers(),
     enabled: open,
     staleTime: 5 * 60 * 1000,
   });
+
+  // When modal is opened for a specific application, only populate access fields after users & branch mappings are fetched
+  useEffect(() => {
+    if (!open) return;
+    if (!linkedApp) return;
+    if (!usersFetched || !branchEmpsFetched) return;
+    try {
+      // reset to avoid stale values
+      form.setValue('counsellorId', '');
+      form.setValue('admissionOfficerId', '');
+      if (linkedApp.regionId) form.setValue('regionId', String(linkedApp.regionId));
+      if (linkedApp.branchId) form.setValue('branchId', String(linkedApp.branchId));
+
+      const resolveUserIdFromApp = (appId:any) => {
+        if (!appId) return undefined;
+        const idStr = String(appId);
+        const u = (users || []).find((x:any) => String(x.id) === idStr);
+        if (u) return String(u.id);
+        const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
+        if (be) return String(be.userId ?? be.user_id);
+        return undefined;
+      };
+
+      const sourceCounsellor = (linkedApp as any).counsellorId ?? (linkedApp as any).counselorId ?? (linkedApp as any).counsellor_id ?? (linkedApp as any).counselor_id;
+      const sourceOfficer = (linkedApp as any).admissionOfficerId ?? (linkedApp as any).admission_officer_id ?? (linkedApp as any).officerId ?? (linkedApp as any).officer_id;
+      const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+      const resolvedO = resolveUserIdFromApp(sourceOfficer);
+
+      // set after a tick so Select options that depend on branchId recompute first
+      setTimeout(() => {
+        if (resolvedC) form.setValue('counsellorId', resolvedC);
+        if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+      }, 20);
+
+    } catch (e) {
+      console.error('[AddAdmissionModal] linkedApp sync error', e);
+    }
+  }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps]);
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const counsellorOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -328,7 +382,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }) : [];
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    // Ensure selected value is present in options so Select shows correct label
+    try {
+      const sel = String(form.getValues('counsellorId') || '');
+      if (sel && !opts.some((o:any) => String(o.value) === sel) && Array.isArray(users)) {
+        const su = users.find((x:any) => String(x.id) === sel);
+        if (su) opts.unshift({ value: String(su.id), label: `${su.firstName || ''} ${su.lastName || ''}`.trim() || (su.email || 'User') });
+      }
+    } catch {}
+    return opts;
   }, [users, branchEmps, branchId]);
 
   const officerOptions = React.useMemo(() => {
@@ -340,7 +403,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }) : [];
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-    return base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+    try {
+      const sel = String(form.getValues('admissionOfficerId') || '');
+      if (sel && !opts.some((o:any) => String(o.value) === sel) && Array.isArray(users)) {
+        const su = users.find((x:any) => String(x.id) === sel);
+        if (su) opts.unshift({ value: String(su.id), label: `${su.firstName || ''} ${su.lastName || ''}`.trim() || (su.email || 'User') });
+      }
+    } catch {}
+    return opts;
   }, [users, branchEmps, branchId]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
@@ -485,6 +556,31 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       form.setValue('studentId', selectedApp.studentId);
       form.setValue('university', selectedApp.university || '');
       form.setValue('program', selectedApp.program || '');
+      try {
+        const anyApp: any = selectedApp as any;
+        if (anyApp.regionId) form.setValue('regionId', String(anyApp.regionId));
+        if (anyApp.branchId) form.setValue('branchId', String(anyApp.branchId));
+        const resolveUserIdFromApp = (appId:any) => {
+          if (!appId) return undefined;
+          const idStr = String(appId);
+          const u = (users || []).find((x:any) => String(x.id) === idStr);
+          if (u) return String(u.id);
+          const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
+          if (be) return String(be.userId ?? be.user_id);
+          return undefined;
+        };
+        // Clear to avoid stale selections while lookups happen
+        form.setValue('counsellorId', '');
+        form.setValue('admissionOfficerId', '');
+        const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
+        const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+        console.log('[AddAdmissionModal] handleApplicationChange counsellor source:', { sourceCounsellor, resolvedC });
+        if (resolvedC) { form.setValue('counsellorId', resolvedC); console.log('[AddAdmissionModal] handleApplicationChange set counsellorId to', resolvedC); }
+        const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
+        const resolvedO = resolveUserIdFromApp(sourceOfficer);
+        console.log('[AddAdmissionModal] handleApplicationChange officer source:', { sourceOfficer, resolvedO });
+        if (resolvedO) { form.setValue('admissionOfficerId', resolvedO); console.log('[AddAdmissionModal] handleApplicationChange set admissionOfficerId to', resolvedO); }
+      } catch {}
     }
   };
 
