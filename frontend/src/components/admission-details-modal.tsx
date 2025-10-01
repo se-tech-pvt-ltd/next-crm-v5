@@ -185,11 +185,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Deposit Date</label>
-                        <p>{admission.depositDate ? new Date(admission.depositDate).toLocaleDateString() : 'Not specified'}</p>
+                        <p>{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Visa Date</label>
-                        <p>{admission.visaDate ? new Date(admission.visaDate).toLocaleDateString() : 'Not specified'}</p>
+                        <p>{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Status</label>
