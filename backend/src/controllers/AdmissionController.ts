@@ -29,6 +29,19 @@ export class AdmissionController {
     }
   }
 
+  static async getAdmission(req: AuthenticatedRequest, res: Response) {
+    try {
+      const id = req.params.id;
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const admission = await AdmissionService.getAdmission(id, currentUser.id, currentUser.role);
+      if (!admission) return res.status(404).json({ message: 'Admission not found' });
+      res.json(admission);
+    } catch (error) {
+      console.error('Get admission error:', error);
+      res.status(500).json({ message: 'Failed to fetch admission' });
+    }
+  }
+
   static async createAdmission(req: AuthenticatedRequest, res: Response) {
     try {
       // Coerce string date fields to Date objects before zod validation
