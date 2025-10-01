@@ -322,7 +322,7 @@ export default function AddAdmissionPage() {
                                       form.setValue('university', app.university);
                                       form.setValue('program', app.program);
                                       try {
-                                        const anyApp: any = app as any;
+                                        const anyApp: any = app as any; console.log('[AddAdmissionPage] selectedApp raw:', { id: anyApp.id, counsellorId: anyApp.counsellorId, admissionOfficerId: anyApp.admissionOfficerId, branchId: anyApp.branchId, regionId: anyApp.regionId });
                                         if (anyApp.regionId) form.setValue('regionId', String(anyApp.regionId));
                                         if (anyApp.branchId) form.setValue('branchId', String(anyApp.branchId));
                                         const resolveUserIdFromApp = (appId:any) => {
