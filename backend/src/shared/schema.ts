@@ -1,6 +1,62 @@
-import { mysqlTable, text, int, timestamp, boolean, varchar, date } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, int, timestamp, boolean, varchar, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+const PriorityEnum = mysqlEnum("priority", ["High", "Medium", "Low"]);
+const CategoryEnum = mysqlEnum("category", ["UG", "PG", "Research", "Top up"]);
+
+export const universityCourses = mysqlTable("university_courses", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  universityId: varchar("university_id", { length: 36 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  category: CategoryEnum.notNull(),
+  fees: decimal("fees", { precision: 12, scale: 2 }),
+  isTopCourse: tinyint("is_top_course").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const universityIntakes = mysqlTable("university_intakes", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  universityId: varchar("university_id", { length: 36 }).notNull(),
+  intakeLabel: varchar("intake_label", { length: 128 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const universityAcceptedElts = mysqlTable("university_accepted_elts", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  universityId: varchar("university_id", { length: 36 }).notNull(),
+  eltName: varchar("elt_name", { length: 128 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const universities = mysqlTable("universities", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  priority: PriorityEnum,
+  about: text("about"),
+  campusCity: varchar("campus_city", { length: 255 }),
+  website: text("website"),
+  totalFees: decimal("total_fees", { precision: 12, scale: 2 }),
+  initialDepositAmount: decimal("initial_deposit_amount", { precision: 12, scale: 2 }),
+  scholarshipFee: decimal("scholarship_fee", { precision: 12, scale: 2 }),
+  meritScholarships: text("merit_scholarships"),
+  ugEntryCriteria: text("ug_entry_criteria"),
+  pgEntryCriteria: text("pg_entry_criteria"),
+  eltRequirements: text("elt_requirements"),
+  moiPolicy: text("moi"),
+  studyGap: text("study_gap"),
+  driveUrl: text("drive_url"),
+  notes: text("notes"),
+
+  coverImageUrl: text("cover_image_url").default(""), // 📌 Cover image URL
+  logoImageUrl: text("logo_image_url").default(""),   // 📌 Logo image URL
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdBy: varchar("created_by", { length: 36 }),
+  updatedBy: varchar("updated_by", { length: 36 }),
+});
+
 
 // Attachments table (for uploaded files/images)
 export const attachments = mysqlTable("attachments", {
@@ -385,7 +441,49 @@ export type Application = typeof applications.$inferSelect;
 export type Admission = typeof admissions.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
-
+export type University = typeof universities.$inferSelect;
+export type UniversitySummary = Pick<University, "id" | "name" | "website" | "coverImageUrl" | "logoImageUrl">;
+ export type UniversityDetail = {
+  overview: {
+    id: string;
+    name: string;
+    website: string | null;
+    coverImageUrl: string | null;
+    logoImageUrl: string | null;
+    about: string | null;
+    campusCity: string | null;
+  };
+  feesAndFunding: {
+    totalFees: number | null;
+    initialDepositAmount: number | null;
+    scholarshipFee: number | null;
+    meritScholarships: string | null;
+  };
+  admissionRequirements: {
+    ugEntryCriteria: string | null;
+    pgEntryCriteria: string | null;
+    eltRequirements: string | null;
+    moiPolicy: string | null;
+    studyGap: string | null;
+    priority: "High" | "Medium" | "Low" | null;
+    intakes: string[];
+    acceptedElts: string[];
+  };
+  resources: {
+    driveUrl: string | null;
+    notes: string | null;
+  };
+  courses: {
+    id: string;
+    name: string;
+    category: string;
+    fees: number | null;
+    isTopCourse: boolean;
+  }[];
+};
+export type UniversityCourse = typeof universityCourses.$inferSelect;
+export type UniversityIntake = typeof universityIntakes.$inferSelect;
+export type UniversityAcceptedElt = typeof universityAcceptedElts.$inferSelect;
 // Branch employees table (renamed from user_link)
 export const branchEmps = mysqlTable("branch_emps", {
   id: varchar("id", { length: 50 }).primaryKey().notNull(),

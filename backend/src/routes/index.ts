@@ -14,6 +14,7 @@ import { dropdownRoutes } from "./dropdownRoutes.js";
 import eventRoutes from "./eventRoutes.js";
 import eventRegistrationRoutes from "./eventRegistrationRoutes.js";
 import branchRoutes from './branchRoutes.js';
+import universityRoutes from './universityRoutes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create uploads directory if it doesn't exist and serve uploaded files statically (repo root)
@@ -46,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/dropdowns', dropdownRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/event-registrations', eventRegistrationRoutes);
+  app.use('/api/universities', universityRoutes);
   app.use('/api/configurations', (await import('./configurationRoutes.js')).default);
 
   // Branches

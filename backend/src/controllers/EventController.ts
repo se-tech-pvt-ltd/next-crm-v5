@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { insertEventSchema } from "../shared/schema.js";
 import { EventService } from "../services/EventService.js";
-import { z } from "zod";
 
 export class EventController {
   static getFallbackUser() {
