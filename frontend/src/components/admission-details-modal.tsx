@@ -8,6 +8,7 @@ import { Award, X, ExternalLink } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
+import * as DropdownsService from '@/services/dropdowns';
 import { useState, useEffect } from "react";
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,7 +20,8 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
-  const [currentVisaStatus, setCurrentVisaStatus] = useState<string>(admission?.visaStatus || 'not_applied');
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || 'not_applied');
+  const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
 
   const queryClient = useQueryClient();
 
@@ -28,10 +30,29 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     enabled: !!admission?.studentId,
   });
 
-  const updateVisaStatusMutation = useMutation({
+  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Admissions'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
+    enabled: !!admission,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    setCurrentStatus(admission?.status || 'not_applied');
+    setCaseStatus(admission?.caseStatus || '');
+  }, [admission]);
+
+  const getCaseStatusOptions = () => {
+    const dd = admissionDropdowns || {};
+    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
+    if (!Array.isArray(list)) list = [];
+    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
+  };
+
+  const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
       if (!admission) return;
-      return AdmissionsService.updateAdmission(admission.id, { visaStatus: newStatus });
+      return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
@@ -39,14 +60,26 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     },
   });
 
-  const handleVisaStatusChange = (newStatus: string) => {
-    setCurrentVisaStatus(newStatus);
-    updateVisaStatusMutation.mutate(newStatus);
+  const updateCaseStatusMutation = useMutation({
+    mutationFn: async (newCaseStatus: string) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, { caseStatus: newCaseStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+    },
+  });
+
+  const handleStatusChange = (newStatus: string) => {
+    setCurrentStatus(newStatus);
+    updateStatusMutation.mutate(newStatus);
   };
 
-  useEffect(() => {
-    setCurrentVisaStatus(admission?.visaStatus || 'not_applied');
-  }, [admission]);
+  const handleCaseStatusChange = (newCase: string) => {
+    setCaseStatus(newCase);
+    updateCaseStatusMutation.mutate(newCase);
+  };
 
   const formatDateOrdinal = (d: any) => {
     if (!d) return '';
@@ -87,18 +120,26 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                     </div>
 
                     <div className="hidden md:block">
-                      <label htmlFor="header-status" className="text-[11px] text-gray-500">Visa Status</label>
-                      <Select value={currentVisaStatus} onValueChange={handleVisaStatusChange}>
+                      <label htmlFor="header-status" className="text-[11px] text-gray-500">Status</label>
+                      <Select value={currentStatus} onValueChange={handleStatusChange}>
                         <SelectTrigger className="h-8 text-xs w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not_applied">Not Applied</SelectItem>
-                          <SelectItem value="applied">Applied</SelectItem>
-                          <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                          <SelectItem value="on_hold">On Hold</SelectItem>
+                          {/* If dropdown config exists, try to render options; otherwise fall back to common statuses */}
+                          {getCaseStatusOptions().length === 0 ? (
+                            <>
+                              <SelectItem value="not_applied">Not Applied</SelectItem>
+                              <SelectItem value="applied">Applied</SelectItem>
+                              <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                              <SelectItem value="on_hold">On Hold</SelectItem>
+                            </>
+                          ) : (
+                            // reuse caseStatus options as a simple fallback for status options when configured
+                            getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -121,12 +162,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                     <div className="w-full bg-gray-100 rounded-md p-1.5">
                       <div className="flex items-center justify-between relative">
                         {['not_applied','applied','interview_scheduled','approved','on_hold','rejected'].map((s, index, arr) => {
-                          const currentIndex = arr.indexOf(currentVisaStatus || '');
+                          const currentIndex = arr.indexOf(currentStatus || '');
                           const isCompleted = currentIndex >= 0 && index <= currentIndex;
                           const label = s.charAt(0).toUpperCase() + s.slice(1).replace('_',' ');
                           const handleClick = () => {
-                            if (s === currentVisaStatus) return;
-                            handleVisaStatusChange(s);
+                            if (s === currentStatus) return;
+                            handleStatusChange(s);
                           };
                           return (
                             <div key={s} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${label}`}>
@@ -197,7 +238,16 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Case Status</label>
-                        <p>{(admission.caseStatus || '').toString() || 'Not specified'}</p>
+                        <div className="mt-1">
+                          <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
+                            <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select case status" /></SelectTrigger>
+                            <SelectContent>
+                              {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                                <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
