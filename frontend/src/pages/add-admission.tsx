@@ -13,6 +13,7 @@ import { http } from '@/services/http';
 import * as ApplicationsService from '@/services/applications';
 import * as AdmissionsService from '@/services/admissions';
 import * as UsersService from '@/services/users';
+import * as BranchEmpsService from '@/services/branchEmps';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import { motion } from 'framer-motion';
@@ -176,6 +177,7 @@ export default function AddAdmissionPage() {
     queryFn: async () => UsersService.getUsers(),
     staleTime: 5 * 60 * 1000,
   });
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), staleTime: 60_000 });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const counsellorOptions = Array.isArray(users)
     ? users.filter((u: any) => {
@@ -194,40 +196,33 @@ export default function AddAdmissionPage() {
 
   // Ensure required values are set from linked application so form can submit
   useEffect(() => {
-    if (linkedApp) {
-      const idStr = String(linkedApp.id);
-      if (form.getValues('applicationId') !== idStr) {
-        form.setValue('applicationId', idStr);
-      }
-      if (!form.getValues('studentId')) {
-        form.setValue('studentId', linkedApp.studentId);
-      }
-      form.setValue('university', linkedApp.university || '');
-      form.setValue('program', linkedApp.program || '');
-      try {
-        const anyApp: any = linkedApp as any;
-        if (anyApp.regionId && !form.getValues('regionId')) form.setValue('regionId', String(anyApp.regionId));
-        if (anyApp.branchId && !form.getValues('branchId')) form.setValue('branchId', String(anyApp.branchId));
-        const resolveUserIdFromApp = (appId:any) => {
-          if (!appId) return undefined;
-          const idStr = String(appId);
-          const u = (users || []).find((x:any) => String(x.id) === idStr);
-          if (u) return String(u.id);
-          const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
-          if (be) return String(be.userId ?? be.user_id);
-          return undefined;
-        };
-        if (!form.getValues('counsellorId')) {
-          const resolved = resolveUserIdFromApp(anyApp.counsellorId);
-          if (resolved) form.setValue('counsellorId', resolved);
-        }
-        if (!form.getValues('admissionOfficerId')) {
-          const resolved = resolveUserIdFromApp(anyApp.admissionOfficerId);
-          if (resolved) form.setValue('admissionOfficerId', resolved);
-        }
-      } catch {}
-    }
-  }, [linkedApp, form]);
+    if (!linkedApp) return;
+    const idStr = String(linkedApp.id);
+    if (form.getValues('applicationId') !== idStr) form.setValue('applicationId', idStr);
+    if (!form.getValues('studentId')) form.setValue('studentId', linkedApp.studentId);
+    form.setValue('university', linkedApp.university || '');
+    form.setValue('program', linkedApp.program || '');
+    try {
+      const anyApp: any = linkedApp as any;
+      if (anyApp.regionId) form.setValue('regionId', String(anyApp.regionId));
+      if (anyApp.branchId) form.setValue('branchId', String(anyApp.branchId));
+      const resolveUserIdFromApp = (appId:any) => {
+        if (!appId) return undefined;
+        const idStr2 = String(appId);
+        const u = (users || []).find((x:any) => String(x.id) === idStr2);
+        if (u) return String(u.id);
+        const be = (branchEmps || []).find((b:any) => String(b.id) === idStr2 || String(b.userId ?? b.user_id) === idStr2);
+        if (be) return String(be.userId ?? be.user_id);
+        return undefined;
+      };
+      const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
+      const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+      if (resolvedC) form.setValue('counsellorId', resolvedC);
+      const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
+      const resolvedO = resolveUserIdFromApp(sourceOfficer);
+      if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+    } catch {}
+  }, [linkedApp, form, users, branchEmps]);
 
   // Admission dropdowns grouped by module (same approach as leads/add) with debug logs
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
@@ -326,6 +321,26 @@ export default function AddAdmissionPage() {
                                       form.setValue('studentId', app.studentId);
                                       form.setValue('university', app.university);
                                       form.setValue('program', app.program);
+                                      try {
+                                        const anyApp: any = app as any;
+                                        if (anyApp.regionId) form.setValue('regionId', String(anyApp.regionId));
+                                        if (anyApp.branchId) form.setValue('branchId', String(anyApp.branchId));
+                                        const resolveUserIdFromApp = (appId:any) => {
+                                          if (!appId) return undefined;
+                                          const idStr2 = String(appId);
+                                          const u = (users || []).find((x:any) => String(x.id) === idStr2);
+                                          if (u) return String(u.id);
+                                          const be = (branchEmps || []).find((b:any) => String(b.id) === idStr2 || String(b.userId ?? b.user_id) === idStr2);
+                                          if (be) return String(be.userId ?? be.user_id);
+                                          return undefined;
+                                        };
+                                        const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
+                                        const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+                                        if (resolvedC) form.setValue('counsellorId', resolvedC);
+                                        const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
+                                        const resolvedO = resolveUserIdFromApp(sourceOfficer);
+                                        if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+                                      } catch {}
                                     }
                                   }}
                                 >
