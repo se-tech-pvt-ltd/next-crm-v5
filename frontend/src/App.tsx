@@ -13,7 +13,6 @@ import AddApplication from "@/pages/add-application";
 import ApplicationDetails from "@/pages/application-details";
 import Admissions from "@/pages/admissions";
 import EventsPage from "@/pages/events";
-import AddAdmissionPage from "@/pages/add-admission";
 import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
