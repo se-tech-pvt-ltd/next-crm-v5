@@ -487,6 +487,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       form.setValue('studentId', selectedApp.studentId);
       form.setValue('university', selectedApp.university || '');
       form.setValue('program', selectedApp.program || '');
+      try {
+        const anyApp: any = selectedApp as any;
+        if (anyApp.regionId) form.setValue('regionId', String(anyApp.regionId));
+        if (anyApp.branchId) form.setValue('branchId', String(anyApp.branchId));
+        const resolveUserIdFromApp = (appId:any) => {
+          if (!appId) return undefined;
+          const idStr = String(appId);
+          const u = (users || []).find((x:any) => String(x.id) === idStr);
+          if (u) return String(u.id);
+          const be = (branchEmps || []).find((b:any) => String(b.id) === idStr || String(b.userId ?? b.user_id) === idStr);
+          if (be) return String(be.userId ?? be.user_id);
+          return undefined;
+        };
+        const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
+        const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+        if (resolvedC) form.setValue('counsellorId', resolvedC);
+        const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
+        const resolvedO = resolveUserIdFromApp(sourceOfficer);
+        if (resolvedO) form.setValue('admissionOfficerId', resolvedO);
+      } catch {}
     }
   };
 
