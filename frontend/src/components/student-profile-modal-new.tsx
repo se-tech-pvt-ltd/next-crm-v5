@@ -471,7 +471,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
 
             return (
               <div key={statusId} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${statusName}`}>
-                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-blue-600 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
                   {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
                 </div>
                 <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600'}`}>{statusName}</span>
