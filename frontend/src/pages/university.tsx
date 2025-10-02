@@ -55,6 +55,13 @@ export default function UniversityPage() {
     queryFn: UniversitiesService.listUniversities,
   });
 
+  const countries = useMemo(() => {
+    const list = Array.isArray(universities) ? universities : [];
+    const set = new Set<string>();
+    list.forEach((u: any) => { if (u?.country) set.add(String(u.country)); });
+    return ['All', ...Array.from(set).sort()];
+  }, [universities]);
+
   const filtered = useMemo(() => {
     const list = Array.isArray(universities) ? universities : [];
     return list.filter((u) => {
@@ -62,10 +69,11 @@ export default function UniversityPage() {
         const hay = `${u.name} ${u.website ?? ''}`.toLowerCase();
         if (!hay.includes(search.toLowerCase())) return false;
       }
-      // Other filters (country/type/priority/toggles) are not applied since API does not provide these fields in list
+      if (country && country !== 'All' && (u as any).country !== country) return false;
+      // Other filters (type/priority/toggles) are not applied since API may not provide these fields in list
       return true;
     });
-  }, [universities, search]);
+  }, [universities, search, country]);
 
   const { data: detail } = useQuery<UniversityDetail | undefined>({
     queryKey: ['/api/universities', selectedId],
