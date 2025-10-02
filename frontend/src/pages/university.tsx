@@ -20,7 +20,6 @@ type CourseCategory = 'UG' | 'PG' | 'Research' | 'Top up';
 
 type PanelKey = 'overview' | 'fees' | 'admissions' | 'resources' | 'courses';
 
-const countries = ['All', 'United Kingdom', 'United States', 'Canada'];
 const types = ['All', 'Public', 'Private'];
 const priorities = ['All', 'High', 'Medium', 'Low'];
 
@@ -29,6 +28,15 @@ export default function UniversityPage() {
   const [country, setCountry] = useState<string>('All');
   const [type, setType] = useState<string>('All');
   const [priority, setPriority] = useState<string>('All');
+
+  const countries = useMemo(() => {
+    const list = Array.isArray(universities) ? universities : [];
+    const set = new Set<string>();
+    list.forEach((u: any) => {
+      if (u?.country) set.add(String(u.country));
+    });
+    return ['All', ...Array.from(set).sort()];
+  }, [universities]);
 
   const [focus, setFocus] = useState(false);
   const [lowDeposit, setLowDeposit] = useState(false);
