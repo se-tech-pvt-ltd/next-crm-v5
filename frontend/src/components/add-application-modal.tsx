@@ -622,9 +622,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                       <FormItem>
                         <FormLabel>Intake</FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                          <Select
+                            disabled={!selectedUniversityId}
+                            onValueChange={field.onChange}
+                            value={field.value || ''}
+                          >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger disabled={!selectedUniversityId}>
                                 <SelectValue placeholder={selectedUniversityId ? 'Select intake' : 'Select university first'} />
                               </SelectTrigger>
                             </FormControl>
