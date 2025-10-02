@@ -123,7 +123,23 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
     },
-    onSuccess: () => {
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        // Update list cache if present
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+
+        // Update single admission cache
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
+
+      // Still invalidate to ensure fresh server data if needed
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
     },
