@@ -151,7 +151,7 @@ export default function UniversityPage() {
   );
 
   return (
-    <Layout title="Toolkit" showSearch={false} helpText="Search and filter universities to apply for students.">
+    <Layout title="Universities" showSearch={false} helpText="Search and filter universities to apply for students.">
       <div className="space-y-4">
         <Card>
           <CardContent className="p-4">
