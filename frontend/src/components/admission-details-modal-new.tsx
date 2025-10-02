@@ -27,6 +27,8 @@ interface AdmissionDetailsModalProps {
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
   const [, setLocation] = useLocation();
+  const [matchEdit] = useRoute('/admissions/:id/edit');
+  const isEdit = !!matchEdit;
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -296,21 +298,34 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 <div>
                   <Label>Deposit Date</Label>
                   <div className="mt-1">
-                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled={!isEdit} className="text-xs" />
                   </div>
                 </div>
 
                 <div>
                   <Label>Visa Date</Label>
                   <div className="mt-1">
-                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled={!isEdit} className="text-xs" />
                   </div>
                 </div>
 
                 <div>
                   <Label>Case Status</Label>
                   <div className="mt-1">
-                    <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                    {isEdit ? (
+                      <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select case status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                            <SelectItem key="__none__" value="__none__" disabled>{admission.caseStatus || 'Not specified'}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                    )}
                   </div>
                 </div>
 
