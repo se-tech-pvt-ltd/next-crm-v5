@@ -23,7 +23,7 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
-  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || 'not_applied');
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || '');
   const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
   const { toast } = useToast();
 
@@ -60,13 +60,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   });
 
   useEffect(() => {
-    setCurrentStatus(admission?.status || 'not_applied');
+    setCurrentStatus(admission?.status || '');
     setCaseStatus(admission?.caseStatus || '');
   }, [admission]);
 
   const statusSequence = useMemo<string[]>(() => {
     const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','on_hold','rejected'];
+    if (!Array.isArray(list)) return [];
     return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
   }, [admissionDropdowns]);
 
@@ -187,17 +187,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {statusSequence.length === 0 ? (
-                            <>
-                              <SelectItem value="not_applied">Not Applied</SelectItem>
-                              <SelectItem value="applied">Applied</SelectItem>
-                              <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                              <SelectItem value="approved">Approved</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                              <SelectItem value="on_hold">On Hold</SelectItem>
-                            </>
-                          ) : (
-                            statusSequence.map(s => <SelectItem key={s} value={s}>{getStatusDisplayName(s)}</SelectItem>)
+                            {statusSequence.length > 0 ? statusSequence.map(s => <SelectItem key={s} value={s}>{getStatusDisplayName(s)}</SelectItem>) : (
+                            <SelectItem value="__none__" disabled>{currentStatus || 'Not specified'}</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
