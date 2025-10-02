@@ -120,6 +120,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
   const intakeOptions = makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']);
 
+  const form = useForm({
+    resolver: zodResolver(insertApplicationSchema),
+    defaultValues: {
+      studentId: studentId || '',
+      university: '',
+      program: '',
+      courseType: '',
+      appStatus: '',
+      caseStatus: '',
+      country: '',
+      channelPartner: '',
+      intake: '',
+      googleDriveLink: '',
+      notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+      regionId: '',
+      branchId: '',
+    },
+  });
+
   // Universities-based dynamic data
   const { data: uniSummaries = [] } = useQuery({
     queryKey: ['/api/universities'],
