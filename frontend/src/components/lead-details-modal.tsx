@@ -478,6 +478,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       defaultCountry="in"
                       className="w-full"
                       inputClassName="w-full h-7 text-[11px]"
+                      buttonClassName="h-7"
                       disabled={!isEditing || updateLeadMutation.isPending}
                     />
                   </div>
