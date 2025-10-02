@@ -474,7 +474,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
                   {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
                 </div>
-                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600'}`}>{statusName}</span>
+                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-blue-600' : 'text-gray-600'}`}>{statusName}</span>
                 {index < statusSequence.length - 1 && (
                   <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${index < currentIndex ? 'bg-blue-600' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
