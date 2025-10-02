@@ -220,7 +220,8 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
                       onChange={(val) => setEditData({ ...editData, phone: val })}
                       defaultCountry="in"
                       className="w-full"
-                      inputClassName="w-full h-9 text-sm"
+                      inputClassName="w-full h-7 text-sm"
+                      buttonClassName="h-7"
                       disabled={!isEditing || updateStudentMutation.isPending}
                     />
                   </div>
