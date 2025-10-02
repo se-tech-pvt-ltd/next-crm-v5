@@ -103,12 +103,12 @@ export function Sidebar() {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
+    { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
     { path: '/events', label: 'Event', icon: Calendar, count: Array.isArray(eventsData) ? eventsData.length : 0, countColor: 'bg-primary' },
     { path: '/leads', label: 'Leads', icon: Users, count: newLeadsCount, countColor: 'bg-emerald-500' },
     { path: '/students', label: 'Students', icon: GraduationCap, count: studentsCount, countColor: 'bg-purple-600' },
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
-    { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ].filter(item => isModuleVisible(item.label));
