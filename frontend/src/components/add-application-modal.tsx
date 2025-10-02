@@ -198,12 +198,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       }
     } catch {}
     try {
-      if (!form.getValues('courseType')) {
-        const def = courseTypeOptions.find(o => o.isDefault);
-        if (def) form.setValue('courseType', def.value as any);
-      }
-    } catch {}
-    try {
       if (!form.getValues('country')) {
         const def = countryOptions.find(o => o.isDefault);
         if (def) form.setValue('country', def.value as any);
