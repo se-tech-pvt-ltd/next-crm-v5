@@ -75,12 +75,14 @@ export interface Application {
   studentId: string;
   university: string;
   program: string;
+  courseId?: string | null;
   courseType: string | null;
   appStatus: string;
   caseStatus: string | null;
   country: string | null;
   channelPartner: string | null;
   intake: string | null;
+  intakeId?: string | null;
   googleDriveLink: string | null;
   notes: string | null;
   // Access fields
@@ -201,13 +203,15 @@ export const insertStudentSchema = z.object({
 export const insertApplicationSchema = z.object({
   studentId: z.string(),
   university: z.string().min(1, "University is required"),
-  program: z.string().min(1, "Program is required"),
+  program: z.string().optional(),
+  courseId: z.string().optional(),
   courseType: z.string().optional(),
   appStatus: z.string().optional(),
   caseStatus: z.string().optional(),
   country: z.string().optional(),
   channelPartner: z.string().optional(),
   intake: z.string().optional(),
+  intakeId: z.string().optional(),
   googleDriveLink: z.preprocess((v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v), z.string().url().optional()),
   notes: z.string().optional(),
   // Access fields (optional)
