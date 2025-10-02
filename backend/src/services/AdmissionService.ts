@@ -172,10 +172,13 @@ export class AdmissionService {
   }
 
   static async updateAdmission(id: string, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
+    console.log('[AdmissionService] updateAdmission called with id:', id, 'updates:', updates);
     const currentAdmission = await AdmissionModel.findById(id);
+    console.log('[AdmissionService] found currentAdmission:', !!currentAdmission);
     if (!currentAdmission) return undefined;
 
     const admission = await AdmissionModel.update(id, updates);
+    console.log('[AdmissionService] AdmissionModel.update returned:', !!admission);
 
     if (admission) {
       // Log changes for each updated field
