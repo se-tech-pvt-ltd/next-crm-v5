@@ -479,6 +479,8 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                       className="w-full"
                       inputClassName="w-full h-7 text-[11px]"
                       buttonClassName="h-7"
+                      inputStyle={{ height: '28px' }}
+                      buttonStyle={{ height: '28px' }}
                       disabled={!isEditing || updateLeadMutation.isPending}
                     />
                   </div>
