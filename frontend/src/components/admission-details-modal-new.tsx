@@ -75,11 +75,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     );
   };
 
-  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || (statusSequence.length>0?statusSequence[0]:'not_applied'));
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || '');
   const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
 
   useEffect(() => {
-    setCurrentStatus(admission?.status || (statusSequence.length>0?statusSequence[0]:'not_applied'));
+    setCurrentStatus(admission?.status || '');
     setCaseStatus(admission?.caseStatus || '');
   }, [admission, statusSequence]);
 
