@@ -116,7 +116,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
   const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
-  const intakeOptions = makeOptions(applicationsDropdowns, ['Intake','intake','Intakes']);
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
@@ -605,27 +604,17 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormLabel>Intake</FormLabel>
                         <FormControl>
                           <Select
-                            disabled={!selectedUniversityId && intakeOptions.length === 0}
+                            disabled={!selectedUniversityId}
                             onValueChange={(val) => {
                               field.onChange(val);
                               try {
                                 const withIds = ((uniDetail?.admissionRequirements as any)?.intakesWithIds || []) as any[];
-                                let set = false;
-                                if (Array.isArray(withIds) && withIds.length) {
-                                  const match = withIds.find((i) => String(i.intakeLabel) === String(val));
-                                  if (match && match.id) {
-                                    form.setValue('intakeId', String(match.id));
-                                    set = true;
-                                  }
+                                const match = Array.isArray(withIds) ? withIds.find((i) => String(i.intakeLabel) === String(val)) : null;
+                                if (match && match.id) {
+                                  form.setValue('intakeId', String(match.id));
+                                } else {
+                                  form.setValue('intakeId', '');
                                 }
-                                if (!set && Array.isArray(intakeOptions) && intakeOptions.length) {
-                                  const opt = intakeOptions.find((o) => String(o.label) === String(val));
-                                  if (opt && opt.value) {
-                                    form.setValue('intakeId', String(opt.value));
-                                    set = true;
-                                  }
-                                }
-                                if (!set) form.setValue('intakeId', '');
                               } catch {
                                 form.setValue('intakeId', '');
                               }
@@ -633,8 +622,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                             value={field.value || ''}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={!selectedUniversityId && intakeOptions.length === 0}>
-                                <SelectValue placeholder={(selectedUniversityId || intakeOptions.length) ? 'Select intake' : 'Select university first'} />
+                              <SelectTrigger disabled={!selectedUniversityId}>
+                                <SelectValue placeholder={selectedUniversityId ? 'Select intake' : 'Select university first'} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -642,14 +631,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                                 ? (((uniDetail?.admissionRequirements as any)?.intakesWithIds as any[]) || []).map((i: any) => (
                                     <SelectItem key={i.id} value={i.intakeLabel}>{i.intakeLabel}</SelectItem>
                                   ))
-                                : (intakeOptions.length
-                                  ? intakeOptions.map((opt) => (
-                                      <SelectItem key={String(opt.value)} value={opt.label}>{opt.label}</SelectItem>
-                                    ))
-                                  : ((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
-                                      <SelectItem key={i} value={i}>{i}</SelectItem>
-                                    ))
-                                  )}
+                                : ((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
+                                    <SelectItem key={i} value={i}>{i}</SelectItem>
+                                  ))}
                             </SelectContent>
                           </Select>
                         </FormControl>
