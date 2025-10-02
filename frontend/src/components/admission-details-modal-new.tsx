@@ -169,6 +169,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
     },
   });
 
@@ -217,6 +218,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
     },
   });
 
