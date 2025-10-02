@@ -179,7 +179,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const filteredCourses = useMemo(() => {
     if (!selectedUniversityId) return [];
-    const courses = Array.isArray(uniDetail?.courses) ? uniDetail?.courses : [];
+    const courses = Array.isArray(uniDetail?.courses) ? (uniDetail?.courses as any[]) : [];
     if (!selectedCourseType) return [];
     return courses.filter((c: any) => String(c?.category || '') === String(selectedCourseType));
   }, [uniDetail, selectedCourseType, selectedUniversityId]);
