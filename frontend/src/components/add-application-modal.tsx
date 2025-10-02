@@ -156,12 +156,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   }, [uniSummaries]);
 
   const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+  const selectedCountry = form.watch('country');
 
   const filteredUniversities = useMemo(() => {
-    const sel = String(form.getValues('country') || '');
+    const sel = String(selectedCountry || '');
     if (!sel) return uniSummaries || [];
     return (uniSummaries || []).filter((u: any) => String(u.country) === sel);
-  }, [uniSummaries, form]);
+  }, [uniSummaries, selectedCountry]);
 
   const { data: uniDetail } = useQuery({
     queryKey: ['/api/universities', selectedUniversityId],
