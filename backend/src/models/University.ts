@@ -58,6 +58,7 @@ export class UniversityModel {
         logoImageUrl: uni.logoImageUrl,
         about: uni.about,
         campusCity: uni.campusCity,
+        country: uni.country,
       },
       feesAndFunding: {
         totalFees: uni.totalFees !== null ? Number(uni.totalFees) : null,
