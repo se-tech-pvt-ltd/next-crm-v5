@@ -89,7 +89,7 @@ export default function EventsPage() {
                 aria-label={`Set status to ${statusName}`}
               >
                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                  isCompleted ? 'bg-blue-600 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                  isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-blue-600'
                 }`}>
                   {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
                 </div>
