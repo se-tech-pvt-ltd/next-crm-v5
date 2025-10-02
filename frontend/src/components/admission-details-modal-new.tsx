@@ -231,25 +231,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
   const headerRight = isEdit ? (
     <div className="flex items-center gap-2">
       <Button
-        variant="outline"
         size="xs"
-        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-        onClick={() => {
-          // Cancel edit: navigate back to view and reset local inputs
-          try { setLocation(`/admissions/${admission.id}`); } catch {}
-          setDepositDateInput(admission.depositDate ? new Date(admission.depositDate).toISOString().slice(0,10) : '');
-          setVisaDateInput(admission.visaDate ? new Date(admission.visaDate).toISOString().slice(0,10) : '');
-          setCaseStatus(admission.caseStatus || '');
-        }}
-        title="Cancel Edit"
-      >
-        Cancel
-      </Button>
-
-      <Button
-        variant="primary"
-        size="xs"
-        className="px-3 [&_svg]:size-3"
+        className="px-3 [&_svg]:size-3 bg-[#0071B0] hover:bg-[#00649D] text-white"
         onClick={() => {
           // Save changes
           const payload: any = {};
@@ -265,6 +248,22 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
         title="Save Changes"
       >
         Save
+      </Button>
+
+      <Button
+        variant="outline"
+        size="xs"
+        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+        onClick={() => {
+          // Cancel edit: navigate back to view and reset local inputs
+          try { setLocation(`/admissions/${admission.id}`); } catch {}
+          setDepositDateInput(admission.depositDate ? new Date(admission.depositDate).toISOString().slice(0,10) : '');
+          setVisaDateInput(admission.visaDate ? new Date(admission.visaDate).toISOString().slice(0,10) : '');
+          setCaseStatus(admission.caseStatus || '');
+        }}
+        title="Cancel Edit"
+      >
+        Cancel
       </Button>
 
       <Button
