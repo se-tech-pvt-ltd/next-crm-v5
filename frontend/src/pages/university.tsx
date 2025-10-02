@@ -29,14 +29,6 @@ export default function UniversityPage() {
   const [type, setType] = useState<string>('All');
   const [priority, setPriority] = useState<string>('All');
 
-  const countries = useMemo(() => {
-    const list = Array.isArray(universities) ? universities : [];
-    const set = new Set<string>();
-    list.forEach((u: any) => {
-      if (u?.country) set.add(String(u.country));
-    });
-    return ['All', ...Array.from(set).sort()];
-  }, [universities]);
 
   const [focus, setFocus] = useState(false);
   const [lowDeposit, setLowDeposit] = useState(false);
