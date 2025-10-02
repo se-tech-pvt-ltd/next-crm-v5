@@ -115,7 +115,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
   const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
-  const courseTypeOptions = makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']);
   const countryOptions = makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
   const intakeOptions = makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']);
