@@ -385,14 +385,22 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 <div>
                   <Label>Deposit Date</Label>
                   <div className="mt-1">
-                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled={!isEdit} readOnly={!isEdit} className="text-xs" />
+                    {isEdit ? (
+                      <Input type="date" value={depositDateInput} onChange={(e) => setDepositDateInput((e.target as HTMLInputElement).value)} className="text-xs" />
+                    ) : (
+                      <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                    )}
                   </div>
                 </div>
 
                 <div>
                   <Label>Visa Date</Label>
                   <div className="mt-1">
-                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled={!isEdit} readOnly={!isEdit} className="text-xs" />
+                    {isEdit ? (
+                      <Input type="date" value={visaDateInput} onChange={(e) => setVisaDateInput((e.target as HTMLInputElement).value)} className="text-xs" />
+                    ) : (
+                      <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                    )}
                   </div>
                 </div>
 
