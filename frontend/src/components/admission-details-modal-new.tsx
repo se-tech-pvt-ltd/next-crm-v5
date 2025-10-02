@@ -289,7 +289,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>University</Label>
                   <p className="text-xs font-semibold">{admission.university || 'Not specified'}</p>
@@ -297,30 +297,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 <div>
                   <Label>Program</Label>
                   <p className="text-xs font-semibold">{admission.program || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Initial Deposit</Label>
-                  <p className="text-xs">{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Full Tuition Fee</Label>
-                  <p className="text-xs">{admission.fullTuitionFee || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Net Tuition Fee</Label>
-                  <p className="text-xs">{admission.netTuitionFee || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Scholarship Amount</Label>
-                  <p className="text-xs">{admission.scholarshipAmount || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Deposit Date</Label>
-                  <p className="text-xs">{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Visa Date</Label>
-                  <p className="text-xs">{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
                 </div>
                 <div>
                   <Label>Case Status</Label>
@@ -336,6 +312,32 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div>
+                  <Label>Initial Deposit</Label>
+                  <p className="text-xs">{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Full Tuition Fee</Label>
+                  <p className="text-xs">{admission.fullTuitionFee || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Scholarship Amount</Label>
+                  <p className="text-xs">{admission.scholarshipAmount || 'Not specified'}</p>
+                </div>
+
+                <div>
+                  <Label>Net Tuition Fee</Label>
+                  <p className="text-xs">{admission.netTuitionFee || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Deposit Date</Label>
+                  <p className="text-xs">{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Visa Date</Label>
+                  <p className="text-xs">{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
                 </div>
               </div>
             </CardContent>
