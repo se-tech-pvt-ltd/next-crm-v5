@@ -353,3 +353,30 @@
 .no-not-allowed label {
   cursor: default !important;
 }
+
+/* Compact phone flag sizing for PhoneInput in Lead Details modal */
+.phone-compact img {
+  height: 16px !important;
+  width: auto !important;
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* Shrink phone input button and center flag */
+.phone-compact button {
+  height: 28px !important;
+  padding: 0 6px !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.phone-compact .react-international-phone__flag,
+.phone-compact .FlagImage,
+.phone-compact .flag {
+  height: 16px !important;
+  width: auto !important;
+}

@@ -89,18 +89,18 @@ export default function EventsPage() {
                 aria-label={`Set status to ${statusName}`}
               >
                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                  isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                  isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-blue-600'
                 }`}>
                   {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
                 </div>
                 <span className={`mt-1 text-[11px] font-medium text-center ${
-                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                  isCompleted ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
                 }`}>
                   {statusName}
                 </span>
                 {index < sequence.length - 1 && (
                   <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
-                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                    index < currentIndex ? 'bg-blue-600' : 'bg-gray-300'
                   }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
@@ -1168,7 +1168,7 @@ export default function EventsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2 pt-0">
-                <div className="text-base font-semibold text-green-600">
+                <div className="text-base font-semibold text-blue-600">
                   {eventsLoading ? <Skeleton className="h-6 w-12" /> : (visibleEvents.filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() >= Date.now() : false; }).length)}
                 </div>
               </CardContent>
@@ -1766,7 +1766,7 @@ export default function EventsPage() {
                 <div className="space-y-3">
                   <div className="text-xs">
                     <div>File: <span className="font-medium">{importFileName || 'N/A'}</span></div>
-                    <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-green-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
+                    <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-blue-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
                     <div className="mt-1">Ready to insert: <span className="font-medium">{importValidRows.length}</span></div>
                   </div>
                   {importErrors.length > 0 && (

@@ -44,7 +44,7 @@ export function CommandMultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between min-h-[2.5rem] h-auto", className)}
+          className={cn("w-full justify-between h-7", className)}
         >
           <div className="flex flex-wrap gap-1 flex-1 text-left">
             {value.length === 0 ? (

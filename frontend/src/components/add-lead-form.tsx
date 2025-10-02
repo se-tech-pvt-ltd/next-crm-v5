@@ -824,7 +824,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           onChange={(val) => { field.onChange(val); checkPhoneDuplicate(val); }}
                           defaultCountry="in"
                           className="w-full"
-                          inputClassName={`w-full h-9 text-sm ${phoneDuplicateStatus.isDuplicate ? 'ring-1 ring-amber-500 rounded-md' : ''}`}
+                          inputClassName={`w-full h-7 text-sm ${phoneDuplicateStatus.isDuplicate ? 'ring-1 ring-amber-500 rounded-md' : ''}`}
+                          buttonClassName="h-7"
                         />
                         {checkingPhone && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
