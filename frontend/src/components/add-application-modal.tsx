@@ -115,9 +115,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
   const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
-  const countryOptions = makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
-  const intakeOptions = makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']);
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
@@ -198,21 +196,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       }
     } catch {}
     try {
-      if (!form.getValues('country')) {
-        const def = countryOptions.find(o => o.isDefault);
-        if (def) form.setValue('country', def.value as any);
-      }
-    } catch {}
-    try {
       if (!form.getValues('channelPartner')) {
         const def = channelPartnerOptions.find(o => o.isDefault);
         if (def) form.setValue('channelPartner', def.value as any);
-      }
-    } catch {}
-    try {
-      if (!form.getValues('intake')) {
-        const def = intakeOptions.find(o => o.isDefault);
-        if (def) form.setValue('intake', def.value as any);
       }
     } catch {}
   }, [applicationsDropdowns]);
