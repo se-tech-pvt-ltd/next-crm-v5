@@ -39,7 +39,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
 
   const statusSequence = useMemo(() => {
     const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
+    if (!Array.isArray(list)) return [];
     return list.map((o: any) => (o.key || o.id || o.value)).filter(Boolean);
   }, [admissionDropdowns]);
 
