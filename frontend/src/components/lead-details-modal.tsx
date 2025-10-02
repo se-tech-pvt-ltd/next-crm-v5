@@ -472,17 +472,19 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
-                    <PhoneInput
-                      value={String(displayData.phone || '')}
-                      onChange={(val) => setEditData({ ...editData, phone: val })}
-                      defaultCountry="in"
-                      className="w-full"
-                      inputClassName="w-full h-7 text-[11px]"
-                      buttonClassName="h-7"
-                      inputStyle={{ height: '28px' }}
-                      buttonStyle={{ height: '28px' }}
-                      disabled={!isEditing || updateLeadMutation.isPending}
-                    />
+                    <div className="relative phone-compact">
+                      <PhoneInput
+                        value={String(displayData.phone || '')}
+                        onChange={(val) => setEditData({ ...editData, phone: val })}
+                        defaultCountry="in"
+                        className="w-full"
+                        inputClassName="w-full h-7 text-[11px]"
+                        buttonClassName="h-7"
+                        inputStyle={{ height: '28px' }}
+                        buttonStyle={{ height: '28px' }}
+                        disabled={!isEditing || updateLeadMutation.isPending}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city" className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>City</span></Label>
