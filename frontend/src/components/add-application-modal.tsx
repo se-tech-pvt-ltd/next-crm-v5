@@ -590,30 +590,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     )}
                   />
 
-                  {/* Channel Partner */}
-                  <FormField
-                    control={form.control}
-                    name="channelPartner"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Channel Partner</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select channel partner" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {channelPartnerOptions.map(opt => (
-                              <SelectItem key={opt.value} value={opt.value as string}>{opt.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   {/* Intake (from university detail) */}
                   <FormField
                     control={form.control}
@@ -639,6 +615,30 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                             </SelectContent>
                           </Select>
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Channel Partner */}
+                  <FormField
+                    control={form.control}
+                    name="channelPartner"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Channel Partner</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select channel partner" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {channelPartnerOptions.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value as string}>{opt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
