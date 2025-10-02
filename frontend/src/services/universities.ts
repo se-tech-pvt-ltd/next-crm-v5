@@ -3,6 +3,7 @@ import { http } from '@/services/http';
 export interface UniversitySummary {
   id: string;
   name: string;
+  country?: string | null;
   website: string | null;
   coverImageUrl: string | null;
   logoImageUrl: string | null;
