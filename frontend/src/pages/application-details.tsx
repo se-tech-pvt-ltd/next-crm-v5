@@ -180,7 +180,7 @@ export default function ApplicationDetails() {
                 }`}>
                   {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
                 </div>
-                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'}`}>
+                <span className={`mt-1 text-xs font-medium text-center ${isCompleted ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}>
                   {status}
                 </span>
                 {index < statusSequence.length - 1 && (
