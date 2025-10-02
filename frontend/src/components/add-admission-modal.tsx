@@ -671,6 +671,42 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [uniDetail, open]);
 
+  // Fallback: if application provides only university name (no universityId), try to find the university by name and autofill fees
+  useEffect(() => {
+    if (!open) return;
+    if (uniDetail) return; // already handled by uniDetail effect
+    const uniName = (currentApp as any)?.university || '';
+    const uniIdFromApp = String((currentApp as any)?.universityId ?? (currentApp as any)?.university_id ?? '');
+    if (uniIdFromApp) return; // nothing to do if id already present
+    if (!uniName || !String(uniName).trim()) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await UniversitiesService.listUniversities();
+        if (cancelled) return;
+        const match = (list || []).find((u: any) => String(u.name || '').trim().toLowerCase() === String(uniName).trim().toLowerCase());
+        if (!match || !match.id) return;
+        const detail = await UniversitiesService.getUniversity(String(match.id));
+        if (cancelled || !detail) return;
+        try {
+          const fees = (detail as any)?.feesAndFunding || {};
+          const totalFees = fees.totalFees;
+          const initDeposit = fees.initialDepositAmount;
+          const scholarship = fees.scholarshipFee;
+          if (!String(form.getValues('fullTuitionFee') || '').trim() && (totalFees || totalFees === 0)) form.setValue('fullTuitionFee', String(totalFees));
+          if (!String(form.getValues('scholarshipAmount') || '').trim() && (scholarship || scholarship === 0)) form.setValue('scholarshipAmount', String(scholarship));
+          if (!String(form.getValues('initialDeposit') || '').trim() && (initDeposit || initDeposit === 0)) form.setValue('initialDeposit', String(initDeposit));
+        } catch {}
+      } catch (e) {
+        console.warn('[AddAdmissionModal] fallback university lookup failed', e);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [currentApp, open, uniDetail]);
+
+
   return (
     <>
       <DetailsDialogLayout
