@@ -194,7 +194,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div>
                         <label className="text-sm font-medium text-gray-600">University</label>
                         {isEditing ? (
-                          <Input value={editData.university || ''} onChange={(e) => setEditData(prev => ({ ...prev, university: e.target.value }))} />
+                          <Input value={editData.university || ''} disabled />
                         ) : (
                           <p className="text-lg font-semibold">{application.university}</p>
                         )}
@@ -203,7 +203,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div>
                         <label className="text-sm font-medium text-gray-600">Program</label>
                         {isEditing ? (
-                          <Input value={editData.program || ''} onChange={(e) => setEditData(prev => ({ ...prev, program: e.target.value }))} />
+                          <Input value={editData.program || ''} disabled />
                         ) : (
                           <p className="text-lg font-semibold">{application.program}</p>
                         )}
@@ -212,7 +212,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div>
                         <label className="text-sm font-medium text-gray-600">Course Type</label>
                         {isEditing ? (
-                          <Input value={editData.courseType || ''} onChange={(e) => setEditData(prev => ({ ...prev, courseType: e.target.value }))} />
+                          <Input value={editData.courseType || ''} disabled />
                         ) : (
                           <p>{application.courseType || 'Not specified'}</p>
                         )}
@@ -221,7 +221,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div>
                         <label className="text-sm font-medium text-gray-600">Country</label>
                         {isEditing ? (
-                          <Input value={editData.country || ''} onChange={(e) => setEditData(prev => ({ ...prev, country: e.target.value }))} />
+                          <Input value={editData.country || ''} disabled />
                         ) : (
                           <p>{application.country || 'Not specified'}</p>
                         )}
@@ -230,7 +230,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                       <div>
                         <label className="text-sm font-medium text-gray-600">Intake</label>
                         {isEditing ? (
-                          <Input value={editData.intake || ''} onChange={(e) => setEditData(prev => ({ ...prev, intake: e.target.value }))} />
+                          <Input value={editData.intake || ''} disabled />
                         ) : (
                           <p>{application.intake || 'Not specified'}</p>
                         )}

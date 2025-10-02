@@ -145,6 +145,7 @@ export default function AddApplication() {
     defaultValues: {
       studentId: presetStudentId,
       university: '',
+      universityId: '',
       program: '',
       courseId: '',
       courseType: '',
@@ -346,7 +347,7 @@ export default function AddApplication() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country</FormLabel>
-                        <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); setSelectedUniversityId(null); form.setValue('university',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('courseType',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
+                        <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); setSelectedUniversityId(null); form.setValue('university',''); form.setValue('universityId',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('courseType',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                               <SelectValue placeholder="Please select" />
@@ -368,7 +369,7 @@ export default function AddApplication() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><School className="w-4 h-4" /> University *</FormLabel>
                         <FormControl>
-                          <Select disabled={!selectedCountry} value={selectedUniversityId || ''} onValueChange={(val) => { setSelectedUniversityId(val || null); const uni = (uniSummaries || []).find((u: any) => String(u.id)===String(val)); form.setValue('university', uni ? (uni.name||'') : ''); form.setValue('courseType',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
+                          <Select disabled={!selectedCountry} value={selectedUniversityId || ''} onValueChange={(val) => { setSelectedUniversityId(val || null); const uni = (uniSummaries || []).find((u: any) => String(u.id)===String(val)); form.setValue('university', uni ? (uni.name||'') : ''); form.setValue('universityId', val || ''); form.setValue('courseType',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
                             <FormControl>
                               <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20" disabled={!selectedCountry}>
                                 <SelectValue placeholder={selectedCountry ? 'Please select' : 'Select country first'} />

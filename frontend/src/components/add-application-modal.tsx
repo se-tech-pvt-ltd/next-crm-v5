@@ -122,6 +122,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     defaultValues: {
       studentId: studentId || '',
       university: '',
+      universityId: '',
       program: '',
       courseId: '',
       courseType: '',
@@ -433,6 +434,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <input type="hidden" {...form.register('studentId')} />
                   <input type="hidden" {...form.register('regionId')} />
                   <input type="hidden" {...form.register('branchId')} />
+                  <input type="hidden" {...form.register('universityId')} />
 
                   {/* Country (derived from universities table) */}
                   <FormField
@@ -448,6 +450,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               // reset dependent selections when country changes
                               setSelectedUniversityId(null);
                               form.setValue('university', '');
+                              form.setValue('universityId', '');
                               form.setValue('program', '');
                               form.setValue('courseId', '');
                               form.setValue('courseType', '');
@@ -488,6 +491,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               setSelectedUniversityId(val || null);
                               const uni = (uniSummaries || []).find((u: any) => String(u.id) === String(val));
                               form.setValue('university', uni ? (uni.name || '') : '');
+                              form.setValue('universityId', val || '');
                               // reset program/course/intake
                               form.setValue('courseType', '');
                               form.setValue('program', '');
