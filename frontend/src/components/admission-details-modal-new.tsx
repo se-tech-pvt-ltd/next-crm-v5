@@ -145,6 +145,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       // Still invalidate to ensure fresh server data if needed
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      // Refresh activity timeline for this admission
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
     },
   });
 
