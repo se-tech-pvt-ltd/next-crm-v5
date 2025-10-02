@@ -437,20 +437,20 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><School className="w-4 h-4" /><span>University</span></Label>
-                      <Input value={isEditing ? (editData.university || '') : (currentApp.university || '')} disabled className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Country</span></Label>
+                      <Input value={isEditing ? (editData.country || '') : (currentApp.country || '')} disabled className="h-8 text-xs transition-all" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Program</span></Label>
-                      <Input value={isEditing ? (editData.program || '') : (currentApp.program || '')} disabled className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
+                      <Label className="flex items-center space-x-2"><School className="w-4 h-4" /><span>University</span></Label>
+                      <Input value={isEditing ? (editData.university || '') : (currentApp.university || '')} disabled className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Course Type</span></Label>
                       <Input value={isEditing ? (editData.courseType || '') : (currentApp.courseType || '')} disabled className="h-8 text-xs transition-all" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Country</span></Label>
-                      <Input value={isEditing ? (editData.country || '') : (currentApp.country || '')} disabled className="h-8 text-xs transition-all" />
+                      <Label className="flex items-center space-x-2"><BookOpen className="w-4 h-4" /><span>Program</span></Label>
+                      <Input value={isEditing ? (editData.program || '') : (currentApp.program || '')} disabled className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20" />
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Intake</span></Label>
