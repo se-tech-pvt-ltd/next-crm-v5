@@ -4,7 +4,7 @@ import { admissions, students, type Admission, type InsertAdmission } from "../s
 import { AdmissionModel } from "../models/Admission.js";
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
-import { and, gte, lt, sql, eq, desc } from "drizzle-orm";
+import { and, gte, lt, sql, eq, desc, like } from "drizzle-orm";
 
 export class AdmissionService {
   static async getAdmissions(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Admission[]> {
@@ -106,14 +106,44 @@ export class AdmissionService {
   }
 
   static async createAdmission(admissionData: InsertAdmission): Promise<Admission> {
-    // Generate an admission code (ADM-YYMMDD-XXX) using timestamp-based sequence to avoid heavy COUNT queries
+    // Generate an admission code (ADM-YYMMDD-XXX) where XXX is a 3-digit sequence starting at 001 each day
     const now = new Date();
     const dd = String(now.getDate()).padStart(2, '0');
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const yy = String(now.getFullYear()).slice(-2);
-    // use milliseconds since epoch modulo 1000 as a simple sequence for uniqueness within the day
-    const seqNum = String(now.getTime() % 1000).padStart(3, '0');
-    const admissionCode = `ADM-${yy}${mm}${dd}-${seqNum}`;
+    const prefix = `ADM-${yy}${mm}${dd}-`;
+
+    let nextSeq = 1;
+    try {
+      // Find latest admissionId for today and increment
+      const latest = await db
+        .select()
+        .from(admissions)
+        .where(like(admissions.admissionId, `${prefix}%`))
+        .orderBy(desc(admissions.admissionId))
+        .limit(1)
+        .execute();
+
+      if (latest && latest.length > 0) {
+        const lastCode = (latest[0] as any).admissionId as string;
+        const parts = lastCode?.split('-') || [];
+        const seqStr = parts[2] || '000';
+        const parsed = parseInt(seqStr, 10);
+        if (!Number.isNaN(parsed)) nextSeq = parsed + 1;
+      }
+    } catch (e) {
+      // fallback to time-based sequence if DB lookup fails
+      try { nextSeq = Math.floor(Date.now() % 1000) || 1; } catch {}
+    }
+
+    // Safety: ensure uniqueness by trying a few increments in case of race
+    let admissionCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    for (let i = 0; i < 5; i++) {
+      const existing = await db.select().from(admissions).where(eq(admissions.admissionId, admissionCode)).execute();
+      if (!existing || existing.length === 0) break;
+      nextSeq += 1;
+      admissionCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    }
 
     const admission = await AdmissionModel.create({
       ...admissionData,
@@ -122,48 +152,79 @@ export class AdmissionService {
 
     // Log activity for the student
     await ActivityService.logActivity(
-      'student', 
-      admission.studentId, 
-      'admission_created', 
+      'student',
+      admission.studentId,
+      'admission_created',
       'Admission decision received',
       `${admission.decision} decision received from ${admission.university} for ${admission.program}`
     );
-    
+
     // Also log activity for the admission itself
     await ActivityService.logActivity(
-      'admission', 
-      admission.id, 
-      'created', 
+      'admission',
+      admission.id,
+      'created',
       'Admission decision recorded',
       `${admission.decision} decision from ${admission.university} for ${admission.program}`
     );
-    
+
     return admission;
   }
 
   static async updateAdmission(id: string, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
+    console.log('[AdmissionService] updateAdmission called with id:', id, 'updates:', updates);
     const currentAdmission = await AdmissionModel.findById(id);
+    console.log('[AdmissionService] found currentAdmission:', !!currentAdmission);
     if (!currentAdmission) return undefined;
 
     const admission = await AdmissionModel.update(id, updates);
+    console.log('[AdmissionService] AdmissionModel.update returned:', !!admission);
 
     if (admission) {
-      // Log changes for each updated field
+      // Log changes for each updated field (use normalized equality checks for dates/numbers/strings)
+      const areValuesEqual = (a: any, b: any) => {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+
+        // Try date comparison: if both parse to valid dates, compare timestamps
+        const aDate = new Date(a);
+        const bDate = new Date(b);
+        if (!Number.isNaN(aDate.getTime()) && !Number.isNaN(bDate.getTime())) {
+          return aDate.getTime() === bDate.getTime();
+        }
+
+        // Try numeric comparison
+        const aNum = Number(a);
+        const bNum = Number(b);
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) return aNum === bNum;
+
+        // Fallback to trimmed string comparison
+        return String(a).trim() === String(b).trim();
+      };
+
       for (const [fieldName, newValue] of Object.entries(updates)) {
         if (fieldName === 'updatedAt') continue;
-        
+
         const oldValue = (currentAdmission as any)[fieldName];
-        if (oldValue !== newValue) {
+        if (!areValuesEqual(oldValue, newValue)) {
           const fieldDisplayName = fieldName
             .replace(/([A-Z])/g, ' $1')
             .replace(/^./, str => str.toUpperCase());
-          
+
+          // Format values for logging: prefer ISO for dates
+          const formatForLog = (v: any) => {
+            if (v == null || v === '') return 'empty';
+            const d = new Date(v);
+            if (!Number.isNaN(d.getTime())) return d.toString();
+            return String(v);
+          };
+
           await ActivityService.logActivity(
-            'admission', 
-            id, 
-            'updated', 
+            'admission',
+            id,
+            'updated',
             `${fieldDisplayName} updated`,
-            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+            `${fieldDisplayName} changed from "${formatForLog(oldValue)}" to "${formatForLog(newValue)}"`,
             fieldName,
             String(oldValue || ''),
             String(newValue || ''),

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/empty-state';
@@ -17,7 +17,6 @@ import { AdmissionDetailsModal } from '@/components/admission-details-modal-new'
 import { useLocation, useRoute } from 'wouter';
 import * as DropdownsService from '@/services/dropdowns';
 import * as AdmissionsService from '@/services/admissions';
-import { useMemo } from 'react';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
@@ -31,6 +30,8 @@ export default function Admissions() {
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
   });
+
+  const queryClient = useQueryClient();
 
   const { data: admissionsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -51,14 +52,35 @@ export default function Admissions() {
     if (matchAd || matchEdit) {
       if (id) {
         const found = (admissions || []).find(a => a.id === id) as Admission | undefined;
-        if (found) setSelectedAdmission(found);
-        else {
-          AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+        if (found) {
+          setSelectedAdmission(found);
+        } else {
+          // Try to read from query cache first (keeps selection in sync with mutations)
+          try {
+            const cached = queryClient.getQueryData([`/api/admissions/${id}`]) as any;
+            if (cached) {
+              setSelectedAdmission(cached as Admission);
+            } else {
+              AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+            }
+          } catch {
+            AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+          }
         }
       }
       setIsDetailsOpen(true);
     }
   }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
+
+  useEffect(() => {
+    // If route has an id and there's a cached single admission for it, update selectedAdmission
+    const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    if (!id) return;
+    try {
+      const cached = queryClient.getQueryData([`/api/admissions/${id}`]) as any;
+      if (cached) setSelectedAdmission(cached as Admission);
+    } catch {}
+  }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
   const visaStatusOptions = useMemo(() => {
     const dd: any = admissionsDropdowns as any;

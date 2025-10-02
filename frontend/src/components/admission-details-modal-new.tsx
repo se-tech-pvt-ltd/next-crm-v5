@@ -6,6 +6,7 @@ import { ActivityTracker } from "./activity-tracker";
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Award, X } from "lucide-react";
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Admission } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
@@ -16,7 +17,7 @@ import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useEffect, useMemo } from "react";
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 
 interface AdmissionDetailsModalProps {
   open: boolean;
@@ -26,6 +27,8 @@ interface AdmissionDetailsModalProps {
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
   const [, setLocation] = useLocation();
+  const [matchEdit] = useRoute('/admissions/:id/edit');
+  const isEdit = !!matchEdit;
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -36,7 +39,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
 
   const statusSequence = useMemo(() => {
     const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','rejected','on_hold'];
+    if (!Array.isArray(list)) return [];
     return list.map((o: any) => (o.key || o.id || o.value)).filter(Boolean);
   }, [admissionDropdowns]);
 
@@ -72,11 +75,11 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     );
   };
 
-  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || (statusSequence.length>0?statusSequence[0]:'not_applied'));
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || '');
   const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
 
   useEffect(() => {
-    setCurrentStatus(admission?.status || (statusSequence.length>0?statusSequence[0]:'not_applied'));
+    setCurrentStatus(admission?.status || '');
     setCaseStatus(admission?.caseStatus || '');
   }, [admission, statusSequence]);
 
@@ -123,9 +126,27 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
     },
-    onSuccess: () => {
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        // Update list cache if present
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+
+        // Update single admission cache
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
+
+      // Still invalidate to ensure fresh server data if needed
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      // Refresh activity timeline for this admission
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
     },
   });
 
@@ -134,9 +155,21 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { caseStatus: newCaseStatus });
     },
-    onSuccess: () => {
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
     },
   });
 
@@ -145,10 +178,49 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     updateStatusMutation.mutate(newStatus);
   };
 
+  // keep local editable inputs for dates
+  const [depositDateInput, setDepositDateInput] = useState<string>('');
+  const [visaDateInput, setVisaDateInput] = useState<string>('');
+
+  useEffect(() => {
+    // initialize date inputs in yyyy-mm-dd format for native date inputs
+    const toISODate = (d: any) => {
+      if (!d) return '';
+      const dt = new Date(d);
+      if (Number.isNaN(dt.getTime())) return '';
+      return dt.toISOString().slice(0, 10);
+    };
+    setDepositDateInput(toISODate(admission?.depositDate));
+    setVisaDateInput(toISODate(admission?.visaDate));
+  }, [admission]);
+
+  // In edit mode, don't auto-save caseStatus. Just set local state.
   const handleCaseStatusChange = (newCase: string) => {
     setCaseStatus(newCase);
-    updateCaseStatusMutation.mutate(newCase);
   };
+
+  const updateAdmissionMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, payload);
+    },
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
+    },
+  });
 
   if (!admission) return null;
 
@@ -156,7 +228,55 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || `Admission ${admission.admissionId || admission.id}`}</div>
   );
 
-  const headerRight = (
+  const headerRight = isEdit ? (
+    <div className="flex items-center gap-2">
+      <Button
+        size="xs"
+        className="px-3 [&_svg]:size-3 bg-[#0071B0] hover:bg-[#00649D] text-white"
+        onClick={() => {
+          // Save changes
+          const payload: any = {};
+          payload.depositDate = depositDateInput || null;
+          payload.visaDate = visaDateInput || null;
+          payload.caseStatus = caseStatus || null;
+          updateAdmissionMutation.mutate(payload, {
+            onSuccess: () => {
+              try { setLocation(`/admissions/${admission.id}`); } catch {}
+            }
+          });
+        }}
+        title="Save Changes"
+      >
+        Save
+      </Button>
+
+      <Button
+        variant="outline"
+        size="xs"
+        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+        onClick={() => {
+          // Cancel edit: navigate back to view and reset local inputs
+          try { setLocation(`/admissions/${admission.id}`); } catch {}
+          setDepositDateInput(admission.depositDate ? new Date(admission.depositDate).toISOString().slice(0,10) : '');
+          setVisaDateInput(admission.visaDate ? new Date(admission.visaDate).toISOString().slice(0,10) : '');
+          setCaseStatus(admission.caseStatus || '');
+        }}
+        title="Cancel Edit"
+      >
+        Cancel
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
+        onClick={() => onOpenChange(false)}
+        aria-label="Close"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </div>
+  ) : (
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
@@ -194,6 +314,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     const year = date.getFullYear();
     return `${day}${suffix} ${month}, ${year}`;
   };
+
+  const caseStatusLabel = (() => { const opt = getCaseStatusOptions().find(o => o.value === caseStatus); return opt?.label || (admission as any)?.caseStatus || ''; })();
 
   return (
     <DetailsDialogLayout
@@ -262,52 +384,84 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>University</Label>
-                  <p className="text-xs font-semibold">{admission.university || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Program</Label>
-                  <p className="text-xs font-semibold">{admission.program || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Initial Deposit</Label>
-                  <p className="text-xs">{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Full Tuition Fee</Label>
-                  <p className="text-xs">{admission.fullTuitionFee || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Net Tuition Fee</Label>
-                  <p className="text-xs">{admission.netTuitionFee || 'Not specified'}</p>
-                </div>
-                <div>
-                  <Label>Scholarship Amount</Label>
-                  <p className="text-xs">{admission.scholarshipAmount || 'Not specified'}</p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>Deposit Date</Label>
-                  <p className="text-xs">{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
+                  <div className="mt-1">
+                    {isEdit ? (
+                      <Input type="date" value={depositDateInput} onChange={(e) => setDepositDateInput((e.target as HTMLInputElement).value)} className="text-xs" />
+                    ) : (
+                      <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                    )}
+                  </div>
                 </div>
+
                 <div>
                   <Label>Visa Date</Label>
-                  <p className="text-xs">{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
+                  <div className="mt-1">
+                    {isEdit ? (
+                      <Input type="date" value={visaDateInput} onChange={(e) => setVisaDateInput((e.target as HTMLInputElement).value)} className="text-xs" />
+                    ) : (
+                      <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                    )}
+                  </div>
                 </div>
+
                 <div>
                   <Label>Case Status</Label>
                   <div className="mt-1">
-                    <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Select case status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
-                          <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    {isEdit ? (
+                      <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select case status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
+                            <SelectItem key="__none__" value="__none__" disabled>{admission.caseStatus || 'Not specified'}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <Label>University</Label>
+                  <div className="mt-1">
+                    <Input value={admission.university ?? ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Program</Label>
+                  <div className="mt-1">
+                    <Input value={admission.program ?? ''} placeholder="Not specified" disabled readOnly className="text-xs" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Net Tuition Fee</Label>
+                  <div className="mt-1">
+                    <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Initial Deposit</Label>
+                  <div className="mt-1">
+                    <Input value={String(admission.initialDeposit ?? admission.depositAmount ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Full Tuition Fee</Label>
+                  <div className="mt-1">
+                    <Input value={String(admission.fullTuitionFee ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Scholarship Amount</Label>
+                  <div className="mt-1">
+                    <Input value={String(admission.scholarshipAmount ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
               </div>

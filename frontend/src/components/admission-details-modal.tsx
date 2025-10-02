@@ -23,7 +23,7 @@ interface AdmissionDetailsModalProps {
 }
 
 export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStudentProfile }: AdmissionDetailsModalProps) {
-  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || 'not_applied');
+  const [currentStatus, setCurrentStatus] = useState<string>(admission?.status || '');
   const [caseStatus, setCaseStatus] = useState<string>(admission?.caseStatus || '');
   const { toast } = useToast();
 
@@ -60,13 +60,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   });
 
   useEffect(() => {
-    setCurrentStatus(admission?.status || 'not_applied');
+    setCurrentStatus(admission?.status || '');
     setCaseStatus(admission?.caseStatus || '');
   }, [admission]);
 
   const statusSequence = useMemo<string[]>(() => {
     const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list) || list.length === 0) return ['not_applied','applied','interview_scheduled','approved','on_hold','rejected'];
+    if (!Array.isArray(list)) return [];
     return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
   }, [admissionDropdowns]);
 
@@ -95,9 +95,21 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
     },
-    onSuccess: () => {
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
       toast({ title: 'Status updated' });
     },
     onError: (e: any) => toast({ title: 'Error', description: e?.message || 'Failed to update status', variant: 'destructive' }),
@@ -108,9 +120,21 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { caseStatus: newCaseStatus });
     },
-    onSuccess: () => {
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
       toast({ title: 'Case status updated' });
     },
     onError: (e: any) => toast({ title: 'Error', description: e?.message || 'Failed to update case status', variant: 'destructive' }),
@@ -165,17 +189,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {statusSequence.length === 0 ? (
-                            <>
-                              <SelectItem value="not_applied">Not Applied</SelectItem>
-                              <SelectItem value="applied">Applied</SelectItem>
-                              <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                              <SelectItem value="approved">Approved</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                              <SelectItem value="on_hold">On Hold</SelectItem>
-                            </>
-                          ) : (
-                            statusSequence.map(s => <SelectItem key={s} value={s}>{getStatusDisplayName(s)}</SelectItem>)
+                            {statusSequence.length > 0 ? statusSequence.map(s => <SelectItem key={s} value={s}>{getStatusDisplayName(s)}</SelectItem>) : (
+                            <SelectItem value="__none__" disabled>{currentStatus || 'Not specified'}</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
@@ -276,7 +291,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                             <SelectTrigger className="h-8 text-xs shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Select case status" /></SelectTrigger>
                             <SelectContent>
                               {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
-                                <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
+                                <SelectItem key="__none__" value="__none__" disabled>{admission.caseStatus || 'Not specified'}</SelectItem>
                               )}
                             </SelectContent>
                           </Select>

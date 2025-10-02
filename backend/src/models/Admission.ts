@@ -53,6 +53,13 @@ export class AdmissionModel {
 
     const affected = result?.affectedRows ?? result?.rowCount ?? result?.rowsAffected ?? 0;
     if (affected === 0) {
+      // No rows affected may mean the values were identical or driver reports 0; still return current record if present
+      try {
+        const existing = await AdmissionModel.findById(id);
+        if (existing) return existing;
+      } catch (e) {
+        // fallthrough
+      }
       return undefined;
     }
 

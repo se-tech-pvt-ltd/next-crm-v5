@@ -73,6 +73,7 @@ export class AdmissionController {
     try {
       const id = req.params.id;
       const body = { ...req.body } as any;
+      console.log('[AdmissionController] updateAdmission called with id:', id, 'body keys:', Object.keys(body));
       const dateFields = ['decisionDate','depositDate','depositDeadline','visaDate'];
       for (const f of dateFields) {
         if (typeof body[f] === 'string' && body[f].trim() !== '') {
@@ -83,6 +84,7 @@ export class AdmissionController {
       const validatedData = insertAdmissionSchema.partial().parse(body);
       const admission = await AdmissionService.updateAdmission(id, validatedData);
       if (!admission) {
+        console.warn('[AdmissionController] updateAdmission - Admission not found for id:', id);
         return res.status(404).json({ message: "Admission not found" });
       }
       res.json(admission);
