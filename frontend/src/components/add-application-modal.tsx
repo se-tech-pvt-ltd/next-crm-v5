@@ -492,20 +492,21 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormLabel>University *</FormLabel>
                         <FormControl>
                           <Select
+                            disabled={!selectedCountry}
                             value={selectedUniversityId || ''}
                             onValueChange={(val) => {
                               setSelectedUniversityId(val || null);
                               const uni = (uniSummaries || []).find((u: any) => String(u.id) === String(val));
                               form.setValue('university', uni ? (uni.name || '') : '');
                               // reset program/course/intake
-                              form.setValue('program', '');
                               form.setValue('courseType', '');
+                              form.setValue('program', '');
                               form.setValue('intake', '');
                             }}
                           >
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedUniversityId ? 'Selected university' : 'Select university'} />
+                              <SelectTrigger disabled={!selectedCountry}>
+                                <SelectValue placeholder={selectedCountry ? (selectedUniversityId ? 'Selected university' : 'Select university') : 'Select country first'} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
