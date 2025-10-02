@@ -32,6 +32,8 @@ export default function Admissions() {
     queryKey: ['/api/admissions'],
   });
 
+  const queryClient = useQueryClient();
+
   const { data: admissionsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Admissions'],
     queryFn: async () => DropdownsService.getModuleDropdowns('Admissions')
