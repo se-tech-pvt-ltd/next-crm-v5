@@ -152,7 +152,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const uniCountries = useMemo(() => {
     const set = new Set<string>();
     (uniSummaries || []).forEach((u: any) => { if (u?.country) set.add(String(u.country)); });
-    return [{ label: 'Select country', value: '' }, ...Array.from(set).sort().map((c) => ({ label: c, value: c }))];
+    return Array.from(set).sort().map((c) => ({ label: c, value: c }));
   }, [uniSummaries]);
 
   const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
