@@ -51,14 +51,44 @@ export default function Admissions() {
     if (matchAd || matchEdit) {
       if (id) {
         const found = (admissions || []).find(a => a.id === id) as Admission | undefined;
-        if (found) setSelectedAdmission(found);
-        else {
-          AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+        if (found) {
+          setSelectedAdmission(found);
+        } else {
+          // Try to read from query cache first (keeps selection in sync with mutations)
+          try {
+            const cached = queryClient.getQueryData([`/api/admissions/${id}`]) as any;
+            if (cached) {
+              setSelectedAdmission(cached as Admission);
+            } else {
+              AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+            }
+          } catch {
+            AdmissionsService.getAdmission(id).then((a) => setSelectedAdmission(a as any)).catch(() => {});
+          }
         }
       }
       setIsDetailsOpen(true);
     }
   }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
+
+  // Keep selectedAdmission in sync if the single-admission query updates (e.g. after inline edits)
+  useEffect(() => {
+    const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    if (!id) return;
+    try {
+      const unsubscribe = queryClient.getQueryCache().find(['/api/admissions', id])?.subscribe?.(() => {});
+    } catch {}
+  }, [queryClient, matchAd, matchEdit, adParams?.id, editParams?.id]);
+
+  useEffect(() => {
+    // If there's a cached single admission for the current route id, update selectedAdmission
+    const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    if (!id) return;
+    try {
+      const cached = queryClient.getQueryData([`/api/admissions/${id}`]) as any;
+      if (cached) setSelectedAdmission(cached as Admission);
+    } catch {}
+  }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
   const visaStatusOptions = useMemo(() => {
     const dd: any = admissionsDropdowns as any;
