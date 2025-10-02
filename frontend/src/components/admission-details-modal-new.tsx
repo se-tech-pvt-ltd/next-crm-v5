@@ -304,7 +304,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                       </SelectTrigger>
                       <SelectContent>
                         {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
-                          <SelectItem key="__none__" value="">{admission.caseStatus || 'Not specified'}</SelectItem>
+                          <SelectItem key="__none__" value="__none__" disabled>{admission.caseStatus || 'Not specified'}</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
