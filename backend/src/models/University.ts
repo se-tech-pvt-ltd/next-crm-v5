@@ -7,6 +7,7 @@ export class UniversityModel {
     return await db.select({
       id: universities.id,
       name: universities.name,
+      country: universities.country,
       website: universities.website,
       coverImageUrl: universities.coverImageUrl,
       logoImageUrl: universities.logoImageUrl,
@@ -57,6 +58,7 @@ export class UniversityModel {
         logoImageUrl: uni.logoImageUrl,
         about: uni.about,
         campusCity: uni.campusCity,
+        country: uni.country,
       },
       feesAndFunding: {
         totalFees: uni.totalFees !== null ? Number(uni.totalFees) : null,

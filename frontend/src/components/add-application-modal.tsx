@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-application-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import * as UniversitiesService from '@/services/universities';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -119,6 +120,62 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
   const intakeOptions = makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']);
 
+  const form = useForm({
+    resolver: zodResolver(insertApplicationSchema),
+    defaultValues: {
+      studentId: studentId || '',
+      university: '',
+      program: '',
+      courseType: '',
+      appStatus: '',
+      caseStatus: '',
+      country: '',
+      channelPartner: '',
+      intake: '',
+      googleDriveLink: '',
+      notes: '',
+      counsellorId: '',
+      admissionOfficerId: '',
+      regionId: '',
+      branchId: '',
+    },
+  });
+
+  // Universities-based dynamic data
+  const { data: uniSummaries = [] } = useQuery({
+    queryKey: ['/api/universities'],
+    queryFn: UniversitiesService.listUniversities,
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const uniCountries = useMemo(() => {
+    const set = new Set<string>();
+    (uniSummaries || []).forEach((u: any) => { if (u?.country) set.add(String(u.country)); });
+    return Array.from(set).sort().map((c) => ({ label: c, value: c }));
+  }, [uniSummaries]);
+
+  const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+
+  const filteredUniversities = useMemo(() => {
+    const sel = String(form.getValues('country') || '');
+    if (!sel) return uniSummaries || [];
+    return (uniSummaries || []).filter((u: any) => String(u.country) === sel);
+  }, [uniSummaries, form]);
+
+  const { data: uniDetail } = useQuery({
+    queryKey: ['/api/universities', selectedUniversityId],
+    queryFn: async () => selectedUniversityId ? UniversitiesService.getUniversity(selectedUniversityId) : undefined,
+    enabled: !!selectedUniversityId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const uniCourseTypes = useMemo(() => {
+    const set = new Set<string>();
+    (uniDetail?.courses || []).forEach((c: any) => { if (c?.category) set.add(String(c.category)); });
+    return Array.from(set).sort();
+  }, [uniDetail]);
+
   useEffect(() => {
     try {
       if (!form.getValues('appStatus')) {
@@ -158,26 +215,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     } catch {}
   }, [applicationsDropdowns]);
 
-  const form = useForm({
-    resolver: zodResolver(insertApplicationSchema),
-    defaultValues: {
-      studentId: studentId || '',
-      university: '',
-      program: presetStudent?.targetProgram || '',
-      courseType: '',
-      appStatus: '',
-      caseStatus: '',
-      country: '',
-      channelPartner: '',
-      intake: '',
-      googleDriveLink: '',
-      notes: '',
-      counsellorId: '',
-      admissionOfficerId: '',
-      regionId: '',
-      branchId: '',
-    },
-  });
 
   // Determine selected student's branch (depends on form)
   const selectedStudentId = form.watch('studentId');
@@ -407,21 +444,81 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <input type="hidden" {...form.register('regionId')} />
                   <input type="hidden" {...form.register('branchId')} />
 
+                  {/* Country (derived from universities table) */}
                   <FormField
                     control={form.control}
-                    name="university"
+                    name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>University *</FormLabel>
+                        <FormLabel>Country</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter university name" {...field} />
+                          <Select
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              // reset dependent selections when country changes
+                              setSelectedUniversityId(null);
+                              form.setValue('university', '');
+                              form.setValue('program', '');
+                              form.setValue('courseType', '');
+                              form.setValue('intake', '');
+                            }}
+                            value={field.value || ''}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select country" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {(uniCountries || []).map((c: any) => (
+                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
+                  {/* University (filtered by country) */}
+                  <FormField
+                    control={form.control}
+                    name="university"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>University *</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={selectedUniversityId || ''}
+                            onValueChange={(val) => {
+                              setSelectedUniversityId(val || null);
+                              const uni = (uniSummaries || []).find((u: any) => String(u.id) === String(val));
+                              form.setValue('university', uni ? (uni.name || '') : '');
+                              // reset program/course/intake
+                              form.setValue('program', '');
+                              form.setValue('courseType', '');
+                              form.setValue('intake', '');
+                            }}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={selectedUniversityId ? 'Selected university' : 'Select university'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {(filteredUniversities || []).map((u: any) => (
+                                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
+                  {/* Channel Partner */}
                   <FormField
                     control={form.control}
                     name="channelPartner"
@@ -445,6 +542,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     )}
                   />
 
+                  {/* Program (populated from selected university) */}
                   <FormField
                     control={form.control}
                     name="program"
@@ -452,77 +550,71 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                       <FormItem>
                         <FormLabel>Program *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Computer Science, Business Administration" {...field} />
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={selectedUniversityId ? 'Select program' : 'Select university first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {((uniDetail?.courses || []) as any[]).map((c) => (
+                                <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
+                  {/* Course Type (derived from selected university courses categories) */}
                   <FormField
                     control={form.control}
                     name="courseType"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Course Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select course type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {courseTypeOptions.map(opt => (
-                              <SelectItem key={opt.value} value={opt.value as string}>{opt.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={selectedUniversityId ? 'Select course type' : 'Select university first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {(uniCourseTypes || []).map((t: any) => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Country</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select country" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {countryOptions.map(opt => (
-                              <SelectItem key={opt.value} value={opt.value as string}>{opt.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
+                  {/* Intake (from university detail) */}
                   <FormField
                     control={form.control}
                     name="intake"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Intake</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select intake" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {intakeOptions.map(opt => (
-                              <SelectItem key={opt.value} value={opt.value as string}>{opt.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={selectedUniversityId ? 'Select intake' : 'Select university first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
+                                <SelectItem key={i} value={i}>{i}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
