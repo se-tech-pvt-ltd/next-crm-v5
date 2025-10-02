@@ -74,6 +74,7 @@ export interface Application {
   applicationCode: string | null;
   studentId: string;
   university: string;
+  universityId?: string | null;
   program: string;
   courseId?: string | null;
   courseType: string | null;
@@ -203,6 +204,7 @@ export const insertStudentSchema = z.object({
 export const insertApplicationSchema = z.object({
   studentId: z.string(),
   university: z.string().min(1, "University is required"),
+  universityId: z.string().optional(),
   program: z.string().optional(),
   courseId: z.string().optional(),
   courseType: z.string().optional(),
