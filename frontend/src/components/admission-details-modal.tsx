@@ -119,7 +119,18 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { caseStatus: newCaseStatus });
     },
-    onSuccess: () => {
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
       toast({ title: 'Case status updated' });
