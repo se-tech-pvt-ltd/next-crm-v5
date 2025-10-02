@@ -181,22 +181,50 @@ export class AdmissionService {
     console.log('[AdmissionService] AdmissionModel.update returned:', !!admission);
 
     if (admission) {
-      // Log changes for each updated field
+      // Log changes for each updated field (use normalized equality checks for dates/numbers/strings)
+      const areValuesEqual = (a: any, b: any) => {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+
+        // Try date comparison: if both parse to valid dates, compare timestamps
+        const aDate = new Date(a);
+        const bDate = new Date(b);
+        if (!Number.isNaN(aDate.getTime()) && !Number.isNaN(bDate.getTime())) {
+          return aDate.getTime() === bDate.getTime();
+        }
+
+        // Try numeric comparison
+        const aNum = Number(a);
+        const bNum = Number(b);
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) return aNum === bNum;
+
+        // Fallback to trimmed string comparison
+        return String(a).trim() === String(b).trim();
+      };
+
       for (const [fieldName, newValue] of Object.entries(updates)) {
         if (fieldName === 'updatedAt') continue;
-        
+
         const oldValue = (currentAdmission as any)[fieldName];
-        if (oldValue !== newValue) {
+        if (!areValuesEqual(oldValue, newValue)) {
           const fieldDisplayName = fieldName
             .replace(/([A-Z])/g, ' $1')
             .replace(/^./, str => str.toUpperCase());
-          
+
+          // Format values for logging: prefer ISO for dates
+          const formatForLog = (v: any) => {
+            if (v == null || v === '') return 'empty';
+            const d = new Date(v);
+            if (!Number.isNaN(d.getTime())) return d.toString();
+            return String(v);
+          };
+
           await ActivityService.logActivity(
-            'admission', 
-            id, 
-            'updated', 
+            'admission',
+            id,
+            'updated',
             `${fieldDisplayName} updated`,
-            `${fieldDisplayName} changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+            `${fieldDisplayName} changed from "${formatForLog(oldValue)}" to "${formatForLog(newValue)}"`,
             fieldName,
             String(oldValue || ''),
             String(newValue || ''),
