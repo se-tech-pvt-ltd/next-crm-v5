@@ -119,6 +119,41 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
   const intakeOptions = makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']);
 
+  // Universities-based dynamic data
+  const { data: uniSummaries = [] } = useQuery({
+    queryKey: ['/api/universities'],
+    queryFn: UniversitiesService.listUniversities,
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const uniCountries = useMemo(() => {
+    const set = new Set<string>();
+    (uniSummaries || []).forEach((u: any) => { if (u?.country) set.add(String(u.country)); });
+    return [{ label: 'Select country', value: '' }, ...Array.from(set).sort().map((c) => ({ label: c, value: c }))];
+  }, [uniSummaries]);
+
+  const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+
+  const filteredUniversities = useMemo(() => {
+    const sel = String(form.getValues('country') || '');
+    if (!sel) return uniSummaries || [];
+    return (uniSummaries || []).filter((u: any) => String(u.country) === sel);
+  }, [uniSummaries, form]);
+
+  const { data: uniDetail } = useQuery({
+    queryKey: ['/api/universities', selectedUniversityId],
+    queryFn: async () => selectedUniversityId ? UniversitiesService.getUniversity(selectedUniversityId) : undefined,
+    enabled: !!selectedUniversityId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const uniCourseTypes = useMemo(() => {
+    const set = new Set<string>();
+    (uniDetail?.courses || []).forEach((c: any) => { if (c?.category) set.add(String(c.category)); });
+    return Array.from(set).sort();
+  }, [uniDetail]);
+
   useEffect(() => {
     try {
       if (!form.getValues('appStatus')) {
