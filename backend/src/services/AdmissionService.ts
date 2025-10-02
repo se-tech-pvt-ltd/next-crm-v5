@@ -106,14 +106,44 @@ export class AdmissionService {
   }
 
   static async createAdmission(admissionData: InsertAdmission): Promise<Admission> {
-    // Generate an admission code (ADM-YYMMDD-XXX) using timestamp-based sequence to avoid heavy COUNT queries
+    // Generate an admission code (ADM-YYMMDD-XXX) where XXX is a 3-digit sequence starting at 001 each day
     const now = new Date();
     const dd = String(now.getDate()).padStart(2, '0');
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const yy = String(now.getFullYear()).slice(-2);
-    // use milliseconds since epoch modulo 1000 as a simple sequence for uniqueness within the day
-    const seqNum = String(now.getTime() % 1000).padStart(3, '0');
-    const admissionCode = `ADM-${yy}${mm}${dd}-${seqNum}`;
+    const prefix = `ADM-${yy}${mm}${dd}-`;
+
+    let nextSeq = 1;
+    try {
+      // Find latest admissionId for today and increment
+      const latest = await db
+        .select()
+        .from(admissions)
+        .where(like(admissions.admissionId, `${prefix}%`))
+        .orderBy(desc(admissions.admissionId))
+        .limit(1)
+        .execute();
+
+      if (latest && latest.length > 0) {
+        const lastCode = (latest[0] as any).admissionId as string;
+        const parts = lastCode?.split('-') || [];
+        const seqStr = parts[2] || '000';
+        const parsed = parseInt(seqStr, 10);
+        if (!Number.isNaN(parsed)) nextSeq = parsed + 1;
+      }
+    } catch (e) {
+      // fallback to time-based sequence if DB lookup fails
+      try { nextSeq = Math.floor(Date.now() % 1000) || 1; } catch {}
+    }
+
+    // Safety: ensure uniqueness by trying a few increments in case of race
+    let admissionCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    for (let i = 0; i < 5; i++) {
+      const existing = await db.select().from(admissions).where(eq(admissions.admissionId, admissionCode)).execute();
+      if (!existing || existing.length === 0) break;
+      nextSeq += 1;
+      admissionCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    }
 
     const admission = await AdmissionModel.create({
       ...admissionData,
@@ -122,22 +152,22 @@ export class AdmissionService {
 
     // Log activity for the student
     await ActivityService.logActivity(
-      'student', 
-      admission.studentId, 
-      'admission_created', 
+      'student',
+      admission.studentId,
+      'admission_created',
       'Admission decision received',
       `${admission.decision} decision received from ${admission.university} for ${admission.program}`
     );
-    
+
     // Also log activity for the admission itself
     await ActivityService.logActivity(
-      'admission', 
-      admission.id, 
-      'created', 
+      'admission',
+      admission.id,
+      'created',
       'Admission decision recorded',
       `${admission.decision} decision from ${admission.university} for ${admission.program}`
     );
-    
+
     return admission;
   }
 
