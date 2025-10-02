@@ -109,6 +109,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
       }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
       toast({ title: 'Status updated' });
     },
     onError: (e: any) => toast({ title: 'Error', description: e?.message || 'Failed to update status', variant: 'destructive' }),
@@ -133,6 +134,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
       }
       queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
       toast({ title: 'Case status updated' });
     },
     onError: (e: any) => toast({ title: 'Error', description: e?.message || 'Failed to update case status', variant: 'destructive' }),
