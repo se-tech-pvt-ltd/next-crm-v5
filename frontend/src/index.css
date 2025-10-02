@@ -353,3 +353,11 @@
 .no-not-allowed label {
   cursor: default !important;
 }
+
+/* Compact phone flag sizing for PhoneInput in Lead Details modal */
+.phone-compact img {
+  height: 16px !important;
+  width: auto !important;
+  display: inline-block;
+  object-fit: contain;
+}
