@@ -94,7 +94,7 @@ export default function EventsPage() {
                   {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
                 </div>
                 <span className={`mt-1 text-[11px] font-medium text-center ${
-                  isCompleted ? 'text-green-600' : 'text-gray-600 hover:text-green-600'
+                  isCompleted ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
                 }`}>
                   {statusName}
                 </span>
@@ -1168,7 +1168,7 @@ export default function EventsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2 pt-0">
-                <div className="text-base font-semibold text-green-600">
+                <div className="text-base font-semibold text-blue-600">
                   {eventsLoading ? <Skeleton className="h-6 w-12" /> : (visibleEvents.filter((e: any) => { const dt = getEventDateTime(e); return dt ? dt.getTime() >= Date.now() : false; }).length)}
                 </div>
               </CardContent>
@@ -1766,7 +1766,7 @@ export default function EventsPage() {
                 <div className="space-y-3">
                   <div className="text-xs">
                     <div>File: <span className="font-medium">{importFileName || 'N/A'}</span></div>
-                    <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-green-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
+                    <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-blue-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
                     <div className="mt-1">Ready to insert: <span className="font-medium">{importValidRows.length}</span></div>
                   </div>
                   {importErrors.length > 0 && (
