@@ -426,11 +426,11 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     </div>
                     <div className="text-xs">
                       <div className="text-[11px] text-gray-500">Student Name</div>
-                      <div className="font-medium">{presetStudent?.name || selectedStudent?.name || '-'}</div>
+                    <div className="font-medium mt-1">{presetStudent?.name || selectedStudent?.name || '-'}</div>
                     </div>
                     <div className="text-xs">
                       <div className="text-[11px] text-gray-500">Email</div>
-                      <div className="font-medium">{presetStudent?.email || selectedStudent?.email || '-'}</div>
+                    <div className="font-medium mt-1">{presetStudent?.email || selectedStudent?.email || '-'}</div>
                     </div>
                   </div>
                 </CardContent>
