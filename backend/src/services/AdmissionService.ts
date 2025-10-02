@@ -4,7 +4,7 @@ import { admissions, students, type Admission, type InsertAdmission } from "../s
 import { AdmissionModel } from "../models/Admission.js";
 import { StudentModel } from "../models/Student.js";
 import { ActivityService } from "./ActivityService.js";
-import { and, gte, lt, sql, eq, desc } from "drizzle-orm";
+import { and, gte, lt, sql, eq, desc, like } from "drizzle-orm";
 
 export class AdmissionService {
   static async getAdmissions(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Admission[]> {
