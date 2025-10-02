@@ -335,7 +335,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                 </div>
                 <span className={`mt-1 text-[10px] font-medium ${isCompleted ? 'text-green-600' : 'text-gray-600'}`}>{label}</span>
                 {index < statusSequence.length - 1 && (
-                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${index < idx ? 'bg-blue-600' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
+                  <div className={`absolute top-2.5 left-1/2 w-full h-0.5 -translate-y-1/2 ${index < idx ? 'bg-green-500' : 'bg-gray-300'}`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
             );
