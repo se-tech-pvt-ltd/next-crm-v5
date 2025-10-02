@@ -449,8 +449,10 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               setSelectedUniversityId(null);
                               form.setValue('university', '');
                               form.setValue('program', '');
+                              form.setValue('courseId', '');
                               form.setValue('courseType', '');
                               form.setValue('intake', '');
+                              form.setValue('intakeId', '');
                             }}
                             value={field.value || ''}
                           >
@@ -489,7 +491,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               // reset program/course/intake
                               form.setValue('courseType', '');
                               form.setValue('program', '');
+                              form.setValue('courseId', '');
                               form.setValue('intake', '');
+                              form.setValue('intakeId', '');
                             }}
                           >
                             <FormControl>
@@ -522,6 +526,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                             onValueChange={(val) => {
                               field.onChange(val);
                               form.setValue('program', '');
+                              form.setValue('courseId', '');
                             }}
                             value={field.value || ''}
                           >
@@ -552,7 +557,19 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormControl>
                           <Select
                             disabled={!selectedUniversityId || !selectedCourseType}
-                            onValueChange={field.onChange}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              try {
+                                const course = filteredCourses.find((c: any) => String(c.name) === String(val));
+                                if (course && course.id) {
+                                  form.setValue('courseId', String(course.id));
+                                } else {
+                                  form.setValue('courseId', '');
+                                }
+                              } catch {
+                                form.setValue('courseId', '');
+                              }
+                            }}
                             value={field.value || ''}
                           >
                             <FormControl>
@@ -588,7 +605,20 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormControl>
                           <Select
                             disabled={!selectedUniversityId}
-                            onValueChange={field.onChange}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              try {
+                                const withIds = ((uniDetail?.admissionRequirements as any)?.intakesWithIds || []) as any[];
+                                const match = Array.isArray(withIds) ? withIds.find((i) => String(i.intakeLabel) === String(val)) : null;
+                                if (match && match.id) {
+                                  form.setValue('intakeId', String(match.id));
+                                } else {
+                                  form.setValue('intakeId', '');
+                                }
+                              } catch {
+                                form.setValue('intakeId', '');
+                              }
+                            }}
                             value={field.value || ''}
                           >
                             <FormControl>
@@ -597,9 +627,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
-                                <SelectItem key={i} value={i}>{i}</SelectItem>
-                              ))}
+                              {(((uniDetail?.admissionRequirements as any)?.intakesWithIds as any[]) || [])?.length
+                                ? (((uniDetail?.admissionRequirements as any)?.intakesWithIds as any[]) || []).map((i: any) => (
+                                    <SelectItem key={i.id} value={i.intakeLabel}>{i.intakeLabel}</SelectItem>
+                                  ))
+                                : ((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
+                                    <SelectItem key={i} value={i}>{i}</SelectItem>
+                                  ))}
                             </SelectContent>
                           </Select>
                         </FormControl>
