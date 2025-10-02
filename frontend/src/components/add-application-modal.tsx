@@ -115,10 +115,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
   const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
-  const courseTypeOptions = makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']);
-  const countryOptions = makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']);
   const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
-  const intakeOptions = makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']);
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
@@ -156,12 +153,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   }, [uniSummaries]);
 
   const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+  const selectedCountry = form.watch('country');
+  const selectedCourseType = form.watch('courseType');
 
   const filteredUniversities = useMemo(() => {
-    const sel = String(form.getValues('country') || '');
-    if (!sel) return uniSummaries || [];
+    const sel = String(selectedCountry || '');
+    if (!sel) return [];
     return (uniSummaries || []).filter((u: any) => String(u.country) === sel);
-  }, [uniSummaries, form]);
+  }, [uniSummaries, selectedCountry]);
 
   const { data: uniDetail } = useQuery({
     queryKey: ['/api/universities', selectedUniversityId],
@@ -175,6 +174,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     (uniDetail?.courses || []).forEach((c: any) => { if (c?.category) set.add(String(c.category)); });
     return Array.from(set).sort();
   }, [uniDetail]);
+
+  const filteredCourses = useMemo(() => {
+    if (!selectedUniversityId) return [];
+    const courses = Array.isArray(uniDetail?.courses) ? (uniDetail?.courses as any[]) : [];
+    if (!selectedCourseType) return [];
+    return courses.filter((c: any) => String(c?.category || '') === String(selectedCourseType));
+  }, [uniDetail, selectedCourseType, selectedUniversityId]);
 
   useEffect(() => {
     try {
@@ -190,27 +196,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       }
     } catch {}
     try {
-      if (!form.getValues('courseType')) {
-        const def = courseTypeOptions.find(o => o.isDefault);
-        if (def) form.setValue('courseType', def.value as any);
-      }
-    } catch {}
-    try {
-      if (!form.getValues('country')) {
-        const def = countryOptions.find(o => o.isDefault);
-        if (def) form.setValue('country', def.value as any);
-      }
-    } catch {}
-    try {
       if (!form.getValues('channelPartner')) {
         const def = channelPartnerOptions.find(o => o.isDefault);
         if (def) form.setValue('channelPartner', def.value as any);
-      }
-    } catch {}
-    try {
-      if (!form.getValues('intake')) {
-        const def = intakeOptions.find(o => o.isDefault);
-        if (def) form.setValue('intake', def.value as any);
       }
     } catch {}
   }, [applicationsDropdowns]);
@@ -425,11 +413,11 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     </div>
                     <div className="text-xs">
                       <div className="text-[11px] text-gray-500">Student Name</div>
-                      <div className="font-medium">{presetStudent?.name || selectedStudent?.name || '-'}</div>
+                    <div className="font-medium mt-1">{presetStudent?.name || selectedStudent?.name || '-'}</div>
                     </div>
                     <div className="text-xs">
                       <div className="text-[11px] text-gray-500">Email</div>
-                      <div className="font-medium">{presetStudent?.email || selectedStudent?.email || '-'}</div>
+                    <div className="font-medium mt-1">{presetStudent?.email || selectedStudent?.email || '-'}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -490,25 +478,125 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormLabel>University *</FormLabel>
                         <FormControl>
                           <Select
+                            disabled={!selectedCountry}
                             value={selectedUniversityId || ''}
                             onValueChange={(val) => {
                               setSelectedUniversityId(val || null);
                               const uni = (uniSummaries || []).find((u: any) => String(u.id) === String(val));
                               form.setValue('university', uni ? (uni.name || '') : '');
                               // reset program/course/intake
-                              form.setValue('program', '');
                               form.setValue('courseType', '');
+                              form.setValue('program', '');
                               form.setValue('intake', '');
                             }}
                           >
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedUniversityId ? 'Selected university' : 'Select university'} />
+                              <SelectTrigger disabled={!selectedCountry}>
+                                <SelectValue placeholder={selectedCountry ? (selectedUniversityId ? 'Selected university' : 'Select university') : 'Select country first'} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {(filteredUniversities || []).map((u: any) => (
                                 <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Course Type (derived from selected university courses categories) */}
+                  <FormField
+                    control={form.control}
+                    name="courseType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Course Type</FormLabel>
+                        <FormControl>
+                          <Select
+                            disabled={!selectedUniversityId}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('program', '');
+                            }}
+                            value={field.value || ''}
+                          >
+                            <FormControl>
+                              <SelectTrigger disabled={!selectedUniversityId}>
+                                <SelectValue placeholder={selectedUniversityId ? 'Select course type' : 'Select university first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {(uniCourseTypes || []).map((t: any) => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Program (populated from selected university and course type) */}
+                  <FormField
+                    control={form.control}
+                    name="program"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Program *</FormLabel>
+                        <FormControl>
+                          <Select
+                            disabled={!selectedUniversityId || !selectedCourseType}
+                            onValueChange={field.onChange}
+                            value={field.value || ''}
+                          >
+                            <FormControl>
+                              <SelectTrigger disabled={!selectedUniversityId || !selectedCourseType}>
+                                <SelectValue
+                                  placeholder={!selectedUniversityId
+                                    ? 'Select university first'
+                                    : !selectedCourseType
+                                      ? 'Select course type first'
+                                      : 'Select program'}
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {filteredCourses.map((c: any) => (
+                                <SelectItem key={c.id ?? c.name} value={c.name}>{c.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Intake (from university detail) */}
+                  <FormField
+                    control={form.control}
+                    name="intake"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Intake</FormLabel>
+                        <FormControl>
+                          <Select
+                            disabled={!selectedUniversityId}
+                            onValueChange={field.onChange}
+                            value={field.value || ''}
+                          >
+                            <FormControl>
+                              <SelectTrigger disabled={!selectedUniversityId}>
+                                <SelectValue placeholder={selectedUniversityId ? 'Select intake' : 'Select university first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
+                                <SelectItem key={i} value={i}>{i}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -537,84 +625,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Program (populated from selected university) */}
-                  <FormField
-                    control={form.control}
-                    name="program"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Program *</FormLabel>
-                        <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value || ''}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedUniversityId ? 'Select program' : 'Select university first'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {((uniDetail?.courses || []) as any[]).map((c) => (
-                                <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Course Type (derived from selected university courses categories) */}
-                  <FormField
-                    control={form.control}
-                    name="courseType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Course Type</FormLabel>
-                        <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value || ''}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedUniversityId ? 'Select course type' : 'Select university first'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {(uniCourseTypes || []).map((t: any) => (
-                                <SelectItem key={t} value={t}>{t}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Intake (from university detail) */}
-                  <FormField
-                    control={form.control}
-                    name="intake"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Intake</FormLabel>
-                        <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value || ''}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedUniversityId ? 'Select intake' : 'Select university first'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
-                                <SelectItem key={i} value={i}>{i}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
