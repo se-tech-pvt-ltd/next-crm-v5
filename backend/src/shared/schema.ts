@@ -218,6 +218,7 @@ export const applications = mysqlTable("applications", {
   regionId: varchar("region_id", { length: 50 }),
   counsellorId: varchar("counsellor_id", { length: 50 }),
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
+  universityId: varchar("university_id", { length: 50 }),
   courseId: varchar("course_id", { length: 50 }),
   intakeId: varchar("intake_id", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
