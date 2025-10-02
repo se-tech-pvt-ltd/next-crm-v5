@@ -175,10 +175,48 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     updateStatusMutation.mutate(newStatus);
   };
 
+  // keep local editable inputs for dates
+  const [depositDateInput, setDepositDateInput] = useState<string>('');
+  const [visaDateInput, setVisaDateInput] = useState<string>('');
+
+  useEffect(() => {
+    // initialize date inputs in yyyy-mm-dd format for native date inputs
+    const toISODate = (d: any) => {
+      if (!d) return '';
+      const dt = new Date(d);
+      if (Number.isNaN(dt.getTime())) return '';
+      return dt.toISOString().slice(0, 10);
+    };
+    setDepositDateInput(toISODate(admission?.depositDate));
+    setVisaDateInput(toISODate(admission?.visaDate));
+  }, [admission]);
+
+  // In edit mode, don't auto-save caseStatus. Just set local state.
   const handleCaseStatusChange = (newCase: string) => {
     setCaseStatus(newCase);
-    updateCaseStatusMutation.mutate(newCase);
   };
+
+  const updateAdmissionMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      if (!admission) return;
+      return AdmissionsService.updateAdmission(admission.id, payload);
+    },
+    onSuccess: (updatedAdmission: any) => {
+      try {
+        queryClient.setQueryData(['/api/admissions'], (old: any) => {
+          if (!old) return old;
+          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+          return old;
+        });
+        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+      } catch (e) {
+        console.warn('[AdmissionDetailsModal] cache update failed', e);
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+    },
+  });
 
   if (!admission) return null;
 
@@ -186,7 +224,56 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{student?.name || `Admission ${admission.admissionId || admission.id}`}</div>
   );
 
-  const headerRight = (
+  const headerRight = isEdit ? (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="xs"
+        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+        onClick={() => {
+          // Cancel edit: navigate back to view and reset local inputs
+          try { setLocation(`/admissions/${admission.id}`); } catch {}
+          setDepositDateInput(admission.depositDate ? new Date(admission.depositDate).toISOString().slice(0,10) : '');
+          setVisaDateInput(admission.visaDate ? new Date(admission.visaDate).toISOString().slice(0,10) : '');
+          setCaseStatus(admission.caseStatus || '');
+        }}
+        title="Cancel Edit"
+      >
+        Cancel
+      </Button>
+
+      <Button
+        variant="primary"
+        size="xs"
+        className="px-3 [&_svg]:size-3"
+        onClick={() => {
+          // Save changes
+          const payload: any = {};
+          payload.depositDate = depositDateInput || null;
+          payload.visaDate = visaDateInput || null;
+          payload.caseStatus = caseStatus || null;
+          updateAdmissionMutation.mutate(payload, {
+            onSuccess: () => {
+              try { setLocation(`/admissions/${admission.id}`); } catch {}
+            }
+          });
+        }}
+        title="Save Changes"
+      >
+        Save
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
+        onClick={() => onOpenChange(false)}
+        aria-label="Close"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </div>
+  ) : (
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
