@@ -384,7 +384,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   const getActivityColor = (activityType: string) => {
     switch (activityType) {
-      case 'created': return 'bg-green-100 text-green-700';
+      case 'created': return 'bg-blue-100 text-blue-700';
       case 'updated': return 'bg-blue-100 text-blue-700';
       case 'status_changed': return 'bg-orange-100 text-orange-700';
       case 'comment': return 'bg-purple-100 text-purple-700';
