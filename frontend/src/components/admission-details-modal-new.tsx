@@ -294,6 +294,27 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
+                  <Label>Deposit Date</Label>
+                  <div className="mt-1">
+                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Visa Date</Label>
+                  <div className="mt-1">
+                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Case Status</Label>
+                  <div className="mt-1">
+                    <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
+                </div>
+
+                <div>
                   <Label>University</Label>
                   <div className="mt-1">
                     <Input value={admission.university ?? ''} placeholder="Not specified" disabled className="text-xs" />
@@ -306,9 +327,9 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                   </div>
                 </div>
                 <div>
-                  <Label>Case Status</Label>
+                  <Label>Net Tuition Fee</Label>
                   <div className="mt-1">
-                    <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled className="text-xs" />
                   </div>
                 </div>
 
@@ -328,25 +349,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                   <Label>Scholarship Amount</Label>
                   <div className="mt-1">
                     <Input value={String(admission.scholarshipAmount ?? '')} placeholder="Not specified" disabled className="text-xs" />
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Net Tuition Fee</Label>
-                  <div className="mt-1">
-                    <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled className="text-xs" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Deposit Date</Label>
-                  <div className="mt-1">
-                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled className="text-xs" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Visa Date</Label>
-                  <div className="mt-1">
-                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled className="text-xs" />
                   </div>
                 </div>
               </div>
