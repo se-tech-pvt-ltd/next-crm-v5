@@ -6,6 +6,7 @@ import { ActivityTracker } from "./activity-tracker";
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Award, X } from "lucide-react";
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Admission } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
@@ -222,6 +223,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     return `${day}${suffix} ${month}, ${year}`;
   };
 
+  const caseStatusLabel = (() => { const opt = getCaseStatusOptions().find(o => o.value === caseStatus); return opt?.label || (admission as any)?.caseStatus || ''; })();
+
   return (
     <DetailsDialogLayout
       open={open}
@@ -292,52 +295,59 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>University</Label>
-                  <p className="text-xs font-semibold">{admission.university || 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={admission.university ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
                 <div>
                   <Label>Program</Label>
-                  <p className="text-xs font-semibold">{admission.program || 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={admission.program ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
                 <div>
                   <Label>Case Status</Label>
                   <div className="mt-1">
-                    <Select value={caseStatus || ''} onValueChange={handleCaseStatusChange}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Select case status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getCaseStatusOptions().length > 0 ? getCaseStatusOptions().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>) : (
-                          <SelectItem key="__none__" value="__none__" disabled>{admission.caseStatus || 'Not specified'}</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled className="text-xs" />
                   </div>
                 </div>
 
                 <div>
                   <Label>Initial Deposit</Label>
-                  <p className="text-xs">{admission.initialDeposit ?? admission.depositAmount ?? 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={String(admission.initialDeposit ?? admission.depositAmount ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
                 <div>
                   <Label>Full Tuition Fee</Label>
-                  <p className="text-xs">{admission.fullTuitionFee || 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={String(admission.fullTuitionFee ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
                 <div>
                   <Label>Scholarship Amount</Label>
-                  <p className="text-xs">{admission.scholarshipAmount || 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={String(admission.scholarshipAmount ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
 
                 <div>
                   <Label>Net Tuition Fee</Label>
-                  <p className="text-xs">{admission.netTuitionFee || 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
                 <div>
                   <Label>Deposit Date</Label>
-                  <p className="text-xs">{admission.depositDate ? formatDateOrdinal(admission.depositDate) : 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
                 <div>
                   <Label>Visa Date</Label>
-                  <p className="text-xs">{admission.visaDate ? formatDateOrdinal(admission.visaDate) : 'Not specified'}</p>
+                  <div className="mt-1">
+                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled className="text-xs" />
+                  </div>
                 </div>
               </div>
             </CardContent>
