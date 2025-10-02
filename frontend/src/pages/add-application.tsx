@@ -13,11 +13,12 @@ import { insertApplicationSchema, type Student, type InsertApplication } from '@
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
+import * as UniversitiesService from '@/services/universities';
 import * as UsersService from '@/services/users';
 import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users } from 'lucide-react';
 import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -92,7 +93,7 @@ export default function AddApplication() {
   const courseTypeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Course Type', 'courseType', 'CourseType']), [applicationsDropdowns, groupedFromAll]);
   const countryOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Country', 'Countries', 'country', 'countryList']), [applicationsDropdowns, groupedFromAll]);
   const channelPartnerOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']), [applicationsDropdowns, groupedFromAll]);
-  const intakeOptions = useMemo(() => makeOptions(applicationsDropdowns, ['Intake', 'intake', 'Intakes']), [applicationsDropdowns, groupedFromAll]);
+  // Intake must come from university_intakes; dropdown options are not used here.
 
   useEffect(() => {
     // Pre-select defaults for application form when dropdowns load
@@ -137,14 +138,7 @@ export default function AddApplication() {
       }
     } catch {}
 
-    try {
-      const curIntake = form.getValues('intake');
-      if (!curIntake) {
-        const defI = intakeOptions.find(o => o.isDefault);
-        if (defI) form.setValue('intake', defI.value);
-      }
-    } catch {}
-  }, [appStatusOptions, caseStatusOptions, courseTypeOptions, countryOptions, channelPartnerOptions, intakeOptions]);
+  }, [appStatusOptions, caseStatusOptions, courseTypeOptions, countryOptions, channelPartnerOptions]);
 
   const form = useForm<InsertApplication>({
     resolver: zodResolver(insertApplicationSchema),
@@ -152,12 +146,14 @@ export default function AddApplication() {
       studentId: presetStudentId,
       university: '',
       program: '',
+      courseId: '',
       courseType: '',
       appStatus: '',
       caseStatus: '',
       country: '',
       channelPartner: '',
       intake: '',
+      intakeId: '',
       googleDriveLink: '',
       notes: '',
       counsellorId: '',
@@ -190,6 +186,47 @@ export default function AddApplication() {
     staleTime: 5 * 60 * 1000,
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+
+  // Universities-based dynamic data
+  const { data: uniSummaries = [] } = useQuery({
+    queryKey: ['/api/universities'],
+    queryFn: UniversitiesService.listUniversities,
+  });
+
+  const uniCountries = useMemo(() => {
+    const set = new Set<string>();
+    (uniSummaries || []).forEach((u: any) => { if (u?.country) set.add(String(u.country)); });
+    return Array.from(set).sort().map((c) => ({ label: c, value: c }));
+  }, [uniSummaries]);
+
+  const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+  const selectedCountry = form.watch('country');
+  const selectedCourseType = form.watch('courseType');
+
+  const filteredUniversities = useMemo(() => {
+    const sel = String(selectedCountry || '');
+    if (!sel) return [];
+    return (uniSummaries || []).filter((u: any) => String(u.country) === sel);
+  }, [uniSummaries, selectedCountry]);
+
+  const { data: uniDetail } = useQuery({
+    queryKey: ['/api/universities', selectedUniversityId],
+    queryFn: async () => selectedUniversityId ? UniversitiesService.getUniversity(selectedUniversityId) : undefined,
+    enabled: !!selectedUniversityId,
+  });
+
+  const uniCourseTypes = useMemo(() => {
+    const set = new Set<string>();
+    (uniDetail?.courses || []).forEach((c: any) => { if (c?.category) set.add(String(c.category)); });
+    return Array.from(set).sort();
+  }, [uniDetail]);
+
+  const filteredCourses = useMemo(() => {
+    if (!selectedUniversityId) return [];
+    const courses = Array.isArray(uniDetail?.courses) ? (uniDetail?.courses as any[]) : [];
+    if (!selectedCourseType) return [];
+    return courses.filter((c: any) => String(c?.category || '') === String(selectedCourseType));
+  }, [uniDetail, selectedCourseType, selectedUniversityId]);
 
   // Determine selected student's branch
   const selectedStudentId = form.watch('studentId');
@@ -305,13 +342,64 @@ export default function AddApplication() {
 
                   <FormField
                     control={form.control}
-                    name="university"
+                    name="country"
                     render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country</FormLabel>
+                        <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); setSelectedUniversityId(null); form.setValue('university',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('courseType',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
+                          <FormControl>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Please select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {uniCountries.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="university"
+                    render={() => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><School className="w-4 h-4" /> University *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter university name" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                          <Select disabled={!selectedCountry} value={selectedUniversityId || ''} onValueChange={(val) => { setSelectedUniversityId(val || null); const uni = (uniSummaries || []).find((u: any) => String(u.id)===String(val)); form.setValue('university', uni ? (uni.name||'') : ''); form.setValue('courseType',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
+                            <FormControl>
+                              <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20" disabled={!selectedCountry}>
+                                <SelectValue placeholder={selectedCountry ? 'Please select' : 'Select country first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {filteredUniversities.map((u:any) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="courseType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Course Type</FormLabel>
+                        <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); form.setValue('program',''); form.setValue('courseId',''); }} disabled={!selectedUniversityId}>
+                          <FormControl>
+                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder={selectedUniversityId ? 'Please select' : 'Select university first'} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {uniCourseTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -324,7 +412,16 @@ export default function AddApplication() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Program *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Computer Science" className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
+                          <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); try { const c = filteredCourses.find((x:any) => String(x.name)===String(val)); form.setValue('courseId', c?.id ? String(c.id) : ''); } catch { form.setValue('courseId',''); } }} disabled={!selectedUniversityId || !selectedCourseType}>
+                            <FormControl>
+                              <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
+                                <SelectValue placeholder={selectedCourseType ? 'Please select' : 'Select course type first'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {filteredCourses.map((c:any) => <SelectItem key={c.id ?? c.name} value={c.name}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -373,47 +470,7 @@ export default function AddApplication() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="courseType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Course Type</FormLabel>
-                        <Select value={field.value || ''} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Please select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {courseTypeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country</FormLabel>
-                        <Select value={field.value || ''} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Please select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {countryOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
@@ -507,14 +564,20 @@ export default function AddApplication() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Intake</FormLabel>
-                        <Select value={field.value || ''} onValueChange={field.onChange}>
+                        <Select value={field.value || ''} disabled={!selectedUniversityId} onValueChange={(val) => { field.onChange(val); try { const withIds = ((uniDetail?.admissionRequirements as any)?.intakesWithIds || []) as any[]; const match = Array.isArray(withIds) ? withIds.find((i:any) => String(i.intakeLabel)===String(val)) : null; form.setValue('intakeId', match?.id ? String(match.id) : ''); } catch { form.setValue('intakeId',''); } }}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                              <SelectValue placeholder="Please select" />
+                              <SelectValue placeholder={selectedUniversityId ? 'Please select' : 'Select university first'} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {intakeOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                            {(((uniDetail?.admissionRequirements as any)?.intakesWithIds as any[]) || [])?.length
+                              ? (((uniDetail?.admissionRequirements as any)?.intakesWithIds as any[]) || []).map((i:any) => (
+                                  <SelectItem key={i.id} value={i.intakeLabel}>{i.intakeLabel}</SelectItem>
+                                ))
+                              : ((uniDetail?.admissionRequirements?.intakes || []) as string[]).map((i) => (
+                                  <SelectItem key={i} value={i}>{i}</SelectItem>
+                                ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

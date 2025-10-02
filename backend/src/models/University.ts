@@ -29,7 +29,7 @@ export class UniversityModel {
     if (!uni) return null;
 
     const intakes = await db
-      .select({ intakeLabel: universityIntakes.intakeLabel })
+      .select({ id: universityIntakes.id, intakeLabel: universityIntakes.intakeLabel })
       .from(universityIntakes)
       .where(eq(universityIntakes.universityId, id));
 
@@ -74,6 +74,7 @@ export class UniversityModel {
         studyGap: uni.studyGap,
         priority: uni.priority,
         intakes: intakes.map(i => i.intakeLabel),
+        intakesWithIds: intakes.map(i => ({ id: i.id, intakeLabel: i.intakeLabel })),
         acceptedElts: acceptedElts.map(e => e.eltName),
       },
       resources: {
