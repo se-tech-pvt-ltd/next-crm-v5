@@ -32,6 +32,7 @@ export const universityAcceptedElts = mysqlTable("university_accepted_elts", {
 export const universities = mysqlTable("universities", {
   id: varchar("id", { length: 36 }).primaryKey().notNull(),
   name: varchar("name", { length: 255 }).notNull(),
+  country: varchar("country", { length: 255 }),
   priority: PriorityEnum,
   about: text("about"),
   campusCity: varchar("campus_city", { length: 255 }),
@@ -442,7 +443,7 @@ export type Admission = typeof admissions.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type University = typeof universities.$inferSelect;
-export type UniversitySummary = Pick<University, "id" | "name" | "website" | "coverImageUrl" | "logoImageUrl">;
+export type UniversitySummary = Pick<University, "id" | "name" | "country" | "website" | "coverImageUrl" | "logoImageUrl">;
  export type UniversityDetail = {
   overview: {
     id: string;
