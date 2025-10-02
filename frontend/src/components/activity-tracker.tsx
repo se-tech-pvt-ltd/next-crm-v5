@@ -373,7 +373,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   const getActivityIcon = (activityType: string, size: string = "h-4 w-4") => {
     switch (activityType) {
-      case 'created': return <Plus className={`${size} text-green-500`} />;
+      case 'created': return <Plus className={`${size} text-blue-600`} />;
       case 'updated': return <ActivityIcon className={`${size} text-primary`} />;
       case 'status_changed': return <ActivityIcon className={`${size} text-orange-500`} />;
       case 'comment': return <MessageSquare className={`${size} text-purple-500`} />;
