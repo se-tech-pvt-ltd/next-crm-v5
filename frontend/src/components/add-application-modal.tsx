@@ -215,26 +215,6 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     } catch {}
   }, [applicationsDropdowns]);
 
-  const form = useForm({
-    resolver: zodResolver(insertApplicationSchema),
-    defaultValues: {
-      studentId: studentId || '',
-      university: '',
-      program: presetStudent?.targetProgram || '',
-      courseType: '',
-      appStatus: '',
-      caseStatus: '',
-      country: '',
-      channelPartner: '',
-      intake: '',
-      googleDriveLink: '',
-      notes: '',
-      counsellorId: '',
-      admissionOfficerId: '',
-      regionId: '',
-      branchId: '',
-    },
-  });
 
   // Determine selected student's branch (depends on form)
   const selectedStudentId = form.watch('studentId');
