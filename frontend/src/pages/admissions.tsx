@@ -73,17 +73,8 @@ export default function Admissions() {
     }
   }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
 
-  // Keep selectedAdmission in sync if the single-admission query updates (e.g. after inline edits)
   useEffect(() => {
-    const id = (matchEdit ? editParams?.id : adParams?.id) || null;
-    if (!id) return;
-    try {
-      const unsubscribe = queryClient.getQueryCache().find(['/api/admissions', id])?.subscribe?.(() => {});
-    } catch {}
-  }, [queryClient, matchAd, matchEdit, adParams?.id, editParams?.id]);
-
-  useEffect(() => {
-    // If there's a cached single admission for the current route id, update selectedAdmission
+    // If route has an id and there's a cached single admission for it, update selectedAdmission
     const id = (matchEdit ? editParams?.id : adParams?.id) || null;
     if (!id) return;
     try {
