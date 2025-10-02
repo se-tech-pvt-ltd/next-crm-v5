@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { insertAdmissionSchema, type InsertAdmission, type Student, type Application } from '@/lib/types';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
+import * as UniversitiesService from '@/services/universities';
 import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
@@ -580,6 +581,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         const resolvedO = resolveUserIdFromApp(sourceOfficer);
         console.log('[AddAdmissionModal] handleApplicationChange officer source:', { sourceOfficer, resolvedO });
         if (resolvedO) { form.setValue('admissionOfficerId', resolvedO); console.log('[AddAdmissionModal] handleApplicationChange set admissionOfficerId to', resolvedO); }
+        // Reset financials; will be auto-filled from university data if available
+        form.setValue('fullTuitionFee', '');
+        form.setValue('scholarshipAmount', '');
+        form.setValue('initialDeposit', '');
       } catch {}
     }
   };
@@ -628,6 +633,43 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       console.error('[AddAdmissionModal] handleSubmitClick error:', e);
     }
   };
+
+  // Resolve current selected application (from list or linkedApp)
+  const currentAppId = String(form.watch('applicationId') || applicationId || '');
+  const currentApp = React.useMemo(() => {
+    if (currentAppId && Array.isArray(applications)) {
+      const fromList = applications.find((a) => String(a.id) === currentAppId);
+      if (fromList) return fromList as any;
+    }
+    return linkedApp || null;
+  }, [currentAppId, applications, linkedApp]);
+
+  const currentUniversityId = React.useMemo(() => {
+    const a: any = currentApp as any;
+    return String(a?.universityId ?? a?.university_id ?? '') || '';
+  }, [currentApp]);
+
+  const { data: uniDetail } = useQuery({
+    queryKey: ['/api/universities', currentUniversityId],
+    queryFn: async () => currentUniversityId ? UniversitiesService.getUniversity(currentUniversityId) : undefined,
+    enabled: open && !!currentUniversityId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Auto-fill financials when university detail is loaded and fields are empty
+  useEffect(() => {
+    if (!open) return;
+    if (!uniDetail) return;
+    try {
+      const fees = (uniDetail as any)?.feesAndFunding || {};
+      const totalFees = fees.totalFees;
+      const initDeposit = fees.initialDepositAmount;
+      const scholarship = fees.scholarshipFee;
+      if (!String(form.getValues('fullTuitionFee') || '').trim() && (totalFees || totalFees === 0)) form.setValue('fullTuitionFee', String(totalFees));
+      if (!String(form.getValues('scholarshipAmount') || '').trim() && (scholarship || scholarship === 0)) form.setValue('scholarshipAmount', String(scholarship));
+      if (!String(form.getValues('initialDeposit') || '').trim() && (initDeposit || initDeposit === 0)) form.setValue('initialDeposit', String(initDeposit));
+    } catch {}
+  }, [uniDetail, open]);
 
   return (
     <>
