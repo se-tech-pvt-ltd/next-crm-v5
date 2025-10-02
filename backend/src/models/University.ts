@@ -7,6 +7,7 @@ export class UniversityModel {
     return await db.select({
       id: universities.id,
       name: universities.name,
+      country: universities.country,
       website: universities.website,
       coverImageUrl: universities.coverImageUrl,
       logoImageUrl: universities.logoImageUrl,
