@@ -298,14 +298,14 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 <div>
                   <Label>Deposit Date</Label>
                   <div className="mt-1">
-                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled={!isEdit} className="text-xs" />
+                    <Input value={admission.depositDate ? formatDateOrdinal(admission.depositDate) : ''} placeholder="Not specified" disabled={!isEdit} readOnly={!isEdit} className="text-xs" />
                   </div>
                 </div>
 
                 <div>
                   <Label>Visa Date</Label>
                   <div className="mt-1">
-                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled={!isEdit} className="text-xs" />
+                    <Input value={admission.visaDate ? formatDateOrdinal(admission.visaDate) : ''} placeholder="Not specified" disabled={!isEdit} readOnly={!isEdit} className="text-xs" />
                   </div>
                 </div>
 
@@ -324,7 +324,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                      <Input value={caseStatusLabel ?? ''} placeholder="Not specified" disabled readOnly className="text-xs" />
                     )}
                   </div>
                 </div>
@@ -332,38 +332,38 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                 <div>
                   <Label>University</Label>
                   <div className="mt-1">
-                    <Input value={admission.university ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={admission.university ?? ''} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
                 <div>
                   <Label>Program</Label>
                   <div className="mt-1">
-                    <Input value={admission.program ?? ''} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={admission.program ?? ''} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
                 <div>
                   <Label>Net Tuition Fee</Label>
                   <div className="mt-1">
-                    <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
 
                 <div>
                   <Label>Initial Deposit</Label>
                   <div className="mt-1">
-                    <Input value={String(admission.initialDeposit ?? admission.depositAmount ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={String(admission.initialDeposit ?? admission.depositAmount ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
                 <div>
                   <Label>Full Tuition Fee</Label>
                   <div className="mt-1">
-                    <Input value={String(admission.fullTuitionFee ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={String(admission.fullTuitionFee ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
                 <div>
                   <Label>Scholarship Amount</Label>
                   <div className="mt-1">
-                    <Input value={String(admission.scholarshipAmount ?? '')} placeholder="Not specified" disabled className="text-xs" />
+                    <Input value={String(admission.scholarshipAmount ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
               </div>
