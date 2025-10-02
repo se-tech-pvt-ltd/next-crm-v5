@@ -156,10 +156,11 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
   const selectedCountry = form.watch('country');
+  const selectedCourseType = form.watch('courseType');
 
   const filteredUniversities = useMemo(() => {
     const sel = String(selectedCountry || '');
-    if (!sel) return uniSummaries || [];
+    if (!sel) return [];
     return (uniSummaries || []).filter((u: any) => String(u.country) === sel);
   }, [uniSummaries, selectedCountry]);
 
@@ -175,6 +176,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     (uniDetail?.courses || []).forEach((c: any) => { if (c?.category) set.add(String(c.category)); });
     return Array.from(set).sort();
   }, [uniDetail]);
+
+  const filteredCourses = useMemo(() => {
+    if (!selectedUniversityId) return [];
+    const courses = Array.isArray(uniDetail?.courses) ? uniDetail?.courses : [];
+    if (!selectedCourseType) return [];
+    return courses.filter((c: any) => String(c?.category || '') === String(selectedCourseType));
+  }, [uniDetail, selectedCourseType, selectedUniversityId]);
 
   useEffect(() => {
     try {
