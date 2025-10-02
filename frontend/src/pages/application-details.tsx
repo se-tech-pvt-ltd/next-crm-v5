@@ -176,7 +176,7 @@ export default function ApplicationDetails() {
             return (
               <div key={status} className="flex flex-col items-center relative flex-1 cursor-pointer select-none" onClick={handleClick} role="button" aria-label={`Set status to ${status}`}>
                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                  isCompleted ? 'bg-blue-600 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                  isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-blue-600'
                 }`}>
                   {isCompleted ? <div className="w-1.5 h-1.5 bg-white rounded-full" /> : <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />}
                 </div>
