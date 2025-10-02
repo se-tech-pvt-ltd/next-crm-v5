@@ -89,7 +89,7 @@ export default function EventsPage() {
                 aria-label={`Set status to ${statusName}`}
               >
                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                  isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
+                  isCompleted ? 'bg-blue-600 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-500'
                 }`}>
                   {isCompleted ? <div className="w-1 h-1 bg-white rounded-full" /> : <div className="w-1 h-1 bg-gray-300 rounded-full" />}
                 </div>
@@ -100,7 +100,7 @@ export default function EventsPage() {
                 </span>
                 {index < sequence.length - 1 && (
                   <div className={`absolute top-2 left-1/2 w-full h-0.5 transform -translate-y-1/2 ${
-                    index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                    index < currentIndex ? 'bg-blue-600' : 'bg-gray-300'
                   }`} style={{ marginLeft: '0.625rem', width: 'calc(100% - 1.25rem)' }} />
                 )}
               </div>
