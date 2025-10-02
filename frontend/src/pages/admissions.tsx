@@ -17,7 +17,7 @@ import { AdmissionDetailsModal } from '@/components/admission-details-modal-new'
 import { useLocation, useRoute } from 'wouter';
 import * as DropdownsService from '@/services/dropdowns';
 import * as AdmissionsService from '@/services/admissions';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 
 export default function Admissions() {
   const [decisionFilter, setDecisionFilter] = useState('all');
