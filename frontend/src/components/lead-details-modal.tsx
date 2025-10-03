@@ -324,12 +324,13 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             const isCompleted = index <= idx && idx !== -1;
             const label = getStatusDisplayName(statusId);
             const handleClick = () => {
+              if (isLost) return;
               if (statusUpdateMutation.isPending) return;
               if (currentStatus === statusId) return;
               handleStatusChange(statusId);
             };
             return (
-              <div key={statusId} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={handleClick}>
+              <div key={statusId} className={`flex-1 flex flex-col items-center relative select-none ${isLost ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={handleClick} aria-disabled={isLost}>
                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${isCompleted ? 'bg-white' : 'bg-gray-300'}`} />
                 </div>
@@ -346,6 +347,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   );
 
   const processedLeadForDisplay = lead ? { ...lead, country: parseFieldValue(lead.country), program: parseFieldValue(lead.program) } : {} as any;
+  const isLost = (() => {
+    const v: any = (lead as any)?.isLost;
+    return v === 1 || v === '1' || v === true;
+  })();
   const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
 
   const headerLeft = (
@@ -373,7 +378,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </Button>
           ) : (
             <>
-              {!isEditing && (
+              {!isEditing && !isLost && (
                 <>
                   <Button
                     variant="outline"
@@ -431,6 +436,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                 </>
               )}
             </>
+          )}
+          {isLost && (
+            <div className="px-2.5 py-1 rounded-md bg-red-600 text-white text-xs sm:text-sm font-semibold uppercase tracking-wide border border-red-400 shadow-sm">
+              LOST
+            </div>
           )}
           <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)} title="Close">
             <X className="w-4 h-4" />
@@ -494,7 +504,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               </CardContent>
             </Card>
 
-            <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="flex items-center space-x-2"><Target className="w-4 h-4 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
+            <CollapsibleCard defaultOpen persistKey={`lead-details:modal:${lead.id}:lead-information`} header={<CardTitle className="flex items-center space-x-2"><Target className="w-4 h-4 text-primary" /><span>Lead Information</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Lead Type</span></Label>
@@ -559,7 +569,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               </div>
             </CollapsibleCard>
 
-            <CollapsibleCard persistKey={`lead-details:modal:${lead.id}:lead-access`} header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Lead Access</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
+            <CollapsibleCard defaultOpen persistKey={`lead-details:modal:${lead.id}:lead-access`} header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Lead Access</span></CardTitle>} cardClassName="shadow-md border border-gray-200 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 <div className="space-y-1.5">
                   <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>

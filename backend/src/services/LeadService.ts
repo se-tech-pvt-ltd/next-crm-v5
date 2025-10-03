@@ -168,7 +168,7 @@ export class LeadService {
       // Log only selected changes
       for (const [fieldName, newValue] of Object.entries(updates)) {
         if (fieldName === 'updatedAt') continue;
-        if (fieldName !== 'status' && fieldName !== 'counselorId') continue;
+        if (fieldName !== 'status' && fieldName !== 'counselorId' && fieldName !== 'isLost' && fieldName !== 'lostReason') continue;
 
         const oldValue = (currentLead as any)[fieldName];
         if (oldValue !== newValue) {
@@ -191,6 +191,46 @@ export class LeadService {
               'assigned',
               'Admission officer changed',
               `Admission officer changed from "${oldValue || 'empty'}" to "${newValue || 'empty'}"`,
+              fieldName,
+              String(oldValue || ''),
+              String(newValue || ''),
+              currentUserId
+            );
+          } else if (fieldName === 'isLost') {
+            const wasLost = String(oldValue ?? '') === '1' || oldValue === 1 || oldValue === true;
+            const becameLost = String(newValue ?? '') === '1' || newValue === 1 || newValue === true;
+            if (becameLost && !wasLost) {
+              await ActivityService.logActivity(
+                'lead',
+                id,
+                'marked_lost',
+                'Lead marked as lost',
+                (updates as any)?.lostReason ? `Reason: ${(updates as any).lostReason}` : undefined,
+                fieldName,
+                String(oldValue ?? ''),
+                String(newValue ?? ''),
+                currentUserId
+              );
+            } else if (!becameLost && wasLost) {
+              await ActivityService.logActivity(
+                'lead',
+                id,
+                'unmarked_lost',
+                'Lead unmarked as lost',
+                undefined,
+                fieldName,
+                String(oldValue ?? ''),
+                String(newValue ?? ''),
+                currentUserId
+              );
+            }
+          } else if (fieldName === 'lostReason') {
+            await ActivityService.logActivity(
+              'lead',
+              id,
+              'lost_reason_updated',
+              'Lost reason updated',
+              `Changed from "${String(oldValue || '') || '-'}" to "${String(newValue || '') || '-'}"`,
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
