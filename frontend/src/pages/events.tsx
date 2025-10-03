@@ -326,6 +326,36 @@ export default function EventsPage() {
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEvent, setEditEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEventAccess, setEditEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+
+  const minEventDateTime = formatDateTimeLocalValue(getNextIntervalDate(new Date()));
+
+  const handleNewEventDateTimeChange = (value: string) => {
+    if (!value) {
+      setNewEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      setNewEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const normalized = getNextIntervalDate(parsed);
+    const now = new Date();
+
+    if (normalized.getTime() < now.getTime()) {
+      const fallback = getNextIntervalDate(now);
+      toast({ title: 'Event date cannot be in the past.', variant: 'destructive' });
+      const fallbackParts = parseDateTimeParts(formatDateTimeLocalValue(fallback));
+      setNewEvent((prev) => ({ ...prev, ...fallbackParts }));
+      return;
+    }
+
+    const parts = parseDateTimeParts(formatDateTimeLocalValue(normalized));
+    setNewEvent((prev) => ({ ...prev, ...parts }));
+  };
+
   const { user, accessByRole } = useAuth() as any;
   // Parse token payload once for fallback ids
   const tokenPayload = React.useMemo(() => {
