@@ -346,6 +346,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   );
 
   const processedLeadForDisplay = lead ? { ...lead, country: parseFieldValue(lead.country), program: parseFieldValue(lead.program) } : {} as any;
+  const isLost = (() => {
+    const v: any = (lead as any)?.isLost;
+    return v === 1 || v === '1' || v === true;
+  })();
   const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
 
   const headerLeft = (
@@ -373,7 +377,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             </Button>
           ) : (
             <>
-              {!isEditing && (
+              {!isEditing && !isLost && (
                 <>
                   <Button
                     variant="outline"
