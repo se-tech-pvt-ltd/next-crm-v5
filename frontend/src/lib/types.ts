@@ -32,6 +32,7 @@ export interface Lead {
   studyPlan: string | null;
   elt: string | null;
   lostReason: string | null;
+  isLost?: number | boolean | string | null;
   budget: string | null;
   timeline: string | null;
   notes: string | null;
@@ -171,6 +172,7 @@ export const insertLeadSchema = z.object({
   studyPlan: z.string().optional(),
   elt: z.string().optional(),
   lostReason: z.string().optional(),
+  isLost: z.union([z.boolean(), z.number(), z.string()]).optional(),
   budget: z.string().optional(),
   timeline: z.string().optional(),
   notes: z.string().optional(),
