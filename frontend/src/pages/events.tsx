@@ -27,6 +27,8 @@ import * as XLSX from 'xlsx';
 import { queryClient } from '@/lib/queryClient';
 import { Skeleton } from '@/components/ui/skeleton';
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 
 const FIFTEEN_MINUTE_STEP = 15;
@@ -1466,8 +1468,8 @@ export default function EventsPage() {
                           <TableHeader>
                             <TableRow>
                               <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                              <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                              <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Full Name</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Phone Number</TableHead>
                               <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                               <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                               <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
@@ -1580,7 +1582,14 @@ export default function EventsPage() {
 
                 <div className="flex flex-col">
                   <Label className="mb-1">Phone Number</Label>
-                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\\-\\s]*$" value={regForm.number} onChange={(e) => { setRegForm({ ...regForm, number: e.target.value }); }} className="h-9" />
+                  <PhoneInput
+                    value={regForm.number || ''}
+                    onChange={(val) => setRegForm({ ...regForm, number: val })}
+                    defaultCountry="in"
+                    className="w-full"
+                    inputClassName="w-full h-9 text-sm"
+                    buttonClassName="h-9"
+                  />
                 </div>
 
                 <div className="flex flex-col">
@@ -1626,7 +1635,7 @@ export default function EventsPage() {
                 </div>
 
                 <div>
-                  <Label>Name</Label>
+                  <Label>Full Name</Label>
                   <Input value={editingReg.name || ''} onChange={(e) => setEditingReg({ ...editingReg, name: e.target.value })} />
                 </div>
                 <div>
@@ -1635,8 +1644,15 @@ export default function EventsPage() {
                 </div>
 
                 <div>
-                  <Label>Number</Label>
-                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
+                  <Label>Phone Number</Label>
+                  <PhoneInput
+                    value={editingReg.number || ''}
+                    onChange={(val) => setEditingReg({ ...editingReg, number: val })}
+                    defaultCountry="in"
+                    className="w-full"
+                    inputClassName="w-full h-9 text-sm"
+                    buttonClassName="h-9"
+                  />
                 </div>
                 <div>
                   <Label>Email</Label>
@@ -1651,161 +1667,181 @@ export default function EventsPage() {
           </DialogContent>
         </Dialog>
 
-        {/* View Registration Modal */}
-        <Dialog open={isViewRegOpen} onOpenChange={(o) => { setIsViewRegOpen(o); if (!o) setViewReg(null); }}>
-          <DialogContent className="max-w-2xl">
-            <DialogTitle className="sr-only">Registration Details</DialogTitle>
-            {viewReg && (
-              <Card>
-                <CardHeader className="pb-2 space-y-2">
-                  <div className="flex-1">
-                    <StatusProgressBarReg />
+        {/* View Registration Modal - Redesigned to match Lead Details */}
+        <DetailsDialogLayout
+          open={isViewRegOpen}
+          onOpenChange={(o) => {
+            setIsViewRegOpen(o);
+            if (!o) {
+              const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (selectedEvent && selectedEvent.id);
+              setViewReg(null);
+              if (eventId) navigate(`/events/${eventId}/registrations`);
+            }
+          }}
+          title="Registration Details"
+          headerClassName="bg-[#223E7D] text-white"
+          statusBarWrapperClassName="px-4 py-2 bg-[#223E7D] text-white -mt-px"
+          headerLeft={(
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">
+              {viewReg ? (viewReg.name || 'Registration') : 'Registration'}
+            </div>
+          )}
+          headerRight={(
+            <div className="flex items-center gap-2">
+              {viewReg && (() => {
+                const converted = (viewReg as any).isConverted === 1 || (viewReg as any).isConverted === '1' || (viewReg as any).is_converted === 1 || (viewReg as any).is_converted === '1';
+                if (converted) {
+                  return (
+                    <span className="px-2 py-1 rounded-md bg-green-600 text-white text-xs font-semibold uppercase tracking-wide border border-green-400 shadow-sm">Converted</span>
+                  );
+                }
+                if (!isEditingView) {
+                  return (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                        onClick={() => setIsEditingView(true)}
+                        title="Edit"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                        onClick={() => viewReg && openConvertToLeadModal(viewReg)}
+                        disabled={convertMutation.isPending}
+                        title="Convert to Lead"
+                      >
+                        {convertMutation.isPending ? 'Converting…' : 'Convert'}
+                      </Button>
+                    </>
+                  );
+                }
+                return (
+                  <>
+                    <Button
+                      size="xs"
+                      className="bg-[#0071B0] hover:bg-[#00649D] text-white"
+                      onClick={async () => {
+                        if (!viewReg) return;
+                        const payload = {
+                          name: viewEditData.name || '',
+                          number: viewEditData.number || '',
+                          email: viewEditData.email || '',
+                          city: viewEditData.city || '',
+                          source: viewEditData.source || '',
+                        } as Partial<RegService.RegistrationPayload>;
+                        try {
+                          // @ts-ignore mutateAsync exists
+                          await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
+                          setIsEditingView(false);
+                          setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
+                        } catch {}
+                      }}
+                      disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
+                      title="Save"
+                    >
+                      {updateRegMutation.isPending ? 'Saving…' : 'Save'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="bg-white text-[#223E7D] hover:bg-white/90 border border-white"
+                      onClick={() => { if (!viewReg) return; setIsEditingView(false); setViewEditData({
+                        name: viewReg.name,
+                        number: viewReg.number,
+                        email: viewReg.email,
+                        city: viewReg.city,
+                        source: viewReg.source,
+                        eventId: viewReg.eventId,
+                        status: viewReg.status,
+                      }); }}
+                      title="Cancel"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+          showDefaultClose
+          autoHeight
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] p-0 rounded-xl shadow-xl"
+          statusBar={viewReg ? <StatusProgressBarReg /> : undefined}
+          leftContent={viewReg ? (
+            <Card className="w-full shadow-md border border-gray-200 bg-white">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Registration Information</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div className="space-y-1.5">
+                    <Label>Registration ID</Label>
+                    <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.registrationCode}</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs">Registration Information</CardTitle>
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        const converted = viewReg && ((viewReg as any).isConverted === 1 || (viewReg as any).isConverted === '1' || (viewReg as any).is_converted === 1 || (viewReg as any).is_converted === '1');
-                        if (converted) {
-                          return (
-                            <span className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-100">Converted</span>
-                          );
-                        }
-
-                        if (!isEditingView) {
-                          return (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                className="rounded-full px-2 [&_svg]:size-3"
-                                onClick={() => setIsEditingView(true)}
-                                title="Edit"
-                              >
-                                <Edit />
-                                <span className="hidden lg:inline">Edit</span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                className="rounded-full px-2 [&_svg]:size-3"
-                                onClick={() => openConvertToLeadModal(viewReg)}
-                                disabled={convertMutation.isPending}
-                                title="Convert to Lead"
-                              >
-                                <UserPlus />
-                                <span className="hidden lg:inline">{convertMutation.isPending ? 'Converting…' : 'Convert to Lead'}</span>
-                              </Button>
-                            </>
-                          );
-                        }
-
-                        return (
-                          <>
-                            <Button
-                              size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={async () => {
-                                if (!viewReg) return;
-                                const payload = {
-                                  name: viewEditData.name || '',
-                                  number: viewEditData.number || '',
-                                  email: viewEditData.email || '',
-                                  city: viewEditData.city || '',
-                                  source: viewEditData.source || '',
-                                } as Partial<RegService.RegistrationPayload>;
-                                try {
-                                  // @ts-ignore mutateAsync exists
-                                  await updateRegMutation.mutateAsync({ id: viewReg.id, data: payload });
-                                  setIsEditingView(false);
-                                  setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
-                                } catch {}
-                              }}
-                              disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
-                              title="Save"
-                            >
-                              Save
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              className="rounded-full px-2 [&_svg]:size-3"
-                              onClick={() => { setIsEditingView(false); setViewEditData({
-                                name: viewReg.name,
-                                number: viewReg.number,
-                                email: viewReg.email,
-                                city: viewReg.city,
-                                source: viewReg.source,
-                                eventId: viewReg.eventId,
-                                status: viewReg.status,
-                              }); }}
-                              title="Cancel"
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        );
-                      })()}
-                    </div>
+                  <div className="space-y-1.5">
+                    <Label>Full Name</Label>
+                    {isEditingView ? (
+                      <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    ) : (
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.name}</div>
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <Label>Registration ID</Label>
-                      <div className="text-xs">{viewReg.registrationCode}</div>
-                    </div>
-                    <div>
-                      <Label>Name</Label>
-                      {isEditingView ? (
-                        <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} />
-                      ) : (
-                        <div className="text-xs">{viewReg.name}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Number</Label>
-                      {isEditingView ? (
-                        <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={viewEditData.number || ''} onChange={(e) => setViewEditData(v => ({ ...v, number: e.target.value }))} />
-                      ) : (
-                        <div className="text-xs">{viewReg.number || '-'}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Email</Label>
-                      {isEditingView ? (
-                        <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} />
-                      ) : (
-                        <div className="text-xs">{viewReg.email || '-'}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label>City</Label>
-                      {isEditingView ? (
-                        <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} />
-                      ) : (
-                        <div className="text-xs">{viewReg.city || '-'}</div>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Source</Label>
-                      {isEditingView ? (
-                        <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
-                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Please select" /></SelectTrigger>
-                          <SelectContent>
-                            {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="text-xs">{getSourceLabel(viewReg.source) || '-'}</div>
-                      )}
-                    </div>
+                  <div className="space-y-1.5">
+                    <Label>Phone Number</Label>
+                    {isEditingView ? (
+                      <PhoneInput
+                        value={viewEditData.number || ''}
+                        onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
+                        defaultCountry="in"
+                        className="w-full"
+                        inputClassName="w-full h-7 text-[11px]"
+                        buttonClassName="h-7"
+                      />
+                    ) : (
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.number || '-'}</div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </DialogContent>
-        </Dialog>
+                  <div className="space-y-1.5">
+                    <Label>Email</Label>
+                    {isEditingView ? (
+                      <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    ) : (
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.email || '-'}</div>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>City</Label>
+                    {isEditingView ? (
+                      <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                    ) : (
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.city || '-'}</div>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Source</Label>
+                    {isEditingView ? (
+                      <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
+                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
+                        <SelectContent>
+                          {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{getSourceLabel(viewReg.source) || '-'}</div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : undefined}
+        />
 
         {/* Add Lead Modal (used for converting registrations) */}
         <Dialog open={addLeadModalOpen} onOpenChange={setAddLeadModalOpen}>
