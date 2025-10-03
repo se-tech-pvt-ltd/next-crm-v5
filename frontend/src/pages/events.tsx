@@ -43,6 +43,24 @@ export default function EventsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  const canUseNativePicker = useMemo(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+    try {
+      if (window.self !== window.top) return false;
+    } catch {
+      return false;
+    }
+    const testInput = document.createElement('input');
+    return typeof (testInput as HTMLInputElement).showPicker === 'function';
+  }, []);
+
+  const openNativePicker = useCallback((element: HTMLInputElement | null) => {
+    if (!canUseNativePicker || !element) return;
+    try {
+      element.showPicker?.();
+    } catch {}
+  }, [canUseNativePicker]);
+
   // Import CSV wizard state
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importStep, setImportStep] = useState<1 | 2 | 3>(1);
@@ -1890,9 +1908,9 @@ export default function EventsPage() {
                         const [d, t] = v.split('T');
                         setEditEvent({ ...editEvent, date: d || '', time: (t || '').slice(0, 5) });
                       }}
-                      readOnly
-                      onFocus={(e) => e.target.showPicker?.()}
-                      onClick={(e) => e.currentTarget.showPicker?.()}
+                      readOnly={canUseNativePicker}
+                      onFocus={(e) => openNativePicker(e.currentTarget)}
+                      onClick={(e) => openNativePicker(e.currentTarget)}
                     />
                   </div>
                   <div>
@@ -2046,9 +2064,9 @@ export default function EventsPage() {
                         const [d, t] = v.split('T');
                         setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
                       }}
-                      readOnly
-                      onFocus={(e) => e.target.showPicker?.()}
-                      onClick={(e) => e.currentTarget.showPicker?.()}
+                      readOnly={canUseNativePicker}
+                      onFocus={(e) => openNativePicker(e.currentTarget)}
+                      onClick={(e) => openNativePicker(e.currentTarget)}
                     />
                   </div>
                   <div>
