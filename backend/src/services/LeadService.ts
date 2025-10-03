@@ -214,6 +214,9 @@ export class LeadService {
                 String(newValue ?? ''),
                 currentUserId
               );
+              if (lead) {
+                void NotificationService.queueLeadLostNotification(lead);
+              }
             } else if (!becameLost && wasLost) {
               await ActivityService.logActivity(
                 'lead',

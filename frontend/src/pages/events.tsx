@@ -1852,14 +1852,31 @@ export default function EventsPage() {
                       value={editEvent.name}
                       onChange={(e) => {
                         const v = e.target.value;
-                        const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
                         setEditEvent({ ...editEvent, name: title });
                       }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
                     />
                   </div>
                   <div>
                     <Label>Type</Label>
-                    <Input value={editEvent.type} onChange={(e) => setEditEvent({ ...editEvent, type: e.target.value })} />
+                    <Input
+                      value={editEvent.type}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setEditEvent({ ...editEvent, type: title });
+                      }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                    />
                   </div>
                   <div>
                     <Label>Date & Time</Label>
@@ -1873,11 +1890,26 @@ export default function EventsPage() {
                         const [d, t] = v.split('T');
                         setEditEvent({ ...editEvent, date: d || '', time: (t || '').slice(0, 5) });
                       }}
+                      readOnly
+                      onFocus={(e) => e.target.showPicker?.()}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                     />
                   </div>
                   <div>
                     <Label>Venue</Label>
-                    <Input value={editEvent.venue} onChange={(e) => setEditEvent({ ...editEvent, venue: e.target.value })} />
+                    <Input
+                      value={editEvent.venue}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setEditEvent({ ...editEvent, venue: title });
+                      }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                    />
                   </div>
                 </div>
               </CollapsibleCard>
@@ -1949,7 +1981,7 @@ export default function EventsPage() {
           headerRight={(
             <Button
               size="xs"
-              className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+              className="px-3 mr-2 [&_svg]:size-3 bg-[#0071B0] hover:bg-[#00649D] text-white"
               onClick={handleCreateEvent}
               disabled={addEventMutation.isPending}
             >
@@ -1973,14 +2005,31 @@ export default function EventsPage() {
                       value={newEvent.name}
                       onChange={(e) => {
                         const v = e.target.value;
-                        const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
                         setNewEvent({ ...newEvent, name: title });
                       }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
                     />
                   </div>
                   <div>
                     <Label>Type</Label>
-                    <Input value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+                    <Input
+                      value={newEvent.type}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setNewEvent({ ...newEvent, type: title });
+                      }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                    />
                   </div>
                   <div>
                     <Label>Date & Time</Label>
@@ -1997,11 +2046,26 @@ export default function EventsPage() {
                         const [d, t] = v.split('T');
                         setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
                       }}
+                      readOnly
+                      onFocus={(e) => e.target.showPicker?.()}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                     />
                   </div>
                   <div>
                     <Label>Venue</Label>
-                    <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+                    <Input
+                      value={newEvent.venue}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setNewEvent({ ...newEvent, venue: title });
+                      }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                    />
                   </div>
                 </div>
               </CollapsibleCard>
@@ -2010,6 +2074,7 @@ export default function EventsPage() {
                 persistKey={`events:new:access`}
                 header={<CardTitle className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-primary" /><span>Event Access</span></CardTitle>}
                 cardClassName="shadow-md border border-gray-200 bg-white"
+                defaultOpen
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>

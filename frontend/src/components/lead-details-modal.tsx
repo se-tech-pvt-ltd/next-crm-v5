@@ -305,6 +305,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
   if (!lead) return null;
 
+  const isLost = (() => {
+    const v: any = (lead as any)?.isLost;
+    return v === 1 || v === '1' || v === true;
+  })();
+
   const lostReasonOptions = [
     { label: 'No Response', value: 'no_response' },
     { label: 'Not Interested', value: 'not_interested' },
@@ -347,10 +352,6 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   );
 
   const processedLeadForDisplay = lead ? { ...lead, country: parseFieldValue(lead.country), program: parseFieldValue(lead.program) } : {} as any;
-  const isLost = (() => {
-    const v: any = (lead as any)?.isLost;
-    return v === 1 || v === '1' || v === true;
-  })();
   const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
 
   const headerLeft = (

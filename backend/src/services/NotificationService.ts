@@ -3,6 +3,7 @@ import { NotificationModel, type InsertNotification } from "../models/Notificati
 import { type Lead } from "../shared/schema.js";
 
 const LEAD_CREATION_TEMPLATE_ID = "nxtcrm_lead_creation";
+const LEAD_LOST_TEMPLATE_ID = "nxtcrm_lead_lost";
 
 export type QueueNotificationInput = {
   entityType: string;
@@ -58,6 +59,28 @@ export class NotificationService {
       });
     } catch (error) {
       console.error("[NotificationService] Failed to queue lead creation notification:", error);
+    }
+  }
+
+  static async queueLeadLostNotification(lead: Lead): Promise<void> {
+    try {
+      if (!lead?.id) {
+        return;
+      }
+
+      await NotificationService.queueNotification({
+        entityType: "lead",
+        entityId: lead.id,
+        templateId: LEAD_LOST_TEMPLATE_ID,
+        channel: "whatsapp",
+        variables: {
+          lead_name: lead.name ?? "",
+          lost_reason: (lead as any)?.lostReason ?? "",
+        },
+        recipientAddress: lead.phone ?? null,
+      });
+    } catch (error) {
+      console.error("[NotificationService] Failed to queue lead lost notification:", error);
     }
   }
 }
