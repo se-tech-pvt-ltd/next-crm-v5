@@ -1753,7 +1753,8 @@ export default function EventsPage() {
             </div>
           )}
           showDefaultClose
-          contentClassName="no-not-allowed max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
+          autoHeight
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] p-0 rounded-xl shadow-xl"
           statusBar={viewReg ? <StatusProgressBarReg /> : undefined}
           leftContent={viewReg ? (
             <Card className="w-full shadow-md border border-gray-200 bg-white">

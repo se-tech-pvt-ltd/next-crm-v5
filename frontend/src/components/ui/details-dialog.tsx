@@ -17,6 +17,7 @@ interface DetailsDialogLayoutProps {
   contentClassName?: string;
   headerClassName?: string; // e.g. 'bg-primary text-primary-foreground'
   showDefaultClose?: boolean;
+  autoHeight?: boolean; // when true, dialog body auto-fits content up to a max height
 }
 
 export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
@@ -34,6 +35,7 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
   contentClassName = 'no-not-allowed max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl',
   headerClassName = 'bg-white',
   showDefaultClose,
+  autoHeight = false,
 }) => {
   const hasRight = !!rightContent;
   // Determine right pane width (support old prop form like 'w-[420px]')
@@ -44,7 +46,7 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose className={contentClassName}>
         <DialogTitle className="sr-only">{title}</DialogTitle>
-        <div className="flex flex-col h-[90vh] min-h-0 bg-[#EDEDED]">
+        <div className={`flex flex-col ${autoHeight ? 'max-h-[85vh]' : 'h-[90vh]'} min-h-0 bg-[#EDEDED]`}>
           {/* Header */}
           <div className="sticky top-0 z-20">
             <div className={`px-4 py-3 flex items-center justify-between ${headerClassName}`}>
@@ -69,15 +71,15 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
           </div>
 
           {/* Body */}
-          <div className={hasRight ? 'grid flex-1 min-h-0' : 'flex flex-col flex-1 min-h-0 overflow-hidden'} style={hasRight ? { gridTemplateColumns: `1fr ${rightPaneWidth}` } : undefined}>
+          <div className={hasRight ? 'grid flex-1 min-h-0' : `flex flex-col flex-1 min-h-0 ${autoHeight ? '' : 'overflow-hidden'}`} style={hasRight ? { gridTemplateColumns: `1fr ${rightPaneWidth}` } : undefined}>
             <div className="flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+              <div className={`p-4 space-y-4 min-h-0 ${autoHeight ? 'overflow-y-visible' : 'flex-1 overflow-y-auto'}`}>
                 {leftContent}
               </div>
             </div>
             {hasRight && (
               <div className="border-l bg-white flex flex-col min-h-0" style={{ width: rightPaneWidth }}>
-                <div className="flex-1 overflow-y-auto p-4 min-h-0">
+                <div className={`p-4 min-h-0 ${autoHeight ? 'overflow-y-visible' : 'flex-1 overflow-y-auto'}`}>
                   {rightContent}
                 </div>
               </div>
