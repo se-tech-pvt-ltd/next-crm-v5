@@ -1852,9 +1852,12 @@ export default function EventsPage() {
                       value={editEvent.name}
                       onChange={(e) => {
                         const v = e.target.value;
-                        const title = v.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const title = sanitized.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
                         setEditEvent({ ...editEvent, name: title });
                       }}
+                      inputMode="text"
+                      pattern="[A-Za-z ]*"
                     />
                   </div>
                   <div>
