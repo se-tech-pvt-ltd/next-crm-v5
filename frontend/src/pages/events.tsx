@@ -1147,17 +1147,20 @@ export default function EventsPage() {
       const match2 = list.find(r => String(r.id) === String(pendingOpenLeadId) || String(r.eventRegId) === String(pendingOpenLeadId));
       if (match2) {
         // prepare initial data preferring 'Events' as source
-        setLeadInitialData({
-          name: match2.name,
-          email: match2.email,
-          phone: match2.number,
-          city: match2.city,
-          // ensure lead source is set to Events when opening via /lead route
-          source: 'Events',
-          status: 'new',
-          eventRegId: match2.id,
-        });
-        setAddLeadModalOpen(true);
+        try {
+          const dataToPass = {
+            name: match2.name,
+            email: match2.email,
+            phone: match2.number,
+            city: match2.city,
+            // ensure lead source is set to Events when opening via /lead route
+            source: 'Events',
+            status: 'new',
+            eventRegId: match2.id,
+          };
+          try { sessionStorage.setItem('pendingLeadInitialData', JSON.stringify(dataToPass)); } catch {}
+          try { navigate('/leads/new'); } catch {}
+        } catch (e) {}
         setPendingOpenLeadId(null);
       }
     }
