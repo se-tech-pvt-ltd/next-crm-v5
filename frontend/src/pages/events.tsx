@@ -22,6 +22,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
+import { AddLeadModal } from '@/components/add-lead-modal';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { queryClient } from '@/lib/queryClient';
