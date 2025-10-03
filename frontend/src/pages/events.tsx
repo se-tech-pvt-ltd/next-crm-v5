@@ -1616,7 +1616,7 @@ export default function EventsPage() {
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t">
                 <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving��' : 'Save Registration'}</Button>
+                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving���' : 'Save Registration'}</Button>
               </div>
             </form>
           </DialogContent>
@@ -1890,11 +1890,11 @@ export default function EventsPage() {
 
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
             <DialogHeader>
               <DialogTitle>Import Registrations (CSV/Excel)</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="p-4 space-y-4">
               <div className="flex items-center justify-between text-xs">
                 <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
                 <div className="w-6 h-[1px] bg-gray-200" />
@@ -1915,35 +1915,109 @@ export default function EventsPage() {
 
               {importStep === 2 && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600">Choose your CSV or Excel file to validate. No data will be inserted yet.</p>
+                  <p className="text-sm text-gray-600">Choose your CSV or Excel file to validate. No data will be inserted yet.</p>
                   <div className="flex items-center gap-2">
-                    <Button size="xs" onClick={() => fileInputRef.current?.click()}>Choose File</Button>
-                    <span className="text-xs text-gray-700 truncate">{importFileName || 'No file selected'}</span>
+                    <Button size="sm" onClick={() => fileInputRef.current?.click()}>Choose File</Button>
+                    <span className="text-sm text-gray-700 truncate">{importFileName || 'No file selected'}</span>
                   </div>
+
+                  {/* Preview of uploaded rows (if parsed) */}
+                  {importValidRows && importValidRows.length > 0 ? (
+                    <div className="max-h-[60vh] overflow-auto border rounded p-2 bg-white">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-xs text-gray-600">
+                            <th className="px-2 py-1">#</th>
+                            <th className="px-2 py-1">Name</th>
+                            <th className="px-2 py-1">Phone</th>
+                            <th className="px-2 py-1">Email</th>
+                            <th className="px-2 py-1">City</th>
+                            <th className="px-2 py-1">Source</th>
+                            <th className="px-2 py-1">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importValidRows.map((r: any, i: number) => (
+                            <tr key={i} className="border-t">
+                              <td className="px-2 py-1 align-top text-[12px]">{i+1}</td>
+                              <td className="px-2 py-1 align-top">{String(r.name || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.number || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.email || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.city || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.source || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.status || '')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500">No preview available. Select a file to see rows here.</div>
+                  )}
+
                   <div className="flex gap-2">
-                    <Button size="xs" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                    <Button size="sm" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                    <Button size="sm" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
                   </div>
                 </div>
               )}
 
               {importStep === 3 && (
                 <div className="space-y-3">
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <div>File: <span className="font-medium">{importFileName || 'N/A'}</span></div>
                     <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-blue-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
                     <div className="mt-1">Ready to insert: <span className="font-medium">{importValidRows.length}</span></div>
                   </div>
-                  {importErrors.length > 0 && (
-                    <div className="max-h-40 overflow-auto border rounded p-2 bg-red-50 text-red-700 text-[11px]">
-                      {importErrors.slice(0, 50).map((e, i) => (
-                        <div key={i}>Row {e.row}: {e.message}</div>
-                      ))}
-                      {importErrors.length > 50 && (<div>+{importErrors.length - 50} more…</div>)}
-                    </div>
-                  )}
+
+                  {/* Show all parsed rows in a large list view */}
+                  <div className="max-h-[58vh] overflow-auto border rounded p-2 bg-white">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs text-gray-600">
+                          <th className="px-2 py-1">#</th>
+                          <th className="px-2 py-1">Name</th>
+                          <th className="px-2 py-1">Phone</th>
+                          <th className="px-2 py-1">Email</th>
+                          <th className="px-2 py-1">City</th>
+                          <th className="px-2 py-1">Source</th>
+                          <th className="px-2 py-1">Status</th>
+                          <th className="px-2 py-1">Errors</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importValidRows.map((r: any, i: number) => (
+                          <tr key={i} className="border-t">
+                            <td className="px-2 py-1 align-top text-[12px]">{i+1}</td>
+                            <td className="px-2 py-1 align-top">{String(r.name || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.number || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.email || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.city || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.source || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.status || '')}</td>
+                            <td className="px-2 py-1 align-top text-red-600 text-[12px]">
+                              {/* show any matching importErrors for this row by row number */}
+                              {importErrors.filter(e => e.row === (i+1)).map((e, idx) => (
+                                <div key={idx}>{e.message}</div>
+                              ))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Show errors that don't map to row numbers (if any) */}
+                    {importErrors.length > 0 && (
+                      <div className="mt-2 text-xs text-red-700">
+                        <div className="font-medium">Other errors:</div>
+                        {importErrors.filter(e => !e.row).map((e, i) => <div key={i}>{e.message}</div>)}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-2">
-                    <Button size="xs" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
-                    <Button size="xs" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
+                    <Button size="sm" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
+                    <Button size="sm" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
                       setIsImporting(true);
                       let success = 0; let failed = 0;
                       for (const row of importValidRows) {
