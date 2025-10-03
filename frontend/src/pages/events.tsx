@@ -1546,7 +1546,21 @@ export default function EventsPage() {
                   toast({ title: msg, variant: 'destructive' });
                   return;
                 }
-                addRegMutation.mutate(regForm);
+                // Enrich registration payload with event's access fields
+                try {
+                  const targetEventId = regForm.eventId || filterEventId || selectedEvent?.id;
+                  const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+                  const payload: any = { ...regForm };
+                  if (ev) {
+                    if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+                    if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+                    if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+                    if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+                  }
+                  addRegMutation.mutate(payload);
+                } catch (e) {
+                  addRegMutation.mutate(regForm);
+                }
               }}
               className="space-y-4"
             >
