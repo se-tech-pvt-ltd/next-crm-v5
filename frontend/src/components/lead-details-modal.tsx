@@ -353,12 +353,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
 
   const headerLeft = (
-    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw] flex items-center gap-2">
-      <span className="truncate">{(lead && (lead as any).name) || 'Lead'}</span>
-      {isLost && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200" title="Lead is marked as lost">Lost</span>
-      )}
-    </div>
+    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{(lead && (lead as any).name) || 'Lead'}</div>
   );
 
   const headerRight = (
@@ -441,6 +436,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               )}
             </>
           )}
+          {isLost && <span className="text-xs font-semibold text-red-200">Lost</span>}
           <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)} title="Close">
             <X className="w-4 h-4" />
           </Button>
