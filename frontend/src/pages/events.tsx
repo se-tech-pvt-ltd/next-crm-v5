@@ -356,6 +356,33 @@ export default function EventsPage() {
     setNewEvent((prev) => ({ ...prev, ...parts }));
   };
 
+  const handleEditEventDateTimeChange = (value: string) => {
+    if (!value) {
+      setEditEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      setEditEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const normalized = getNextIntervalDate(parsed);
+    const now = new Date();
+
+    if (normalized.getTime() < now.getTime()) {
+      const fallback = getNextIntervalDate(now);
+      toast({ title: 'Event date cannot be in the past.', variant: 'destructive' });
+      const fallbackParts = parseDateTimeParts(formatDateTimeLocalValue(fallback));
+      setEditEvent((prev) => ({ ...prev, ...fallbackParts }));
+      return;
+    }
+
+    const parts = parseDateTimeParts(formatDateTimeLocalValue(normalized));
+    setEditEvent((prev) => ({ ...prev, ...parts }));
+  };
+
   const { user, accessByRole } = useAuth() as any;
   // Parse token payload once for fallback ids
   const tokenPayload = React.useMemo(() => {
