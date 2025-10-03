@@ -21,7 +21,7 @@ export class NotificationService {
   static async queueNotification(payload: QueueNotificationInput): Promise<void> {
     try {
       const now = new Date();
-      const scheduledAt = payload.scheduledAt ?? now;
+      const scheduledAt = payload.scheduledAt === undefined ? now : payload.scheduledAt;
 
       await NotificationModel.create({
         entityType: payload.entityType,
