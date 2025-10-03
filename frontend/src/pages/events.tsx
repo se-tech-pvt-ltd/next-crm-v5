@@ -1956,7 +1956,7 @@ export default function EventsPage() {
                     <Label>Date & Time</Label>
                     <Input
                       type="datetime-local"
-                      step="60"
+                      step={TIME_STEP_SECONDS}
                       value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
                       onChange={(e) => {
                         const v = e.target.value;
