@@ -4,7 +4,7 @@ import { type Lead } from "../shared/schema.js";
 
 const LEAD_CREATION_TEMPLATE_ID = "nxtcrm_lead_creation";
 
-type QueueNotificationInput = {
+export type QueueNotificationInput = {
   entityType: string;
   entityId: string | number;
   templateId: string;
