@@ -353,7 +353,12 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   const displayData = isEditing ? (editData as any) : processedLeadForDisplay;
 
   const headerLeft = (
-    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw]">{(lead && (lead as any).name) || 'Lead'}</div>
+    <div className="text-base sm:text-lg font-semibold leading-tight truncate max-w-[60vw] flex items-center gap-2">
+      <span className="truncate">{(lead && (lead as any).name) || 'Lead'}</span>
+      {isLost && (
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200" title="Lead is marked as lost">Lost</span>
+      )}
+    </div>
   );
 
   const headerRight = (
