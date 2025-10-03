@@ -1949,7 +1949,7 @@ export default function EventsPage() {
           headerRight={(
             <Button
               size="xs"
-              className="px-3 mr-2 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+              className="px-3 mr-2 [&_svg]:size-3 bg-[#0071B0] hover:bg-[#00649D] text-white"
               onClick={handleCreateEvent}
               disabled={addEventMutation.isPending}
             >
