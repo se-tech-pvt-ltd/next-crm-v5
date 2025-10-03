@@ -1432,14 +1432,6 @@ export default function EventsPage() {
                       <span>{countdown}</span>
                     </span>
                   )}
-                  {showList && selectedEvent && canUpdateEvent && (
-                    <Link href={`/events/${selectedEvent.id}/edit`}>
-                      <Button variant="outline" size="xs" className="rounded-full px-3 [&_svg]:size-3" title="Edit Event">
-                        <Edit />
-                        <span className="hidden lg:inline">Edit Event</span>
-                      </Button>
-                    </Link>
-                  )}
                   {filterEventId && filterEventId !== 'all' && (
                     <>
                       <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
