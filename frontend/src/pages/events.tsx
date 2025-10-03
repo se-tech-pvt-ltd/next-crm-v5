@@ -2109,17 +2109,10 @@ export default function EventsPage() {
                     <Label>Date & Time</Label>
                     <Input
                       type="datetime-local"
-                      step="60"
+                      step={TIME_STEP_SECONDS}
+                      min={minEventDateTime}
                       value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (!v) {
-                          setNewEvent({ ...newEvent, date: '', time: '' });
-                          return;
-                        }
-                        const [d, t] = v.split('T');
-                        setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
-                      }}
+                      onChange={(e) => handleNewEventDateTimeChange(e.target.value)}
                       readOnly={canUseNativePicker}
                       onFocus={(e) => openNativePicker(e.currentTarget)}
                       onClick={(e) => openNativePicker(e.currentTarget)}
