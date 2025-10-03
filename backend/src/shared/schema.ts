@@ -17,6 +17,7 @@ export const notifications = mysqlTable("notifications", {
   channel: varchar("channel", { length: 50 }).notNull(),
   status: NotificationStatusEnum.default("pending").notNull(),
   variables: json("variables").notNull(), // JSON column
+  recipientAddress: varchar("recipient_address", { length: 30 }),
   scheduledAt: timestamp("scheduled_at"),
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
