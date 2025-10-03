@@ -1890,6 +1890,9 @@ export default function EventsPage() {
                         const [d, t] = v.split('T');
                         setEditEvent({ ...editEvent, date: d || '', time: (t || '').slice(0, 5) });
                       }}
+                      readOnly
+                      onFocus={(e) => e.target.showPicker?.()}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                     />
                   </div>
                   <div>
@@ -2043,6 +2046,9 @@ export default function EventsPage() {
                         const [d, t] = v.split('T');
                         setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
                       }}
+                      readOnly
+                      onFocus={(e) => e.target.showPicker?.()}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                     />
                   </div>
                   <div>
