@@ -1856,28 +1856,23 @@ export default function EventsPage() {
           ) : undefined}
         />
 
-        {/* Add Lead Modal (used for converting registrations) */}
-        <Dialog open={addLeadModalOpen} onOpenChange={setAddLeadModalOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            <DialogHeader>
-              <DialogTitle className="sr-only">Add New Lead</DialogTitle>
-            </DialogHeader>
-            <AddLeadForm
-              onCancel={() => setAddLeadModalOpen(false)}
-              onSuccess={() => {
-                setAddLeadModalOpen(false);
-                try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
-                refetchRegs?.();
-                setShowList(true);
-                setIsViewRegOpen(false);
-                setIsAddRegOpen(false);
-                setIsEditRegOpen(false);
-                setViewReg(null);
-              }}
-              initialData={leadInitialData || undefined}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Add Lead Modal (used for converting registrations) - use same UI as /leads/new */}
+        <AddLeadModal
+          open={addLeadModalOpen}
+          onOpenChange={(open) => {
+            setAddLeadModalOpen(open);
+            if (!open) {
+              try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+              refetchRegs?.();
+              setShowList(true);
+              setIsViewRegOpen(false);
+              setIsAddRegOpen(false);
+              setIsEditRegOpen(false);
+              setViewReg(null);
+            }
+          }}
+          initialData={leadInitialData || undefined}
+        />
 
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
