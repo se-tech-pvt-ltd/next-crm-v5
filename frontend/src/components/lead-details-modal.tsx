@@ -436,7 +436,11 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               )}
             </>
           )}
-          {isLost && <span className="text-xs font-semibold text-red-200">Lost</span>}
+          {isLost && (
+            <div className="px-2.5 py-1 rounded-md bg-red-600 text-white text-xs sm:text-sm font-semibold uppercase tracking-wide border border-red-400 shadow-sm">
+              LOST
+            </div>
+          )}
           <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)} title="Close">
             <X className="w-4 h-4" />
           </Button>
