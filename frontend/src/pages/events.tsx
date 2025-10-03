@@ -790,12 +790,17 @@ export default function EventsPage() {
       return;
     }
 
+    if (!eventAccess.regionId || !eventAccess.branchId || !eventAccess.counsellorId || !eventAccess.admissionOfficerId) {
+      toast({ title: 'Select region, branch, counsellor, and admission officer.', variant: 'destructive' });
+      return;
+    }
+
     const payload = {
       ...newEvent,
-      regionId: eventAccess.regionId || undefined,
-      branchId: eventAccess.branchId || undefined,
-      counsellorId: eventAccess.counsellorId || undefined,
-      admissionOfficerId: eventAccess.admissionOfficerId || undefined,
+      regionId: String(eventAccess.regionId),
+      branchId: String(eventAccess.branchId),
+      counsellorId: String(eventAccess.counsellorId),
+      admissionOfficerId: String(eventAccess.admissionOfficerId),
     } as any;
     addEventMutation.mutate(payload);
   };
@@ -1938,12 +1943,17 @@ export default function EventsPage() {
                   return;
                 }
 
+                if (!editEventAccess.regionId || !editEventAccess.branchId || !editEventAccess.counsellorId || !editEventAccess.admissionOfficerId) {
+                  toast({ title: 'Select region, branch, counsellor, and admission officer.', variant: 'destructive' });
+                  return;
+                }
+
                 const payload = {
                   ...editEvent,
-                  regionId: editEventAccess.regionId || undefined,
-                  branchId: editEventAccess.branchId || undefined,
-                  counsellorId: editEventAccess.counsellorId || undefined,
-                  admissionOfficerId: editEventAccess.admissionOfficerId || undefined,
+                  regionId: String(editEventAccess.regionId),
+                  branchId: String(editEventAccess.branchId),
+                  counsellorId: String(editEventAccess.counsellorId),
+                  admissionOfficerId: String(editEventAccess.admissionOfficerId),
                 } as any;
                 updateEventMutation.mutate({ id: String(editParams.id), data: payload });
               }}
