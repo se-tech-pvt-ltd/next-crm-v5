@@ -154,6 +154,7 @@ export const leads = mysqlTable("leads", {
   studyLevel: text("study_level"),
   studyPlan: text("study_plan"),
   elt: text("elt"),
+  isLost: tinyint("is_lost").default(0),
   lostReason: text("lost_reason"),
   notes: text("notes"),
   counselorId: varchar("counsellor_id", { length: 255 }),
