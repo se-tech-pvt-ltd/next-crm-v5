@@ -324,6 +324,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
             const isCompleted = index <= idx && idx !== -1;
             const label = getStatusDisplayName(statusId);
             const handleClick = () => {
+              if (isLost) return;
               if (statusUpdateMutation.isPending) return;
               if (currentStatus === statusId) return;
               handleStatusChange(statusId);
