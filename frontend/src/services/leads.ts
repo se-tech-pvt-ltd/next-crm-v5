@@ -18,7 +18,7 @@ export async function updateLead(id: string | undefined, data: Partial<Lead>) {
 
 export async function markLeadAsLost(id: string | undefined, reason: string) {
   if (!id) throw new Error('Lead ID is required');
-  return http.put<Lead>(`/api/leads/${id}`, { status: 'lost', lostReason: reason });
+  return http.put<Lead>(`/api/leads/${id}`, { isLost: 1, lostReason: reason });
 }
 
 export async function getStudentByLeadId(id: string | undefined): Promise<Student | null> {
