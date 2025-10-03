@@ -1930,6 +1930,14 @@ export default function EventsPage() {
                   toast({ title: 'Please fill all fields', variant: 'destructive' });
                   return;
                 }
+
+                const composed = `${editEvent.date}T${editEvent.time}`;
+                const eventDate = new Date(composed);
+                if (Number.isNaN(eventDate.getTime()) || eventDate.getTime() < Date.now()) {
+                  toast({ title: 'Choose a future date and time in 15-minute steps.', variant: 'destructive' });
+                  return;
+                }
+
                 const payload = {
                   ...editEvent,
                   regionId: editEventAccess.regionId || undefined,
