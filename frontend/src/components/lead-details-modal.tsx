@@ -330,7 +330,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
               handleStatusChange(statusId);
             };
             return (
-              <div key={statusId} className="flex-1 flex flex-col items-center relative cursor-pointer select-none" onClick={handleClick}>
+              <div key={statusId} className={`flex-1 flex flex-col items-center relative select-none ${isLost ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={handleClick} aria-disabled={isLost}>
                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isCompleted ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${isCompleted ? 'bg-white' : 'bg-gray-300'}`} />
                 </div>
