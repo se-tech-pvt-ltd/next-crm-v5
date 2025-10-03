@@ -27,6 +27,8 @@ import * as XLSX from 'xlsx';
 import { queryClient } from '@/lib/queryClient';
 import { Skeleton } from '@/components/ui/skeleton';
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 
 const FIFTEEN_MINUTE_STEP = 15;
@@ -1466,8 +1468,8 @@ export default function EventsPage() {
                           <TableHeader>
                             <TableRow>
                               <TableHead className="h-8 px-2 text-[11px]">Registration ID</TableHead>
-                              <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                              <TableHead className="h-8 px-2 text-[11px]">Number</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Full Name</TableHead>
+                              <TableHead className="h-8 px-2 text-[11px]">Phone Number</TableHead>
                               <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                               <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                               <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
@@ -1580,7 +1582,14 @@ export default function EventsPage() {
 
                 <div className="flex flex-col">
                   <Label className="mb-1">Phone Number</Label>
-                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\\-\\s]*$" value={regForm.number} onChange={(e) => { setRegForm({ ...regForm, number: e.target.value }); }} className="h-9" />
+                  <PhoneInput
+                    value={regForm.number || ''}
+                    onChange={(val) => setRegForm({ ...regForm, number: val })}
+                    defaultCountry="in"
+                    className="w-full"
+                    inputClassName="w-full h-9 text-sm"
+                    buttonClassName="h-9"
+                  />
                 </div>
 
                 <div className="flex flex-col">
@@ -1626,7 +1635,7 @@ export default function EventsPage() {
                 </div>
 
                 <div>
-                  <Label>Name</Label>
+                  <Label>Full Name</Label>
                   <Input value={editingReg.name || ''} onChange={(e) => setEditingReg({ ...editingReg, name: e.target.value })} />
                 </div>
                 <div>
@@ -1635,8 +1644,15 @@ export default function EventsPage() {
                 </div>
 
                 <div>
-                  <Label>Number</Label>
-                  <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={editingReg.number || ''} onChange={(e) => setEditingReg({ ...editingReg, number: e.target.value })} />
+                  <Label>Phone Number</Label>
+                  <PhoneInput
+                    value={editingReg.number || ''}
+                    onChange={(val) => setEditingReg({ ...editingReg, number: val })}
+                    defaultCountry="in"
+                    className="w-full"
+                    inputClassName="w-full h-9 text-sm"
+                    buttonClassName="h-9"
+                  />
                 </div>
                 <div>
                   <Label>Email</Label>
@@ -1770,7 +1786,7 @@ export default function EventsPage() {
                     <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.registrationCode}</div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Name</Label>
+                    <Label>Full Name</Label>
                     {isEditingView ? (
                       <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                     ) : (
@@ -1778,9 +1794,16 @@ export default function EventsPage() {
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Number</Label>
+                    <Label>Phone Number</Label>
                     {isEditingView ? (
-                      <Input type="tel" inputMode="tel" autoComplete="tel" pattern="^[+0-9()\-\s]*$" value={viewEditData.number || ''} onChange={(e) => setViewEditData(v => ({ ...v, number: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+                      <PhoneInput
+                        value={viewEditData.number || ''}
+                        onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
+                        defaultCountry="in"
+                        className="w-full"
+                        inputClassName="w-full h-7 text-[11px]"
+                        buttonClassName="h-7"
+                      />
                     ) : (
                       <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.number || '-'}</div>
                     )}
