@@ -1,4 +1,4 @@
-import { mysqlTable, text, int, timestamp, boolean, varchar, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, int, timestamp, boolean, varchar, json, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 const PriorityEnum = mysqlEnum("priority", ["High", "Medium", "Low"]);
@@ -16,6 +16,7 @@ export const notifications = mysqlTable("notifications", {
   templateId: char("template_id", { length: 36 }).notNull(),
   channel: varchar("channel", { length: 50 }).notNull(),
   status: NotificationStatusEnum.default("pending").notNull(),
+  variables: json("variables").notNull(), // JSON column
   scheduledAt: timestamp("scheduled_at"),
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
