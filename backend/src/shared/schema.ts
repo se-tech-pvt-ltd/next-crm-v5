@@ -1,4 +1,4 @@
-import { mysqlTable, text, int, timestamp, boolean, varchar, json, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, int, timestamp, boolean, varchar, json, char, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 const PriorityEnum = mysqlEnum("priority", ["High", "Medium", "Low"]);
