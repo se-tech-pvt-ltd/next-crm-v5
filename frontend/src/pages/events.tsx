@@ -1805,7 +1805,19 @@ export default function EventsPage() {
                         buttonClassName="h-7"
                       />
                     ) : (
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.number || '-'}</div>
+                      <div className="relative phone-compact">
+                        <PhoneInput
+                          value={String(viewReg.number || '')}
+                          onChange={() => {}}
+                          defaultCountry="in"
+                          className="w-full"
+                          inputClassName="w-full h-7 text-[11px]"
+                          buttonClassName="h-7"
+                          inputStyle={{ height: '28px' }}
+                          buttonStyle={{ height: '28px' }}
+                          disabled
+                        />
+                      </div>
                     )}
                   </div>
                   <div className="space-y-1.5">
