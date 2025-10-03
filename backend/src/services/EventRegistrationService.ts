@@ -1,6 +1,7 @@
 import { type EventRegistration, type InsertEventRegistration, type InsertLead, leads } from "../shared/schema.js";
 import { EventRegistrationModel } from "../models/EventRegistration.js";
 import { LeadService } from "./LeadService.js";
+import { EventService } from "./EventService.js";
 import { type EventRegistration, type InsertEventRegistration, type InsertLead } from "../shared/schema.js";
 
 export class EventRegistrationService {
