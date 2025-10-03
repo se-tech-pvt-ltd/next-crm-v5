@@ -673,6 +673,7 @@ export default function Leads() {
             setLocation('/leads');
           }
         }}
+        initialData={addLeadInitialData}
       />
       <LeadDetailsModal
         open={leadModalOpen}
