@@ -6,7 +6,7 @@ const LEAD_CREATION_TEMPLATE_ID = "nxtcrm_lead_creation";
 
 type QueueNotificationInput = {
   entityType: string;
-  entityId: string;
+  entityId: string | number;
   templateId: string;
   channel: string;
   variables?: Record<string, unknown>;
@@ -25,7 +25,7 @@ export class NotificationService {
 
       await NotificationModel.create({
         entityType: payload.entityType,
-        entityId: payload.entityId,
+        entityId: String(payload.entityId),
         templateId: payload.templateId,
         channel: payload.channel,
         status: payload.status ?? "pending",
