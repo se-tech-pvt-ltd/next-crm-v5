@@ -29,6 +29,32 @@ import { Skeleton } from '@/components/ui/skeleton';
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 
 
+const FIFTEEN_MINUTE_STEP = 15;
+const TIME_STEP_SECONDS = FIFTEEN_MINUTE_STEP * 60;
+
+const formatDateTimeLocalValue = (date: Date) => {
+  const pad = (value: number) => value.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const getNextIntervalDate = (base: Date, stepMinutes = FIFTEEN_MINUTE_STEP) => {
+  const result = new Date(base);
+  result.setSeconds(0, 0);
+  const remainder = result.getMinutes() % stepMinutes;
+  if (remainder > 0) {
+    result.setMinutes(result.getMinutes() + (stepMinutes - remainder));
+  }
+  if (result.getTime() < base.getTime()) {
+    result.setMinutes(result.getMinutes() + stepMinutes);
+  }
+  return result;
+};
+
+const parseDateTimeParts = (value: string) => {
+  const [datePart = '', timePart = ''] = value.split('T');
+  return { date: datePart, time: timePart.slice(0, 5) };
+};
+
 export default function EventsPage() {
   const [isAddRegOpen, setIsAddRegOpen] = useState(false);
   const [isEditRegOpen, setIsEditRegOpen] = useState(false);
@@ -42,6 +68,24 @@ export default function EventsPage() {
   const [showList, setShowList] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const canUseNativePicker = useMemo(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+    try {
+      if (window.self !== window.top) return false;
+    } catch {
+      return false;
+    }
+    const testInput = document.createElement('input');
+    return typeof (testInput as HTMLInputElement).showPicker === 'function';
+  }, []);
+
+  const openNativePicker = useCallback((element: HTMLInputElement | null) => {
+    if (!canUseNativePicker || !element) return;
+    try {
+      element.showPicker?.();
+    } catch {}
+  }, [canUseNativePicker]);
 
   // Import CSV wizard state
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -282,6 +326,63 @@ export default function EventsPage() {
   const [newEvent, setNewEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEvent, setEditEvent] = useState({ name: '', type: '', date: '', venue: '', time: '' });
   const [editEventAccess, setEditEventAccess] = useState<{ regionId: string; branchId: string; counsellorId?: string; admissionOfficerId?: string }>({ regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+
+  const minEventDateTime = formatDateTimeLocalValue(getNextIntervalDate(new Date()));
+
+  const handleNewEventDateTimeChange = (value: string) => {
+    if (!value) {
+      setNewEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      setNewEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const normalized = getNextIntervalDate(parsed);
+    const now = new Date();
+
+    if (normalized.getTime() < now.getTime()) {
+      const fallback = getNextIntervalDate(now);
+      toast({ title: 'Event date cannot be in the past.', variant: 'destructive' });
+      const fallbackParts = parseDateTimeParts(formatDateTimeLocalValue(fallback));
+      setNewEvent((prev) => ({ ...prev, ...fallbackParts }));
+      return;
+    }
+
+    const parts = parseDateTimeParts(formatDateTimeLocalValue(normalized));
+    setNewEvent((prev) => ({ ...prev, ...parts }));
+  };
+
+  const handleEditEventDateTimeChange = (value: string) => {
+    if (!value) {
+      setEditEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      setEditEvent((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    const normalized = getNextIntervalDate(parsed);
+    const now = new Date();
+
+    if (normalized.getTime() < now.getTime()) {
+      const fallback = getNextIntervalDate(now);
+      toast({ title: 'Event date cannot be in the past.', variant: 'destructive' });
+      const fallbackParts = parseDateTimeParts(formatDateTimeLocalValue(fallback));
+      setEditEvent((prev) => ({ ...prev, ...fallbackParts }));
+      return;
+    }
+
+    const parts = parseDateTimeParts(formatDateTimeLocalValue(normalized));
+    setEditEvent((prev) => ({ ...prev, ...parts }));
+  };
+
   const { user, accessByRole } = useAuth() as any;
   // Parse token payload once for fallback ids
   const tokenPayload = React.useMemo(() => {
@@ -681,12 +782,25 @@ export default function EventsPage() {
       toast({ title: 'Please fill all fields', variant: 'destructive' });
       return;
     }
+
+    const composed = `${newEvent.date}T${newEvent.time}`;
+    const eventDate = new Date(composed);
+    if (Number.isNaN(eventDate.getTime()) || eventDate.getTime() < Date.now()) {
+      toast({ title: 'Choose a future date and time in 15-minute steps.', variant: 'destructive' });
+      return;
+    }
+
+    if (!eventAccess.regionId || !eventAccess.branchId || !eventAccess.counsellorId || !eventAccess.admissionOfficerId) {
+      toast({ title: 'Select region, branch, counsellor, and admission officer.', variant: 'destructive' });
+      return;
+    }
+
     const payload = {
       ...newEvent,
-      regionId: eventAccess.regionId || undefined,
-      branchId: eventAccess.branchId || undefined,
-      counsellorId: eventAccess.counsellorId || undefined,
-      admissionOfficerId: eventAccess.admissionOfficerId || undefined,
+      regionId: String(eventAccess.regionId),
+      branchId: String(eventAccess.branchId),
+      counsellorId: String(eventAccess.counsellorId),
+      admissionOfficerId: String(eventAccess.admissionOfficerId),
     } as any;
     addEventMutation.mutate(payload);
   };
@@ -1318,14 +1432,6 @@ export default function EventsPage() {
                       <span>{countdown}</span>
                     </span>
                   )}
-                  {showList && selectedEvent && canUpdateEvent && (
-                    <Link href={`/events/${selectedEvent.id}/edit`}>
-                      <Button variant="outline" size="xs" className="rounded-full px-3 [&_svg]:size-3" title="Edit Event">
-                        <Edit />
-                        <span className="hidden lg:inline">Edit Event</span>
-                      </Button>
-                    </Link>
-                  )}
                   {filterEventId && filterEventId !== 'all' && (
                     <>
                       <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
@@ -1821,12 +1927,25 @@ export default function EventsPage() {
                   toast({ title: 'Please fill all fields', variant: 'destructive' });
                   return;
                 }
+
+                const composed = `${editEvent.date}T${editEvent.time}`;
+                const eventDate = new Date(composed);
+                if (Number.isNaN(eventDate.getTime()) || eventDate.getTime() < Date.now()) {
+                  toast({ title: 'Choose a future date and time in 15-minute steps.', variant: 'destructive' });
+                  return;
+                }
+
+                if (!editEventAccess.regionId || !editEventAccess.branchId || !editEventAccess.counsellorId || !editEventAccess.admissionOfficerId) {
+                  toast({ title: 'Select region, branch, counsellor, and admission officer.', variant: 'destructive' });
+                  return;
+                }
+
                 const payload = {
                   ...editEvent,
-                  regionId: editEventAccess.regionId || undefined,
-                  branchId: editEventAccess.branchId || undefined,
-                  counsellorId: editEventAccess.counsellorId || undefined,
-                  admissionOfficerId: editEventAccess.admissionOfficerId || undefined,
+                  regionId: String(editEventAccess.regionId),
+                  branchId: String(editEventAccess.branchId),
+                  counsellorId: String(editEventAccess.counsellorId),
+                  admissionOfficerId: String(editEventAccess.admissionOfficerId),
                 } as any;
                 updateEventMutation.mutate({ id: String(editParams.id), data: payload });
               }}
@@ -1882,17 +2001,13 @@ export default function EventsPage() {
                     <Label>Date & Time</Label>
                     <Input
                       type="datetime-local"
-                      step="60"
+                      step={TIME_STEP_SECONDS}
+                      min={minEventDateTime}
                       value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (!v) { setEditEvent({ ...editEvent, date: '', time: '' }); return; }
-                        const [d, t] = v.split('T');
-                        setEditEvent({ ...editEvent, date: d || '', time: (t || '').slice(0, 5) });
-                      }}
-                      readOnly
-                      onFocus={(e) => e.target.showPicker?.()}
-                      onClick={(e) => e.currentTarget.showPicker?.()}
+                      onChange={(e) => handleEditEventDateTimeChange(e.target.value)}
+                      readOnly={canUseNativePicker}
+                      onFocus={(e) => openNativePicker(e.currentTarget)}
+                      onClick={(e) => openNativePicker(e.currentTarget)}
                     />
                   </div>
                   <div>
@@ -2035,20 +2150,13 @@ export default function EventsPage() {
                     <Label>Date & Time</Label>
                     <Input
                       type="datetime-local"
-                      step="60"
+                      step={TIME_STEP_SECONDS}
+                      min={minEventDateTime}
                       value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (!v) {
-                          setNewEvent({ ...newEvent, date: '', time: '' });
-                          return;
-                        }
-                        const [d, t] = v.split('T');
-                        setNewEvent({ ...newEvent, date: d || '', time: (t || '').slice(0, 5) });
-                      }}
-                      readOnly
-                      onFocus={(e) => e.target.showPicker?.()}
-                      onClick={(e) => e.currentTarget.showPicker?.()}
+                      onChange={(e) => handleNewEventDateTimeChange(e.target.value)}
+                      readOnly={canUseNativePicker}
+                      onFocus={(e) => openNativePicker(e.currentTarget)}
+                      onClick={(e) => openNativePicker(e.currentTarget)}
                     />
                   </div>
                   <div>
