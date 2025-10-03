@@ -2047,7 +2047,19 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Venue</Label>
-                    <Input value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+                    <Input
+                      value={newEvent.venue}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setNewEvent({ ...newEvent, venue: title });
+                      }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                    />
                   </div>
                 </div>
               </CollapsibleCard>
