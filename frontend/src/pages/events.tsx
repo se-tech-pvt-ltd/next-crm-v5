@@ -1992,13 +1992,9 @@ export default function EventsPage() {
                     <Input
                       type="datetime-local"
                       step={TIME_STEP_SECONDS}
+                      min={minEventDateTime}
                       value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (!v) { setEditEvent({ ...editEvent, date: '', time: '' }); return; }
-                        const [d, t] = v.split('T');
-                        setEditEvent({ ...editEvent, date: d || '', time: (t || '').slice(0, 5) });
-                      }}
+                      onChange={(e) => handleEditEventDateTimeChange(e.target.value)}
                       readOnly={canUseNativePicker}
                       onFocus={(e) => openNativePicker(e.currentTarget)}
                       onClick={(e) => openNativePicker(e.currentTarget)}
