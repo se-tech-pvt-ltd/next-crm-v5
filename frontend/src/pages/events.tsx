@@ -2010,6 +2010,7 @@ export default function EventsPage() {
                 persistKey={`events:new:access`}
                 header={<CardTitle className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-primary" /><span>Event Access</span></CardTitle>}
                 cardClassName="shadow-md border border-gray-200 bg-white"
+                defaultOpen
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
