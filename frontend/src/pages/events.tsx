@@ -29,6 +29,32 @@ import { Skeleton } from '@/components/ui/skeleton';
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 
 
+const FIFTEEN_MINUTE_STEP = 15;
+const TIME_STEP_SECONDS = FIFTEEN_MINUTE_STEP * 60;
+
+const formatDateTimeLocalValue = (date: Date) => {
+  const pad = (value: number) => value.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const getNextIntervalDate = (base: Date, stepMinutes = FIFTEEN_MINUTE_STEP) => {
+  const result = new Date(base);
+  result.setSeconds(0, 0);
+  const remainder = result.getMinutes() % stepMinutes;
+  if (remainder > 0) {
+    result.setMinutes(result.getMinutes() + (stepMinutes - remainder));
+  }
+  if (result.getTime() < base.getTime()) {
+    result.setMinutes(result.getMinutes() + stepMinutes);
+  }
+  return result;
+};
+
+const parseDateTimeParts = (value: string) => {
+  const [datePart = '', timePart = ''] = value.split('T');
+  return { date: datePart, time: timePart.slice(0, 5) };
+};
+
 export default function EventsPage() {
   const [isAddRegOpen, setIsAddRegOpen] = useState(false);
   const [isEditRegOpen, setIsEditRegOpen] = useState(false);
