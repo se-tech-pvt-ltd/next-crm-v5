@@ -3,6 +3,24 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 const PriorityEnum = mysqlEnum("priority", ["High", "Medium", "Low"]);
 const CategoryEnum = mysqlEnum("category", ["UG", "PG", "Research", "Top up"]);
+const NotificationStatusEnum = mysqlEnum("status", [
+  "pending",
+  "sent",
+  "failed",
+]);
+
+export const notifications = mysqlTable("notifications", {
+  id: char("id", { length: 36 }).primaryKey().notNull(),
+  entityType: varchar("entity_type", { length: 50 }).notNull(),
+  entityId: varchar("entity_id", { length: 255 }).notNull(),
+  templateId: char("template_id", { length: 36 }).notNull(),
+  channel: varchar("channel", { length: 50 }).notNull(),
+  status: NotificationStatusEnum.default("pending").notNull(),
+  scheduledAt: timestamp("scheduled_at"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 export const universityCourses = mysqlTable("university_courses", {
   id: varchar("id", { length: 36 }).primaryKey().notNull(),
