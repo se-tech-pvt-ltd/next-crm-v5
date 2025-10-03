@@ -1853,11 +1853,13 @@ export default function EventsPage() {
                       onChange={(e) => {
                         const v = e.target.value;
                         const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
-                        const title = sanitized.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
                         setEditEvent({ ...editEvent, name: title });
                       }}
                       inputMode="text"
-                      pattern="[A-Za-z ]*"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
                     />
                   </div>
                   <div>
