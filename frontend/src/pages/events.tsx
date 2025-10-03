@@ -1864,7 +1864,19 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Type</Label>
-                    <Input value={editEvent.type} onChange={(e) => setEditEvent({ ...editEvent, type: e.target.value })} />
+                    <Input
+                      value={editEvent.type}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const sanitized = v.replace(/[^a-zA-Z\s]/g, '');
+                        const singleSpaced = sanitized.replace(/\s+/g, ' ');
+                        const trimmed = singleSpaced.replace(/^\s+/, '');
+                        const title = trimmed.replace(/(^|\s)([a-z])/g, (_m, p1, p2) => p1 + String(p2).toUpperCase());
+                        setEditEvent({ ...editEvent, type: title });
+                      }}
+                      inputMode="text"
+                      pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                    />
                   </div>
                   <div>
                     <Label>Date & Time</Label>
