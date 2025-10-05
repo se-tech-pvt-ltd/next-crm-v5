@@ -20,7 +20,7 @@ import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Edit, UserPlus, Users, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X } from 'lucide-react';
+import { Plus, Edit, UserPlus, Users, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X, Target } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { format } from 'date-fns';
