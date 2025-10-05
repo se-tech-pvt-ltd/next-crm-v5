@@ -1894,17 +1894,7 @@ export default function EventsPage() {
                     <div className="text-xs opacity-90 truncate">CSV/Excel — validate and insert registrations</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setIsImportOpen(false)} className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md">Cancel</button>
-                  <button
-                    type="button"
-                    aria-label="Close"
-                    onClick={() => setIsImportOpen(false)}
-                    className="rounded-full w-8 h-8 inline-flex items-center justify-center bg-white/80 text-gray-700 hover:bg-white"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                <div className="flex items-center gap-2" />
               </div>
             </DialogHeader>
             <div className="p-4 space-y-4">
