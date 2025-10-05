@@ -21,6 +21,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const uploadsDir = path.resolve(process.cwd(), '..', 'uploads');
   app.use('/uploads', express.static(uploadsDir));
 
+  // Public Make integration routes (no auth required) - try to load if present
+  try {
+    const { default: makeRoutes } = await import('./makeRoutes.js');
+    app.use('/make', makeRoutes);
+  } catch (e) {
+    // not available - continue
+  }
+
   // Register auth route first (public)
   app.use('/api/auth', authRoutes);
 
