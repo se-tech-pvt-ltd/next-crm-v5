@@ -376,7 +376,12 @@ export default function UniversityPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">Loading...</div>
+                  <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <div className="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" />
+                      <div>Loading university details...</div>
+                    </div>
+                  </div>
                 )}
               </section>
             </div>
