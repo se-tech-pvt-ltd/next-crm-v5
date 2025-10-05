@@ -1971,8 +1971,6 @@ export default function EventsPage() {
                           <th className="px-2 py-1">Phone</th>
                           <th className="px-2 py-1">Email</th>
                           <th className="px-2 py-1">City</th>
-                          <th className="px-2 py-1">Source</th>
-                          <th className="px-2 py-1">Status</th>
                           <th className="px-2 py-1">Errors</th>
                         </tr>
                       </thead>
