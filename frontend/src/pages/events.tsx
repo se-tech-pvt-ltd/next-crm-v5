@@ -1882,8 +1882,21 @@ export default function EventsPage() {
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
           <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
-            <DialogHeader>
-              <DialogTitle>Import Registrations (CSV/Excel)</DialogTitle>
+            <DialogHeader className="p-0">
+              <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Upload className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-base sm:text-lg font-semibold leading-tight truncate">Import Registrations</div>
+                    <div className="text-xs opacity-90 truncate">CSV/Excel — validate and insert registrations</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setIsImportOpen(false)} className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md">Cancel</button>
+                </div>
+              </div>
             </DialogHeader>
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between text-xs">
