@@ -298,12 +298,14 @@ export default function UniversityPage() {
 
                     {panel === 'admissions' && (
                       <SectionCard title="Admission Requirements">
-                        <InfoRow label="UG Entry Criteria" value={detail.admissionRequirements.ugEntryCriteria ?? undefined} />
-                        <InfoRow label="PG Entry Criteria" value={detail.admissionRequirements.pgEntryCriteria ?? undefined} />
-                        <InfoRow label="Accepted ELT’s" value={(detail.admissionRequirements.acceptedElts || []).length ? detail.admissionRequirements.acceptedElts.join(', ') : undefined} />
-                        <InfoRow label="ELT Requirements" value={detail.admissionRequirements.eltRequirements ?? undefined} />
-                        <InfoRow label="MOI" value={detail.admissionRequirements.moiPolicy ?? undefined} />
-                        <InfoRow label="Study Gap" value={detail.admissionRequirements.studyGap ?? undefined} />
+                        <div className="max-h-[56vh] overflow-y-auto pr-2">
+                          <InfoRow label="UG Entry Criteria" value={detail.admissionRequirements.ugEntryCriteria ?? undefined} />
+                          <InfoRow label="PG Entry Criteria" value={detail.admissionRequirements.pgEntryCriteria ?? undefined} />
+                          <InfoRow label="Accepted ELT’s" value={(detail.admissionRequirements.acceptedElts || []).length ? detail.admissionRequirements.acceptedElts.join(', ') : undefined} />
+                          <InfoRow label="ELT Requirements" value={detail.admissionRequirements.eltRequirements ?? undefined} />
+                          <InfoRow label="MOI" value={detail.admissionRequirements.moiPolicy ?? undefined} />
+                          <InfoRow label="Study Gap" value={detail.admissionRequirements.studyGap ?? undefined} />
+                        </div>
                       </SectionCard>
                     )}
 
@@ -376,7 +378,12 @@ export default function UniversityPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">Loading...</div>
+                  <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <div className="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" />
+                      <div>Loading university details...</div>
+                    </div>
+                  </div>
                 )}
               </section>
             </div>
