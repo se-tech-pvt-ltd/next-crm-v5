@@ -1982,8 +1982,6 @@ export default function EventsPage() {
                             <td className="px-2 py-1 align-top">{String(r.number || '')}</td>
                             <td className="px-2 py-1 align-top">{String(r.email || '')}</td>
                             <td className="px-2 py-1 align-top">{String(r.city || '')}</td>
-                            <td className="px-2 py-1 align-top">{String(r.source || '')}</td>
-                            <td className="px-2 py-1 align-top">{String(r.status || '')}</td>
                             <td className="px-2 py-1 align-top text-red-600 text-[12px]">
                               {Array.isArray(r.errors) && r.errors.length > 0 ? r.errors.map((er: string, idx: number) => <div key={idx}>{er}</div>) : null}
                             </td>
