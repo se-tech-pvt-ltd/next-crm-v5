@@ -849,29 +849,13 @@ export default function EventsPage() {
 
   const downloadSampleCsv = () => {
     const wb = XLSX.utils.book_new();
-    // Sheet 1: registrations sample
+    // Sheet: registrations sample with only required fields
     const registrationsAOA = [
-      ['name','number','email','city','source','status'],
-      ['John Doe','+11234567890','john@example.com','New York','Website','attending'],
+      ['name','number','email','city'],
+      ['John Doe','+11234567890','john@example.com','New York'],
     ];
     const ws1 = XLSX.utils.aoa_to_sheet(registrationsAOA);
     XLSX.utils.book_append_sheet(wb, ws1, 'registrations');
-
-    // Sheet 2: dropdowns (allowed values)
-    const allowedStatus = statusOptions.map(o => [o.label, o.value]);
-    const allowedSources = (sourceOptions && sourceOptions.length > 0)
-      ? sourceOptions.map((o: any) => [o.label, o.value])
-      : [['Website','Website']];
-    const aoa: any[][] = [];
-    aoa.push(['Status - Allowed values']);
-    aoa.push(['Label','Value']);
-    for (const row of allowedStatus) aoa.push(row);
-    aoa.push([]);
-    aoa.push(['Source - Allowed values']);
-    aoa.push(['Label','Value']);
-    for (const row of allowedSources) aoa.push(row);
-    const ws2 = XLSX.utils.aoa_to_sheet(aoa);
-    XLSX.utils.book_append_sheet(wb, ws2, 'dropdowns');
 
     const wbout = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
     const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
