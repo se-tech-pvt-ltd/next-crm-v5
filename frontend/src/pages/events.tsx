@@ -1559,83 +1559,152 @@ export default function EventsPage() {
             </div>
           )}
           leftContent={(
-            <form
-              id="add-registration-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const missing = !regForm.name || !regForm.number || !regForm.email || !regForm.city;
-                if (missing) { toast({ title: 'Please fill required fields', variant: 'destructive' }); return; }
-                if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
-                const targetEventId = regForm.eventId || filterEventId || selectedEvent?.id;
-                const existsEmail = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
-                const existsNumber = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.number && regForm.number && String(r.number) === String(regForm.number));
-                if (existsEmail || existsNumber) {
-                  const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
-                  toast({ title: msg, variant: 'destructive' });
-                  return;
-                }
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="w-full shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center"><UserPlus className="w-4 h-4 mr-2" />Registration Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      id="add-registration-form"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const missing = !regForm.name || !regForm.number || !regForm.email || !regForm.city;
+                        if (missing) { toast({ title: 'Please fill required fields', variant: 'destructive' }); return; }
+                        if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
+                        const targetEventId = regForm.eventId || filterEventId || selectedEvent?.id;
+                        const existsEmail = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
+                        const existsNumber = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.number && regForm.number && String(r.number) === String(regForm.number));
+                        if (existsEmail || existsNumber) {
+                          const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
+                          toast({ title: msg, variant: 'destructive' });
+                          return;
+                        }
 
-                try {
-                  const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
-                  const payload: any = { ...regForm };
-                  if (ev) {
-                    if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
-                    if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
-                    if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
-                    if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
-                  }
-                  addRegMutation.mutate(payload);
-                } catch (e) {
-                  addRegMutation.mutate(regForm);
-                }
-              }}
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <Label className="mb-1">Full Name</Label>
-                  <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
-                </div>
+                        try {
+                          const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+                          const payload: any = { ...regForm };
+                          if (ev) {
+                            if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+                            if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+                            if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+                            if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+                          }
+                          addRegMutation.mutate(payload);
+                        } catch (e) {
+                          addRegMutation.mutate(regForm);
+                        }
+                      }}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Full Name</Label>
+                          <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
+                        </div>
 
-                <div className="flex flex-col">
-                  <Label className="mb-1">City</Label>
-                  <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} className="h-9" />
-                </div>
+                        <div className="flex flex-col">
+                          <Label className="mb-1">City</Label>
+                          <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} className="h-9" />
+                        </div>
 
-                <div className="flex flex-col">
-                  <Label className="mb-1">Phone Number</Label>
-                  <PhoneInput
-                    value={regForm.number || ''}
-                    onChange={(val) => setRegForm({ ...regForm, number: val })}
-                    defaultCountry="in"
-                    className="w-full"
-                    inputClassName="w-full h-9 text-sm"
-                    buttonClassName="h-9"
-                  />
-                </div>
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Phone Number</Label>
+                          <PhoneInput
+                            value={regForm.number || ''}
+                            onChange={(val) => setRegForm({ ...regForm, number: val })}
+                            defaultCountry="in"
+                            className="w-full"
+                            inputClassName="w-full h-9 text-sm"
+                            buttonClassName="h-9"
+                          />
+                        </div>
 
-                <div className="flex flex-col">
-                  <Label className="mb-1">Email Address</Label>
-                  <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
-                  {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
-                </div>
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Email Address</Label>
+                          <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
+                          {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
+                        </div>
 
-                <div className="flex flex-col">
-                  <Label className="mb-1">Event</Label>
-                  <Select value={regForm.eventId || filterEventId || ''} onValueChange={(v) => setRegForm({ ...regForm, eventId: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Select event" /></SelectTrigger>
-                    <SelectContent>
-                      {(Array.isArray(visibleEvents) ? visibleEvents : []).map(ev => <SelectItem key={ev.id} value={String(ev.id)}>{String(ev.name || ev.title || `Event ${ev.id}`)}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Event</Label>
+                          <Select value={regForm.eventId || filterEventId || ''} onValueChange={(v) => setRegForm({ ...regForm, eventId: v })}>
+                            <SelectTrigger className="h-9"><SelectValue placeholder="Select event" /></SelectTrigger>
+                            <SelectContent>
+                              {(Array.isArray(visibleEvents) ? visibleEvents : []).map(ev => <SelectItem key={ev.id} value={String(ev.id)}>{String(ev.name || ev.title || `Event ${ev.id}`)}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
+                      </div>
+
+                    </form>
+                  </CardContent>
+                </Card>
+
+                <Card className="w-full shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center"><Users className="w-4 h-4 mr-2" />Access</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Region</Label>
+                        <Select value={(regForm as any).regionId || ''} onValueChange={(v) => setRegForm({ ...regForm, regionId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select region" /></SelectTrigger>
+                          <SelectContent>
+                            {Array.isArray(regions) && regions.map((r: any) => (
+                              <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Branch</Label>
+                        <Select value={(regForm as any).branchId || ''} onValueChange={(v) => setRegForm({ ...regForm, branchId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                          <SelectContent>
+                            {filteredBranches.map((b: any) => (
+                              <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Counsellor</Label>
+                        <Select value={(regForm as any).counsellorId || ''} onValueChange={(v) => setRegForm({ ...regForm, counsellorId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                          <SelectContent>
+                            {counselorOptions.map((u: any) => (
+                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Admission Officer</Label>
+                        <Select value={(regForm as any).admissionOfficerId || ''} onValueChange={(v) => setRegForm({ ...regForm, admissionOfficerId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select admission officer" /></SelectTrigger>
+                          <SelectContent>
+                            {admissionOfficerOptions.map((u: any) => (
+                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t">
                 <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Close</Button>
               </div>
-            </form>
+            </div>
           )}
         />
 
