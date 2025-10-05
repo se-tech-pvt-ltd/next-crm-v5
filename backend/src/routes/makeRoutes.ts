@@ -3,6 +3,21 @@ import { LeadService } from '../services/LeadService.js';
 
 export const makeRoutes = Router();
 
+// GET used to verify token
+makeRoutes.get('/lead', (req: any, res: any) => {
+  try {
+    const auth = (req.headers && req.headers.authorization) ? String(req.headers.authorization) : '';
+    if (!auth.toLowerCase().startsWith('bearer ')) return res.status(401).json({ message: 'Unauthorized' });
+    const token = auth.split(' ')[1];
+    const expected = String(process.env.MAKE_TOKEN || 'b3a49f4c28de79e83f6c15d0a27b64f2d98e5ca0b7fd14a9c0f2d8e19b6a3e74');
+    if (token !== expected) return res.status(401).json({ message: 'Invalid token' });
+    return res.json({ valid: true });
+  } catch (error) {
+    console.error('Make token verification error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
+
 makeRoutes.post('/lead', async (req: any, res: any) => {
   try {
     const auth = (req.headers && req.headers.authorization) ? String(req.headers.authorization) : '';
