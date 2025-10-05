@@ -96,6 +96,7 @@ export default function EventsPage() {
   const [importFileName, setImportFileName] = useState<string>('');
   const [importErrors, setImportErrors] = useState<{ row: number; message: string }[]>([]);
   const [importValidRows, setImportValidRows] = useState<RegService.RegistrationPayload[]>([]);
+  const [importAllRows, setImportAllRows] = useState<Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }>>([]);
   const [isImporting, setIsImporting] = useState(false);
 
   const isValidEmail = (s?: string) => !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s || '');
