@@ -1469,14 +1469,32 @@ export default function EventsPage() {
                 if (safePage !== page) setPage(safePage);
                 return (
                   <>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-gray-500">Total registrations</div>
-                        <div className="text-lg font-semibold">{total}</div>
-                        <div className="text-xs text-gray-500">Converted</div>
-                        <div className="text-lg font-semibold text-green-600">{convertedCount}</div>
-                      </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                      <Card>
+                        <CardHeader className="pb-1 p-2">
+                          <CardTitle className="text-xs font-medium flex items-center gap-2">
+                            <Users className="w-3 h-3 text-gray-500" />
+                            Total registrations
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-2 pt-0">
+                          <div className="text-base font-semibold">{total}</div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-1 p-2">
+                          <CardTitle className="text-xs font-medium flex items-center gap-2">
+                            <UserPlus className="w-3 h-3 text-primary" />
+                            Converted
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-2 pt-0">
+                          <div className="text-base font-semibold text-green-600">{convertedCount}</div>
+                        </CardContent>
+                      </Card>
                     </div>
+
                     <div className="overflow-x-auto">
                       {((filterEventId && filterEventId !== 'all') && total === 0) ? (
                         <EmptyState
