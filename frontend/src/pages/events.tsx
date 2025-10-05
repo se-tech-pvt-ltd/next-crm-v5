@@ -1460,6 +1460,7 @@ export default function EventsPage() {
               {(() => {
                 const list = (registrations || []) as any[];
                 const total = list.length;
+                const convertedCount = list.filter((r:any) => ((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1')).length;
                 const totalPages = Math.max(1, Math.ceil(total / pageSize));
                 const safePage = Math.min(Math.max(1, page), totalPages);
                 const start = (safePage - 1) * pageSize;
@@ -1468,6 +1469,14 @@ export default function EventsPage() {
                 if (safePage !== page) setPage(safePage);
                 return (
                   <>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-4">
+                        <div className="text-xs text-gray-500">Total registrations</div>
+                        <div className="text-lg font-semibold">{total}</div>
+                        <div className="text-xs text-gray-500">Converted</div>
+                        <div className="text-lg font-semibold text-green-600">{convertedCount}</div>
+                      </div>
+                    </div>
                     <div className="overflow-x-auto">
                       {((filterEventId && filterEventId !== 'all') && total === 0) ? (
                         <EmptyState
