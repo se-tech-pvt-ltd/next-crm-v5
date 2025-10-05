@@ -987,6 +987,7 @@ export default function EventsPage() {
 
     setImportErrors(errors);
     setImportValidRows(valid);
+    setImportAllRows(allRows);
   };
 
   const normalizeRoleList = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
