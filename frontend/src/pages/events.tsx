@@ -1517,29 +1517,65 @@ export default function EventsPage() {
           </Card>
         )}
 
-        {/* Create Registration Modal */}
-        <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
-            <DialogHeader>
-              <DialogTitle>Add Registration</DialogTitle>
-            </DialogHeader>
-
+        {/* Create Registration Modal (lead-style) */}
+        <DetailsDialogLayout
+          open={isAddRegOpen}
+          onOpenChange={(open) => { setIsAddRegOpen(open); if (!open) { /* reset form if needed */ } }}
+          title="Add Registration"
+          headerClassName="bg-[#223E7D] text-white"
+          headerLeft={(
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add Registration</div>
+                <div className="text-xs opacity-90 truncate">Create a registration for the selected event</div>
+              </div>
+            </div>
+          )}
+          headerRight={(
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                onClick={() => setIsAddRegOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+                onClick={() => {
+                  // trigger submission programmatically
+                  const formEl = document.querySelector('#add-registration-form') as HTMLFormElement | null;
+                  if (formEl) formEl.requestSubmit();
+                }}
+                disabled={addRegMutation.isPending}
+              >
+                {addRegMutation.isPending ? 'Saving…' : 'Save'}
+              </Button>
+            </div>
+          )}
+          leftContent={(
             <form
+              id="add-registration-form"
               onSubmit={(e) => {
                 e.preventDefault();
-                const missing = !regForm.status || !regForm.name || !regForm.number || !regForm.email || !regForm.city || !regForm.source || !regForm.eventId;
-                if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
+                const missing = !regForm.name || !regForm.number || !regForm.email || !regForm.city;
+                if (missing) { toast({ title: 'Please fill required fields', variant: 'destructive' }); return; }
                 if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
-                const existsEmail = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
-                const existsNumber = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.number && regForm.number && String(r.number) === String(regForm.number));
+                const targetEventId = regForm.eventId || filterEventId || selectedEvent?.id;
+                const existsEmail = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
+                const existsNumber = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.number && regForm.number && String(r.number) === String(regForm.number));
                 if (existsEmail || existsNumber) {
                   const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
                   toast({ title: msg, variant: 'destructive' });
                   return;
                 }
-                // Enrich registration payload with event's access fields
+
                 try {
-                  const targetEventId = regForm.eventId || filterEventId || selectedEvent?.id;
                   const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
                   const payload: any = { ...regForm };
                   if (ev) {
@@ -1556,26 +1592,6 @@ export default function EventsPage() {
               className="space-y-4"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <Label className="mb-1">Status</Label>
-                  <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex flex-col">
-                  <Label className="mb-1">Source</Label>
-                  <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Please select" /></SelectTrigger>
-                    <SelectContent>
-                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="flex flex-col">
                   <Label className="mb-1">Full Name</Label>
                   <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
@@ -1603,15 +1619,25 @@ export default function EventsPage() {
                   <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
                   {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
                 </div>
+
+                <div className="flex flex-col">
+                  <Label className="mb-1">Event</Label>
+                  <Select value={regForm.eventId || filterEventId || ''} onValueChange={(v) => setRegForm({ ...regForm, eventId: v })}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Select event" /></SelectTrigger>
+                    <SelectContent>
+                      {(Array.isArray(visibleEvents) ? visibleEvents : []).map(ev => <SelectItem key={ev.id} value={String(ev.id)}>{String(ev.name || ev.title || `Event ${ev.id}`)}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t">
-                <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving���' : 'Save Registration'}</Button>
+                <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Close</Button>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
+          )}
+        />
 
         {/* Edit Registration Modal */}
         <Dialog open={isEditRegOpen} onOpenChange={setIsEditRegOpen}>
