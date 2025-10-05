@@ -918,7 +918,7 @@ export default function EventsPage() {
     const header = (matrix[0] || []).map((h: any) => String(h || '').trim().toLowerCase());
     const need = ['name', 'number', 'email', 'city', 'source', 'status'];
     for (const col of need) if (!header.includes(col)) errors.push({ row: 0, message: `Missing column: ${col}` });
-    if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); return; }
+    if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); setImportAllRows([]); return; }
 
     const idx = (k: string) => header.indexOf(k);
     const nameIdx = idx('name');
