@@ -25,6 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   try {
     const { default: makeRoutes } = await import('./makeRoutes.js');
     app.use('/make', makeRoutes);
+    // Also expose under /api/make (must be registered before /api auth middleware)
+    app.use('/api/make', makeRoutes);
   } catch (e) {
     // not available - continue
   }
