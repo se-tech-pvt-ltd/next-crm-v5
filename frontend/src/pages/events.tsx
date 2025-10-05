@@ -916,7 +916,7 @@ export default function EventsPage() {
     }
 
     const header = (matrix[0] || []).map((h: any) => String(h || '').trim().toLowerCase());
-    const need = ['name', 'number', 'email', 'city', 'source', 'status'];
+    const need = ['name', 'number', 'email', 'city'];
     for (const col of need) if (!header.includes(col)) errors.push({ row: 0, message: `Missing column: ${col}` });
     if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); setImportAllRows([]); return; }
 
@@ -925,13 +925,12 @@ export default function EventsPage() {
     const numberIdx = idx('number');
     const emailIdx = idx('email');
     const cityIdx = idx('city');
-    const sourceIdx = idx('source');
-    const statusIdx = idx('status');
 
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
-    const allowedStatusLabels = statusOptions.map(o => o.label).join(', ');
-    const allowedStatusValues = statusOptions.map(o => o.value).join(', ');
+
+    const defaultStatusValue = (statusOptions.find(o => o.isDefault) || statusOptions[0] || { value: '' }).value || '';
+    const defaultSourceValue = (sourceOptions.find((o: any) => o.isDefault) || sourceOptions[0] || { value: '' }).value || '';
 
     const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
 
@@ -942,17 +941,16 @@ export default function EventsPage() {
       const number = String(cols[numberIdx] ?? '').trim();
       const email = String(cols[emailIdx] ?? '').trim();
       const city = String(cols[cityIdx] ?? '').trim();
-      const source = String(cols[sourceIdx] ?? '').trim();
-      const statusRaw = String(cols[statusIdx] ?? '').trim();
-      const status = normalizeStatus(statusRaw);
+
+      // Do NOT read status/source from sheet; use defaults
+      const status = defaultStatusValue;
+      const source = defaultSourceValue;
 
       const rowErrors: string[] = [];
       if (!name) rowErrors.push('Name is required');
       if (!number) rowErrors.push('Number is required');
       if (!email) rowErrors.push('Email is required');
       if (!city) rowErrors.push('City is required');
-      if (!source) rowErrors.push('Source is required');
-      if (!status) rowErrors.push(`Status is invalid: got "${statusRaw}". Allowed: ${allowedStatusLabels} (values: ${allowedStatusValues})`);
       if (email && !isValidEmail(email)) rowErrors.push('Email is invalid');
 
       const emailKey = email.toLowerCase();
