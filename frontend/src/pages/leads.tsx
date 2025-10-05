@@ -272,10 +272,22 @@ export default function Leads() {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
+  const [addLeadInitialData, setAddLeadInitialData] = useState<any | undefined>(undefined);
 
   React.useEffect(() => {
     if (location === '/leads/new') {
       setAddLeadOpen(true);
+      try {
+        const raw = sessionStorage.getItem('pendingLeadInitialData');
+        if (raw) {
+          setAddLeadInitialData(JSON.parse(raw));
+          sessionStorage.removeItem('pendingLeadInitialData');
+        } else {
+          setAddLeadInitialData(undefined);
+        }
+      } catch (e) {
+        setAddLeadInitialData(undefined);
+      }
     }
   }, [location]);
 
@@ -661,6 +673,7 @@ export default function Leads() {
             setLocation('/leads');
           }
         }}
+        initialData={addLeadInitialData}
       />
       <LeadDetailsModal
         open={leadModalOpen}

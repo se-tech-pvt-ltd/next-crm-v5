@@ -1,6 +1,7 @@
 import { type EventRegistration, type InsertEventRegistration, type InsertLead, leads } from "../shared/schema.js";
 import { EventRegistrationModel } from "../models/EventRegistration.js";
 import { LeadService } from "./LeadService.js";
+import { EventService } from "./EventService.js";
 import { type EventRegistration, type InsertEventRegistration, type InsertLead } from "../shared/schema.js";
 
 export class EventRegistrationService {
@@ -56,6 +57,25 @@ export class EventRegistrationService {
       status: "new",
       eventRegId: reg.id,
     } as any;
+
+    // Try to copy access fields from the linked event (region, branch, counsellor/admission officer)
+    try {
+      if (reg.eventId) {
+        const ev = await EventService.getEvent(String(reg.eventId));
+        if (ev) {
+          if (ev.regionId || (ev as any).region_id) payload.regionId = String(ev.regionId ?? (ev as any).region_id);
+          if (ev.branchId || (ev as any).branch_id) payload.branchId = String(ev.branchId ?? (ev as any).branch_id);
+          // event uses 'counsellorId' spelling; leads use 'counselorId' - map both
+          const counsellorVal = (ev as any).counsellorId ?? (ev as any).counsellor_id ?? (ev as any).counselorId ?? (ev as any).counselor_id;
+          if (counsellorVal) payload.counselorId = String(counsellorVal);
+          const admissionVal = (ev as any).admissionOfficerId ?? (ev as any).admission_officer_id;
+          if (admissionVal) payload.admissionOfficerId = String(admissionVal);
+        }
+      }
+    } catch (e) {
+      // ignore and proceed
+      console.warn('[EventRegistrationService.convertToLead] failed to copy event fields', e);
+    }
 
     const lead = await LeadService.createLead(payload);
 

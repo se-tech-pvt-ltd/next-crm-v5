@@ -20,8 +20,9 @@ import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search } from 'lucide-react';
+import { Plus, Edit, UserPlus, Users, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X, Target } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
+import { AddLeadModal } from '@/components/add-lead-modal';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { queryClient } from '@/lib/queryClient';
@@ -95,6 +96,7 @@ export default function EventsPage() {
   const [importFileName, setImportFileName] = useState<string>('');
   const [importErrors, setImportErrors] = useState<{ row: number; message: string }[]>([]);
   const [importValidRows, setImportValidRows] = useState<RegService.RegistrationPayload[]>([]);
+  const [importAllRows, setImportAllRows] = useState<Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }>>([]);
   const [isImporting, setIsImporting] = useState(false);
 
   const isValidEmail = (s?: string) => !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s || '');
@@ -649,7 +651,7 @@ export default function EventsPage() {
     } catch {}
   }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
 
-  const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
+  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const [emailError, setEmailError] = useState(false);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -814,7 +816,27 @@ export default function EventsPage() {
     }
     const defaultStatus = statusOptions.find((o: any) => o.isDefault);
     const defaultSource = sourceOptions.find((o: any) => o.isDefault);
-    setRegForm({ status: defaultStatus ? defaultStatus.value : '', name: '', number: '', email: '', city: '', source: defaultSource ? String(defaultSource.value) : '', eventId: filterEventId });
+    // find the linked event (selected event)
+    const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(filterEventId)) || selectedEvent;
+
+    const initial: any = {
+      status: defaultStatus ? defaultStatus.value : '',
+      name: '',
+      number: '',
+      email: '',
+      city: '',
+      source: defaultSource ? String(defaultSource.value) : '',
+      eventId: filterEventId,
+    };
+
+    if (ev) {
+      if (ev.regionId || ev.region_id) initial.regionId = String(ev.regionId ?? ev.region_id);
+      if (ev.branchId || ev.branch_id) initial.branchId = String(ev.branchId ?? ev.branch_id);
+      if (ev.counsellorId || ev.counsellor_id) initial.counsellorId = String(ev.counsellorId ?? ev.counsellor_id ?? ev.counselorId ?? ev.counselor_id);
+      if (ev.admissionOfficerId || ev.admission_officer_id) initial.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+    }
+
+    setRegForm(initial);
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddRegOpen(true)); } catch { setIsAddRegOpen(true); }
   };
 
@@ -847,29 +869,13 @@ export default function EventsPage() {
 
   const downloadSampleCsv = () => {
     const wb = XLSX.utils.book_new();
-    // Sheet 1: registrations sample
+    // Sheet: registrations sample with only required fields
     const registrationsAOA = [
-      ['name','number','email','city','source','status'],
-      ['John Doe','+11234567890','john@example.com','New York','Website','attending'],
+      ['name','number','email','city'],
+      ['John Doe','+11234567890','john@example.com','New York'],
     ];
     const ws1 = XLSX.utils.aoa_to_sheet(registrationsAOA);
     XLSX.utils.book_append_sheet(wb, ws1, 'registrations');
-
-    // Sheet 2: dropdowns (allowed values)
-    const allowedStatus = statusOptions.map(o => [o.label, o.value]);
-    const allowedSources = (sourceOptions && sourceOptions.length > 0)
-      ? sourceOptions.map((o: any) => [o.label, o.value])
-      : [['Website','Website']];
-    const aoa: any[][] = [];
-    aoa.push(['Status - Allowed values']);
-    aoa.push(['Label','Value']);
-    for (const row of allowedStatus) aoa.push(row);
-    aoa.push([]);
-    aoa.push(['Source - Allowed values']);
-    aoa.push(['Label','Value']);
-    for (const row of allowedSources) aoa.push(row);
-    const ws2 = XLSX.utils.aoa_to_sheet(aoa);
-    XLSX.utils.book_append_sheet(wb, ws2, 'dropdowns');
 
     const wbout = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
     const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -914,22 +920,24 @@ export default function EventsPage() {
     }
 
     const header = (matrix[0] || []).map((h: any) => String(h || '').trim().toLowerCase());
-    const need = ['name', 'number', 'email', 'city', 'source', 'status'];
+    const need = ['name', 'number', 'email', 'city'];
     for (const col of need) if (!header.includes(col)) errors.push({ row: 0, message: `Missing column: ${col}` });
-    if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); return; }
+    if (errors.length > 0) { setImportErrors(errors); setImportValidRows([]); setImportAllRows([]); return; }
 
     const idx = (k: string) => header.indexOf(k);
     const nameIdx = idx('name');
     const numberIdx = idx('number');
     const emailIdx = idx('email');
     const cityIdx = idx('city');
-    const sourceIdx = idx('source');
-    const statusIdx = idx('status');
 
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
-    const allowedStatusLabels = statusOptions.map(o => o.label).join(', ');
-    const allowedStatusValues = statusOptions.map(o => o.value).join(', ');
+
+    // Use fixed defaults for imports as requested
+    const defaultStatusValue = 'a576fe6c-8d7e-11f0-a5b5-92e8d4b3e6a5'; // NOT SURE
+    const defaultSourceValue = 'b75b4253-840f-11f0-a5b5-92e8d4b3yy5'; // Events
+
+    const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
 
     for (let i = 1; i < matrix.length; i++) {
       const rowNo = i + 1;
@@ -938,17 +946,16 @@ export default function EventsPage() {
       const number = String(cols[numberIdx] ?? '').trim();
       const email = String(cols[emailIdx] ?? '').trim();
       const city = String(cols[cityIdx] ?? '').trim();
-      const source = String(cols[sourceIdx] ?? '').trim();
-      const statusRaw = String(cols[statusIdx] ?? '').trim();
-      const status = normalizeStatus(statusRaw);
+
+      // Do NOT read status/source from sheet; use defaults
+      const status = defaultStatusValue;
+      const source = defaultSourceValue;
 
       const rowErrors: string[] = [];
       if (!name) rowErrors.push('Name is required');
       if (!number) rowErrors.push('Number is required');
       if (!email) rowErrors.push('Email is required');
       if (!city) rowErrors.push('City is required');
-      if (!source) rowErrors.push('Source is required');
-      if (!status) rowErrors.push(`Status is invalid: got "${statusRaw}". Allowed: ${allowedStatusLabels} (values: ${allowedStatusValues})`);
       if (email && !isValidEmail(email)) rowErrors.push('Email is invalid');
 
       const emailKey = email.toLowerCase();
@@ -970,15 +977,20 @@ export default function EventsPage() {
       if (existsEmail) rowErrors.push('Duplicate email in this event');
       if (existsNumber) rowErrors.push('Duplicate number in this event');
 
+      const rowObj = { row: rowNo, name, number, email, city, source, status, errors: rowErrors };
+
       if (rowErrors.length > 0) {
         errors.push({ row: rowNo, message: rowErrors.join('; ') });
       } else {
         valid.push({ status, name, number, email, city, source, eventId: filterEventId } as RegService.RegistrationPayload);
       }
+
+      allRows.push(rowObj);
     }
 
     setImportErrors(errors);
     setImportValidRows(valid);
+    setImportAllRows(allRows);
   };
 
   const normalizeRoleList = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -1418,7 +1430,34 @@ export default function EventsPage() {
         )}
 
         {showList && (
-          <Card>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+              <Card>
+                <CardHeader className="pb-1 p-2">
+                  <CardTitle className="text-xs font-medium flex items-center gap-2">
+                    <Users className="w-3 h-3 text-gray-500" />
+                    Total registrations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 pt-0">
+                  <div className="text-base font-semibold">{(registrations || []).length}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-1 p-2">
+                  <CardTitle className="text-xs font-medium flex items-center gap-2">
+                    <UserPlus className="w-3 h-3 text-primary" />
+                    Converted
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 pt-0">
+                  <div className="text-base font-semibold text-green-600">{(registrations || []).filter((r:any) => ((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1')).length}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -1448,6 +1487,7 @@ export default function EventsPage() {
               {(() => {
                 const list = (registrations || []) as any[];
                 const total = list.length;
+                const convertedCount = list.filter((r:any) => ((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1')).length;
                 const totalPages = Math.max(1, Math.ceil(total / pageSize));
                 const safePage = Math.min(Math.max(1, page), totalPages);
                 const start = (safePage - 1) * pageSize;
@@ -1523,89 +1563,185 @@ export default function EventsPage() {
               })()}
             </CardContent>
           </Card>
+          </>
         )}
 
-        {/* Create Registration Modal */}
-        <Dialog open={isAddRegOpen} onOpenChange={setIsAddRegOpen}>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-4">
-            <DialogHeader>
-              <DialogTitle>Add Registration</DialogTitle>
-            </DialogHeader>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const missing = !regForm.status || !regForm.name || !regForm.number || !regForm.email || !regForm.city || !regForm.source || !regForm.eventId;
-                if (missing) { toast({ title: 'All fields are required', variant: 'destructive' }); return; }
-                if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
-                const existsEmail = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
-                const existsNumber = (registrations || []).some((r: any) => r.eventId === regForm.eventId && r.number && regForm.number && String(r.number) === String(regForm.number));
-                if (existsEmail || existsNumber) {
-                  const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
-                  toast({ title: msg, variant: 'destructive' });
-                  return;
-                }
-                addRegMutation.mutate(regForm);
-              }}
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <Label className="mb-1">Status</Label>
-                  <Select value={regForm.status} onValueChange={(v) => setRegForm({ ...regForm, status: v })}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex flex-col">
-                  <Label className="mb-1">Source</Label>
-                  <Select value={regForm.source || ''} onValueChange={(v) => setRegForm({ ...regForm, source: v })}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Please select" /></SelectTrigger>
-                    <SelectContent>
-                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex flex-col">
-                  <Label className="mb-1">Full Name</Label>
-                  <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
-                </div>
-
-                <div className="flex flex-col">
-                  <Label className="mb-1">City</Label>
-                  <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} className="h-9" />
-                </div>
-
-                <div className="flex flex-col">
-                  <Label className="mb-1">Phone Number</Label>
-                  <PhoneInput
-                    value={regForm.number || ''}
-                    onChange={(val) => setRegForm({ ...regForm, number: val })}
-                    defaultCountry="in"
-                    className="w-full"
-                    inputClassName="w-full h-9 text-sm"
-                    buttonClassName="h-9"
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <Label className="mb-1">Email Address</Label>
-                  <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
-                  {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
-                </div>
+        {/* Create Registration Modal (lead-style) */}
+        <DetailsDialogLayout
+          open={isAddRegOpen}
+          onOpenChange={(open) => { setIsAddRegOpen(open); if (!open) { /* reset form if needed */ } }}
+          title="Add Registration"
+          headerClassName="bg-[#223E7D] text-white"
+          headerLeft={(
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-white" />
               </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t">
-                <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={addRegMutation.isPending || emailError}>{addRegMutation.isPending ? 'Saving��' : 'Save Registration'}</Button>
+              <div className="min-w-0">
+                <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add Registration</div>
+                <div className="text-xs opacity-90 truncate">Create a registration for the selected event</div>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </div>
+          )}
+          headerRight={(
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                onClick={() => setIsAddRegOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+                onClick={() => {
+                  // trigger submission programmatically
+                  const formEl = document.querySelector('#add-registration-form') as HTMLFormElement | null;
+                  if (formEl) formEl.requestSubmit();
+                }}
+                disabled={addRegMutation.isPending}
+              >
+                {addRegMutation.isPending ? 'Saving…' : 'Save'}
+              </Button>
+            </div>
+          )}
+          leftContent={(
+            <div className="space-y-4">
+              <div className="space-y-4">
+                <Card className="w-full shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center"><UserPlus className="w-4 h-4 mr-2" />Registration Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      id="add-registration-form"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const missing = !regForm.name || !regForm.number || !regForm.email || !regForm.city;
+                        if (missing) { toast({ title: 'Please fill required fields', variant: 'destructive' }); return; }
+                        if (!isValidEmail(regForm.email)) { toast({ title: 'Invalid email', variant: 'destructive' }); return; }
+                        const targetEventId = regForm.eventId || filterEventId || selectedEvent?.id;
+                        const existsEmail = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.email && regForm.email && String(r.email).toLowerCase() === String(regForm.email).toLowerCase());
+                        const existsNumber = (registrations || []).some((r: any) => String(r.eventId) === String(targetEventId) && r.number && regForm.number && String(r.number) === String(regForm.number));
+                        if (existsEmail || existsNumber) {
+                          const msg = existsEmail && existsNumber ? 'Duplicate email and number for this event' : existsEmail ? 'Duplicate email for this event' : 'Duplicate number for this event';
+                          toast({ title: msg, variant: 'destructive' });
+                          return;
+                        }
+
+                        try {
+                          const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+                          const payload: any = { ...regForm };
+                          if (ev) {
+                            if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+                            if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+                            if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+                            if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+                          }
+                          addRegMutation.mutate(payload);
+                        } catch (e) {
+                          addRegMutation.mutate(regForm);
+                        }
+                      }}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Full Name</Label>
+                          <Input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} className="h-9" />
+                        </div>
+
+                        <div className="flex flex-col">
+                          <Label className="mb-1">City</Label>
+                          <Input value={regForm.city} onChange={(e) => setRegForm({ ...regForm, city: e.target.value })} className="h-9" />
+                        </div>
+
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Phone Number</Label>
+                          <PhoneInput
+                            value={regForm.number || ''}
+                            onChange={(val) => setRegForm({ ...regForm, number: val })}
+                            defaultCountry="in"
+                            className="w-full"
+                            inputClassName="w-full h-9 text-sm"
+                            buttonClassName="h-9"
+                          />
+                        </div>
+
+                        <div className="flex flex-col">
+                          <Label className="mb-1">Email Address</Label>
+                          <Input type="email" inputMode="email" autoComplete="email" value={regForm.email} onChange={(e) => { setRegForm({ ...regForm, email: e.target.value }); setEmailError(!isValidEmail(e.target.value)); }} className="h-9" />
+                          {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
+                        </div>
+
+                      </div>
+
+                    </form>
+                  </CardContent>
+                </Card>
+
+                <Card className="w-full shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center"><Users className="w-4 h-4 mr-2" />Access</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Region</Label>
+                        <Select value={(regForm as any).regionId || ''} onValueChange={(v) => setRegForm({ ...regForm, regionId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select region" /></SelectTrigger>
+                          <SelectContent>
+                            {Array.isArray(regions) && regions.map((r: any) => (
+                              <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Branch</Label>
+                        <Select value={(regForm as any).branchId || ''} onValueChange={(v) => setRegForm({ ...regForm, branchId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                          <SelectContent>
+                            {filteredBranches.map((b: any) => (
+                              <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Counsellor</Label>
+                        <Select value={(regForm as any).counsellorId || ''} onValueChange={(v) => setRegForm({ ...regForm, counsellorId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                          <SelectContent>
+                            {counselorOptions.map((u: any) => (
+                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <Label className="mb-1">Admission Officer</Label>
+                        <Select value={(regForm as any).admissionOfficerId || ''} onValueChange={(v) => setRegForm({ ...regForm, admissionOfficerId: v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Select admission officer" /></SelectTrigger>
+                          <SelectContent>
+                            {admissionOfficerOptions.map((u: any) => (
+                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        />
 
         {/* Edit Registration Modal */}
         <Dialog open={isEditRegOpen} onOpenChange={setIsEditRegOpen}>
@@ -1805,7 +1941,19 @@ export default function EventsPage() {
                         buttonClassName="h-7"
                       />
                     ) : (
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.number || '-'}</div>
+                      <div className="relative phone-compact">
+                        <PhoneInput
+                          value={String(viewReg.number || '')}
+                          onChange={() => {}}
+                          defaultCountry="in"
+                          className="w-full"
+                          inputClassName="w-full h-7 text-[11px]"
+                          buttonClassName="h-7"
+                          inputStyle={{ height: '28px' }}
+                          buttonStyle={{ height: '28px' }}
+                          disabled
+                        />
+                      </div>
                     )}
                   </div>
                   <div className="space-y-1.5">
@@ -1843,36 +1991,52 @@ export default function EventsPage() {
           ) : undefined}
         />
 
-        {/* Add Lead Modal (used for converting registrations) */}
-        <Dialog open={addLeadModalOpen} onOpenChange={setAddLeadModalOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            <DialogHeader>
-              <DialogTitle className="sr-only">Add New Lead</DialogTitle>
-            </DialogHeader>
-            <AddLeadForm
-              onCancel={() => setAddLeadModalOpen(false)}
-              onSuccess={() => {
-                setAddLeadModalOpen(false);
-                try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
-                refetchRegs?.();
-                setShowList(true);
-                setIsViewRegOpen(false);
-                setIsAddRegOpen(false);
-                setIsEditRegOpen(false);
-                setViewReg(null);
-              }}
-              initialData={leadInitialData || undefined}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Add Lead Modal (used for converting registrations) - use same UI as /leads/new */}
+        <AddLeadModal
+          open={addLeadModalOpen}
+          onOpenChange={(open) => {
+            setAddLeadModalOpen(open);
+            if (!open) {
+              try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+              refetchRegs?.();
+              setShowList(true);
+              setIsViewRegOpen(false);
+              setIsAddRegOpen(false);
+              setIsEditRegOpen(false);
+              setViewReg(null);
+            }
+          }}
+          initialData={leadInitialData || undefined}
+        />
 
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Import Registrations (CSV/Excel)</DialogTitle>
+          <DialogContent hideClose className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
+            <DialogTitle className="sr-only">Import Registrations (CSV/Excel)</DialogTitle>
+            <DialogHeader className="p-0">
+              <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Upload className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-base sm:text-lg font-semibold leading-tight truncate">Import Registrations</div>
+                    <div className="text-xs opacity-90 truncate">CSV/Excel — validate and insert registrations</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    onClick={() => setIsImportOpen(false)}
+                    className="rounded-full w-8 h-8 inline-flex items-center justify-center bg-white/80 text-gray-700 hover:bg-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="p-4 space-y-4">
               <div className="flex items-center justify-between text-xs">
                 <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
                 <div className="w-6 h-[1px] bg-gray-200" />
@@ -1893,40 +2057,120 @@ export default function EventsPage() {
 
               {importStep === 2 && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600">Choose your CSV or Excel file to validate. No data will be inserted yet.</p>
+                  <p className="text-sm text-gray-600">Choose your CSV or Excel file to validate. No data will be inserted yet.</p>
                   <div className="flex items-center gap-2">
-                    <Button size="xs" onClick={() => fileInputRef.current?.click()}>Choose File</Button>
-                    <span className="text-xs text-gray-700 truncate">{importFileName || 'No file selected'}</span>
+                    <Button size="sm" onClick={() => fileInputRef.current?.click()}>Choose File</Button>
+                    <span className="text-sm text-gray-700 truncate">{importFileName || 'No file selected'}</span>
                   </div>
+
+                  {/* Preview of uploaded rows (if parsed) */}
+                  {importValidRows && importValidRows.length > 0 ? (
+                    <div className="max-h-[60vh] overflow-auto border rounded p-2 bg-white">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-xs text-gray-600">
+                            <th className="px-2 py-1">#</th>
+                            <th className="px-2 py-1">Name</th>
+                            <th className="px-2 py-1">Phone</th>
+                            <th className="px-2 py-1">Email</th>
+                            <th className="px-2 py-1">City</th>
+                            <th className="px-2 py-1">Source</th>
+                            <th className="px-2 py-1">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importValidRows.map((r: any, i: number) => (
+                            <tr key={i} className="border-t">
+                              <td className="px-2 py-1 align-top text-[12px]">{i+1}</td>
+                              <td className="px-2 py-1 align-top">{String(r.name || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.number || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.email || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.city || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.source || '')}</td>
+                              <td className="px-2 py-1 align-top">{String(r.status || '')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500">No preview available. Select a file to see rows here.</div>
+                  )}
+
                   <div className="flex gap-2">
-                    <Button size="xs" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                    <Button size="sm" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                    <Button size="sm" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
                   </div>
                 </div>
               )}
 
               {importStep === 3 && (
                 <div className="space-y-3">
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <div>File: <span className="font-medium">{importFileName || 'N/A'}</span></div>
                     <div className="mt-1">Validation: <span className={importErrors.length === 0 ? 'text-blue-600' : 'text-red-600'}>{importErrors.length === 0 ? 'No errors found' : `${importErrors.length} error(s)`}</span></div>
                     <div className="mt-1">Ready to insert: <span className="font-medium">{importValidRows.length}</span></div>
                   </div>
-                  {importErrors.length > 0 && (
-                    <div className="max-h-40 overflow-auto border rounded p-2 bg-red-50 text-red-700 text-[11px]">
-                      {importErrors.slice(0, 50).map((e, i) => (
-                        <div key={i}>Row {e.row}: {e.message}</div>
-                      ))}
-                      {importErrors.length > 50 && (<div>+{importErrors.length - 50} more…</div>)}
-                    </div>
-                  )}
+
+                  {/* Show all parsed rows in a large list view */}
+                  <div className="max-h-[58vh] overflow-auto border rounded p-2 bg-white">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs text-gray-600">
+                          <th className="px-2 py-1">#</th>
+                          <th className="px-2 py-1">Name</th>
+                          <th className="px-2 py-1">Phone</th>
+                          <th className="px-2 py-1">Email</th>
+                          <th className="px-2 py-1">City</th>
+                          <th className="px-2 py-1">Errors</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importAllRows.map((r: any, i: number) => (
+                          <tr key={i} className="border-t">
+                            <td className="px-2 py-1 align-top text-[12px]">{r.row}</td>
+                            <td className="px-2 py-1 align-top">{String(r.name || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.number || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.email || '')}</td>
+                            <td className="px-2 py-1 align-top">{String(r.city || '')}</td>
+                            <td className="px-2 py-1 align-top text-red-600 text-[12px]">
+                              {Array.isArray(r.errors) && r.errors.length > 0 ? r.errors.map((er: string, idx: number) => <div key={idx}>{er}</div>) : null}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Show errors that don't map to row numbers (if any) */}
+                    {importErrors.length > 0 && (
+                      <div className="mt-2 text-xs text-red-700">
+                        <div className="font-medium">Other errors:</div>
+                        {importErrors.filter(e => !e.row).map((e, i) => <div key={i}>{e.message}</div>)}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-2">
-                    <Button size="xs" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
-                    <Button size="xs" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
+                    <Button size="sm" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
+                    <Button size="sm" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
                       setIsImporting(true);
                       let success = 0; let failed = 0;
                       for (const row of importValidRows) {
                         try { // eslint-disable-next-line no-await-in-loop
-                          await RegService.createRegistration(row);
+                          try {
+                            const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
+                            const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+                            const payload: any = { ...row };
+                            if (ev) {
+                              if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+                              if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+                              if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+                              if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+                            }
+                            await RegService.createRegistration(payload);
+                          } catch (e) {
+                            await RegService.createRegistration(row);
+                          }
                           success++;
                         } catch { failed++; }
                       }
