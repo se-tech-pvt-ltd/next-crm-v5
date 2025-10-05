@@ -1560,7 +1560,7 @@ export default function EventsPage() {
           )}
           leftContent={(
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <Card className="w-full shadow-sm">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center"><UserPlus className="w-4 h-4 mr-2" />Registration Information</CardTitle>
@@ -1627,16 +1627,6 @@ export default function EventsPage() {
                           {emailError && <div className="text-xs text-red-600 mt-1">Please enter a valid email address</div>}
                         </div>
 
-                        <div className="flex flex-col">
-                          <Label className="mb-1">Event</Label>
-                          <Select value={regForm.eventId || filterEventId || ''} onValueChange={(v) => setRegForm({ ...regForm, eventId: v })}>
-                            <SelectTrigger className="h-9"><SelectValue placeholder="Select event" /></SelectTrigger>
-                            <SelectContent>
-                              {(Array.isArray(visibleEvents) ? visibleEvents : []).map(ev => <SelectItem key={ev.id} value={String(ev.id)}>{String(ev.name || ev.title || `Event ${ev.id}`)}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
                       </div>
 
                     </form>
@@ -1699,10 +1689,6 @@ export default function EventsPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t">
-                <Button variant="outline" onClick={() => setIsAddRegOpen(false)}>Close</Button>
               </div>
             </div>
           )}
