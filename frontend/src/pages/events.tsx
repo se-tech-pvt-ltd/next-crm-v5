@@ -1994,9 +1994,9 @@ export default function EventsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {importValidRows.map((r: any, i: number) => (
+                        {importAllRows.map((r: any, i: number) => (
                           <tr key={i} className="border-t">
-                            <td className="px-2 py-1 align-top text-[12px]">{i+1}</td>
+                            <td className="px-2 py-1 align-top text-[12px]">{r.row}</td>
                             <td className="px-2 py-1 align-top">{String(r.name || '')}</td>
                             <td className="px-2 py-1 align-top">{String(r.number || '')}</td>
                             <td className="px-2 py-1 align-top">{String(r.email || '')}</td>
@@ -2004,10 +2004,7 @@ export default function EventsPage() {
                             <td className="px-2 py-1 align-top">{String(r.source || '')}</td>
                             <td className="px-2 py-1 align-top">{String(r.status || '')}</td>
                             <td className="px-2 py-1 align-top text-red-600 text-[12px]">
-                              {/* show any matching importErrors for this row by row number */}
-                              {importErrors.filter(e => e.row === (i+1)).map((e, idx) => (
-                                <div key={idx}>{e.message}</div>
-                              ))}
+                              {Array.isArray(r.errors) && r.errors.length > 0 ? r.errors.map((er: string, idx: number) => <div key={idx}>{er}</div>) : null}
                             </td>
                           </tr>
                         ))}
