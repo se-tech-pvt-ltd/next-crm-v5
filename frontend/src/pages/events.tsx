@@ -933,6 +933,8 @@ export default function EventsPage() {
     const allowedStatusLabels = statusOptions.map(o => o.label).join(', ');
     const allowedStatusValues = statusOptions.map(o => o.value).join(', ');
 
+    const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
+
     for (let i = 1; i < matrix.length; i++) {
       const rowNo = i + 1;
       const cols = matrix[i] || [];
@@ -972,11 +974,15 @@ export default function EventsPage() {
       if (existsEmail) rowErrors.push('Duplicate email in this event');
       if (existsNumber) rowErrors.push('Duplicate number in this event');
 
+      const rowObj = { row: rowNo, name, number, email, city, source, status, errors: rowErrors };
+
       if (rowErrors.length > 0) {
         errors.push({ row: rowNo, message: rowErrors.join('; ') });
       } else {
         valid.push({ status, name, number, email, city, source, eventId: filterEventId } as RegService.RegistrationPayload);
       }
+
+      allRows.push(rowObj);
     }
 
     setImportErrors(errors);
