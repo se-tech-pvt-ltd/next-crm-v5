@@ -816,7 +816,27 @@ export default function EventsPage() {
     }
     const defaultStatus = statusOptions.find((o: any) => o.isDefault);
     const defaultSource = sourceOptions.find((o: any) => o.isDefault);
-    setRegForm({ status: defaultStatus ? defaultStatus.value : '', name: '', number: '', email: '', city: '', source: defaultSource ? String(defaultSource.value) : '', eventId: filterEventId });
+    // find the linked event (selected event)
+    const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(filterEventId)) || selectedEvent;
+
+    const initial: any = {
+      status: defaultStatus ? defaultStatus.value : '',
+      name: '',
+      number: '',
+      email: '',
+      city: '',
+      source: defaultSource ? String(defaultSource.value) : '',
+      eventId: filterEventId,
+    };
+
+    if (ev) {
+      if (ev.regionId || ev.region_id) initial.regionId = String(ev.regionId ?? ev.region_id);
+      if (ev.branchId || ev.branch_id) initial.branchId = String(ev.branchId ?? ev.branch_id);
+      if (ev.counsellorId || ev.counsellor_id) initial.counsellorId = String(ev.counsellorId ?? ev.counsellor_id ?? ev.counselorId ?? ev.counselor_id);
+      if (ev.admissionOfficerId || ev.admission_officer_id) initial.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+    }
+
+    setRegForm(initial);
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAddRegOpen(true)); } catch { setIsAddRegOpen(true); }
   };
 
