@@ -913,8 +913,9 @@ export default function EventsPage() {
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
 
-    const defaultStatusValue = (statusOptions.find(o => o.isDefault) || statusOptions[0] || { value: '' }).value || '';
-    const defaultSourceValue = (sourceOptions.find((o: any) => o.isDefault) || sourceOptions[0] || { value: '' }).value || '';
+    // Use fixed defaults for imports as requested
+    const defaultStatusValue = 'a576fe6c-8d7e-11f0-a5b5-92e8d4b3e6a5'; // NOT SURE
+    const defaultSourceValue = 'b75b4253-840f-11f0-a5b5-92e8d4b3yy5'; // Events
 
     const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
 
