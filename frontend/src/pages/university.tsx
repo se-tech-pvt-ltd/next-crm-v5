@@ -298,12 +298,14 @@ export default function UniversityPage() {
 
                     {panel === 'admissions' && (
                       <SectionCard title="Admission Requirements">
-                        <InfoRow label="UG Entry Criteria" value={detail.admissionRequirements.ugEntryCriteria ?? undefined} />
-                        <InfoRow label="PG Entry Criteria" value={detail.admissionRequirements.pgEntryCriteria ?? undefined} />
-                        <InfoRow label="Accepted ELT’s" value={(detail.admissionRequirements.acceptedElts || []).length ? detail.admissionRequirements.acceptedElts.join(', ') : undefined} />
-                        <InfoRow label="ELT Requirements" value={detail.admissionRequirements.eltRequirements ?? undefined} />
-                        <InfoRow label="MOI" value={detail.admissionRequirements.moiPolicy ?? undefined} />
-                        <InfoRow label="Study Gap" value={detail.admissionRequirements.studyGap ?? undefined} />
+                        <div className="max-h-[56vh] overflow-y-auto pr-2">
+                          <InfoRow label="UG Entry Criteria" value={detail.admissionRequirements.ugEntryCriteria ?? undefined} />
+                          <InfoRow label="PG Entry Criteria" value={detail.admissionRequirements.pgEntryCriteria ?? undefined} />
+                          <InfoRow label="Accepted ELT’s" value={(detail.admissionRequirements.acceptedElts || []).length ? detail.admissionRequirements.acceptedElts.join(', ') : undefined} />
+                          <InfoRow label="ELT Requirements" value={detail.admissionRequirements.eltRequirements ?? undefined} />
+                          <InfoRow label="MOI" value={detail.admissionRequirements.moiPolicy ?? undefined} />
+                          <InfoRow label="Study Gap" value={detail.admissionRequirements.studyGap ?? undefined} />
+                        </div>
                       </SectionCard>
                     )}
 
