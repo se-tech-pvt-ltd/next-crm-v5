@@ -20,7 +20,7 @@ import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search } from 'lucide-react';
+import { Plus, Edit, UserPlus, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X } from 'lucide-react';
 import AddLeadForm from '@/components/add-lead-form';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { format } from 'date-fns';
@@ -1896,6 +1896,14 @@ export default function EventsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={() => setIsImportOpen(false)} className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md">Cancel</button>
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    onClick={() => setIsImportOpen(false)}
+                    className="rounded-full w-8 h-8 inline-flex items-center justify-center bg-white/80 text-gray-700 hover:bg-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </DialogHeader>
