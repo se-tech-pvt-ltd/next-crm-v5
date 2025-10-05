@@ -651,7 +651,7 @@ export default function EventsPage() {
     } catch {}
   }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
 
-  const [regForm, setRegForm] = useState<RegService.RegistrationPayload>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '' });
+  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const [emailError, setEmailError] = useState(false);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
