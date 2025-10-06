@@ -55,8 +55,8 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Right form panel */}
-        <div className="p-8 md:p-10">
-          <div className="max-w-md mx-auto">
+        <div className="p-8 md:p-10 flex items-center h-full">
+          <div className="max-w-md mx-auto w-full">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Forgot password</h2>
               <p className="text-gray-600">Enter your email and we'll send you a link to reset your password.</p>
