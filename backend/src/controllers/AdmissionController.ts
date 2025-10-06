@@ -58,7 +58,8 @@ export class AdmissionController {
       dateFields.forEach((f) => { if (body[f] === undefined || body[f] === null) delete body[f]; });
       console.log('[AdmissionController] request body date fields types:', dateFields.reduce((acc:any, f) => { acc[f] = typeof body[f]; return acc; }, {}));
       const validatedData = insertAdmissionSchema.parse(body);
-      const admission = await AdmissionService.createAdmission(validatedData);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const admission = await AdmissionService.createAdmission(validatedData, currentUser.id);
       res.status(201).json(admission);
     } catch (error) {
       console.error("Create admission error:", error);
@@ -85,7 +86,8 @@ export class AdmissionController {
         }
       }
       const validatedData = insertAdmissionSchema.partial().parse(body);
-      const admission = await AdmissionService.updateAdmission(id, validatedData);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const admission = await AdmissionService.updateAdmission(id, validatedData, currentUser.id);
       if (!admission) {
         console.warn('[AdmissionController] updateAdmission - Admission not found for id:', id);
         return res.status(404).json({ message: "Admission not found" });

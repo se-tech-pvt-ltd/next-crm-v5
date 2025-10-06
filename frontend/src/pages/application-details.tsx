@@ -140,14 +140,19 @@ export default function ApplicationDetails() {
         setCurrentStatus(updated.appStatus || 'Open');
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
-        // Log activity
         try {
-          const prev = context?.previousStatus ?? '';
-          const curr = updated.appStatus ?? '';
-          const content = `status changed from \"${prev}\" to \"${curr}\"`;
-          await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log application status change', err);
+          const key = `/api/activities/application/${String(updated.id)}`;
+          try {
+            console.log('Fetching activities for', key);
+            const activities = await queryClient.fetchQuery([key]);
+            console.log('Fetched activities via queryClient:', activities);
+            queryClient.setQueryData([key], activities);
+          } catch (fetchErr) {
+            console.error('Failed to fetch activities via queryClient', fetchErr);
+            queryClient.invalidateQueries({ queryKey: [key] });
+          }
+        } catch (e) {
+          console.error('Failed to refresh activities cache', e);
         }
         toast({ title: 'Status updated' });
       } catch (err) {
@@ -171,16 +176,19 @@ export default function ApplicationDetails() {
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
-        // Log activity if status changed
         try {
-          const prevStatus = prevApp?.appStatus ?? '';
-          const currStatus = updated?.appStatus ?? '';
-          if (prevStatus !== currStatus) {
-            const content = `status changed from \"${prevStatus}\" to \"${currStatus}\"`;
-            await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
+          const key = `/api/activities/application/${String(updated.id)}`;
+          try {
+            console.log('Fetching activities for', key);
+            const activities = await queryClient.fetchQuery([key]);
+            console.log('Fetched activities via queryClient:', activities);
+            queryClient.setQueryData([key], activities);
+          } catch (fetchErr) {
+            console.error('Failed to fetch activities via queryClient', fetchErr);
+            queryClient.invalidateQueries({ queryKey: [key] });
           }
-        } catch (err) {
-          console.warn('Failed to log application status change on update', err);
+        } catch (e) {
+          console.error('Failed to refresh activities cache', e);
         }
         toast({ title: 'Application updated' });
       } catch (err) {

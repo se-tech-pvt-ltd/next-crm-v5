@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import * as NotificationsService from '@/services/notifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { GraduationCap, Mail, Lock, AlertCircle, Eye, EyeOff, BookOpen, Users, BarChart3, Shield } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -64,21 +64,8 @@ export default function Login({ onLogin }: LoginProps) {
     }
   };
 
-  // Forgot password modal state & handlers
-  const [isForgotOpen, setIsForgotOpen] = useState(false);
   const { toast } = useToast();
-  const forgotSchema = z.object({ email: z.string().email('Please enter a valid email address') });
-  const forgotForm = useForm({ resolver: zodResolver(forgotSchema), defaultValues: { email: '' } });
-
-  const onForgotSubmit = async (data: any) => {
-    try {
-      await NotificationsService.forgotPassword(data.email);
-      toast({ title: 'Request received', description: 'If an account with that email exists, we have sent instructions to reset the password.' });
-      setIsForgotOpen(false);
-    } catch (err: any) {
-      toast({ title: 'Error', description: err?.message || 'Failed to submit request', variant: 'destructive' });
-    }
-  };
+  const [, setLocation] = useLocation();
 
   return (
     <main role="main" className="min-h-screen bg-white flex">
@@ -252,7 +239,7 @@ export default function Login({ onLogin }: LoginProps) {
                     type="button"
                     className="text-sm text-[#223E7D] hover:opacity-90 font-medium"
                     aria-label="Forgot password"
-                    onClick={() => setIsForgotOpen(true)}
+                    onClick={() => setLocation('/forgot-password')}
                   >
                     Forgot password?
                   </button>
@@ -292,42 +279,6 @@ export default function Login({ onLogin }: LoginProps) {
               </p>
             </div>
 
-            <Dialog open={isForgotOpen} onOpenChange={setIsForgotOpen}>
-              <DialogContent className="max-w-md">
-                <DialogTitle className="text-lg font-medium">Forgot password</DialogTitle>
-                <div className="mt-4">
-                  <Form {...forgotForm}>
-                    <form onSubmit={forgotForm.handleSubmit(onForgotSubmit)} className="space-y-4">
-                      <FormField
-                        control={forgotForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
-                            <FormControl>
-                              <InputWithIcon
-                                leftIcon={<Mail className="w-5 h-5" />}
-                                {...field}
-                                type="email"
-                                placeholder="Enter your email"
-                                autoComplete="email"
-                                inputMode="email"
-                                className="h-12 border-gray-300 focus:border-[#223E7D] focus:ring-[#223E7D] bg-white"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex justify-end">
-                        <Button type="submit" className="bg-[#223E7D] text-white">Send reset link</Button>
-                      </div>
-                    </form>
-                  </Form>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
       </section>

@@ -263,7 +263,7 @@ export class StudentService {
     return this.mapStudentForApi(enriched) as any;
   }
 
-  static async createStudent(studentData: InsertStudent): Promise<Student> {
+  static async createStudent(studentData: InsertStudent, userId?: string): Promise<Student> {
     const student = await StudentModel.create(studentData);
 
     // Log activity
@@ -272,14 +272,18 @@ export class StudentService {
       student.id,
       'created',
       'Student record created',
-      `Student ${student.name} was added to the system`
+      `Student ${student.name} was added to the system`,
+      undefined,
+      undefined,
+      undefined,
+      userId
     );
 
     const [enriched] = await this.enrichDropdownFields([student]);
     return this.mapStudentForApi(enriched) as any;
   }
 
-  static async updateStudent(id: string, updates: Partial<InsertStudent>): Promise<Student | undefined> {
+  static async updateStudent(id: string, updates: Partial<InsertStudent>, userId?: string): Promise<Student | undefined> {
     // Get the current student to track changes
     const currentStudent = await StudentModel.findById(id);
     if (!currentStudent) return undefined;
@@ -306,8 +310,7 @@ export class StudentService {
             fieldName,
             String(oldValue || ''),
             String(newValue || ''),
-            undefined,
-            "Next Bot"
+            userId
           );
         }
       }

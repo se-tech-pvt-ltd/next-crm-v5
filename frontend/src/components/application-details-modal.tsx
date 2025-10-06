@@ -56,12 +56,6 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
         const prev = context?.previousStatus ?? '';
         const curr = updated?.appStatus ?? '';
-        try {
-          const content = `status changed from \"${prev}\" to \"${curr}\"`;
-          await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log application status change', err);
-        }
       } catch (err) {
         console.error('Error in application status onSuccess', err);
       }
@@ -86,15 +80,10 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         setIsEditing(false);
         setCurrentStatus(updated.appStatus);
         // Log activity if status changed
-        try {
-          const prevStatus = prevApp?.appStatus ?? '';
-          const currStatus = updated?.appStatus ?? '';
-          if (prevStatus !== currStatus) {
-            const content = `status changed from \"${prevStatus}\" to \"${currStatus}\"`;
-            await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-          }
-        } catch (err) {
-          console.warn('Failed to log application status change on update', err);
+        const prevStatus = prevApp?.appStatus ?? '';
+        const currStatus = updated?.appStatus ?? '';
+        if (prevStatus !== currStatus) {
+          // Server will log the activity. Just refresh activities cache.
         }
       } catch (e) {
         console.error('Error in updateApplicationMutation onSuccess', e);

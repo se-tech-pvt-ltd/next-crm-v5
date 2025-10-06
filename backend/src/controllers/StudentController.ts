@@ -49,8 +49,9 @@ export class StudentController {
   static async createStudent(req: AuthenticatedRequest, res: Response) {
     try {
       const validatedData = insertStudentSchema.parse(req.body);
-      const student = await StudentService.createStudent(validatedData);
-      res.status(201).json(student);
+    const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+    const student = await StudentService.createStudent(validatedData, currentUser.id);
+    res.status(201).json(student);
     } catch (error) {
       console.error("Create student error:", error);
       if (error instanceof z.ZodError) {
@@ -91,7 +92,8 @@ export class StudentController {
     try {
       const id = req.params.id;
       const validatedData = insertStudentSchema.partial().parse(req.body);
-      const student = await StudentService.updateStudent(id, validatedData);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const student = await StudentService.updateStudent(id, validatedData, currentUser.id);
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }

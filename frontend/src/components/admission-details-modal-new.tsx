@@ -176,16 +176,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       // Refresh activity timeline for this admission
       queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
 
-      // Log activity attributing the status change to the current user
-      try {
-        const prev = context?.previousStatus ?? '';
-        const curr = updatedAdmission?.status ?? '';
-        const content = `status changed from \"${prev}\" to \"${curr}\"`;
-        await ActivitiesService.createActivity({ entityType: 'admission', entityId: String(updatedAdmission.id), content, activityType: 'status_changed' });
-      } catch (err) {
-        console.warn('Failed to log admission status change', err);
-      }
-
       toast({ title: 'Status updated' });
     },
   });
@@ -268,17 +258,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
         queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
         queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
-        // Log activity if status changed
-        try {
-          const prev = (context?.previousAdmission as any)?.status ?? '';
-          const curr = updatedAdmission?.status ?? '';
-          if (prev !== curr) {
-            const content = `status changed from \"${prev}\" to \"${curr}\"`;
-            await ActivitiesService.createActivity({ entityType: 'admission', entityId: String(updatedAdmission.id), content, activityType: 'status_changed' });
-          }
-        } catch (err) {
-          console.warn('Failed to log admission status change on update', err);
-        }
+        // Log activity if status changed (server will log activity); no client-side create needed.
       } catch (e) {
         console.error('Error in updateAdmissionMutation onSuccess', e);
       }

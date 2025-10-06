@@ -95,13 +95,6 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
         queryClient.invalidateQueries({ queryKey: ['/api/students'] });
         setCurrentStatus(updated.status);
         onStudentUpdate?.(updated as Student);
-        // Log activity to attribute the change to the current user
-        try {
-          const content = `status changed to \"${updated.status}\"`;
-          await ActivitiesService.createActivity({ entityType: 'student', entityId: String(student?.id), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log status change activity', err);
-        }
         toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updated.status)}` });
       } catch (err) {
         console.error('Error handling status update success:', err);
