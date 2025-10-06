@@ -80,6 +80,9 @@ export class StudentController {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
+      if (error instanceof Error && (error as any).code === 'LEAD_CONVERTED') {
+        return res.status(400).json({ message: 'Lead has already been converted to a student' });
+      }
       res.status(500).json({ message: "Failed to create student" });
     }
   }
