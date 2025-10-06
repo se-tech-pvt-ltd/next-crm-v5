@@ -51,6 +51,22 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
     try { setSubmitLeadForm(() => fn); } catch {}
   }, []);
   const { toast } = useToast();
+  const { user } = useAuth() as any;
+
+  const computedInitialData = useMemo(() => {
+    try {
+      const base = initialData ? { ...initialData } : {};
+      const roleRaw = String((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || '').trim().toLowerCase();
+      const normalized = roleRaw.replace(/[^a-z0-9]+/g, '_');
+      if ((normalized === 'admission_officer' || normalized === 'admission officer' || normalized === 'admissionofficer') && !base.admissionOfficerId && !base.admission_officer_id && user?.id) {
+        base.admissionOfficerId = String(user.id);
+        base.admission_officer_id = String(user.id);
+      }
+      return base;
+    } catch (e) {
+      return initialData;
+    }
+  }, [initialData, user]);
   const queryClient = useQueryClient();
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
