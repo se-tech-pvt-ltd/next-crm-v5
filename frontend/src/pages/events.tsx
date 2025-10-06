@@ -2030,12 +2030,15 @@ export default function EventsPage() {
             try {
               const regId = init && (init as any).eventRegId;
               if (regId) {
+                // mark viewReg as converted immediately
                 setViewReg((prev: any) => {
                   if (!prev) return prev;
                   const matches = String(prev.id) === String(regId) || String(prev.eventRegId) === String(regId);
                   return matches ? { ...prev, isConverted: 1, is_converted: 1 } : prev;
                 });
                 try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); refetchRegs?.(); } catch {}
+                // prevent the AddLeadModal onClose handler from clearing the viewReg state
+                setSkipClearViewAfterLeadCreate(true);
               }
             } catch {}
           }}
