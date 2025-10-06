@@ -993,6 +993,39 @@ export default function EventsPage() {
     setImportAllRows(allRows);
   };
 
+  const performImport = async () => {
+    setIsImporting(true);
+    let success = 0; let failed = 0;
+    try {
+      for (const row of importValidRows) {
+        try {
+          const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
+          const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+          const payload: any = { ...row };
+          if (ev) {
+            if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+            if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+            if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+            if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+          }
+          await RegService.createRegistration(payload);
+          success++;
+        } catch (e) {
+          try { await RegService.createRegistration(row); success++; } catch { failed++; }
+        }
+      }
+    } finally {
+      setIsImporting(false);
+    }
+    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
+    setIsImportOpen(false);
+    setImportStep(1);
+    setImportErrors([]);
+    setImportValidRows([]);
+    setImportFileName('');
+    refetchRegs();
+  };
+
   const normalizeRoleList = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const isRegionalManagerList = (() => {
     const rn = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
@@ -2025,6 +2058,18 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {importStep === 2 && (
+                    <>
+                      <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(1)}>Back</Button>
+                      <Button size="xs" className="bg-white text-[#0071B0]" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
+                    </>
+                  )}
+                  {importStep === 3 && (
+                    <>
+                      <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(2)}>Back</Button>
+                      <Button size="xs" className="bg-[#0071B0] text-white" onClick={() => performImport()} disabled={isImporting || importValidRows.length === 0}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                    </>
+                  )}
                   <button
                     type="button"
                     aria-label="Close"
@@ -2036,7 +2081,7 @@ export default function EventsPage() {
                 </div>
               </div>
             </DialogHeader>
-            <div className="p-4 space-y-4 overflow-auto">
+            <div className="p-4 space-y-4 overflow-auto pb-24">
               <div className="flex items-center justify-between text-xs">
                 <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
                 <div className="w-6 h-[1px] bg-gray-200" />
@@ -2065,7 +2110,7 @@ export default function EventsPage() {
 
                   {/* Preview of uploaded rows (if parsed) */}
                   {importValidRows && importValidRows.length > 0 ? (
-                    <div className="max-h-[60vh] overflow-auto border rounded p-2 bg-white">
+                    <div className="border rounded p-2 bg-white">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="text-left text-xs text-gray-600">
@@ -2097,10 +2142,6 @@ export default function EventsPage() {
                     <div className="text-xs text-gray-500">No preview available. Select a file to see rows here.</div>
                   )}
 
-                  <div className="sticky bottom-0 bg-white/90 p-2 flex gap-2 z-20">
-                  <Button size="sm" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
-                  <Button size="sm" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
-                </div>
                 </div>
               )}
 
@@ -2113,7 +2154,7 @@ export default function EventsPage() {
                   </div>
 
                   {/* Show all parsed rows in a large list view */}
-                  <div className="max-h-[58vh] overflow-auto border rounded p-2 bg-white">
+                  <div className="border rounded p-2 bg-white">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-left text-xs text-gray-600">
@@ -2150,40 +2191,6 @@ export default function EventsPage() {
                     )}
                   </div>
 
-                  <div className="sticky bottom-0 bg-white/90 p-3 flex gap-2 justify-end z-20">
-                  <Button size="sm" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
-                  <Button size="sm" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
-                    setIsImporting(true);
-                    let success = 0; let failed = 0;
-                    for (const row of importValidRows) {
-                      try { // eslint-disable-next-line no-await-in-loop
-                        try {
-                          const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
-                          const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
-                          const payload: any = { ...row };
-                          if (ev) {
-                            if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
-                            if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
-                            if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
-                            if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
-                          }
-                          await RegService.createRegistration(payload);
-                        } catch (e) {
-                          await RegService.createRegistration(row);
-                        }
-                        success++;
-                      } catch { failed++; }
-                    }
-                    setIsImporting(false);
-                    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
-                    setIsImportOpen(false);
-                    setImportStep(1);
-                    setImportErrors([]);
-                    setImportValidRows([]);
-                    setImportFileName('');
-                    refetchRegs();
-                  }}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
-                </div>
                 </div>
               )}
             </div>
