@@ -140,15 +140,6 @@ export default function ApplicationDetails() {
         setCurrentStatus(updated.appStatus || 'Open');
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
-        // Log activity
-        try {
-          const prev = context?.previousStatus ?? '';
-          const curr = updated.appStatus ?? '';
-          const content = `status changed from \"${prev}\" to \"${curr}\"`;
-          await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log application status change', err);
-        }
         try {
           queryClient.invalidateQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
           queryClient.refetchQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
@@ -175,17 +166,6 @@ export default function ApplicationDetails() {
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
-        // Log activity if status changed
-        try {
-          const prevStatus = prevApp?.appStatus ?? '';
-          const currStatus = updated?.appStatus ?? '';
-          if (prevStatus !== currStatus) {
-            const content = `status changed from \"${prevStatus}\" to \"${currStatus}\"`;
-            await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-          }
-        } catch (err) {
-          console.warn('Failed to log application status change on update', err);
-        }
         try {
           queryClient.invalidateQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
           queryClient.refetchQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
