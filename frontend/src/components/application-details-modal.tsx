@@ -11,6 +11,7 @@ import { School, User, X, ExternalLink, Edit, Save } from "lucide-react";
 import { Application, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ApplicationsService from "@/services/applications";
+import * as ActivitiesService from '@/services/activities';
 import { useState, useEffect } from "react";
 import { useToast } from '@/hooks/use-toast';
 
@@ -39,10 +40,32 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       if (!application) return;
       return ApplicationsService.updateApplication(application.id, { appStatus: newStatus });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
+    onMutate: async (newStatus: string) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/applications'] });
+      const prev = application?.appStatus || '';
+      setCurrentStatus(newStatus);
+      return { previousStatus: prev };
     },
+    onError: (_err, _vars, context: any) => {
+      if (context?.previousStatus) setCurrentStatus(context.previousStatus);
+      toast({ title: 'Error', description: 'Failed to update status', variant: 'destructive' });
+    },
+    onSuccess: async (updated: any, _vars, context: any) => {
+      try {
+        queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
+        const prev = context?.previousStatus ?? '';
+        const curr = updated?.appStatus ?? '';
+        try {
+          const content = `status changed from \"${prev}\" to \"${curr}\"`;
+          await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
+        } catch (err) {
+          console.warn('Failed to log application status change', err);
+        }
+      } catch (err) {
+        console.error('Error in application status onSuccess', err);
+      }
+    }
   });
 
   const updateApplicationMutation = useMutation({
@@ -50,14 +73,36 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       if (!application) return;
       return ApplicationsService.updateApplication(application.id, data);
     },
-    onSuccess: () => {
-      toast({ title: 'Success', description: 'Application updated.' });
-      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
-      setIsEditing(false);
+    onMutate: async (data: Partial<Application>) => {
+      const prev = application ? { ...application } : null;
+      return { previousApp: prev };
     },
-    onError: (err: any) => {
-      toast({ title: 'Error', description: err?.message || 'Failed to update application.', variant: 'destructive' });
+    onSuccess: async (updated: any, _vars, context: any) => {
+      try {
+        const prevApp = context?.previousApp as Application | null;
+        toast({ title: 'Success', description: 'Application updated.' });
+        queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        queryClient.invalidateQueries({ queryKey: [`/api/applications/${application?.id}`] });
+        setIsEditing(false);
+        setCurrentStatus(updated.appStatus);
+        // Log activity if status changed
+        try {
+          const prevStatus = prevApp?.appStatus ?? '';
+          const currStatus = updated?.appStatus ?? '';
+          if (prevStatus !== currStatus) {
+            const content = `status changed from \"${prevStatus}\" to \"${currStatus}\"`;
+            await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
+          }
+        } catch (err) {
+          console.warn('Failed to log application status change on update', err);
+        }
+      } catch (e) {
+        console.error('Error in updateApplicationMutation onSuccess', e);
+      }
+    },
+    onError: (e: any, _vars, context: any) => {
+      toast({ title: 'Error', description: e?.message || 'Failed to update application.', variant: 'destructive' });
+      if (context?.previousApp) setCurrentStatus(context.previousApp.appStatus);
     },
   });
 

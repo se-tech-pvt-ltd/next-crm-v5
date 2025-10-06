@@ -16,6 +16,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
+import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, Edit, Save, X, Plus, Mail, Phone, Calendar as CalendarIcon, MapPin, Award, BookOpen, Globe } from 'lucide-react';
@@ -89,11 +90,22 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
 
   const statusUpdateMutation = useMutation({
     mutationFn: async (status: string) => StudentsService.updateStudent(student?.id, { status }),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
-      setCurrentStatus(updated.status);
-      onStudentUpdate?.(updated as Student);
-      toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updated.status)}` });
+    onSuccess: async (updated, _variables, _context) => {
+      try {
+        queryClient.invalidateQueries({ queryKey: ['/api/students'] });
+        setCurrentStatus(updated.status);
+        onStudentUpdate?.(updated as Student);
+        // Log activity to attribute the change to the current user
+        try {
+          const content = `status changed to \"${updated.status}\"`;
+          await ActivitiesService.createActivity({ entityType: 'student', entityId: String(student?.id), content, activityType: 'status_changed' });
+        } catch (err) {
+          console.warn('Failed to log status change activity', err);
+        }
+        toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updated.status)}` });
+      } catch (err) {
+        console.error('Error handling status update success:', err);
+      }
     },
     onError: (error: any) => {
       setCurrentStatus(student?.status || 'active');

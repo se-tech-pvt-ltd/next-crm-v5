@@ -22,6 +22,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
+import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
@@ -426,10 +427,24 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       if (context?.previousStudent) queryClient.setQueryData([`/api/students/${studentId}`], context.previousStudent);
       toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
     },
-    onSuccess: (updatedStudent) => {
-      setCurrentStatus(updatedStudent.status);
-      queryClient.setQueryData([`/api/students/${studentId}`], updatedStudent);
-      toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updatedStudent.status)}` });
+    onSuccess: async (updatedStudent, _variables, context: any) => {
+      // Update local state and log an activity attributing the change to the current user
+      try {
+        setCurrentStatus(updatedStudent.status);
+        queryClient.setQueryData([`/api/students/${studentId}`], updatedStudent);
+        // Compose content using previous status from context when available
+        const previousStatus = context?.previousStatus ?? '';
+        const newStatus = updatedStudent.status ?? '';
+        const content = `status changed from \"${previousStatus}\" to \"${newStatus}\"`;
+        try {
+          await ActivitiesService.createActivity({ entityType: 'student', entityId: String(studentId), content, activityType: 'status_changed' });
+        } catch (err) {
+          console.warn('Failed to log status change activity', err);
+        }
+        toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updatedStudent.status)}` });
+      } catch (err) {
+        console.error('Error handling status update success:', err);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/activities/student/${studentId}`] });
