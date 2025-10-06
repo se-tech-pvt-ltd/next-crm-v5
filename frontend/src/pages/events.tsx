@@ -2034,29 +2034,30 @@ export default function EventsPage() {
           onCreated={(lead, init) => {
             try {
               const regId = init && (init as any).eventRegId;
+              const evtId = init && (init as any).eventId;
               if (regId) {
-                // mark viewReg as converted immediately
+                // Invalidate and refetch registrations so latest data is available
+                try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+                try { refetchRegs?.(); } catch {}
+
+                // Navigate to registration detail route and mark pending so the view opens when data is available
+                try {
+                  const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
+                  if (eventIdToUse) {
+                    navigate(`/events/${eventIdToUse}/registrations/${regId}`);
+                  }
+                } catch {}
+
+                try { setPendingRegId(String(regId)); } catch {}
+
+                // Also update local viewReg immediately if present
                 setViewReg((prev: any) => {
                   const matchesPrev = prev && (String(prev.id) === String(regId) || String(prev.eventRegId) === String(regId));
                   if (matchesPrev) {
                     return { ...prev, isConverted: 1, is_converted: 1 };
                   }
-                  // If prev is null or doesn't match, create a minimal viewReg so the modal shows converted status
-                  const minimal: any = {
-                    id: regId,
-                    eventRegId: regId,
-                    isConverted: 1,
-                    is_converted: 1,
-                    name: (init && (init as any).name) || '',
-                    registrationCode: (init && (init as any).registrationCode) || '',
-                  };
-                  return minimal;
+                  return prev;
                 });
-                try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); refetchRegs?.(); } catch {}
-                // prevent the AddLeadModal onClose handler from clearing the viewReg state
-                setSkipClearViewAfterLeadCreate(true);
-                // ensure the registration details modal is open so user sees updated converted status
-                setIsViewRegOpen(true);
               }
             } catch {}
           }}
