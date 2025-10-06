@@ -8,6 +8,7 @@ import { Award, X, ExternalLink } from "lucide-react";
 import { Admission, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
+import * as ActivitiesService from '@/services/activities';
 import * as DropdownsService from '@/services/dropdowns';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
