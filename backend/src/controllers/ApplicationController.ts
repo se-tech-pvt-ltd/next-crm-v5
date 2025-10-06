@@ -64,7 +64,8 @@ export class ApplicationController {
     try {
       const id = req.params.id;
       const validatedData = insertApplicationSchema.partial().parse(req.body);
-      const application = await ApplicationService.updateApplication(id, validatedData);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const application = await ApplicationService.updateApplication(id, validatedData, currentUser.id);
       if (!application) {
         return res.status(404).json({ message: "Application not found" });
       }
