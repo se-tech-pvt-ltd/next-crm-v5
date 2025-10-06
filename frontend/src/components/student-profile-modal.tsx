@@ -67,16 +67,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
         });
         queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
         setIsEditing(false);
-        // If update included a status change, create an activity so the feed attributes the change to the user
-        try {
-          const status = (updated as any)?.status;
-          if (status) {
-            const content = `status changed to \"${status}\"`;
-            await ActivitiesService.createActivity({ entityType: 'student', entityId: String(studentId), content, activityType: 'status_changed' });
-          }
-        } catch (err) {
-          console.warn('Failed to log student update activity', err);
-        }
+        // Server will log status change activities; just refresh activities cache if needed.
       } catch (err) {
         console.error('Error in updateStudentMutation onSuccess:', err);
       }
