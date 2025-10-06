@@ -270,7 +270,7 @@ export class ApplicationService {
     return (await this.enrichDropdownFields(rows)) as any;
   }
 
-  static async createApplication(applicationData: InsertApplication): Promise<Application> {
+  static async createApplication(applicationData: InsertApplication, userId?: string): Promise<Application> {
     const application = await ApplicationModel.create(applicationData);
 
     // Log activity for the student
@@ -279,7 +279,12 @@ export class ApplicationService {
       application.studentId,
       'application_created',
       'Application created',
-      `Application submitted to ${application.university} for ${application.program}`
+      `Application submitted to ${application.university} for ${application.program}`,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      userId
     );
 
     // Also log activity for the application itself
@@ -288,7 +293,12 @@ export class ApplicationService {
       application.id,
       'created',
       'Application submitted',
-      `Application submitted to ${application.university} for ${application.program}`
+      `Application submitted to ${application.university} for ${application.program}`,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      userId
     );
 
     const [enriched] = await this.enrichDropdownFields([application]);
