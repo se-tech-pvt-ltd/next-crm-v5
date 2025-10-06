@@ -1464,7 +1464,7 @@ export default function EventsPage() {
                         <div className="flex items-center text-xs text-gray-700">
                           <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           <span>{formatEventDate(e.date)}</span>
-                          {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                          {e.time ? (<><span className="mx-2 text-gray-300">��</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
                         </div>
                         <div className="flex items-center text-xs text-gray-700">
                           <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
@@ -2012,6 +2012,19 @@ export default function EventsPage() {
             }
           }}
           initialData={leadInitialData || undefined}
+          onCreated={(lead, init) => {
+            try {
+              const regId = init && (init as any).eventRegId;
+              if (regId) {
+                setViewReg((prev: any) => {
+                  if (!prev) return prev;
+                  const matches = String(prev.id) === String(regId) || String(prev.eventRegId) === String(regId);
+                  return matches ? { ...prev, isConverted: 1, is_converted: 1 } : prev;
+                });
+                try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); refetchRegs?.(); } catch {}
+              }
+            } catch {}
+          }}
         />
 
         {/* Import CSV Wizard */}
