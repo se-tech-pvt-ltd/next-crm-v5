@@ -130,7 +130,7 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => LeadsService.createLead(data),
-    onSuccess: async () => {
+    onSuccess: async (createdLead: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
         title: "Success! 🎉",
