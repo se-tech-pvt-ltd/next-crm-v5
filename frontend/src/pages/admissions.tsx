@@ -216,10 +216,10 @@ export default function Admissions() {
               <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">Admission ID</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Student</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">University</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Program</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Admission ID</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Scholarship</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
@@ -231,6 +231,9 @@ export default function Admissions() {
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => { setLocation(`/admissions/${admission.id}`); }}
                     >
+                      <TableCell className="p-2 text-xs">
+                        <div className="text-[11px] font-mono text-gray-700 truncate max-w-[12rem]">{(admission as any).admissionId || admission.id}</div>
+                      </TableCell>
                       <TableCell className="font-medium p-2 text-xs">{getStudentName(admission.studentId)}</TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="flex items-center text-xs">
@@ -240,9 +243,6 @@ export default function Admissions() {
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">{admission.program}</div>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="text-[11px] font-mono text-gray-700 truncate max-w-[12rem]">{(admission as any).admissionId || admission.id}</div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         {admission.scholarshipAmount ? (
