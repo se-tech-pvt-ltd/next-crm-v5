@@ -16,6 +16,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
+import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { User as UserIcon, Edit, Save, X, Plus, Mail, Phone, Calendar as CalendarIcon, MapPin, Award, BookOpen, Globe } from 'lucide-react';
