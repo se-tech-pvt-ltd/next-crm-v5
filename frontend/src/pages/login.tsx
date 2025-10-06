@@ -64,21 +64,8 @@ export default function Login({ onLogin }: LoginProps) {
     }
   };
 
-  // Forgot password modal state & handlers
-  const [isForgotOpen, setIsForgotOpen] = useState(false);
   const { toast } = useToast();
-  const forgotSchema = z.object({ email: z.string().email('Please enter a valid email address') });
-  const forgotForm = useForm({ resolver: zodResolver(forgotSchema), defaultValues: { email: '' } });
-
-  const onForgotSubmit = async (data: any) => {
-    try {
-      await NotificationsService.forgotPassword(data.email);
-      toast({ title: 'Request received', description: 'If an account with that email exists, we have sent instructions to reset the password.' });
-      setIsForgotOpen(false);
-    } catch (err: any) {
-      toast({ title: 'Error', description: err?.message || 'Failed to submit request', variant: 'destructive' });
-    }
-  };
+  const [, setLocation] = useLocation();
 
   return (
     <main role="main" className="min-h-screen bg-white flex">
