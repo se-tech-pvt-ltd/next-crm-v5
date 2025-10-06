@@ -82,7 +82,12 @@ function Router() {
   }
 
   if (!isAuthenticated) {
-    console.log('Router: User not authenticated, showing Login component');
+    console.log('Router: User not authenticated');
+    if (location === '/forgot-password') {
+      console.log('Router: showing ForgotPassword page');
+      return <ForgotPassword />;
+    }
+    console.log('Router: showing Login component');
     return <Login onLogin={login} />;
   }
 
