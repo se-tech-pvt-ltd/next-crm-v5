@@ -18,6 +18,8 @@ import * as BranchesService from '@/services/branches';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useEffect, useMemo } from "react";
 import { useLocation, useRoute } from 'wouter';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 interface AdmissionDetailsModalProps {
   open: boolean;
@@ -28,7 +30,23 @@ interface AdmissionDetailsModalProps {
 export function AdmissionDetailsModal({ open, onOpenChange, admission }: AdmissionDetailsModalProps) {
   const [, setLocation] = useLocation();
   const [matchEdit] = useRoute('/admissions/:id/edit');
-  const isEdit = !!matchEdit;
+
+  const { accessByRole } = useAuth() as any;
+  const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => String(s || '').replace(/s$/i, '');
+  const canEditAdmission = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'admission');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canEdit ?? e.can_edit) === true || (e.canUpdate ?? e.can_update) === true || (e.edit ?? e.update) === true || e.canEdit === 1 || e.can_update === 1);
+  }, [accessByRole]);
+
+  const isEdit = !!(matchEdit && canEditAdmission);
+
+  useEffect(() => {
+    if (matchEdit && !canEditAdmission && admission?.id) {
+      try { setLocation(`/admissions/${admission.id}`); } catch {}
+    }
+  }, [matchEdit, canEditAdmission, admission?.id, setLocation]);
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
