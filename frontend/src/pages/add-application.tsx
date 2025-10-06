@@ -313,79 +313,18 @@ export default function AddApplication() {
           studentId={selectedStudentIdForModal || presetStudentId || undefined}
         />
 
-        <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
-          <DialogContent hideClose className="max-w-2xl overflow-hidden p-0">
-          <DialogHeader className="p-0">
-            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
-              <DialogTitle className="text-white">Select a student to create application</DialogTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
-                onClick={() => { setStudentPickerOpen(false); }}
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </DialogHeader>
-          <div className="space-y-3 p-4">
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="Search by name, ID, or contact"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1"
-              />
-            </div>
-            <div className="border rounded-md overflow-hidden">
-              <Table className="text-xs">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">Student ID</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Student Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(() => {
-                    const toArray = (resp: any): any[] => Array.isArray(resp) ? resp : (resp?.data || []);
-                    const base = search ? toArray(studentsAll) : toArray(studentsPaged);
-                    const filtered = (base || []).filter((s: any) => {
-                      if (!search) return true;
-                      const q = search.toLowerCase();
-                      const id = String(s.student_id || s.id || '').toLowerCase();
-                      const name = String(s.name || '').toLowerCase();
-                      const phone = String(s.phone || '').toLowerCase();
-                      const email = String(s.email || '').toLowerCase();
-                      return id.includes(q) || name.includes(q) || phone.includes(q) || email.includes(q);
-                    });
-                    const rows = filtered.slice(0, pageSize);
-                    if (rows.length === 0) {
-                      return (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No students found</TableCell>
-                        </TableRow>
-                      );
-                    }
-                    return rows.map((s: any) => (
-                      <TableRow key={s.id}>
-                        <TableCell className="p-2 text-xs font-mono">{s.student_id || s.id}</TableCell>
-                        <TableCell className="p-2 text-xs">{s.name || '-'}</TableCell>
-                        <TableCell className="p-2 text-xs">{s.phone || s.email || '-'}</TableCell>
-                        <TableCell className="p-2 text-right">
-                          <Button size="sm" className="h-7" onClick={() => handlePickStudent(String(s.id))}>Select</Button>
-                        </TableCell>
-                      </TableRow>
-                    ));
-                  })()}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </DialogContent>
-        </Dialog>
+        <StudentPickerDialog
+          open={studentPickerOpen}
+          onOpenChange={(open) => {
+            setStudentPickerOpen(open);
+            if (!open && !selectedStudentIdForModal && !presetStudentId) {
+              setLocation('/applications');
+            }
+          }}
+          onSelect={(studentId) => handlePickStudent(studentId)}
+          title="Select a student to create application"
+          pageSize={4}
+        />
       </>
     );
   }
