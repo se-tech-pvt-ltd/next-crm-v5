@@ -582,8 +582,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       const currentBranch = String(form.getValues('branchId') || '');
       if (currentRegion && currentBranch) return;
 
-      const existingCounsellorId = String(form.getValues('counsellorId') || '');
-      const existingAdmissionOfficerId = String(form.getValues('admissionOfficerId') || '');
+      const existingCounsellorIdRaw = form.getValues('counsellorId');
+      const existingAdmissionOfficerIdRaw = form.getValues('admissionOfficerId');
+      const existingCounsellorId = existingCounsellorIdRaw ? String(existingCounsellorIdRaw) : '';
+      const existingAdmissionOfficerId = existingAdmissionOfficerIdRaw ? String(existingAdmissionOfficerIdRaw) : '';
 
       const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
       const token = safeGetToken();
