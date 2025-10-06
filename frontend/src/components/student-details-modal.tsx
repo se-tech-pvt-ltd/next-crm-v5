@@ -264,14 +264,9 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
         </>
       )}
       rightContent={(
-        <>
-          <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-            <h2 className="text-sm font-semibold">Activity Timeline</h2>
-          </div>
-          <div className="pt-2">
-            <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
-          </div>
-        </>
+        <div className="pt-2">
+          <ActivityTracker entityType="student" entityId={student.id} entityName={student.name} />
+        </div>
       )}
       rightWidthClassName="w-[420px]"
     />
