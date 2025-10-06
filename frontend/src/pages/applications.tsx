@@ -594,9 +594,31 @@ export default function Applications() {
     }}
   />
 
+  <StudentPickerDialog
+    open={isStudentPickerOpen}
+    onOpenChange={(open) => {
+      setIsStudentPickerOpen(open);
+      if (!open && matchNew && !addApplicationStudentId) {
+        try { setLocation('/applications'); } catch {}
+      }
+    }}
+    onSelect={handleStudentPickerSelect}
+    title="Select a student to create application"
+    pageSize={4}
+  />
+
   <AddApplicationModal
     open={isAddApplicationModalOpen}
-    onOpenChange={(o) => { setIsAddApplicationModalOpen(o); if (!o) setAddApplicationStudentId(undefined); }}
+    onOpenChange={(open) => {
+      setIsAddApplicationModalOpen(open);
+      if (!open) {
+        setAddApplicationStudentId(undefined);
+        setIsStudentPickerOpen(false);
+        if (matchNew) {
+          try { setLocation('/applications'); } catch {}
+        }
+      }
+    }}
     studentId={addApplicationStudentId}
   />
 
