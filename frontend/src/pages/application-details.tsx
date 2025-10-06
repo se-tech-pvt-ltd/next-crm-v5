@@ -141,9 +141,12 @@ export default function ApplicationDetails() {
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
         try {
-          queryClient.invalidateQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
-          queryClient.refetchQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
-        } catch {}
+          const key = [`/api/activities/application/${String(updated.id)}`];
+          queryClient.invalidateQueries({ queryKey: key });
+          queryClient.refetchQueries({ queryKey: key });
+        } catch (e) {
+          console.error('Failed to refresh activities cache', e);
+        }
         toast({ title: 'Status updated' });
       } catch (err) {
         console.error('Error handling status update', err);
@@ -167,9 +170,12 @@ export default function ApplicationDetails() {
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
         try {
-          queryClient.invalidateQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
-          queryClient.refetchQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
-        } catch {}
+          const key = [`/api/activities/application/${String(updated.id)}`];
+          queryClient.invalidateQueries({ queryKey: key });
+          queryClient.refetchQueries({ queryKey: key });
+        } catch (e) {
+          console.error('Failed to refresh activities cache', e);
+        }
         toast({ title: 'Application updated' });
       } catch (err) {
         console.error('Error in updateApplicationMutation onSuccess', err);
