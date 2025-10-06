@@ -330,7 +330,7 @@ export default function AddApplication() {
         />
 
         <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
-          <DialogContent className="max-w-2xl overflow-hidden p-0">
+          <DialogContent hideClose className="max-w-2xl overflow-hidden p-0">
           <DialogHeader className="p-0">
             <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
               <DialogTitle className="text-white">Select a student to create application</DialogTitle>
