@@ -239,7 +239,7 @@ export default function Login({ onLogin }: LoginProps) {
                     type="button"
                     className="text-sm text-[#223E7D] hover:opacity-90 font-medium"
                     aria-label="Forgot password"
-                    onClick={() => setIsForgotOpen(true)}
+                    onClick={() => setLocation('/forgot-password')}
                   >
                     Forgot password?
                   </button>
