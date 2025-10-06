@@ -31,6 +31,7 @@ export default function Applications() {
   const [matchApp, appParams] = useRoute('/applications/:id');
   const [matchEdit, editParams] = useRoute('/applications/:id/edit');
   const [matchAddAdm, addAdmParams] = useRoute('/applications/:id/admission');
+  const [matchNew] = useRoute('/applications/new');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
