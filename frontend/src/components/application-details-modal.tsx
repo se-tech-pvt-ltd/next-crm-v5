@@ -11,6 +11,7 @@ import { School, User, X, ExternalLink, Edit, Save } from "lucide-react";
 import { Application, Student } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ApplicationsService from "@/services/applications";
+import * as ActivitiesService from '@/services/activities';
 import { useState, useEffect } from "react";
 import { useToast } from '@/hooks/use-toast';
 
