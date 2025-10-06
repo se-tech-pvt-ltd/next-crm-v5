@@ -283,9 +283,19 @@ export default function EventsPage() {
 
   const [addLeadModalOpen, setAddLeadModalOpen] = useState(false);
   const [leadInitialData, setLeadInitialData] = useState<any | null>(null);
+  // when a lead is created from a registration, prevent clearing the viewReg immediately so UI shows updated converted state
+  const [skipClearViewAfterLeadCreate, setSkipClearViewAfterLeadCreate] = useState(false);
+  // when true, skip the addLeadModalOpen close handler's navigation back to the registration detail (we set this when lead is created)
+  const [skipNavigateAfterLeadCreate, setSkipNavigateAfterLeadCreate] = useState(false);
+  // when true, prevent the pendingOpenLeadId handler from opening the registration view (used briefly when navigating to the /lead route)
+  const [skipOpenViewForLeadRoute, setSkipOpenViewForLeadRoute] = useState(false);
 
   const openConvertToLeadModal = (reg: any) => {
-    setLeadInitialData({
+    // find the linked event (selected event)
+    const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
+    const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(eventId)) || selectedEvent;
+
+    const initialData: any = {
       name: reg.name,
       email: reg.email,
       phone: reg.number,
@@ -294,14 +304,27 @@ export default function EventsPage() {
       source: 'Events',
       status: 'new',
       eventRegId: reg.id,
-    });
+      eventId: eventId,
+    };
 
-    // close the registration details modal first
+    if (ev) {
+      if (ev.regionId || ev.region_id) initialData.regionId = String(ev.regionId ?? ev.region_id);
+      if (ev.branchId || ev.branch_id) initialData.branchId = String(ev.branchId ?? ev.branch_id);
+      if (ev.counsellorId || ev.counsellor_id || ev.counselorId || ev.counselor_id) initialData.counsellorId = String(ev.counsellorId ?? ev.counsellor_id ?? ev.counselorId ?? ev.counselor_id);
+      if (ev.admissionOfficerId || ev.admission_officer_id) initialData.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+    }
+
+    setLeadInitialData(initialData);
+
+    // aggressively close the registration details modal and clear viewReg to ensure it does not sit behind the AddLead modal
     try { setIsViewRegOpen(false); } catch {}
+    try { setViewReg(null); } catch {}
+
+    // set a short guard so route-driven handlers don't re-open the registration view while we're switching to the lead modal
+    try { setSkipOpenViewForLeadRoute(true); setTimeout(() => setSkipOpenViewForLeadRoute(false), 700); } catch {}
 
     // navigate to /lead route for this registration
     try {
-      const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
       navigate(`/events/${eventId}/registrations/${reg.id}/lead`);
     } catch {}
 
@@ -309,7 +332,7 @@ export default function EventsPage() {
     const openModalFn = () => {
       try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
     };
-    setTimeout(openModalFn, 150);
+    setTimeout(openModalFn, 250);
   };
 
   // Keep URL in sync when the Add Lead modal opens/closes
@@ -317,6 +340,12 @@ export default function EventsPage() {
     if (addLeadModalOpen) return; // when open, already set by openConvertToLeadModal
     // when modal closes, revert URL to registration detail or registrations list
     try {
+      if (skipNavigateAfterLeadCreate) {
+        // consume the flag and do not navigate back to registration detail
+        setSkipNavigateAfterLeadCreate(false);
+        return;
+      }
+
       const regId = (leadInitialData && leadInitialData.eventRegId) || (regDetailParams && regDetailParams.regId) || pendingRegId || (leadParams && leadParams.regId);
       const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (leadParams && leadParams.id) || (selectedEvent && selectedEvent.id) || (leadInitialData && leadInitialData.eventId) || null;
       if (eventId && regId) {
@@ -993,10 +1022,48 @@ export default function EventsPage() {
     setImportAllRows(allRows);
   };
 
+  const performImport = async () => {
+    setIsImporting(true);
+    let success = 0; let failed = 0;
+    try {
+      for (const row of importValidRows) {
+        try {
+          const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
+          const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+          const payload: any = { ...row };
+          if (ev) {
+            if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+            if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+            if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+            if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+          }
+          await RegService.createRegistration(payload);
+          success++;
+        } catch (e) {
+          try { await RegService.createRegistration(row); success++; } catch { failed++; }
+        }
+      }
+    } finally {
+      setIsImporting(false);
+    }
+    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
+    setIsImportOpen(false);
+    setImportStep(1);
+    setImportErrors([]);
+    setImportValidRows([]);
+    setImportFileName('');
+    refetchRegs();
+  };
+
   const normalizeRoleList = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const isRegionalManagerList = (() => {
     const rn = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
     return rn === 'regional_manager' || rn === 'region_manager' || rn === 'regionalmanager' || rn === 'regionmanager';
+  })();
+
+  const isBranchManager = (() => {
+    const rn = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    return rn === 'branch_manager' || rn === 'branchmanager';
   })();
 
   const myRegionId = useMemo(() => {
@@ -1028,11 +1095,41 @@ export default function EventsPage() {
     return rid;
   }, [user, regions, isRegionalManagerList]);
 
+  const myBranchId = useMemo(() => {
+    let bid = '' as string;
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (t) {
+        const parts = String(t).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const rd = payload?.role_details || payload?.roleDetails || {};
+          const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+          if (candidateBranch) bid = String(candidateBranch);
+        }
+      }
+    } catch {}
+    if (!bid) {
+      const uBid = String((user as any)?.branchId ?? (user as any)?.branch_id ?? '');
+      if (uBid) bid = uBid;
+    }
+    if (!bid && Array.isArray(branchEmps)) {
+      const mappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
+      if (mappings.length === 1) bid = String(mappings[0].branchId ?? mappings[0].branch_id);
+    }
+    return bid;
+  }, [user, branchEmps]);
+
   const visibleEvents = useMemo(() => {
     const all = Array.isArray(events) ? events : [];
     if (isRegionalManagerList && myRegionId) return all.filter((e: any) => String(e.regionId ?? e.region_id ?? '') === String(myRegionId));
+    if (isBranchManager && myBranchId) return all.filter((e: any) => String(e.branchId ?? e.branch_id ?? '') === String(myBranchId));
     return all;
-  }, [events, isRegionalManagerList, myRegionId]);
+  }, [events, isRegionalManagerList, myRegionId, isBranchManager, myBranchId]);
 
   const editingEvent = useMemo(() => visibleEvents.find((e: any) => String(e.id) === String(editParams?.id)), [visibleEvents, editParams?.id]);
 
@@ -1145,6 +1242,9 @@ export default function EventsPage() {
   // When registrations data loads, if there's a pendingRegId from the route, open the view modal for it
   useEffect(() => {
     if (!pendingRegId && !pendingOpenLeadId) return;
+    // if we're in a transient state where we are opening the AddLead modal via route, skip opening the view
+    if (skipOpenViewForLeadRoute) return;
+
     const list = (registrations || []) as any[];
     if (pendingRegId) {
       const match = list.find(r => String(r.id) === String(pendingRegId) || String(r.eventRegId) === String(pendingRegId));
@@ -1158,8 +1258,11 @@ export default function EventsPage() {
     if (pendingOpenLeadId) {
       const match2 = list.find(r => String(r.id) === String(pendingOpenLeadId) || String(r.eventRegId) === String(pendingOpenLeadId));
       if (match2) {
-        // prepare initial data preferring 'Events' as source
-        setLeadInitialData({
+        // find linked event and include its defaults
+        const eventIdForMatch = match2.eventId || match2.event_id || filterEventId || selectedEvent?.id;
+        const ev2 = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(eventIdForMatch)) || selectedEvent;
+
+        const initialDataForRoute: any = {
           name: match2.name,
           email: match2.email,
           phone: match2.number,
@@ -1168,12 +1271,22 @@ export default function EventsPage() {
           source: 'Events',
           status: 'new',
           eventRegId: match2.id,
-        });
+          eventId: eventIdForMatch,
+        };
+
+        if (ev2) {
+          if (ev2.regionId || ev2.region_id) initialDataForRoute.regionId = String(ev2.regionId ?? ev2.region_id);
+          if (ev2.branchId || ev2.branch_id) initialDataForRoute.branchId = String(ev2.branchId ?? ev2.branch_id);
+          if (ev2.counsellorId || ev2.counsellor_id || ev2.counselorId || ev2.counselor_id) initialDataForRoute.counsellorId = String(ev2.counsellorId ?? ev2.counsellor_id ?? ev2.counselorId ?? ev2.counselor_id);
+          if (ev2.admissionOfficerId || ev2.admission_officer_id) initialDataForRoute.admissionOfficerId = String(ev2.admissionOfficerId ?? ev2.admission_officer_id);
+        }
+
+        setLeadInitialData(initialDataForRoute);
         setAddLeadModalOpen(true);
         setPendingOpenLeadId(null);
       }
     }
-  }, [registrations, pendingRegId, pendingOpenLeadId]);
+  }, [registrations, pendingRegId, pendingOpenLeadId, skipOpenViewForLeadRoute]);
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
@@ -1405,7 +1518,7 @@ export default function EventsPage() {
                         <div className="flex items-center text-xs text-gray-700">
                           <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           <span>{formatEventDate(e.date)}</span>
-                          {e.time ? (<><span className="mx-2 text-gray-300">•</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                          {e.time ? (<><span className="mx-2 text-gray-300">��</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
                         </div>
                         <div className="flex items-center text-xs text-gray-700">
                           <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
@@ -1431,7 +1544,7 @@ export default function EventsPage() {
 
         {showList && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
               <Card>
                 <CardHeader className="pb-1 p-2">
                   <CardTitle className="text-xs font-medium flex items-center gap-2">
@@ -1441,6 +1554,18 @@ export default function EventsPage() {
                 </CardHeader>
                 <CardContent className="p-2 pt-0">
                   <div className="text-base font-semibold">{(registrations || []).length}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-1 p-2">
+                  <CardTitle className="text-xs font-medium flex items-center gap-2">
+                    <Target className="w-3 h-3 text-gray-500" />
+                    Active registrations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 pt-0">
+                  <div className="text-base font-semibold">{(registrations || []).filter((r:any) => !(((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1'))).length}</div>
                 </CardContent>
               </Card>
 
@@ -1572,6 +1697,8 @@ export default function EventsPage() {
           onOpenChange={(open) => { setIsAddRegOpen(open); if (!open) { /* reset form if needed */ } }}
           title="Add Registration"
           headerClassName="bg-[#223E7D] text-white"
+          autoHeight
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] p-0 rounded-xl shadow-xl"
           headerLeft={(
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -1608,7 +1735,7 @@ export default function EventsPage() {
             </div>
           )}
           leftContent={(
-            <div className="space-y-4">
+            <div className="space-y-4 p-4">
               <div className="space-y-4">
                 <Card className="w-full shadow-sm">
                   <CardHeader className="pb-2">
@@ -1663,7 +1790,7 @@ export default function EventsPage() {
                           <PhoneInput
                             value={regForm.number || ''}
                             onChange={(val) => setRegForm({ ...regForm, number: val })}
-                            defaultCountry="in"
+                            defaultCountry="pk"
                             className="w-full"
                             inputClassName="w-full h-9 text-sm"
                             buttonClassName="h-9"
@@ -1682,62 +1809,6 @@ export default function EventsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="w-full shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center"><Users className="w-4 h-4 mr-2" />Access</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Region</Label>
-                        <Select value={(regForm as any).regionId || ''} onValueChange={(v) => setRegForm({ ...regForm, regionId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select region" /></SelectTrigger>
-                          <SelectContent>
-                            {Array.isArray(regions) && regions.map((r: any) => (
-                              <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Branch</Label>
-                        <Select value={(regForm as any).branchId || ''} onValueChange={(v) => setRegForm({ ...regForm, branchId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select branch" /></SelectTrigger>
-                          <SelectContent>
-                            {filteredBranches.map((b: any) => (
-                              <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Counsellor</Label>
-                        <Select value={(regForm as any).counsellorId || ''} onValueChange={(v) => setRegForm({ ...regForm, counsellorId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                          <SelectContent>
-                            {counselorOptions.map((u: any) => (
-                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Admission Officer</Label>
-                        <Select value={(regForm as any).admissionOfficerId || ''} onValueChange={(v) => setRegForm({ ...regForm, admissionOfficerId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select admission officer" /></SelectTrigger>
-                          <SelectContent>
-                            {admissionOfficerOptions.map((u: any) => (
-                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           )}
@@ -1784,7 +1855,7 @@ export default function EventsPage() {
                   <PhoneInput
                     value={editingReg.number || ''}
                     onChange={(val) => setEditingReg({ ...editingReg, number: val })}
-                    defaultCountry="in"
+                    defaultCountry="pk"
                     className="w-full"
                     inputClassName="w-full h-9 text-sm"
                     buttonClassName="h-9"
@@ -1909,86 +1980,86 @@ export default function EventsPage() {
           contentClassName="no-not-allowed max-w-3xl w-[90vw] p-0 rounded-xl shadow-xl"
           statusBar={viewReg ? <StatusProgressBarReg /> : undefined}
           leftContent={viewReg ? (
-            <Card className="w-full shadow-md border border-gray-200 bg-white">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Registration Information</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  <div className="space-y-1.5">
-                    <Label>Registration ID</Label>
-                    <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.registrationCode}</div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Full Name</Label>
-                    {isEditingView ? (
-                      <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
-                    ) : (
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.name}</div>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Phone Number</Label>
-                    {isEditingView ? (
-                      <PhoneInput
-                        value={viewEditData.number || ''}
-                        onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
-                        defaultCountry="in"
-                        className="w-full"
-                        inputClassName="w-full h-7 text-[11px]"
-                        buttonClassName="h-7"
-                      />
-                    ) : (
-                      <div className="relative phone-compact">
-                        <PhoneInput
-                          value={String(viewReg.number || '')}
-                          onChange={() => {}}
-                          defaultCountry="in"
-                          className="w-full"
-                          inputClassName="w-full h-7 text-[11px]"
-                          buttonClassName="h-7"
-                          inputStyle={{ height: '28px' }}
-                          buttonStyle={{ height: '28px' }}
-                          disabled
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Email</Label>
-                    {isEditingView ? (
-                      <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
-                    ) : (
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.email || '-'}</div>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>City</Label>
-                    {isEditingView ? (
-                      <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
-                    ) : (
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.city || '-'}</div>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Source</Label>
-                    {isEditingView ? (
-                      <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
-                        <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
-                        <SelectContent>
-                          {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{getSourceLabel(viewReg.source) || '-'}</div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : undefined}
+    <Card className="w-full shadow-md border border-gray-200 bg-white">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle>Registration Information</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="space-y-1.5">
+            <Label>Registration ID</Label>
+            <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.registrationCode}</div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Full Name</Label>
+            {isEditingView ? (
+              <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.name}</div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Phone Number</Label>
+            {isEditingView ? (
+              <PhoneInput
+                value={viewEditData.number || ''}
+                onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
+                defaultCountry="pk"
+                className="w-full"
+                inputClassName="w-full h-7 text-[11px]"
+                buttonClassName="h-7"
+              />
+            ) : (
+              <div className="relative phone-compact">
+                <PhoneInput
+                  value={String(viewReg.number || '')}
+                  onChange={() => {}}
+                  defaultCountry="pk"
+                  className="w-full"
+                  inputClassName="w-full h-7 text-[11px]"
+                  buttonClassName="h-7"
+                  inputStyle={{ height: '28px' }}
+                  buttonStyle={{ height: '28px' }}
+                  disabled
+                />
+              </div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Email</Label>
+            {isEditingView ? (
+              <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.email || '-'}</div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>City</Label>
+            {isEditingView ? (
+              <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.city || '-'}</div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Source</Label>
+            {isEditingView ? (
+              <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
+                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
+                <SelectContent>
+                  {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{getSourceLabel(viewReg.source) || '-'}</div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ) : undefined}
         />
 
         {/* Add Lead Modal (used for converting registrations) - use same UI as /leads/new */}
@@ -2000,6 +2071,11 @@ export default function EventsPage() {
               try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
               refetchRegs?.();
               setShowList(true);
+              // if a lead was just created from a registration, keep the registration view open and updated
+              if (skipClearViewAfterLeadCreate) {
+                setSkipClearViewAfterLeadCreate(false);
+                return;
+              }
               setIsViewRegOpen(false);
               setIsAddRegOpen(false);
               setIsEditRegOpen(false);
@@ -2007,11 +2083,46 @@ export default function EventsPage() {
             }
           }}
           initialData={leadInitialData || undefined}
+          onCreated={(lead, init) => {
+            try {
+              const regId = init && (init as any).eventRegId;
+              const evtId = init && (init as any).eventId;
+
+              // Invalidate and refetch registrations so latest data is available
+              try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+              try { refetchRegs?.(); } catch {}
+
+              // Close lead modal and registration details popup (user requested all popups closed on save)
+              try { setAddLeadModalOpen(false); } catch {}
+              try { setIsViewRegOpen(false); } catch {}
+              try { setIsAddRegOpen(false); } catch {}
+              try { setIsEditRegOpen(false); } catch {}
+              try { setViewReg(null); } catch {}
+
+              // prevent the addLeadModalOpen close handler from navigating back to the registration detail
+              try { setSkipNavigateAfterLeadCreate(true); } catch {}
+
+              // Clear any initial lead data we set for conversion
+              try { setLeadInitialData(null); } catch {}
+
+              // Optionally navigate back to registrations list for the event
+              try {
+                const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
+                if (eventIdToUse) {
+                  navigate(`/events/${eventIdToUse}/registrations`);
+                }
+              } catch {}
+
+              // Clear pending flags
+              try { setPendingRegId(null); } catch {}
+
+            } catch {}
+          }}
         />
 
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
-          <DialogContent hideClose className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
+          <DialogContent hideClose className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl flex flex-col">
             <DialogTitle className="sr-only">Import Registrations (CSV/Excel)</DialogTitle>
             <DialogHeader className="p-0">
               <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
@@ -2025,6 +2136,24 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {importStep === 1 && (
+                    <>
+                      <Button size="xs" onClick={downloadSampleCsv} className="bg-white text-[#0071B0]">Download Sample Excel</Button>
+                      <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(2)}>Next</Button>
+                    </>
+                  )}
+                  {importStep === 2 && (
+                    <>
+                      <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(1)}>Back</Button>
+                      <Button size="xs" className="bg-white text-[#0071B0]" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
+                    </>
+                  )}
+                  {importStep === 3 && (
+                    <>
+                      <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(2)}>Back</Button>
+                      <Button size="xs" className="bg-[#0071B0] text-white" onClick={() => performImport()} disabled={isImporting || importValidRows.length === 0}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                    </>
+                  )}
                   <button
                     type="button"
                     aria-label="Close"
@@ -2036,7 +2165,7 @@ export default function EventsPage() {
                 </div>
               </div>
             </DialogHeader>
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 overflow-auto pb-24">
               <div className="flex items-center justify-between text-xs">
                 <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
                 <div className="w-6 h-[1px] bg-gray-200" />
@@ -2048,10 +2177,6 @@ export default function EventsPage() {
               {importStep === 1 && (
                 <div className="space-y-3">
                   <p className="text-xs text-gray-600">Download the sample CSV, fill it, then proceed to upload. Event will be set to the currently selected event.</p>
-                  <div className="flex gap-2">
-                    <Button size="xs" onClick={downloadSampleCsv}>Download Sample Excel</Button>
-                    <Button size="xs" variant="outline" onClick={() => { setImportStep(2); }}>Next</Button>
-                  </div>
                 </div>
               )}
 
@@ -2065,7 +2190,7 @@ export default function EventsPage() {
 
                   {/* Preview of uploaded rows (if parsed) */}
                   {importValidRows && importValidRows.length > 0 ? (
-                    <div className="max-h-[60vh] overflow-auto border rounded p-2 bg-white">
+                    <div className="border rounded p-2 bg-white">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="text-left text-xs text-gray-600">
@@ -2097,10 +2222,6 @@ export default function EventsPage() {
                     <div className="text-xs text-gray-500">No preview available. Select a file to see rows here.</div>
                   )}
 
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
-                    <Button size="sm" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
-                  </div>
                 </div>
               )}
 
@@ -2113,7 +2234,7 @@ export default function EventsPage() {
                   </div>
 
                   {/* Show all parsed rows in a large list view */}
-                  <div className="max-h-[58vh] overflow-auto border rounded p-2 bg-white">
+                  <div className="border rounded p-2 bg-white">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-left text-xs text-gray-600">
@@ -2150,40 +2271,6 @@ export default function EventsPage() {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
-                    <Button size="sm" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
-                      setIsImporting(true);
-                      let success = 0; let failed = 0;
-                      for (const row of importValidRows) {
-                        try { // eslint-disable-next-line no-await-in-loop
-                          try {
-                            const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
-                            const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
-                            const payload: any = { ...row };
-                            if (ev) {
-                              if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
-                              if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
-                              if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
-                              if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
-                            }
-                            await RegService.createRegistration(payload);
-                          } catch (e) {
-                            await RegService.createRegistration(row);
-                          }
-                          success++;
-                        } catch { failed++; }
-                      }
-                      setIsImporting(false);
-                      toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
-                      setIsImportOpen(false);
-                      setImportStep(1);
-                      setImportErrors([]);
-                      setImportValidRows([]);
-                      setImportFileName('');
-                      refetchRegs();
-                    }}>{isImporting ? 'Importing��' : `Insert ${importValidRows.length} rows`}</Button>
-                  </div>
                 </div>
               )}
             </div>

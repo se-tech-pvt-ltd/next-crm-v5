@@ -39,9 +39,12 @@ interface AddLeadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: Partial<any>;
+  // Called when a lead is successfully created. If the lead was created from an event registration,
+  // initialData.eventRegId will be present and callers can update UI accordingly.
+  onCreated?: (lead: any, initialData?: Partial<any>) => void;
 }
 
-export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalProps) {
+export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: AddLeadModalProps) {
   const [submitLeadForm, setSubmitLeadForm] = useState<(() => void) | null>(null);
   const handleRegisterSubmit = useCallback((fn: () => void) => {
     try { setSubmitLeadForm(() => fn); } catch {}
@@ -127,7 +130,7 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => LeadsService.createLead(data),
-    onSuccess: async () => {
+    onSuccess: async (createdLead: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       toast({
         title: "Success! 🎉",
@@ -140,6 +143,15 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
           // @ts-ignore
           await (await import('@/services/event-registrations')).updateRegistration((initialData as any).eventRegId, { isConverted: 1, is_converted: 1 });
           queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] });
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      // notify caller that a lead was created (useful to update UI like registration converted flag)
+      try {
+        if (typeof onCreated === 'function') {
+          onCreated(createdLead, initialData);
         }
       } catch (e) {
         // ignore

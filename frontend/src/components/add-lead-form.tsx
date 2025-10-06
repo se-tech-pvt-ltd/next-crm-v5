@@ -490,12 +490,27 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         city: initialData.city || '',
         source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
         status: mapLabelToKeyRobust('Status', initialData.status || defaultStatusLabel),
-        counselorId: initialData.counselorId || '',
+        counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
         type: mapLabelToKeyRobust('Type', initialData.type || defaultTypeLabel),
+        // populate region/branch/counsellor/admission defaults when provided (usually from an event)
+        regionId: initialData.regionId || initialData.region_id || '',
+        branchId: initialData.branchId || initialData.branch_id || '',
+        counsellorId: initialData.counsellorId || initialData.counselorId || initialData.counsellor_id || initialData.counselor_id || '',
+        admissionOfficerId: initialData.admissionOfficerId || initialData.admission_officer_id || '',
       };
       form.reset(values);
+      // If initial data provides region/branch defaults (from an event), ensure selects are enabled so values show
+      try {
+        const hasRegion = Boolean(values.regionId);
+        const hasBranch = Boolean(values.branchId);
+        if (hasRegion) setAutoRegionDisabled(false);
+        if (hasBranch) setAutoBranchDisabled(false);
+        // ensure counsellor/admission values are applied (in case options are available)
+        if (values.counsellorId) form.setValue('counsellorId', values.counsellorId);
+        if (values.admissionOfficerId) form.setValue('admissionOfficerId', values.admissionOfficerId);
+      } catch {}
     } else if (dropdownData) {
       // No initial data: apply default selections from dropdownData if present
       try {
@@ -541,6 +556,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   // Auto-select region/branch based on JWT and assignments
   useEffect(() => {
     try {
+      // If this form was opened with initialData originating from an event (region/branch defaults),
+      // do not override those values with JWT-derived defaults.
+      if (initialData && (initialData.regionId || initialData.region_id || initialData.branchId || initialData.branch_id)) return;
+
       const currentRegion = String(form.getValues('regionId') || '');
       const currentBranch = String(form.getValues('branchId') || '');
       if (currentRegion && currentBranch) return;
