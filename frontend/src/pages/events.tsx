@@ -2019,6 +2019,11 @@ export default function EventsPage() {
               try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
               refetchRegs?.();
               setShowList(true);
+              // if a lead was just created from a registration, keep the registration view open and updated
+              if (skipClearViewAfterLeadCreate) {
+                setSkipClearViewAfterLeadCreate(false);
+                return;
+              }
               setIsViewRegOpen(false);
               setIsAddRegOpen(false);
               setIsEditRegOpen(false);
