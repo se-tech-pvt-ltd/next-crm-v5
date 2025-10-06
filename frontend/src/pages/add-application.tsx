@@ -15,10 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import * as UniversitiesService from '@/services/universities';
 import * as UsersService from '@/services/users';
-import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users } from 'lucide-react';
+import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users, X } from 'lucide-react';
 import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AddApplicationModal } from '@/components/add-application-modal';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -28,10 +31,40 @@ export default function AddApplication() {
   const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const presetStudentId = params.get('studentId') || '';
 
+  const [studentPickerOpen, setStudentPickerOpen] = useState(false);
+  const [selectedStudentIdForModal, setSelectedStudentIdForModal] = useState<string | undefined>(undefined);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
     enabled: !presetStudentId,
   });
+
+  const [search, setSearch] = useState('');
+  const [page] = useState(1);
+  const pageSize = 4;
+
+  const { data: studentsPaged } = useQuery({
+    queryKey: ['/api/students', { page, limit: pageSize }],
+    queryFn: async () => (await (await import('@/services/students')).getStudents({ page, limit: pageSize })) as any,
+    enabled: studentPickerOpen && !search,
+  });
+
+  const { data: studentsAll } = useQuery({
+    queryKey: ['/api/students', 'all-for-search'],
+    queryFn: async () => (await (await import('@/services/students')).getStudents()) as any,
+    enabled: studentPickerOpen && !!search,
+    staleTime: 60_000,
+  });
+
+  useEffect(() => {
+    if (presetStudentId) {
+      setSelectedStudentIdForModal(presetStudentId);
+      setAddModalOpen(true);
+    } else {
+      setStudentPickerOpen(true);
+    }
+  }, [presetStudentId]);
 
   const { data: presetStudent } = useQuery<Student>({
     queryKey: [`/api/students/${presetStudentId}`],
@@ -270,6 +303,108 @@ export default function AddApplication() {
   }, [users, selectedBranchId]);
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
+
+  const handlePickStudent = (id: string) => {
+    if (!id) return;
+    setSelectedStudentIdForModal(id);
+    setStudentPickerOpen(false);
+    setAddModalOpen(true);
+    try {
+      const url = new URL(typeof window !== 'undefined' ? window.location.href : '/applications/new', window.location.origin);
+      url.searchParams.set('studentId', id);
+      setLocation(`${url.pathname}${url.search}`);
+    } catch {}
+  };
+
+  // Wrapper flow: select student then show the same modal UI used from Students page
+  if (true) {
+    return (
+      <Layout title="Add New Application" subtitle="Create a university application for a student" helpText="Fill in the application details and submit to track progress.">
+        <AddApplicationModal
+          open={addModalOpen}
+          onOpenChange={(o) => {
+            setAddModalOpen(o);
+            if (!o) setLocation('/applications');
+          }}
+          studentId={selectedStudentIdForModal || presetStudentId || undefined}
+        />
+
+        <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
+          <DialogContent className="max-w-2xl overflow-hidden p-0">
+          <DialogHeader className="p-0">
+            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
+              <DialogTitle className="text-white">Select a student to create application</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
+                onClick={() => { setStudentPickerOpen(false); }}
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="space-y-3 p-4">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Search by name, ID, or contact"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            <div className="border rounded-md overflow-hidden">
+              <Table className="text-xs">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">Student ID</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Student Name</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    const toArray = (resp: any): any[] => Array.isArray(resp) ? resp : (resp?.data || []);
+                    const base = search ? toArray(studentsAll) : toArray(studentsPaged);
+                    const filtered = (base || []).filter((s: any) => {
+                      if (!search) return true;
+                      const q = search.toLowerCase();
+                      const id = String(s.student_id || s.id || '').toLowerCase();
+                      const name = String(s.name || '').toLowerCase();
+                      const phone = String(s.phone || '').toLowerCase();
+                      const email = String(s.email || '').toLowerCase();
+                      return id.includes(q) || name.includes(q) || phone.includes(q) || email.includes(q);
+                    });
+                    const rows = filtered.slice(0, pageSize);
+                    if (rows.length === 0) {
+                      return (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No students found</TableCell>
+                        </TableRow>
+                      );
+                    }
+                    return rows.map((s: any) => (
+                      <TableRow key={s.id}>
+                        <TableCell className="p-2 text-xs font-mono">{s.student_id || s.id}</TableCell>
+                        <TableCell className="p-2 text-xs">{s.name || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{s.phone || s.email || '-'}</TableCell>
+                        <TableCell className="p-2 text-right">
+                          <Button size="sm" className="h-7" onClick={() => handlePickStudent(String(s.id))}>Select</Button>
+                        </TableCell>
+                      </TableRow>
+                    ));
+                  })()}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </DialogContent>
+        </Dialog>
+      </Layout>
+    );
+  }
 
   return (
     <Layout

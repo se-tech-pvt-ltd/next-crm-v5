@@ -21,6 +21,8 @@ import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import * as DropdownsService from '@/services/dropdowns';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -39,9 +41,23 @@ export default function Applications() {
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateApplication = (() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'application');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  })();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleAddApplicationClick = () => {
+    setIsNavigating(true);
+    try { setLocation('/applications/new'); } finally { setTimeout(() => setIsNavigating(false), 600); }
+  };
 
   const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
     queryKey: ['/api/applications', { page: currentPage, limit: pageSize, statusFilter, universityFilter }],
@@ -310,6 +326,37 @@ export default function Applications() {
                   </Button>
                 )}
               </div>
+
+              <div className="flex items-center gap-2">
+                {canCreateApplication && (
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                    className="ml-2"
+                  >
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
+                      onClick={handleAddApplicationClick}
+                      disabled={isNavigating}
+                      title="Add New Application"
+                    >
+                      {isNavigating ? (
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }}>
+                          <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div initial={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                          <Plus className="w-4 h-4" />
+                        </motion.div>
+                      )}
+                    </Button>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-3 pt-0">
@@ -329,12 +376,12 @@ export default function Applications() {
                 icon={<GraduationCap className="h-12 w-12" />}
                 title="No applications found"
                 description={statusFilter === 'all' ? 'Applications will appear here when students apply to universities.' : `No applications with status "${statusFilter}".`}
-                action={
-                  <Button onClick={() => setLocation('/applications/add')}>
+                action={canCreateApplication ? (
+                  <Button onClick={handleAddApplicationClick}>
                     <Plus className="w-4 h-4 mr-2" />
                     New Application
                   </Button>
-                }
+                ) : undefined}
               />
             ) : (
               <Table className="text-xs">
