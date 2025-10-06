@@ -59,13 +59,27 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
 
   const updateStudentMutation = useMutation({
     mutationFn: async (data: Partial<Student>) => StudentsService.updateStudent(student?.id, data),
-    onSuccess: () => {
-      toast({
-        title: 'Success',
-        description: 'Student updated successfully.',
-      });
-      queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
-      setIsEditing(false);
+    onSuccess: async (updated) => {
+      try {
+        toast({
+          title: 'Success',
+          description: 'Student updated successfully.',
+        });
+        queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
+        setIsEditing(false);
+        // If update included a status change, create an activity so the feed attributes the change to the user
+        try {
+          const status = (updated as any)?.status;
+          if (status) {
+            const content = `status changed to \"${status}\"`;
+            await ActivitiesService.createActivity({ entityType: 'student', entityId: String(studentId), content, activityType: 'status_changed' });
+          }
+        } catch (err) {
+          console.warn('Failed to log student update activity', err);
+        }
+      } catch (err) {
+        console.error('Error in updateStudentMutation onSuccess:', err);
+      }
     },
     onError: (error: Error) => {
       toast({ title: 'Error', description: error.message || 'Failed to update student.', variant: 'destructive' });
