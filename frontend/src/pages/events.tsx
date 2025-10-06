@@ -2049,6 +2049,12 @@ export default function EventsPage() {
               try { setIsEditRegOpen(false); } catch {}
               try { setViewReg(null); } catch {}
 
+              // prevent the addLeadModalOpen close handler from navigating back to the registration detail
+              try { setSkipNavigateAfterLeadCreate(true); } catch {}
+
+              // Clear any initial lead data we set for conversion
+              try { setLeadInitialData(null); } catch {}
+
               // Optionally navigate back to registrations list for the event
               try {
                 const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
