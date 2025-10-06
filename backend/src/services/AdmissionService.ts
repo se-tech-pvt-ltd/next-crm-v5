@@ -105,7 +105,7 @@ export class AdmissionService {
     return await AdmissionModel.findByStudent(studentId);
   }
 
-  static async createAdmission(admissionData: InsertAdmission): Promise<Admission> {
+  static async createAdmission(admissionData: InsertAdmission, userId?: string): Promise<Admission> {
     // Generate an admission code (ADM-YYMMDD-XXX) where XXX is a 3-digit sequence starting at 001 each day
     const now = new Date();
     const dd = String(now.getDate()).padStart(2, '0');
@@ -183,7 +183,11 @@ export class AdmissionService {
         admission.studentId,
         'admission_created',
         'Admission decision received',
-        `${admission.decision} decision received from ${admission.university} for ${admission.program}`
+        `${admission.decision} decision received from ${admission.university} for ${admission.program}`,
+        undefined,
+        undefined,
+        undefined,
+        userId
       );
 
       // Also log activity for the admission itself
@@ -192,14 +196,18 @@ export class AdmissionService {
         admission.id,
         'created',
         'Admission decision recorded',
-        `${admission.decision} decision from ${admission.university} for ${admission.program}`
+        `${admission.decision} decision from ${admission.university} for ${admission.program}`,
+        undefined,
+        undefined,
+        undefined,
+        userId
       );
     }
 
     return admission;
   }
 
-  static async updateAdmission(id: string, updates: Partial<InsertAdmission>): Promise<Admission | undefined> {
+  static async updateAdmission(id: string, updates: Partial<InsertAdmission>, userId?: string): Promise<Admission | undefined> {
     console.log('[AdmissionService] updateAdmission called with id:', id, 'updates:', updates);
     const currentAdmission = await AdmissionModel.findById(id);
     console.log('[AdmissionService] found currentAdmission:', !!currentAdmission);
@@ -267,8 +275,7 @@ export class AdmissionService {
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
-              undefined,
-              "Next Bot"
+              userId
             );
           }
         }
