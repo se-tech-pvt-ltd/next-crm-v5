@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { AddApplicationModal } from '@/components/add-application-modal';
+import { StudentPickerDialog } from '@/components/student-picker-dialog';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -37,6 +38,7 @@ export default function Applications() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [isStudentPickerOpen, setIsStudentPickerOpen] = useState(false);
   const [addApplicationStudentId, setAddApplicationStudentId] = useState<string | undefined>(undefined);
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
@@ -58,6 +60,23 @@ export default function Applications() {
   const handleAddApplicationClick = () => {
     setIsNavigating(true);
     try { setLocation('/applications/new'); } finally { setTimeout(() => setIsNavigating(false), 600); }
+  };
+
+  const handleStudentPickerSelect = (studentId: string) => {
+    if (!studentId) return;
+    setAddApplicationStudentId(studentId);
+    setIsStudentPickerOpen(false);
+    setIsAddApplicationModalOpen(true);
+    if (matchNew) {
+      try {
+        const params = new URLSearchParams();
+        params.set('studentId', studentId);
+        const target = `/applications/new?${params.toString()}`;
+        if (location !== target) {
+          setLocation(target);
+        }
+      } catch {}
+    }
   };
 
   const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
@@ -210,15 +229,40 @@ export default function Applications() {
     }
   }, [matchAddAdm, addAdmParams?.id]);
 
-  // Open Add Application modal when route matches /applications/new
+  // Handle /applications/new route to show student picker first
   useEffect(() => {
-    if (matchNew) {
-      setIsAddApplicationModalOpen(true);
-    } else {
-      setIsAddApplicationModalOpen(false);
-      setAddApplicationStudentId(undefined);
+    if (!matchNew) {
+      setIsStudentPickerOpen(false);
+      return;
     }
-  }, [matchNew]);
+
+    const queryString = (() => {
+      try {
+        const index = location.indexOf('?');
+        return index >= 0 ? location.slice(index + 1) : '';
+      } catch {
+        return '';
+      }
+    })();
+
+    const params = new URLSearchParams(queryString);
+    const queryStudentId = params.get('studentId');
+
+    if (queryStudentId && addApplicationStudentId !== queryStudentId) {
+      setAddApplicationStudentId(queryStudentId);
+      return;
+    }
+
+    if (queryStudentId || addApplicationStudentId) {
+      if (!isAddApplicationModalOpen) {
+        setIsAddApplicationModalOpen(true);
+      }
+      setIsStudentPickerOpen(false);
+      return;
+    }
+
+    setIsStudentPickerOpen(true);
+  }, [matchNew, location, addApplicationStudentId, isAddApplicationModalOpen]);
 
   return (
     <Layout 
@@ -550,9 +594,31 @@ export default function Applications() {
     }}
   />
 
+  <StudentPickerDialog
+    open={isStudentPickerOpen}
+    onOpenChange={(open) => {
+      setIsStudentPickerOpen(open);
+      if (!open && matchNew && !addApplicationStudentId) {
+        try { setLocation('/applications'); } catch {}
+      }
+    }}
+    onSelect={handleStudentPickerSelect}
+    title="Select a student to create application"
+    pageSize={4}
+  />
+
   <AddApplicationModal
     open={isAddApplicationModalOpen}
-    onOpenChange={(o) => { setIsAddApplicationModalOpen(o); if (!o) setAddApplicationStudentId(undefined); }}
+    onOpenChange={(open) => {
+      setIsAddApplicationModalOpen(open);
+      if (!open) {
+        setAddApplicationStudentId(undefined);
+        setIsStudentPickerOpen(false);
+        if (matchNew) {
+          try { setLocation('/applications'); } catch {}
+        }
+      }
+    }}
     studentId={addApplicationStudentId}
   />
 
