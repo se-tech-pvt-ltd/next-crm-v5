@@ -2035,47 +2035,29 @@ export default function EventsPage() {
             try {
               const regId = init && (init as any).eventRegId;
               const evtId = init && (init as any).eventId;
-              if (regId) {
-                // Invalidate and refetch registrations so latest data is available
-                try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
-                try { refetchRegs?.(); } catch {}
 
-                // Navigate to registration detail route
-                try {
-                  const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
-                  if (eventIdToUse) {
-                    navigate(`/events/${eventIdToUse}/registrations/${regId}`);
-                  }
-                } catch {}
+              // Invalidate and refetch registrations so latest data is available
+              try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+              try { refetchRegs?.(); } catch {}
 
-                // Try to fetch the fresh registration directly from the server and open it
-                (async () => {
-                  try {
-                    const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
-                    if (eventIdToUse) {
-                      const regs = await RegService.getRegistrationsByEvent(eventIdToUse);
-                      const fresh = (Array.isArray(regs) ? regs : []).find((r:any) => String(r.id) === String(regId) || String(r.eventRegId) === String(regId));
-                      if (fresh) {
-                        setViewReg(fresh);
-                        setIsViewRegOpen(true);
-                        return;
-                      }
-                    }
-                  } catch (e) {}
+              // Close lead modal and registration details popup (user requested all popups closed on save)
+              try { setAddLeadModalOpen(false); } catch {}
+              try { setIsViewRegOpen(false); } catch {}
+              try { setIsAddRegOpen(false); } catch {}
+              try { setIsEditRegOpen(false); } catch {}
+              try { setViewReg(null); } catch {}
 
-                  // fallback: attempt to use pendingRegId to open when the list updates
-                  try { setPendingRegId(String(regId)); } catch {}
-                })();
+              // Optionally navigate back to registrations list for the event
+              try {
+                const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
+                if (eventIdToUse) {
+                  navigate(`/events/${eventIdToUse}/registrations`);
+                }
+              } catch {}
 
-                // Also update local viewReg immediately if present
-                setViewReg((prev: any) => {
-                  const matchesPrev = prev && (String(prev.id) === String(regId) || String(prev.eventRegId) === String(regId));
-                  if (matchesPrev) {
-                    return { ...prev, isConverted: 1, is_converted: 1 };
-                  }
-                  return prev;
-                });
-              }
+              // Clear pending flags
+              try { setPendingRegId(null); } catch {}
+
             } catch {}
           }}
         />
