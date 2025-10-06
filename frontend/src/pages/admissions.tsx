@@ -13,6 +13,7 @@ import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter,
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
+import { StudentPickerDialog } from '@/components/student-picker-dialog';
 import { useLocation, useRoute } from 'wouter';
 import * as AdmissionsService from '@/services/admissions';
 
@@ -27,6 +28,9 @@ export default function Admissions() {
 
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
+
+  const [isStudentPickerOpen, setIsStudentPickerOpen] = useState(false);
+  const [addAdmissionStudentId, setAddAdmissionStudentId] = useState<string | undefined>(undefined);
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -68,15 +72,40 @@ export default function Admissions() {
     } catch {}
   }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
-  // Open Add Admission modal when route matches /admissions/new
+  // Open Add Admission modal or student picker when route matches /admissions/new
   useEffect(() => {
-    if (matchNew) {
-      setIsAddAdmissionModalOpen(true);
-    } else {
+    if (!matchNew) {
+      setIsStudentPickerOpen(false);
       setIsAddAdmissionModalOpen(false);
-      setAddAdmissionAppId(undefined);
+      setAddAdmissionStudentId(undefined);
+      return;
     }
-  }, [matchNew]);
+
+    const queryString = (() => {
+      try {
+        const index = typeof window !== 'undefined' ? window.location.href.indexOf('?') : -1;
+        return index >= 0 ? (typeof window !== 'undefined' ? window.location.href.slice(index + 1) : '') : '';
+      } catch {
+        return '';
+      }
+    })();
+
+    const params = new URLSearchParams(queryString);
+    const queryStudentId = params.get('studentId');
+
+    if (queryStudentId && addAdmissionStudentId !== queryStudentId) {
+      setAddAdmissionStudentId(queryStudentId);
+      return;
+    }
+
+    if (queryStudentId || addAdmissionStudentId) {
+      if (!isAddAdmissionModalOpen) setIsAddAdmissionModalOpen(true);
+      setIsStudentPickerOpen(false);
+      return;
+    }
+
+    setIsStudentPickerOpen(true);
+  }, [matchNew, addAdmissionStudentId, isAddAdmissionModalOpen]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -325,6 +354,34 @@ export default function Admissions() {
         admission={selectedAdmission}
       />
 
+      <StudentPickerDialog
+        open={isStudentPickerOpen}
+        onOpenChange={(open) => {
+          setIsStudentPickerOpen(open);
+          if (!open && matchNew && !addAdmissionStudentId) {
+            try { setLocation('/admissions'); } catch {}
+          }
+        }}
+        onSelect={(studentId: string) => {
+          if (!studentId) return;
+          setAddAdmissionStudentId(studentId);
+          setIsStudentPickerOpen(false);
+          setIsAddAdmissionModalOpen(true);
+          if (matchNew) {
+            try {
+              const params = new URLSearchParams();
+              params.set('studentId', studentId);
+              const target = `/admissions/new?${params.toString()}`;
+              if (typeof window !== 'undefined' && window.location.href !== target) {
+                window.history.replaceState({}, '', target);
+              }
+            } catch {}
+          }
+        }}
+        title="Select a student to create admission"
+        pageSize={4}
+      />
+
       <AddAdmissionModal
         open={isAddAdmissionModalOpen}
         onOpenChange={(o) => {
@@ -334,10 +391,11 @@ export default function Admissions() {
               setLocation('/admissions');
             } catch {}
             setAddAdmissionAppId(undefined);
+            setAddAdmissionStudentId(undefined);
           }
         }}
         applicationId={addAdmissionAppId}
-        studentId={undefined}
+        studentId={addAdmissionStudentId}
       />
     </Layout>
   );
