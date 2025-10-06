@@ -242,6 +242,15 @@ export class StudentService {
       `Lead ${student.name} was converted to student ${student.name}`
     );
 
+    // Mark lead record as converted (is_converted = 1)
+    try {
+      if (leadId) {
+        await LeadModel.update(String(leadId), { isConverted: 1 } as any);
+      }
+    } catch (e) {
+      console.warn('[StudentService.convertFromLead] Failed to mark lead as converted', e);
+    }
+
     const [enriched] = await this.enrichDropdownFields([student]);
     return this.mapStudentForApi(enriched) as any;
   }
