@@ -285,7 +285,11 @@ export default function EventsPage() {
   const [leadInitialData, setLeadInitialData] = useState<any | null>(null);
 
   const openConvertToLeadModal = (reg: any) => {
-    setLeadInitialData({
+    // find the linked event (selected event)
+    const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
+    const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(eventId)) || selectedEvent;
+
+    const initialData: any = {
       name: reg.name,
       email: reg.email,
       phone: reg.number,
@@ -294,14 +298,23 @@ export default function EventsPage() {
       source: 'Events',
       status: 'new',
       eventRegId: reg.id,
-    });
+      eventId: eventId,
+    };
+
+    if (ev) {
+      if (ev.regionId || ev.region_id) initialData.regionId = String(ev.regionId ?? ev.region_id);
+      if (ev.branchId || ev.branch_id) initialData.branchId = String(ev.branchId ?? ev.branch_id);
+      if (ev.counsellorId || ev.counsellor_id || ev.counselorId || ev.counselor_id) initialData.counsellorId = String(ev.counsellorId ?? ev.counsellor_id ?? ev.counselorId ?? ev.counselor_id);
+      if (ev.admissionOfficerId || ev.admission_officer_id) initialData.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
+    }
+
+    setLeadInitialData(initialData);
 
     // close the registration details modal first
     try { setIsViewRegOpen(false); } catch {}
 
     // navigate to /lead route for this registration
     try {
-      const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
       navigate(`/events/${eventId}/registrations/${reg.id}/lead`);
     } catch {}
 
