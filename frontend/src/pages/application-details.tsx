@@ -485,13 +485,13 @@ export default function ApplicationDetails() {
 
             </div>
 
-            {/* Activity Sidebar */}
-            <div className="w-[30rem] flex-shrink-0 bg-gray-50 rounded-lg p-3 flex flex-col min-h-full">
-              <h3 className="text-sm font-semibold mb-2 flex items-center">
-                <Calendar className="w-5 h-5 mr-2" />
-                Activity Timeline
-              </h3>
-              <div className="flex-1 overflow-y-auto">
+            {/* Activity Sidebar (lead-style) */}
+            <div className="border-l bg-white flex flex-col min-h-0" style={{ width: '420px' }}>
+              <div className="p-4 min-h-0 flex-1 overflow-y-auto">
+                <h3 className="text-sm font-semibold mb-2 flex items-center">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Activity Timeline
+                </h3>
                 <ActivityTracker
                   entityType="application"
                   entityId={application.id}
