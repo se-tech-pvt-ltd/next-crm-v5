@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { Admission, Student } from '@/lib/types';
-import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter } from 'lucide-react';
+import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter, Plus } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
+import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { useLocation, useRoute } from 'wouter';
 import * as AdmissionsService from '@/services/admissions';
 
@@ -20,8 +21,12 @@ export default function Admissions() {
   const [, setLocation] = useLocation();
   const [matchAd, adParams] = useRoute('/admissions/:id');
   const [matchEdit, editParams] = useRoute('/admissions/:id/edit');
+  const [matchNew] = useRoute('/admissions/new');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+
+  const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
+  const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -62,6 +67,16 @@ export default function Admissions() {
       if (cached) setSelectedAdmission(cached as Admission);
     } catch {}
   }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
+
+  // Open Add Admission modal when route matches /admissions/new
+  useEffect(() => {
+    if (matchNew) {
+      setIsAddAdmissionModalOpen(true);
+    } else {
+      setIsAddAdmissionModalOpen(false);
+      setAddAdmissionAppId(undefined);
+    }
+  }, [matchNew]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -192,6 +207,22 @@ export default function Admissions() {
                   </Button>
                 )}
               </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
+                  onClick={() => {
+                    try {
+                      setLocation('/admissions/new');
+                    } catch { }
+                  }}
+                  title="Add New Admission"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-3 pt-0">
@@ -292,6 +323,21 @@ export default function Admissions() {
           }
         }}
         admission={selectedAdmission}
+      />
+
+      <AddAdmissionModal
+        open={isAddAdmissionModalOpen}
+        onOpenChange={(o) => {
+          setIsAddAdmissionModalOpen(o);
+          if (!o) {
+            try {
+              setLocation('/admissions');
+            } catch {}
+            setAddAdmissionAppId(undefined);
+          }
+        }}
+        applicationId={addAdmissionAppId}
+        studentId={undefined}
       />
     </Layout>
   );
