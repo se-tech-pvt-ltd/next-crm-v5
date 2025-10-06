@@ -143,7 +143,9 @@ export default function ApplicationDetails() {
         try {
           const key = `/api/activities/application/${String(updated.id)}`;
           try {
+            console.log('Fetching activities for', key);
             const activities = await (await import('@/services/http')).http.get<any>(key);
+            console.log('Fetched activities:', activities);
             queryClient.setQueryData([key], activities);
           } catch (fetchErr) {
             console.error('Failed to fetch activities', fetchErr);
@@ -177,7 +179,9 @@ export default function ApplicationDetails() {
         try {
           const key = `/api/activities/application/${String(updated.id)}`;
           try {
+            console.log('Fetching activities for', key);
             const activities = await (await import('@/services/http')).http.get<any>(key);
+            console.log('Fetched activities:', activities);
             queryClient.setQueryData([key], activities);
           } catch (fetchErr) {
             console.error('Failed to fetch activities', fetchErr);
