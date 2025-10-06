@@ -122,10 +122,12 @@ export const StudentPickerDialog = ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  rows.map((student) => {
-                    const id = String(student.id ?? student.student_id ?? "");
+                  rows.map((student, index) => {
+                    const rawId = student.id ?? student.student_id ?? null;
+                    const resolvedId = rawId ? String(rawId) : "";
+                    const key = rawId ? String(rawId) : `student-${index}`;
                     return (
-                      <TableRow key={id || Math.random().toString(36).slice(2)}>
+                      <TableRow key={key}>
                         <TableCell className="p-2 font-mono text-xs">{student.student_id ?? student.id ?? "-"}</TableCell>
                         <TableCell className="p-2 text-xs">{student.name ?? "-"}</TableCell>
                         <TableCell className="p-2 text-xs">{student.phone ?? student.email ?? "-"}</TableCell>
@@ -134,7 +136,8 @@ export const StudentPickerDialog = ({
                             type="button"
                             size="sm"
                             className="h-7"
-                            onClick={() => onSelect(id, student)}
+                            disabled={!resolvedId}
+                            onClick={() => resolvedId && onSelect(resolvedId, student)}
                           >
                             Select
                           </Button>
