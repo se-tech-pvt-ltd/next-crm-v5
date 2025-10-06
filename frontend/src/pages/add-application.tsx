@@ -19,7 +19,7 @@ import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCi
 import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { StudentPickerDialog } from '@/components/student-picker-dialog';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
