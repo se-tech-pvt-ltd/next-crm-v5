@@ -141,9 +141,14 @@ export default function ApplicationDetails() {
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
         try {
-          const key = [`/api/activities/application/${String(updated.id)}`];
-          queryClient.invalidateQueries({ queryKey: key });
-          queryClient.refetchQueries({ queryKey: key });
+          const key = `/api/activities/application/${String(updated.id)}`;
+          try {
+            const activities = await (await import('@/services/http')).http.get<any>(key);
+            queryClient.setQueryData([key], activities);
+          } catch (fetchErr) {
+            console.error('Failed to fetch activities', fetchErr);
+            queryClient.invalidateQueries({ queryKey: [key] });
+          }
         } catch (e) {
           console.error('Failed to refresh activities cache', e);
         }
@@ -170,9 +175,14 @@ export default function ApplicationDetails() {
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
         try {
-          const key = [`/api/activities/application/${String(updated.id)}`];
-          queryClient.invalidateQueries({ queryKey: key });
-          queryClient.refetchQueries({ queryKey: key });
+          const key = `/api/activities/application/${String(updated.id)}`;
+          try {
+            const activities = await (await import('@/services/http')).http.get<any>(key);
+            queryClient.setQueryData([key], activities);
+          } catch (fetchErr) {
+            console.error('Failed to fetch activities', fetchErr);
+            queryClient.invalidateQueries({ queryKey: [key] });
+          }
         } catch (e) {
           console.error('Failed to refresh activities cache', e);
         }
