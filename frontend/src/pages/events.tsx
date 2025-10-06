@@ -2030,6 +2030,12 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {importStep === 1 && (
+                    <>
+                      <Button size="xs" onClick={downloadSampleCsv} className="bg-white text-[#0071B0]">Download Sample Excel</Button>
+                      <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(2)}>Next</Button>
+                    </>
+                  )}
                   {importStep === 2 && (
                     <>
                       <Button size="xs" variant="outline" className="bg-white text-black" onClick={() => setImportStep(1)}>Back</Button>
@@ -2065,10 +2071,6 @@ export default function EventsPage() {
               {importStep === 1 && (
                 <div className="space-y-3">
                   <p className="text-xs text-gray-600">Download the sample CSV, fill it, then proceed to upload. Event will be set to the currently selected event.</p>
-                  <div className="flex gap-2">
-                    <Button size="xs" onClick={downloadSampleCsv}>Download Sample Excel</Button>
-                    <Button size="xs" variant="outline" onClick={() => { setImportStep(2); }}>Next</Button>
-                  </div>
                 </div>
               )}
 
