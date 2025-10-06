@@ -2037,9 +2037,20 @@ export default function EventsPage() {
               if (regId) {
                 // mark viewReg as converted immediately
                 setViewReg((prev: any) => {
-                  if (!prev) return prev;
-                  const matches = String(prev.id) === String(regId) || String(prev.eventRegId) === String(regId);
-                  return matches ? { ...prev, isConverted: 1, is_converted: 1 } : prev;
+                  const matchesPrev = prev && (String(prev.id) === String(regId) || String(prev.eventRegId) === String(regId));
+                  if (matchesPrev) {
+                    return { ...prev, isConverted: 1, is_converted: 1 };
+                  }
+                  // If prev is null or doesn't match, create a minimal viewReg so the modal shows converted status
+                  const minimal: any = {
+                    id: regId,
+                    eventRegId: regId,
+                    isConverted: 1,
+                    is_converted: 1,
+                    name: (init && (init as any).name) || '',
+                    registrationCode: (init && (init as any).registrationCode) || '',
+                  };
+                  return minimal;
                 });
                 try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); refetchRegs?.(); } catch {}
                 // prevent the AddLeadModal onClose handler from clearing the viewReg state
