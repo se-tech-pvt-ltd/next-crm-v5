@@ -283,6 +283,8 @@ export default function EventsPage() {
 
   const [addLeadModalOpen, setAddLeadModalOpen] = useState(false);
   const [leadInitialData, setLeadInitialData] = useState<any | null>(null);
+  // when a lead is created from a registration, prevent clearing the viewReg immediately so UI shows updated converted state
+  const [skipClearViewAfterLeadCreate, setSkipClearViewAfterLeadCreate] = useState(false);
 
   const openConvertToLeadModal = (reg: any) => {
     // find the linked event (selected event)
