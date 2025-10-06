@@ -250,17 +250,10 @@ export default function Applications() {
 
     if (queryStudentId && addApplicationStudentId !== queryStudentId) {
       setAddApplicationStudentId(queryStudentId);
-    }
-
-    if ((queryStudentId && queryStudentId === addApplicationStudentId) || (queryStudentId && addApplicationStudentId !== queryStudentId)) {
-      if (!isAddApplicationModalOpen) {
-        setIsAddApplicationModalOpen(true);
-      }
-      setIsStudentPickerOpen(false);
       return;
     }
 
-    if (addApplicationStudentId) {
+    if (queryStudentId || addApplicationStudentId) {
       if (!isAddApplicationModalOpen) {
         setIsAddApplicationModalOpen(true);
       }
