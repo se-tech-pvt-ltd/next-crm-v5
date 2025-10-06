@@ -18,6 +18,7 @@ import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Forbidden from "@/pages/forbidden";
 import Login from "@/pages/login";
+import ForgotPassword from "@/pages/forgot-password";
 import UniversityPage from "@/pages/university";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
