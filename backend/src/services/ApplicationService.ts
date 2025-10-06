@@ -305,7 +305,7 @@ export class ApplicationService {
     return enriched as any;
   }
 
-  static async updateApplication(id: string, updates: Partial<InsertApplication>): Promise<Application | undefined> {
+  static async updateApplication(id: string, updates: Partial<InsertApplication>, userId?: string): Promise<Application | undefined> {
     const currentApplication = await ApplicationModel.findById(id);
     if (!currentApplication) return undefined;
 
@@ -331,8 +331,7 @@ export class ApplicationService {
             fieldName,
             String(oldValue || ''),
             String(newValue || ''),
-            undefined,
-            'Next Bot'
+            userId
           );
         }
       }
