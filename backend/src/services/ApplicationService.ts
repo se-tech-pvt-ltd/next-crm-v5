@@ -96,7 +96,7 @@ export class ApplicationService {
         })
         .from(applications)
         .innerJoin(students, eq(applications.studentId, students.id))
-        .where(eq(students.counselorId, userId))
+        .where(eq(students.counsellorId, userId))
         .orderBy(desc(applications.createdAt));
       return (await this.enrichDropdownFields(rows)) as any;
     }
@@ -223,7 +223,7 @@ export class ApplicationService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(application.studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return undefined;
       }
     }
@@ -255,7 +255,7 @@ export class ApplicationService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return [];
       }
     }

@@ -31,7 +31,7 @@ export class AdmissionService {
           const student = await getStudent(adm.studentId);
           if (!student) continue;
           if (userRole === 'counselor' && userId) {
-            if (student.counselorId === userId) filtered.push(adm);
+            if ((student as any).counsellorId === userId) filtered.push(adm);
             continue;
           }
           if (userRole === 'admission_officer' && userId) {
@@ -73,7 +73,7 @@ export class AdmissionService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(admission.studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return undefined;
       }
     }
@@ -91,7 +91,7 @@ export class AdmissionService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return [];
       }
     }
@@ -143,6 +143,23 @@ export class AdmissionService {
       if (!existing || existing.length === 0) break;
       nextSeq += 1;
       admissionCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+    }
+
+    // If linked to an application, ensure application is not already converted
+    try {
+      if (admissionData.applicationId) {
+        const { ApplicationModel } = await import('../models/Application.js');
+        const app = await ApplicationModel.findById(String(admissionData.applicationId));
+        if (app && ((app as any).isConverted === 1 || (app as any).isConverted === '1')) {
+          const err = new Error('APPLICATION_CONVERTED');
+          // @ts-expect-error attach code
+          (err as any).code = 'APPLICATION_CONVERTED';
+          throw err;
+        }
+      }
+    } catch (e) {
+      // Rethrow to be handled by controller
+      throw e;
     }
 
     const admission = await AdmissionModel.create({

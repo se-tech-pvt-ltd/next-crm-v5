@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-lead-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import AddLeadForm from '@/components/add-lead-form';
@@ -19,6 +19,7 @@ import * as UsersService from '@/services/users';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { CommandMultiSelect } from './command-multi-select';
 import {
   User,
@@ -50,6 +51,22 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
     try { setSubmitLeadForm(() => fn); } catch {}
   }, []);
   const { toast } = useToast();
+  const { user } = useAuth() as any;
+
+  const computedInitialData = useMemo(() => {
+    try {
+      const base = initialData ? { ...initialData } : {};
+      const roleRaw = String((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || '').trim().toLowerCase();
+      const normalized = roleRaw.replace(/[^a-z0-9]+/g, '_');
+      if ((normalized === 'admission_officer' || normalized === 'admission officer' || normalized === 'admissionofficer') && !base.admissionOfficerId && !base.admission_officer_id && user?.id) {
+        base.admissionOfficerId = String(user.id);
+        base.admission_officer_id = String(user.id);
+      }
+      return base;
+    } catch (e) {
+      return initialData;
+    }
+  }, [initialData, user]);
   const queryClient = useQueryClient();
   const [counselorSearchQuery, setCounselorSearchQuery] = useState('');
   const [searchingCounselors, setSearchingCounselors] = useState(false);
@@ -239,7 +256,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
     <DetailsDialogLayout
       open={open}
       onOpenChange={onOpenChange}
-      title="Add Lead"
+      title={initialData && (initialData as any).eventRegId ? 'Convert to Lead' : 'Add Lead'}
       headerClassName="bg-[#223E7D] text-white"
       contentClassName="no-not-allowed w-[65vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
       headerLeft={(
@@ -248,7 +265,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
             <Users className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
-            <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New Lead</div>
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate">{initialData && (initialData as any).eventRegId ? 'Convert to Lead' : 'Add New Lead'}</div>
             <div className="text-xs opacity-90 truncate">Capture lead information to start the student journey</div>
           </div>
         </div>
@@ -286,7 +303,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
         <AddLeadForm
           onCancel={() => onOpenChange(false)}
           onSuccess={() => { onOpenChange(false); try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); } catch {} }}
-          initialData={initialData}
+          initialData={computedInitialData}
           onRegisterSubmit={handleRegisterSubmit}
         />
       )}

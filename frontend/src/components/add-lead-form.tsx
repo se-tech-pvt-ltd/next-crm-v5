@@ -209,6 +209,20 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     return '';
   };
 
+  const isBranchManager = (() => {
+    try {
+      const rn = getNormalizedRole();
+      return rn === 'branch_manager' || rn === 'branchmanager' || rn === 'branch-manager';
+    } catch { return false; }
+  })();
+
+  const isAdmissionOfficer = (() => {
+    try {
+      const rn = getNormalizedRole();
+      return rn === 'admission_officer' || rn === 'admission officer' || rn === 'admissionofficer';
+    } catch { return false; }
+  })();
+
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
     value: String(r.id),
@@ -376,8 +390,14 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
         })
         .filter((u: any) => {
-          // Only include admission officers when a branch is selected
-          if (!selectedBranchId) return false;
+          // Include the current user when no branch is selected so admission officer sees themselves
+          if (!selectedBranchId) {
+            try {
+              const myRole = getNormalizedRole();
+              if ((myRole === 'admission_officer' || myRole === 'admission officer' || myRole === 'admissionofficer') && String((user as any)?.id) === String(u.id)) return true;
+            } catch {}
+            return false;
+          }
           const links = Array.isArray(branchEmps) ? branchEmps : [];
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
         })
@@ -1048,7 +1068,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Region *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
+                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled || isBranchManager || isAdmissionOfficer} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1061,7 +1081,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Branch *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = getNormalizedRole(); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(isRegional ? true : !isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = getNormalizedRole(); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(isRegional ? true : !isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled || isBranchManager || isAdmissionOfficer} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1087,7 +1107,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Admission Officer *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={admissionOfficerOptions} loading={usersLoading} placeholder="Search and select officer..." searchPlaceholder="Type to search officers..." emptyMessage={counselorSearchQuery ? 'No officers found.' : 'Start typing to search officers...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={isAdmissionOfficer} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
