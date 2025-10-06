@@ -1490,7 +1490,7 @@ export default function EventsPage() {
 
         {showList && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
               <Card>
                 <CardHeader className="pb-1 p-2">
                   <CardTitle className="text-xs font-medium flex items-center gap-2">
