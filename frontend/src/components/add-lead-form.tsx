@@ -209,6 +209,13 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     return '';
   };
 
+  const isBranchManager = (() => {
+    try {
+      const rn = getNormalizedRole();
+      return rn === 'branch_manager' || rn === 'branchmanager' || rn === 'branch-manager';
+    } catch { return false; }
+  })();
+
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
     value: String(r.id),
@@ -1048,7 +1055,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Region *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled} />
+                      <SearchableSelect value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); setAutoRegionDisabled(false); setAutoBranchDisabled(false); }} placeholder="Select region" searchPlaceholder="Search regions..." options={regionOptions} emptyMessage="No regions found" className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoRegionDisabled || isBranchManager} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1061,7 +1068,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Branch *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = getNormalizedRole(); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(isRegional ? true : !isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled} />
+                      <SearchableCombobox value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); const rn = getNormalizedRole(); const isRegional = rn === 'regional_manager' || rn === 'regional_head'; setAutoBranchDisabled(!isRegional); setAutoRegionDisabled(isRegional ? true : !isRegional); }} onSearch={handleBranchSearch} options={branchOptions} loading={false} placeholder="Select branch" searchPlaceholder="Search branches..." emptyMessage={branchSearchQuery ? 'No branches found.' : 'Start typing to search branches...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={autoBranchDisabled || isBranchManager} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
