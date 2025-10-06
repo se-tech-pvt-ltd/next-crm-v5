@@ -2044,6 +2044,8 @@ export default function EventsPage() {
                 try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); refetchRegs?.(); } catch {}
                 // prevent the AddLeadModal onClose handler from clearing the viewReg state
                 setSkipClearViewAfterLeadCreate(true);
+                // ensure the registration details modal is open so user sees updated converted status
+                setIsViewRegOpen(true);
               }
             } catch {}
           }}
