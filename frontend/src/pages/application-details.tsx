@@ -487,11 +487,7 @@ export default function ApplicationDetails() {
 
             {/* Activity Sidebar (lead-style) */}
             <div className="border-l bg-white flex flex-col min-h-0" style={{ width: '420px' }}>
-              <div className="p-4 min-h-0 flex-1 overflow-y-auto">
-                <h3 className="text-sm font-semibold mb-2 flex items-center">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Activity Timeline
-                </h3>
+              <div className="pt-1 min-h-0 flex-1 overflow-y-auto">
                 <ActivityTracker
                   entityType="application"
                   entityId={application.id}
