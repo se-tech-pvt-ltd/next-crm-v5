@@ -490,10 +490,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         city: initialData.city || '',
         source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
         status: mapLabelToKeyRobust('Status', initialData.status || defaultStatusLabel),
-        counselorId: initialData.counselorId || '',
+        counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
         type: mapLabelToKeyRobust('Type', initialData.type || defaultTypeLabel),
+        // populate region/branch/counsellor/admission defaults when provided (usually from an event)
+        regionId: initialData.regionId || initialData.region_id || '',
+        branchId: initialData.branchId || initialData.branch_id || '',
+        counsellorId: initialData.counsellorId || initialData.counselorId || initialData.counsellor_id || initialData.counselor_id || '',
+        admissionOfficerId: initialData.admissionOfficerId || initialData.admission_officer_id || '',
       };
       form.reset(values);
     } else if (dropdownData) {
