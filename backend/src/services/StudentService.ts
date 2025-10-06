@@ -86,7 +86,7 @@ export class StudentService {
     const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
     const counselorMap: Record<string,string> = {};
     counselorList.forEach((c: any) => { if (c.id) counselorMap[c.id]=c.value; if (c.key) counselorMap[c.key]=c.value; });
-    const withCounselorName = enriched.map((r: any) => ({ ...r, counselor: counselorMap[r.counselorId] || r.counselor || null }));
+    const withCounselorName = enriched.map((r: any) => ({ ...r, counselor: counselorMap[r.counsellorId] || r.counselor || null }));
     return withCounselorName.map(this.mapStudentForApi);
   }
 
@@ -96,7 +96,7 @@ export class StudentService {
     if (!student) return undefined;
 
     // Check role-based access
-    if (userRole === 'counselor' && userId && student.counselorId !== userId) {
+    if (userRole === 'counselor' && userId && student.counsellorId !== userId) {
       return undefined;
     }
     if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
@@ -120,14 +120,14 @@ export class StudentService {
     const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
     const counselorMap: Record<string,string> = {};
     counselorList.forEach((c: any) => { if (c.id) counselorMap[c.id]=c.value; if (c.key) counselorMap[c.key]=c.value; });
-    enriched.counselor = counselorMap[enriched.counselorId] || enriched.counselor || null;
+    enriched.counselor = counselorMap[enriched.counsellorId] || enriched.counselor || null;
     return this.mapStudentForApi(enriched) as any;
   }
 
   static async getStudentByLeadId(leadId: string, userId?: string, userRole?: string): Promise<Student | undefined> {
     const student = await StudentModel.findByLeadId(leadId);
     if (!student) return undefined;
-    if (userRole === 'counselor' && userId && student.counselorId !== userId) {
+    if (userRole === 'counselor' && userId && student.counsellorId !== userId) {
       return undefined;
     }
     if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
@@ -138,7 +138,7 @@ export class StudentService {
     const counselorList = (dropdowns || []).filter((d: any) => (d.fieldName || '').toLowerCase().includes('counsel'));
     const counselorMap: Record<string,string> = {};
     counselorList.forEach((c: any) => { if (c.id) counselorMap[c.id]=c.value; if (c.key) counselorMap[c.key]=c.value; });
-    enriched.counselor = counselorMap[enriched.counselorId] || enriched.counselor || null;
+    enriched.counselor = counselorMap[enriched.counsellorId] || enriched.counselor || null;
     return this.mapStudentForApi(enriched) as any;
   }
 
@@ -171,7 +171,7 @@ export class StudentService {
     if (userRole === 'counselor' && userId) {
       rows = await db.select().from(students).where(
         and(
-          eq(students.counselorId, userId),
+          eq(students.counsellorId, userId),
           searchConditions
         )
       );
@@ -202,7 +202,7 @@ export class StudentService {
       // Prefer values coming from request; fallback to lead record
       branchId: (studentData as any).branchId ?? (lead as any)?.branchId ?? undefined,
       regionId: (studentData as any).regionId ?? (lead as any)?.regionId ?? undefined,
-      counsellorId: (studentData as any).counsellorId ?? (studentData as any).counselorId ?? (lead as any)?.counselorId ?? undefined,
+      counsellorId: (studentData as any).counsellorId ?? (studentData as any).counsellorId ?? (lead as any)?.counsellorId ?? undefined,
       admissionOfficerId: (studentData as any).admissionOfficerId ?? (lead as any)?.admissionOfficerId ?? undefined,
     } as any;
     console.log('[StudentService.convertFromLead] payload:', JSON.stringify(payload));
