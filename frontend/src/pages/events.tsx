@@ -2011,7 +2011,7 @@ export default function EventsPage() {
 
         {/* Import CSV Wizard */}
         <Dialog open={isImportOpen} onOpenChange={(o) => { setIsImportOpen(o); if (!o) { setImportStep(1); setImportErrors([]); setImportValidRows([]); setImportFileName(''); } }}>
-          <DialogContent hideClose className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl">
+          <DialogContent hideClose className="max-w-6xl w-[90vw] max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl flex flex-col">
             <DialogTitle className="sr-only">Import Registrations (CSV/Excel)</DialogTitle>
             <DialogHeader className="p-0">
               <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
