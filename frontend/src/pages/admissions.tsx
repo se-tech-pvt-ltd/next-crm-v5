@@ -1,25 +1,21 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpTooltip } from '@/components/help-tooltip';
 
 import { Admission, Student } from '@/lib/types';
-import { Plus, MoreHorizontal, Trophy, Calendar, DollarSign, School, AlertCircle, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
+import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { useLocation, useRoute } from 'wouter';
-import * as DropdownsService from '@/services/dropdowns';
 import * as AdmissionsService from '@/services/admissions';
 
 export default function Admissions() {
-  const [decisionFilter, setDecisionFilter] = useState('all');
   const [universityFilter, setUniversityFilter] = useState('all');
   const [, setLocation] = useLocation();
   const [matchAd, adParams] = useRoute('/admissions/:id');
@@ -33,19 +29,6 @@ export default function Admissions() {
 
   const queryClient = useQueryClient();
 
-  const { data: admissionsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions')
-  });
-
-  const decisionOptions = useMemo(() => {
-    const dd: any = admissionsDropdowns as any;
-    let list: any[] = dd?.Decision || dd?.decision || dd?.Decisions || dd?.decisionStatus || [];
-    if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
-  }, [admissionsDropdowns]);
-
   // Open details modal when route matches and ensure selected admission is set
   useEffect(() => {
     const id = (matchEdit ? editParams?.id : adParams?.id) || null;
@@ -55,7 +38,6 @@ export default function Admissions() {
         if (found) {
           setSelectedAdmission(found);
         } else {
-          // Try to read from query cache first (keeps selection in sync with mutations)
           try {
             const cached = queryClient.getQueryData([`/api/admissions/${id}`]) as any;
             if (cached) {
@@ -73,7 +55,6 @@ export default function Admissions() {
   }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
 
   useEffect(() => {
-    // If route has an id and there's a cached single admission for it, update selectedAdmission
     const id = (matchEdit ? editParams?.id : adParams?.id) || null;
     if (!id) return;
     try {
@@ -82,38 +63,13 @@ export default function Admissions() {
     } catch {}
   }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
-  const visaStatusOptions = useMemo(() => {
-    const dd: any = admissionsDropdowns as any;
-    let list: any[] = dd?.['Visa Status'] || dd?.visaStatus || dd?.VisaStatus || dd?.visa_status || [];
-    if (!Array.isArray(list)) list = [];
-    return list;
-  }, [admissionsDropdowns]);
-
-  const getVisaStatusLabel = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const o of visaStatusOptions) {
-      const key = (o?.id ?? o?.key ?? o?.value);
-      if (key != null) {
-        const k = String(key);
-        map.set(k, String(o.value));
-        map.set(k.toLowerCase(), String(o.value));
-      }
-    }
-    return (val?: string | null) => {
-      if (!val) return '';
-      const v = String(val);
-      return map.get(v) || map.get(v.toLowerCase()) || v.replace(/[_-]/g, ' ');
-    };
-  }, [visaStatusOptions]);
-
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
   });
 
   const filteredAdmissions = admissions?.filter(admission => {
-    const decisionMatch = decisionFilter === 'all' || admission.decision === decisionFilter;
     const universityMatch = universityFilter === 'all' || admission.university === universityFilter;
-    return decisionMatch && universityMatch;
+    return universityMatch;
   }) || [];
 
   // Get unique universities for filter dropdown
@@ -128,45 +84,6 @@ export default function Admissions() {
   const getStudentName = (studentId: string) => {
     const student = students?.find(s => s.id === studentId);
     return student?.name || 'Unknown';
-  };
-
-  const getDecisionColor = (decision: string) => {
-    switch (decision) {
-      case 'accepted':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'waitlisted':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'conditional':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getVisaStatusColor = (status: string) => {
-    const s = (status || '').toLowerCase().replace(/_/g, '-');
-    switch (s) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'not-applied':
-      case 'on-hold':
-      case 'interview-scheduled':
-      case 'applied':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
   };
 
   return (
@@ -248,19 +165,6 @@ export default function Admissions() {
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
                 </div>
-                <Select value={decisionFilter} onValueChange={setDecisionFilter}>
-                  <SelectTrigger className="w-28 h-7 text-xs">
-                    <SelectValue placeholder="Filter by decision" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Decisions</SelectItem>
-                    {decisionOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>
                   <SelectTrigger className="w-28 h-7 text-xs">
                     <SelectValue placeholder="Filter by university" />
@@ -275,13 +179,12 @@ export default function Admissions() {
                   </SelectContent>
                 </Select>
 
-                {(decisionFilter !== 'all' || universityFilter !== 'all') && (
+                {(universityFilter !== 'all') && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="h-7 text-xs"
                     onClick={() => {
-                      setDecisionFilter('all');
                       setUniversityFilter('all');
                     }}
                   >
@@ -307,7 +210,7 @@ export default function Admissions() {
               <EmptyState
                 icon={<Trophy className="h-10 w-10" />}
                 title="No admissions found"
-                description={decisionFilter === 'all' ? 'Admission records will appear here when universities make decisions.' : `No admissions with decision "${decisionFilter}".`}
+                description={'Admission records will appear here when universities make decisions.'}
               />
             ) : (
               <Table className="text-xs">
@@ -317,10 +220,7 @@ export default function Admissions() {
                     <TableHead className="h-8 px-2 text-[11px]">University</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Program</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Admission ID</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Decision</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Scholarship</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Visa Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Decision Date</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -345,11 +245,6 @@ export default function Admissions() {
                         <div className="text-[11px] font-mono text-gray-700 truncate max-w-[12rem]">{(admission as any).admissionId || admission.id}</div>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <Badge className={getDecisionColor(admission.decision)}>
-                          {admission.decision}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
                         {admission.scholarshipAmount ? (
                           <div className="flex items-center text-xs text-green-600">
                             <DollarSign className="w-3 h-3 mr-1" />
@@ -358,17 +253,6 @@ export default function Admissions() {
                         ) : (
                           <span className="text-xs text-gray-500">None</span>
                         )}
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Badge className={getVisaStatusColor((admission.visaStatus || 'pending') as string)}>
-                          {getVisaStatusLabel(admission.visaStatus || 'pending')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(admission.decisionDate)}
-                        </div>
                       </TableCell>
                       <TableCell className="p-2">
                         <DropdownMenu>
