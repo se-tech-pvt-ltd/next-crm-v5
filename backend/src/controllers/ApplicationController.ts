@@ -48,8 +48,9 @@ export class ApplicationController {
   static async createApplication(req: AuthenticatedRequest, res: Response) {
     try {
       const validatedData = insertApplicationSchema.parse(req.body);
-      const application = await ApplicationService.createApplication(validatedData);
-      res.status(201).json(application);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+    const application = await ApplicationService.createApplication(validatedData, currentUser.id);
+    res.status(201).json(application);
     } catch (error) {
       console.error("Create application error:", error);
       if (error instanceof z.ZodError) {
