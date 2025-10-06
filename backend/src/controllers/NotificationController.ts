@@ -28,8 +28,8 @@ export class NotificationController {
           channel: 'email',
           variables: {
             email: (user as any).email || email,
-            first_name: (user as any).firstName || (user as any).first_name || '',
-            last_name: (user as any).lastName || (user as any).last_name || '',
+            firstName: (user as any).firstName || (user as any).first_name || '',
+            lastName: (user as any).lastName || (user as any).last_name || '',
           },
           recipientAddress: (user as any).email || email,
           status: 'pending',
