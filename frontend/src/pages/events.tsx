@@ -2097,10 +2097,10 @@ export default function EventsPage() {
                     <div className="text-xs text-gray-500">No preview available. Select a file to see rows here.</div>
                   )}
 
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
-                    <Button size="sm" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
-                  </div>
+                  <div className="sticky bottom-0 bg-white/90 p-2 flex gap-2 z-20">
+                  <Button size="sm" variant="outline" onClick={() => setImportStep(1)}>Back</Button>
+                  <Button size="sm" onClick={() => setImportStep(3)} disabled={!importFileName}>Next</Button>
+                </div>
                 </div>
               )}
 
