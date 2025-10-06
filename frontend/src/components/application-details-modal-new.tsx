@@ -223,13 +223,6 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         setCurrentApp((prevApp) => (prevApp ? { ...prevApp, appStatus: updated.appStatus } as Application : prevApp));
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
-        // Log activity
-        try {
-          const content = `status changed from \"${prev}\" to \"${curr}\"`;
-          await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log application status change', err);
-        }
         toast({ title: 'Status updated' });
       } catch (err) {
         console.error('Error handling application status success', err);
@@ -253,17 +246,7 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
-        // If appStatus changed, log activity
-        try {
-          const prevStatus = prevApp?.appStatus ?? '';
-          const currStatus = updated.appStatus ?? '';
-          if (prevStatus !== currStatus) {
-            const content = `status changed from \"${prevStatus}\" to \"${currStatus}\"`;
-            await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
-          }
-        } catch (err) {
-          console.warn('Failed to log application status change on update', err);
-        }
+        // If appStatus changed, server will log activity; just notify and refresh.
         toast({ title: 'Application updated' });
         try { setLocation(`/applications/${updated.id}`); } catch {}
       } catch (e) {
