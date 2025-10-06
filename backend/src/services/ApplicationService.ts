@@ -223,7 +223,7 @@ export class ApplicationService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(application.studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return undefined;
       }
     }
@@ -255,7 +255,7 @@ export class ApplicationService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return [];
       }
     }
