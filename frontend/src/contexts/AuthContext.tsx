@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { http, setUnauthorizedHandler } from '@/services/http';
+import { queryClient } from '@/lib/queryClient';
 
 export interface User {
   id: string;
@@ -93,11 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (userData: User) => {
-    // Ensure queries are cleared/refetched when user changes to avoid stale cached data
-    try { const { queryClient } = await import('@/lib/queryClient'); /* placeholder to satisfy TS */ } catch {}
+    // Clear cached queries immediately to avoid showing previous user's data
+    try {
+      queryClient.clear();
+    } catch (e) {}
+
     // Set minimal session immediately
     setUser(userData);
-    localStorage.setItem('auth_user', JSON.stringify(userData));
+    try { localStorage.setItem('auth_user', JSON.stringify(userData)); } catch {}
 
     // Fetch full user profile and role access before UI depends on it
     (async () => {
@@ -115,13 +119,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         const merged = { ...userData, ...(full || {}) } as User & any;
         setUser(merged);
-        localStorage.setItem('auth_user', JSON.stringify(merged));
+        try { localStorage.setItem('auth_user', JSON.stringify(merged)); } catch {}
 
         const roleId = String((merged as any)?.roleId ?? (merged as any)?.role_id ?? '');
         const UserAccessService = await import('@/services/userAccess');
         const list = await UserAccessService.listUserAccess({ roleId }).catch(() => []);
         setAccessByRole(Array.isArray(list) ? list : []);
         try { if (roleId) localStorage.setItem(`user_access_cache_${roleId}`, JSON.stringify(Array.isArray(list) ? list : [])); } catch {}
+
+        // Invalidate and refetch queries now that we have the authoritative user
+        try {
+          await queryClient.invalidateQueries();
+          await queryClient.refetchQueries();
+        } catch (e) {}
       } catch {}
       finally {
         setIsAccessLoading(false);
@@ -134,6 +144,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { logout: apiLogout } = await import('@/services/auth');
       await apiLogout();
     } catch {}
+
+    // Clear query cache on logout
+    try { queryClient.clear(); } catch (e) {}
+
     setUser(null);
     try { localStorage.removeItem('auth_user'); } catch {}
     try { localStorage.removeItem('auth_token'); } catch {}
