@@ -167,23 +167,34 @@ export class AdmissionService {
       admissionId: admissionCode,
     } as InsertAdmission);
 
-    // Log activity for the student
-    await ActivityService.logActivity(
-      'student',
-      admission.studentId,
-      'admission_created',
-      'Admission decision received',
-      `${admission.decision} decision received from ${admission.university} for ${admission.program}`
-    );
+    // Only log activity if the decision value is meaningful
+    const isValidDecision = (d: any) => {
+      if (d === undefined || d === null) return false;
+      const s = String(d).trim().toLowerCase();
+      if (!s) return false;
+      if (s === 'undefined' || s === 'null' || s === 'n/a') return false;
+      return true;
+    };
 
-    // Also log activity for the admission itself
-    await ActivityService.logActivity(
-      'admission',
-      admission.id,
-      'created',
-      'Admission decision recorded',
-      `${admission.decision} decision from ${admission.university} for ${admission.program}`
-    );
+    if (isValidDecision(admission.decision)) {
+      // Log activity for the student
+      await ActivityService.logActivity(
+        'student',
+        admission.studentId,
+        'admission_created',
+        'Admission decision received',
+        `${admission.decision} decision received from ${admission.university} for ${admission.program}`
+      );
+
+      // Also log activity for the admission itself
+      await ActivityService.logActivity(
+        'admission',
+        admission.id,
+        'created',
+        'Admission decision recorded',
+        `${admission.decision} decision from ${admission.university} for ${admission.program}`
+      );
+    }
 
     return admission;
   }
