@@ -247,18 +247,30 @@ export class AdmissionService {
             return String(v);
           };
 
-          await ActivityService.logActivity(
-            'admission',
-            id,
-            'updated',
-            `${fieldDisplayName} updated`,
-            `${fieldDisplayName} changed from "${formatForLog(oldValue)}" to "${formatForLog(newValue)}"`,
-            fieldName,
-            String(oldValue || ''),
-            String(newValue || ''),
-            undefined,
-            "Next Bot"
-          );
+            // Skip logging if decision field was updated to an invalid/empty value
+          const isInvalidDecisionUpdate = (fname: string, nv: any) => {
+            if (!fname) return false;
+            const fn = String(fname).toLowerCase();
+            if (fn !== 'decision' && fn !== 'admissiondecision') return false;
+            if (nv === undefined || nv === null) return true;
+            const sv = String(nv).trim().toLowerCase();
+            return sv === '' || sv === 'undefined' || sv === 'null' || sv === 'n/a';
+          };
+
+          if (!isInvalidDecisionUpdate(fieldName, newValue)) {
+            await ActivityService.logActivity(
+              'admission',
+              id,
+              'updated',
+              `${fieldDisplayName} updated`,
+              `${fieldDisplayName} changed from "${formatForLog(oldValue)}" to "${formatForLog(newValue)}"`,
+              fieldName,
+              String(oldValue || ''),
+              String(newValue || ''),
+              undefined,
+              "Next Bot"
+            );
+          }
         }
       }
     }
