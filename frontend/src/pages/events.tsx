@@ -1506,6 +1506,18 @@ export default function EventsPage() {
               <Card>
                 <CardHeader className="pb-1 p-2">
                   <CardTitle className="text-xs font-medium flex items-center gap-2">
+                    <Target className="w-3 h-3 text-gray-500" />
+                    Active registrations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 pt-0">
+                  <div className="text-base font-semibold">{(registrations || []).filter((r:any) => !(((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1'))).length}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-1 p-2">
+                  <CardTitle className="text-xs font-medium flex items-center gap-2">
                     <UserPlus className="w-3 h-3 text-primary" />
                     Converted
                   </CardTitle>
