@@ -239,7 +239,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
     <DetailsDialogLayout
       open={open}
       onOpenChange={onOpenChange}
-      title="Add Lead"
+      title={initialData && (initialData as any).eventRegId ? 'Convert to Lead' : 'Add Lead'}
       headerClassName="bg-[#223E7D] text-white"
       contentClassName="no-not-allowed w-[65vw] max-w-7xl max-h-[90vh] overflow-hidden p-0 rounded-xl shadow-xl"
       headerLeft={(
@@ -248,7 +248,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
             <Users className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
-            <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New Lead</div>
+            <div className="text-base sm:text-lg font-semibold leading-tight truncate">{initialData && (initialData as any).eventRegId ? 'Convert to Lead' : 'Add New Lead'}</div>
             <div className="text-xs opacity-90 truncate">Capture lead information to start the student journey</div>
           </div>
         </div>
