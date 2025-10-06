@@ -92,7 +92,8 @@ export class StudentController {
     try {
       const id = req.params.id;
       const validatedData = insertStudentSchema.partial().parse(req.body);
-      const student = await StudentService.updateStudent(id, validatedData);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const student = await StudentService.updateStudent(id, validatedData, currentUser.id);
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
