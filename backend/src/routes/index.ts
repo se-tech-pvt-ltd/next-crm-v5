@@ -32,6 +32,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Register auth route first (public)
+  try {
+    const { notificationRoutes } = await import('./notificationRoutes.js');
+    app.use('/api/notifications', notificationRoutes);
+  } catch (e) {
+    // notification routes not available
+  }
   app.use('/api/auth', authRoutes);
 
   // Public version endpoint for diagnostics
