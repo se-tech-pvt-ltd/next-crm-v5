@@ -556,6 +556,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   // Auto-select region/branch based on JWT and assignments
   useEffect(() => {
     try {
+      // If this form was opened with initialData originating from an event (region/branch defaults),
+      // do not override those values with JWT-derived defaults.
+      if (initialData && (initialData.regionId || initialData.region_id || initialData.branchId || initialData.branch_id)) return;
+
       const currentRegion = String(form.getValues('regionId') || '');
       const currentBranch = String(form.getValues('branchId') || '');
       if (currentRegion && currentBranch) return;
