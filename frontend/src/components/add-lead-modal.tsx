@@ -303,7 +303,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
         <AddLeadForm
           onCancel={() => onOpenChange(false)}
           onSuccess={() => { onOpenChange(false); try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); } catch {} }}
-          initialData={initialData}
+          initialData={computedInitialData}
           onRegisterSubmit={handleRegisterSubmit}
         />
       )}
