@@ -65,6 +65,9 @@ export class AdmissionController {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
+      if (error instanceof Error && (error as any).code === 'APPLICATION_CONVERTED') {
+        return res.status(400).json({ message: 'Application has already been converted to an admission' });
+      }
       res.status(500).json({ message: "Failed to create admission" });
     }
   }
