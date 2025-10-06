@@ -843,6 +843,7 @@ export default function EventsPage() {
       toast({ title: 'Select an Event first', variant: 'destructive' });
       return;
     }
+    if (!canCreateEvent) { toast({ title: 'You do not have permission to create registrations', variant: 'destructive' }); return; }
     const defaultStatus = statusOptions.find((o: any) => o.isDefault);
     const defaultSource = sourceOptions.find((o: any) => o.isDefault);
     // find the linked event (selected event)
@@ -874,6 +875,7 @@ export default function EventsPage() {
       toast({ title: 'Select an Event to import into', variant: 'destructive' });
       return;
     }
+    if (!canCreateEvent) { toast({ title: 'You do not have permission to import registrations', variant: 'destructive' }); return; }
     try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsImportOpen(true)); } catch { setIsImportOpen(true); }
     setImportStep(1);
     setImportFileName('');
@@ -1600,9 +1602,9 @@ export default function EventsPage() {
                   )}
                   {filterEventId && filterEventId !== 'all' && (
                     <>
-                      <Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>
+                      {canCreateEvent && (<Button size="xs" variant="default" onClick={openAddRegistration} className="rounded-full px-3"><Plus className="w-3 h-3 mr-1" />Add Registration</Button>)}
                       <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async (e) => { const input = e.target as HTMLInputElement; const f = input.files?.[0]; input.value = ''; if (f) { setImportFileName(f.name); await validateCsvText(f); setImportStep(3); } }} />
-                      <Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import</Button>
+                      {canCreateEvent && (<Button size="xs" variant="default" onClick={handleImportClick} className="rounded-full px-3"><Upload className="w-3 h-3 mr-1" />Import</Button>)}
                     </>
                   )}
                 </div>
@@ -1728,7 +1730,7 @@ export default function EventsPage() {
                   const formEl = document.querySelector('#add-registration-form') as HTMLFormElement | null;
                   if (formEl) formEl.requestSubmit();
                 }}
-                disabled={addRegMutation.isPending}
+                disabled={!canCreateEvent || addRegMutation.isPending}
               >
                 {addRegMutation.isPending ? 'Saving…' : 'Save'}
               </Button>
@@ -1869,7 +1871,7 @@ export default function EventsPage() {
             )}
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsEditRegOpen(false)}>Cancel</Button>
-              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={updateRegMutation.isPending || !editingReg?.name || (editingReg?.email ? !isValidEmail(editingReg.email) : false)}>Save</Button>
+              <Button onClick={() => editingReg && updateRegMutation.mutate({ id: editingReg.id, data: { status: editingReg.status, name: editingReg.name, number: editingReg.number, email: editingReg.email, city: editingReg.city, source: editingReg.source } })} disabled={!canUpdateEvent || updateRegMutation.isPending || !editingReg?.name || (editingReg?.email ? !isValidEmail(editingReg.email) : false)}>Save</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -1905,6 +1907,7 @@ export default function EventsPage() {
                 if (!isEditingView) {
                   return (
                     <>
+                      {canUpdateEvent && (
                       <Button
                         variant="outline"
                         size="xs"
@@ -1914,6 +1917,7 @@ export default function EventsPage() {
                       >
                         Edit
                       </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="xs"
@@ -1948,7 +1952,7 @@ export default function EventsPage() {
                           setViewReg((prev: any) => prev ? { ...prev, ...payload } : prev);
                         } catch {}
                       }}
-                      disabled={updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
+                      disabled={!canUpdateEvent || updateRegMutation.isPending || !viewEditData.name || (viewEditData.email ? !isValidEmail(viewEditData.email) : false)}
                       title="Save"
                     >
                       {updateRegMutation.isPending ? 'Saving…' : 'Save'}
