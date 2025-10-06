@@ -55,7 +55,8 @@ function Router() {
 
   // Redirects should not run during render. Use effects to perform navigation.
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated && location !== '/login') {
+    // Allow unauthenticated users to access /login and /forgot-password without redirecting
+    if (!isLoading && !isAuthenticated && location !== '/login' && location !== '/forgot-password') {
       try { setLocation('/login'); } catch {}
     }
   }, [isLoading, isAuthenticated, location, setLocation]);
