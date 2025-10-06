@@ -2150,40 +2150,40 @@ export default function EventsPage() {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
-                    <Button size="sm" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
-                      setIsImporting(true);
-                      let success = 0; let failed = 0;
-                      for (const row of importValidRows) {
-                        try { // eslint-disable-next-line no-await-in-loop
-                          try {
-                            const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
-                            const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
-                            const payload: any = { ...row };
-                            if (ev) {
-                              if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
-                              if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
-                              if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
-                              if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
-                            }
-                            await RegService.createRegistration(payload);
-                          } catch (e) {
-                            await RegService.createRegistration(row);
+                  <div className="sticky bottom-0 bg-white/90 p-3 flex gap-2 justify-end z-20">
+                  <Button size="sm" variant="outline" onClick={() => setImportStep(2)}>Back</Button>
+                  <Button size="sm" disabled={isImporting || importValidRows.length === 0} onClick={async () => {
+                    setIsImporting(true);
+                    let success = 0; let failed = 0;
+                    for (const row of importValidRows) {
+                      try { // eslint-disable-next-line no-await-in-loop
+                        try {
+                          const targetEventId = row.eventId || filterEventId || selectedEvent?.id;
+                          const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(targetEventId));
+                          const payload: any = { ...row };
+                          if (ev) {
+                            if (ev.regionId || ev.region_id) payload.regionId = String(ev.regionId ?? ev.region_id);
+                            if (ev.branchId || ev.branch_id) payload.branchId = String(ev.branchId ?? ev.branch_id);
+                            if (ev.counsellorId || ev.counsellor_id) payload.counsellorId = String(ev.counsellorId ?? ev.counsellor_id);
+                            if (ev.admissionOfficerId || ev.admission_officer_id) payload.admissionOfficerId = String(ev.admissionOfficerId ?? ev.admission_officer_id);
                           }
-                          success++;
-                        } catch { failed++; }
-                      }
-                      setIsImporting(false);
-                      toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
-                      setIsImportOpen(false);
-                      setImportStep(1);
-                      setImportErrors([]);
-                      setImportValidRows([]);
-                      setImportFileName('');
-                      refetchRegs();
-                    }}>{isImporting ? 'Importing��' : `Insert ${importValidRows.length} rows`}</Button>
-                  </div>
+                          await RegService.createRegistration(payload);
+                        } catch (e) {
+                          await RegService.createRegistration(row);
+                        }
+                        success++;
+                      } catch { failed++; }
+                    }
+                    setIsImporting(false);
+                    toast({ title: 'Import finished', description: `${success} added, ${failed} failed` });
+                    setIsImportOpen(false);
+                    setImportStep(1);
+                    setImportErrors([]);
+                    setImportValidRows([]);
+                    setImportFileName('');
+                    refetchRegs();
+                  }}>{isImporting ? 'Importing…' : `Insert ${importValidRows.length} rows`}</Button>
+                </div>
                 </div>
               )}
             </div>
