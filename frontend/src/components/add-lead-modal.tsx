@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-lead-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import AddLeadForm from '@/components/add-lead-form';
