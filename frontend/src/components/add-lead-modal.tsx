@@ -39,6 +39,9 @@ interface AddLeadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: Partial<any>;
+  // Called when a lead is successfully created. If the lead was created from an event registration,
+  // initialData.eventRegId will be present and callers can update UI accordingly.
+  onCreated?: (lead: any, initialData?: Partial<any>) => void;
 }
 
 export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalProps) {
