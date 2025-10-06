@@ -316,8 +316,12 @@ export default function EventsPage() {
 
     setLeadInitialData(initialData);
 
-    // close the registration details modal first
+    // aggressively close the registration details modal and clear viewReg to ensure it does not sit behind the AddLead modal
     try { setIsViewRegOpen(false); } catch {}
+    try { setViewReg(null); } catch {}
+
+    // set a short guard so route-driven handlers don't re-open the registration view while we're switching to the lead modal
+    try { setSkipOpenViewForLeadRoute(true); setTimeout(() => setSkipOpenViewForLeadRoute(false), 700); } catch {}
 
     // navigate to /lead route for this registration
     try {
@@ -328,7 +332,7 @@ export default function EventsPage() {
     const openModalFn = () => {
       try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setAddLeadModalOpen(true)); } catch { setAddLeadModalOpen(true); }
     };
-    setTimeout(openModalFn, 150);
+    setTimeout(openModalFn, 250);
   };
 
   // Keep URL in sync when the Add Lead modal opens/closes
