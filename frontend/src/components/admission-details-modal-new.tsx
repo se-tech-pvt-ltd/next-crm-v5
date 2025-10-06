@@ -145,7 +145,16 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, { status: newStatus });
     },
-    onSuccess: (updatedAdmission: any) => {
+    onMutate: async (newStatus: string) => {
+      const prev = admission?.status ?? '';
+      setCurrentStatus(newStatus);
+      return { previousStatus: prev };
+    },
+    onError: (_err, _vars, context: any) => {
+      if (context?.previousStatus) setCurrentStatus(context.previousStatus);
+      toast({ title: 'Error', description: 'Failed to update status', variant: 'destructive' });
+    },
+    onSuccess: async (updatedAdmission: any, _vars, context: any) => {
       try {
         // Update list cache if present
         queryClient.setQueryData(['/api/admissions'], (old: any) => {
@@ -166,6 +175,18 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
       // Refresh activity timeline for this admission
       queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
+
+      // Log activity attributing the status change to the current user
+      try {
+        const prev = context?.previousStatus ?? '';
+        const curr = updatedAdmission?.status ?? '';
+        const content = `status changed from \"${prev}\" to \"${curr}\"`;
+        await ActivitiesService.createActivity({ entityType: 'admission', entityId: String(updatedAdmission.id), content, activityType: 'status_changed' });
+      } catch (err) {
+        console.warn('Failed to log admission status change', err);
+      }
+
+      toast({ title: 'Status updated' });
     },
   });
 
