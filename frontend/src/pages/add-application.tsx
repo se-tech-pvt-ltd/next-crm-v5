@@ -319,7 +319,7 @@ export default function AddApplication() {
   // Wrapper flow: select student then show the same modal UI used from Students page
   if (true) {
     return (
-      <Layout title="Add New Application" subtitle="Create a university application for a student" helpText="Fill in the application details and submit to track progress.">
+      <>
         <AddApplicationModal
           open={addModalOpen}
           onOpenChange={(o) => {
@@ -402,7 +402,7 @@ export default function AddApplication() {
           </div>
         </DialogContent>
         </Dialog>
-      </Layout>
+      </>
     );
   }
 
