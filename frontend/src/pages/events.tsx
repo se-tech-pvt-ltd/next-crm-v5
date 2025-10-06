@@ -1605,7 +1605,8 @@ export default function EventsPage() {
           onOpenChange={(open) => { setIsAddRegOpen(open); if (!open) { /* reset form if needed */ } }}
           title="Add Registration"
           headerClassName="bg-[#223E7D] text-white"
-          contentClassName="no-not-allowed max-w-3xl w-[90vw] max-h-[85vh] overflow-hidden p-0 rounded-xl shadow-xl"
+          autoHeight
+          contentClassName="no-not-allowed max-w-3xl w-[90vw] p-0 rounded-xl shadow-xl"
           headerLeft={(
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
