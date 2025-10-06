@@ -300,17 +300,19 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     </div>
   ) : (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="xs"
-        className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-        onClick={() => {
-          try { setLocation(`/admissions/${admission.id}/edit`); } catch { }
-        }}
-        title="Edit Admission"
-      >
-        Edit
-      </Button>
+      {canEditAdmission && (
+        <Button
+          variant="outline"
+          size="xs"
+          className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+          onClick={() => {
+            try { setLocation(`/admissions/${admission.id}/edit`); } catch { }
+          }}
+          title="Edit Admission"
+        >
+          Edit
+        </Button>
+      )}
 
       <Button
         variant="ghost"
@@ -564,7 +566,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                     {(() => {
                       const cid = (admission as any)?.counsellorId || (admission as any)?.counselorId || (student as any)?.counselorId || (student as any)?.counsellorId;
                       const c = cid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(cid)) : null;
-                      if (!c) return '��';
+                      if (!c) return '—';
                       const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
                       const email = c.email || '';
                       return (
