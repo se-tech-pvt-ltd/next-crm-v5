@@ -145,6 +145,23 @@ export class AdmissionService {
       admissionCode = `${prefix}${String(nextSeq).padStart(3, '0')}`;
     }
 
+    // If linked to an application, ensure application is not already converted
+    try {
+      if (admissionData.applicationId) {
+        const { ApplicationModel } = await import('../models/Application.js');
+        const app = await ApplicationModel.findById(String(admissionData.applicationId));
+        if (app && ((app as any).isConverted === 1 || (app as any).isConverted === '1')) {
+          const err = new Error('APPLICATION_CONVERTED');
+          // @ts-expect-error attach code
+          (err as any).code = 'APPLICATION_CONVERTED';
+          throw err;
+        }
+      }
+    } catch (e) {
+      // Rethrow to be handled by controller
+      throw e;
+    }
+
     const admission = await AdmissionModel.create({
       ...admissionData,
       admissionId: admissionCode,
