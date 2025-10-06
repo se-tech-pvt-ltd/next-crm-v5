@@ -2023,11 +2023,11 @@ export default function EventsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="w-full shadow-md border border-gray-200 bg-white">
+              <Card className="max-w-full shadow-md border border-gray-200 bg-white overflow-hidden">
                 <CardHeader className="pb-2">
                   <CardTitle>Access</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 overflow-auto max-h-[60vh]">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
