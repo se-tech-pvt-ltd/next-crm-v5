@@ -1061,6 +1061,11 @@ export default function EventsPage() {
     return rn === 'regional_manager' || rn === 'region_manager' || rn === 'regionalmanager' || rn === 'regionmanager';
   })();
 
+  const isBranchManager = (() => {
+    const rn = normalizeRoleList((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
+    return rn === 'branch_manager' || rn === 'branchmanager';
+  })();
+
   const myRegionId = useMemo(() => {
     let rid = '' as string;
     try {
@@ -1090,11 +1095,41 @@ export default function EventsPage() {
     return rid;
   }, [user, regions, isRegionalManagerList]);
 
+  const myBranchId = useMemo(() => {
+    let bid = '' as string;
+    try {
+      const t = localStorage.getItem('auth_token');
+      if (t) {
+        const parts = String(t).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const rd = payload?.role_details || payload?.roleDetails || {};
+          const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+          if (candidateBranch) bid = String(candidateBranch);
+        }
+      }
+    } catch {}
+    if (!bid) {
+      const uBid = String((user as any)?.branchId ?? (user as any)?.branch_id ?? '');
+      if (uBid) bid = uBid;
+    }
+    if (!bid && Array.isArray(branchEmps)) {
+      const mappings = (branchEmps as any[]).filter((m: any) => String(m.userId ?? m.user_id) === String((user as any)?.id));
+      if (mappings.length === 1) bid = String(mappings[0].branchId ?? mappings[0].branch_id);
+    }
+    return bid;
+  }, [user, branchEmps]);
+
   const visibleEvents = useMemo(() => {
     const all = Array.isArray(events) ? events : [];
     if (isRegionalManagerList && myRegionId) return all.filter((e: any) => String(e.regionId ?? e.region_id ?? '') === String(myRegionId));
+    if (isBranchManager && myBranchId) return all.filter((e: any) => String(e.branchId ?? e.branch_id ?? '') === String(myBranchId));
     return all;
-  }, [events, isRegionalManagerList, myRegionId]);
+  }, [events, isRegionalManagerList, myRegionId, isBranchManager, myBranchId]);
 
   const editingEvent = useMemo(() => visibleEvents.find((e: any) => String(e.id) === String(editParams?.id)), [visibleEvents, editParams?.id]);
 
