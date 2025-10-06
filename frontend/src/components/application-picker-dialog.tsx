@@ -85,7 +85,7 @@ export const ApplicationPickerDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-[300px] overflow-hidden p-0">
+      <DialogContent hideClose className="max-w-[900px] overflow-hidden p-0">
         <DialogHeader className="p-0">
           <div className="flex items-center justify-between bg-[#223E7D] px-4 py-3 text-white">
             <DialogTitle className="text-base font-semibold text-white">{title}</DialogTitle>
