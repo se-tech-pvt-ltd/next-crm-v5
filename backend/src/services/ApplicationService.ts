@@ -283,7 +283,6 @@ export class ApplicationService {
       undefined,
       undefined,
       undefined,
-      undefined,
       userId
     );
 
@@ -294,7 +293,6 @@ export class ApplicationService {
       'created',
       'Application submitted',
       `Application submitted to ${application.university} for ${application.program}`,
-      undefined,
       undefined,
       undefined,
       undefined,
