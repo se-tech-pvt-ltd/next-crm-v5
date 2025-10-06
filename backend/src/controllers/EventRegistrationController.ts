@@ -83,6 +83,9 @@ export class EventRegistrationController {
       if (!lead) return res.status(404).json({ message: "Registration not found" });
       res.json(lead);
     } catch (e) {
+      if (e instanceof Error && (e as any).code === 'ALREADY_CONVERTED') {
+        return res.status(400).json({ message: 'Registration has already been converted to a lead' });
+      }
       res.status(500).json({ message: "Failed to convert to lead" });
     }
   }
