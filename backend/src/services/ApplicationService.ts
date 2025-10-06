@@ -96,7 +96,7 @@ export class ApplicationService {
         })
         .from(applications)
         .innerJoin(students, eq(applications.studentId, students.id))
-        .where(eq(students.counselorId, userId))
+        .where(eq(students.counsellorId, userId))
         .orderBy(desc(applications.createdAt));
       return (await this.enrichDropdownFields(rows)) as any;
     }
