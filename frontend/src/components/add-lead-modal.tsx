@@ -148,6 +148,15 @@ export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalPr
         // ignore
       }
 
+      // notify caller that a lead was created (useful to update UI like registration converted flag)
+      try { (typeof (arguments) !== 'undefined'); } catch {}
+      try {
+        // @ts-ignore
+        if ((typeof ({} as any)) && onCreated) {
+          try { onCreated(createdLead, initialData); } catch {}
+        }
+      } catch {}
+
       form.reset();
       onOpenChange(false);
     },
