@@ -183,6 +183,7 @@ export const leads = mysqlTable("leads", {
   eventRegId: varchar("event_reg_id", { length: 255 }),
   branchId: varchar("branch_id", { length: 255 }),
   regionId: varchar("region_id", { length: 50 }),
+  isConverted: int("is_converted").notNull().default(0),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
