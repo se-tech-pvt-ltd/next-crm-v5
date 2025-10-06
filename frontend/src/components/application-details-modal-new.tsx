@@ -201,14 +201,40 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
       if (!currentApp) return;
       return ApplicationsService.updateApplication(currentApp.id, { appStatus: newStatus });
     },
-    onSuccess: (updated: Application) => {
-      setCurrentStatus(updated.appStatus || 'Open');
-      setCurrentApp((prev) => (prev ? { ...prev, appStatus: updated.appStatus } as Application : prev));
-      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-      queryClient.refetchQueries({ queryKey: ['/api/applications'] });
-      toast({ title: 'Status updated' });
+    onMutate: async (newStatus: string) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/applications'] });
+      const prev = currentApp?.appStatus || '';
+      setCurrentStatus(newStatus);
+      setCurrentApp((c) => c ? { ...c, appStatus: newStatus } : c);
+      return { previousStatus: prev };
     },
-    onError: () => toast({ title: 'Error', description: 'Failed to update status', variant: 'destructive' })
+    onError: (_err, _vars, context: any) => {
+      if (context?.previousStatus) {
+        setCurrentStatus(context.previousStatus);
+        setCurrentApp((c) => c ? { ...c, appStatus: context.previousStatus } : c);
+      }
+      toast({ title: 'Error', description: 'Failed to update status', variant: 'destructive' });
+    },
+    onSuccess: async (updated: Application, _vars, context: any) => {
+      try {
+        const prev = context?.previousStatus ?? '';
+        const curr = updated.appStatus ?? '';
+        setCurrentStatus(curr);
+        setCurrentApp((prevApp) => (prevApp ? { ...prevApp, appStatus: updated.appStatus } as Application : prevApp));
+        queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        queryClient.refetchQueries({ queryKey: ['/api/applications'] });
+        // Log activity
+        try {
+          const content = `status changed from \"${prev}\" to \"${curr}\"`;
+          await ActivitiesService.createActivity({ entityType: 'application', entityId: String(updated.id), content, activityType: 'status_changed' });
+        } catch (err) {
+          console.warn('Failed to log application status change', err);
+        }
+        toast({ title: 'Status updated' });
+      } catch (err) {
+        console.error('Error handling application status success', err);
+      }
+    }
   });
 
   const updateApplicationMutation = useMutation({
