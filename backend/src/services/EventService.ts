@@ -38,11 +38,17 @@ export class EventService {
       return [];
     }
 
+    // Linked branch users (any role with a branch, except super_admin) see only their branch events
+    if (branchId && userRole !== 'super_admin') {
+      return await db.select().from(events).where(eq(events.branchId, branchId)).orderBy(desc(events.createdAt));
+    }
+
     // Default: if user has a region, scope by region unless super_admin
     if (regionId && userRole !== 'super_admin') {
       return await db.select().from(events).where(eq(events.regionId, regionId)).orderBy(desc(events.createdAt));
     }
 
+    // Fallback for super_admin or users without region/branch context
     return await EventModel.findAll();
   }
 
@@ -61,6 +67,17 @@ export class EventService {
     // Branch manager scoping
     if (userRole === 'branch_manager') {
       if (!branchId) return undefined;
+      if ((event as any).branchId !== branchId) return undefined;
+    }
+
+    // Linked branch users (any role with a branch, except special roles/super_admin)
+    if (
+      branchId &&
+      userRole !== 'super_admin' &&
+      userRole !== 'branch_manager' &&
+      userRole !== 'counselor' &&
+      userRole !== 'admission_officer'
+    ) {
       if ((event as any).branchId !== branchId) return undefined;
     }
 
