@@ -31,7 +31,7 @@ export class AdmissionService {
           const student = await getStudent(adm.studentId);
           if (!student) continue;
           if (userRole === 'counselor' && userId) {
-            if (student.counselorId === userId) filtered.push(adm);
+            if ((student as any).counsellorId === userId) filtered.push(adm);
             continue;
           }
           if (userRole === 'admission_officer' && userId) {
@@ -73,7 +73,7 @@ export class AdmissionService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(admission.studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return undefined;
       }
     }
@@ -91,7 +91,7 @@ export class AdmissionService {
     // Check role-based access
     if (userRole === 'counselor' && userId) {
       const student = await StudentModel.findById(studentId);
-      if (!student || student.counselorId !== userId) {
+      if (!student || (student as any).counsellorId !== userId) {
         return [];
       }
     }
