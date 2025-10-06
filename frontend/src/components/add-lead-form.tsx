@@ -390,8 +390,14 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           return r === 'admission_officer' || r === 'admission officer' || r === 'admissionofficer';
         })
         .filter((u: any) => {
-          // Only include admission officers when a branch is selected
-          if (!selectedBranchId) return false;
+          // Include the current user when no branch is selected so admission officer sees themselves
+          if (!selectedBranchId) {
+            try {
+              const myRole = getNormalizedRole();
+              if ((myRole === 'admission_officer' || myRole === 'admission officer' || myRole === 'admissionofficer') && String((user as any)?.id) === String(u.id)) return true;
+            } catch {}
+            return false;
+          }
           const links = Array.isArray(branchEmps) ? branchEmps : [];
           return links.some((be: any) => String(be.userId ?? be.user_id) === String(u.id) && String(be.branchId ?? be.branch_id) === String(selectedBranchId));
         })
