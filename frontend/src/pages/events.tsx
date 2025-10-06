@@ -2036,7 +2036,7 @@ export default function EventsPage() {
                 </div>
               </div>
             </DialogHeader>
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 overflow-auto">
               <div className="flex items-center justify-between text-xs">
                 <div className={`flex-1 px-2 py-1 rounded border ${importStep>=1?'border-primary text-primary':'border-gray-200 text-gray-500'}`}>1. Prepare</div>
                 <div className="w-6 h-[1px] bg-gray-200" />
