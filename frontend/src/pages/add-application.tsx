@@ -319,7 +319,7 @@ export default function AddApplication() {
   // Wrapper flow: select student then show the same modal UI used from Students page
   if (true) {
     return (
-      <Layout title="Add New Application" subtitle="Create a university application for a student" helpText="Fill in the application details and submit to track progress.">
+      <>
         <AddApplicationModal
           open={addModalOpen}
           onOpenChange={(o) => {
@@ -330,7 +330,7 @@ export default function AddApplication() {
         />
 
         <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
-          <DialogContent className="max-w-2xl overflow-hidden p-0">
+          <DialogContent hideClose className="max-w-2xl overflow-hidden p-0">
           <DialogHeader className="p-0">
             <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
               <DialogTitle className="text-white">Select a student to create application</DialogTitle>
@@ -402,7 +402,7 @@ export default function AddApplication() {
           </div>
         </DialogContent>
         </Dialog>
-      </Layout>
+      </>
     );
   }
 

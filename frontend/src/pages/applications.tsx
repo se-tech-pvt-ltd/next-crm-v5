@@ -31,6 +31,7 @@ export default function Applications() {
   const [matchApp, appParams] = useRoute('/applications/:id');
   const [matchEdit, editParams] = useRoute('/applications/:id/edit');
   const [matchAddAdm, addAdmParams] = useRoute('/applications/:id/admission');
+  const [matchNew] = useRoute('/applications/new');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -208,6 +209,16 @@ export default function Applications() {
       setAddAdmissionAppId(undefined);
     }
   }, [matchAddAdm, addAdmParams?.id]);
+
+  // Open Add Application modal when route matches /applications/new
+  useEffect(() => {
+    if (matchNew) {
+      setIsAddApplicationModalOpen(true);
+    } else {
+      setIsAddApplicationModalOpen(false);
+      setAddApplicationStudentId(undefined);
+    }
+  }, [matchNew]);
 
   return (
     <Layout 

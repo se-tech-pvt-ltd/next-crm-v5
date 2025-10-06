@@ -584,18 +584,13 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
         </>
       )}
       rightContent={(
-        <>
-          <div className="sticky top-0 z-10 px-4 py-3 border-b bg-white">
-            <h3 className="text-sm font-semibold">Activity Timeline</h3>
-          </div>
-          <div className="flex-1 overflow-y-auto pt-1 min-h-0">
-            <ActivityTracker
-              entityType="admission"
-              entityId={admission.id}
-              entityName={admission.program}
-            />
-          </div>
-        </>
+        <div className="flex-1 overflow-y-auto pt-1 min-h-0">
+          <ActivityTracker
+            entityType="admission"
+            entityId={admission.id}
+            entityName={admission.program}
+          />
+        </div>
       )}
     />
   );
