@@ -31,12 +31,9 @@ interface ActivityTrackerProps {
 
 const ACTIVITY_TYPES = [
   { value: 'comment', label: 'Comment', icon: MessageSquare },
-  { value: 'update', label: 'Update', icon: Edit },
-  { value: 'status_change', label: 'Status Change', icon: AlertCircle },
   { value: 'note', label: 'Note', icon: FileText },
   { value: 'follow_up', label: 'Follow Up', icon: Calendar },
   { value: 'call', label: 'Call', icon: UserIcon },
-  { value: 'meeting', label: 'Meeting', icon: Users },
 ];
 
 export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName, canAdd = true }: ActivityTrackerProps) {
