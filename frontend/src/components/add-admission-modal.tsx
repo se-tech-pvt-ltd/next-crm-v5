@@ -171,6 +171,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
             await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
             queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
           }
+          // Mark application as converted when admission is created
+          if (data.applicationId) {
+            try {
+              await ApplicationsService.updateApplication(String(data.applicationId), { isConverted: 1 as any });
+              queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+            } catch (err) {
+              console.warn('[AddAdmissionModal] failed to mark application converted', err);
+            }
+          }
         } catch (e) { console.warn('[AddAdmissionModal] failed to update application:', e); }
         return created;
       } catch (err) {
