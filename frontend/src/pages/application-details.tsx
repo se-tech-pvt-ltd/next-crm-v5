@@ -149,6 +149,10 @@ export default function ApplicationDetails() {
         } catch (err) {
           console.warn('Failed to log application status change', err);
         }
+        try {
+          queryClient.invalidateQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
+          queryClient.refetchQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
+        } catch {}
         toast({ title: 'Status updated' });
       } catch (err) {
         console.error('Error handling status update', err);
@@ -182,6 +186,10 @@ export default function ApplicationDetails() {
         } catch (err) {
           console.warn('Failed to log application status change on update', err);
         }
+        try {
+          queryClient.invalidateQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
+          queryClient.refetchQueries({ queryKey: [`/api/activities/application/${updated.id}`] });
+        } catch {}
         toast({ title: 'Application updated' });
       } catch (err) {
         console.error('Error in updateApplicationMutation onSuccess', err);
