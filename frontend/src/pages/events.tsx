@@ -1643,7 +1643,7 @@ export default function EventsPage() {
             </div>
           )}
           leftContent={(
-            <div className="space-y-4">
+            <div className="space-y-4 p-4">
               <div className="space-y-4">
                 <Card className="w-full shadow-sm">
                   <CardHeader className="pb-2">
