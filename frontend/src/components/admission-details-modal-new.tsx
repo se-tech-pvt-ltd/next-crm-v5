@@ -192,6 +192,10 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
   });
 
   const handleStatusChange = (newStatus: string) => {
+    if (!canEditAdmission) {
+      toast({ title: 'You do not have permission to edit admissions', variant: 'destructive' });
+      return;
+    }
     setCurrentStatus(newStatus);
     updateStatusMutation.mutate(newStatus);
   };
@@ -560,7 +564,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                     {(() => {
                       const cid = (admission as any)?.counsellorId || (admission as any)?.counselorId || (student as any)?.counselorId || (student as any)?.counsellorId;
                       const c = cid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(cid)) : null;
-                      if (!c) return '—';
+                      if (!c) return '��';
                       const fullName = [c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim();
                       const email = c.email || '';
                       return (
