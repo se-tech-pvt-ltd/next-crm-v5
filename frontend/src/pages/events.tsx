@@ -1715,62 +1715,6 @@ export default function EventsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="w-full shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center"><Users className="w-4 h-4 mr-2" />Access</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Region</Label>
-                        <div className="text-xs px-2 py-2 rounded border bg-white">
-                          {(() => {
-                            const rid = (regForm as any).regionId || (selectedEvent as any)?.regionId || (selectedEvent as any)?.region_id || '';
-                            const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(rid)) : null;
-                            return r ? (r.regionName || (r as any).name || (r as any).id) : '—';
-                          })()}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Branch</Label>
-                        <div className="text-xs px-2 py-2 rounded border bg-white">
-                          {(() => {
-                            const bid = (regForm as any).branchId || (selectedEvent as any)?.branchId || (selectedEvent as any)?.branch_id || '';
-                            const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(bid)) : null;
-                            return b ? ((b as any).branchName || (b as any).name || (b as any).code || (b as any).id) : '—';
-                          })()}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Counsellor</Label>
-                        <div className="text-xs px-2 py-2 rounded border bg-white">
-                          {(() => {
-                            const cid = (regForm as any).counsellorId || (selectedEvent as any)?.counsellorId || (selectedEvent as any)?.counselorId || (selectedEvent as any)?.counsellor_id || (selectedEvent as any)?.counselor_id || '';
-                            const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === String(cid)) : null;
-                            if (!u) return '—';
-                            const name = `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim();
-                            return name || u.email || u.id;
-                          })()}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <Label className="mb-1">Admission Officer</Label>
-                        <div className="text-xs px-2 py-2 rounded border bg-white">
-                          {(() => {
-                            const aid = (regForm as any).admissionOfficerId || (selectedEvent as any)?.admissionOfficerId || (selectedEvent as any)?.admission_officer_id || '';
-                            const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === String(aid)) : null;
-                            if (!u) return '—';
-                            const name = `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim();
-                            return name || u.email || u.id;
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           )}
