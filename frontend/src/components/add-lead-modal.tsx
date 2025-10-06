@@ -19,6 +19,7 @@ import * as UsersService from '@/services/users';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { CommandMultiSelect } from './command-multi-select';
 import {
   User,
