@@ -195,6 +195,14 @@ export class StudentService {
     const { LeadModel } = await import('../models/Lead.js');
     const lead = await LeadModel.findById(leadId);
 
+    // Server-side guard: disallow converting an already converted lead
+    if (lead && ((lead as any).isConverted === 1 || (lead as any).isConverted === '1')) {
+      const err = new Error('LEAD_CONVERTED');
+      // @ts-expect-error attach code
+      (err as any).code = 'LEAD_CONVERTED';
+      throw err;
+    }
+
     // build payload (targetCountry normalized below)
     const payload = {
       ...(studentData as any),
