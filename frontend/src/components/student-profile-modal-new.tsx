@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 console.log('[modal] loaded: frontend/src/components/student-profile-modal-new.tsx');
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
