@@ -86,7 +86,8 @@ export class AdmissionController {
         }
       }
       const validatedData = insertAdmissionSchema.partial().parse(body);
-      const admission = await AdmissionService.updateAdmission(id, validatedData);
+      const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
+      const admission = await AdmissionService.updateAdmission(id, validatedData, currentUser.id);
       if (!admission) {
         console.warn('[AdmissionController] updateAdmission - Admission not found for id:', id);
         return res.status(404).json({ message: "Admission not found" });
