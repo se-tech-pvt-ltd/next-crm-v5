@@ -59,7 +59,7 @@ interface StudentProfileModalProps {
 type StudentEditState = Partial<Student> & { targetCountry?: string[] | string | null };
 
 export function StudentProfileModal({ open, onOpenChange, studentId, onOpenApplication, onOpenAddApplication, startInEdit }: StudentProfileModalProps) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, accessByRole } = useAuth() as any;
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -295,11 +295,19 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     }
   }, [student, dropdownData, leadsDropdowns, isEditing]);
 
+  const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => String(s || '').replace(/s$/i, '');
+  const canEditStudent = React.useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'student');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canEdit ?? e.can_edit) === true);
+  }, [accessByRole]);
+
   useEffect(() => {
     if (open && startInEdit) {
-      setIsEditing(true);
+      if (canEditStudent) setIsEditing(true); else setIsEditing(false);
     }
-  }, [open, startInEdit, studentId]);
+  }, [open, startInEdit, studentId, canEditStudent]);
 
   // Build status sequence from dropdown API (ordered by sequence)
   const statusSequence = useMemo<string[]>(() => {
@@ -534,21 +542,23 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                   <Plus />
                   <span>Add Application</span>
                 </Button>
+                {canEditStudent && (
                 <Button
                   variant="outline"
                   size="xs"
                   className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                  onClick={() => { setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
+                  onClick={() => { if (!canEditStudent) return; setIsEditing(true); try { setLocation(`/students/${student?.id}/edit`); } catch {} }}
                   disabled={isLoading}
                   title="Edit"
                 >
                   <Edit />
                   <span>Edit</span>
                 </Button>
+                )}
               </>
             ) : (
               <>
-                <Button size="xs" onClick={handleSaveChanges} disabled={updateStudentMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
+                <Button size="xs" onClick={handleSaveChanges} disabled={!canEditStudent || updateStudentMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
                   <Save className="w-3.5 h-3.5 mr-1" />
                   <span>Save Changes</span>
                 </Button>
