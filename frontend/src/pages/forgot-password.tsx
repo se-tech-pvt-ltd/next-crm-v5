@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
     <main className="min-h-screen bg-gray-50 flex items-stretch">
       <div className="w-full h-screen bg-white overflow-hidden grid grid-cols-1 md:grid-cols-2">
         {/* Left art panel */}
-        <div className="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-[#223E7D] to-[#375aa0] p-10 text-white">
+        <div className="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-[#223E7D] to-[#375aa0] p-10 text-white h-full">
           <div className="rounded-full bg-white/10 p-6 mb-6">
             <div className="w-28 h-28 rounded-full bg-white/10 flex items-center justify-center">
               <User className="w-16 h-16 text-white/90" />
