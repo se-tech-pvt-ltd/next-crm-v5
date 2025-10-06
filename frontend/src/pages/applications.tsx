@@ -229,15 +229,47 @@ export default function Applications() {
     }
   }, [matchAddAdm, addAdmParams?.id]);
 
-  // Open Add Application modal when route matches /applications/new
+  // Handle /applications/new route to show student picker first
   useEffect(() => {
-    if (matchNew) {
-      setIsAddApplicationModalOpen(true);
-    } else {
-      setIsAddApplicationModalOpen(false);
-      setAddApplicationStudentId(undefined);
+    if (!matchNew) {
+      setIsStudentPickerOpen(false);
+      return;
     }
-  }, [matchNew]);
+
+    const queryString = (() => {
+      try {
+        const index = location.indexOf('?');
+        return index >= 0 ? location.slice(index + 1) : '';
+      } catch {
+        return '';
+      }
+    })();
+
+    const params = new URLSearchParams(queryString);
+    const queryStudentId = params.get('studentId');
+
+    if (queryStudentId && addApplicationStudentId !== queryStudentId) {
+      setAddApplicationStudentId(queryStudentId);
+    }
+
+    if ((queryStudentId && queryStudentId === addApplicationStudentId) || (queryStudentId && addApplicationStudentId !== queryStudentId)) {
+      if (!isAddApplicationModalOpen) {
+        setIsAddApplicationModalOpen(true);
+      }
+      setIsStudentPickerOpen(false);
+      return;
+    }
+
+    if (addApplicationStudentId) {
+      if (!isAddApplicationModalOpen) {
+        setIsAddApplicationModalOpen(true);
+      }
+      setIsStudentPickerOpen(false);
+      return;
+    }
+
+    setIsStudentPickerOpen(true);
+  }, [matchNew, location, addApplicationStudentId, isAddApplicationModalOpen]);
 
   return (
     <Layout 
