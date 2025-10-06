@@ -38,6 +38,7 @@ export default function Applications() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isAddApplicationModalOpen, setIsAddApplicationModalOpen] = useState(false);
+  const [isStudentPickerOpen, setIsStudentPickerOpen] = useState(false);
   const [addApplicationStudentId, setAddApplicationStudentId] = useState<string | undefined>(undefined);
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
