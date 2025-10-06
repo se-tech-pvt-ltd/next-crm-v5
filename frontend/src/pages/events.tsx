@@ -1207,6 +1207,9 @@ export default function EventsPage() {
   // When registrations data loads, if there's a pendingRegId from the route, open the view modal for it
   useEffect(() => {
     if (!pendingRegId && !pendingOpenLeadId) return;
+    // if we're in a transient state where we are opening the AddLead modal via route, skip opening the view
+    if (skipOpenViewForLeadRoute) return;
+
     const list = (registrations || []) as any[];
     if (pendingRegId) {
       const match = list.find(r => String(r.id) === String(pendingRegId) || String(r.eventRegId) === String(pendingRegId));
@@ -1248,7 +1251,7 @@ export default function EventsPage() {
         setPendingOpenLeadId(null);
       }
     }
-  }, [registrations, pendingRegId, pendingOpenLeadId]);
+  }, [registrations, pendingRegId, pendingOpenLeadId, skipOpenViewForLeadRoute]);
 
   const eventOptions = [{ label: 'All Events', value: 'all' }, ...(visibleEvents.map((e: any) => ({ label: `${e.name} (${e.date})`, value: e.id })))] as { label: string; value: string }[];
   const selectedEvent = useMemo(() => visibleEvents.find((e: any) => e.id === filterEventId), [visibleEvents, filterEventId]);
