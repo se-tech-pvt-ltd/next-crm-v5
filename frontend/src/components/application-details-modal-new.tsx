@@ -16,6 +16,7 @@ import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { type Application, type Student, type Admission } from '@/lib/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
@@ -47,6 +48,14 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { accessByRole } = useAuth() as any;
+  const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => String(s || '').replace(/s$/i, '');
+  const canEditApplication = React.useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalizeModule(a.moduleName ?? a.module_name)) === 'application');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canEdit ?? e.can_edit) === true);
+  }, [accessByRole]);
 
   const [currentApp, setCurrentApp] = useState<Application | null>(application || null);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
@@ -72,9 +81,9 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
 
   useEffect(() => {
     if (open && startInEdit) {
-      setIsEditing(true);
+      if (canEditApplication) setIsEditing(true); else setIsEditing(false);
     }
-  }, [open, startInEdit]);
+  }, [open, startInEdit, canEditApplication]);
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -332,20 +341,22 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
                     <span>Add Admission</span>
                   </Button>
                 )}
+                {canEditApplication && (
                 <Button
                   variant="outline"
                   size="xs"
                   className="px-3 [&_svg]:size-3 bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
-                  onClick={() => { setIsEditing(true); try { setLocation(`/applications/${currentApp?.id}/edit`); } catch {} }}
+                  onClick={() => { if (!canEditApplication) return; setIsEditing(true); try { setLocation(`/applications/${currentApp?.id}/edit`); } catch {} }}
                   title="Edit"
                 >
                   <Edit />
                   <span>Edit</span>
                 </Button>
+                )}
               </>
             ) : (
               <>
-                <Button size="xs" onClick={handleSave} disabled={updateApplicationMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
+                <Button size="xs" onClick={handleSave} disabled={!canEditApplication || updateApplicationMutation.isPending} title="Save Changes" className="bg-[#0071B0] hover:bg-[#00649D] text-white">
                   <Save className="w-3.5 h-3.5 mr-1" />
                   <span>Save Changes</span>
                 </Button>
