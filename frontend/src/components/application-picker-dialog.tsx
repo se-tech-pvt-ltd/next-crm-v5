@@ -59,7 +59,13 @@ export const ApplicationPickerDialog = ({
 
   const rows = useMemo(() => {
     const source = search.trim().length > 0 ? appsAll : appsPaged;
-    const list = toArray(source);
+    // Only include applications that are not yet converted (isConverted === 0)
+    const rawList = toArray(source);
+    const list = rawList.filter((app: any) => {
+      const v = app?.isConverted ?? app?.is_converted ?? app?.isconverted ?? app?.converted ?? 0;
+      return Number(v) === 0;
+    });
+
     const students = Array.isArray(studentsAll) ? studentsAll : (toArray(studentsAll) || []);
     const getStudentName = (sid: any) => {
       if (!sid) return 'Unknown';
