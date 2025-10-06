@@ -1942,154 +1942,86 @@ export default function EventsPage() {
           contentClassName="no-not-allowed max-w-3xl w-[90vw] p-0 rounded-xl shadow-xl"
           statusBar={viewReg ? <StatusProgressBarReg /> : undefined}
           leftContent={viewReg ? (
-            <>
-              <Card className="w-full shadow-md border border-gray-200 bg-white">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Registration Information</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    <div className="space-y-1.5">
-                      <Label>Registration ID</Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.registrationCode}</div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Full Name</Label>
-                      {isEditingView ? (
-                        <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
-                      ) : (
-                        <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.name}</div>
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Phone Number</Label>
-                      {isEditingView ? (
-                        <PhoneInput
-                          value={viewEditData.number || ''}
-                          onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
-                          defaultCountry="in"
-                          className="w-full"
-                          inputClassName="w-full h-7 text-[11px]"
-                          buttonClassName="h-7"
-                        />
-                      ) : (
-                        <div className="relative phone-compact">
-                          <PhoneInput
-                            value={String(viewReg.number || '')}
-                            onChange={() => {}}
-                            defaultCountry="in"
-                            className="w-full"
-                            inputClassName="w-full h-7 text-[11px]"
-                            buttonClassName="h-7"
-                            inputStyle={{ height: '28px' }}
-                            buttonStyle={{ height: '28px' }}
-                            disabled
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Email</Label>
-                      {isEditingView ? (
-                        <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
-                      ) : (
-                        <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.email || '-'}</div>
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>City</Label>
-                      {isEditingView ? (
-                        <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
-                      ) : (
-                        <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.city || '-'}</div>
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Source</Label>
-                      {isEditingView ? (
-                        <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
-                          <SelectContent>
-                            {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="text-xs px-2 py-1.5 rounded border bg-white">{getSourceLabel(viewReg.source) || '-'}</div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="max-w-full shadow-md border border-gray-200 bg-white overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle>Access</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 overflow-auto max-h-[60vh]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Region</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const rid = (viewReg as any)?.regionId || (viewReg as any)?.region_id || '';
-                          const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(rid)) : null;
-                          if (!r) return '—';
-                          const regionName = (r as any).regionName || (r as any).name || (r as any).id;
-                          const head = Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String((r as any).regionHeadId || '')) : null;
-                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
-                          return `${regionName}${headName ? ` - Head: ${headName}` : ''}`;
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Branch</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const bid = (viewReg as any)?.branchId || (viewReg as any)?.branch_id || '';
-                          const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(bid)) : null;
-                          if (!b) return '—';
-                          const branchName = (b as any).branchName || (b as any).name || (b as any).code || (b as any).id;
-                          const headId = (b as any).branchHeadId || (b as any).managerId || null;
-                          const head = headId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(headId)) : null;
-                          const headName = head ? ([head.firstName || head.first_name, head.lastName || head.last_name].filter(Boolean).join(' ').trim() || head.email || head.id) : '';
-                          return `${branchName}${headName ? ` - Head: ${headName}` : ''}`;
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Admission Officer</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const officerId = (viewReg as any).admissionOfficerId || (viewReg as any).admission_officer_id || (viewReg as any)?.admissionOfficerId || '';
-                          const officer = officerId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(officerId)) : null;
-                          if (!officer) return '—';
-                          const name = ([officer.firstName || officer.first_name, officer.lastName || officer.last_name].filter(Boolean).join(' ').trim() || officer.email || officer.id);
-                          return name;
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center space-x-2"><Users className="w-4 h-4" /><span>Counselor</span></Label>
-                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                        {(() => {
-                          const cid = (viewReg as any).counsellorId || (viewReg as any)?.counsellorId || '';
-                          const c = Array.isArray(users) ? users.find((u: any) => String(u.id) === String(cid)) : null;
-                          if (!c) return '—';
-                          const cname = ([c.firstName || c.first_name, c.lastName || c.last_name].filter(Boolean).join(' ').trim() || c.email || c.id);
-                          return cname;
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          ) : undefined}
+    <Card className="w-full shadow-md border border-gray-200 bg-white">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle>Registration Information</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="space-y-1.5">
+            <Label>Registration ID</Label>
+            <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.registrationCode}</div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Full Name</Label>
+            {isEditingView ? (
+              <Input value={viewEditData.name || ''} onChange={(e) => setViewEditData(v => ({ ...v, name: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.name}</div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Phone Number</Label>
+            {isEditingView ? (
+              <PhoneInput
+                value={viewEditData.number || ''}
+                onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
+                defaultCountry="in"
+                className="w-full"
+                inputClassName="w-full h-7 text-[11px]"
+                buttonClassName="h-7"
+              />
+            ) : (
+              <div className="relative phone-compact">
+                <PhoneInput
+                  value={String(viewReg.number || '')}
+                  onChange={() => {}}
+                  defaultCountry="in"
+                  className="w-full"
+                  inputClassName="w-full h-7 text-[11px]"
+                  buttonClassName="h-7"
+                  inputStyle={{ height: '28px' }}
+                  buttonStyle={{ height: '28px' }}
+                  disabled
+                />
+              </div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Email</Label>
+            {isEditingView ? (
+              <Input type="email" inputMode="email" autoComplete="email" value={viewEditData.email || ''} onChange={(e) => setViewEditData(v => ({ ...v, email: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.email || '-'}</div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>City</Label>
+            {isEditingView ? (
+              <Input value={viewEditData.city || ''} onChange={(e) => setViewEditData(v => ({ ...v, city: e.target.value }))} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{viewReg.city || '-'}</div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Source</Label>
+            {isEditingView ? (
+              <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
+                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
+                <SelectContent>
+                  {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="text-xs px-2 py-1.5 rounded border bg-white">{getSourceLabel(viewReg.source) || '-'}</div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ) : undefined}
         />
 
         {/* Add Lead Modal (used for converting registrations) - use same UI as /leads/new */}
