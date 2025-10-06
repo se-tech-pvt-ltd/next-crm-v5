@@ -237,6 +237,7 @@ export const applications = mysqlTable("applications", {
   intake: text("intake"),
   googleDriveLink: text("google_drive_link"),
   notes: text("notes"),
+  isConverted: int("is_converted").notNull().default(0),
   branchId: varchar("branch_id", { length: 255 }),
   regionId: varchar("region_id", { length: 50 }),
   counsellorId: varchar("counsellor_id", { length: 50 }),
