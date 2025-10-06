@@ -73,7 +73,7 @@ export const DetailsDialogLayout: React.FC<DetailsDialogLayoutProps> = ({
           {/* Body */}
           <div className={hasRight ? 'grid flex-1 min-h-0' : `flex flex-col flex-1 min-h-0 ${autoHeight ? '' : 'overflow-hidden'}`} style={hasRight ? { gridTemplateColumns: `1fr ${rightPaneWidth}` } : undefined}>
             <div className="flex flex-col min-h-0">
-              <div className={`p-4 space-y-4 min-h-0 ${autoHeight ? 'overflow-y-visible' : 'flex-1 overflow-y-auto'}`}>
+              <div className={`pt-3 px-4 pb-4 space-y-4 min-h-0 ${autoHeight ? 'overflow-y-visible' : 'flex-1 overflow-y-auto'}`}>
                 {leftContent}
               </div>
             </div>
