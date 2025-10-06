@@ -40,22 +40,6 @@ export default function AddApplication() {
     enabled: !presetStudentId,
   });
 
-  const [search, setSearch] = useState('');
-  const [page] = useState(1);
-  const pageSize = 4;
-
-  const { data: studentsPaged } = useQuery({
-    queryKey: ['/api/students', { page, limit: pageSize }],
-    queryFn: async () => (await (await import('@/services/students')).getStudents({ page, limit: pageSize })) as any,
-    enabled: studentPickerOpen && !search,
-  });
-
-  const { data: studentsAll } = useQuery({
-    queryKey: ['/api/students', 'all-for-search'],
-    queryFn: async () => (await (await import('@/services/students')).getStudents()) as any,
-    enabled: studentPickerOpen && !!search,
-    staleTime: 60_000,
-  });
 
   useEffect(() => {
     if (presetStudentId) {
