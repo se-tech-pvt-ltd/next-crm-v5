@@ -13,6 +13,7 @@ import { type Student, type Application, type Admission } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
+import * as ActivitiesService from '@/services/activities';
 import { useToast } from '@/hooks/use-toast';
 import { User, Edit, Save, X, Plus, FileText, Award, Calendar, Phone, Mail } from 'lucide-react';
 
