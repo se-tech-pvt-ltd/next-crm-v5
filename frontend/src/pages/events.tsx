@@ -1690,50 +1690,50 @@ export default function EventsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="flex flex-col">
                         <Label className="mb-1">Region</Label>
-                        <Select value={(regForm as any).regionId || ''} onValueChange={(v) => setRegForm({ ...regForm, regionId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select region" /></SelectTrigger>
-                          <SelectContent>
-                            {Array.isArray(regions) && regions.map((r: any) => (
-                              <SelectItem key={r.id} value={String(r.id)}>{r.regionName || r.name || r.id}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="text-xs px-2 py-2 rounded border bg-white">
+                          {(() => {
+                            const rid = (regForm as any).regionId || (selectedEvent as any)?.regionId || (selectedEvent as any)?.region_id || '';
+                            const r = Array.isArray(regions) ? (regions as any[]).find((x: any) => String(x.id) === String(rid)) : null;
+                            return r ? (r.regionName || (r as any).name || (r as any).id) : '—';
+                          })()}
+                        </div>
                       </div>
 
                       <div className="flex flex-col">
                         <Label className="mb-1">Branch</Label>
-                        <Select value={(regForm as any).branchId || ''} onValueChange={(v) => setRegForm({ ...regForm, branchId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select branch" /></SelectTrigger>
-                          <SelectContent>
-                            {filteredBranches.map((b: any) => (
-                              <SelectItem key={b.id} value={String(b.id)}>{b.branchName || b.name || b.code || b.id}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="text-xs px-2 py-2 rounded border bg-white">
+                          {(() => {
+                            const bid = (regForm as any).branchId || (selectedEvent as any)?.branchId || (selectedEvent as any)?.branch_id || '';
+                            const b = Array.isArray(branches) ? (branches as any[]).find((x: any) => String(x.id) === String(bid)) : null;
+                            return b ? ((b as any).branchName || (b as any).name || (b as any).code || (b as any).id) : '—';
+                          })()}
+                        </div>
                       </div>
 
                       <div className="flex flex-col">
                         <Label className="mb-1">Counsellor</Label>
-                        <Select value={(regForm as any).counsellorId || ''} onValueChange={(v) => setRegForm({ ...regForm, counsellorId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                          <SelectContent>
-                            {counselorOptions.map((u: any) => (
-                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="text-xs px-2 py-2 rounded border bg-white">
+                          {(() => {
+                            const cid = (regForm as any).counsellorId || (selectedEvent as any)?.counsellorId || (selectedEvent as any)?.counselorId || (selectedEvent as any)?.counsellor_id || (selectedEvent as any)?.counselor_id || '';
+                            const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === String(cid)) : null;
+                            if (!u) return '—';
+                            const name = `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim();
+                            return name || u.email || u.id;
+                          })()}
+                        </div>
                       </div>
 
                       <div className="flex flex-col">
                         <Label className="mb-1">Admission Officer</Label>
-                        <Select value={(regForm as any).admissionOfficerId || ''} onValueChange={(v) => setRegForm({ ...regForm, admissionOfficerId: v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Select admission officer" /></SelectTrigger>
-                          <SelectContent>
-                            {admissionOfficerOptions.map((u: any) => (
-                              <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="text-xs px-2 py-2 rounded border bg-white">
+                          {(() => {
+                            const aid = (regForm as any).admissionOfficerId || (selectedEvent as any)?.admissionOfficerId || (selectedEvent as any)?.admission_officer_id || '';
+                            const u = Array.isArray(users) ? (users as any[]).find((x: any) => String(x.id) === String(aid)) : null;
+                            if (!u) return '—';
+                            const name = `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim();
+                            return name || u.email || u.id;
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
