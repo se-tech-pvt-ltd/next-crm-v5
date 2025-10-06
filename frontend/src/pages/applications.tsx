@@ -210,6 +210,16 @@ export default function Applications() {
     }
   }, [matchAddAdm, addAdmParams?.id]);
 
+  // Open Add Application modal when route matches /applications/new
+  useEffect(() => {
+    if (matchNew) {
+      setIsAddApplicationModalOpen(true);
+    } else {
+      setIsAddApplicationModalOpen(false);
+      setAddApplicationStudentId(undefined);
+    }
+  }, [matchNew]);
+
   return (
     <Layout 
       title="Applications" 
