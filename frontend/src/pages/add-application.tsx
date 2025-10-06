@@ -20,8 +20,8 @@ import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { AddApplicationModal } from '@/components/add-application-modal';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -38,6 +38,23 @@ export default function AddApplication() {
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
     enabled: !presetStudentId,
+  });
+
+  const [search, setSearch] = useState('');
+  const [page] = useState(1);
+  const pageSize = 4;
+
+  const { data: studentsPaged } = useQuery({
+    queryKey: ['/api/students', { page, limit: pageSize }],
+    queryFn: async () => (await (await import('@/services/students')).getStudents({ page, limit: pageSize })) as any,
+    enabled: studentPickerOpen && !search,
+  });
+
+  const { data: studentsAll } = useQuery({
+    queryKey: ['/api/students', 'all-for-search'],
+    queryFn: async () => (await (await import('@/services/students')).getStudents()) as any,
+    enabled: studentPickerOpen && !!search,
+    staleTime: 60_000,
   });
 
   useEffect(() => {
@@ -287,8 +304,6 @@ export default function AddApplication() {
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
-  const studentOptions = (Array.isArray(students) ? students : []).map((s) => ({ value: s.id, label: s.name || s.id, email: (s as any).email || '', hint: (s as any).student_id || '' }));
-
   const handlePickStudent = (id: string) => {
     if (!id) return;
     setSelectedStudentIdForModal(id);
@@ -315,25 +330,69 @@ export default function AddApplication() {
         />
 
         <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Select a student to create application</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3">
-              <SearchableCombobox
-                value={selectedStudentIdForModal || ''}
-                onValueChange={handlePickStudent}
-                onSearch={() => { /* preloaded */ }}
-                options={studentOptions}
-                placeholder="Choose student..."
-                searchPlaceholder="Type to search students by name or email..."
-                emptyMessage="No students found"
+          <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Select a student to create application</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Search by name, ID, or contact"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1"
               />
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setLocation('/applications')}>Cancel</Button>
-              </div>
             </div>
-          </DialogContent>
+            <div className="border rounded-md overflow-hidden">
+              <Table className="text-xs">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">Student ID</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Student Name</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Contact</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    const toArray = (resp: any): any[] => Array.isArray(resp) ? resp : (resp?.data || []);
+                    const base = search ? toArray(studentsAll) : toArray(studentsPaged);
+                    const filtered = (base || []).filter((s: any) => {
+                      if (!search) return true;
+                      const q = search.toLowerCase();
+                      const id = String(s.student_id || s.id || '').toLowerCase();
+                      const name = String(s.name || '').toLowerCase();
+                      const phone = String(s.phone || '').toLowerCase();
+                      const email = String(s.email || '').toLowerCase();
+                      return id.includes(q) || name.includes(q) || phone.includes(q) || email.includes(q);
+                    });
+                    const rows = filtered.slice(0, pageSize);
+                    if (rows.length === 0) {
+                      return (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No students found</TableCell>
+                        </TableRow>
+                      );
+                    }
+                    return rows.map((s: any) => (
+                      <TableRow key={s.id}>
+                        <TableCell className="p-2 text-xs font-mono">{s.student_id || s.id}</TableCell>
+                        <TableCell className="p-2 text-xs">{s.name || '-'}</TableCell>
+                        <TableCell className="p-2 text-xs">{s.phone || s.email || '-'}</TableCell>
+                        <TableCell className="p-2 text-right">
+                          <Button size="sm" className="h-7" onClick={() => handlePickStudent(String(s.id))}>Select</Button>
+                        </TableCell>
+                      </TableRow>
+                    ));
+                  })()}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button variant="outline" onClick={() => setLocation('/applications')}>Cancel</Button>
+            </div>
+          </div>
+        </DialogContent>
         </Dialog>
       </Layout>
     );
