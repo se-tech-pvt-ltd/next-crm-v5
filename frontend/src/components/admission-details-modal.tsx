@@ -122,16 +122,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
         queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
 
-        // Log activity attributing the status change to the current user
-        try {
-          const prev = context?.previousStatus ?? '';
-          const curr = updatedAdmission?.status ?? '';
-          const content = `status changed from \"${prev}\" to \"${curr}\"`;
-          await ActivitiesService.createActivity({ entityType: 'admission', entityId: String(updatedAdmission.id), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log admission status change', err);
-        }
-
         toast({ title: 'Status updated' });
       } catch (e) {
         console.error('Error handling admission status update success', e);
