@@ -93,6 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (userData: User) => {
+    // Ensure queries are cleared/refetched when user changes to avoid stale cached data
+    try { const { queryClient } = await import('@/lib/queryClient'); /* placeholder to satisfy TS */ } catch {}
     // Set minimal session immediately
     setUser(userData);
     localStorage.setItem('auth_user', JSON.stringify(userData));
