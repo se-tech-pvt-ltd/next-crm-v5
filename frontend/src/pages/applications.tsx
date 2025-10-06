@@ -62,6 +62,23 @@ export default function Applications() {
     try { setLocation('/applications/new'); } finally { setTimeout(() => setIsNavigating(false), 600); }
   };
 
+  const handleStudentPickerSelect = (studentId: string) => {
+    if (!studentId) return;
+    setAddApplicationStudentId(studentId);
+    setIsStudentPickerOpen(false);
+    setIsAddApplicationModalOpen(true);
+    if (matchNew) {
+      try {
+        const params = new URLSearchParams();
+        params.set('studentId', studentId);
+        const target = `/applications/new?${params.toString()}`;
+        if (location !== target) {
+          setLocation(target);
+        }
+      } catch {}
+    }
+  };
+
   const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
     queryKey: ['/api/applications', { page: currentPage, limit: pageSize, statusFilter, universityFilter }],
     queryFn: async () => ApplicationsService.getApplications({ page: currentPage, limit: pageSize }),
