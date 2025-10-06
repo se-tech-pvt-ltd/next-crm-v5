@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HelpTooltipSimple as HelpTooltip } from '@/components/help-tooltip-simple';
 import * as UniversitiesService from '@/services/universities';
 import * as UsersService from '@/services/users';
-import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users } from 'lucide-react';
+import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCircle, GraduationCap, Save, Users, X } from 'lucide-react';
 import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
@@ -332,8 +332,17 @@ export default function AddApplication() {
         <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
           <DialogContent className="max-w-2xl overflow-hidden p-0">
           <DialogHeader className="p-0">
-            <div className="px-4 py-3 bg-[#223E7D] text-white">
+            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
               <DialogTitle className="text-white">Select a student to create application</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8 rounded-full bg-white text-black hover:bg-gray-100 border border-gray-300"
+                onClick={() => { setStudentPickerOpen(false); }}
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
           </DialogHeader>
           <div className="space-y-3 p-4">
@@ -389,9 +398,6 @@ export default function AddApplication() {
                   })()}
                 </TableBody>
               </Table>
-            </div>
-            <div className="flex justify-end gap-2 mt-2">
-              <Button variant="outline" onClick={() => setLocation('/applications')}>Cancel</Button>
             </div>
           </div>
         </DialogContent>
