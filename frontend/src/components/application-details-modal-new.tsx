@@ -598,16 +598,8 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
           </div>
         )}
         rightContent={(
-          <div className="p-3">
-            <div className="sticky top-0 z-10 px-1 pb-2 bg-white">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                <h2 className="text-sm font-semibold">Activity Timeline</h2>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <ActivityTracker entityType="application" entityId={currentApp.id} initialInfoDate={currentApp.createdAt as any} />
-            </div>
+          <div className="pt-1 min-h-0 flex-1 overflow-y-auto">
+            <ActivityTracker entityType="application" entityId={currentApp.id} initialInfoDate={currentApp.createdAt as any} />
           </div>
         )}
       />
