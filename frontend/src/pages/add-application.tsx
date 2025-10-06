@@ -19,6 +19,9 @@ import { School, FileText, Globe, Briefcase, Link as LinkIcon, ArrowLeft, PlusCi
 import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
+import { AddApplicationModal } from '@/components/add-application-modal';
 
 export default function AddApplication() {
   const [, setLocation] = useLocation();
@@ -28,10 +31,23 @@ export default function AddApplication() {
   const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const presetStudentId = params.get('studentId') || '';
 
+  const [studentPickerOpen, setStudentPickerOpen] = useState(false);
+  const [selectedStudentIdForModal, setSelectedStudentIdForModal] = useState<string | undefined>(undefined);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
     enabled: !presetStudentId,
   });
+
+  useEffect(() => {
+    if (presetStudentId) {
+      setSelectedStudentIdForModal(presetStudentId);
+      setAddModalOpen(true);
+    } else {
+      setStudentPickerOpen(true);
+    }
+  }, [presetStudentId]);
 
   const { data: presetStudent } = useQuery<Student>({
     queryKey: [`/api/students/${presetStudentId}`],
@@ -270,6 +286,58 @@ export default function AddApplication() {
   }, [users, selectedBranchId]);
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
+
+  const studentOptions = (Array.isArray(students) ? students : []).map((s) => ({ value: s.id, label: s.name || s.id, email: (s as any).email || '', hint: (s as any).student_id || '' }));
+
+  const handlePickStudent = (id: string) => {
+    if (!id) return;
+    setSelectedStudentIdForModal(id);
+    setStudentPickerOpen(false);
+    setAddModalOpen(true);
+    try {
+      const url = new URL(typeof window !== 'undefined' ? window.location.href : '/applications/new', window.location.origin);
+      url.searchParams.set('studentId', id);
+      setLocation(`${url.pathname}${url.search}`);
+    } catch {}
+  };
+
+  // Wrapper flow: select student then show the same modal UI used from Students page
+  if (true) {
+    return (
+      <Layout title="Add New Application" subtitle="Create a university application for a student" helpText="Fill in the application details and submit to track progress.">
+        <AddApplicationModal
+          open={addModalOpen}
+          onOpenChange={(o) => {
+            setAddModalOpen(o);
+            if (!o) setLocation('/applications');
+          }}
+          studentId={selectedStudentIdForModal || presetStudentId || undefined}
+        />
+
+        <Dialog open={studentPickerOpen} onOpenChange={(o) => { setStudentPickerOpen(o); if (!o && !selectedStudentIdForModal && !presetStudentId) setLocation('/applications'); }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Select a student to create application</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <SearchableCombobox
+                value={selectedStudentIdForModal || ''}
+                onValueChange={handlePickStudent}
+                onSearch={() => { /* preloaded */ }}
+                options={studentOptions}
+                placeholder="Choose student..."
+                searchPlaceholder="Type to search students by name or email..."
+                emptyMessage="No students found"
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setLocation('/applications')}>Cancel</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </Layout>
+    );
+  }
 
   return (
     <Layout
