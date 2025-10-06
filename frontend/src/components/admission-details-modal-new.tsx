@@ -248,21 +248,40 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
       if (!admission) return;
       return AdmissionsService.updateAdmission(admission.id, payload);
     },
-    onSuccess: (updatedAdmission: any) => {
+    onMutate: async (payload: any) => {
+      const prev = admission ? { ...admission } : null;
+      return { previousAdmission: prev };
+    },
+    onSuccess: async (updatedAdmission: any, _vars, context: any) => {
       try {
-        queryClient.setQueryData(['/api/admissions'], (old: any) => {
-          if (!old) return old;
-          if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
-          if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
-          return old;
-        });
-        queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+        try {
+          queryClient.setQueryData(['/api/admissions'], (old: any) => {
+            if (!old) return old;
+            if (Array.isArray(old)) return old.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a));
+            if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.map((a: any) => (a.id === updatedAdmission.id ? updatedAdmission : a)) };
+            return old;
+          });
+          queryClient.setQueryData([`/api/admissions/${updatedAdmission.id}`], updatedAdmission);
+        } catch (e) {
+          console.warn('[AdmissionDetailsModal] cache update failed', e);
+        }
+        queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
+        queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
+        // Log activity if status changed
+        try {
+          const prev = (context?.previousAdmission as any)?.status ?? '';
+          const curr = updatedAdmission?.status ?? '';
+          if (prev !== curr) {
+            const content = `status changed from \"${prev}\" to \"${curr}\"`;
+            await ActivitiesService.createActivity({ entityType: 'admission', entityId: String(updatedAdmission.id), content, activityType: 'status_changed' });
+          }
+        } catch (err) {
+          console.warn('Failed to log admission status change on update', err);
+        }
       } catch (e) {
-        console.warn('[AdmissionDetailsModal] cache update failed', e);
+        console.error('Error in updateAdmissionMutation onSuccess', e);
       }
-      queryClient.invalidateQueries({ queryKey: ['/api/admissions'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/admissions/${admission?.id}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/activities/admission/${admission?.id}`] });
     },
   });
 
