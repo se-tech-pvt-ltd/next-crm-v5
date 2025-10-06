@@ -13,7 +13,7 @@ import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter,
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
-import { StudentPickerDialog } from '@/components/student-picker-dialog';
+import { ApplicationPickerDialog } from '@/components/application-picker-dialog';
 import { useLocation, useRoute } from 'wouter';
 import * as AdmissionsService from '@/services/admissions';
 
@@ -31,6 +31,10 @@ export default function Admissions() {
 
   const [isStudentPickerOpen, setIsStudentPickerOpen] = useState(false);
   const [addAdmissionStudentId, setAddAdmissionStudentId] = useState<string | undefined>(undefined);
+
+  // Application picker state
+  const [isApplicationPickerOpen, setIsApplicationPickerOpen] = useState(false);
+  const [addAdmissionAppIdState, setAddAdmissionAppIdState] = useState<string | undefined>(undefined);
 
   const { data: admissions, isLoading: admissionsLoading } = useQuery<Admission[]>({
     queryKey: ['/api/admissions'],
@@ -75,9 +79,9 @@ export default function Admissions() {
   // Open Add Admission modal or student picker when route matches /admissions/new
   useEffect(() => {
     if (!matchNew) {
-      setIsStudentPickerOpen(false);
+      setIsApplicationPickerOpen(false);
       setIsAddAdmissionModalOpen(false);
-      setAddAdmissionStudentId(undefined);
+      setAddAdmissionAppIdState(undefined);
       return;
     }
 
@@ -91,21 +95,21 @@ export default function Admissions() {
     })();
 
     const params = new URLSearchParams(queryString);
-    const queryStudentId = params.get('studentId');
+    const queryAppId = params.get('applicationId');
 
-    if (queryStudentId && addAdmissionStudentId !== queryStudentId) {
-      setAddAdmissionStudentId(queryStudentId);
+    if (queryAppId && addAdmissionAppIdState !== queryAppId) {
+      setAddAdmissionAppIdState(queryAppId);
       return;
     }
 
-    if (queryStudentId || addAdmissionStudentId) {
+    if (queryAppId || addAdmissionAppIdState) {
       if (!isAddAdmissionModalOpen) setIsAddAdmissionModalOpen(true);
-      setIsStudentPickerOpen(false);
+      setIsApplicationPickerOpen(false);
       return;
     }
 
-    setIsStudentPickerOpen(true);
-  }, [matchNew, addAdmissionStudentId, isAddAdmissionModalOpen]);
+    setIsApplicationPickerOpen(true);
+  }, [matchNew, addAdmissionAppIdState, isAddAdmissionModalOpen]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
@@ -354,23 +358,23 @@ export default function Admissions() {
         admission={selectedAdmission}
       />
 
-      <StudentPickerDialog
-        open={isStudentPickerOpen}
+      <ApplicationPickerDialog
+        open={isApplicationPickerOpen}
         onOpenChange={(open) => {
-          setIsStudentPickerOpen(open);
-          if (!open && matchNew && !addAdmissionStudentId) {
+          setIsApplicationPickerOpen(open);
+          if (!open && matchNew && !addAdmissionAppIdState) {
             try { setLocation('/admissions'); } catch {}
           }
         }}
-        onSelect={(studentId: string) => {
-          if (!studentId) return;
-          setAddAdmissionStudentId(studentId);
-          setIsStudentPickerOpen(false);
+        onSelect={(applicationId: string, application?: any) => {
+          if (!applicationId) return;
+          setAddAdmissionAppIdState(applicationId);
+          setIsApplicationPickerOpen(false);
           setIsAddAdmissionModalOpen(true);
           if (matchNew) {
             try {
               const params = new URLSearchParams();
-              params.set('studentId', studentId);
+              params.set('applicationId', applicationId);
               const target = `/admissions/new?${params.toString()}`;
               if (typeof window !== 'undefined' && window.location.href !== target) {
                 window.history.replaceState({}, '', target);
@@ -378,8 +382,8 @@ export default function Admissions() {
             } catch {}
           }
         }}
-        title="Select a student to create admission"
-        pageSize={4}
+        title="Select an application to create admission"
+        pageSize={6}
       />
 
       <AddAdmissionModal
@@ -392,10 +396,11 @@ export default function Admissions() {
             } catch {}
             setAddAdmissionAppId(undefined);
             setAddAdmissionStudentId(undefined);
+            setAddAdmissionAppIdState(undefined);
           }
         }}
-        applicationId={addAdmissionAppId}
-        studentId={addAdmissionStudentId}
+        applicationId={addAdmissionAppIdState}
+        studentId={undefined}
       />
     </Layout>
   );
