@@ -119,6 +119,7 @@ function Router() {
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/login" component={Login} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
