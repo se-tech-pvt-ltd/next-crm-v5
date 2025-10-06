@@ -287,6 +287,8 @@ export default function EventsPage() {
   const [skipClearViewAfterLeadCreate, setSkipClearViewAfterLeadCreate] = useState(false);
   // when true, skip the addLeadModalOpen close handler's navigation back to the registration detail (we set this when lead is created)
   const [skipNavigateAfterLeadCreate, setSkipNavigateAfterLeadCreate] = useState(false);
+  // when true, prevent the pendingOpenLeadId handler from opening the registration view (used briefly when navigating to the /lead route)
+  const [skipOpenViewForLeadRoute, setSkipOpenViewForLeadRoute] = useState(false);
 
   const openConvertToLeadModal = (reg: any) => {
     // find the linked event (selected event)
