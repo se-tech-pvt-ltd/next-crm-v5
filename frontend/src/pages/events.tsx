@@ -1698,7 +1698,7 @@ export default function EventsPage() {
                           <PhoneInput
                             value={regForm.number || ''}
                             onChange={(val) => setRegForm({ ...regForm, number: val })}
-                            defaultCountry="in"
+                            defaultCountry="pk"
                             className="w-full"
                             inputClassName="w-full h-9 text-sm"
                             buttonClassName="h-9"
@@ -1763,7 +1763,7 @@ export default function EventsPage() {
                   <PhoneInput
                     value={editingReg.number || ''}
                     onChange={(val) => setEditingReg({ ...editingReg, number: val })}
-                    defaultCountry="in"
+                    defaultCountry="pk"
                     className="w-full"
                     inputClassName="w-full h-9 text-sm"
                     buttonClassName="h-9"
@@ -1914,7 +1914,7 @@ export default function EventsPage() {
               <PhoneInput
                 value={viewEditData.number || ''}
                 onChange={(val) => setViewEditData(v => ({ ...v, number: val }))}
-                defaultCountry="in"
+                defaultCountry="pk"
                 className="w-full"
                 inputClassName="w-full h-7 text-[11px]"
                 buttonClassName="h-7"
@@ -1924,7 +1924,7 @@ export default function EventsPage() {
                 <PhoneInput
                   value={String(viewReg.number || '')}
                   onChange={() => {}}
-                  defaultCountry="in"
+                  defaultCountry="pk"
                   className="w-full"
                   inputClassName="w-full h-7 text-[11px]"
                   buttonClassName="h-7"
