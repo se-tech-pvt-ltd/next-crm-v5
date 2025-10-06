@@ -1204,8 +1204,11 @@ export default function EventsPage() {
     if (pendingOpenLeadId) {
       const match2 = list.find(r => String(r.id) === String(pendingOpenLeadId) || String(r.eventRegId) === String(pendingOpenLeadId));
       if (match2) {
-        // prepare initial data preferring 'Events' as source
-        setLeadInitialData({
+        // find linked event and include its defaults
+        const eventIdForMatch = match2.eventId || match2.event_id || filterEventId || selectedEvent?.id;
+        const ev2 = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(eventIdForMatch)) || selectedEvent;
+
+        const initialDataForRoute: any = {
           name: match2.name,
           email: match2.email,
           phone: match2.number,
@@ -1214,7 +1217,17 @@ export default function EventsPage() {
           source: 'Events',
           status: 'new',
           eventRegId: match2.id,
-        });
+          eventId: eventIdForMatch,
+        };
+
+        if (ev2) {
+          if (ev2.regionId || ev2.region_id) initialDataForRoute.regionId = String(ev2.regionId ?? ev2.region_id);
+          if (ev2.branchId || ev2.branch_id) initialDataForRoute.branchId = String(ev2.branchId ?? ev2.branch_id);
+          if (ev2.counsellorId || ev2.counsellor_id || ev2.counselorId || ev2.counselor_id) initialDataForRoute.counsellorId = String(ev2.counsellorId ?? ev2.counsellor_id ?? ev2.counselorId ?? ev2.counselor_id);
+          if (ev2.admissionOfficerId || ev2.admission_officer_id) initialDataForRoute.admissionOfficerId = String(ev2.admissionOfficerId ?? ev2.admission_officer_id);
+        }
+
+        setLeadInitialData(initialDataForRoute);
         setAddLeadModalOpen(true);
         setPendingOpenLeadId(null);
       }
