@@ -2040,7 +2040,7 @@ export default function EventsPage() {
                 try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
                 try { refetchRegs?.(); } catch {}
 
-                // Navigate to registration detail route and mark pending so the view opens when data is available
+                // Navigate to registration detail route
                 try {
                   const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
                   if (eventIdToUse) {
@@ -2048,7 +2048,24 @@ export default function EventsPage() {
                   }
                 } catch {}
 
-                try { setPendingRegId(String(regId)); } catch {}
+                // Try to fetch the fresh registration directly from the server and open it
+                (async () => {
+                  try {
+                    const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
+                    if (eventIdToUse) {
+                      const regs = await RegService.getRegistrationsByEvent(eventIdToUse);
+                      const fresh = (Array.isArray(regs) ? regs : []).find((r:any) => String(r.id) === String(regId) || String(r.eventRegId) === String(regId));
+                      if (fresh) {
+                        setViewReg(fresh);
+                        setIsViewRegOpen(true);
+                        return;
+                      }
+                    }
+                  } catch (e) {}
+
+                  // fallback: attempt to use pendingRegId to open when the list updates
+                  try { setPendingRegId(String(regId)); } catch {}
+                })();
 
                 // Also update local viewReg immediately if present
                 setViewReg((prev: any) => {
