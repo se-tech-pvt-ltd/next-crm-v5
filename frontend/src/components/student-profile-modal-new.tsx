@@ -436,11 +436,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         const previousStatus = context?.previousStatus ?? '';
         const newStatus = updatedStudent.status ?? '';
         const content = `status changed from \"${previousStatus}\" to \"${newStatus}\"`;
-        try {
-          await ActivitiesService.createActivity({ entityType: 'student', entityId: String(studentId), content, activityType: 'status_changed' });
-        } catch (err) {
-          console.warn('Failed to log status change activity', err);
-        }
+        // Server will log the activity; just notify the user.
         toast({ title: 'Status updated', description: `Student status set to ${getStatusDisplayName(updatedStudent.status)}` });
       } catch (err) {
         console.error('Error handling status update success:', err);
