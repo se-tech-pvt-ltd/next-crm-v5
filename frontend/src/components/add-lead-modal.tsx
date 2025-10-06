@@ -44,7 +44,7 @@ interface AddLeadModalProps {
   onCreated?: (lead: any, initialData?: Partial<any>) => void;
 }
 
-export function AddLeadModal({ open, onOpenChange, initialData }: AddLeadModalProps) {
+export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: AddLeadModalProps) {
   const [submitLeadForm, setSubmitLeadForm] = useState<(() => void) | null>(null);
   const handleRegisterSubmit = useCallback((fn: () => void) => {
     try { setSubmitLeadForm(() => fn); } catch {}
