@@ -576,13 +576,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   // Auto-select region/branch based on JWT and assignments
   useEffect(() => {
     try {
-      // If this form was opened with initialData originating from an event (region/branch defaults),
-      // do not override those values with JWT-derived defaults.
       if (initialData && (initialData.regionId || initialData.region_id || initialData.branchId || initialData.branch_id)) return;
 
       const currentRegion = String(form.getValues('regionId') || '');
       const currentBranch = String(form.getValues('branchId') || '');
       if (currentRegion && currentBranch) return;
+
+      const existingCounsellorIdRaw = form.getValues('counsellorId');
+      const existingAdmissionOfficerIdRaw = form.getValues('admissionOfficerId');
+      const existingCounsellorId = existingCounsellorIdRaw ? String(existingCounsellorIdRaw) : '';
+      const existingAdmissionOfficerId = existingAdmissionOfficerIdRaw ? String(existingAdmissionOfficerIdRaw) : '';
 
       const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
       const token = safeGetToken();
@@ -607,7 +610,6 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         } catch {}
       }
 
-      // Fallbacks using current user and assignments
       const roleName = getNormalizedRole();
 
       if (!resolvedRegionId) {
@@ -641,15 +643,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       if (resolvedRegionId) {
         form.setValue('regionId', resolvedRegionId, { shouldDirty: true, shouldValidate: true });
-        const roleName = getNormalizedRole();
-        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        const roleDerived = getNormalizedRole();
+        const isRegional = roleDerived === 'regional_manager' || roleDerived === 'regional_head';
         setAutoRegionDisabled(isRegional ? true : !isRegional);
       }
 
       if (resolvedBranchId) {
         form.setValue('branchId', resolvedBranchId, { shouldDirty: true, shouldValidate: true });
-        const roleName = getNormalizedRole();
-        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        const roleDerived = getNormalizedRole();
+        const isRegional = roleDerived === 'regional_manager' || roleDerived === 'regional_head';
         setAutoBranchDisabled(!isRegional);
       } else if (resolvedRegionId && !currentBranch) {
         form.setValue('branchId', '');
@@ -657,14 +659,29 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       }
 
       if (resolvedRegionId || resolvedBranchId) {
-        form.setValue('counsellorId', '');
-        form.setValue('admissionOfficerId', '');
+        if (!existingCounsellorId) form.setValue('counsellorId', '');
+        if (!existingAdmissionOfficerId) form.setValue('admissionOfficerId', '');
       } else {
         setAutoRegionDisabled(false);
         setAutoBranchDisabled(false);
       }
+
+      const myId = String((user as any)?.id ?? '');
+      const branchForAssignmentRaw = form.getValues('branchId') || resolvedBranchId;
+      const branchForAssignment = branchForAssignmentRaw ? String(branchForAssignmentRaw) : '';
+      const isAdmissionOfficerRole = roleName === 'admission_officer' || roleName === 'admission officer' || roleName === 'admissionofficer';
+      if (!existingAdmissionOfficerId && isAdmissionOfficerRole && myId) {
+        let canAssign = true;
+        if (branchForAssignment) {
+          const links = Array.isArray(branchEmps) ? branchEmps : [];
+          canAssign = links.some((be: any) => String(be.userId ?? be.user_id) === myId && String(be.branchId ?? be.branch_id) === branchForAssignment);
+        }
+        if (canAssign) {
+          form.setValue('admissionOfficerId', myId, { shouldDirty: false, shouldValidate: true });
+        }
+      }
     } catch {}
-  }, [user, regionsList, branchesList, branchEmps]);
+  }, [user, regionsList, branchesList, branchEmps, initialData, selectedBranchId]);
 
   // Ensure region is derived from selected branch if missing
   useEffect(() => {
