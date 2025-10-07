@@ -71,19 +71,19 @@ export class ActivityService {
     const rawType = String(activityWithUser.activityType ?? "").toLowerCase();
     const normalizedType = rawType.replace(/[\s_-]/g, "");
     if (normalizedType === "followup") {
-      const authorId = userId ?? (activityWithUser as any).userId;
+      const authorId = userId ?? activityWithUser.userId ?? undefined;
       if (!authorId) {
         await ActivityModel.delete(activity.id);
         throw new Error("User id is required to create follow-up records");
       }
 
-      const followUpOn = (activityWithUser as any).followUpAt ?? null;
+      const followUpOn = activityWithUser.followUpAt ?? null;
       if (!(followUpOn instanceof Date) || Number.isNaN(followUpOn.getTime())) {
         await ActivityModel.delete(activity.id);
         throw new Error("Follow-up date and time are required for follow-up activities");
       }
 
-      const descriptionSource = (activityWithUser as any).description ?? activityWithUser.title;
+      const descriptionSource = activityWithUser.description ?? activityWithUser.title;
       const comments = typeof descriptionSource === "string"
         ? descriptionSource.trim()
         : descriptionSource != null
