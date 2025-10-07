@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, startOfDay } from 'date-fns';
+import { useLocation } from 'wouter';
 
 type EventItem = {
   id: string;
