@@ -41,6 +41,14 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
     setModalOpen(true);
   };
 
+  const [eventModalOpen, setEventModalOpen] = React.useState(false);
+  const [selectedEvent, setSelectedEvent] = React.useState<EventItem | null>(null);
+
+  const openEventModal = (ev: EventItem) => {
+    setSelectedEvent(ev);
+    setEventModalOpen(true);
+  };
+
   return (
     <div className="w-full flex flex-col">
       <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-2">
