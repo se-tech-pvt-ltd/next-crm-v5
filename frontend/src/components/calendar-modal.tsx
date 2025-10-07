@@ -3,6 +3,9 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import type { FollowUp } from '@/lib/types';
+import { getFollowUps } from '@/services/followUps';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   addDays,
@@ -10,11 +13,14 @@ import {
   addYears,
   eachDayOfInterval,
   eachMonthOfInterval,
+  endOfDay,
+  endOfMonth,
   endOfWeek,
   endOfYear,
   format,
   isSameDay,
   isSameMonth,
+  startOfDay,
   startOfMonth,
   startOfWeek,
   startOfYear,
