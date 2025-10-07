@@ -176,6 +176,49 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   const followUpsError = followUpQuery.error instanceof Error ? followUpQuery.error : null;
   const isFollowUpsLoading = followUpQuery.isLoading;
 
+  const followUpsByDay = React.useMemo(() => {
+    const map = new Map<string, { date: Date; items: FollowUp[] }>();
+    for (const followUp of followUps) {
+      const date = new Date(followUp.followUpOn);
+      if (Number.isNaN(date.getTime())) {
+        continue;
+      }
+      const normalized = startOfDay(date);
+      const key = normalized.toISOString();
+      const entry = map.get(key);
+      if (entry) {
+        entry.items.push(followUp);
+      } else {
+        map.set(key, { date: normalized, items: [followUp] });
+      }
+    }
+    map.forEach((entry) => {
+      entry.items.sort(
+        (a, b) => new Date(a.followUpOn).getTime() - new Date(b.followUpOn).getTime(),
+      );
+    });
+    return map;
+  }, [followUps]);
+
+  const followUpHighlightDates = React.useMemo(
+    () => Array.from(followUpsByDay.values()).map((entry) => entry.date),
+    [followUpsByDay],
+  );
+
+  const selectedDayFollowUps = React.useMemo(() => {
+    const key = startOfDay(selectedDate).toISOString();
+    const entry = followUpsByDay.get(key);
+    return entry ? entry.items : [];
+  }, [followUpsByDay, selectedDate]);
+
+  const formatFollowUpTime = React.useCallback((value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+    return format(date, 'p');
+  }, []);
+
   const handleSelectDay = React.useCallback((date?: Date) => {
     if (!date) {
       return;
