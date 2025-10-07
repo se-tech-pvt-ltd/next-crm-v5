@@ -471,11 +471,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                 <h3 className="text-sm font-semibold text-gray-900">
                   Follow-ups on {format(selectedDate, 'PPP')}
                 </h3>
-                {followUpsMeta && (
-                  <span className="text-xs text-muted-foreground">
-                    Showing {selectedDayFollowUps.length} of {followUpsMeta.total} in range
-                  </span>
-                )}
               </div>
 
               {isFollowUpsLoading && (
