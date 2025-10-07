@@ -253,35 +253,71 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
             </div>
           </div>
         );
-      case 'year':
+      case 'year': {
+        const currentMonth = new Date();
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
-            <div className="w-full max-w-4xl">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="flex h-full w-full flex-col items-center overflow-auto px-1">
+            <div className="w-full max-w-5xl">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {yearMonths.map((month) => {
-                  const isSelected = isSameMonth(month, selectedDate);
+                  const isSelectedMonth = isSameMonth(month, selectedDate);
+                  const isCurrentMonth = isSameMonth(month, currentMonth);
                   return (
-                    <button
+                    <div
                       key={month.toISOString()}
-                      type="button"
-                      onClick={() => {
-                        setFocusDate(month);
-                        setView('month');
-                      }}
                       className={cn(
-                        'rounded-lg border bg-white p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                        isSelected ? 'border-primary bg-primary/10' : 'border-gray-200 hover:border-primary/60 hover:bg-primary/5',
+                        'flex flex-col rounded-xl border bg-white p-3 shadow-sm transition',
+                        isSelectedMonth
+                          ? 'border-primary shadow-md'
+                          : 'border-gray-200 hover:border-primary/60 hover:shadow',
                       )}
                     >
-                      <div className="text-lg font-semibold text-gray-900">{format(month, 'MMMM')}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">{format(month, 'yyyy')}</div>
-                    </button>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-semibold text-gray-900">{format(month, 'MMMM')}</div>
+                        <div className="text-xs text-muted-foreground">{format(month, 'yyyy')}</div>
+                      </div>
+                      <Calendar
+                        mode="single"
+                        disableNavigation
+                        showOutsideDays
+                        month={month}
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          if (!date) {
+                            return;
+                          }
+                          setSelectedDate(date);
+                          setFocusDate(startOfMonth(date));
+                          setView('month');
+                        }}
+                        className="mt-2 w-full self-center rounded-lg border bg-transparent p-2"
+                        classNames={{
+                          nav: 'hidden',
+                          caption: 'hidden',
+                          months: 'flex flex-col',
+                          month: 'space-y-2',
+                          table: 'w-full border-collapse space-y-0',
+                          head_row: 'flex',
+                          head_cell: 'text-[11px] font-semibold uppercase tracking-wide text-muted-foreground',
+                          row: 'flex w-full mt-1',
+                          cell: 'h-7 w-7 p-0 text-center text-xs',
+                          day: 'h-7 w-7 rounded-full text-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                          day_selected:
+                            'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
+                          day_today: cn(
+                            'border border-primary text-primary',
+                            isCurrentMonth ? 'border-primary' : 'border-primary/60',
+                          ),
+                        }}
+                      />
+                    </div>
                   );
                 })}
               </div>
             </div>
           </div>
         );
+      }
       default:
         return null;
     }
