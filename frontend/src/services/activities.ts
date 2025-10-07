@@ -5,6 +5,7 @@ export async function createActivity(data: {
   entityId: string;
   content: string;
   activityType?: string;
+  followUpAt?: string | Date | null;
 }) {
   const payload = {
     entityType: data.entityType,
@@ -12,6 +13,7 @@ export async function createActivity(data: {
     activityType: data.activityType || 'comment',
     title: data.content,
     description: data.content,
+    followUpAt: data.followUpAt ?? null,
   };
   return http.post<any>('/api/activities', payload);
 }
