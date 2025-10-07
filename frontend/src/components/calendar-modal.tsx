@@ -431,47 +431,31 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
-                {viewOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    size="sm"
-                    variant={view === option.value ? 'default' : 'outline'}
-                    className={view === option.value ? 'bg-white text-[#223E7D] border-white hover:bg-white' : 'border-white/40 text-white hover:bg-white/10'}
-                    onClick={() => setView(option.value)}
-                    aria-pressed={view === option.value}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
+              <div className="min-w-0 text-sm font-medium text-white sm:text-base" aria-live="polite">
+                {viewLabel}
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-medium text-white sm:text-base" aria-live="polite">
-                  {viewLabel}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-white/40 text-white hover:bg-white/10"
-                    onClick={handlePrev}
-                    aria-label="Previous period"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10" onClick={handleToday}>
-                    Today
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-white/40 text-white hover:bg-white/10"
-                    onClick={handleNext}
-                    aria-label="Next period"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="flex flex-wrap items-center justify-end gap-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-white/40 text-white hover:bg-white/10"
+                  onClick={handlePrev}
+                  aria-label="Previous period"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10" onClick={handleToday}>
+                  Today
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-white/40 text-white hover:bg-white/10"
+                  onClick={handleNext}
+                  aria-label="Next period"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
