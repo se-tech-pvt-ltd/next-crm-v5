@@ -716,6 +716,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                         setNewActivity("");
                         setActivityType("comment");
                         setFollowUpDate(undefined);
+                        setFollowUpTime("");
                         setComposerError(null);
                       }}
                     >
