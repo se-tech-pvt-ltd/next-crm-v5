@@ -59,6 +59,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     setActivityType(value);
     if (value !== 'follow_up') {
       setFollowUpDate(undefined);
+      setFollowUpTime("");
     }
     setComposerError(null);
   };
