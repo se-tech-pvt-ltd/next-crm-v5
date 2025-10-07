@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { ActivityModel } from "../models/Activity.js";
 import { AttachmentModel } from "../models/Attachment.js";
 import { FollowUpModel } from "../models/FollowUp.js";
