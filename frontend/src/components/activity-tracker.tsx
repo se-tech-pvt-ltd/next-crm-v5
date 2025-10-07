@@ -65,6 +65,16 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return "09:00";
   }, []);
 
+  const computeMinTimeForDate = React.useCallback((selected: Date) => {
+    const now = new Date();
+    if (selected.toDateString() !== now.toDateString()) {
+      return undefined;
+    }
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }, []);
+
   const followUpDateTime = React.useMemo(() => {
     if (!followUpDate) return undefined;
     if (!followUpTime) return undefined;
@@ -81,14 +91,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
   const minTimeForSelectedDate = React.useMemo(() => {
     if (!followUpDate) return undefined;
-    const now = new Date();
-    if (followUpDate.toDateString() !== now.toDateString()) {
-      return undefined;
-    }
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  }, [followUpDate]);
+    return computeMinTimeForDate(followUpDate);
+  }, [followUpDate, computeMinTimeForDate]);
 
   const handleActivityTypeChange = (value: string) => {
     setActivityType(value);
