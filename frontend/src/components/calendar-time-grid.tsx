@@ -121,11 +121,11 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="grid grid-cols-[64px_1fr] md:grid-cols-[72px_repeat(var(--cols),1fr)]" style={{ ['--cols' as any]: String(normDays.length) }}>
+      <div className="grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
         <div />
-        <div className="col-span-1 md:col-span-[var(--cols)] grid grid-cols-[repeat(var(--cols),1fr)]">
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${normDays.length}, minmax(0, 1fr))` }}>
           {normDays.map((d) => (
-            <div key={d.toISOString()} className="border-b border-gray-200 py-2 text-center sticky top-0 bg-white z-10">
+            <div key={d.toISOString()} className="sticky top-0 z-10 border-b border-gray-200 bg-white py-2 text-center">
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{format(d, 'EEE')}</div>
               <div className="text-sm font-semibold text-gray-900">{format(d, 'MMM d')}</div>
             </div>
@@ -134,7 +134,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
       </div>
 
       {/* Body */}
-      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_repeat(var(--cols),1fr)]" style={{ ['--cols' as any]: String(normDays.length) }}>
+      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
         {/* Time column */}
         <div className="bg-white">
           {hourRange.map((h) => (
@@ -145,7 +145,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
         </div>
 
         {/* Days columns */}
-        <div className="col-span-1 md:col-span-[var(--cols)] grid grid-cols-[repeat(var(--cols),1fr)]">
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${normDays.length}, minmax(0, 1fr))` }}>
           {normDays.map((day) => {
             const key = day.toISOString();
             const dayEvents = positionedByDay.get(key) || [];
