@@ -46,17 +46,7 @@ export class NotificationController {
           scheduledAt: new Date(),
         });
       } else {
-        // No user found: queue a generic notification keyed by email
-        await NotificationService.queueNotification({
-          entityType: 'auth',
-          entityId: String(email),
-          templateId: 'forgot_password',
-          channel: 'email',
-          variables: { email },
-          recipientAddress: email,
-          status: 'pending',
-          scheduledAt: new Date(),
-        });
+        // Intentionally do nothing to avoid creating entries for non-existent emails
       }
 
       return res.status(201).json({ message: 'Notification queued' });
