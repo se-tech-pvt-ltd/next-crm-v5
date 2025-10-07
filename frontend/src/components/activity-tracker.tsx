@@ -55,6 +55,41 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return base;
   }, []);
 
+  const computeDefaultFollowUpTime = React.useCallback((selected: Date) => {
+    const now = new Date();
+    if (selected.toDateString() === now.toDateString()) {
+      const nextSlot = addMinutes(now, 30);
+      nextSlot.setSeconds(0, 0);
+      return format(nextSlot, "HH:mm");
+    }
+    return "09:00";
+  }, []);
+
+  const followUpDateTime = React.useMemo(() => {
+    if (!followUpDate) return undefined;
+    if (!followUpTime) return undefined;
+    const [hoursStr, minutesStr] = followUpTime.split(":");
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+      return undefined;
+    }
+    const combined = new Date(followUpDate.getTime());
+    combined.setHours(hours, minutes, 0, 0);
+    return combined;
+  }, [followUpDate, followUpTime]);
+
+  const minTimeForSelectedDate = React.useMemo(() => {
+    if (!followUpDate) return undefined;
+    const now = new Date();
+    if (followUpDate.toDateString() !== now.toDateString()) {
+      return undefined;
+    }
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }, [followUpDate]);
+
   const handleActivityTypeChange = (value: string) => {
     setActivityType(value);
     if (value !== 'follow_up') {
