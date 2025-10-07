@@ -225,8 +225,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           return addDays(prev, 7);
         case 'month':
           return addMonths(prev, 1);
-        case 'year':
-          return addYears(prev, 1);
         default:
           return prev;
       }
