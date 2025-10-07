@@ -591,7 +591,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                       <SelectValue placeholder="Select activity type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ACTIVITY_TYPES.map((type) => {
+                      {getActivityTypes(entityType).map((type) => {
                         const IconComponent = type.icon;
                         return (
                           <SelectItem key={type.value} value={type.value}>
