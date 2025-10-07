@@ -8,9 +8,18 @@ export function formatFieldName(fieldName: string): string {
     .replace(/^./, str => str.toUpperCase());
 }
 
-export function sanitizeUser(user: any) {
-  const { passwordHash, ...userWithoutPassword } = user;
-  return userWithoutPassword;
+export function sanitizeUser<T extends Record<string, unknown> | null | undefined>(user: T): T {
+  if (user === null || user === undefined) {
+    return user;
+  }
+
+  const sanitized: Record<string, unknown> = { ...user };
+  delete sanitized.passwordHash;
+  delete sanitized.password_hash;
+  delete sanitized.password;
+  delete sanitized.salt;
+
+  return sanitized as T;
 }
 
 export function generateUniqueFilename(originalName: string): string {
