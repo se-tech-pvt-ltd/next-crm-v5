@@ -404,8 +404,8 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           <div className="flex flex-col gap-3 border-b border-[#223E7D] bg-[#223E7D] text-white px-4 py-3 sm:px-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <DialogTitle className="text-lg font-semibold text-blue-900 sm:text-xl">Calendar</DialogTitle>
-                <DialogDescription className="text-sm text-blue-800/70">
+                <DialogTitle className="text-lg font-semibold text-white sm:text-xl">Calendar</DialogTitle>
+                <DialogDescription className="text-sm text-white/80">
                   Browse dates and plan upcoming activities.
                 </DialogDescription>
               </div>
@@ -420,6 +420,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                     key={option.value}
                     size="sm"
                     variant={view === option.value ? 'default' : 'outline'}
+                    className={view === option.value ? 'bg-white text-[#223E7D] border-white hover:bg-white' : 'border-white/40 text-white hover:bg-white/10'}
                     onClick={() => setView(option.value)}
                     aria-pressed={view === option.value}
                   >
@@ -428,24 +429,26 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-medium text-blue-900 sm:text-base" aria-live="polite">
+                <div className="text-sm font-medium text-white sm:text-base" aria-live="polite">
                   {viewLabel}
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
                     size="sm"
                     variant="outline"
+                    className="border-white/40 text-white hover:bg-white/10"
                     onClick={handlePrev}
                     aria-label="Previous period"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={handleToday}>
+                  <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10" onClick={handleToday}>
                     Today
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
+                    className="border-white/40 text-white hover:bg-white/10"
                     onClick={handleNext}
                     aria-label="Next period"
                   >
