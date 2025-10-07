@@ -8,7 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar as CalendarIcon, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
 import { Activity, User as UserType } from "@/lib/types";
 import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
@@ -32,17 +34,32 @@ interface ActivityTrackerProps {
 const ACTIVITY_TYPES = [
   { value: 'comment', label: 'Comment', icon: MessageSquare },
   { value: 'note', label: 'Note', icon: FileText },
-  { value: 'follow_up', label: 'Follow Up', icon: Calendar },
+  { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
   { value: 'call', label: 'Call', icon: UserIcon },
 ];
 
 export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName, canAdd = true }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
+  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
+  const [composerError, setComposerError] = useState<string | null>(null);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const today = React.useMemo(() => {
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }, []);
+
+  const handleActivityTypeChange = (value: string) => {
+    setActivityType(value);
+    if (value !== 'follow_up') {
+      setFollowUpDate(undefined);
+    }
+    setComposerError(null);
+  };
 
   // Extract conversion details like: "This record was converted from lead ID <uuid>. All previous..."
   const parseConversionDescription = (desc?: string): { fromType?: string; fromId?: string } => {
@@ -178,6 +195,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       oldValue: a.oldValue ?? a.old_value,
       newValue: a.newValue ?? a.new_value,
       fieldName: a.fieldName ?? a.field_name,
+      followUpAt: a.followUpAt ?? a.follow_up_at ?? null,
       userId: a.userId ?? a.user_id,
       userName: a.userName ?? a.user_name,
       userProfileImage: a.userProfileImage ?? a.user_profile_image,
@@ -302,13 +320,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   }, [activities, users, fetchedProfiles]);
 
   const addActivityMutation = useMutation({
-    mutationFn: async (data: { type: string; content: string }) => {
+    mutationFn: async (data: { type: string; content: string; followUpAt?: string | null }) => {
       console.log('Adding activity:', { entityType, entityId, data });
       const result = await ActivitiesService.createActivity({
         entityType,
         entityId: String(entityId),
         activityType: data.type,
         content: data.content,
+        followUpAt: data.followUpAt ?? null,
       });
       console.log('Activity created:', result);
       return result;
@@ -327,6 +346,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         userName: user?.firstName || user?.name || user?.email || 'You',
         userId: user?.id,
         userProfileImage: (user as any)?.profileImageUrl || (user as any)?.profileImage || null,
+        followUpAt: data.followUpAt ?? null,
         createdAt,
         isOptimistic: true,
       };
@@ -336,6 +356,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], (old = []) => [optimisticActivity as any, ...(Array.isArray(old) ? old : [])]);
       setNewActivity('');
       setActivityType('comment');
+      setFollowUpDate(undefined);
+      setComposerError(null);
       setIsAddingActivity(false);
       return { previous, tempId };
     },
@@ -356,9 +378,20 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   });
 
   const handleAddActivity = () => {
-    if (newActivity.trim()) {
-      addActivityMutation.mutate({ type: activityType, content: newActivity.trim() });
+    const content = newActivity.trim();
+    if (!content) {
+      return;
     }
+    if (activityType === 'follow_up' && !followUpDate) {
+      setComposerError('Select a follow-up date');
+      return;
+    }
+    setComposerError(null);
+    addActivityMutation.mutate({
+      type: activityType,
+      content,
+      followUpAt: followUpDate ? followUpDate.toISOString() : null,
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -492,7 +525,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                 </Button>
               ) : (
                 <div className="space-y-3">
-                  <Select value={activityType} onValueChange={setActivityType}>
+                  <Select value={activityType} onValueChange={handleActivityTypeChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select activity type" />
                     </SelectTrigger>
@@ -511,6 +544,42 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     </SelectContent>
                   </Select>
 
+                  {activityType === 'follow_up' && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-semibold text-gray-700">Follow-up date</span>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={`w-full justify-start text-sm font-normal ${followUpDate ? 'text-gray-900' : 'text-muted-foreground'}`}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarPicker
+                            mode="single"
+                            selected={followUpDate}
+                            onSelect={(date) => {
+                              setFollowUpDate(date ?? undefined);
+                              setComposerError(null);
+                            }}
+                            disabled={(date) => date < today}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  )}
+
+                  {composerError && (
+                    <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-600">
+                      {composerError}
+                    </div>
+                  )}
+
                   <Textarea
                     ref={textareaRef}
                     placeholder="Enter activity details... (Press Enter to submit, Shift+Enter for new line)"
@@ -524,7 +593,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <Button
                       size="sm"
                       onClick={handleAddActivity}
-                      disabled={!newActivity.trim() || addActivityMutation.isPending}
+                      disabled={!newActivity.trim() || addActivityMutation.isPending || (activityType === 'follow_up' && !followUpDate)}
                     >
                       {addActivityMutation.isPending ? "Adding..." : "Add Activity"}
                     </Button>
@@ -535,6 +604,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                         setIsAddingActivity(false);
                         setNewActivity("");
                         setActivityType("comment");
+                        setFollowUpDate(undefined);
+                        setComposerError(null);
                       }}
                     >
                       Cancel

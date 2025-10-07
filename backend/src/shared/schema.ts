@@ -448,6 +448,7 @@ export const activities = mysqlTable("activities", {
   oldValue: text("old_value"),
   newValue: text("new_value"),
   fieldName: text("field_name"),
+  followUpAt: timestamp("follow_up_at"),
   userId: varchar("user_id", { length: 255 }), // User who performed the action
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -466,6 +467,15 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
   createdAt: true,
 }).extend({
   entityId: z.union([z.string(), z.number()]).transform(String), // Accept both but convert to string
+  followUpAt: z.union([z.string(), z.date(), z.null()]).optional().transform((value) => {
+    if (value == null) return null;
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return parsed;
+  }),
 });
 
 export const insertDropdownSchema = createInsertSchema(dropdowns);

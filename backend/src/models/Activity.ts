@@ -80,6 +80,7 @@ export class ActivityModel {
         oldValue: activity.oldValue,
         newValue: activity.newValue,
         fieldName: activity.fieldName,
+        followUpAt: (activity as any).followUpAt ?? null,
         userId: activity.userId,
         createdAt: activity.createdAt,
       });

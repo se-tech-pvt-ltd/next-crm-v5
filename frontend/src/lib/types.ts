@@ -139,6 +139,7 @@ export interface Activity {
   oldValue: string | null;
   newValue: string | null;
   fieldName: string | null;
+  followUpAt?: string | Date | null;
   userId: string | null;
   createdAt: Date;
 }
@@ -297,6 +298,15 @@ export const insertActivitySchema = z.object({
   oldValue: z.string().optional(),
   newValue: z.string().optional(),
   fieldName: z.string().optional(),
+  followUpAt: z.union([z.string(), z.date(), z.null()]).optional().transform((value) => {
+    if (value == null) return null;
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      throw new Error("Invalid date format");
+    }
+    return parsed;
+  }),
   userId: z.string().optional(),
 });
 
