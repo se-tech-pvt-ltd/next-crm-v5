@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, UserPlus, GraduationCap, Megaphone, CalendarDays } from 'lucide-react';
+import { Search, Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
@@ -11,13 +11,12 @@ import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
 import { UpdatesModal } from './updates-modal';
-import { CalendarModal } from './calendar-modal';
 import { AdmissionDetailsModal } from './admission-details-modal-new';
 import { StudentProfileModal } from './student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import type { Admission, Application } from '@/lib/types';
-import { useLocation, useRoute } from 'wouter';
+import { useLocation } from 'wouter';
 
 interface HeaderProps {
   title: string;
