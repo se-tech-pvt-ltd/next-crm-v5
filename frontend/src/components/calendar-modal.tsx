@@ -137,14 +137,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           end: endOfDay(end),
         };
       }
-      case 'year': {
-        const start = startOfYear(focusDate);
-        const end = endOfYear(focusDate);
-        return {
-          start: startOfDay(start),
-          end: endOfDay(end),
-        };
-      }
       default:
         return {
           start: startOfDay(focusDate),
