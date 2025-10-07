@@ -429,7 +429,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-white/30 text-white hover:bg-white/15"
+                    className="border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20"
                     onClick={handlePrev}
                     aria-label="Previous period"
                   >
@@ -438,7 +438,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-white/30 text-white hover:bg-white/15"
+                    className="border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20"
                     onClick={handleToday}
                   >
                     Today
@@ -446,7 +446,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-white/30 text-white hover:bg-white/15"
+                    className="border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20"
                     onClick={handleNext}
                     aria-label="Next period"
                   >
