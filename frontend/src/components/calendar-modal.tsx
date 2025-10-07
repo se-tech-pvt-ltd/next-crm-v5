@@ -401,7 +401,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
         <div className="flex h-full max-h-[90vh] flex-col">
-          <div className="flex flex-col gap-3 border-b border-blue-200 bg-blue-50/60 px-4 py-3 sm:px-6">
+          <div className="flex flex-col gap-3 border-b border-[#223E7D] bg-[#223E7D] text-white px-4 py-3 sm:px-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <DialogTitle className="text-lg font-semibold text-blue-900 sm:text-xl">Calendar</DialogTitle>
