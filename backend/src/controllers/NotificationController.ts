@@ -1,8 +1,7 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { NotificationService } from '../services/NotificationService.js';
 import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
-import type { Request, Response } from 'express';
 
 export class NotificationController {
   static async forgotPassword(req: Request, res: Response) {
