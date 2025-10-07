@@ -109,8 +109,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       }
       case 'month':
         return format(focusDate, 'MMMM yyyy');
-      case 'year':
-        return format(focusDate, 'yyyy');
       default:
         return '';
     }
