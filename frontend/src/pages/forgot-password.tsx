@@ -7,7 +7,7 @@ import { useLocation } from 'wouter';
 import * as NotificationsService from '@/services/notifications';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
-import { Mail, User, HelpCircle } from 'lucide-react';
+import { Mail, User, HelpCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const forgotSchema = z.object({ email: z.string().email('Please enter a valid email address') });
@@ -19,6 +19,7 @@ export default function ForgotPasswordPage() {
   const [, setLocation] = useLocation();
 
   const form = useForm<ForgotForm>({ resolver: zodResolver(forgotSchema), defaultValues: { email: '' } });
+  const isSubmitting = form.formState.isSubmitting;
 
   const onSubmit = async (data: ForgotForm) => {
     try {
@@ -63,7 +64,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" aria-busy={isSubmitting}>
                 <FormField
                   control={form.control}
                   name="email"
@@ -78,6 +79,7 @@ export default function ForgotPasswordPage() {
                           placeholder="your.name@example.com"
                           autoComplete="email"
                           inputMode="email"
+                          disabled={isSubmitting}
                           className="h-12 border-gray-300 focus:border-[#223E7D] focus:ring-[#223E7D] bg-white"
                         />
                       </FormControl>
@@ -87,7 +89,9 @@ export default function ForgotPasswordPage() {
                 />
 
                 <div className="flex justify-between items-center">
-                  <Button type="submit" className="bg-[#223E7D] text-white">Send reset link</Button>
+                  <Button type="submit" className="bg-[#223E7D] text-white" disabled={isSubmitting}>
+                    {isSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Sending...</>) : 'Send reset link'}
+                  </Button>
                   <button type="button" className="text-sm text-gray-500 hover:underline" onClick={() => setLocation('/login')}>Back to sign in</button>
                 </div>
               </form>

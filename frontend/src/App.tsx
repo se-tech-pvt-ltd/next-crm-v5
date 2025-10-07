@@ -20,6 +20,7 @@ import Forbidden from "@/pages/forbidden";
 import Login from "@/pages/login";
 import ForgotPassword from "@/pages/forgot-password";
 import UniversityPage from "@/pages/university";
+import ResetPassword from "@/pages/reset-password";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
@@ -55,8 +56,9 @@ function Router() {
 
   // Redirects should not run during render. Use effects to perform navigation.
   React.useEffect(() => {
-    // Allow unauthenticated users to access /login and /forgot-password without redirecting
-    if (!isLoading && !isAuthenticated && location !== '/login' && location !== '/forgot-password') {
+    // Allow unauthenticated users to access /login, /forgot-password, and /reset-password without redirecting
+    const allowUnauthed = (loc: string) => loc === '/login' || loc === '/forgot-password' || loc.startsWith('/reset-password');
+    if (!isLoading && !isAuthenticated && !allowUnauthed(location)) {
       try { setLocation('/login'); } catch {}
     }
   }, [isLoading, isAuthenticated, location, setLocation]);
@@ -86,6 +88,10 @@ function Router() {
     if (location === '/forgot-password') {
       console.log('Router: showing ForgotPassword page');
       return <ForgotPassword />;
+    }
+    if (location.startsWith('/reset-password')) {
+      console.log('Router: showing ResetPassword page');
+      return <ResetPassword />;
     }
     console.log('Router: showing Login component');
     return <Login onLogin={login} />;
@@ -126,6 +132,7 @@ function Router() {
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
       <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/login" component={Login} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

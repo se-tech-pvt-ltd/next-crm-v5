@@ -366,10 +366,51 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
+          <DialogContent hideClose className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
-              <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/15 via-accent/10 to-transparent">
-                <DialogTitle className="text-2xl text-primary flex items-center gap-2"><UserPlus className="w-5 h-5" /> Add User</DialogTitle>
+              <DialogHeader className="p-0">
+                <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
+                  <DialogTitle className="sr-only">Add User</DialogTitle>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <UserPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New User</div>
+                      <div className="text-xs opacity-90 truncate">Create a new team member</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }}
+                      className="px-3 h-8 text-xs bg-white text-black hover:bg-gray-100 border border-gray-300 rounded-md"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => handleCreate()}
+                      disabled={create.isPending || !form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(form.email).trim()) || !form.roleId || (function(){
+                        const nRole = normalizeRole(form.role);
+                        if (nRole === 'regional_manager') return !form.regionId;
+                        if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
+                        return false;
+                      })()}
+                      className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
+                    >
+                      {create.isPending ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Saving...</span>
+                        </div>
+                      ) : (
+                        <span>Save</span>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </DialogHeader>
 
               <div className="px-6 pb-6">
@@ -379,19 +420,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
                     <div>
                       <div className="flex items-center justify-between">
                         <div className="text-base sm:text-lg font-semibold text-primary flex items-center gap-2"><IdCard className="w-4 h-4" /> User information</div>
-                        <div className="flex items-center gap-2">
-                          <Button size="icon" aria-label="Save user" title="Save" onClick={() => handleCreate()} disabled={create.isPending || !form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(form.email).trim()) || !form.roleId || (function(){
-                            const nRole = normalizeRole(form.role);
-                            if (nRole === 'regional_manager') return !form.regionId;
-                            if (nRole === 'branch_manager' || nRole === 'counselor' || nRole === 'admission_officer') return !form.regionId || !form.branchId;
-                            return false;
-                          })()}>
-                            {create.isPending ? <span className="animate-pulse">...</span> : <Save className="w-4 h-4" />}
-                          </Button>
-                          <Button size="icon" variant="outline" aria-label="Cancel" title="Cancel" onClick={() => { setForm({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' }); setModalOpen(false); }} disabled={create.isPending}>
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <div className="hidden sm:block text-xs text-muted-foreground">Fill in the details below</div>
                       </div>
                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4 p-4 rounded-xl border bg-gradient-to-b from-primary/5 to-background shadow-sm">
                         <div className="flex justify-center sm:justify-start">

@@ -64,7 +64,7 @@ const ResetPasswordPage: React.FC = () => {
       } catch (err: any) {
         if (!isMounted) return;
         setStatus('invalid');
-        setErrorMessage(err?.message || 'Reset link is invalid or has expired.');
+        setErrorMessage('This reset link is invalid, expired, or already used. Please request a new link.');
       }
     };
 
