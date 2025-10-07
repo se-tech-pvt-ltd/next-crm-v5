@@ -144,7 +144,7 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
                     <div className="flex justify-between text-sm">
                       <div>
                         <div className="font-medium text-gray-700">Date</div>
-                        <div className="text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
+                        <div className="text-muted-foreground">{format(selectedEvent.start, 'EEE - MMM d, yyyy')}</div>
                       </div>
                       <div className="text-right">
                         <div className="font-medium text-gray-700">Time</div>
