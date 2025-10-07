@@ -105,8 +105,8 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       case 'day':
         return format(focusDate, 'EEEE, MMMM d, yyyy');
       case 'week': {
-        const start = startOfWeek(focusDate, { weekStartsOn: 1 });
-        const end = endOfWeek(focusDate, { weekStartsOn: 1 });
+        const start = startOfWeek(focusDate, WEEK_OPTIONS);
+        const end = endOfWeek(focusDate, WEEK_OPTIONS);
         const sameMonth = start.getMonth() === end.getMonth();
         const sameYear = start.getFullYear() === end.getFullYear();
         const startFormat = sameYear ? (sameMonth ? 'MMM d' : 'MMM d, yyyy') : 'MMM d, yyyy';
@@ -121,6 +121,60 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         return '';
     }
   }, [focusDate, view]);
+
+  const viewRange = React.useMemo(() => {
+    switch (view) {
+      case 'day':
+        return {
+          start: startOfDay(focusDate),
+          end: endOfDay(focusDate),
+        };
+      case 'week': {
+        const start = startOfWeek(focusDate, WEEK_OPTIONS);
+        const end = endOfWeek(focusDate, WEEK_OPTIONS);
+        return {
+          start: startOfDay(start),
+          end: endOfDay(end),
+        };
+      }
+      case 'month': {
+        const start = startOfMonth(focusDate);
+        const end = endOfMonth(focusDate);
+        return {
+          start: startOfDay(start),
+          end: endOfDay(end),
+        };
+      }
+      case 'year': {
+        const start = startOfYear(focusDate);
+        const end = endOfYear(focusDate);
+        return {
+          start: startOfDay(start),
+          end: endOfDay(end),
+        };
+      }
+      default:
+        return {
+          start: startOfDay(focusDate),
+          end: endOfDay(focusDate),
+        };
+    }
+  }, [focusDate, view]);
+
+  const rangeStartKey = React.useMemo(() => viewRange.start.toISOString(), [viewRange]);
+  const rangeEndKey = React.useMemo(() => viewRange.end.toISOString(), [viewRange]);
+
+  const followUpQuery = useQuery({
+    queryKey: ['follow-ups', view, rangeStartKey, rangeEndKey],
+    queryFn: () => getFollowUps({ start: viewRange.start, end: viewRange.end }),
+    enabled: open,
+    keepPreviousData: true,
+  });
+
+  const followUps = followUpQuery.data?.data ?? [];
+  const followUpsMeta = followUpQuery.data?.meta;
+  const followUpsError = followUpQuery.error instanceof Error ? followUpQuery.error : null;
+  const isFollowUpsLoading = followUpQuery.isLoading;
 
   const handleSelectDay = React.useCallback((date?: Date) => {
     if (!date) {
