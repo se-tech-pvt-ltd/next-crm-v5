@@ -17,6 +17,7 @@ import { StudentProfileModal } from './student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import type { Admission, Application } from '@/lib/types';
+import { useLocation, useRoute } from 'wouter';
 
 interface HeaderProps {
   title: string;
@@ -39,7 +40,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [, navigate] = useLocation();
+  const [isCalendarRoute] = useRoute('/calendar');
 
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -203,7 +205,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               size="icon"
               className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50"
               aria-label="Open calendar"
-              onClick={() => setIsCalendarOpen(true)}
+              onClick={() => navigate('/calendar')}
             >
               <CalendarDays size={18} aria-hidden="true" />
             </Button>
@@ -287,7 +289,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         studentId={selectedStudentId}
       />
 
-      <CalendarModal open={isCalendarOpen} onOpenChange={setIsCalendarOpen} />
+      <CalendarModal open={Boolean(isCalendarRoute)} onOpenChange={(open) => navigate(open ? '/calendar' : '/')} />
       <UpdatesModal open={isUpdatesOpen} onOpenChange={setIsUpdatesOpen} />
     </>
   );
