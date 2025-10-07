@@ -87,8 +87,8 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   const monthForCalendar = React.useMemo(() => startOfMonth(focusDate), [focusDate]);
 
   const weekDays = React.useMemo(() => {
-    const start = startOfWeek(focusDate, { weekStartsOn: 1 });
-    const end = endOfWeek(focusDate, { weekStartsOn: 1 });
+    const start = startOfWeek(focusDate, WEEK_OPTIONS);
+    const end = endOfWeek(focusDate, WEEK_OPTIONS);
     return eachDayOfInterval({ start, end });
   }, [focusDate]);
 
