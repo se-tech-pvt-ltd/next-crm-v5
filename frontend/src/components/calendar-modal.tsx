@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -36,13 +36,12 @@ interface CalendarModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type CalendarView = 'day' | 'week' | 'month' | 'year';
+type CalendarView = 'day' | 'week' | 'month';
 
 const viewOptions: { value: CalendarView; label: string }[] = [
   { value: 'day', label: 'Day' },
   { value: 'week', label: 'Week' },
   { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
 ];
 
 const WEEK_OPTIONS = { weekStartsOn: 1 as const };
@@ -74,14 +73,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           return prev;
         }
         return startOfMonth(selectedDate);
-      });
-    }
-    if (view === 'year') {
-      setFocusDate((prev) => {
-        if (prev.getFullYear() === selectedDate.getFullYear()) {
-          return prev;
-        }
-        return selectedDate;
       });
     }
   }, [view, selectedDate]);
@@ -118,8 +109,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       }
       case 'month':
         return format(focusDate, 'MMMM yyyy');
-      case 'year':
-        return format(focusDate, 'yyyy');
       default:
         return '';
     }
@@ -143,14 +132,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       case 'month': {
         const start = startOfMonth(focusDate);
         const end = endOfMonth(focusDate);
-        return {
-          start: startOfDay(start),
-          end: endOfDay(end),
-        };
-      }
-      case 'year': {
-        const start = startOfYear(focusDate);
-        const end = endOfYear(focusDate);
         return {
           start: startOfDay(start),
           end: endOfDay(end),
@@ -229,8 +210,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           return subDays(prev, 7);
         case 'month':
           return subMonths(prev, 1);
-        case 'year':
-          return subYears(prev, 1);
         default:
           return prev;
       }
@@ -246,8 +225,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           return addDays(prev, 7);
         case 'month':
           return addMonths(prev, 1);
-        case 'year':
-          return addYears(prev, 1);
         default:
           return prev;
       }
@@ -401,27 +378,19 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
         <div className="flex h-full max-h-[90vh] flex-col">
-          <div className="flex flex-col gap-3 border-b border-[#223E7D] bg-[#223E7D] text-white px-4 py-3 sm:px-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <DialogTitle className="text-lg font-semibold text-white sm:text-xl">Calendar</DialogTitle>
-                <DialogDescription className="text-sm text-white/80">
-                  Browse dates and plan upcoming activities.
-                </DialogDescription>
-              </div>
-              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
-                <span className="sr-only">Close</span>
-                <svg aria-hidden="true" viewBox="0 0 20 20" className="w-4 h-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
-              </Button>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
+          <div className="flex flex-col gap-2 border-b border-[#223E7D] bg-[#223E7D] px-4 py-2 text-white sm:px-5">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex flex-wrap items-center gap-1">
                 {viewOptions.map((option) => (
                   <Button
                     key={option.value}
                     size="sm"
                     variant={view === option.value ? 'default' : 'outline'}
-                    className={view === option.value ? 'bg-white text-[#223E7D] border-white hover:bg-white' : 'border-white/40 text-white hover:bg-white/10'}
+                    className={
+                      view === option.value
+                        ? 'border-[#0071B0] bg-[#0071B0] text-white hover:bg-[#00649D]'
+                        : 'border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20'
+                    }
                     onClick={() => setView(option.value)}
                     aria-pressed={view === option.value}
                   >
@@ -429,33 +398,42 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                   </Button>
                 ))}
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-medium text-white sm:text-base" aria-live="polite">
-                  {viewLabel}
-                </div>
+              <div className="flex flex-1 basis-full justify-center text-center text-sm font-medium text-white sm:basis-auto sm:text-base" aria-live="polite">
+                <span className="truncate">{viewLabel}</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
                 <div className="flex items-center gap-1">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-white/40 text-white hover:bg-white/10"
+                    className="border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20"
                     onClick={handlePrev}
                     aria-label="Previous period"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10" onClick={handleToday}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20"
+                    onClick={handleToday}
+                  >
                     Today
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-white/40 text-white hover:bg-white/10"
+                    className="border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20"
                     onClick={handleNext}
                     aria-label="Next period"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
+                  <span className="sr-only">Close</span>
+                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
+                </Button>
               </div>
             </div>
           </div>
