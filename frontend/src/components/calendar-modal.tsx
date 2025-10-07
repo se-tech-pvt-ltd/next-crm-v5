@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { FollowUp } from '@/lib/types';
 import { getFollowUps } from '@/services/followUps';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarTimeGrid } from './calendar-time-grid';
 import {
   addDays,
   addMonths,
