@@ -291,9 +291,9 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
-        className="fixed inset-0 left-0 top-0 m-0 h-screen w-screen translate-x-0 translate-y-0 rounded-none border-0 bg-white p-0 shadow-none sm:rounded-none"
+        className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full max-h-[90vh] flex-col">
           <div className="flex flex-col gap-3 border-b px-4 py-3 sm:px-6">
             <div className="flex items-start justify-between gap-3">
               <div>
