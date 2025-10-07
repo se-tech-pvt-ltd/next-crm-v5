@@ -291,7 +291,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         const day = startOfDay(focusDate);
         const dayEvents = eventsForGrid.filter((e) => isSameDay(e.start, day));
         return (
-          <div className="flex h-full w-full flex-col overflow-auto">
+          <div className="flex h-full w-full flex-col">
             <div className="px-2 sm:px-0">
               <CalendarTimeGrid days={[day]} events={dayEvents} startHour={0} endHour={24} />
             </div>
@@ -300,7 +300,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       }
       case 'week': {
         return (
-          <div className="flex h-full w-full flex-col overflow-auto">
+          <div className="flex h-full w-full flex-col">
             <div className="px-2 sm:px-0">
               <CalendarTimeGrid days={weekDays} events={eventsForGrid} startHour={0} endHour={24} />
             </div>
@@ -309,7 +309,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       }
       case 'month':
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
+          <div className="flex h-full w-full flex-col items-center">
             <div className="rounded-lg border bg-white shadow-sm">
               <Calendar
                 mode="single"
@@ -330,7 +330,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       case 'year': {
         const currentMonth = new Date();
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto px-1">
+          <div className="flex h-full w-full flex-col items-center px-1">
             <div className="w-full max-w-5xl">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {yearMonths.map((month) => {
