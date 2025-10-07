@@ -259,7 +259,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       const end = new Date(start.getTime() + 30 * 60 * 1000);
       return {
         id: fu.id,
-        title: format(start, 'p') + ' • ' + (fu.comments || 'Follow-up'),
+        title: fu.comments || 'Follow-up',
         start,
         end,
         status: fu.status,
