@@ -230,6 +230,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
 
           <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
         <DialogContent className="max-w-md p-0">
+          <DialogTitle className="sr-only">Follow Up</DialogTitle>
           <div className="flex flex-col">
             <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
               <div className="text-lg font-semibold">Follow Up</div>
