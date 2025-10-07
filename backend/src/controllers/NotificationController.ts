@@ -1,5 +1,6 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { NotificationService } from '../services/NotificationService.js';
+import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
 
 export class NotificationController {
@@ -20,18 +21,27 @@ export class NotificationController {
       }
 
       if (user && (user as any).id) {
+        const userRecord = user as any;
+        const userId = String(userRecord.id);
+        const resetTokenPayload = await UserResetTokenService.issueTokenForUser(userId);
+
         // Queue notification linked to the user record with user variables
         await NotificationService.queueNotification({
           entityType: 'user',
-          entityId: String((user as any).id),
+          entityId: userId,
           templateId: 'forgot_password',
           channel: 'email',
           variables: {
-            email: (user as any).email || email,
-            firstName: (user as any).firstName || (user as any).first_name || '',
-            lastName: (user as any).lastName || (user as any).last_name || '',
+            email: userRecord.email || email,
+            firstName: userRecord.firstName || userRecord.first_name || '',
+            lastName: userRecord.lastName || userRecord.last_name || '',
+            token: resetTokenPayload.token,
+            resetToken: resetTokenPayload.token,
+            expiry: resetTokenPayload.record.expiry.toISOString(),
+            resetTokenExpiry: resetTokenPayload.record.expiry.toISOString(),
+            resetTokenId: resetTokenPayload.record.id,
           },
-          recipientAddress: (user as any).email || email,
+          recipientAddress: userRecord.email || email,
           status: 'pending',
           scheduledAt: new Date(),
         });

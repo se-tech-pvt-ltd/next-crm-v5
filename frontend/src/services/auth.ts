@@ -1,5 +1,7 @@
 import { http } from './http';
 
+import { http } from './http';
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -30,4 +32,24 @@ export async function logout() {
   } catch (err) {
     // ignore
   }
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  password: string;
+}
+
+export interface VerifyResetTokenResponse {
+  message: string;
+  expiresAt: string;
+}
+
+export async function verifyResetToken(email: string, token: string): Promise<VerifyResetTokenResponse> {
+  const query = new URLSearchParams({ email, token }).toString();
+  return http.get(`/api/auth/reset-password/verify?${query}`);
+}
+
+export async function resetPassword(payload: ResetPasswordRequest): Promise<{ message: string }> {
+  return http.post('/api/auth/reset-password', payload);
 }
