@@ -5,6 +5,7 @@ export interface FollowUpQueryParams {
   start: Date | string;
   end: Date | string;
   entityTypes?: string[];
+  userId?: string;
 }
 
 export interface FollowUpQueryResponse {
