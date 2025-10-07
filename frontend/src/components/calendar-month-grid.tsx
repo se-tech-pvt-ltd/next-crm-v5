@@ -134,7 +134,7 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
           <DialogTitle className="sr-only">Follow Up</DialogTitle>
           <div className="flex flex-col">
             <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center">
-              <div className="text-lg font-semibold">Follow Up</div>
+              <div className="text-lg font-semibold">Follow Up{selectedEvent?.entityType ? ` (${String(selectedEvent.entityType).charAt(0).toUpperCase() + String(selectedEvent.entityType).slice(1)})` : ''}</div>
             </div>
             <div className="p-4 bg-white">
               {selectedEvent && (
