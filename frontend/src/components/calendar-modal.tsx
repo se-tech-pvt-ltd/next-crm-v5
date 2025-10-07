@@ -173,8 +173,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   });
 
   const followUps = followUpQuery.data?.data ?? [];
-  const followUpsError = followUpQuery.error instanceof Error ? followUpQuery.error : null;
-  const isFollowUpsLoading = followUpQuery.isLoading;
 
   const followUpsByDay = React.useMemo(() => {
     const map = new Map<string, { date: Date; items: FollowUp[] }>();
@@ -205,19 +203,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     [followUpsByDay],
   );
 
-  const selectedDayFollowUps = React.useMemo(() => {
-    const key = startOfDay(selectedDate).toISOString();
-    const entry = followUpsByDay.get(key);
-    return entry ? entry.items : [];
-  }, [followUpsByDay, selectedDate]);
 
-  const formatFollowUpTime = React.useCallback((value: string) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return '—';
-    }
-    return format(date, 'p');
-  }, []);
 
   const handleSelectDay = React.useCallback((date?: Date) => {
     if (!date) {
@@ -466,55 +452,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           <div className="flex-1 overflow-auto px-3 py-6 sm:px-6">
             {renderView()}
 
-            <div className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Follow-ups on {format(selectedDate, 'PPP')}
-                </h3>
-              </div>
-
-              {isFollowUpsLoading && (
-                <div className="mt-4 text-sm text-muted-foreground">Loading follow-ups…</div>
-              )}
-              {followUpsError && (
-                <div className="mt-4 text-sm text-red-600">
-                  Failed to load follow-ups: {followUpsError.message}
-                </div>
-              )}
-              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length === 0 && (
-                <div className="mt-4 text-sm text-muted-foreground">No follow-ups scheduled.</div>
-              )}
-
-              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length > 0 && (
-                <ul className="mt-4 space-y-2">
-                  {selectedDayFollowUps.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-start justify-between rounded-md border border-gray-200 bg-white p-3 hover:border-primary/50"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-900">
-                            {formatFollowUpTime(item.followUpOn)}
-                          </span>
-                          <span className={cn(
-                            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                            item.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-                          )}>
-                            {item.status === 'overdue' ? 'Overdue' : 'Upcoming'}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                            {item.entityType}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-700 line-clamp-2">{item.comments}</div>
-                      </div>
-                      <div className="ml-3 text-[10px] text-muted-foreground">#{item.entityId}</div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
           </div>
         </div>
       </DialogContent>
