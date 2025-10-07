@@ -409,8 +409,9 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                   Browse dates and plan upcoming activities.
                 </DialogDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-                Close
+              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
+                <span className="sr-only">Close</span>
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="w-4 h-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
               </Button>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
