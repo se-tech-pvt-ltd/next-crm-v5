@@ -210,8 +210,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           return subDays(prev, 7);
         case 'month':
           return subMonths(prev, 1);
-        case 'year':
-          return subYears(prev, 1);
         default:
           return prev;
       }
