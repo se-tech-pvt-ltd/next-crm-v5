@@ -53,6 +53,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return base;
   }, []);
 
+  const handleActivityTypeChange = (value: string) => {
+    setActivityType(value);
+    if (value !== 'follow_up') {
+      setFollowUpDate(undefined);
+    }
+    setComposerError(null);
+  };
+
   // Extract conversion details like: "This record was converted from lead ID <uuid>. All previous..."
   const parseConversionDescription = (desc?: string): { fromType?: string; fromId?: string } => {
     if (!desc) return {};
