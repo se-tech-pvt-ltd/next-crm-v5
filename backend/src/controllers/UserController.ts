@@ -161,7 +161,7 @@ export class UserController {
         }
       }
 
-      res.json(users);
+      res.json(users.map(user => sanitizeUser(user)));
     } catch (error) {
       console.error("Get users error:", error);
       res.status(500).json({ message: "Failed to fetch users" });
