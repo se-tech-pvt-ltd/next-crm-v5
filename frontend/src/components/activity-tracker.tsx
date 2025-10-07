@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "./help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,7 +17,7 @@ import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
 import * as UsersService from '@/services/users';
 import * as LeadsService from '@/services/leads';
-import { format } from "date-fns";
+import { addMinutes, format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'wouter';
@@ -42,6 +43,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
   const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
+  const [followUpTime, setFollowUpTime] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,10 +55,46 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return base;
   }, []);
 
+  const computeDefaultFollowUpTime = React.useCallback((selected: Date) => {
+    const now = new Date();
+    if (selected.toDateString() === now.toDateString()) {
+      const nextSlot = addMinutes(now, 30);
+      nextSlot.setSeconds(0, 0);
+      return format(nextSlot, "HH:mm");
+    }
+    return "09:00";
+  }, []);
+
+  const followUpDateTime = React.useMemo(() => {
+    if (!followUpDate) return undefined;
+    if (!followUpTime) return undefined;
+    const [hoursStr, minutesStr] = followUpTime.split(":");
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+      return undefined;
+    }
+    const combined = new Date(followUpDate.getTime());
+    combined.setHours(hours, minutes, 0, 0);
+    return combined;
+  }, [followUpDate, followUpTime]);
+
+  const minTimeForSelectedDate = React.useMemo(() => {
+    if (!followUpDate) return undefined;
+    const now = new Date();
+    if (followUpDate.toDateString() !== now.toDateString()) {
+      return undefined;
+    }
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }, [followUpDate]);
+
   const handleActivityTypeChange = (value: string) => {
     setActivityType(value);
     if (value !== 'follow_up') {
       setFollowUpDate(undefined);
+      setFollowUpTime("");
     }
     setComposerError(null);
   };
@@ -357,6 +395,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       setNewActivity('');
       setActivityType('comment');
       setFollowUpDate(undefined);
+      setFollowUpTime('');
       setComposerError(null);
       setIsAddingActivity(false);
       return { previous, tempId };
@@ -382,15 +421,21 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     if (!content) {
       return;
     }
-    if (activityType === 'follow_up' && !followUpDate) {
-      setComposerError('Select a follow-up date');
-      return;
+    if (activityType === 'follow_up') {
+      if (!followUpDate || !followUpTime || !followUpDateTime) {
+        setComposerError('Select follow-up date and time');
+        return;
+      }
+      if (followUpDateTime.getTime() < Date.now()) {
+        setComposerError('Follow-up must be scheduled in the future');
+        return;
+      }
     }
     setComposerError(null);
     addActivityMutation.mutate({
       type: activityType,
       content,
-      followUpAt: followUpDate ? followUpDate.toISOString() : null,
+      followUpAt: followUpDateTime ? followUpDateTime.toISOString() : null,
     });
   };
 
@@ -481,6 +526,28 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       const dt = new Date(d);
       if (isNaN(dt.getTime())) return '';
       return format(dt, 'MMM d, h:mm a');
+    } catch {
+      return '';
+    }
+  };
+
+  const safeFormatFollowUpDate = (value: any) => {
+    try {
+      if (!value) return '';
+      if (value instanceof Date) {
+        return format(value, 'PPP');
+      }
+      const iso = String(value);
+      const dateMatch = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (dateMatch) {
+        const [, year, month, day] = dateMatch;
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+        return format(date, 'PPP');
+      }
+      const parsed = new Date(iso);
+      if (Number.isNaN(parsed.getTime())) return '';
+      const midnight = parsed.getHours() === 0 && parsed.getMinutes() === 0 && parsed.getSeconds() === 0 && parsed.getMilliseconds() === 0;
+      return format(parsed, midnight ? 'PPP' : 'PPP p');
     } catch {
       return '';
     }
@@ -717,6 +784,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
             return list.map((activity: Activity, idx: number) => {
               const isLast = idx === list.length - 1;
               const profileImage = (activity as any).userProfileImage || ((activity as any).userId ? (getUserProfileImage((activity as any).userId as any) || fetchedProfiles[(activity as any).userId]) : null) || getCurrentUserProfileIfMatch(activity);
+              const followUpDisplay = safeFormatFollowUpDate((activity as any).followUpAt);
               return (
                 <div key={`${activity.id}-${activity.createdAt}`} className="relative flex gap-3">
                   <div className="relative w-5 flex flex-col items-center">
@@ -762,6 +830,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                             }
                             return (activity.description || (activity as any).title);
                           })()}
+                        </div>
+                      )}
+                      {followUpDisplay && String(activity.activityType || '').toLowerCase() === 'follow_up' && (
+                        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs text-blue-700">
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          <span>
+                            Follow-up scheduled for <span className="font-semibold text-blue-900">{followUpDisplay}</span>
+                          </span>
                         </div>
                       )}
                     </div>
