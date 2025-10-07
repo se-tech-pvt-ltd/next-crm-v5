@@ -293,7 +293,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         return (
           <div className="flex h-full w-full flex-col overflow-auto">
             <div className="px-2 sm:px-0">
-              <CalendarTimeGrid days={[day]} events={dayEvents} startHour={8} endHour={20} />
+              <CalendarTimeGrid days={[day]} events={dayEvents} startHour={0} endHour={24} />
             </div>
           </div>
         );
@@ -302,7 +302,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         return (
           <div className="flex h-full w-full flex-col overflow-auto">
             <div className="px-2 sm:px-0">
-              <CalendarTimeGrid days={weekDays} events={eventsForGrid} startHour={8} endHour={20} />
+              <CalendarTimeGrid days={weekDays} events={eventsForGrid} startHour={0} endHour={24} />
             </div>
           </div>
         );
