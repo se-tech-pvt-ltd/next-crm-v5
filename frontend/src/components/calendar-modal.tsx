@@ -413,7 +413,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                       className={
                         view === option.value
                           ? 'border-white bg-white text-[#223E7D] hover:bg-white/90'
-                          : 'border-white/30 text-white/90 hover:bg-white/15'
+                          : 'border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20'
                       }
                       onClick={() => setView(option.value)}
                       aria-pressed={view === option.value}
