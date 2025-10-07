@@ -94,6 +94,15 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return computeMinTimeForDate(followUpDate);
   }, [followUpDate, computeMinTimeForDate]);
 
+  useEffect(() => {
+    if (!followUpDate) return;
+    if (!followUpTime) return;
+    if (!minTimeForSelectedDate) return;
+    if (followUpTime < minTimeForSelectedDate) {
+      setFollowUpTime(minTimeForSelectedDate);
+    }
+  }, [followUpDate, followUpTime, minTimeForSelectedDate]);
+
   const handleActivityTypeChange = (value: string) => {
     setActivityType(value);
     if (value !== 'follow_up') {
