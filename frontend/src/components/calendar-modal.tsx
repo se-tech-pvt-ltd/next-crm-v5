@@ -267,82 +267,47 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     setFocusDate(now);
   }, []);
 
+  const eventsForGrid = React.useMemo(() => {
+    return followUps.map((fu) => {
+      const start = new Date(fu.followUpOn);
+      const end = new Date(start.getTime() + 30 * 60 * 1000);
+      return {
+        id: fu.id,
+        title: format(start, 'p') + ' • ' + (fu.comments || 'Follow-up'),
+        start,
+        end,
+        status: fu.status,
+        entityType: fu.entityType,
+        entityId: fu.entityId,
+        comments: fu.comments,
+      };
+    });
+  }, [followUps]);
+
   const renderView = () => {
     switch (view) {
-      case 'day':
+      case 'day': {
+        const day = startOfDay(focusDate);
+        const dayEvents = eventsForGrid.filter((e) => isSameDay(e.start, day));
+        const DayGrid = require('./calendar-time-grid').CalendarTimeGrid as React.FC<any>;
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
-            <div className="w-full max-w-3xl px-2">
-              <div className="text-center">
-                <div className="text-3xl font-semibold text-gray-900 sm:text-4xl">
-                  {format(focusDate, 'EEEE')}
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground sm:text-base">
-                  {format(focusDate, 'MMMM d, yyyy')}
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-3">
-                {hourSlots.map((hour) => {
-                  const slotTime = new Date(
-                    focusDate.getFullYear(),
-                    focusDate.getMonth(),
-                    focusDate.getDate(),
-                    hour,
-                    0,
-                    0,
-                    0,
-                  );
-                  const label = format(slotTime, 'h a');
-                  return (
-                    <React.Fragment key={hour}>
-                      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-                      <div
-                        className="h-12 rounded-md border border-dashed border-gray-200 bg-white"
-                        role="group"
-                        aria-label={`${label} slot`}
-                      >
-                        <span className="sr-only">No events scheduled</span>
-                      </div>
-                    </React.Fragment>
-                  );
-                })}
-              </div>
+          <div className="flex h-full w-full flex-col overflow-auto">
+            <div className="px-2 sm:px-0">
+              <DayGrid days={[day]} events={dayEvents} startHour={8} endHour={20} />
             </div>
           </div>
         );
-      case 'week':
+      }
+      case 'week': {
+        const DayGrid = require('./calendar-time-grid').CalendarTimeGrid as React.FC<any>;
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
-            <div className="w-full max-w-4xl">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
-                {weekDays.map((day) => {
-                  const isSelected = isSameDay(day, selectedDate);
-                  return (
-                    <button
-                      key={day.toISOString()}
-                      type="button"
-                      onClick={() => handleSelectDay(day)}
-                      className={cn(
-                        'rounded-lg border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                        isSelected ? 'border-primary bg-primary/10' : 'border-gray-200 hover:border-primary/60 hover:bg-primary/5',
-                      )}
-                    >
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {format(day, 'EEE')}
-                      </div>
-                      <div className="mt-1 text-2xl font-semibold text-gray-900">
-                        {format(day, 'd')}
-                      </div>
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        {format(day, 'MMMM yyyy')}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+          <div className="flex h-full w-full flex-col overflow-auto">
+            <div className="px-2 sm:px-0">
+              <DayGrid days={weekDays} events={eventsForGrid} startHour={8} endHour={20} />
             </div>
           </div>
         );
+      }
       case 'month':
         return (
           <div className="flex h-full w-full flex-col items-center overflow-auto">
