@@ -138,7 +138,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
         {/* Time column */}
         <div className="bg-white">
           {hourRange.map((h) => (
-            <div key={h} className="relative border-b border-gray-100" style={{ height: "calc(64px - 1px)" }}>
+            <div key={h} className="relative h-16">
               <div className="sticky left-0 -mt-2 pr-2 text-right text-[10px] text-muted-foreground select-none">{format(new Date(2020, 0, 1, h), 'ha')}</div>
             </div>
           ))}
@@ -151,10 +151,8 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
             const dayEvents = positionedByDay.get(key) || [];
             return (
               <div key={key} className="relative border-l border-gray-100">
-                {/* hour grid lines */}
-                {hourRange.map((h) => (
-                  <div key={h} className="border-b border-gray-100" style={{ height: "calc(64px - 1px)" }} />
-                ))}
+                {/* hour grid lines via background gradient every 64px */}
+                <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 64px)" }} />
 
                 {/* current time line */}
                 {isSameDay(day, now) && isTodayInView && (
@@ -170,9 +168,10 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                 {dayEvents.map((ev) => {
                   const startMin = differenceInMinutes(ev.start, day);
                   const endMin = Math.max(startMin + 15, differenceInMinutes(ev.end, day));
-                  const top = minuteToTop(startMin);
-                  const bottom = minuteToTop(endMin);
-                  const heightCalc = `calc(${bottom} - ${top})`;
+                  const clamp = (n: number) => Math.min(100, Math.max(0, n));
+                  const top = clamp(parseFloat(minuteToTop(startMin)));
+                  const bottom = clamp(parseFloat(minuteToTop(endMin)));
+                  const heightCalc = `calc(${bottom}% - ${top}%)`;
                   const width = `${100 / ev.laneCount}%`;
                   const left = `${ev.lane * (100 / ev.laneCount)}%`;
 
@@ -183,7 +182,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                     <div
                       key={ev.id}
                       className={cn('absolute z-10 overflow-hidden rounded-md border p-1 text-xs shadow-sm', color)}
-                      style={{ top, height: heightCalc, left, width }}
+                      style={{ top: `${top}%`, height: heightCalc, left, width }}
                       title={ev.title}
                     >
                       <div className="line-clamp-2">
