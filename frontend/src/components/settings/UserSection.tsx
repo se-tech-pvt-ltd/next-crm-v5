@@ -366,7 +366,7 @@ export default function UserSection({ toast }: { toast: (v: any) => void }) {
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
+          <DialogContent hideClose className="max-w-4xl p-0 sm:rounded-xl shadow-2xl ring-1 ring-primary/10 max-h-[85vh] overflow-y-auto">
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
               <DialogHeader className="p-0">
                 <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
