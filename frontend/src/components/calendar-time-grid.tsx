@@ -134,7 +134,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
       </div>
 
       {/* Body (scrollable) */}
-      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr] flex-1 overflow-auto">
+      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr] flex-1 overflow-auto max-h-[70vh]">
         {/* Time column */}
         <div className="relative bg-white">
           <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 64px)" }} />
