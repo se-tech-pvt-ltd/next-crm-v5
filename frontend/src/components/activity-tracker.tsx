@@ -524,7 +524,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                 </Button>
               ) : (
                 <div className="space-y-3">
-                  <Select value={activityType} onValueChange={setActivityType}>
+                  <Select value={activityType} onValueChange={handleActivityTypeChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select activity type" />
                     </SelectTrigger>
@@ -542,6 +542,42 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                       })}
                     </SelectContent>
                   </Select>
+
+                  {activityType === 'follow_up' && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-semibold text-gray-700">Follow-up date</span>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={`w-full justify-start text-sm font-normal ${followUpDate ? 'text-gray-900' : 'text-muted-foreground'}`}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarPicker
+                            mode="single"
+                            selected={followUpDate}
+                            onSelect={(date) => {
+                              setFollowUpDate(date ?? undefined);
+                              setComposerError(null);
+                            }}
+                            disabled={(date) => date < today}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  )}
+
+                  {composerError && (
+                    <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-600">
+                      {composerError}
+                    </div>
+                  )}
 
                   <Textarea
                     ref={textareaRef}
