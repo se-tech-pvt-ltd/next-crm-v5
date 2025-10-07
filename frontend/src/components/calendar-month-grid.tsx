@@ -133,19 +133,32 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
         <DialogContent className="max-w-md p-0">
           <DialogTitle className="sr-only">Follow Up</DialogTitle>
           <div className="flex flex-col">
-            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
+            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center">
               <div className="text-lg font-semibold">Follow Up</div>
-              <button aria-label="Close" onClick={() => setEventModalOpen(false)} className="rounded-full w-8 h-8 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 text-white">
-                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z" clipRule="evenodd"/></svg>
-              </button>
             </div>
             <div className="p-4 bg-white">
               {selectedEvent && (
-                <div className="mt-2 space-y-3">
-                  <div className="text-sm"><span className="font-medium text-gray-700">Schedule date: </span><span className="text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</span></div>
-                  <div className="text-sm"><span className="font-medium text-gray-700">Schedule time: </span><span>{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</span></div>
-                  {selectedEvent.comments && <div className="text-sm text-gray-700">{selectedEvent.comments}</div>}
-                  <div className="flex justify-end mt-4">
+                <div className="space-y-4">
+                  <div className="rounded-md border p-3 bg-gray-50">
+                    <div className="text-sm font-semibold mb-2">Schedule</div>
+                    <div className="flex justify-between text-sm">
+                      <div>
+                        <div className="font-medium text-gray-700">Date</div>
+                        <div className="text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium text-gray-700">Time</div>
+                        <div>{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-semibold">Notes</div>
+                    <div className="mt-1 p-3 rounded border bg-white text-sm text-gray-700">{selectedEvent.comments || '—'}</div>
+                  </div>
+
+                  <div className="flex justify-end mt-2">
                     <EventOpenButton event={selectedEvent} />
                   </div>
                 </div>
