@@ -1,6 +1,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, differenceInMinutes, isSameDay } from "date-fns";
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useLocation } from 'wouter';
 
 export interface TimeGridEvent {
   id: string;
