@@ -1,0 +1,122 @@
+import React from 'react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, startOfDay } from 'date-fns';
+
+type EventItem = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  status?: string;
+  entityType?: string | null;
+};
+
+export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> = ({ month, events }) => {
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalDate, setModalDate] = React.useState<Date | null>(null);
+
+  const start = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
+  const end = endOfWeek(endOfMonth(month), { weekStartsOn: 0 });
+
+  const days: Date[] = [];
+  for (let d = start; d <= end; d = addDays(d, 1)) {
+    days.push(new Date(d));
+  }
+
+  const eventsByDay = React.useMemo(() => {
+    const map = new Map<string, EventItem[]>();
+    for (const ev of events) {
+      const key = startOfDay(ev.start).toISOString();
+      const list = map.get(key) || [];
+      list.push(ev);
+      map.set(key, list);
+    }
+    return map;
+  }, [events]);
+
+  const openDayModal = (date: Date) => {
+    setModalDate(date);
+    setModalOpen(true);
+  };
+
+  return (
+    <div className="w-full">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-2">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+          <div key={d} className="py-1">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {days.map((day) => {
+          const key = startOfDay(day).toISOString();
+          const dayEvents = eventsByDay.get(key) || [];
+          const isCurrentMonth = isSameMonth(day, month);
+          const today = isSameDay(day, new Date());
+
+          return (
+            <div
+              key={key}
+              className={
+                `relative border rounded-md bg-white min-h-[96px] p-2 flex flex-col ${
+                  isCurrentMonth ? '' : 'opacity-60'
+                } ${today ? 'ring-2 ring-primary' : ''}`
+              }
+            >
+              <div className="flex items-start justify-between">
+                <div className="text-xs font-medium text-gray-700">{format(day, 'd')}</div>
+              </div>
+
+              <div className="mt-2 flex-1 overflow-hidden">
+                <div className="space-y-1">
+                  {dayEvents.slice(0, 3).map((ev) => (
+                    <div key={ev.id} className="rounded-md border px-2 py-[3px] text-xs bg-indigo-50 text-indigo-800 overflow-hidden whitespace-nowrap text-ellipsis">
+                      <div className="font-semibold text-[12px] leading-4 truncate">{format(ev.start, 'hh:mm a')} {ev.title}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {dayEvents.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => openDayModal(day)}
+                    className="mt-1 text-xs text-muted-foreground hover:underline"
+                  >
+                    +{dayEvents.length - 3} more
+                  </button>
+                )}
+
+                {/* compact view for small screens */}
+                {dayEvents.length > 0 && (
+                  <div className="sm:hidden mt-1 flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-full bg-indigo-600" />
+                    <span className="text-xs truncate">{dayEvents[0].title}</span>
+                    {dayEvents.length > 1 && <span className="text-xs text-muted-foreground">+{dayEvents.length - 1}</span>}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogTitle>{modalDate ? format(modalDate, 'EEEE, MMMM d, yyyy') : 'Events'}</DialogTitle>
+          <div className="space-y-2 mt-2">
+            {modalDate && (eventsByDay.get(startOfDay(modalDate).toISOString()) || []).map((ev) => (
+              <div key={ev.id} className="rounded-md border p-2 bg-white">
+                <div className="text-sm font-semibold">{ev.title}</div>
+                <div className="text-xs text-muted-foreground">{format(ev.start, 'hh:mm a')} — {format(ev.end, 'hh:mm a')}</div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default CalendarMonthGrid;
