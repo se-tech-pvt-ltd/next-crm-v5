@@ -247,7 +247,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                       </div>
                       <div className="text-right">
                         <div className="font-medium text-gray-700">Time</div>
-                        <div>{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
+                        <div>{format(selectedEvent.start, 'hh:mm a')}</div>
                       </div>
                     </div>
                   </div>
