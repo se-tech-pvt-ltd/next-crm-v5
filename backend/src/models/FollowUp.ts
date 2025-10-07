@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "../config/database.js";
 import { followUps, type FollowUp, type InsertFollowUp } from "../shared/schema.js";
