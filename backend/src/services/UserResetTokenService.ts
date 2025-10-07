@@ -32,4 +32,30 @@ export class UserResetTokenService {
       record,
     };
   }
+
+  static async validateTokenForUser(userId: string, token: string): Promise<UserResetTokenRecord | null> {
+    const record = await UserResetTokenModel.findLatestActiveByUserId(userId);
+    if (!record) {
+      return null;
+    }
+
+    if (record.isUsed) {
+      return null;
+    }
+
+    if (record.expiry.getTime() <= Date.now()) {
+      return null;
+    }
+
+    const matches = await bcrypt.compare(token, record.hashedToken);
+    if (!matches) {
+      return null;
+    }
+
+    return record;
+  }
+
+  static async markTokenAsUsed(id: string): Promise<void> {
+    await UserResetTokenModel.markTokenAsUsed(id);
+  }
 }
