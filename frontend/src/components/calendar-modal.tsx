@@ -438,7 +438,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto px-3 py-6 sm:px-6">
+          <div className="flex-1 px-3 py-6 sm:px-6">
             {renderView()}
 
           </div>
