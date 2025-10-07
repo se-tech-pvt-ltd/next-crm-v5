@@ -515,20 +515,23 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const safeFormatFollowUpDate = (value: any) => {
     try {
       if (!value) return '';
+      const formatWithTime = (date: Date) => format(date, "MMMM d, yyyy 'at' h:mm a");
       if (value instanceof Date) {
-        return format(value, 'PPP');
+        return formatWithTime(value);
       }
-      const iso = String(value);
+      const iso = String(value).trim();
+      if (!iso) return '';
+      const parsed = new Date(iso);
+      if (!Number.isNaN(parsed.getTime())) {
+        return formatWithTime(parsed);
+      }
       const dateMatch = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
       if (dateMatch) {
         const [, year, month, day] = dateMatch;
         const date = new Date(Number(year), Number(month) - 1, Number(day));
-        return format(date, 'PPP');
+        return format(date, 'MMMM d, yyyy');
       }
-      const parsed = new Date(iso);
-      if (Number.isNaN(parsed.getTime())) return '';
-      const midnight = parsed.getHours() === 0 && parsed.getMinutes() === 0 && parsed.getSeconds() === 0 && parsed.getMilliseconds() === 0;
-      return format(parsed, midnight ? 'PPP' : 'PPP p');
+      return '';
     } catch {
       return '';
     }
