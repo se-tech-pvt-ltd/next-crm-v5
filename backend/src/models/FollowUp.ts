@@ -9,9 +9,9 @@ export class FollowUpModel {
     const payload: InsertFollowUp = {
       ...data,
       id,
-      userId: data.userId,
-      entityId: data.entityId,
-      entityType: data.entityType,
+      userId: String(data.userId),
+      entityId: String(data.entityId),
+      entityType: String(data.entityType),
       comments: data.comments,
       followUpOn: data.followUpOn,
     };
