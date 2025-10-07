@@ -299,11 +299,10 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         );
       }
       case 'week': {
-        const DayGrid = require('./calendar-time-grid').CalendarTimeGrid as React.FC<any>;
         return (
           <div className="flex h-full w-full flex-col overflow-auto">
             <div className="px-2 sm:px-0">
-              <DayGrid days={weekDays} events={eventsForGrid} startHour={8} endHour={20} />
+              <CalendarTimeGrid days={weekDays} events={eventsForGrid} startHour={8} endHour={20} />
             </div>
           </div>
         );
