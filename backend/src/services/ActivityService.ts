@@ -1,6 +1,8 @@
+import { randomUUID } from "crypto";
 import { ActivityModel } from "../models/Activity.js";
-import { UserModel } from "../models/User.js";
 import { AttachmentModel } from "../models/Attachment.js";
+import { FollowUpModel } from "../models/FollowUp.js";
+import { UserModel } from "../models/User.js";
 import { type Activity, type InsertActivity } from "../shared/schema.js";
 
 export class ActivityService {
@@ -53,18 +55,57 @@ export class ActivityService {
   }
 
   static async createActivity(activityData: InsertActivity): Promise<Activity> {
-    return await ActivityModel.create(activityData);
+    return await ActivityService.createActivityWithUser(activityData);
   }
 
   static async createActivityWithUser(activityData: InsertActivity, userId?: string): Promise<Activity> {
     // Do not persist userName and userProfileImage on activities; only store userId.
-    const activityWithUser: any = {
+    const activityWithUser: InsertActivity = {
       ...activityData,
       entityId: String(activityData.entityId), // Convert to string for consistency
       userId: userId || null,
     };
 
-    return await ActivityModel.create(activityWithUser as InsertActivity);
+    const activity = await ActivityModel.create(activityWithUser);
+
+    const rawType = String(activityWithUser.activityType ?? "").toLowerCase();
+    const normalizedType = rawType.replace(/[\s_-]/g, "");
+    if (normalizedType === "followup") {
+      const authorId = userId ?? activityWithUser.userId ?? undefined;
+      if (!authorId) {
+        await ActivityModel.delete(activity.id);
+        throw new Error("User id is required to create follow-up records");
+      }
+
+      const followUpOn = activityWithUser.followUpAt ?? null;
+      if (!(followUpOn instanceof Date) || Number.isNaN(followUpOn.getTime())) {
+        await ActivityModel.delete(activity.id);
+        throw new Error("Follow-up date and time are required for follow-up activities");
+      }
+
+      const descriptionSource = activityWithUser.description ?? activityWithUser.title;
+      const comments = typeof descriptionSource === "string"
+        ? descriptionSource.trim()
+        : descriptionSource != null
+          ? String(descriptionSource)
+          : "";
+
+      try {
+        await FollowUpModel.create({
+          id: randomUUID(),
+          userId: String(authorId),
+          entityId: String(activity.entityId),
+          entityType: String(activity.entityType),
+          comments: comments || "Follow-up recorded",
+          followUpOn,
+        });
+      } catch (error) {
+        await ActivityModel.delete(activity.id);
+        throw error;
+      }
+    }
+
+    return activity;
   }
 
   static async logActivity(
