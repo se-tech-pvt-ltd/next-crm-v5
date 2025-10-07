@@ -119,13 +119,13 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
   const nowTop = minuteToTop(now.getHours() * 60 + now.getMinutes());
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col">
       {/* Header */}
       <div className="grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
         <div />
         <div className="grid" style={{ gridTemplateColumns: `repeat(${normDays.length}, minmax(0, 1fr))` }}>
           {normDays.map((d) => (
-            <div key={d.toISOString()} className="sticky top-0 z-10 border-b border-gray-200 bg-white py-2 text-center">
+            <div key={d.toISOString()} className="border-b border-gray-200 bg-white py-2 text-center">
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{format(d, 'EEE')}</div>
               <div className="text-sm font-semibold text-gray-900">{format(d, 'MMM d')}</div>
             </div>
@@ -133,8 +133,8 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
         </div>
       </div>
 
-      {/* Body */}
-      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
+      {/* Body (scrollable) */}
+      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr] flex-1 overflow-auto">
         {/* Time column */}
         <div className="relative bg-white">
           <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 64px)" }} />
