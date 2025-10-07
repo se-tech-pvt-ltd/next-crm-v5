@@ -120,6 +120,30 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
   const isTodayInView = normDays.some((d) => isSameDay(d, now));
   const nowTop = minuteToTop(now.getHours() * 60 + now.getMinutes());
 
+  const [eventModalOpen, setEventModalOpen] = React.useState(false);
+  const [selectedEvent, setSelectedEvent] = React.useState<TimeGridEvent | null>(null);
+  const [, navigate] = useLocation();
+
+  const openEventModal = (ev: TimeGridEvent) => {
+    setSelectedEvent(ev);
+    setEventModalOpen(true);
+  };
+
+  const handleOpenRecord = (ev: TimeGridEvent | null) => {
+    if (!ev) return;
+    const t = String(ev.entityType || '').toLowerCase();
+    let path = '/';
+    switch (t) {
+      case 'lead': path = `/leads/${ev.entityId}`; break;
+      case 'student': path = `/students/${ev.entityId}`; break;
+      case 'application': path = `/applications/${ev.entityId}`; break;
+      case 'admission': path = `/admissions/${ev.entityId}`; break;
+      case 'event': path = `/events/${ev.entityId}`; break;
+      default: path = '/';
+    }
+    try { navigate(path); } catch {}
+  };
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header */}
@@ -184,9 +208,10 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                   return (
                     <div
                       key={ev.id}
-                      className={cn('absolute z-10 overflow-hidden rounded-md border p-1 text-xs shadow-sm', color)}
+                      className={cn('absolute z-10 overflow-hidden rounded-md border p-1 text-xs shadow-sm cursor-pointer', color)}
                       style={{ top: `${top}%`, height: heightCalc, left, width }}
                       title={ev.title}
+                      onClick={() => openEventModal(ev)}
                     >
                       <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis">
                         <span className={cn('mr-1 inline-block rounded px-1 py-[1px] text-[10px] font-semibold capitalize', chip)} title={ev.entityType || undefined}>
@@ -202,6 +227,23 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
           })}
         </div>
       </div>
+
+      <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogTitle>{selectedEvent ? selectedEvent.title : 'Event'}</DialogTitle>
+          {selectedEvent && (
+            <div className="mt-2 space-y-2">
+              <div className="text-sm text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
+              <div className="text-sm">{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
+              {selectedEvent.comments && <div className="text-sm text-gray-700">{selectedEvent.comments}</div>}
+              <div className="text-sm text-muted-foreground">Status: {selectedEvent.status || '—'}</div>
+              <div className="flex justify-end mt-4">
+                <button onClick={() => handleOpenRecord(selectedEvent)} className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">Open record</button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
