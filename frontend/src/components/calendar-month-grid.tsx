@@ -83,10 +83,10 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
                 <div className="mt-2 flex-1 overflow-hidden">
                   <div className="space-y-1">
                     {dayEvents.slice(0, 3).map((ev) => (
-                      <div key={ev.id} className="rounded-md border px-2 py-[3px] text-xs bg-indigo-50 text-indigo-800 overflow-hidden whitespace-nowrap text-ellipsis">
-                        <div className="font-semibold text-[12px] leading-4 truncate">{format(ev.start, 'hh:mm a')} {ev.title}</div>
-                      </div>
-                    ))}
+                    <div key={ev.id} className="rounded-md border px-2 py-[3px] text-xs bg-indigo-50 text-indigo-800 overflow-hidden whitespace-nowrap text-ellipsis cursor-pointer" onClick={() => openEventModal(ev)}>
+                      <div className="font-semibold text-[12px] leading-4 truncate">{format(ev.start, 'hh:mm a')} {ev.title}</div>
+                    </div>
+                  ))}
                   </div>
 
                   {dayEvents.length > 3 && (
@@ -125,6 +125,23 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
               </div>
             ))}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogTitle>{selectedEvent ? selectedEvent.title : 'Follow-up'}</DialogTitle>
+          {selectedEvent && (
+            <div className="mt-2 space-y-2">
+              <div className="text-sm text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
+              <div className="text-sm">{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
+              {selectedEvent.comments && <div className="text-sm text-gray-700">{selectedEvent.comments}</div>}
+              <div className="text-sm text-muted-foreground">Status: {selectedEvent.status}</div>
+              <div className="flex justify-end mt-4">
+                <EventOpenButton event={selectedEvent} />
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
