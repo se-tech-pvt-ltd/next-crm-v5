@@ -35,6 +35,7 @@ export class NotificationController {
             email: userRecord.email || email,
             firstName: userRecord.firstName || userRecord.first_name || '',
             lastName: userRecord.lastName || userRecord.last_name || '',
+            token: resetTokenPayload.token,
             resetToken: resetTokenPayload.token,
             resetTokenExpiry: resetTokenPayload.record.expiry.toISOString(),
             resetTokenId: resetTokenPayload.record.id,
