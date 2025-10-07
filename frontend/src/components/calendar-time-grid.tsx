@@ -186,15 +186,12 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                       style={{ top: `${top}%`, height: heightCalc, left, width }}
                       title={ev.title}
                     >
-                      <div className="line-clamp-2">
-                        <span className={cn('mr-1 inline-block rounded px-1 py-[1px] text-[10px] font-semibold', chip)}>
+                      <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                        <span className={cn('mr-1 inline-block rounded px-1 py-[1px] text-[10px] font-semibold capitalize', chip)} title={ev.entityType || undefined}>
                           {ev.entityType}
                         </span>
-                        {ev.title}
+                        <span className="truncate">{ev.title}</span>
                       </div>
-                      {ev.comments && (
-                        <div className="mt-0.5 line-clamp-1 text-[10px] opacity-80">{ev.comments}</div>
-                      )}
                     </div>
                   );
                 })}
