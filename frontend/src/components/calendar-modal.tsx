@@ -36,13 +36,12 @@ interface CalendarModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type CalendarView = 'day' | 'week' | 'month' | 'year';
+type CalendarView = 'day' | 'week' | 'month';
 
 const viewOptions: { value: CalendarView; label: string }[] = [
   { value: 'day', label: 'Day' },
   { value: 'week', label: 'Week' },
   { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
 ];
 
 const WEEK_OPTIONS = { weekStartsOn: 1 as const };
