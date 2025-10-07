@@ -402,17 +402,33 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       >
         <div className="flex h-full max-h-[90vh] flex-col">
           <div className="flex flex-col gap-3 border-b border-[#223E7D] bg-[#223E7D] text-white px-4 py-3 sm:px-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1 space-y-1">
                 <DialogTitle className="text-lg font-semibold text-white sm:text-xl">Calendar</DialogTitle>
                 <DialogDescription className="text-sm text-white/80">
                   Browse dates and plan upcoming activities.
                 </DialogDescription>
               </div>
-              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
-                <span className="sr-only">Close</span>
-                <svg aria-hidden="true" viewBox="0 0 20 20" className="w-4 h-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
-              </Button>
+              <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <div className="flex flex-wrap justify-end gap-1">
+                  {viewOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      size="sm"
+                      variant={view === option.value ? 'default' : 'outline'}
+                      className={view === option.value ? 'bg-white text-[#223E7D] border-white hover:bg-white' : 'border-white/40 text-white hover:bg-white/10'}
+                      onClick={() => setView(option.value)}
+                      aria-pressed={view === option.value}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+                <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
+                  <span className="sr-only">Close</span>
+                  <svg aria-hidden="true" viewBox="0 0 20 20" className="w-4 h-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1">
