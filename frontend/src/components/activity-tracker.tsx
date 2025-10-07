@@ -9,9 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarPicker } from "@/components/ui/calendar";
-import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar as CalendarIcon, Clock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
+import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar as CalendarIcon, CalendarClock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
 import { Activity, User as UserType } from "@/lib/types";
 import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
@@ -42,72 +40,43 @@ const ACTIVITY_TYPES = [
 export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName, canAdd = true }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
-  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
-  const [followUpTime, setFollowUpTime] = useState("");
+  const [followUpDateTimeValue, setFollowUpDateTimeValue] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
-  const today = React.useMemo(() => {
-    const base = new Date();
-    base.setHours(0, 0, 0, 0);
-    return base;
+
+  const toInputDateTimeValue = React.useCallback((date: Date) => {
+    return format(date, "yyyy-MM-dd'T'HH:mm");
   }, []);
 
-  const computeDefaultFollowUpTime = React.useCallback((selected: Date) => {
+  const computeDefaultFollowUpDateTimeValue = React.useCallback(() => {
     const now = new Date();
-    if (selected.toDateString() === now.toDateString()) {
-      const nextSlot = addMinutes(now, 30);
-      nextSlot.setSeconds(0, 0);
-      return format(nextSlot, "HH:mm");
-    }
-    return "09:00";
-  }, []);
-
-  const computeMinTimeForDate = React.useCallback((selected: Date) => {
-    const now = new Date();
-    if (selected.toDateString() !== now.toDateString()) {
-      return undefined;
-    }
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  }, []);
+    const nextSlot = addMinutes(now, 30);
+    nextSlot.setSeconds(0, 0);
+    return toInputDateTimeValue(nextSlot);
+  }, [toInputDateTimeValue]);
 
   const followUpDateTime = React.useMemo(() => {
-    if (!followUpDate) return undefined;
-    if (!followUpTime) return undefined;
-    const [hoursStr, minutesStr] = followUpTime.split(":");
-    const hours = Number(hoursStr);
-    const minutes = Number(minutesStr);
-    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    if (!followUpDateTimeValue) return undefined;
+    const parsed = new Date(followUpDateTimeValue);
+    if (Number.isNaN(parsed.getTime())) {
       return undefined;
     }
-    const combined = new Date(followUpDate.getTime());
-    combined.setHours(hours, minutes, 0, 0);
-    return combined;
-  }, [followUpDate, followUpTime]);
+    return parsed;
+  }, [followUpDateTimeValue]);
 
-  const minTimeForSelectedDate = React.useMemo(() => {
-    if (!followUpDate) return undefined;
-    return computeMinTimeForDate(followUpDate);
-  }, [followUpDate, computeMinTimeForDate]);
-
-  useEffect(() => {
-    if (!followUpDate) return;
-    if (!followUpTime) return;
-    if (!minTimeForSelectedDate) return;
-    if (followUpTime < minTimeForSelectedDate) {
-      setFollowUpTime(minTimeForSelectedDate);
-    }
-  }, [followUpDate, followUpTime, minTimeForSelectedDate]);
+  const minDateTimeValue = React.useMemo(() => {
+    return toInputDateTimeValue(new Date());
+  }, [toInputDateTimeValue]);
 
   const handleActivityTypeChange = (value: string) => {
     setActivityType(value);
     if (value !== 'follow_up') {
-      setFollowUpDate(undefined);
-      setFollowUpTime("");
+      setFollowUpDateTimeValue("");
+    } else {
+      setFollowUpDateTimeValue((prev) => (prev ? prev : computeDefaultFollowUpDateTimeValue()));
     }
     setComposerError(null);
   };
@@ -407,8 +376,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], (old = []) => [optimisticActivity as any, ...(Array.isArray(old) ? old : [])]);
       setNewActivity('');
       setActivityType('comment');
-      setFollowUpDate(undefined);
-      setFollowUpTime('');
+      setFollowUpDateTimeValue('');
       setComposerError(null);
       setIsAddingActivity(false);
       return { previous, tempId };
@@ -435,7 +403,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       return;
     }
     if (activityType === 'follow_up') {
-      if (!followUpDate || !followUpTime || !followUpDateTime) {
+      if (!followUpDateTime) {
         setComposerError('Select follow-up date and time');
         return;
       }
@@ -626,61 +594,21 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
                   {activityType === 'follow_up' && (
                     <div className="space-y-2">
-                      <span className="text-xs font-semibold text-gray-700">Follow-up date & time</span>
-                      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,140px)]">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={`w-full justify-start text-sm font-normal ${followUpDate ? 'text-gray-900' : 'text-muted-foreground'}`}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <CalendarPicker
-                              mode="single"
-                              selected={followUpDate}
-                              onSelect={(date) => {
-                                setFollowUpDate(date ?? undefined);
-                                if (date) {
-                                  setFollowUpTime((prev) => {
-                                    if (!prev) {
-                                      return computeDefaultFollowUpTime(date);
-                                    }
-                                    const minForDate = computeMinTimeForDate(date);
-                                    if (minForDate && prev < minForDate) {
-                                      return minForDate;
-                                    }
-                                    return prev;
-                                  });
-                                } else {
-                                  setFollowUpTime("");
-                                }
-                                setComposerError(null);
-                              }}
-                              disabled={(date) => date < today}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <div className="relative">
-                          <Clock className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="time"
-                            value={followUpTime}
-                            onChange={(event) => {
-                              setFollowUpTime(event.target.value);
-                              setComposerError(null);
-                            }}
-                            min={minTimeForSelectedDate}
-                            disabled={!followUpDate}
-                            step="60"
-                            className="h-10 pl-8"
-                          />
-                        </div>
+                      <span className="text-xs font-semibold text-gray-700">Follow-up schedule</span>
+                      <div className="relative">
+                        <CalendarClock className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="datetime-local"
+                          value={followUpDateTimeValue}
+                          onChange={(event) => {
+                            setFollowUpDateTimeValue(event.target.value);
+                            setComposerError(null);
+                          }}
+                          min={minDateTimeValue}
+                          step="60"
+                          placeholder="Select date and time"
+                          className="h-10 pl-8"
+                        />
                       </div>
                     </div>
                   )}
@@ -704,7 +632,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <Button
                       size="sm"
                       onClick={handleAddActivity}
-                      disabled={!newActivity.trim() || addActivityMutation.isPending || (activityType === 'follow_up' && (!followUpDate || !followUpTime))}
+                      disabled={!newActivity.trim() || addActivityMutation.isPending || (activityType === 'follow_up' && !followUpDateTimeValue)}
                     >
                       {addActivityMutation.isPending ? "Adding..." : "Add Activity"}
                     </Button>
@@ -715,8 +643,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                         setIsAddingActivity(false);
                         setNewActivity("");
                         setActivityType("comment");
-                        setFollowUpDate(undefined);
-                        setFollowUpTime("");
+                        setFollowUpDateTimeValue("");
                         setComposerError(null);
                       }}
                     >
