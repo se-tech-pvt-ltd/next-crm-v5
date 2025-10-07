@@ -148,8 +148,10 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
   );
 };
 
+import { useLocation } from 'wouter';
+
 function EventOpenButton({ event }: { event: EventItem }) {
-  const [, navigate] = require('wouter').useLocation();
+  const [, navigate] = useLocation();
   const handleOpen = () => {
     const t = (event.entityType || '').toLowerCase();
     let path = '/';
