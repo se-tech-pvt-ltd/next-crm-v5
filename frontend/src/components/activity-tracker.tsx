@@ -134,6 +134,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     return () => window.removeEventListener('open-activity-composer', handler as EventListener);
   }, [entityType, entityId]);
 
+  // Ensure follow_up type isn't selected for non-lead entities
+  useEffect(() => {
+    if ((activityType === 'follow_up' || activityType === 'follow-up') && String((entityType || '').toLowerCase()) !== 'lead') {
+      setActivityType('comment');
+      setFollowUpDateTimeValue('');
+    }
+  }, [entityType]);
+
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
     enabled: !!entityId,
