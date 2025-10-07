@@ -319,13 +319,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   }, [activities, users, fetchedProfiles]);
 
   const addActivityMutation = useMutation({
-    mutationFn: async (data: { type: string; content: string }) => {
+    mutationFn: async (data: { type: string; content: string; followUpAt?: string | null }) => {
       console.log('Adding activity:', { entityType, entityId, data });
       const result = await ActivitiesService.createActivity({
         entityType,
         entityId: String(entityId),
         activityType: data.type,
         content: data.content,
+        followUpAt: data.followUpAt ?? null,
       });
       console.log('Activity created:', result);
       return result;
@@ -344,6 +345,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         userName: user?.firstName || user?.name || user?.email || 'You',
         userId: user?.id,
         userProfileImage: (user as any)?.profileImageUrl || (user as any)?.profileImage || null,
+        followUpAt: data.followUpAt ?? null,
         createdAt,
         isOptimistic: true,
       };
@@ -353,6 +355,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       queryClient.setQueryData<Activity[]>([`/api/activities/${entityType}/${entityId}`], (old = []) => [optimisticActivity as any, ...(Array.isArray(old) ? old : [])]);
       setNewActivity('');
       setActivityType('comment');
+      setFollowUpDate(undefined);
+      setComposerError(null);
       setIsAddingActivity(false);
       return { previous, tempId };
     },
