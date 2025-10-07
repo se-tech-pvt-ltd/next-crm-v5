@@ -43,6 +43,8 @@ const viewOptions: { value: CalendarView; label: string }[] = [
   { value: 'year', label: 'Year' },
 ];
 
+const WEEK_OPTIONS = { weekStartsOn: 1 as const };
+
 export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange }) => {
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   const [focusDate, setFocusDate] = React.useState<Date>(new Date());
