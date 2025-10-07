@@ -117,7 +117,7 @@ export class UserController {
         console.error('Post-invite side effects error:', sideErr);
       }
 
-      res.status(201).json({ ...created, invited: true });
+      res.status(201).json({ ...sanitizeUser(created), invited: true });
     } catch (error: any) {
       console.error('Invite user error:', error);
       const msg = String(error?.message || 'Failed to invite user');
