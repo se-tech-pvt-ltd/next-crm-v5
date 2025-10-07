@@ -244,9 +244,12 @@ export class UserController {
       const user = await UserService.getUser(userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
 
+      const sanitizedUser = sanitizeUser(user);
+      const baseUser = sanitizedUser as any;
+
       // Resolve profile image URL from attachments using profile_image_id, if present
-      let profileImageId: string | undefined = (user as any).profileImageId ?? (user as any).profile_image_id;
-      let profileImageUrl: string | undefined = (user as any).profileImageUrl ?? (user as any).profile_image_url;
+      let profileImageId: string | undefined = baseUser.profileImageId ?? baseUser.profile_image_id;
+      let profileImageUrl: string | undefined = baseUser.profileImageUrl ?? baseUser.profile_image_url;
       if (!profileImageUrl && profileImageId) {
         try {
           const { AttachmentModel } = await import('../models/Attachment.js');
@@ -259,23 +262,23 @@ export class UserController {
 
       // Normalize output to include both snake_case and camelCase fields used across frontend
       const out: any = {
-        ...user,
+        ...sanitizedUser,
         // names
-        first_name: (user as any).firstName ?? (user as any).first_name ?? undefined,
-        firstName: (user as any).firstName ?? (user as any).first_name ?? undefined,
-        last_name: (user as any).lastName ?? (user as any).last_name ?? undefined,
-        lastName: (user as any).lastName ?? (user as any).last_name ?? undefined,
+        first_name: baseUser.firstName ?? baseUser.first_name ?? undefined,
+        firstName: baseUser.firstName ?? baseUser.first_name ?? undefined,
+        last_name: baseUser.lastName ?? baseUser.last_name ?? undefined,
+        lastName: baseUser.lastName ?? baseUser.last_name ?? undefined,
         // phone
-        phone_number: (user as any).phoneNumber ?? (user as any).phone_number ?? undefined,
-        phoneNumber: (user as any).phoneNumber ?? (user as any).phone_number ?? undefined,
+        phone_number: baseUser.phoneNumber ?? baseUser.phone_number ?? undefined,
+        phoneNumber: baseUser.phoneNumber ?? baseUser.phone_number ?? undefined,
         // profile image
         profile_image_url: profileImageUrl,
         profileImageUrl: profileImageUrl,
         profile_image_id: profileImageId,
         profileImageId: profileImageId,
         // profile complete flag
-        is_profile_complete: (user as any).isProfileComplete ?? (user as any).is_profile_complete ?? undefined,
-        isProfileComplete: (user as any).isProfileComplete ?? (user as any).is_profile_complete ?? undefined,
+        is_profile_complete: baseUser.isProfileComplete ?? baseUser.is_profile_complete ?? undefined,
+        isProfileComplete: baseUser.isProfileComplete ?? baseUser.is_profile_complete ?? undefined,
       };
 
       res.json(out);
