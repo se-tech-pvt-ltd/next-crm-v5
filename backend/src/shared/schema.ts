@@ -1,6 +1,9 @@
 import { mysqlTable, text, int, timestamp, boolean, varchar, json, char, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
+
+
 const PriorityEnum = mysqlEnum("priority", ["High", "Medium", "Low"]);
 const CategoryEnum = mysqlEnum("category", ["UG", "PG", "Research", "Top up"]);
 const NotificationStatusEnum = mysqlEnum("status", [
@@ -8,6 +11,16 @@ const NotificationStatusEnum = mysqlEnum("status", [
   "sent",
   "failed",
 ]);
+
+export const usersResetTokens = mysqlTable("users_reset_token", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
+  isUsed: boolean("is_used").notNull().default(false),
+  expiry: timestamp("expiry").notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
 
 export const notifications = mysqlTable("notifications", {
   id: char("id", { length: 36 }).primaryKey().notNull(),
@@ -525,6 +538,14 @@ export const insertBranchEmpSchema = createInsertSchema(branchEmps).omit({
   createdOn: true,
   updatedOn: true,
 }).partial({ id: true });
+
+export const usersResetTokenRelations = relations(usersResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [usersResetTokens.userId],
+    references: [users.id],
+  }),
+}));
+
 
 export type BranchEmp = typeof branchEmps.$inferSelect;
 export type InsertBranchEmp = z.infer<typeof insertBranchEmpSchema>;
