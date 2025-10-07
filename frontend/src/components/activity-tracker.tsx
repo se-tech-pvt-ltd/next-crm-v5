@@ -603,6 +603,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                         setIsAddingActivity(false);
                         setNewActivity("");
                         setActivityType("comment");
+                        setFollowUpDate(undefined);
+                        setComposerError(null);
                       }}
                     >
                       Cancel
