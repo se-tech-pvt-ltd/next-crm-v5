@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { UserService } from "../services/UserService.js";
-import { EmailService } from "../services/EmailService.js";
-import { generateNumericPassword } from "../utils/helpers.js";
+import { NotificationService } from "../services/NotificationService.js";
 
 export class UserController {
   private static getCurrentUser() {
@@ -13,14 +12,14 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
+      const { email, firstName, lastName, phoneNumber, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
       if (!email || !roleId) {
         return res.status(400).json({ message: 'email and roleId are required' });
       }
       const id = (await import('uuid')).v4();
       // For testing environments, allow a deterministic password via TEST_USER_PASSWORD env var; default to 'admin123'
       const password = (process.env.TEST_USER_PASSWORD && String(process.env.TEST_USER_PASSWORD)) || 'admin123';
-      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, roleId, branchId, department, profileImageId } as any, password);
+      const created = await UserService.createUserWithPassword({ id, email, firstName, lastName, phoneNumber, roleId, branchId, department, profileImageId } as any, password);
 
       try {
         // If regional manager is set, update the region head mapping
@@ -52,28 +51,21 @@ export class UserController {
         console.error('Post-create side effects error:', sideErr);
       }
 
-      // Send invite/notification email using template "new registration"
       try {
-        console.log("Sending email")
-        await EmailService.sendTemplatedEmail({
-          to: email,
-          templateName: 'new registration',
-          subject: 'Your account has been created',
+        await NotificationService.queueNotification({
+          entityType: 'user',
+          entityId: String(created.id),
+          templateId: 'new_user',
+          channel: 'email',
           variables: {
-            first_name: String(firstName || ''),
-            last_name: String(lastName || ''),
             email: String(email),
-            password: String(password),
+            firstName: String(firstName || ''),
+            lastName: String(lastName || ''),
           },
+          recipientAddress: String(email),
         });
-        try {
-          await UserService.updateUser(String(created.id), { isRegistrationEmailSent: true } as any);
-          (created as any).isRegistrationEmailSent = true;
-        } catch (flagErr) {
-          console.error('Failed to set is_registration_email_sent flag:', flagErr);
-        }
-      } catch (mailErr: any) {
-        console.error('Email send error:', mailErr?.message || mailErr);
+      } catch (notificationErr) {
+        console.error('Failed to queue new user notification:', notificationErr);
       }
 
       res.status(201).json(created);
@@ -87,12 +79,12 @@ export class UserController {
 
   static async inviteUser(req: Request, res: Response) {
     try {
-      const { email, firstName, lastName, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
+      const { email, firstName, lastName, phoneNumber, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
       if (!email || !roleId) {
         return res.status(400).json({ message: 'email and roleId are required' });
       }
       const id = (await import('uuid')).v4();
-      const created = await UserService.createUser({ id, email, firstName, lastName, roleId, branchId, department, profileImageId } as any);
+      const created = await UserService.createUser({ id, email, firstName, lastName, phoneNumber, roleId, branchId, department, profileImageId } as any);
 
       try {
         const { connection } = await import('../config/database.js');
