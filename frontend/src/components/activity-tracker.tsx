@@ -420,15 +420,21 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     if (!content) {
       return;
     }
-    if (activityType === 'follow_up' && !followUpDate) {
-      setComposerError('Select a follow-up date');
-      return;
+    if (activityType === 'follow_up') {
+      if (!followUpDate || !followUpTime || !followUpDateTime) {
+        setComposerError('Select follow-up date and time');
+        return;
+      }
+      if (followUpDateTime.getTime() < Date.now()) {
+        setComposerError('Follow-up must be scheduled in the future');
+        return;
+      }
     }
     setComposerError(null);
     addActivityMutation.mutate({
       type: activityType,
       content,
-      followUpAt: followUpDate ? followUpDate.toISOString() : null,
+      followUpAt: followUpDateTime ? followUpDateTime.toISOString() : null,
     });
   };
 
