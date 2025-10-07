@@ -412,7 +412,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                       variant={view === option.value ? 'default' : 'outline'}
                       className={
                         view === option.value
-                          ? 'border-white bg-white text-[#223E7D] hover:bg-white/90'
+                          ? 'border-[#102A5F] bg-[#102A5F] text-white hover:bg-[#102A5F]/90'
                           : 'border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20'
                       }
                       onClick={() => setView(option.value)}
