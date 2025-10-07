@@ -148,23 +148,8 @@ export default function FollowUpsPage() {
 
         <div>
           {view === 'month' ? (
-            <div className="rounded-lg border bg-white shadow-sm">
-              <Calendar
-                mode="single"
-                month={startOfMonth(focusDate)}
-                onMonthChange={(date) => setFocusDate(startOfMonth(date || new Date()))}
-                selected={selectedDate}
-                onSelect={(date) => {
-                  if (!date) return;
-                  setSelectedDate(date);
-                  setView('day');
-                }}
-                className="bg-transparent p-4"
-                modifiers={{ hasFollowUps: followUps.map((f: any) => startOfDay(new Date(f.followUpOn))) }}
-                modifiersClassNames={{
-                  hasFollowUps: 'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary after:content-[""]',
-                }}
-              />
+            <div className="rounded-lg border bg-white shadow-sm p-4">
+              <CalendarMonthGrid month={startOfMonth(focusDate)} events={eventsForGrid} />
             </div>
           ) : (
             <div className="rounded-lg border bg-white shadow-sm">
