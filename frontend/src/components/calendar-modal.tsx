@@ -175,7 +175,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   });
 
   const followUps = followUpQuery.data?.data ?? [];
-  const { user } = useAuth() as any;
   const myFollowUps = React.useMemo(() => {
     const uid = user?.id != null ? String(user.id) : null;
     if (!uid) return [] as FollowUp[];
