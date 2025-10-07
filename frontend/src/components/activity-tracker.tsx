@@ -486,6 +486,28 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     }
   };
 
+  const safeFormatFollowUpDate = (value: any) => {
+    try {
+      if (!value) return '';
+      if (value instanceof Date) {
+        return format(value, 'PPP');
+      }
+      const iso = String(value);
+      const dateMatch = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (dateMatch) {
+        const [, year, month, day] = dateMatch;
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+        return format(date, 'PPP');
+      }
+      const parsed = new Date(iso);
+      if (Number.isNaN(parsed.getTime())) return '';
+      const midnight = parsed.getHours() === 0 && parsed.getMinutes() === 0 && parsed.getSeconds() === 0 && parsed.getMilliseconds() === 0;
+      return format(parsed, midnight ? 'PPP' : 'PPP p');
+    } catch {
+      return '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3 pt-0 px-3 pb-3">
@@ -717,6 +739,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
             return list.map((activity: Activity, idx: number) => {
               const isLast = idx === list.length - 1;
               const profileImage = (activity as any).userProfileImage || ((activity as any).userId ? (getUserProfileImage((activity as any).userId as any) || fetchedProfiles[(activity as any).userId]) : null) || getCurrentUserProfileIfMatch(activity);
+              const followUpDisplay = safeFormatFollowUpDate((activity as any).followUpAt);
               return (
                 <div key={`${activity.id}-${activity.createdAt}`} className="relative flex gap-3">
                   <div className="relative w-5 flex flex-col items-center">
@@ -762,6 +785,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                             }
                             return (activity.description || (activity as any).title);
                           })()}
+                        </div>
+                      )}
+                      {followUpDisplay && String(activity.activityType || '').toLowerCase() === 'follow_up' && (
+                        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs text-blue-700">
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          <span>
+                            Follow-up scheduled for <span className="font-semibold text-blue-900">{followUpDisplay}</span>
+                          </span>
                         </div>
                       )}
                     </div>
