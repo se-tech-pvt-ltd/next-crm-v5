@@ -704,7 +704,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                     <Button
                       size="sm"
                       onClick={handleAddActivity}
-                      disabled={!newActivity.trim() || addActivityMutation.isPending || (activityType === 'follow_up' && !followUpDate)}
+                      disabled={!newActivity.trim() || addActivityMutation.isPending || (activityType === 'follow_up' && (!followUpDate || !followUpTime))}
                     >
                       {addActivityMutation.isPending ? "Adding..." : "Add Activity"}
                     </Button>
