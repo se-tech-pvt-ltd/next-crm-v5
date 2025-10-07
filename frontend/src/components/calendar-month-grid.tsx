@@ -40,7 +40,7 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col">
       <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
           <div key={d} className="py-1">
@@ -49,57 +49,59 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((day) => {
-          const key = startOfDay(day).toISOString();
-          const dayEvents = eventsByDay.get(key) || [];
-          const isCurrentMonth = isSameMonth(day, month);
-          const today = isSameDay(day, new Date());
+      <div className="overflow-auto max-h-[60vh]">
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day) => {
+            const key = startOfDay(day).toISOString();
+            const dayEvents = eventsByDay.get(key) || [];
+            const isCurrentMonth = isSameMonth(day, month);
+            const today = isSameDay(day, new Date());
 
-          return (
-            <div
-              key={key}
-              className={
-                `relative border rounded-md bg-white min-h-[96px] p-2 flex flex-col ${
-                  isCurrentMonth ? '' : 'opacity-60'
-                } ${today ? 'ring-2 ring-primary' : ''}`
-              }
-            >
-              <div className="flex items-start justify-between">
-                <div className="text-xs font-medium text-gray-700">{format(day, 'd')}</div>
-              </div>
-
-              <div className="mt-2 flex-1 overflow-hidden">
-                <div className="space-y-1">
-                  {dayEvents.slice(0, 3).map((ev) => (
-                    <div key={ev.id} className="rounded-md border px-2 py-[3px] text-xs bg-indigo-50 text-indigo-800 overflow-hidden whitespace-nowrap text-ellipsis">
-                      <div className="font-semibold text-[12px] leading-4 truncate">{format(ev.start, 'hh:mm a')} {ev.title}</div>
-                    </div>
-                  ))}
+            return (
+              <div
+                key={key}
+                className={
+                  `relative border rounded-md bg-white min-h-[96px] p-2 flex flex-col ${
+                    isCurrentMonth ? '' : 'opacity-60'
+                  } ${today ? 'ring-2 ring-primary' : ''}`
+                }
+              >
+                <div className="flex items-start justify-between">
+                  <div className="text-xs font-medium text-gray-700">{format(day, 'd')}</div>
                 </div>
 
-                {dayEvents.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => openDayModal(day)}
-                    className="mt-1 text-xs text-muted-foreground hover:underline"
-                  >
-                    +{dayEvents.length - 3} more
-                  </button>
-                )}
-
-                {/* compact view for small screens */}
-                {dayEvents.length > 0 && (
-                  <div className="sm:hidden mt-1 flex items-center gap-1">
-                    <span className="inline-block h-2 w-2 rounded-full bg-indigo-600" />
-                    <span className="text-xs truncate">{dayEvents[0].title}</span>
-                    {dayEvents.length > 1 && <span className="text-xs text-muted-foreground">+{dayEvents.length - 1}</span>}
+                <div className="mt-2 flex-1 overflow-hidden">
+                  <div className="space-y-1">
+                    {dayEvents.slice(0, 3).map((ev) => (
+                      <div key={ev.id} className="rounded-md border px-2 py-[3px] text-xs bg-indigo-50 text-indigo-800 overflow-hidden whitespace-nowrap text-ellipsis">
+                        <div className="font-semibold text-[12px] leading-4 truncate">{format(ev.start, 'hh:mm a')} {ev.title}</div>
+                      </div>
+                    ))}
                   </div>
-                )}
+
+                  {dayEvents.length > 3 && (
+                    <button
+                      type="button"
+                      onClick={() => openDayModal(day)}
+                      className="mt-1 text-xs text-muted-foreground hover:underline"
+                    >
+                      +{dayEvents.length - 3} more
+                    </button>
+                  )}
+
+                  {/* compact view for small screens */}
+                  {dayEvents.length > 0 && (
+                    <div className="sm:hidden mt-1 flex items-center gap-1">
+                      <span className="inline-block h-2 w-2 rounded-full bg-indigo-600" />
+                      <span className="text-xs truncate">{dayEvents[0].title}</span>
+                      {dayEvents.length > 1 && <span className="text-xs text-muted-foreground">+{dayEvents.length - 1}</span>}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
