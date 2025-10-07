@@ -30,12 +30,22 @@ interface ActivityTrackerProps {
   canAdd?: boolean;
 }
 
-const ACTIVITY_TYPES = [
-  { value: 'comment', label: 'Comment', icon: MessageSquare },
-  { value: 'note', label: 'Note', icon: FileText },
-  { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
-  { value: 'call', label: 'Call', icon: UserIcon },
-];
+const getActivityTypes = (entityType?: string) => {
+  const base = [
+    { value: 'comment', label: 'Comment', icon: MessageSquare },
+    { value: 'note', label: 'Note', icon: FileText },
+    { value: 'call', label: 'Call', icon: UserIcon },
+  ];
+  const t = (entityType || '').toLowerCase();
+  if (t === 'lead') {
+    return [
+      ...base.slice(0, 2),
+      { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
+      ...base.slice(2),
+    ];
+  }
+  return base;
+};
 
 export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName, canAdd = true }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
