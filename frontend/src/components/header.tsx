@@ -40,7 +40,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [, navigate] = useLocation();
-  const [isCalendarRoute] = useRoute('/calendar');
 
   React.useEffect(() => {
     const handler = (e: any) => {
