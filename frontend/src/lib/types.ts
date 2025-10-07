@@ -144,6 +144,18 @@ export interface Activity {
   createdAt: Date;
 }
 
+export interface FollowUp {
+  id: string;
+  userId: string;
+  entityId: string;
+  entityType: string;
+  comments: string;
+  followUpOn: string;
+  createdOn: string;
+  updatedOn: string;
+  status: "overdue" | "upcoming";
+}
+
 // Zod validation schemas for frontend forms (without database dependencies)
 export const insertUserSchema = z.object({
   id: z.string(),
