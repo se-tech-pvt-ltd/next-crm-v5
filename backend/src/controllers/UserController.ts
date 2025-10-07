@@ -70,7 +70,7 @@ export class UserController {
         console.error('Failed to queue new user notification:', notificationErr);
       }
 
-      res.status(201).json(created);
+      res.status(201).json(sanitizeUser(created));
     } catch (error: any) {
       console.error('Create user error:', error);
       const msg = String(error?.message || 'Failed to create user');
