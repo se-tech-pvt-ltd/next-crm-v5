@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
