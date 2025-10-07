@@ -167,8 +167,8 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   const rangeEndKey = React.useMemo(() => viewRange.end.toISOString(), [viewRange]);
 
   const followUpQuery = useQuery({
-    queryKey: ['follow-ups', view, rangeStartKey, rangeEndKey],
-    queryFn: () => getFollowUps({ start: viewRange.start, end: viewRange.end }),
+    queryKey: ['follow-ups', view, rangeStartKey, rangeEndKey, (user as any)?.id || 'anon'],
+    queryFn: () => getFollowUps({ start: viewRange.start, end: viewRange.end, userId: (user as any)?.id }),
     enabled: open,
     keepPreviousData: true,
   });
