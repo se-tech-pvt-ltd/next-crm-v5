@@ -101,6 +101,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   }, [focusDate]);
 
   const hourSlots = React.useMemo(() => Array.from({ length: 24 }, (_, idx) => idx), []);
+  const { user } = useAuth() as any;
 
   const viewLabel = React.useMemo(() => {
     switch (view) {
