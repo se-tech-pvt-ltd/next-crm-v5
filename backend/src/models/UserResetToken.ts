@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import { db } from "../config/database.js";
@@ -42,5 +42,29 @@ export class UserResetTokenModel {
       .update(usersResetTokens)
       .set({ isUsed: true, updatedOn: new Date() })
       .where(eq(usersResetTokens.userId, userId));
+  }
+
+  static async findLatestActiveByUserId(userId: string): Promise<UserResetTokenRecord | undefined> {
+    const [record] = await db
+      .select()
+      .from(usersResetTokens)
+      .where(
+        and(
+          eq(usersResetTokens.userId, userId),
+          eq(usersResetTokens.isUsed, false),
+          gt(usersResetTokens.expiry, new Date())
+        )
+      )
+      .orderBy(desc(usersResetTokens.createdOn))
+      .limit(1);
+
+    return record;
+  }
+
+  static async markTokenAsUsed(id: string): Promise<void> {
+    await db
+      .update(usersResetTokens)
+      .set({ isUsed: true, updatedOn: new Date() })
+      .where(eq(usersResetTokens.id, id));
   }
 }
