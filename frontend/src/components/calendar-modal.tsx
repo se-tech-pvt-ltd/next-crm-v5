@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { FollowUp } from '@/lib/types';
 import { getFollowUps } from '@/services/followUps';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarTimeGrid } from './calendar-time-grid';
 import {
   addDays,
   addMonths,
@@ -172,7 +173,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   });
 
   const followUps = followUpQuery.data?.data ?? [];
-  const followUpsMeta = followUpQuery.data?.meta;
   const followUpsError = followUpQuery.error instanceof Error ? followUpQuery.error : null;
   const isFollowUpsLoading = followUpQuery.isLoading;
 
@@ -267,85 +267,48 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     setFocusDate(now);
   }, []);
 
+  const eventsForGrid = React.useMemo(() => {
+    return followUps.map((fu) => {
+      const start = new Date(fu.followUpOn);
+      const end = new Date(start.getTime() + 30 * 60 * 1000);
+      return {
+        id: fu.id,
+        title: format(start, 'p') + ' • ' + (fu.comments || 'Follow-up'),
+        start,
+        end,
+        status: fu.status,
+        entityType: fu.entityType,
+        entityId: fu.entityId,
+        comments: fu.comments,
+      };
+    });
+  }, [followUps]);
+
   const renderView = () => {
     switch (view) {
-      case 'day':
+      case 'day': {
+        const day = startOfDay(focusDate);
+        const dayEvents = eventsForGrid.filter((e) => isSameDay(e.start, day));
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
-            <div className="w-full max-w-3xl px-2">
-              <div className="text-center">
-                <div className="text-3xl font-semibold text-gray-900 sm:text-4xl">
-                  {format(focusDate, 'EEEE')}
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground sm:text-base">
-                  {format(focusDate, 'MMMM d, yyyy')}
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-3">
-                {hourSlots.map((hour) => {
-                  const slotTime = new Date(
-                    focusDate.getFullYear(),
-                    focusDate.getMonth(),
-                    focusDate.getDate(),
-                    hour,
-                    0,
-                    0,
-                    0,
-                  );
-                  const label = format(slotTime, 'h a');
-                  return (
-                    <React.Fragment key={hour}>
-                      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-                      <div
-                        className="h-12 rounded-md border border-dashed border-gray-200 bg-white"
-                        role="group"
-                        aria-label={`${label} slot`}
-                      >
-                        <span className="sr-only">No events scheduled</span>
-                      </div>
-                    </React.Fragment>
-                  );
-                })}
-              </div>
+          <div className="flex h-full w-full flex-col">
+            <div className="px-2 sm:px-0">
+              <CalendarTimeGrid days={[day]} events={dayEvents} startHour={0} endHour={24} />
             </div>
           </div>
         );
-      case 'week':
+      }
+      case 'week': {
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
-            <div className="w-full max-w-4xl">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
-                {weekDays.map((day) => {
-                  const isSelected = isSameDay(day, selectedDate);
-                  return (
-                    <button
-                      key={day.toISOString()}
-                      type="button"
-                      onClick={() => handleSelectDay(day)}
-                      className={cn(
-                        'rounded-lg border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                        isSelected ? 'border-primary bg-primary/10' : 'border-gray-200 hover:border-primary/60 hover:bg-primary/5',
-                      )}
-                    >
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {format(day, 'EEE')}
-                      </div>
-                      <div className="mt-1 text-2xl font-semibold text-gray-900">
-                        {format(day, 'd')}
-                      </div>
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        {format(day, 'MMMM yyyy')}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+          <div className="flex h-full w-full flex-col">
+            <div className="px-2 sm:px-0">
+              <CalendarTimeGrid days={weekDays} events={eventsForGrid} startHour={0} endHour={24} />
             </div>
           </div>
         );
+      }
       case 'month':
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto">
+          <div className="flex h-full w-full flex-col items-center">
             <div className="rounded-lg border bg-white shadow-sm">
               <Calendar
                 mode="single"
@@ -354,6 +317,11 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                 selected={selectedDate}
                 onSelect={handleSelectDay}
                 className="bg-transparent p-4"
+                modifiers={{ hasFollowUps: followUpHighlightDates }}
+                modifiersClassNames={{
+                  hasFollowUps:
+                    'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary after:content-[""]',
+                }}
               />
             </div>
           </div>
@@ -361,7 +329,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       case 'year': {
         const currentMonth = new Date();
         return (
-          <div className="flex h-full w-full flex-col items-center overflow-auto px-1">
+          <div className="flex h-full w-full flex-col items-center px-1">
             <div className="w-full max-w-5xl">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {yearMonths.map((month) => {
@@ -413,6 +381,11 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                             'border border-primary text-primary',
                             isCurrentMonth ? 'border-primary' : 'border-primary/60',
                           ),
+                        }}
+                        modifiers={{ hasFollowUps: followUpHighlightDates }}
+                        modifiersClassNames={{
+                          hasFollowUps:
+                            'relative after:absolute after:bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary after:content-[""]',
                         }}
                       />
                     </div>
@@ -490,9 +463,57 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col overflow-hidden px-3 py-6 sm:px-6">
-            <div className="flex-1 overflow-auto">
-              {renderView()}
+          <div className="flex-1 overflow-auto px-3 py-6 sm:px-6">
+            {renderView()}
+
+            <div className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Follow-ups on {format(selectedDate, 'PPP')}
+                </h3>
+              </div>
+
+              {isFollowUpsLoading && (
+                <div className="mt-4 text-sm text-muted-foreground">Loading follow-ups…</div>
+              )}
+              {followUpsError && (
+                <div className="mt-4 text-sm text-red-600">
+                  Failed to load follow-ups: {followUpsError.message}
+                </div>
+              )}
+              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length === 0 && (
+                <div className="mt-4 text-sm text-muted-foreground">No follow-ups scheduled.</div>
+              )}
+
+              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length > 0 && (
+                <ul className="mt-4 space-y-2">
+                  {selectedDayFollowUps.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-start justify-between rounded-md border border-gray-200 bg-white p-3 hover:border-primary/50"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-gray-900">
+                            {formatFollowUpTime(item.followUpOn)}
+                          </span>
+                          <span className={cn(
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                            item.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
+                          )}>
+                            {item.status === 'overdue' ? 'Overdue' : 'Upcoming'}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                            {item.entityType}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-700 line-clamp-2">{item.comments}</div>
+                      </div>
+                      <div className="ml-3 text-[10px] text-muted-foreground">#{item.entityId}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
