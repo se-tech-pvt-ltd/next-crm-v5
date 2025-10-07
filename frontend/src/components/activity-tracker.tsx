@@ -626,31 +626,62 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
 
                   {activityType === 'follow_up' && (
                     <div className="space-y-2">
-                      <span className="text-xs font-semibold text-gray-700">Follow-up date</span>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={`w-full justify-start text-sm font-normal ${followUpDate ? 'text-gray-900' : 'text-muted-foreground'}`}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarPicker
-                            mode="single"
-                            selected={followUpDate}
-                            onSelect={(date) => {
-                              setFollowUpDate(date ?? undefined);
+                      <span className="text-xs font-semibold text-gray-700">Follow-up date & time</span>
+                      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,140px)]">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className={`w-full justify-start text-sm font-normal ${followUpDate ? 'text-gray-900' : 'text-muted-foreground'}`}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarPicker
+                              mode="single"
+                              selected={followUpDate}
+                              onSelect={(date) => {
+                                setFollowUpDate(date ?? undefined);
+                                if (date) {
+                                  setFollowUpTime((prev) => {
+                                    if (!prev) {
+                                      return computeDefaultFollowUpTime(date);
+                                    }
+                                    const minForDate = computeMinTimeForDate(date);
+                                    if (minForDate && prev < minForDate) {
+                                      return minForDate;
+                                    }
+                                    return prev;
+                                  });
+                                } else {
+                                  setFollowUpTime("");
+                                }
+                                setComposerError(null);
+                              }}
+                              disabled={(date) => date < today}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <div className="relative">
+                          <Clock className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="time"
+                            value={followUpTime}
+                            onChange={(event) => {
+                              setFollowUpTime(event.target.value);
                               setComposerError(null);
                             }}
-                            disabled={(date) => date < today}
-                            initialFocus
+                            min={minTimeForSelectedDate}
+                            disabled={!followUpDate}
+                            step="60"
+                            className="h-10 pl-8"
                           />
-                        </PopoverContent>
-                      </Popover>
+                        </div>
+                      </div>
                     </div>
                   )}
 
