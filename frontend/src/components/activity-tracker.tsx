@@ -43,6 +43,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
   const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
+  const [followUpTime, setFollowUpTime] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
