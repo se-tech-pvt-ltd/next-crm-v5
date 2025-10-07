@@ -21,6 +21,7 @@ import Login from "@/pages/login";
 import ForgotPassword from "@/pages/forgot-password";
 import UniversityPage from "@/pages/university";
 import ResetPassword from "@/pages/reset-password";
+import CalendarPage from "@/pages/calendar";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
@@ -128,6 +129,7 @@ function Router() {
       <Route path="/events/:id/registrations/:regId" component={EventsPage} />
       <Route path="/events/:id/registrations/:regId/lead" component={EventsPage} />
       <Route path="/events" component={EventsPage} />
+      <Route path="/calendar" component={CalendarPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />

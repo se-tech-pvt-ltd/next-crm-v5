@@ -136,10 +136,11 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
       {/* Body */}
       <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
         {/* Time column */}
-        <div className="bg-white">
+        <div className="relative bg-white">
+          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 64px)" }} />
           {hourRange.map((h) => (
             <div key={h} className="relative h-16">
-              <div className="sticky left-0 -mt-2 pr-2 text-right text-[10px] text-muted-foreground select-none">{format(new Date(2020, 0, 1, h), 'ha')}</div>
+              <div className="absolute top-px right-2 text-right text-[10px] text-muted-foreground select-none">{format(new Date(2020, 0, 1, h), 'ha')}</div>
             </div>
           ))}
         </div>
@@ -185,15 +186,12 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                       style={{ top: `${top}%`, height: heightCalc, left, width }}
                       title={ev.title}
                     >
-                      <div className="line-clamp-2">
-                        <span className={cn('mr-1 inline-block rounded px-1 py-[1px] text-[10px] font-semibold', chip)}>
+                      <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                        <span className={cn('mr-1 inline-block rounded px-1 py-[1px] text-[10px] font-semibold capitalize', chip)} title={ev.entityType || undefined}>
                           {ev.entityType}
                         </span>
-                        {ev.title}
+                        <span className="truncate">{ev.title}</span>
                       </div>
-                      {ev.comments && (
-                        <div className="mt-0.5 line-clamp-1 text-[10px] opacity-80">{ev.comments}</div>
-                      )}
                     </div>
                   );
                 })}

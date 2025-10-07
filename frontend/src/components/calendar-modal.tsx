@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { FollowUp } from '@/lib/types';
 import { getFollowUps } from '@/services/followUps';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { CalendarTimeGrid } from './calendar-time-grid';
 import {
   addDays,
@@ -49,14 +50,14 @@ const WEEK_OPTIONS = { weekStartsOn: 1 as const };
 export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange }) => {
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   const [focusDate, setFocusDate] = React.useState<Date>(new Date());
-  const [view, setView] = React.useState<CalendarView>('month');
+  const [view, setView] = React.useState<CalendarView>('week');
 
   React.useEffect(() => {
     if (!open) {
       const now = new Date();
       setSelectedDate(now);
       setFocusDate(now);
-      setView('month');
+      setView('week');
     }
   }, [open]);
 
@@ -100,6 +101,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   }, [focusDate]);
 
   const hourSlots = React.useMemo(() => Array.from({ length: 24 }, (_, idx) => idx), []);
+  const { user } = useAuth() as any;
 
   const viewLabel = React.useMemo(() => {
     switch (view) {
@@ -166,19 +168,22 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   const rangeEndKey = React.useMemo(() => viewRange.end.toISOString(), [viewRange]);
 
   const followUpQuery = useQuery({
-    queryKey: ['follow-ups', view, rangeStartKey, rangeEndKey],
-    queryFn: () => getFollowUps({ start: viewRange.start, end: viewRange.end }),
+    queryKey: ['follow-ups', view, rangeStartKey, rangeEndKey, (user as any)?.id || 'anon'],
+    queryFn: () => getFollowUps({ start: viewRange.start, end: viewRange.end, userId: (user as any)?.id }),
     enabled: open,
     keepPreviousData: true,
   });
 
   const followUps = followUpQuery.data?.data ?? [];
-  const followUpsError = followUpQuery.error instanceof Error ? followUpQuery.error : null;
-  const isFollowUpsLoading = followUpQuery.isLoading;
+  const myFollowUps = React.useMemo(() => {
+    const uid = user?.id != null ? String(user.id) : null;
+    if (!uid) return [] as FollowUp[];
+    return (followUps || []).filter((f) => String(f.userId) === uid);
+  }, [followUps, user]);
 
   const followUpsByDay = React.useMemo(() => {
     const map = new Map<string, { date: Date; items: FollowUp[] }>();
-    for (const followUp of followUps) {
+    for (const followUp of myFollowUps) {
       const date = new Date(followUp.followUpOn);
       if (Number.isNaN(date.getTime())) {
         continue;
@@ -205,19 +210,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     [followUpsByDay],
   );
 
-  const selectedDayFollowUps = React.useMemo(() => {
-    const key = startOfDay(selectedDate).toISOString();
-    const entry = followUpsByDay.get(key);
-    return entry ? entry.items : [];
-  }, [followUpsByDay, selectedDate]);
 
-  const formatFollowUpTime = React.useCallback((value: string) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return '—';
-    }
-    return format(date, 'p');
-  }, []);
 
   const handleSelectDay = React.useCallback((date?: Date) => {
     if (!date) {
@@ -268,12 +261,12 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   }, []);
 
   const eventsForGrid = React.useMemo(() => {
-    return followUps.map((fu) => {
+    return myFollowUps.map((fu) => {
       const start = new Date(fu.followUpOn);
       const end = new Date(start.getTime() + 30 * 60 * 1000);
       return {
         id: fu.id,
-        title: format(start, 'p') + ' • ' + (fu.comments || 'Follow-up'),
+        title: fu.comments || 'Follow-up',
         start,
         end,
         status: fu.status,
@@ -408,16 +401,17 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
         <div className="flex h-full max-h-[90vh] flex-col">
-          <div className="flex flex-col gap-3 border-b px-4 py-3 sm:px-6">
+          <div className="flex flex-col gap-3 border-b border-[#223E7D] bg-[#223E7D] text-white px-4 py-3 sm:px-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <DialogTitle className="text-lg font-semibold text-gray-900 sm:text-xl">Calendar</DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">
+                <DialogTitle className="text-lg font-semibold text-white sm:text-xl">Calendar</DialogTitle>
+                <DialogDescription className="text-sm text-white/80">
                   Browse dates and plan upcoming activities.
                 </DialogDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-                Close
+              <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 bg-white text-[#223E7D] hover:bg-white/90" onClick={() => onOpenChange(false)}>
+                <span className="sr-only">Close</span>
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="w-4 h-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
               </Button>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -427,6 +421,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                     key={option.value}
                     size="sm"
                     variant={view === option.value ? 'default' : 'outline'}
+                    className={view === option.value ? 'bg-white text-[#223E7D] border-white hover:bg-white' : 'border-white/40 text-white hover:bg-white/10'}
                     onClick={() => setView(option.value)}
                     aria-pressed={view === option.value}
                   >
@@ -435,24 +430,26 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-medium text-gray-700 sm:text-base" aria-live="polite">
+                <div className="text-sm font-medium text-white sm:text-base" aria-live="polite">
                   {viewLabel}
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
                     size="sm"
                     variant="outline"
+                    className="border-white/40 text-white hover:bg-white/10"
                     onClick={handlePrev}
                     aria-label="Previous period"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={handleToday}>
+                  <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10" onClick={handleToday}>
                     Today
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
+                    className="border-white/40 text-white hover:bg-white/10"
                     onClick={handleNext}
                     aria-label="Next period"
                   >
@@ -466,55 +463,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           <div className="flex-1 overflow-auto px-3 py-6 sm:px-6">
             {renderView()}
 
-            <div className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Follow-ups on {format(selectedDate, 'PPP')}
-                </h3>
-              </div>
-
-              {isFollowUpsLoading && (
-                <div className="mt-4 text-sm text-muted-foreground">Loading follow-ups…</div>
-              )}
-              {followUpsError && (
-                <div className="mt-4 text-sm text-red-600">
-                  Failed to load follow-ups: {followUpsError.message}
-                </div>
-              )}
-              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length === 0 && (
-                <div className="mt-4 text-sm text-muted-foreground">No follow-ups scheduled.</div>
-              )}
-
-              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length > 0 && (
-                <ul className="mt-4 space-y-2">
-                  {selectedDayFollowUps.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-start justify-between rounded-md border border-gray-200 bg-white p-3 hover:border-primary/50"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-900">
-                            {formatFollowUpTime(item.followUpOn)}
-                          </span>
-                          <span className={cn(
-                            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                            item.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-                          )}>
-                            {item.status === 'overdue' ? 'Overdue' : 'Upcoming'}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                            {item.entityType}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-700 line-clamp-2">{item.comments}</div>
-                      </div>
-                      <div className="ml-3 text-[10px] text-muted-foreground">#{item.entityId}</div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
           </div>
         </div>
       </DialogContent>
