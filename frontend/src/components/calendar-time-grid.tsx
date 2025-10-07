@@ -240,11 +240,10 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
             </div>
             <div className="p-4 bg-white">
               {selectedEvent && (
-                <div className="mt-2 space-y-2">
-                  <div className="text-sm text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
-                  <div className="text-sm">{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
+                <div className="mt-2 space-y-3">
+                  <div className="text-sm"><span className="font-medium text-gray-700">Schedule date: </span><span className="text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</span></div>
+                  <div className="text-sm"><span className="font-medium text-gray-700">Schedule time: </span><span>{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</span></div>
                   {selectedEvent.comments && <div className="text-sm text-gray-700">{selectedEvent.comments}</div>}
-                  <div className="text-sm text-muted-foreground">Status: {selectedEvent.status || '—'}</div>
                   <div className="flex justify-end mt-4">
                     <button onClick={() => handleOpenRecord(selectedEvent)} className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">Open record</button>
                   </div>
