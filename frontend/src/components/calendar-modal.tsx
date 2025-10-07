@@ -75,14 +75,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         return startOfMonth(selectedDate);
       });
     }
-    if (view === 'year') {
-      setFocusDate((prev) => {
-        if (prev.getFullYear() === selectedDate.getFullYear()) {
-          return prev;
-        }
-        return selectedDate;
-      });
-    }
   }, [view, selectedDate]);
 
   const monthForCalendar = React.useMemo(() => startOfMonth(focusDate), [focusDate]);
