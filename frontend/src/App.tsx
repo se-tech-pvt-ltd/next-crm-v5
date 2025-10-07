@@ -129,6 +129,7 @@ function Router() {
       <Route path="/events/:id/registrations/:regId" component={EventsPage} />
       <Route path="/events/:id/registrations/:regId/lead" component={EventsPage} />
       <Route path="/events" component={EventsPage} />
+      <Route path="/calendar" component={CalendarPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={SettingsGuard} />
