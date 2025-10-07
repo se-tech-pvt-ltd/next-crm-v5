@@ -1,4 +1,6 @@
 import type { Request, Response } from "express";
+import type { Request, Response } from "express";
+import { sanitizeUser } from "../utils/helpers.js";
 import { UserService } from "../services/UserService.js";
 import { NotificationService } from "../services/NotificationService.js";
 
