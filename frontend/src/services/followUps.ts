@@ -26,11 +26,15 @@ const toIso = (value: Date | string): string => {
 };
 
 export async function getFollowUps(params: FollowUpQueryParams): Promise<FollowUpQueryResponse> {
-  const { start, end, entityTypes } = params;
+  const { start, end, entityTypes, userId } = params;
   const searchParams = new URLSearchParams({
     start: toIso(start),
     end: toIso(end),
   });
+
+  if (userId && String(userId).trim()) {
+    searchParams.set('userId', String(userId).trim());
+  }
 
   if (entityTypes && entityTypes.length > 0) {
     for (const type of entityTypes) {
