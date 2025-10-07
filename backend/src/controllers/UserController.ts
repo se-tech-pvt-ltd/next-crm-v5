@@ -212,7 +212,7 @@ export class UserController {
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(updatedUser);
+      res.json(sanitizeUser(updatedUser));
     } catch (error: any) {
       console.error("Update user error:", error);
       const msg = String(error?.message || 'Failed to update user');
@@ -231,7 +231,7 @@ export class UserController {
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(updatedUser);
+      res.json(sanitizeUser(updatedUser));
     } catch (error) {
       console.error("Update profile image error:", error);
       res.status(500).json({ message: "Failed to update profile image" });
