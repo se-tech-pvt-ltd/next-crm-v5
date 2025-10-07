@@ -198,16 +198,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               </Badge>
             </Button>
 
-            {/* Calendar */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50"
-              aria-label="Open calendar"
-              onClick={() => navigate('/calendar')}
-            >
-              <CalendarDays size={18} aria-hidden="true" />
-            </Button>
 
             {/* Notifications */}
             <DropdownMenu>
