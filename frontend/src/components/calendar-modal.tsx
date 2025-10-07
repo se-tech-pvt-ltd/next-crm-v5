@@ -377,6 +377,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         hideClose
         className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
+        <DialogTitle className="sr-only">Calendar</DialogTitle>
         <div className="flex h-full max-h-[90vh] flex-col">
           <div className="flex flex-col gap-2 border-b border-[#223E7D] bg-[#223E7D] px-4 py-2 text-white sm:px-5">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
