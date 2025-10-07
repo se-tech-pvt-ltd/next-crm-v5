@@ -15,12 +15,12 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalDate, setModalDate] = React.useState<Date | null>(null);
 
+  // Force a 5-row (35-day) grid starting from the first day of the week
+  // that contains the month's first day. This ensures a consistent 5x7 layout.
   const start = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
-  const end = endOfWeek(endOfMonth(month), { weekStartsOn: 0 });
-
   const days: Date[] = [];
-  for (let d = start; d <= end; d = addDays(d, 1)) {
-    days.push(new Date(d));
+  for (let i = 0; i < 35; i++) {
+    days.push(addDays(start, i));
   }
 
   const eventsByDay = React.useMemo(() => {
