@@ -245,7 +245,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
               <Calendar
                 mode="single"
                 month={monthForCalendar}
-                onMonthChange={(date) => setFocusDate(date)}
+                onMonthChange={(date) => setFocusDate(startOfMonth(date))}
                 selected={selectedDate}
                 onSelect={handleSelectDay}
                 className="bg-transparent"
