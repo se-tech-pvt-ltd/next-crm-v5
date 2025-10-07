@@ -148,4 +148,35 @@ export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> =
   );
 };
 
+function EventOpenButton({ event }: { event: EventItem }) {
+  const [, navigate] = require('wouter').useLocation();
+  const handleOpen = () => {
+    const t = (event.entityType || '').toLowerCase();
+    let path = '/';
+    switch (t) {
+      case 'lead':
+        path = `/leads/${event.entityId}`;
+        break;
+      case 'student':
+        path = `/students/${event.entityId}`;
+        break;
+      case 'application':
+        path = `/applications/${event.entityId}`;
+        break;
+      case 'admission':
+        path = `/admissions/${event.entityId}`;
+        break;
+      case 'event':
+        path = `/events/${event.entityId}`;
+        break;
+      default:
+        path = '/';
+    }
+    try { navigate(path); } catch {}
+  };
+  return (
+    <button onClick={handleOpen} className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">Open record</button>
+  );
+}
+
 export default CalendarMonthGrid;
