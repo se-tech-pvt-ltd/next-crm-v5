@@ -12,6 +12,27 @@ const NotificationStatusEnum = mysqlEnum("status", [
   "failed",
 ]);
 
+export const followUps = mysqlTable("follow_ups", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  entityId: varchar("entity_id", { length: 36 }).notNull(),
+  entityType: varchar("entity_type", { length: 36 }).notNull(), // fixed spelling from `entitiy_type`
+  comments: text("comments").notNull(),
+  followUpOn: timestamp("followup_on").notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+// Insert schema for followUps
+export const insertFollowUpSchema = createInsertSchema(followUps).omit({
+  createdOn: true,
+  updatedOn: true,
+}).partial({ id: true });
+
+export type FollowUp = typeof followUps.$inferSelect;
+export type InsertFollowUp = z.infer<typeof insertFollowUpSchema>;
+
+
 export const usersResetTokens = mysqlTable("users_reset_token", {
   id: varchar("id", { length: 36 }).primaryKey().notNull(),
   userId: varchar("user_id", { length: 36 }).notNull(),
