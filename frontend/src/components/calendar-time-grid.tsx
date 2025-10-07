@@ -238,12 +238,6 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
             <div className="p-4 bg-white">
               {selectedEvent && (
                 <div className="space-y-4">
-                  {selectedEvent.entityType && (
-                    <div>
-                      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-800 capitalize">{selectedEvent.entityType}</span>
-                    </div>
-                  )}
-
                   <div className="rounded-md border p-3 bg-gray-50">
                     <div className="text-sm font-semibold mb-2">Schedule</div>
                     <div className="flex justify-between text-sm">
