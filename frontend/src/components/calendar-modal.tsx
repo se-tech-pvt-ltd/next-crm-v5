@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { FollowUp } from '@/lib/types';
 import { getFollowUps } from '@/services/followUps';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { CalendarTimeGrid } from './calendar-time-grid';
 import {
   addDays,
@@ -49,14 +50,14 @@ const WEEK_OPTIONS = { weekStartsOn: 1 as const };
 export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange }) => {
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   const [focusDate, setFocusDate] = React.useState<Date>(new Date());
-  const [view, setView] = React.useState<CalendarView>('month');
+  const [view, setView] = React.useState<CalendarView>('week');
 
   React.useEffect(() => {
     if (!open) {
       const now = new Date();
       setSelectedDate(now);
       setFocusDate(now);
-      setView('month');
+      setView('week');
     }
   }, [open]);
 
@@ -173,10 +174,16 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   });
 
   const followUps = followUpQuery.data?.data ?? [];
+  const { user } = useAuth() as any;
+  const myFollowUps = React.useMemo(() => {
+    const uid = user?.id != null ? String(user.id) : null;
+    if (!uid) return [] as FollowUp[];
+    return (followUps || []).filter((f) => String(f.userId) === uid);
+  }, [followUps, user]);
 
   const followUpsByDay = React.useMemo(() => {
     const map = new Map<string, { date: Date; items: FollowUp[] }>();
-    for (const followUp of followUps) {
+    for (const followUp of myFollowUps) {
       const date = new Date(followUp.followUpOn);
       if (Number.isNaN(date.getTime())) {
         continue;
@@ -254,7 +261,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   }, []);
 
   const eventsForGrid = React.useMemo(() => {
-    return followUps.map((fu) => {
+    return myFollowUps.map((fu) => {
       const start = new Date(fu.followUpOn);
       const end = new Date(start.getTime() + 30 * 60 * 1000);
       return {
@@ -394,11 +401,11 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
         <div className="flex h-full max-h-[90vh] flex-col">
-          <div className="flex flex-col gap-3 border-b px-4 py-3 sm:px-6">
+          <div className="flex flex-col gap-3 border-b border-blue-200 bg-blue-50/60 px-4 py-3 sm:px-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <DialogTitle className="text-lg font-semibold text-gray-900 sm:text-xl">Calendar</DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">
+                <DialogTitle className="text-lg font-semibold text-blue-900 sm:text-xl">Calendar</DialogTitle>
+                <DialogDescription className="text-sm text-blue-800/70">
                   Browse dates and plan upcoming activities.
                 </DialogDescription>
               </div>
@@ -421,7 +428,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-medium text-gray-700 sm:text-base" aria-live="polite">
+                <div className="text-sm font-medium text-blue-900 sm:text-base" aria-live="polite">
                   {viewLabel}
                 </div>
                 <div className="flex items-center gap-1">
