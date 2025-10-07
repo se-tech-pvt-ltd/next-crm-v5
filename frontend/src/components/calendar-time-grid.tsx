@@ -228,20 +228,29 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
         </div>
       </div>
 
-      <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogTitle>{selectedEvent ? selectedEvent.title : 'Event'}</DialogTitle>
-          {selectedEvent && (
-            <div className="mt-2 space-y-2">
-              <div className="text-sm text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
-              <div className="text-sm">{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
-              {selectedEvent.comments && <div className="text-sm text-gray-700">{selectedEvent.comments}</div>}
-              <div className="text-sm text-muted-foreground">Status: {selectedEvent.status || '—'}</div>
-              <div className="flex justify-end mt-4">
-                <button onClick={() => handleOpenRecord(selectedEvent)} className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">Open record</button>
-              </div>
+          <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
+        <DialogContent className="max-w-md p-0">
+          <div className="flex flex-col">
+            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center justify-between">
+              <div className="text-lg font-semibold">Follow Up</div>
+              <button aria-label="Close" onClick={() => setEventModalOpen(false)} className="rounded-full w-8 h-8 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 text-white">
+                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z" clipRule="evenodd"/></svg>
+              </button>
             </div>
-          )}
+            <div className="p-4 bg-white">
+              {selectedEvent && (
+                <div className="mt-2 space-y-2">
+                  <div className="text-sm text-muted-foreground">{format(selectedEvent.start, 'EEEE, MMMM d, yyyy')}</div>
+                  <div className="text-sm">{format(selectedEvent.start, 'hh:mm a')} — {format(selectedEvent.end, 'hh:mm a')}</div>
+                  {selectedEvent.comments && <div className="text-sm text-gray-700">{selectedEvent.comments}</div>}
+                  <div className="text-sm text-muted-foreground">Status: {selectedEvent.status || '—'}</div>
+                  <div className="flex justify-end mt-4">
+                    <button onClick={() => handleOpenRecord(selectedEvent)} className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">Open record</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
