@@ -130,7 +130,7 @@ export class UserController {
     try {
       const { search, role, limit } = req.query;
 
-      let users;
+      let users: any[] = [];
 
       if (search && typeof search === 'string' && search.trim()) {
         // Parse roles if provided
