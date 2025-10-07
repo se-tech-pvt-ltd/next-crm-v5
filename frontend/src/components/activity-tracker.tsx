@@ -34,7 +34,7 @@ interface ActivityTrackerProps {
 const ACTIVITY_TYPES = [
   { value: 'comment', label: 'Comment', icon: MessageSquare },
   { value: 'note', label: 'Note', icon: FileText },
-  { value: 'follow_up', label: 'Follow Up', icon: Calendar },
+  { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
   { value: 'call', label: 'Call', icon: UserIcon },
 ];
 
