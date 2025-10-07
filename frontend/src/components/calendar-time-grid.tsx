@@ -138,7 +138,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
         {/* Time column */}
         <div className="bg-white">
           {hourRange.map((h) => (
-            <div key={h} className="relative h-16 border-b border-gray-100">
+            <div key={h} className="relative border-b border-gray-100" style={{ height: "calc(64px - 1px)" }}>
               <div className="sticky left-0 -mt-2 pr-2 text-right text-[10px] text-muted-foreground select-none">{format(new Date(2020, 0, 1, h), 'ha')}</div>
             </div>
           ))}
@@ -153,7 +153,7 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
               <div key={key} className="relative border-l border-gray-100">
                 {/* hour grid lines */}
                 {hourRange.map((h) => (
-                  <div key={h} className="h-16 border-b border-gray-100" />
+                  <div key={h} className="border-b border-gray-100" style={{ height: "calc(64px - 1px)" }} />
                 ))}
 
                 {/* current time line */}
