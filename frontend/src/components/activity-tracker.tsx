@@ -377,9 +377,20 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   });
 
   const handleAddActivity = () => {
-    if (newActivity.trim()) {
-      addActivityMutation.mutate({ type: activityType, content: newActivity.trim() });
+    const content = newActivity.trim();
+    if (!content) {
+      return;
     }
+    if (activityType === 'follow_up' && !followUpDate) {
+      setComposerError('Select a follow-up date');
+      return;
+    }
+    setComposerError(null);
+    addActivityMutation.mutate({
+      type: activityType,
+      content,
+      followUpAt: followUpDate ? followUpDate.toISOString() : null,
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
