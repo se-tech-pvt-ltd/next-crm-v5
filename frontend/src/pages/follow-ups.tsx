@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarTimeGrid } from '@/components/calendar-time-grid';
+import CalendarMonthGrid from '@/components/calendar-month-grid';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, eachMonthOfInterval, startOfMonth, endOfMonth, addDays, subDays, addMonths, subMonths, addYears, subYears, format, isSameMonth } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
