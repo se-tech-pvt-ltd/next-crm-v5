@@ -41,10 +41,17 @@ const ACTIVITY_TYPES = [
 export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName, canAdd = true }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
   const [activityType, setActivityType] = useState("comment");
+  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
+  const [composerError, setComposerError] = useState<string | null>(null);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const today = React.useMemo(() => {
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }, []);
 
   // Extract conversion details like: "This record was converted from lead ID <uuid>. All previous..."
   const parseConversionDescription = (desc?: string): { fromType?: string; fromId?: string } => {
