@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, asc, eq, gte, lte } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { db } from "../config/database.js";
 import { followUps, type FollowUp, type InsertFollowUp } from "../shared/schema.js";
 
@@ -24,5 +25,19 @@ export class FollowUpModel {
     }
 
     return created;
+  }
+
+  static async findByUserAndRange(userId: string, start: Date, end: Date): Promise<FollowUp[]> {
+    return await db
+      .select()
+      .from(followUps)
+      .where(
+        and(
+          eq(followUps.userId, String(userId)),
+          gte(followUps.followUpOn, start),
+          lte(followUps.followUpOn, end),
+        ),
+      )
+      .orderBy(asc(followUps.followUpOn));
   }
 }
