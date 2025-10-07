@@ -402,26 +402,27 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       >
         <div className="flex h-full max-h-[90vh] flex-col">
           <div className="flex flex-col gap-2 border-b border-[#223E7D] bg-[#223E7D] px-4 py-2 text-white sm:px-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
-                <div className="flex flex-wrap items-center gap-1">
-                  {viewOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      size="sm"
-                      variant={view === option.value ? 'default' : 'outline'}
-                      className={
-                        view === option.value
-                          ? 'border-[#102A5F] bg-[#102A5F] text-white hover:bg-[#102A5F]/90'
-                          : 'border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20'
-                      }
-                      onClick={() => setView(option.value)}
-                      aria-pressed={view === option.value}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex flex-wrap items-center gap-1">
+                {viewOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    size="sm"
+                    variant={view === option.value ? 'default' : 'outline'}
+                    className={
+                      view === option.value
+                        ? 'border-[#102A5F] bg-[#102A5F] text-white hover:bg-[#102A5F]/90'
+                        : 'border-[#223E7D]/40 text-[#223E7D] hover:bg-white/20'
+                    }
+                    onClick={() => setView(option.value)}
+                    aria-pressed={view === option.value}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex flex-1 basis-full justify-center text-center text-sm font-medium text-white sm:basis-auto sm:text-base" aria-live="polite">
+                <span className="truncate">{viewLabel}</span>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
                 <div className="flex items-center gap-1">
@@ -456,11 +457,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                   <span className="sr-only">Close</span>
                   <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4"><path fill="currentColor" d="M11.414 10l3.536-3.536a1 1 0 10-1.414-1.414L10 8.586 6.464 5.05a1 1 0 10-1.414 1.414L8.586 10l-3.536 3.536a1 1 0 101.414 1.414L10 11.414l3.536 3.536a1 1 0 001.414-1.414L11.414 10z"/></svg>
                 </Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-white/70 sm:text-base">
-              <div className="min-w-0 truncate font-medium text-white" aria-live="polite">
-                {viewLabel}
               </div>
             </div>
           </div>
