@@ -354,6 +354,11 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                 selected={selectedDate}
                 onSelect={handleSelectDay}
                 className="bg-transparent p-4"
+                modifiers={{ hasFollowUps: followUpHighlightDates }}
+                modifiersClassNames={{
+                  hasFollowUps:
+                    'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary after:content-[""]',
+                }}
               />
             </div>
           </div>
@@ -413,6 +418,11 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
                             'border border-primary text-primary',
                             isCurrentMonth ? 'border-primary' : 'border-primary/60',
                           ),
+                        }}
+                        modifiers={{ hasFollowUps: followUpHighlightDates }}
+                        modifiersClassNames={{
+                          hasFollowUps:
+                            'relative after:absolute after:bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary after:content-[""]',
                         }}
                       />
                     </div>
@@ -490,9 +500,62 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col overflow-hidden px-3 py-6 sm:px-6">
-            <div className="flex-1 overflow-auto">
-              {renderView()}
+          <div className="flex-1 overflow-auto px-3 py-6 sm:px-6">
+            {renderView()}
+
+            <div className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Follow-ups on {format(selectedDate, 'PPP')}
+                </h3>
+                {followUpsMeta && (
+                  <span className="text-xs text-muted-foreground">
+                    Showing {selectedDayFollowUps.length} of {followUpsMeta.total} in range
+                  </span>
+                )}
+              </div>
+
+              {isFollowUpsLoading && (
+                <div className="mt-4 text-sm text-muted-foreground">Loading follow-ups…</div>
+              )}
+              {followUpsError && (
+                <div className="mt-4 text-sm text-red-600">
+                  Failed to load follow-ups: {followUpsError.message}
+                </div>
+              )}
+              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length === 0 && (
+                <div className="mt-4 text-sm text-muted-foreground">No follow-ups scheduled.</div>
+              )}
+
+              {!isFollowUpsLoading && !followUpsError && selectedDayFollowUps.length > 0 && (
+                <ul className="mt-4 space-y-2">
+                  {selectedDayFollowUps.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-start justify-between rounded-md border border-gray-200 bg-white p-3 hover:border-primary/50"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-gray-900">
+                            {formatFollowUpTime(item.followUpOn)}
+                          </span>
+                          <span className={cn(
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                            item.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
+                          )}>
+                            {item.status === 'overdue' ? 'Overdue' : 'Upcoming'}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                            {item.entityType}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-700 line-clamp-2">{item.comments}</div>
+                      </div>
+                      <div className="ml-3 text-[10px] text-muted-foreground">#{item.entityId}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
