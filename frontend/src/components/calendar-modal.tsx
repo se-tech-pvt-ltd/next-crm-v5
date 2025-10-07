@@ -173,7 +173,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
   });
 
   const followUps = followUpQuery.data?.data ?? [];
-  const followUpsMeta = followUpQuery.data?.meta;
   const followUpsError = followUpQuery.error instanceof Error ? followUpQuery.error : null;
   const isFollowUpsLoading = followUpQuery.isLoading;
 
