@@ -404,7 +404,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
           <div className="flex flex-col gap-2 border-b border-[#223E7D] bg-[#223E7D] px-4 py-2 text-white sm:px-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
-                <DialogTitle className="text-base font-semibold text-white sm:text-lg">Calendar</DialogTitle>
                 <div className="flex flex-wrap items-center gap-1">
                   {viewOptions.map((option) => (
                     <Button
