@@ -9,6 +9,8 @@ type EventItem = {
   end: Date;
   status?: string;
   entityType?: string | null;
+  entityId?: string | number | null;
+  comments?: string | null;
 };
 
 export const CalendarMonthGrid: React.FC<{ month: Date; events: EventItem[] }> = ({ month, events }) => {
