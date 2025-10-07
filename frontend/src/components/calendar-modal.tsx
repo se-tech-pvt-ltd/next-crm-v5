@@ -258,11 +258,10 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     switch (view) {
       case 'day': {
         const day = startOfDay(focusDate);
-        const dayEvents = eventsForGrid.filter((e) => isSameDay(e.start, day));
         return (
           <div className="flex h-full w-full flex-col">
             <div className="px-2 sm:px-0 h-full">
-              <CalendarTimeGrid days={[day]} events={dayEvents} startHour={0} endHour={24} />
+              <CalendarTimeGrid days={[day]} events={eventsForGrid} startHour={0} endHour={24} />
             </div>
           </div>
         );
