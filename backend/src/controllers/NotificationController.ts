@@ -37,6 +37,7 @@ export class NotificationController {
             lastName: userRecord.lastName || userRecord.last_name || '',
             token: resetTokenPayload.token,
             resetToken: resetTokenPayload.token,
+            expiry: resetTokenPayload.record.expiry.toISOString(),
             resetTokenExpiry: resetTokenPayload.record.expiry.toISOString(),
             resetTokenId: resetTokenPayload.record.id,
           },
