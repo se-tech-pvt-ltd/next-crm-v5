@@ -278,7 +278,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         studentId={selectedStudentId}
       />
 
-      <CalendarModal open={Boolean(isCalendarRoute)} onOpenChange={(open) => navigate(open ? '/calendar' : '/')} />
       <UpdatesModal open={isUpdatesOpen} onOpenChange={setIsUpdatesOpen} />
     </>
   );
