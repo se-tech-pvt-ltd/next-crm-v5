@@ -22,6 +22,40 @@ import {
   Target
 } from 'lucide-react';
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import * as BranchesService from '@/services/branches';
+import * as UsersService from '@/services/users';
+import * as EventsService from '@/services/events';
+import * as RegistrationsService from '@/services/event-registrations';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts';
+
+function isWithinRange(dLike: any, from?: Date | null, to?: Date | null) {
+  if (!dLike) return false;
+  const d = new Date(dLike);
+  if (Number.isNaN(d.getTime())) return false;
+  if (from && d < from) return false;
+  if (to && d > to) return false;
+  return true;
+}
+
+function groupCount<T>(items: T[], pick: (item: T) => string | null | undefined) {
+  const map = new Map<string, number>();
+  for (const it of items) {
+    const key = (pick(it) || 'Unknown').toString();
+    map.set(key, (map.get(key) || 0) + 1);
+  }
+  return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a,b)=>b.value-a.value);
+}
+
 export default function Reports() {
   const { data: leadsResponse, isLoading: leadsLoading } = useQuery({
     queryKey: ['/api/leads'],
