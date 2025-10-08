@@ -231,19 +231,32 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               <DropdownMenuContent align="end" className="w-80">
                 <div className="p-3">
                   <h4 className="font-medium text-sm mb-2">Notifications</h4>
-                  <div className="space-y-2">
-                    <div className="p-2 bg-blue-50 rounded-md">
-                      <p className="text-xs text-blue-800">New lead assigned: Emma Thompson</p>
-                      <p className="text-xs text-gray-500">2 minutes ago</p>
-                    </div>
-                    <div className="p-2 bg-green-50 rounded-md">
-                      <p className="text-xs text-green-800">Application approved: University of Toronto</p>
-                      <p className="text-xs text-gray-500">1 hour ago</p>
-                    </div>
-                    <div className="p-2 bg-orange-50 rounded-md">
-                      <p className="text-xs text-orange-800">Visa status update required</p>
-                      <p className="text-xs text-gray-500">3 hours ago</p>
-                    </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="text-sm text-gray-500">No new notifications</div>
+                    ) : (
+                      notifications.map((n) => {
+                        const vars = n.variables || {};
+                        const title = vars.message || vars.lead_name || n.templateId || 'Notification';
+                        const time = n.createdAt ? formatDistanceToNow(new Date(n.createdAt)) + ' ago' : '';
+                        const isPending = String(n.status).toLowerCase() === 'pending';
+                        return (
+                          <div key={n.id} className={`p-2 rounded-md ${isPending ? 'bg-yellow-50' : 'bg-white'} flex justify-between items-start`}>
+                            <div>
+                              <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'}`}>{title}</p>
+                              <p className="text-xs text-gray-500">{time}</p>
+                            </div>
+                            <div>
+                              {isPending ? (
+                                <Badge className="bg-yellow-200 text-yellow-800 text-xs">Pending</Badge>
+                              ) : (
+                                <Badge className="bg-green-100 text-green-800 text-xs">Read</Badge>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </DropdownMenuContent>
