@@ -83,7 +83,7 @@ function DashboardContent() {
     successRate: applicationsThisMonth.length ? (depositsThisMonth.length / applicationsThisMonth.length) * 100 : 0,
   };
 
-  const pipelineData: PipelineData = {
+  const pipelineData = {
     newLeads: leadsThisMonth.length,
     qualifiedStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).toLowerCase() === 'active').length,
     applicationsSubmitted: applicationsThisMonth.length,
