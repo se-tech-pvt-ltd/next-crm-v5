@@ -230,6 +230,8 @@ export const leads = mysqlTable("leads", {
   eventRegId: varchar("event_reg_id", { length: 255 }),
   branchId: varchar("branch_id", { length: 255 }),
   regionId: varchar("region_id", { length: 50 }),
+  partner: varchar("partner", { length: 36 }),
+  subPartner: varchar("sub_partner", { length: 36 }),
   isConverted: int("is_converted").notNull().default(0),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
@@ -267,6 +269,9 @@ export const students = mysqlTable("students", {
   regionId: varchar("region_id", { length: 50 }),
   counsellorId: varchar("counsellor_id", { length: 50 }),
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
+  partner: varchar("partner", { length: 36 }),
+  subPartner: varchar("sub_partner", { length: 36 }),
+
 });
 
 
@@ -289,6 +294,9 @@ export const applications = mysqlTable("applications", {
   regionId: varchar("region_id", { length: 50 }),
   counsellorId: varchar("counsellor_id", { length: 50 }),
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
+  partner: varchar("partner", { length: 36 }),
+  subPartner: varchar("sub_partner", { length: 36 }),
+
   universityId: varchar("university_id", { length: 50 }),
   courseId: varchar("course_id", { length: 50 }),
   intakeId: varchar("intake_id", { length: 50 }),
@@ -320,6 +328,8 @@ export const admissions = mysqlTable("admissions", {
   status: text("status"),
   caseStatus: text("case_status"),
   googleDriveLink: text("google_drive_link"),
+  partner: varchar("partner", { length: 36 }),
+  subPartner: varchar("sub_partner", { length: 36 }),
 
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -339,6 +349,8 @@ export const events = mysqlTable("events", {
   regionId: varchar("region_id", { length: 50 }),
   counsellorId: varchar("counsellor_id", { length: 50 }),
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),
+  partner: varchar("partner", { length: 36 }),
+  subPartner: varchar("sub_partner", { length: 36 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
