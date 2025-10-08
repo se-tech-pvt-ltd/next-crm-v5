@@ -13,7 +13,7 @@ import {
   Plus,
   Calendar,
 } from 'lucide-react';
-import { DashboardMetrics, PipelineData, Activity, FollowUp, Application, Lead, Student, Admission } from '@/lib/types';
+import { Activity, FollowUp, Application, Lead, Student, Admission } from '@/lib/types';
 import React from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { getFollowUps } from '@/services/followUps';
