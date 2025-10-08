@@ -159,6 +159,7 @@ export default function Reports() {
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="admissions">Admissions</TabsTrigger>
+            <TabsTrigger value="partners">Partners</TabsTrigger>
           </TabsList>
 
           {/* Overall */}
