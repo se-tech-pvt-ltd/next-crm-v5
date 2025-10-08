@@ -243,13 +243,16 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                         return (
                           <div key={n.id} className={`p-2 rounded-md ${isPending ? 'bg-yellow-50' : 'bg-white'} flex justify-between items-start`}>
                             <div className="flex-1">
-                              <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'} font-medium`}>{title}</p>
+                              <div className="flex items-center gap-2">
+                                {isPending && <span className="text-[11px] font-semibold text-yellow-800 bg-yellow-100 px-1.5 py-0.5 rounded">Unread</span>}
+                                <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'} font-medium`}>{title}</p>
+                              </div>
                               <p className="text-xs text-gray-500 mt-1">{contentSnippet}</p>
                               <p className="text-xs text-gray-400 mt-1">{time}</p>
                             </div>
                             <div className="ml-3">
                               {isPending ? (
-                                <Badge className="bg-yellow-200 text-yellow-800 text-xs">Pending</Badge>
+                                <Badge className="bg-yellow-200 text-yellow-800 text-xs">Unread</Badge>
                               ) : (
                                 <Badge className="bg-green-100 text-green-800 text-xs">Read</Badge>
                               )}
