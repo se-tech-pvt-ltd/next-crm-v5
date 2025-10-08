@@ -1,4 +1,4 @@
-import { mysqlTable, text, int, timestamp, boolean, varchar, json, char, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, int, timestamp, boolean, varchar, json, char, date, decimal, mysqlEnum, tinyint, longtext, datetime } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
