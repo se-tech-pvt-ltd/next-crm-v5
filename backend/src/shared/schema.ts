@@ -52,8 +52,8 @@ export const templates = mysqlTable("templates", {
   redirectUrl: varchar("redirect_url", { length: 255 }),
   createdBy: varchar("created_by", { length: 255 }).notNull(),
   updatedBy: varchar("updated_by", { length: 255 }).notNull(),
-  createdOn: datetime("created_on").notNull().defaultNow(),
-  updatedOn: datetime("updated_on").notNull().defaultNow(),
+  createdOn: timestamp("created_on").notNull().defaultNow(),
+  updatedOn: timestamp("updated_on").notNull().defaultNow(),
 });
 
 export const notifications = mysqlTable("notifications", {
