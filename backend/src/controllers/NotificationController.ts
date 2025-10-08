@@ -4,7 +4,7 @@ import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
 
 import { db } from '../config/database.js';
-import { notifications } from '../shared/schema.js';
+import { notifications, templates } from '../shared/schema.js';
 import { eq, and, desc } from 'drizzle-orm';
 
 export class NotificationController {
