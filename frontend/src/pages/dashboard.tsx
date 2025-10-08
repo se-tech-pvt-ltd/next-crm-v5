@@ -74,7 +74,7 @@ function DashboardContent() {
   const applicationsThisMonth = React.useMemo(() => applicationsArray.filter(a => inCurrentMonth((a as any).createdAt || (a as any).created_at || (a as any).created_on)), [applicationsArray]);
   const depositsThisMonth = React.useMemo(() => admissionsArray.filter(a => inCurrentMonth((a as any).depositDate || (a as any).deposit_date)), [admissionsArray]);
 
-  const metrics: DashboardMetrics = {
+  const metrics = {
     totalLeads: leadsThisMonth.length,
     activeStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).toLowerCase() === 'active').length,
     applications: applicationsThisMonth.length,
