@@ -3,6 +3,10 @@ import { NotificationService } from '../services/NotificationService.js';
 import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
 
+import { db } from '../config/database.js';
+import { notifications } from '../shared/schema.js';
+import { eq, and, desc } from 'drizzle-orm';
+
 export class NotificationController {
   static async forgotPassword(req: Request, res: Response) {
     try {
@@ -53,6 +57,61 @@ export class NotificationController {
     } catch (error) {
       console.error('[NotificationController] forgotPassword error:', error);
       return res.status(500).json({ message: 'Failed to queue notification' });
+    }
+  }
+
+  static async pending(req: Request, res: Response) {
+    try {
+      const { templates } = await import('../shared/schema.js');
+      const rows = await db
+        .select({
+          content: templates.template,
+          subject: templates.subject,
+          variables: notifications.variables,
+          entity_type: notifications.entityType,
+          status: notifications.status,
+          linked_user: notifications.recipientAddress,
+          redirect_url: templates.redirectUrl,
+          id: notifications.id,
+          createdAt: notifications.createdAt,
+        })
+        .from(notifications)
+        .leftJoin(templates, eq(templates.name, notifications.templateId))
+        .where(and(eq(notifications.channel, 'notification'), eq(notifications.status, 'pending')))
+        .orderBy(desc(notifications.createdAt));
+
+      const processed = (rows || []).map((r: any) => {
+        const vars = r.variables || {};
+        let subject = r.subject || '';
+        let content = r.content || '';
+        try {
+          Object.keys(vars).forEach((k) => {
+            const v = vars[k];
+            const safe = v == null ? '' : String(v);
+            const re = new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, 'g');
+            subject = subject.replace(re, safe);
+            content = content.replace(re, safe);
+          });
+        } catch (e) {
+          // ignore replacement errors
+        }
+        return {
+          id: r.id,
+          subject,
+          content,
+          variables: r.variables,
+          entity_type: r.entity_type,
+          status: r.status,
+          linked_user: r.linked_user,
+          redirect_url: r.redirect_url,
+          createdAt: r.createdAt,
+        };
+      });
+
+      return res.status(200).json(processed);
+    } catch (error) {
+      console.error('[NotificationController] pending error:', error);
+      return res.status(500).json({ message: 'Failed to fetch notifications' });
     }
   }
 }

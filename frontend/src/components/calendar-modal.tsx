@@ -258,11 +258,10 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
     switch (view) {
       case 'day': {
         const day = startOfDay(focusDate);
-        const dayEvents = eventsForGrid.filter((e) => isSameDay(e.start, day));
         return (
           <div className="flex h-full w-full flex-col">
-            <div className="px-2 sm:px-0">
-              <CalendarTimeGrid days={[day]} events={dayEvents} startHour={0} endHour={24} />
+            <div className="px-2 sm:px-0 h-full">
+              <CalendarTimeGrid days={[day]} events={eventsForGrid} startHour={0} endHour={24} />
             </div>
           </div>
         );
@@ -270,7 +269,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
       case 'week': {
         return (
           <div className="flex h-full w-full flex-col">
-            <div className="px-2 sm:px-0">
+            <div className="px-2 sm:px-0 h-full">
               <CalendarTimeGrid days={weekDays} events={eventsForGrid} startHour={0} endHour={24} />
             </div>
           </div>
@@ -377,6 +376,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
         hideClose
         className="sm:max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden border-0 bg-white p-0 shadow-xl"
       >
+        <DialogTitle className="sr-only">Calendar</DialogTitle>
         <div className="flex h-full max-h-[90vh] flex-col">
           <div className="flex flex-col gap-2 border-b border-[#223E7D] bg-[#223E7D] px-4 py-2 text-white sm:px-5">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -438,7 +438,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ open, onOpenChange
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto px-3 py-6 sm:px-6">
+          <div className="flex-1 px-3 py-6 sm:px-6">
             {renderView()}
 
           </div>

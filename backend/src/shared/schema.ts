@@ -1,4 +1,4 @@
-import { mysqlTable, text, int, timestamp, boolean, varchar, json, char, date, decimal, mysqlEnum, tinyint } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, int, timestamp, boolean, varchar, json, char, date, decimal, mysqlEnum, tinyint, longtext, datetime } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -41,6 +41,19 @@ export const usersResetTokens = mysqlTable("users_reset_token", {
   expiry: timestamp("expiry").notNull(),
   createdOn: timestamp("created_on").defaultNow().notNull(),
   updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
+export const templates = mysqlTable("templates", {
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull().default(""),
+  template: longtext("template").notNull(),
+  redirectUrl: varchar("redirect_url", { length: 255 }),
+  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  updatedBy: varchar("updated_by", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").notNull().defaultNow(),
+  updatedOn: timestamp("updated_on").notNull().defaultNow(),
 });
 
 export const notifications = mysqlTable("notifications", {

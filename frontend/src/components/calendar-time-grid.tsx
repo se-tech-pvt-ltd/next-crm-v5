@@ -1,6 +1,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, differenceInMinutes, isSameDay } from "date-fns";
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useLocation } from 'wouter';
 
 export interface TimeGridEvent {
   id: string;
@@ -118,14 +120,38 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
   const isTodayInView = normDays.some((d) => isSameDay(d, now));
   const nowTop = minuteToTop(now.getHours() * 60 + now.getMinutes());
 
+  const [eventModalOpen, setEventModalOpen] = React.useState(false);
+  const [selectedEvent, setSelectedEvent] = React.useState<TimeGridEvent | null>(null);
+  const [, navigate] = useLocation();
+
+  const openEventModal = (ev: TimeGridEvent) => {
+    setSelectedEvent(ev);
+    setEventModalOpen(true);
+  };
+
+  const handleOpenRecord = (ev: TimeGridEvent | null) => {
+    if (!ev) return;
+    const t = String(ev.entityType || '').toLowerCase();
+    let path = '/';
+    switch (t) {
+      case 'lead': path = `/leads/${ev.entityId}`; break;
+      case 'student': path = `/students/${ev.entityId}`; break;
+      case 'application': path = `/applications/${ev.entityId}`; break;
+      case 'admission': path = `/admissions/${ev.entityId}`; break;
+      case 'event': path = `/events/${ev.entityId}`; break;
+      default: path = '/';
+    }
+    try { navigate(path); } catch {}
+  };
+
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col">
       {/* Header */}
       <div className="grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
         <div />
         <div className="grid" style={{ gridTemplateColumns: `repeat(${normDays.length}, minmax(0, 1fr))` }}>
           {normDays.map((d) => (
-            <div key={d.toISOString()} className="sticky top-0 z-10 border-b border-gray-200 bg-white py-2 text-center">
+            <div key={d.toISOString()} className="border-b border-gray-200 bg-white py-2 text-center">
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{format(d, 'EEE')}</div>
               <div className="text-sm font-semibold text-gray-900">{format(d, 'MMM d')}</div>
             </div>
@@ -133,8 +159,8 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
         </div>
       </div>
 
-      {/* Body */}
-      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr]">
+      {/* Body (scrollable) */}
+      <div className="relative grid grid-cols-[64px_1fr] md:grid-cols-[72px_1fr] flex-1 overflow-auto max-h-[70vh] pb-16">
         {/* Time column */}
         <div className="relative bg-white">
           <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 64px)" }} />
@@ -182,9 +208,10 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                   return (
                     <div
                       key={ev.id}
-                      className={cn('absolute z-10 overflow-hidden rounded-md border p-1 text-xs shadow-sm', color)}
+                      className={cn('absolute z-10 overflow-hidden rounded-md border p-1 text-xs shadow-sm cursor-pointer', color)}
                       style={{ top: `${top}%`, height: heightCalc, left, width }}
                       title={ev.title}
+                      onClick={() => openEventModal(ev)}
                     >
                       <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis">
                         <span className={cn('mr-1 inline-block rounded px-1 py-[1px] text-[10px] font-semibold capitalize', chip)} title={ev.entityType || undefined}>
@@ -200,6 +227,45 @@ export const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
           })}
         </div>
       </div>
+
+          <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
+        <DialogContent className="max-w-md p-0">
+          <DialogTitle className="sr-only">Follow Up</DialogTitle>
+          <div className="flex flex-col">
+            <div className="px-4 py-3 bg-[#223E7D] text-white flex items-center">
+              <div className="text-lg font-semibold">Follow Up{selectedEvent?.entityType ? ` (${String(selectedEvent.entityType).charAt(0).toUpperCase() + String(selectedEvent.entityType).slice(1)})` : ''}</div>
+            </div>
+            <div className="p-4 bg-white">
+              {selectedEvent && (
+                <div className="space-y-4">
+                  <div className="rounded-md border p-3 bg-gray-50">
+                    <div className="text-sm font-semibold mb-2">Schedule</div>
+                    <div className="flex justify-between text-sm">
+                      <div>
+                        <div className="font-medium text-gray-700">Date</div>
+                        <div className="text-muted-foreground">{format(selectedEvent.start, 'EEE - MMM d, yyyy')}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium text-gray-700">Time</div>
+                        <div>{format(selectedEvent.start, 'hh:mm a')}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-semibold">Notes</div>
+                    <div className="mt-1 p-3 rounded border bg-white text-sm text-gray-700">{selectedEvent.comments || '—'}</div>
+                  </div>
+
+                  <div className="flex justify-end mt-2">
+                    <button onClick={() => handleOpenRecord(selectedEvent)} className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm">Open record</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

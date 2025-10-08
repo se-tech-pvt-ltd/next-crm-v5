@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, UserPlus, GraduationCap, Megaphone, CalendarDays } from 'lucide-react';
+import { Search, Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
@@ -11,13 +11,14 @@ import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
 import { UpdatesModal } from './updates-modal';
-import { CalendarModal } from './calendar-modal';
-import { AdmissionDetailsModal } from './admission-details-modal-new';
-import { StudentProfileModal } from './student-profile-modal-new';
+import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
+import * as NotificationsService from '@/services/notifications';
 import type { Admission, Application } from '@/lib/types';
-import { useLocation, useRoute } from 'wouter';
+import { useLocation } from 'wouter';
+import { formatDistanceToNow } from 'date-fns';
 
 interface HeaderProps {
   title: string;
@@ -41,7 +42,24 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [, navigate] = useLocation();
-  const [isCalendarRoute] = useRoute('/calendar');
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const pendingCount = notifications.length;
+
+  const fetchPending = React.useCallback(async () => {
+    try {
+      const data = await NotificationsService.fetchPendingNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (err) {
+      // ignore errors silently
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchPending();
+    const id = setInterval(fetchPending, 30000);
+    return () => clearInterval(id);
+  }, [fetchPending]);
 
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -199,43 +217,47 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               </Badge>
             </Button>
 
-            {/* Calendar */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50"
-              aria-label="Open calendar"
-              onClick={() => navigate('/calendar')}
-            >
-              <CalendarDays size={18} aria-hidden="true" />
-            </Button>
 
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Open notifications" aria-haspopup="menu">
                   <Bell size={18} aria-hidden="true" />
-                  <Badge aria-label="3 unread notifications" className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
-                    3
+                  <Badge aria-label={`${pendingCount} unread notifications`} className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
+                    {pendingCount}
                   </Badge>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <div className="p-3">
                   <h4 className="font-medium text-sm mb-2">Notifications</h4>
-                  <div className="space-y-2">
-                    <div className="p-2 bg-blue-50 rounded-md">
-                      <p className="text-xs text-blue-800">New lead assigned: Emma Thompson</p>
-                      <p className="text-xs text-gray-500">2 minutes ago</p>
-                    </div>
-                    <div className="p-2 bg-green-50 rounded-md">
-                      <p className="text-xs text-green-800">Application approved: University of Toronto</p>
-                      <p className="text-xs text-gray-500">1 hour ago</p>
-                    </div>
-                    <div className="p-2 bg-orange-50 rounded-md">
-                      <p className="text-xs text-orange-800">Visa status update required</p>
-                      <p className="text-xs text-gray-500">3 hours ago</p>
-                    </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="text-sm text-gray-500">No new notifications</div>
+                    ) : (
+                      notifications.map((n) => {
+                        const title = n.subject || (n.content ? String(n.content).split('\n')[0] : 'Notification');
+                        const contentSnippet = n.content ? String(n.content).slice(0, 200) : '';
+                        const time = n.createdAt ? formatDistanceToNow(new Date(n.createdAt)) + ' ago' : '';
+                        const isPending = String(n.status).toLowerCase() === 'pending';
+                        return (
+                          <div key={n.id} className={`p-2 rounded-md ${isPending ? 'bg-yellow-50' : 'bg-white'} flex justify-between items-start`}>
+                            <div className="flex-1">
+                              <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'} font-medium`}>{title}</p>
+                              <p className="text-xs text-gray-500 mt-1">{contentSnippet}</p>
+                              <p className="text-xs text-gray-400 mt-1">{time}</p>
+                            </div>
+                            <div className="ml-3">
+                              {isPending ? (
+                                <Badge className="bg-yellow-200 text-yellow-800 text-xs">Unread</Badge>
+                              ) : (
+                                <Badge className="bg-green-100 text-green-800 text-xs">Read</Badge>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </DropdownMenuContent>
@@ -289,7 +311,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
         studentId={selectedStudentId}
       />
 
-      <CalendarModal open={Boolean(isCalendarRoute)} onOpenChange={(open) => navigate(open ? '/calendar' : '/')} />
       <UpdatesModal open={isUpdatesOpen} onOpenChange={setIsUpdatesOpen} />
     </>
   );

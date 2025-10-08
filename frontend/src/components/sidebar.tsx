@@ -103,6 +103,7 @@ export function Sidebar() {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
+    { path: '/calendar', label: 'My Calendar', icon: Calendar, count: undefined },
     { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
     { path: '/events', label: 'Event', icon: Calendar, count: Array.isArray(eventsData) ? eventsData.length : 0, countColor: 'bg-primary' },
     { path: '/leads', label: 'Leads', icon: Users, count: newLeadsCount, countColor: 'bg-emerald-500' },

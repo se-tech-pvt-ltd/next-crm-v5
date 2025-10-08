@@ -30,12 +30,22 @@ interface ActivityTrackerProps {
   canAdd?: boolean;
 }
 
-const ACTIVITY_TYPES = [
-  { value: 'comment', label: 'Comment', icon: MessageSquare },
-  { value: 'note', label: 'Note', icon: FileText },
-  { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
-  { value: 'call', label: 'Call', icon: UserIcon },
-];
+const getActivityTypes = (entityType?: string) => {
+  const base = [
+    { value: 'comment', label: 'Comment', icon: MessageSquare },
+    { value: 'note', label: 'Note', icon: FileText },
+    { value: 'call', label: 'Call', icon: UserIcon },
+  ];
+  const t = (entityType || '').toLowerCase();
+  if (t === 'lead') {
+    return [
+      ...base.slice(0, 2),
+      { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
+      ...base.slice(2),
+    ];
+  }
+  return base;
+};
 
 export function ActivityTracker({ entityType, entityId, entityName, initialInfo, initialInfoDate, initialInfoUserName, canAdd = true }: ActivityTrackerProps) {
   const [newActivity, setNewActivity] = useState("");
@@ -123,6 +133,14 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     window.addEventListener('open-activity-composer', handler as EventListener);
     return () => window.removeEventListener('open-activity-composer', handler as EventListener);
   }, [entityType, entityId]);
+
+  // Ensure follow_up type isn't selected for non-lead entities
+  useEffect(() => {
+    if ((activityType === 'follow_up' || activityType === 'follow-up') && String((entityType || '').toLowerCase()) !== 'lead') {
+      setActivityType('comment');
+      setFollowUpDateTimeValue('');
+    }
+  }, [entityType]);
 
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
@@ -581,7 +599,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                       <SelectValue placeholder="Select activity type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ACTIVITY_TYPES.map((type) => {
+                      {getActivityTypes(entityType).map((type) => {
                         const IconComponent = type.icon;
                         return (
                           <SelectItem key={type.value} value={type.value}>
