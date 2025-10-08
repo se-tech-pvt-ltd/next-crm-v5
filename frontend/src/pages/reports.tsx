@@ -301,6 +301,29 @@ export default function Reports() {
               <Card className="lg:col-span-2"><CardHeader><CardTitle>By Counsellor</CardTitle></CardHeader><CardContent className="h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={groupCount(admissions,(ad:any)=>ad.counsellorId || ad.counselorId)}><XAxis dataKey="name" interval={0} angle={-15} textAnchor="end" height={60} /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="value" fill="#059669" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer></CardContent></Card>
             </div>
           </TabsContent>
+
+          {/* Partners */}
+          <TabsContent value="partners">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Total Partners</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{Array.from(new Set(applications.map((a:any)=>a.channelPartner).filter(Boolean))).length}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Applications via Partners</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{applications.filter((a:any)=>!!a.channelPartner).length}</div></CardContent></Card>
+            </div>
+            <div className="grid grid-cols-1 gap-6 mt-6">
+              <Card>
+                <CardHeader><CardTitle>Applications by Partner</CardTitle></CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={groupCount(applications.filter((a:any)=>!!a.channelPartner),(a:any)=>a.channelPartner)}>
+                      <XAxis dataKey="name" interval={0} angle={-15} textAnchor="end" height={60} />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#0ea5e9" radius={[4,4,0,0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>
