@@ -223,8 +223,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Open notifications" aria-haspopup="menu">
                   <Bell size={18} aria-hidden="true" />
-                  <Badge aria-label="3 unread notifications" className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
-                    3
+                  <Badge aria-label={`${pendingCount} unread notifications`} className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
+                    {pendingCount}
                   </Badge>
                 </Button>
               </DropdownMenuTrigger>
