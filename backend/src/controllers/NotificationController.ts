@@ -3,6 +3,10 @@ import { NotificationService } from '../services/NotificationService.js';
 import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
 
+import { db } from '../config/database.js';
+import { notifications } from '../shared/schema.js';
+import { eq, and, desc } from 'drizzle-orm';
+
 export class NotificationController {
   static async forgotPassword(req: Request, res: Response) {
     try {
@@ -53,6 +57,16 @@ export class NotificationController {
     } catch (error) {
       console.error('[NotificationController] forgotPassword error:', error);
       return res.status(500).json({ message: 'Failed to queue notification' });
+    }
+  }
+
+  static async pending(req: Request, res: Response) {
+    try {
+      const rows = await db.select().from(notifications).where(and(eq(notifications.channel, 'notification'), eq(notifications.status, 'pending'))).orderBy(desc(notifications.createdAt));
+      return res.status(200).json(rows);
+    } catch (error) {
+      console.error('[NotificationController] pending error:', error);
+      return res.status(500).json({ message: 'Failed to fetch notifications' });
     }
   }
 }
