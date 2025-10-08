@@ -11,12 +11,14 @@ import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import { AddAdmissionModal } from './add-admission-modal';
 import { UpdatesModal } from './updates-modal';
-import { AdmissionDetailsModal } from './admission-details-modal-new';
-import { StudentProfileModal } from './student-profile-modal-new';
+import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
+import * as NotificationsService from '@/services/notifications';
 import type { Admission, Application } from '@/lib/types';
 import { useLocation } from 'wouter';
+import { formatDistanceToNow } from 'date-fns';
 
 interface HeaderProps {
   title: string;
