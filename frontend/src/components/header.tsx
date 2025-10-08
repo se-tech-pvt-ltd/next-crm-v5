@@ -43,6 +43,24 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [, navigate] = useLocation();
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const pendingCount = notifications.length;
+
+  const fetchPending = React.useCallback(async () => {
+    try {
+      const data = await NotificationsService.fetchPendingNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (err) {
+      // ignore errors silently
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchPending();
+    const id = setInterval(fetchPending, 30000);
+    return () => clearInterval(id);
+  }, [fetchPending]);
+
   React.useEffect(() => {
     const handler = (e: any) => {
       const d = e?.detail || {};
