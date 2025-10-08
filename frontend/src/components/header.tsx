@@ -236,17 +236,18 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                       <div className="text-sm text-gray-500">No new notifications</div>
                     ) : (
                       notifications.map((n) => {
-                        const vars = n.variables || {};
-                        const title = vars.message || vars.lead_name || n.templateId || 'Notification';
+                        const title = n.subject || (n.content ? String(n.content).split('\n')[0] : 'Notification');
+                        const contentSnippet = n.content ? String(n.content).slice(0, 200) : '';
                         const time = n.createdAt ? formatDistanceToNow(new Date(n.createdAt)) + ' ago' : '';
                         const isPending = String(n.status).toLowerCase() === 'pending';
                         return (
                           <div key={n.id} className={`p-2 rounded-md ${isPending ? 'bg-yellow-50' : 'bg-white'} flex justify-between items-start`}>
-                            <div>
-                              <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'}`}>{title}</p>
-                              <p className="text-xs text-gray-500">{time}</p>
+                            <div className="flex-1">
+                              <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'} font-medium`}>{title}</p>
+                              <p className="text-xs text-gray-500 mt-1">{contentSnippet}</p>
+                              <p className="text-xs text-gray-400 mt-1">{time}</p>
                             </div>
-                            <div>
+                            <div className="ml-3">
                               {isPending ? (
                                 <Badge className="bg-yellow-200 text-yellow-800 text-xs">Pending</Badge>
                               ) : (
