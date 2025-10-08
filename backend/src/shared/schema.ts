@@ -43,6 +43,19 @@ export const usersResetTokens = mysqlTable("users_reset_token", {
   updatedOn: timestamp("updated_on").defaultNow().notNull(),
 });
 
+export const templates = mysqlTable("templates", {
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull().default(""),
+  template: longtext("template").notNull(),
+  redirectUrl: varchar("redirect_url", { length: 255 }),
+  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  updatedBy: varchar("updated_by", { length: 255 }).notNull(),
+  createdOn: datetime("created_on").notNull().defaultNow(),
+  updatedOn: datetime("updated_on").notNull().defaultNow(),
+});
+
 export const notifications = mysqlTable("notifications", {
   id: char("id", { length: 36 }).primaryKey().notNull(),
   entityType: varchar("entity_type", { length: 50 }).notNull(),
