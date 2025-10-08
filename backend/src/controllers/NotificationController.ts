@@ -62,6 +62,7 @@ export class NotificationController {
 
   static async pending(req: Request, res: Response) {
     try {
+      const { templates } = await import('../shared/schema.js');
       const rows = await db
         .select({
           content: templates.template,
