@@ -4,6 +4,19 @@ import { AttachmentModel } from "../models/Attachment.js";
 import { FollowUpModel } from "../models/FollowUp.js";
 import { UserModel } from "../models/User.js";
 import { type Activity, type InsertActivity } from "../shared/schema.js";
+import { connection } from "../config/database.js";
+
+export interface ActivitySummaryParams {
+  from?: Date | null;
+  to?: Date | null;
+  branchId?: string | null;
+  counsellorId?: string | null;
+}
+
+export interface ActivitySummaryResponse {
+  total: number;
+  byBranch: { branchId: string; count: number }[];
+}
 
 export class ActivityService {
   static async getActivities(entityType: string, entityId: string | number): Promise<Activity[]> {
@@ -143,5 +156,40 @@ export class ActivityService {
     toEntityId: string | number
   ): Promise<void> {
     return await ActivityModel.transferActivities(fromEntityType, fromEntityId, toEntityType, toEntityId);
+  }
+
+  static async getSummary(params: ActivitySummaryParams): Promise<ActivitySummaryResponse> {
+    const from = params.from ?? null;
+    const to = params.to ?? null;
+    const branchId = params.branchId ?? null;
+    const counsellorId = params.counsellorId ?? null;
+
+    const whereParts: string[] = [];
+    const values: any[] = [];
+
+    if (from) { whereParts.push('a.created_at >= ?'); values.push(from); }
+    if (to) { whereParts.push('a.created_at <= ?'); values.push(to); }
+    if (counsellorId) { whereParts.push('a.user_id = ?'); values.push(String(counsellorId)); }
+    if (branchId) { whereParts.push('a.user_id IN (SELECT be.user_id FROM branch_emps be WHERE be.branch_id = ?)'); values.push(String(branchId)); }
+
+    const whereClause = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
+
+    // Total
+    const [totalRows] = await connection.query<any[]>(`SELECT COUNT(*) as cnt FROM activities a ${whereClause}`, values);
+    const total = Number((totalRows as any)[0]?.cnt || 0);
+
+    // By Branch (derived from user branch mapping)
+    const [branchRows] = await connection.query<any[]>(
+      `SELECT be.branch_id AS branchId, COUNT(*) AS cnt
+       FROM activities a
+       JOIN branch_emps be ON be.user_id = a.user_id
+       ${whereClause ? whereClause : ''}
+       GROUP BY be.branch_id
+       ORDER BY cnt DESC`,
+      values,
+    );
+    const byBranch = (branchRows as any[]).map((r) => ({ branchId: String(r.branchId), count: Number(r.cnt) }));
+
+    return { total, byBranch };
   }
 }
