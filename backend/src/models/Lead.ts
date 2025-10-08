@@ -1,4 +1,4 @@
-import { eq, desc, and, not, exists, count, sql } from "drizzle-orm";
+import { eq, desc, and, not, exists, count, or, type SQL } from "drizzle-orm";
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
@@ -12,6 +12,20 @@ interface PaginationOptions {
 interface PaginatedLeadsResult {
   leads: Lead[];
   total: number;
+}
+
+export interface LeadStats {
+  total: number;
+  active: number;
+  lost: number;
+  converted: number;
+}
+
+interface LeadScope {
+  counselorId?: string;
+  admissionOfficerId?: string;
+  branchId?: string;
+  regionId?: string;
 }
 
 export class LeadModel {
@@ -44,6 +58,85 @@ export class LeadModel {
     }
 
     return parsedLead;
+  }
+
+  private static buildScopeConditions(scope?: LeadScope): SQL<unknown>[] {
+    if (!scope) return [];
+    const conditions: SQL<unknown>[] = [];
+    if (scope.counselorId) {
+      conditions.push(eq(leads.counselorId, scope.counselorId));
+    }
+    if (scope.admissionOfficerId) {
+      conditions.push(eq(leads.admissionOfficerId, scope.admissionOfficerId));
+    }
+    if (scope.branchId) {
+      conditions.push(eq(leads.branchId, scope.branchId));
+    }
+    if (scope.regionId) {
+      conditions.push(eq(leads.regionId, scope.regionId));
+    }
+    return conditions;
+  }
+
+  private static combineConditions(conditions: SQL<unknown>[]): SQL<unknown> | undefined {
+    if (conditions.length === 0) return undefined;
+    if (conditions.length === 1) return conditions[0];
+    return and(...conditions);
+  }
+
+  private static countWithConditions(scopeConditions: SQL<unknown>[], extraConditions: SQL<unknown>[] = []) {
+    const whereClause = this.combineConditions([...scopeConditions, ...extraConditions]);
+    const query = db.select({ count: count() }).from(leads);
+    return whereClause ? query.where(whereClause) : query;
+  }
+
+  static async getStats(scope?: LeadScope): Promise<LeadStats> {
+    const scopeConditions = this.buildScopeConditions(scope);
+
+    const lostCondition = or(
+      eq(leads.isLost, 1),
+      eq(leads.status, 'lost')
+    );
+
+    const convertedCondition = or(
+      eq(leads.isConverted, 1),
+      eq(leads.status, 'converted'),
+      exists(
+        db
+          .select({ id: students.id })
+          .from(students)
+          .where(eq(students.leadId, leads.id))
+      )
+    );
+
+    const [totalRows, lostRows, convertedRows, activeRows] = await Promise.all([
+      this.countWithConditions(scopeConditions),
+      this.countWithConditions(scopeConditions, [lostCondition]),
+      this.countWithConditions(scopeConditions, [convertedCondition]),
+      this.countWithConditions(scopeConditions, [not(lostCondition), not(convertedCondition)]),
+    ]);
+
+    const normalizeCount = (rows: Array<{ count: number | bigint | string }>): number => {
+      const raw = rows?.[0]?.count ?? 0;
+      if (typeof raw === 'bigint') return Number(raw);
+      return Number(raw) || 0;
+    };
+
+    const total = normalizeCount(totalRows);
+    const lost = normalizeCount(lostRows);
+    const converted = normalizeCount(convertedRows);
+    let active = normalizeCount(activeRows);
+
+    if (active > total) {
+      active = Math.max(total - lost - converted, 0);
+    }
+
+    return {
+      total,
+      lost,
+      converted,
+      active,
+    };
   }
 
   static async findById(id: string): Promise<Lead | undefined> {
