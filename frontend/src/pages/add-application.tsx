@@ -405,7 +405,7 @@ export default function AddApplication() {
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" /> Country <span className="text-red-600">*</span></FormLabel>
                         <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); setSelectedUniversityId(null); form.setValue('university',''); form.setValue('universityId',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('courseType',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -426,7 +426,7 @@ export default function AddApplication() {
                     name="university"
                     render={() => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><School className="w-4 h-4" /> University *</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><School className="w-4 h-4" /> University <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select disabled={!selectedCountry} value={selectedUniversityId || ''} onValueChange={(val) => { setSelectedUniversityId(val || null); const uni = (uniSummaries || []).find((u: any) => String(u.id)===String(val)); form.setValue('university', uni ? (uni.name||'') : ''); form.setValue('universityId', val || ''); form.setValue('courseType',''); form.setValue('program',''); form.setValue('courseId',''); form.setValue('intake',''); form.setValue('intakeId',''); }}>
                             <FormControl>
@@ -449,7 +449,7 @@ export default function AddApplication() {
                     name="courseType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Course Type</FormLabel>
+                        <FormLabel>Course Type <span className="text-red-600">*</span></FormLabel>
                         <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); form.setValue('program',''); form.setValue('courseId',''); }} disabled={!selectedUniversityId}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -470,7 +470,7 @@ export default function AddApplication() {
                     name="program"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Program *</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Program <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select value={field.value || ''} onValueChange={(val) => { field.onChange(val); try { const c = filteredCourses.find((x:any) => String(x.name)===String(val)); form.setValue('courseId', c?.id ? String(c.id) : ''); } catch { form.setValue('courseId',''); } }} disabled={!selectedUniversityId || !selectedCourseType}>
                             <FormControl>
@@ -493,7 +493,7 @@ export default function AddApplication() {
                     name="appStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Application Status</FormLabel>
+                        <FormLabel>Application Status <span className="text-red-600">*</span></FormLabel>
                         <Select value={field.value || 'Open'} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -514,7 +514,7 @@ export default function AddApplication() {
                     name="caseStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Case Status</FormLabel>
+                        <FormLabel>Case Status <span className="text-red-600">*</span></FormLabel>
                         <Select value={field.value || 'Raw'} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -537,7 +537,7 @@ export default function AddApplication() {
                     name="channelPartner"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Channel Partner</FormLabel>
+                        <FormLabel>Channel Partner <span className="text-red-600">*</span></FormLabel>
                         <Select value={field.value || ''} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -568,7 +568,7 @@ export default function AddApplication() {
                     name="counsellorId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Counsellor</FormLabel>
+                        <FormLabel>Counsellor <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -591,7 +591,7 @@ export default function AddApplication() {
                     name="admissionOfficerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Admission Officer</FormLabel>
+                        <FormLabel>Admission Officer <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -623,7 +623,7 @@ export default function AddApplication() {
                     name="intake"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Intake</FormLabel>
+                        <FormLabel>Intake <span className="text-red-600">*</span></FormLabel>
                         <Select value={field.value || ''} disabled={!selectedUniversityId} onValueChange={(val) => { field.onChange(val); try { const withIds = ((uniDetail?.admissionRequirements as any)?.intakesWithIds || []) as any[]; const match = Array.isArray(withIds) ? withIds.find((i:any) => String(i.intakeLabel)===String(val)) : null; form.setValue('intakeId', match?.id ? String(match.id) : ''); } catch { form.setValue('intakeId',''); } }}>
                           <FormControl>
                             <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
@@ -650,7 +650,7 @@ export default function AddApplication() {
                     name="googleDriveLink"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Google Drive Link</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Google Drive Link <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="https://drive.google.com/..." className="transition-all focus:ring-2 focus:ring-primary/20" {...field} />
                         </FormControl>
