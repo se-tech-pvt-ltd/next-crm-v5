@@ -48,6 +48,8 @@ import {
   User as UserIcon,
   Globe
 } from 'lucide-react';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 interface StudentProfileModalProps {
   open: boolean;
@@ -308,8 +310,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   useEffect(() => {
     if (open && startInEdit) {
       if (canEditStudent) setIsEditing(true); else setIsEditing(false);
+      return;
+    }
+    if (!open) {
+      setIsEditing(false);
     }
   }, [open, startInEdit, studentId, canEditStudent]);
+
+  useEffect(() => {
+    if (!student) return;
+    setIsEditing(Boolean(startInEdit));
+  }, [student?.id, startInEdit]);
 
   // Build status sequence from dropdown API (ordered by sequence)
   const statusSequence = useMemo<string[]>(() => {
@@ -631,7 +642,19 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                       <Phone className="w-4 h-4" />
                       <span>Phone Number</span>
                     </Label>
-                    <Input id="phone" type="tel" value={isEditing ? (editData.phone || '') : (student?.phone || '')} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} disabled={!isEditing} className="h-7 text-[11px] transition-all focus:ring-2 focus:ring-primary/20" />
+                    <div className="relative phone-compact">
+                      <PhoneInput
+                        value={isEditing ? (editData.phone || '') : (student?.phone || '')}
+                        onChange={(val) => setEditData({ ...editData, phone: val })}
+                        defaultCountry="pk"
+                        className="w-full"
+                        inputClassName="w-full h-7 text-sm"
+                        buttonClassName="h-7"
+                        inputStyle={{ height: '28px' }}
+                        buttonStyle={{ height: '28px' }}
+                        disabled={!isEditing}
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">

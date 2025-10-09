@@ -217,25 +217,25 @@ export const insertStudentSchema = z.object({
 });
 
 export const insertApplicationSchema = z.object({
-  studentId: z.string(),
+  studentId: z.string().min(1, "Student is required"),
   university: z.string().min(1, "University is required"),
-  universityId: z.string().optional(),
-  program: z.string().optional(),
-  courseId: z.string().optional(),
-  courseType: z.string().optional(),
-  appStatus: z.string().optional(),
-  caseStatus: z.string().optional(),
-  country: z.string().optional(),
-  channelPartner: z.string().optional(),
-  intake: z.string().optional(),
-  intakeId: z.string().optional(),
-  googleDriveLink: z.preprocess((v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v), z.string().url().optional()),
-  notes: z.string().optional(),
-  // Access fields (optional)
-  branchId: z.string().optional(),
-  regionId: z.string().optional(),
-  counsellorId: z.string().optional(),
-  admissionOfficerId: z.string().optional(),
+  universityId: z.string().min(1, "University ID is required"),
+  program: z.string().min(1, "Program is required"),
+  courseId: z.string().min(1, "Course is required"),
+  courseType: z.string().min(1, "Course type is required"),
+  appStatus: z.string().min(1, "Application status is required"),
+  caseStatus: z.string().min(1, "Case status is required"),
+  country: z.string().min(1, "Country is required"),
+  channelPartner: z.string().min(1, "Channel partner is required"),
+  intake: z.string().min(1, "Intake is required"),
+  intakeId: z.string().min(1, "Intake ID is required"),
+  googleDriveLink: z.string().min(1, "Google Drive link is required").url("Invalid URL for Google Drive link"),
+  notes: z.string().min(1, "Notes are required"),
+  // Access fields (required)
+  branchId: z.string().min(1, "Branch is required"),
+  regionId: z.string().min(1, "Region is required"),
+  counsellorId: z.string().min(1, "Counsellor is required"),
+  admissionOfficerId: z.string().min(1, "Admission officer is required"),
 });
 
 export const insertAdmissionSchema = z.object({

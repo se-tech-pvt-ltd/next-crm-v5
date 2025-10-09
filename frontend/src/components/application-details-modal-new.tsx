@@ -83,8 +83,17 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   useEffect(() => {
     if (open && startInEdit) {
       if (canEditApplication) setIsEditing(true); else setIsEditing(false);
+      return;
+    }
+    if (!open) {
+      setIsEditing(false);
     }
   }, [open, startInEdit, canEditApplication]);
+
+  useEffect(() => {
+    if (!currentApp) return;
+    setIsEditing(Boolean(startInEdit));
+  }, [currentApp?.id, startInEdit]);
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],

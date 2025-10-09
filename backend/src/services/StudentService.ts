@@ -63,6 +63,8 @@ export class StudentService {
       rows = await StudentModel.findByCounselor(userId);
     } else if (userRole === 'admission_officer' && userId) {
       rows = await StudentModel.findByAdmissionOfficer(userId);
+    } else if (userRole === 'partner' && userId) {
+      rows = await db.select().from(students).where(eq(students.partner, userId)).orderBy(desc(students.createdAt));
     } else if (userRole === 'branch_manager') {
       if (branchId) {
         rows = await db.select().from(students).where(eq(students.branchId, branchId)).orderBy(desc(students.createdAt));
@@ -100,6 +102,11 @@ export class StudentService {
       return undefined;
     }
     if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
+      return undefined;
+    }
+
+    // Partner scoping
+    if (userRole === 'partner' && userId && (student as any).partner !== userId) {
       return undefined;
     }
 
@@ -179,6 +186,13 @@ export class StudentService {
       rows = await db.select().from(students).where(
         and(
           eq(students.admissionOfficerId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'partner' && userId) {
+      rows = await db.select().from(students).where(
+        and(
+          eq(students.partner, userId),
           searchConditions
         )
       );

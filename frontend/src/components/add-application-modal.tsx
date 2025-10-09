@@ -119,6 +119,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
+    mode: 'onChange',
     defaultValues: {
       studentId: studentId || '',
       university: '',
@@ -381,7 +382,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               <Button
                 type="button"
                 onClick={() => form.handleSubmit(onSubmit)()}
-                disabled={createApplicationMutation.isPending}
+                disabled={createApplicationMutation.isPending || !form.formState.isValid}
                 className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
               >
                 {createApplicationMutation.isPending ? 'Creating…' : 'Create'}
@@ -442,7 +443,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country</FormLabel>
+                        <FormLabel>Country <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={(val) => {
@@ -523,7 +524,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="courseType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Course Type</FormLabel>
+                        <FormLabel>Course Type <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select
                             disabled={!selectedUniversityId}
@@ -605,7 +606,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="intake"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Intake</FormLabel>
+                        <FormLabel>Intake <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select
                             disabled={!selectedUniversityId}
@@ -652,7 +653,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="channelPartner"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Channel Partner</FormLabel>
+                        <FormLabel>Channel Partner <span className="text-red-600">*</span></FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -683,7 +684,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="counsellorId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Counsellor</FormLabel>
+                        <FormLabel>Counsellor <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <FormControl>
@@ -708,7 +709,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="admissionOfficerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Admission Officer</FormLabel>
+                        <FormLabel>Admission Officer <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Select value={field.value || ''} onValueChange={field.onChange}>
                             <FormControl>
@@ -740,7 +741,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="appStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Application Status</FormLabel>
+                        <FormLabel>Application Status <span className="text-red-600">*</span></FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
@@ -763,7 +764,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="caseStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Case Status</FormLabel>
+                        <FormLabel>Case Status <span className="text-red-600">*</span></FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger>
@@ -787,7 +788,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="googleDriveLink"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Google Drive Link</FormLabel>
+                        <FormLabel>Google Drive Link <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="https://drive.google.com/..." {...field} />
                         </FormControl>
@@ -808,6 +809,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                     name="notes"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Notes <span className="text-red-600">*</span></FormLabel>
                         <FormControl>
                           <Textarea rows={4} placeholder="Any additional notes..." {...field} />
                         </FormControl>

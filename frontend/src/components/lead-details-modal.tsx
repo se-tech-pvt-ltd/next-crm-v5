@@ -78,8 +78,17 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
   useEffect(() => {
     if (open && startInEdit) {
       setIsEditing(true);
+      return;
+    }
+    if (!open) {
+      setIsEditing(false);
     }
   }, [open, startInEdit]);
+
+  useEffect(() => {
+    if (!lead) return;
+    setIsEditing(Boolean(startInEdit));
+  }, [lead?.id, startInEdit]);
 
   const parseFieldValue = (value: any): string[] => {
     if (!value) return [];

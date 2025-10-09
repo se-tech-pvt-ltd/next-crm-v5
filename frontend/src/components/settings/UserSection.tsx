@@ -18,7 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination } from '@/components/ui/pagination';
 import { queryClient } from '@/lib/queryClient';
 
-export default function UserSection({ toast }: { toast: (v: any) => void }) {
+export default function UserSection({ toast, isPartnerView }: { toast: (v: any) => void; isPartnerView?: boolean }) {
   const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
   const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30000 });
 

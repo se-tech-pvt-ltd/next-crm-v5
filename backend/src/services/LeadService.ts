@@ -27,6 +27,11 @@ export class LeadService {
       return await LeadModel.findByAdmissionOfficer(userId, pagination);
     }
 
+    // Partners see only leads attached to their partner id
+    if (userRole === 'partner' && userId) {
+      return await LeadModel.findByPartner(userId, pagination);
+    }
+
     if (userRole === 'branch_manager') {
       if (branchId) {
         return await LeadModel.findByBranch(branchId, pagination);
@@ -56,6 +61,10 @@ export class LeadService {
     }
     if (userRole === 'admission_officer' && userId) {
       return await LeadModel.getStats({ admissionOfficerId: userId });
+    }
+
+    if (userRole === 'partner' && userId) {
+      return await LeadModel.getStats({ partner: userId });
     }
 
     if (userRole === 'branch_manager') {
@@ -89,6 +98,11 @@ export class LeadService {
       return undefined;
     }
     if (userRole === 'admission_officer' && userId && (lead as any).admissionOfficerId !== userId) {
+      return undefined;
+    }
+
+    // Partner scoping
+    if (userRole === 'partner' && userId && (lead as any).partner !== userId) {
       return undefined;
     }
 
@@ -402,6 +416,13 @@ export class LeadService {
       results = await db.select().from(leads).where(
         and(
           eq(leads.admissionOfficerId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'partner' && userId) {
+      results = await db.select().from(leads).where(
+        and(
+          eq(leads.partner, userId),
           searchConditions
         )
       );

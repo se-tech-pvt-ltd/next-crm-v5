@@ -22,6 +22,11 @@ export class EventService {
       return await db.select().from(events).where(eq(events.admissionOfficerId, userId)).orderBy(desc(events.createdAt));
     }
 
+    // Partners see only events tied to their partner id
+    if (userRole === 'partner' && userId) {
+      return await db.select().from(events).where(eq(events.partner, userId)).orderBy(desc(events.createdAt));
+    }
+
     // Branch managers see events for their branch
     if (userRole === 'branch_manager') {
       if (branchId) {
@@ -61,6 +66,11 @@ export class EventService {
       return undefined;
     }
     if (userRole === 'admission_officer' && userId && (event as any).admissionOfficerId !== userId) {
+      return undefined;
+    }
+
+    // Partner scoping
+    if (userRole === 'partner' && userId && (event as any).partner !== userId) {
       return undefined;
     }
 
