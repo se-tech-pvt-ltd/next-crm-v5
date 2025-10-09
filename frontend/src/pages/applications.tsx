@@ -542,21 +542,7 @@ export default function Applications() {
         onOpenChange={(open) => {
           setIsDetailsOpen(open);
           if (!open) {
-            if (matchEdit && editParams?.id) {
-              setLocation(`/applications/${editParams.id}`);
-            } else {
-              // If user navigated to student details (or other route) while modal was open, don't override that navigation
-              try {
-                const path = typeof window !== 'undefined' ? window.location.pathname : location;
-                if (!path || !path.startsWith('/students/')) {
-                  setLocation('/applications');
-                }
-              } catch {
-                if (!location || !location.startsWith('/students/')) {
-                  setLocation('/applications');
-                }
-              }
-            }
+            try { setLocation('/applications'); } catch {}
             setSelectedApplication(null);
           }
         }}
