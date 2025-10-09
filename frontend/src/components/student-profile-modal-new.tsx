@@ -310,8 +310,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   useEffect(() => {
     if (open && startInEdit) {
       if (canEditStudent) setIsEditing(true); else setIsEditing(false);
+      return;
+    }
+    if (!open) {
+      setIsEditing(false);
     }
   }, [open, startInEdit, studentId, canEditStudent]);
+
+  useEffect(() => {
+    if (!student) return;
+    setIsEditing(Boolean(startInEdit));
+  }, [student?.id, startInEdit]);
 
   // Build status sequence from dropdown API (ordered by sequence)
   const statusSequence = useMemo<string[]>(() => {
