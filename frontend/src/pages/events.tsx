@@ -324,7 +324,7 @@ export default function EventsPage() {
     try { setViewReg(null); } catch {}
 
     // set a short guard so route-driven handlers don't re-open the registration view while we're switching to the lead modal
-    try { setSkipOpenViewForLeadRoute(true); setTimeout(() => setSkipOpenViewForLeadRoute(false), 700); } catch {}
+    try { setSkipOpenViewForLeadRoute(true); setTimeout(() => setSkipOpenViewForLeadRoute(false), 1200); } catch {}
 
     // navigate to /lead route for this registration
     try {
@@ -2154,7 +2154,7 @@ export default function EventsPage() {
               try {
                 setSkipNavigateAfterLeadCreate(true);
                 setSkipOpenViewForLeadRoute(true);
-                setTimeout(() => { try { setSkipOpenViewForLeadRoute(false); } catch {} }, 700);
+                setTimeout(() => { try { setSkipOpenViewForLeadRoute(false); } catch {} }, 1200);
               } catch {}
 
               // Invalidate and refetch registrations so latest data is available
