@@ -474,43 +474,71 @@ export default function Leads() {
 
                 {/* Date Range Filter */}
                 <div className="flex items-center space-x-2">
-                  <Popover>
+                  {/* Controlled popover with native date input for From */}
+                  <Popover open={openFrom} onOpenChange={setOpenFrom}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
                         <Calendar className="w-3 h-3 mr-2" />
                         <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[320px] p-0" align="start" sideOffset={6}>
-                      <CalendarComponent
-                        mode="single"
-                        selected={dateFromFilter}
-                        onSelect={(date) => {
-                          setDateFromFilter(date);
-                          setCurrentPage(1); // Reset to first page when filter changes
-                        }}
-                        initialFocus
-                      />
+                    <PopoverContent className="w-[240px] p-3" align="start" sideOffset={6}>
+                      <div className="flex flex-col space-y-2">
+                        <input
+                          type="date"
+                          className="w-full rounded-md border border-input px-2 py-1 text-sm"
+                          value={dateFromFilter ? dateFromFilter.toISOString().slice(0, 10) : ""}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (!v) {
+                              setDateFromFilter(undefined);
+                              setCurrentPage(1);
+                              return;
+                            }
+                            const d = new Date(v + 'T00:00:00');
+                            setDateFromFilter(d);
+                            setCurrentPage(1);
+                            setOpenFrom(false);
+                          }}
+                        />
+                        <div className="flex justify-end">
+                          <Button variant="ghost" size="sm" onClick={() => { setDateFromFilter(undefined); setOpenFrom(false); }}>Clear</Button>
+                        </div>
+                      </div>
                     </PopoverContent>
                   </Popover>
 
-                  <Popover>
+                  {/* Controlled popover with native date input for To */}
+                  <Popover open={openTo} onOpenChange={setOpenTo}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
                         <Calendar className="w-3 h-3 mr-2" />
                         <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[320px] p-0" align="start" sideOffset={6}>
-                      <CalendarComponent
-                        mode="single"
-                        selected={dateToFilter}
-                        onSelect={(date) => {
-                          setDateToFilter(date);
-                          setCurrentPage(1); // Reset to first page when filter changes
-                        }}
-                        initialFocus
-                      />
+                    <PopoverContent className="w-[240px] p-3" align="start" sideOffset={6}>
+                      <div className="flex flex-col space-y-2">
+                        <input
+                          type="date"
+                          className="w-full rounded-md border border-input px-2 py-1 text-sm"
+                          value={dateToFilter ? dateToFilter.toISOString().slice(0, 10) : ""}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (!v) {
+                              setDateToFilter(undefined);
+                              setCurrentPage(1);
+                              return;
+                            }
+                            const d = new Date(v + 'T00:00:00');
+                            setDateToFilter(d);
+                            setCurrentPage(1);
+                            setOpenTo(false);
+                          }}
+                        />
+                        <div className="flex justify-end">
+                          <Button variant="ghost" size="sm" onClick={() => { setDateToFilter(undefined); setOpenTo(false); }}>Clear</Button>
+                        </div>
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
