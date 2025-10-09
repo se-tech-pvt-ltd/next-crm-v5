@@ -18,6 +18,8 @@ import { Lead } from '@/lib/types';
 import { Plus, UserPlus, Phone, Globe, Users, XCircle, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
+import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
