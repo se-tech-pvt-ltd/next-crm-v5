@@ -1248,7 +1248,7 @@ export default function EventsPage() {
   useEffect(() => {
     if (!pendingRegId && !pendingOpenLeadId) return;
     // if we're in a transient state where we are opening the AddLead modal via route, skip opening the view
-    if (skipOpenViewForLeadRoute) return;
+    if (skipOpenViewForLeadRoute || skipNavigateAfterLeadCreate) return;
 
     const list = (registrations || []) as any[];
     if (pendingRegId) {
