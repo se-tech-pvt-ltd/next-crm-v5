@@ -213,7 +213,14 @@ export class LeadService {
           const value = String(d.value ?? '').toLowerCase();
           return key === s.toLowerCase() || value === s.toLowerCase() || String(d.id) === s;
         });
-        return found ? (found.value || s) : s;
+        if (found) return String(found.value ?? s);
+        const pretty = s
+          .replace(/[_-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLowerCase()
+          .replace(/\b([a-z])/g, (_, ch) => ch.toUpperCase());
+        return pretty || s;
       };
 
       // Determine if this update marks the lead as lost and includes a lostReason so we can log a single combined activity
