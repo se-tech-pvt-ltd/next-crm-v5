@@ -26,6 +26,7 @@ interface LeadScope {
   admissionOfficerId?: string;
   branchId?: string;
   regionId?: string;
+  partner?: string;
 }
 
 export class LeadModel {
