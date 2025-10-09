@@ -63,6 +63,8 @@ export class StudentService {
       rows = await StudentModel.findByCounselor(userId);
     } else if (userRole === 'admission_officer' && userId) {
       rows = await StudentModel.findByAdmissionOfficer(userId);
+    } else if (userRole === 'partner' && userId) {
+      rows = await db.select().from(students).where(eq(students.partner, userId)).orderBy(desc(students.createdAt));
     } else if (userRole === 'branch_manager') {
       if (branchId) {
         rows = await db.select().from(students).where(eq(students.branchId, branchId)).orderBy(desc(students.createdAt));
