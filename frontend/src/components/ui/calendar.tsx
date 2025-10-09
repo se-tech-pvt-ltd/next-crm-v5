@@ -46,7 +46,6 @@ function Calendar({ selected, onSelect, showOutsideDays = true, className }: Cal
           onSelect && onSelect(date as Date | null);
         }}
         tileContent={null}
-        calendarType={'ISO 8601'}
         showNeighboringMonth={Boolean(showOutsideDays)}
       />
     </div>
