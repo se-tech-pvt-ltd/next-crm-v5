@@ -89,6 +89,8 @@ export default function Leads() {
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
   const [queryText, setQueryText] = useState('');
+  const [openFrom, setOpenFrom] = useState(false);
+  const [openTo, setOpenTo] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
