@@ -284,9 +284,10 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
           <Button
             type="button"
             onClick={() => {
+              try { setTempSaving(true); setTimeout(() => setTempSaving(false), 1000); } catch {}
               try { if (submitLeadForm) submitLeadForm(); else (document.getElementById('add-lead-form-submit') as HTMLButtonElement | null)?.click(); } catch {}
             }}
-            disabled={createLeadMutation.isPending}
+            disabled={createLeadMutation.isPending || tempSaving}
             className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
           >
             {createLeadMutation.isPending ? (
