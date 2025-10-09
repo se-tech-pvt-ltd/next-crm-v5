@@ -509,28 +509,19 @@ export default function Leads() {
                         <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[240px] p-3" align="start" sideOffset={6}>
-                      <div className="flex flex-col space-y-2">
-                        <input
-                          type="date"
-                          className="w-full rounded-md border border-input px-2 py-1 text-sm"
-                          value={dateToFilter ? dateToFilter.toISOString().slice(0, 10) : ""}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            if (!v) {
-                              setDateToFilter(undefined);
-                              setCurrentPage(1);
-                              return;
-                            }
-                            const d = new Date(v + 'T00:00:00');
-                            setDateToFilter(d);
+                    <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
+                      <div className="w-full overflow-hidden">
+                        <CalendarComponent
+                          mode="single"
+                          selected={dateToFilter}
+                          onSelect={(date) => {
+                            setDateToFilter(date);
                             setCurrentPage(1);
                             setOpenTo(false);
                           }}
+                          className="w-full"
+                          showOutsideDays={false}
                         />
-                        <div className="flex justify-end">
-                          <Button variant="ghost" size="sm" onClick={() => { setDateToFilter(undefined); setOpenTo(false); }}>Clear</Button>
-                        </div>
                       </div>
                     </PopoverContent>
                   </Popover>
