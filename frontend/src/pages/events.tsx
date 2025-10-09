@@ -164,7 +164,7 @@ export default function EventsPage() {
     queryFn: EventsService.getEvents,
   });
 
-  const { data: registrations, refetch: refetchRegs } = useQuery({
+  const { data: registrations, isLoading: registrationsLoading, refetch: refetchRegs } = useQuery({
     queryKey: ['/api/event-registrations', filterEventId],
     queryFn: async () =>
       filterEventId && filterEventId !== 'all'
@@ -1633,6 +1633,24 @@ export default function EventsPage() {
             </CardHeader>
             <CardContent>
               {(() => {
+                if (registrationsLoading) {
+                  return (
+                    <div className="overflow-x-auto">
+                      <div className="animate-pulse space-y-2">
+                        <div className="h-6 bg-gray-200 rounded w-40" />
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="flex items-center gap-2 p-2 bg-white border rounded">
+                            <div className="h-4 bg-gray-200 rounded w-16" />
+                            <div className="h-4 bg-gray-200 rounded w-24" />
+                            <div className="h-4 bg-gray-200 rounded w-20" />
+                            <div className="h-4 bg-gray-200 rounded w-32" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
                 const list = (registrations || []) as any[];
                 const total = list.length;
                 const convertedCount = list.filter((r:any) => ((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1')).length;
