@@ -688,9 +688,9 @@ export default function Leads() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <span className="text-xs">
+                        <Badge className="bg-gray-100 text-gray-800">
                           {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         {lead.country ? (
