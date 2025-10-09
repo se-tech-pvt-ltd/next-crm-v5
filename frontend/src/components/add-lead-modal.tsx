@@ -290,7 +290,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
             disabled={createLeadMutation.isPending || tempSaving}
             className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
           >
-            {createLeadMutation.isPending ? (
+            {createLeadMutation.isPending || tempSaving ? (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 <span>Saving...</span>
