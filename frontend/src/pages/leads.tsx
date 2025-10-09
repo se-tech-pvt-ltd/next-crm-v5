@@ -781,11 +781,7 @@ export default function Leads() {
         onOpenChange={(open) => {
           setLeadModalOpen(open);
           if (!open) {
-            if (matchEdit && editParams?.id) {
-              setLocation(`/leads/${editParams.id}`);
-            } else if (location === '/leads/new' || (matchLead && leadParams?.id)) {
-              setLocation('/leads');
-            }
+            try { setLocation('/leads'); } catch {}
             setSelectedLead(null);
           }
         }}
