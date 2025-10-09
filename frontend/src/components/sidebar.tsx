@@ -101,7 +101,7 @@ export function Sidebar() {
     };
   }, [accessByRole]);
 
-  const navItems = [
+  let navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
     { path: '/calendar', label: 'My Calendar', icon: Calendar, count: undefined },
     { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
@@ -112,7 +112,17 @@ export function Sidebar() {
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
-  ].filter(item => isModuleVisible(item.label));
+  ];
+
+  // If role-specific access rules hide modules, apply them
+  navItems = navItems.filter(item => isModuleVisible(item.label));
+
+  // Additional restriction: if user is a Partner, only show the partner-related modules
+  const userRoleNormalized = String((user as any)?.role || '').toLowerCase();
+  if (userRoleNormalized === 'partner') {
+    const allowed = new Set(['event','lead','leads','student','students','application','applications','admission','admissions']);
+    navItems = navItems.filter(i => allowed.has(normalize(i.label)) || allowed.has(singularize(normalize(i.label))));
+  }
 
   const sidebarWidth = isExpanded ? 'w-56' : 'w-16';
 
