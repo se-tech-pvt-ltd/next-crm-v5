@@ -1474,71 +1474,92 @@ export default function EventsPage() {
               </div>
             </div>
 
-            {(Array.isArray(visibleEvents) && visibleEvents.length === 0) ? (
-              <EmptyState
-                icon={<Calendar className="h-10 w-10" />}
-                title="No events found"
-                description="There are no events at the moment."
-                action={canCreateEvent ? (
-                  <Link href="/events/new">
-                    <Button className="h-8">
-                      <Plus className="w-3 h-3 mr-1" />
-                      Add Event
-                    </Button>
-                  </Link>
-                ) : undefined}
-              />
+            {eventsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <div className="h-1 bg-gray-200 rounded-t-md" />
+                    <CardHeader className="pb-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-sm w-40 h-4 bg-gray-200 rounded" />
+                        <div className="h-7 w-7 bg-gray-200 rounded" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-1 space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-32" />
+                      <div className="h-3 bg-gray-200 rounded w-48" />
+                      <div className="h-6 bg-gray-200 rounded w-20" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             ) : (
-              filteredEvents.length === 0 ? (
+              (Array.isArray(visibleEvents) && visibleEvents.length === 0) ? (
                 <EmptyState
                   icon={<Calendar className="h-10 w-10" />}
-                  title="No matching events"
-                  description="Try adjusting your filters."
+                  title="No events found"
+                  description="There are no events at the moment."
+                  action={canCreateEvent ? (
+                    <Link href="/events/new">
+                      <Button className="h-8">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add Event
+                      </Button>
+                    </Link>
+                  ) : undefined}
                 />
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
-                    <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { navigate(`/events/${e.id}/registrations`); }}>
-                      <div className="h-1 bg-gradient-to-r from-[#223E7D] to-[#223E7D]/30" />
-                      <CardHeader className="pb-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
-                          {canUpdateEvent && (
-                            <button
-                              type="button"
-                              aria-label="Edit event"
-                              onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); navigate(`/events/${e.id}/edit`); }}
-                              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#223E7D] hover:bg-[#223E7D]/10"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-1 space-y-2">
-                        <div className="flex items-center text-xs text-gray-700">
-                          <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
-                          <span>{formatEventDate(e.date)}</span>
-                          {e.time ? (<><span className="mx-2 text-gray-300">��</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
-                        </div>
-                        <div className="flex items-center text-xs text-gray-700">
-                          <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
-                          <span className="truncate">{e.venue}</span>
-                        </div>
-                        <div>
-                          <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-[#223E7D]/20 bg-[#223E7D]/5 text-[#223E7D]">{e.type}</span>
-                        </div>
-                        <div className="pt-1">
-                          <div className="inline-flex items-center text-[11px] text-[#223E7D] group-hover:translate-x-0.5 transition">
-                            View Registrations
-                            <ArrowRight className="ml-1 w-3 h-3" />
+                filteredEvents.length === 0 ? (
+                  <EmptyState
+                    icon={<Calendar className="h-10 w-10" />}
+                    title="No matching events"
+                    description="Try adjusting your filters."
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredEvents.map((e: any) => { const p = getPalette(e.type); return (
+                      <Card key={e.id} className={`group cursor-pointer rounded-xl border border-[#223E7D]/20 bg-white hover:shadow-md hover:-translate-y-0.5 transform-gpu transition overflow-hidden`} onClick={() => { navigate(`/events/${e.id}/registrations`); }}>
+                        <div className="h-1 bg-gradient-to-r from-[#223E7D] to-[#223E7D]/30" />
+                        <CardHeader className="pb-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-sm line-clamp-2">{e.name}</CardTitle>
+                            {canUpdateEvent && (
+                              <button
+                                type="button"
+                                aria-label="Edit event"
+                                onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); navigate(`/events/${e.id}/edit`); }}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#223E7D] hover:bg-[#223E7D]/10"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ); })}
-                </div>
+                        </CardHeader>
+                        <CardContent className="pt-1 space-y-2">
+                          <div className="flex items-center text-xs text-gray-700">
+                            <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                            <span>{formatEventDate(e.date)}</span>
+                            {e.time ? (<><span className="mx-2 text-gray-300">��</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                          </div>
+                          <div className="flex items-center text-xs text-gray-700">
+                            <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                            <span className="truncate">{e.venue}</span>
+                          </div>
+                          <div>
+                            <span className="inline-flex items-center text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 border border-[#223E7D]/20 bg-[#223E7D]/5 text-[#223E7D]">{e.type}</span>
+                          </div>
+                          <div className="pt-1">
+                            <div className="inline-flex items-center text-[11px] text-[#223E7D] group-hover:translate-x-0.5 transition">
+                              View Registrations
+                              <ArrowRight className="ml-1 w-3 h-3" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ); })}
+                  </div>
+                )
               )
             )}
           </>
