@@ -48,6 +48,8 @@ import {
   User as UserIcon,
   Globe
 } from 'lucide-react';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 interface StudentProfileModalProps {
   open: boolean;
