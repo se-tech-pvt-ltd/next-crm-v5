@@ -16,6 +16,8 @@ import * as StudentsService from '@/services/students';
 import * as ActivitiesService from '@/services/activities';
 import { useToast } from '@/hooks/use-toast';
 import { User, Edit, Save, X, Plus, FileText, Award, Calendar, Phone, Mail } from 'lucide-react';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 interface StudentProfileModalProps {
   open: boolean;
@@ -202,7 +204,17 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
                         </div>
                         <div>
                           <Label htmlFor="phone">Phone</Label>
-                          <Input id="phone" value={editData.phone || ''} onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))} disabled={!isEditing} />
+                          <div className="relative">
+                            <PhoneInput
+                              value={String(editData.phone || '')}
+                              onChange={(val) => setEditData(prev => ({ ...prev, phone: val }))}
+                              defaultCountry="pk"
+                              className="w-full"
+                              inputClassName="w-full h-7 text-sm"
+                              buttonClassName="h-7"
+                              disabled={!isEditing}
+                            />
+                          </div>
                         </div>
                         <div>
                           <Label htmlFor="dateOfBirth">Date of Birth</Label>
