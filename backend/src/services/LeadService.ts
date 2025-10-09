@@ -49,6 +49,35 @@ export class LeadService {
     return await LeadModel.findAll(pagination);
   }
 
+  static async getStats(userId?: string, userRole?: string, regionId?: string, branchId?: string) {
+    if (userRole === 'counselor' && userId) {
+      return await LeadModel.getStats({ counselorId: userId });
+    }
+    if (userRole === 'admission_officer' && userId) {
+      return await LeadModel.getStats({ admissionOfficerId: userId });
+    }
+
+    if (userRole === 'branch_manager') {
+      if (branchId) {
+        return await LeadModel.getStats({ branchId });
+      }
+      return { total: 0, active: 0, lost: 0, converted: 0 };
+    }
+
+    if (userRole === 'regional_manager') {
+      if (regionId) {
+        return await LeadModel.getStats({ regionId });
+      }
+      return { total: 0, active: 0, lost: 0, converted: 0 };
+    }
+
+    if (regionId && userRole !== 'super_admin') {
+      return await LeadModel.getStats({ regionId });
+    }
+
+    return await LeadModel.getStats();
+  }
+
   static async getLead(id: string, userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Lead | undefined> {
     const lead = await LeadModel.findById(id);
 

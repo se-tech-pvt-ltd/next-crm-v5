@@ -5,6 +5,7 @@ import { requireAuth } from "../middlewares/auth.js";
 export const leadRoutes = Router();
 
 leadRoutes.get("/", requireAuth, LeadController.getLeads);
+leadRoutes.get("/stats", requireAuth, LeadController.getStats);
 leadRoutes.get("/:id", requireAuth, LeadController.getLead);
 leadRoutes.post("/", requireAuth, LeadController.createLead);
 leadRoutes.put("/:id", requireAuth, LeadController.updateLead);

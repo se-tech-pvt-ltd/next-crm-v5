@@ -15,7 +15,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { Lead } from '@/lib/types';
-import { Plus, UserPlus, Phone, Globe, Users, TrendingUp, Filter, Calendar } from 'lucide-react';
+import { Plus, UserPlus, Phone, Globe, Users, XCircle, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -235,9 +235,11 @@ export default function Leads() {
       ? true
       : statusFilter === 'converted'
         ? convertedLeadIds.has(lead.id)
-        : lead.status === statusFilter;
+        : statusFilter === 'lost'
+          ? (String((lead as any).isLost || '') === '1' || lead.status === 'lost')
+          : lead.status === statusFilter;
     const sourceMatch = sourceFilter === 'all' || lead.source === sourceFilter;
-    
+
     // Date range filter
     let dateMatch = true;
     if (dateFromFilter || dateToFilter) {
@@ -247,7 +249,7 @@ export default function Leads() {
         if (dateToFilter && leadDate > dateToFilter) dateMatch = false;
       }
     }
-    
+
     return statusMatch && sourceMatch && dateMatch;
   }) || [];
 
@@ -271,6 +273,13 @@ export default function Leads() {
 
 
   const [showConvertModal, setShowConvertModal] = useState(false);
+  const { data: leadsStats } = useQuery({
+    queryKey: ['/api/leads/stats'],
+    queryFn: async () => LeadsService.getLeadsStats(),
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
   const [addLeadInitialData, setAddLeadInitialData] = useState<any | undefined>(undefined);
 
@@ -340,7 +349,7 @@ export default function Leads() {
       <div className="space-y-3">
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           <Card>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
@@ -369,6 +378,20 @@ export default function Leads() {
             </CardContent>
           </Card>
 
+
+          <Card>
+            <CardHeader className="pb-1 p-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-2">
+                <XCircle className="w-3 h-3 text-red-500" />
+                Lost Leads
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-2 pt-0">
+              <div className="text-base font-semibold text-red-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.lost ?? 0)}
+              </div>
+            </CardContent>
+          </Card>
 
           <Card className="cursor-pointer" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
             <CardHeader className="pb-1 p-2">

@@ -34,3 +34,7 @@ export async function getStudentByLeadId(id: string | undefined): Promise<Studen
 export async function createLead(data: Partial<Lead>) {
   return http.post<Lead>('/api/leads', data);
 }
+
+export async function getLeadsStats() {
+  return http.get<any>('/api/leads/stats');
+}

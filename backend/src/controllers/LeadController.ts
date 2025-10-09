@@ -44,6 +44,17 @@ export class LeadController {
     }
   }
 
+  static async getStats(req: Request, res: Response) {
+    try {
+      const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
+      const stats = await LeadService.getStats(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Get leads stats error:", error);
+      res.status(500).json({ message: "Failed to fetch leads stats" });
+    }
+  }
+
   static async getLead(req: Request, res: Response) {
     try {
       const id = req.params.id;
