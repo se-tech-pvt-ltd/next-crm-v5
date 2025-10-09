@@ -2143,7 +2143,7 @@ export default function EventsPage() {
             }
           }}
           initialData={leadInitialData || undefined}
-          onCreated={(lead, init) => {
+          onCreated={async (lead, init) => {
             try {
               const regId = init && (init as any).eventRegId;
               const evtId = init && (init as any).eventId;
