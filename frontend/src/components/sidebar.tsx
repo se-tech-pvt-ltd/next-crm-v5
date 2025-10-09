@@ -91,6 +91,18 @@ export function Sidebar() {
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
 
+  // robust role detection
+  const userRoleCandidates = [
+    (user as any)?.role,
+    (user as any)?.roleId,
+    (user as any)?.role_id,
+    (user as any)?.roleName,
+    (user as any)?.role_name,
+    (user as any)?.roleDetails?.role_name,
+    (user as any)?.roleDetails?.role,
+  ].filter(Boolean).map(String).map(s => s.toLowerCase().replace(/\s+/g, '_'));
+  const userRoleNormalized = userRoleCandidates[0] || '';
+
   const isModuleVisible = useMemo(() => {
     return (label: string) => {
       const mod = singularize(normalize(label));
