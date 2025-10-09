@@ -655,8 +655,8 @@ export default function Leads() {
                     <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Converted Leads</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Is Converted</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -703,16 +703,16 @@ export default function Leads() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
+                        <Badge className={getStatusColor(lead.status || 'new')}>
+                          {getStatusDisplayName(lead.status || 'new')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="p-2 text-xs">
                         {convertedLeadIds.has(lead.id) ? (
                           <Badge className="bg-green-100 text-green-800">Yes</Badge>
                         ) : (
                           <Badge className="bg-gray-100 text-gray-800">No</Badge>
                         )}
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Badge className={getStatusColor(lead.status || 'new')}>
-                          {getStatusDisplayName(lead.status || 'new')}
-                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
