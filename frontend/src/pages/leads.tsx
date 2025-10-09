@@ -370,11 +370,11 @@ export default function Leads() {
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
+            <CardContent className="p-2 pt-0 relative">
               <div className="text-base font-semibold">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (pagination.total || 0)}
               </div>
-              <div className="text-xs text-muted-foreground">
+              <div className="absolute top-2 right-2 text-xs text-muted-foreground font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : ((pagination.total || 0) ? '100%' : '0%')}
               </div>
             </CardContent>
@@ -387,11 +387,11 @@ export default function Leads() {
                 Active Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
+            <CardContent className="p-2 pt-0 relative">
               <div className="text-base font-semibold text-yellow-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.active ?? 0)}
               </div>
-              <div className="text-xs text-yellow-600">
+              <div className="absolute top-2 right-2 text-xs text-yellow-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = (leadsStats?.active ?? 0);
@@ -409,11 +409,11 @@ export default function Leads() {
                 Lost Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
+            <CardContent className="p-2 pt-0 relative">
               <div className="text-base font-semibold text-red-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.lost ?? 0)}
               </div>
-              <div className="text-xs text-red-600">
+              <div className="absolute top-2 right-2 text-xs text-red-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = (leadsStats?.lost ?? 0);
@@ -430,11 +430,11 @@ export default function Leads() {
                 Converted Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
+            <CardContent className="p-2 pt-0 relative">
               <div className="text-base font-semibold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
               </div>
-              <div className="text-xs text-green-600">
+              <div className="absolute top-2 right-2 text-xs text-green-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = convertedCount || 0;
