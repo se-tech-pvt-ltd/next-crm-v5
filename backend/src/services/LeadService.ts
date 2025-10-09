@@ -198,6 +198,32 @@ export class LeadService {
     const lead = await LeadModel.update(id, { ...updates, updatedBy: (updates as any).updatedBy ?? currentUserId ?? (updates as any).createdBy ?? (updates as any).counselorId ?? null });
 
     if (lead) {
+      // Pre-fetch lostReason dropdown labels so we can show human-friendly values
+      let lostReasonOptions: any[] = [];
+      try {
+        lostReasonOptions = await DropdownService.getDropdownsByModuleAndField('Leads', 'lostReason');
+      } catch (_) {
+        lostReasonOptions = [];
+      }
+      const resolveLostReasonLabel = (val: any) => {
+        if (val === undefined || val === null) return '';
+        const s = String(val);
+        const found = (lostReasonOptions || []).find((d: any) => {
+          const key = String(d.key ?? d.id ?? '').toLowerCase();
+          const value = String(d.value ?? '').toLowerCase();
+          return key === s.toLowerCase() || value === s.toLowerCase() || String(d.id) === s;
+        });
+        return found ? (found.value || s) : s;
+      };
+
+      // Determine if this update marks the lead as lost and includes a lostReason so we can log a single combined activity
+      const willMarkLost = (updates as any).hasOwnProperty('isLost');
+      const lostReasonProvided = (updates as any).hasOwnProperty('lostReason');
+      const oldIsLostRaw = (currentLead as any).isLost ?? (currentLead as any).is_lost;
+      const newIsLostRaw = (updates as any).isLost ?? (updates as any).is_lost;
+      const wasLost = String(oldIsLostRaw ?? '') === '1' || oldIsLostRaw === 1 || oldIsLostRaw === true;
+      const becameLost = String(newIsLostRaw ?? '') === '1' || newIsLostRaw === 1 || newIsLostRaw === true;
+
       // Log only selected changes
       for (const [fieldName, newValue] of Object.entries(updates)) {
         if (fieldName === 'updatedAt') continue;
@@ -230,22 +256,40 @@ export class LeadService {
               currentUserId
             );
           } else if (fieldName === 'isLost') {
-            const wasLost = String(oldValue ?? '') === '1' || oldValue === 1 || oldValue === true;
-            const becameLost = String(newValue ?? '') === '1' || newValue === 1 || newValue === true;
             if (becameLost && !wasLost) {
-              await ActivityService.logActivity(
-                'lead',
-                id,
-                'marked_lost',
-                'Lead marked as lost',
-                (updates as any)?.lostReason ? `Reason: ${(updates as any).lostReason}` : undefined,
-                fieldName,
-                String(oldValue ?? ''),
-                String(newValue ?? ''),
-                currentUserId
-              );
-              if (lead) {
-                void NotificationService.queueLeadLostNotification(lead);
+              // If lostReason is provided in the same update, log a single combined activity with the label
+              if (lostReasonProvided) {
+                const rawReason = (updates as any).lostReason;
+                const label = resolveLostReasonLabel(rawReason) || rawReason;
+                await ActivityService.logActivity(
+                  'lead',
+                  id,
+                  'marked_lost',
+                  'Lead marked as lost',
+                  `Lead was marked LOST with reason: ${label}`,
+                  'isLost',
+                  String(oldValue ?? ''),
+                  String(newValue ?? ''),
+                  currentUserId
+                );
+                if (lead) {
+                  void NotificationService.queueLeadLostNotification(lead);
+                }
+              } else {
+                await ActivityService.logActivity(
+                  'lead',
+                  id,
+                  'marked_lost',
+                  'Lead marked as lost',
+                  undefined,
+                  fieldName,
+                  String(oldValue ?? ''),
+                  String(newValue ?? ''),
+                  currentUserId
+                );
+                if (lead) {
+                  void NotificationService.queueLeadLostNotification(lead);
+                }
               }
             } else if (!becameLost && wasLost) {
               await ActivityService.logActivity(
@@ -261,12 +305,21 @@ export class LeadService {
               );
             }
           } else if (fieldName === 'lostReason') {
+            // If we already logged a combined marked_lost above when both fields were provided, skip this separate lostReason log
+            if (willMarkLost && lostReasonProvided && becameLost && !wasLost) {
+              // skip separate lostReason activity
+              continue;
+            }
+
+            // Otherwise, log lostReason change as before, but show label instead of raw key when possible
+            const oldLabel = resolveLostReasonLabel(oldValue);
+            const newLabel = resolveLostReasonLabel(newValue);
             await ActivityService.logActivity(
               'lead',
               id,
               'lost_reason_updated',
               'Lost reason updated',
-              `Changed from "${String(oldValue || '') || '-'}" to "${String(newValue || '') || '-'}"`,
+              `Changed from "${String(oldLabel || '') || '-'}" to "${String(newLabel || '') || '-'}"`,
               fieldName,
               String(oldValue || ''),
               String(newValue || ''),
