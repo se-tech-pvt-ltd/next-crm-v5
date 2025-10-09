@@ -204,7 +204,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
                         </div>
                         <div>
                           <Label htmlFor="phone">Phone</Label>
-                          <div className="relative">
+                          <div className="relative phone-compact">
                             <PhoneInput
                               value={String(editData.phone || '')}
                               onChange={(val) => setEditData(prev => ({ ...prev, phone: val }))}
@@ -212,6 +212,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
                               className="w-full"
                               inputClassName="w-full h-7 text-sm"
                               buttonClassName="h-7"
+                              inputStyle={{ height: '28px' }}
+                              buttonStyle={{ height: '28px' }}
                               disabled={!isEditing}
                             />
                           </div>
