@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ReactCalendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export type CalendarProps = {
@@ -11,17 +10,43 @@ export type CalendarProps = {
 };
 
 function Calendar({ selected, onSelect, showOutsideDays = true, className }: CalendarProps) {
+  const [Cal, setCal] = useState<any | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const mod = await import('react-calendar');
+        await import('react-calendar/dist/Calendar.css');
+        if (!mounted) return;
+        setCal(() => mod.default || mod);
+      } catch (err: any) {
+        console.error('Failed to load react-calendar dynamically', err);
+        if (mounted) setLoadError(String(err?.message || err));
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  if (loadError) {
+    return <div className={cn('p-2 text-sm text-red-600', className)}>Calendar failed to load</div>;
+  }
+
+  if (!Cal) {
+    return <div className={cn('p-2', className)}>Loading calendar...</div>;
+  }
+
   return (
     <div className={cn('p-2', className)}>
-      <ReactCalendar
+      <Cal
         value={selected ?? null}
         onChange={(d: Date | Date[]) => {
-          // react-calendar returns Date or Date[] depending on select range; we only support single
           const date = Array.isArray(d) ? d[0] ?? null : d ?? null;
           onSelect && onSelect(date as Date | null);
         }}
         tileContent={null}
-        calendarType="ISO 8601"
+        calendarType={'ISO 8601'}
         showNeighboringMonth={Boolean(showOutsideDays)}
       />
     </div>
