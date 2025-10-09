@@ -484,28 +484,19 @@ export default function Leads() {
                         <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[240px] p-3" align="start" sideOffset={6}>
-                      <div className="flex flex-col space-y-2">
-                        <input
-                          type="date"
-                          className="w-full rounded-md border border-input px-2 py-1 text-sm"
-                          value={dateFromFilter ? dateFromFilter.toISOString().slice(0, 10) : ""}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            if (!v) {
-                              setDateFromFilter(undefined);
-                              setCurrentPage(1);
-                              return;
-                            }
-                            const d = new Date(v + 'T00:00:00');
-                            setDateFromFilter(d);
+                    <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
+                      <div className="w-full overflow-hidden">
+                        <CalendarComponent
+                          mode="single"
+                          selected={dateFromFilter}
+                          onSelect={(date) => {
+                            setDateFromFilter(date);
                             setCurrentPage(1);
                             setOpenFrom(false);
                           }}
+                          className="w-full"
+                          showOutsideDays={false}
                         />
-                        <div className="flex justify-end">
-                          <Button variant="ghost" size="sm" onClick={() => { setDateFromFilter(undefined); setOpenFrom(false); }}>Clear</Button>
-                        </div>
                       </div>
                     </PopoverContent>
                   </Popover>
