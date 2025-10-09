@@ -350,8 +350,7 @@ export default function Admissions() {
         onOpenChange={(open) => {
           setIsDetailsOpen(open);
           if (!open) {
-            if (matchEdit && editParams?.id) setLocation(`/admissions/${editParams.id}`);
-            else setLocation('/admissions');
+            try { setLocation('/admissions'); } catch {}
             setSelectedAdmission(null);
           }
         }}
