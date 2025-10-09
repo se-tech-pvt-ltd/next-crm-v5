@@ -656,7 +656,7 @@ export default function Leads() {
                     <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Is Converted</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Current Stage</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -708,11 +708,17 @@ export default function Leads() {
                         </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        {convertedLeadIds.has(lead.id) ? (
-                          <Badge className="bg-green-100 text-green-800">Yes</Badge>
-                        ) : (
-                          <Badge className="bg-gray-100 text-gray-800">No</Badge>
-                        )}
+                        {(() => {
+                          const isConverted = Boolean((lead as any).isConverted || (lead as any).is_converted || convertedLeadIds.has(lead.id) || (lead.status === 'converted'));
+                          const isLost = Boolean((lead as any).isLost || (lead as any).is_lost || (lead.status === 'lost'));
+                          if (isConverted && !isLost) {
+                            return <Badge className="bg-green-100 text-green-800">Converted</Badge>;
+                          }
+                          if (!isConverted && isLost) {
+                            return <Badge className="bg-red-100 text-red-800">Lost</Badge>;
+                          }
+                          return <Badge className="bg-yellow-100 text-yellow-800">Active</Badge>;
+                        })()}
                       </TableCell>
                     </TableRow>
                   ))}
