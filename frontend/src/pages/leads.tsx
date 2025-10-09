@@ -372,7 +372,10 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : pagination.total || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (pagination.total || 0)}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : ((pagination.total || 0) ? '100%' : '0%')}
               </div>
             </CardContent>
           </Card>
@@ -385,8 +388,15 @@ export default function Leads() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
-              <div className="text-base font-semibold text-blue-600">
+              <div className="text-base font-semibold text-yellow-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.active ?? 0)}
+              </div>
+              <div className="text-xs text-yellow-600">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
+                  const total = (pagination.total || 0);
+                  const val = (leadsStats?.active ?? 0);
+                  return total ? `${Math.round((val / total) * 100)}%` : '0%';
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -403,6 +413,13 @@ export default function Leads() {
               <div className="text-base font-semibold text-red-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.lost ?? 0)}
               </div>
+              <div className="text-xs text-red-600">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
+                  const total = (pagination.total || 0);
+                  const val = (leadsStats?.lost ?? 0);
+                  return total ? `${Math.round((val / total) * 100)}%` : '0%';
+                })()}
+              </div>
             </CardContent>
           </Card>
 
@@ -414,8 +431,15 @@ export default function Leads() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
-              <div className="text-base font-semibold text-purple-600">
+              <div className="text-base font-semibold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
+              </div>
+              <div className="text-xs text-green-600">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
+                  const total = (pagination.total || 0);
+                  const val = convertedCount || 0;
+                  return total ? `${Math.round((val / total) * 100)}%` : '0%';
+                })()}
               </div>
             </CardContent>
           </Card>
