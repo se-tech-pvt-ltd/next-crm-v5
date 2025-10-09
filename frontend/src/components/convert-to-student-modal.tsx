@@ -714,7 +714,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <span>Counsellor</span>
                   </Label>
                   <Select value={formData.counsellor} onValueChange={(value) => handleInputChange('counsellor', value)}>
-                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger disabled className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
@@ -733,7 +733,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <span>Admission Officer</span>
                   </Label>
                   <Select value={formData.admissionOfficer} onValueChange={(value) => handleInputChange('admissionOfficer', value)}>
-                    <SelectTrigger className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger disabled className="h-8 text-xs transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
