@@ -18,7 +18,16 @@ type AllowedCategory = typeof ALLOWED[number] | 'partners';
 export default function Settings() {
   const { toast } = useToast();
   const { user } = useAuth() as any;
-  const isPartner = String((user as any)?.role || '').toLowerCase() === 'partner';
+  const userRoleCandidates = [
+    (user as any)?.role,
+    (user as any)?.roleId,
+    (user as any)?.role_id,
+    (user as any)?.roleName,
+    (user as any)?.role_name,
+    (user as any)?.roleDetails?.role_name,
+    (user as any)?.roleDetails?.role,
+  ].filter(Boolean).map(String).map(s => s.toLowerCase().replace(/\s+/g, '_'));
+  const isPartner = userRoleCandidates.includes('partner');
 
   const [category, setCategory] = useState<AllowedCategory>(() => {
     // If partner, default to partners tab
