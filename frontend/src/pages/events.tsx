@@ -273,6 +273,8 @@ export default function EventsPage() {
       try { queryClient.invalidateQueries({ queryKey: ['/api/leads'] }); queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
       refetchRegs?.();
       setShowList(true);
+      // set guards before closing UI so route-driven handlers don't re-open registration detail
+      try { setSkipNavigateAfterLeadCreate(true); setSkipOpenViewForLeadRoute(true); setTimeout(() => { try { setSkipOpenViewForLeadRoute(false); } catch {} }, 700); } catch {}
       setIsViewRegOpen(false);
       setIsAddRegOpen(false);
       setIsEditRegOpen(false);
