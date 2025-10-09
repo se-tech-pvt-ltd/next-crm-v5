@@ -253,7 +253,14 @@ export default function Leads() {
       }
     }
 
-    return statusMatch && sourceMatch && dateMatch;
+    // Free text query filter (name, phone, email, city)
+    const q = String(queryText || '').trim().toLowerCase();
+    const matchesQuery = q === '' ? true : [lead.name, lead.phone, lead.email, lead.city].some(f => {
+      if (!f) return false;
+      return String(f).toLowerCase().includes(q);
+    });
+
+    return statusMatch && sourceMatch && dateMatch && matchesQuery;
   }) || [];
 
 
@@ -509,7 +516,7 @@ export default function Leads() {
                 </div>
 
                 {/* Clear Filters */}
-                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
+                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -519,6 +526,7 @@ export default function Leads() {
                       setSourceFilter('all');
                       setDateFromFilter(undefined);
                       setDateToFilter(undefined);
+                      setQueryText('');
                       setCurrentPage(1); // Reset to first page when clearing filters
                     }}
                   >
