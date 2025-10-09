@@ -481,7 +481,7 @@ export default function Leads() {
                         <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" sideOffset={6}>
+                    <PopoverContent className="w-[320px] p-0" align="start" sideOffset={6}>
                       <CalendarComponent
                         mode="single"
                         selected={dateFromFilter}
@@ -501,7 +501,7 @@ export default function Leads() {
                         <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" sideOffset={6}>
+                    <PopoverContent className="w-[320px] p-0" align="start" sideOffset={6}>
                       <CalendarComponent
                         mode="single"
                         selected={dateToFilter}
