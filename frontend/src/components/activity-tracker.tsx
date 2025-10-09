@@ -803,7 +803,15 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                         <div className="pt-1 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
                           {(() => {
                             const hasValues = ((activity.oldValue ?? '') !== '' || (activity.newValue ?? '') !== '');
+                            const typeStr = String(activity.activityType || '').toLowerCase();
+                            if (typeStr === 'marked_lost' || typeStr === 'unmarked_lost' || typeStr === 'lost_reason_updated') {
+                              return (activity.description || (activity as any).title);
+                            }
                             if (moduleDropdowns && activity.fieldName && hasValues) {
+                              const fieldNorm = String(activity.fieldName || '').toLowerCase();
+                              if (fieldNorm === 'islost' || fieldNorm === 'lostreason') {
+                                return (activity.description || (activity as any).title);
+                              }
                               const fromLabel = getLabelForField(activity.fieldName, activity.oldValue || 'empty');
                               const toLabel = getLabelForField(activity.fieldName, activity.newValue || 'empty');
                               const fieldLabel = (activity.fieldName || '')
