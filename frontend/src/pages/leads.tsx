@@ -427,6 +427,18 @@ export default function Leads() {
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
                 </div>
+
+                {/* Free text search for name, phone, email, city (moved to leftmost) */}
+                <div className="w-52">
+                  <InputWithIcon
+                    value={queryText}
+                    onChange={(e) => { setQueryText(e.target.value); setCurrentPage(1); }}
+                    placeholder="Search name, phone, email, city"
+                    leftIcon={<Search className="w-3 h-3" />}
+                    id="leads-filter-search"
+                    aria-label="Search leads"
+                  />
+                </div>
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
                   setCurrentPage(1); // Reset to first page when filter changes
@@ -459,18 +471,6 @@ export default function Leads() {
                     ))}
                   </SelectContent>
                 </Select>
-
-                {/* Free text search for name, phone, email, city */}
-                <div className="w-52">
-                  <InputWithIcon
-                    value={queryText}
-                    onChange={(e) => { setQueryText(e.target.value); setCurrentPage(1); }}
-                    placeholder="Search name, phone, email, city"
-                    leftIcon={<Search className="w-3 h-3" />}
-                    id="leads-filter-search"
-                    aria-label="Search leads"
-                  />
-                </div>
 
                 {/* Date Range Filter */}
                 <div className="flex items-center space-x-2">
