@@ -2148,9 +2148,16 @@ export default function EventsPage() {
               const regId = init && (init as any).eventRegId;
               const evtId = init && (init as any).eventId;
 
+              // Set guards BEFORE closing modal so route-driven effects don't re-open registration view
+              try {
+                setSkipNavigateAfterLeadCreate(true);
+                setSkipOpenViewForLeadRoute(true);
+                setTimeout(() => { try { setSkipOpenViewForLeadRoute(false); } catch {} }, 700);
+              } catch {}
+
               // Invalidate and refetch registrations so latest data is available
-              try { queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
-              try { refetchRegs?.(); } catch {}
+              try { await queryClient.invalidateQueries({ queryKey: ['/api/event-registrations'] }); } catch {}
+              try { await refetchRegs?.(); } catch {}
 
               // Close lead modal and registration details popup (user requested all popups closed on save)
               try { setAddLeadModalOpen(false); } catch {}
@@ -2159,11 +2166,11 @@ export default function EventsPage() {
               try { setIsEditRegOpen(false); } catch {}
               try { setViewReg(null); } catch {}
 
-              // prevent the addLeadModalOpen close handler from navigating back to the registration detail
-              try { setSkipNavigateAfterLeadCreate(true); } catch {}
-
               // Clear any initial lead data we set for conversion
               try { setLeadInitialData(null); } catch {}
+
+              // Clear pending flags so no route-driven open happens
+              try { setPendingRegId(null); setPendingOpenLeadId(null); } catch {}
 
               // Ensure lead data is primed in the cache and related queries invalidated before navigation
               try {
@@ -2177,17 +2184,17 @@ export default function EventsPage() {
                     await queryClient.invalidateQueries({ queryKey: ['/api/students'] }).catch(() => {});
                   } catch {}
                   // Navigate to the created lead
-                  navigate(`/leads/${leadId}`);
+                  try { navigate(`/leads/${leadId}`); } catch {}
                 } else {
                   const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
                   if (eventIdToUse) {
-                    navigate(`/events/${eventIdToUse}/registrations`);
+                    try { navigate(`/events/${eventIdToUse}/registrations`); } catch {}
                   }
                 }
               } catch {}
 
-              // Clear pending flags
-              try { setPendingRegId(null); } catch {}
+              // Clear pending flags again as a safety
+              try { setPendingRegId(null); setPendingOpenLeadId(null); } catch {}
 
             } catch {}
           }}
