@@ -595,7 +595,7 @@ export default function Leads() {
                     <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Converted Leads</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
