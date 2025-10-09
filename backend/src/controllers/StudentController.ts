@@ -9,6 +9,16 @@ export class StudentController {
     try {
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
       const students = await StudentService.getStudents(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
+      try {
+        console.log('[StudentController.getStudents] currentUser=', JSON.stringify(currentUser));
+        console.log('[StudentController.getStudents] returned students count=', Array.isArray(students) ? students.length : 'non-array');
+        if (Array.isArray(students) && students.length > 0) {
+          const sample = students.slice(0, 5).map(s => ({ id: s.id, partner: (s as any).partner ?? (s as any).partner_id ?? null, counsellorId: (s as any).counsellorId || null }));
+          console.log('[StudentController.getStudents] sample students=', JSON.stringify(sample));
+        }
+      } catch (e) {
+        // ignore logging errors
+      }
       res.json(students);
     } catch (error) {
       console.error("Get students error:", error);
