@@ -2165,11 +2165,16 @@ export default function EventsPage() {
               // Clear any initial lead data we set for conversion
               try { setLeadInitialData(null); } catch {}
 
-              // Optionally navigate back to registrations list for the event
+              // Navigate to created lead if available; otherwise fall back to registrations list
               try {
-                const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
-                if (eventIdToUse) {
-                  navigate(`/events/${eventIdToUse}/registrations`);
+                const leadId = lead && ((lead as any).id || (lead as any).id === 0 ? (lead as any).id : null);
+                if (leadId) {
+                  navigate(`/leads/${leadId}`);
+                } else {
+                  const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
+                  if (eventIdToUse) {
+                    navigate(`/events/${eventIdToUse}/registrations`);
+                  }
                 }
               } catch {}
 
