@@ -9,7 +9,6 @@ import RoleAccessSectionComp from '@/components/settings/RoleAccessSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
 import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
