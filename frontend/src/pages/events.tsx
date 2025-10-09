@@ -21,6 +21,7 @@ import * as RegService from '@/services/event-registrations';
 import * as DropdownsService from '@/services/dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, UserPlus, Users, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X, Target } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import AddLeadForm from '@/components/add-lead-form';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { format } from 'date-fns';
@@ -1690,8 +1691,24 @@ export default function EventsPage() {
                                 <TableCell className="p-2 text-xs">{r.name}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.number || '-'}</TableCell>
                                 <TableCell className="p-2 text-xs">{r.email || '-'}</TableCell>
-                                <TableCell className="p-2 text-xs">{getStatusLabel(r.status) || r.status}</TableCell>
-                                <TableCell className="p-2 text-xs">{((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1') ? 'Yes' : 'No'}</TableCell>
+                                <TableCell className="p-2 text-xs">
+                                  {(() => {
+                                    const label = getStatusLabel(r.status) || r.status || '';
+                                    const l = String(label).toLowerCase();
+                                    if (l.includes('not sure')) return <Badge className="bg-yellow-100 text-yellow-800">{label}</Badge>;
+                                    if (l.includes('unable') && l.includes('contact')) return <Badge className="bg-gray-100 text-gray-800">{label}</Badge>;
+                                    if (l.includes('not attending') || l.includes('not_attending') || l.includes('not-attending')) return <Badge className="bg-red-100 text-red-800">{label}</Badge>;
+                                    if (l.includes('attending')) return <Badge className="bg-green-100 text-green-800">{label}</Badge>;
+                                    // Fallback
+                                    return <Badge className="bg-yellow-100 text-yellow-800">{label}</Badge>;
+                                  })()}
+                                </TableCell>
+                                <TableCell className="p-2 text-xs">
+                                  {(() => {
+                                    const isConv = ((r as any).isConverted === 1 || (r as any).isConverted === '1' || (r as any).is_converted === 1 || (r as any).is_converted === '1');
+                                    return isConv ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : <Badge className="bg-red-100 text-red-800">No</Badge>;
+                                  })()}
+                                </TableCell>
                                 <TableCell className="p-2 text-xs">{r.city || '-'}</TableCell>
                                 <TableCell className="p-2 text-xs">{getSourceLabel(r.source) || '-'}</TableCell>
                               </TableRow>
