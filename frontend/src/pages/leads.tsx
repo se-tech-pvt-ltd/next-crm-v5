@@ -15,7 +15,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { Lead } from '@/lib/types';
-import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
+import { Plus, UserPlus, Phone, Globe, Users, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -340,7 +340,7 @@ export default function Leads() {
       <div className="space-y-3">
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           <Card>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
@@ -369,19 +369,6 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-1 p-2">
-              <CardTitle className="text-xs font-medium flex items-center gap-2">
-                <Target className="w-3 h-3 text-green-500" />
-                Qualified
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-2 pt-0">
-              <div className="text-base font-semibold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'qualified').length || 0}
-              </div>
-            </CardContent>
-          </Card>
 
           <Card className="cursor-pointer" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
             <CardHeader className="pb-1 p-2">
