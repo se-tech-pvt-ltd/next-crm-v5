@@ -47,6 +47,7 @@ interface AddLeadModalProps {
 
 export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: AddLeadModalProps) {
   const [submitLeadForm, setSubmitLeadForm] = useState<(() => void) | null>(null);
+  const [tempSaving, setTempSaving] = useState(false);
   const handleRegisterSubmit = useCallback((fn: () => void) => {
     try { setSubmitLeadForm(() => fn); } catch {}
   }, []);
