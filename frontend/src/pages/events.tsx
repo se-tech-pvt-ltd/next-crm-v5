@@ -340,22 +340,14 @@ export default function EventsPage() {
 
   // Keep URL in sync when the Add Lead modal opens/closes
   useEffect(() => {
-    if (addLeadModalOpen) return; // when open, already set by openConvertToLeadModal
-    // when modal closes, revert URL to registration detail or registrations list
+    if (addLeadModalOpen) return;
     try {
       if (skipNavigateAfterLeadCreate) {
-        // consume the flag and do not navigate back to registration detail
         setSkipNavigateAfterLeadCreate(false);
         return;
       }
-
-      const regId = (leadInitialData && leadInitialData.eventRegId) || (regDetailParams && regDetailParams.regId) || pendingRegId || (leadParams && leadParams.regId);
       const eventId = (regDetailParams && regDetailParams.id) || (regsParams && regsParams.id) || (leadParams && leadParams.id) || (selectedEvent && selectedEvent.id) || (leadInitialData && leadInitialData.eventId) || null;
-      if (eventId && regId) {
-        navigate(`/events/${eventId}/registrations/${regId}`);
-      } else if (eventId) {
-        navigate(`/events/${eventId}/registrations`);
-      }
+      if (eventId) navigate(`/events/${eventId}/registrations`);
     } catch {}
   }, [addLeadModalOpen]);
 
@@ -2177,7 +2169,14 @@ export default function EventsPage() {
               // Ensure lead data is primed in the cache and related queries invalidated before navigation
               try {
                 const leadId = lead && ((lead as any).id || (lead as any).id === 0 ? (lead as any).id : null);
-                if (leadId) {
+                const isConversion = Boolean(init && (init as any).eventRegId);
+                const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
+
+                if (isConversion) {
+                  if (eventIdToUse) {
+                    try { navigate(`/events/${eventIdToUse}/registrations`); } catch {}
+                  }
+                } else if (leadId) {
                   try {
                     // Prime individual lead cache so /leads/:id renders immediately with fresh data
                     queryClient.setQueryData(['/api/leads', String(leadId)], lead);
@@ -2185,10 +2184,8 @@ export default function EventsPage() {
                     await queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
                     await queryClient.invalidateQueries({ queryKey: ['/api/students'] }).catch(() => {});
                   } catch {}
-                  // Navigate to the created lead
                   try { navigate(`/leads/${leadId}`); } catch {}
                 } else {
-                  const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
                   if (eventIdToUse) {
                     try { navigate(`/events/${eventIdToUse}/registrations`); } catch {}
                   }
