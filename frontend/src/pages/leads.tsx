@@ -476,9 +476,9 @@ export default function Leads() {
                 <div className="flex items-center space-x-2">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-28 h-7 text-xs">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
+                      <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -496,9 +496,9 @@ export default function Leads() {
 
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-28 h-7 text-xs">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
+                      <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
