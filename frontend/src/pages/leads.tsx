@@ -523,27 +523,29 @@ export default function Leads() {
                     </PopoverTrigger>
                     <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
                       <div className="w-full overflow-hidden">
-                        <CalendarComponent
-                          mode="single"
-                          selected={dateToFilter}
-                          onSelect={(date) => {
-                            setDateToFilter(date);
-                            setCurrentPage(1);
-                            setOpenTo(false);
-                          }}
-                          className="w-full"
-                          showOutsideDays={false}
-                          classNames={{
-                            months: 'flex',
-                            month: 'grid grid-cols-7 gap-1 min-w-[260px]',
-                            table: 'w-full table-fixed',
-                            head_row: 'grid grid-cols-7',
-                            head_cell: 'text-muted-foreground text-center text-xs',
-                            row: 'grid grid-cols-7',
-                            cell: 'w-full h-10 text-center p-0',
-                            day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
-                          }}
-                        />
+                        <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
+                          <CalendarComponent
+                            mode="single"
+                            selected={dateToFilter}
+                            onSelect={(date) => {
+                              setDateToFilter(date);
+                              setCurrentPage(1);
+                              setOpenTo(false);
+                            }}
+                            className="w-full"
+                            showOutsideDays={false}
+                            classNames={{
+                              months: 'flex',
+                              month: 'grid grid-cols-7 gap-1 min-w-[260px]',
+                              table: 'w-full table-fixed',
+                              head_row: 'grid grid-cols-7',
+                              head_cell: 'text-muted-foreground text-center text-xs',
+                              row: 'grid grid-cols-7',
+                              cell: 'w-full h-10 text-center p-0',
+                              day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
+                            }}
+                          />
+                        </ErrorBoundary>
                       </div>
                     </PopoverContent>
                   </Popover>
