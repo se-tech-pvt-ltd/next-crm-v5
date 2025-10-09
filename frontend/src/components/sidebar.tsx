@@ -130,7 +130,6 @@ export function Sidebar() {
   navItems = navItems.filter(item => isModuleVisible(item.label));
 
   // Additional restriction: if user is a Partner, only show the partner-related modules
-  const userRoleNormalized = String((user as any)?.role || '').toLowerCase();
   if (userRoleNormalized === 'partner') {
     const allowed = new Set(['event','lead','leads','student','students','application','applications','admission','admissions']);
     navItems = navItems.filter(i => allowed.has(normalize(i.label)) || allowed.has(singularize(normalize(i.label))));
