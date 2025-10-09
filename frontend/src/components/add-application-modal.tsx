@@ -382,7 +382,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               <Button
                 type="button"
                 onClick={() => form.handleSubmit(onSubmit)()}
-                disabled={createApplicationMutation.isPending}
+                disabled={createApplicationMutation.isPending || !form.formState.isValid}
                 className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
               >
                 {createApplicationMutation.isPending ? 'Creating…' : 'Create'}
