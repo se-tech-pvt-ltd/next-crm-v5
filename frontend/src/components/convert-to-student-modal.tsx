@@ -342,11 +342,50 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.email) {
+    // Validate required fields: all fields must be provided
+    const requiredFields: { key: keyof typeof formData; label: string }[] = [
+      { key: 'status', label: 'Status' },
+      { key: 'expectation', label: 'Expectation' },
+      { key: 'type', label: 'Type' },
+      { key: 'name', label: 'Name' },
+      { key: 'phone', label: 'Phone' },
+      { key: 'email', label: 'Email' },
+      { key: 'city', label: 'City' },
+      { key: 'source', label: 'Source' },
+      { key: 'interestedCountry', label: 'Interested Country' },
+      { key: 'studyLevel', label: 'Study Level' },
+      { key: 'studyPlan', label: 'Study Plan' },
+      { key: 'admissionOfficer', label: 'Admission Officer' },
+      { key: 'counsellor', label: 'Counsellor' },
+      { key: 'passport', label: 'Passport' },
+      { key: 'dateOfBirth', label: 'Date of Birth' },
+      { key: 'address', label: 'Full Address' },
+      { key: 'eltTest', label: 'ELT Test' },
+      { key: 'consultancyFee', label: 'Consultancy Fee' },
+      { key: 'scholarship', label: 'Scholarship' },
+    ];
+
+    const missing: string[] = [];
+    for (const f of requiredFields) {
+      const val = (formData as any)[f.key];
+      if (Array.isArray(val)) {
+        if ((val as any[]).length === 0) missing.push(f.label);
+      } else if (typeof val === 'string') {
+        if (!String(val || '').trim()) missing.push(f.label);
+      } else if (val === undefined || val === null) {
+        missing.push(f.label);
+      }
+    }
+
+    // If consultancyFee is Yes, require consultancyFeeAttachment; if scholarship is Yes require scholarshipAttachment
+    if (formData.consultancyFee === 'Yes' && !formData.consultancyFeeAttachment) missing.push('Consultancy Fee Attachment');
+    if (formData.scholarship === 'Yes' && !formData.scholarshipAttachment) missing.push('Scholarship Attachment');
+
+    if (missing.length > 0) {
       toast({
-        title: "Error",
-        description: "Name and email are required.",
-        variant: "destructive",
+        title: 'Missing fields',
+        description: `Please provide: ${missing.join(', ')}.`,
+        variant: 'destructive',
       });
       return;
     }
