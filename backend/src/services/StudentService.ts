@@ -103,6 +103,11 @@ export class StudentService {
       return undefined;
     }
 
+    // Partner scoping
+    if (userRole === 'partner' && userId && (student as any).partner !== userId) {
+      return undefined;
+    }
+
     // Branch manager scoping
     if (userRole === 'branch_manager') {
       if (!branchId) return undefined;
@@ -179,6 +184,13 @@ export class StudentService {
       rows = await db.select().from(students).where(
         and(
           eq(students.admissionOfficerId, userId),
+          searchConditions
+        )
+      );
+    } else if (userRole === 'partner' && userId) {
+      rows = await db.select().from(students).where(
+        and(
+          eq(students.partner, userId),
           searchConditions
         )
       );

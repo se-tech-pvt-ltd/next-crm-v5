@@ -126,6 +126,32 @@ export class ApplicationService {
       return (await this.enrichDropdownFields(rows)) as any;
     }
 
+    // Partners see only applications tied to their partner id
+    if (userRole === 'partner' && userId) {
+      const rows = await db
+        .select({
+          id: applications.id,
+          applicationCode: applications.applicationCode,
+          studentId: applications.studentId,
+          university: applications.university,
+          program: applications.program,
+          courseType: applications.courseType,
+          appStatus: applications.appStatus,
+          caseStatus: applications.caseStatus,
+          country: applications.country,
+          channelPartner: applications.channelPartner,
+          intake: applications.intake,
+          googleDriveLink: applications.googleDriveLink,
+          notes: applications.notes,
+          createdAt: applications.createdAt,
+          updatedAt: applications.updatedAt,
+        })
+        .from(applications)
+        .where(eq(applications.partner, userId))
+        .orderBy(desc(applications.createdAt));
+      return (await this.enrichDropdownFields(rows)) as any;
+    }
+
     if (userRole === 'branch_manager') {
       if (branchId) {
         const rows = await db
@@ -232,6 +258,11 @@ export class ApplicationService {
       if (!student || (student as any).admissionOfficerId !== userId) {
         return undefined;
       }
+    }
+
+    // Partner scoping
+    if (userRole === 'partner' && userId && (application as any).partner !== userId) {
+      return undefined;
     }
 
     // Branch manager scoping

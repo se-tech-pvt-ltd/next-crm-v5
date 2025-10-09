@@ -15,6 +15,11 @@ export class AdmissionService {
       // If no role/filters, return all
       if (!userRole && !regionId && !branchId && !userId) return all;
 
+      // If partner role, filter by admission.partner
+      if (userRole === 'partner' && userId) {
+        return all.filter(a => (a as any).partner === userId);
+      }
+
       // Helper to fetch student for matching
       const studentCache: Record<string, any> = {};
       const getStudent = async (id: string) => {
@@ -82,6 +87,11 @@ export class AdmissionService {
       if (!student || (student as any).admissionOfficerId !== userId) {
         return undefined;
       }
+    }
+
+    // Partner scoping
+    if (userRole === 'partner' && userId && (admission as any).partner !== userId) {
+      return undefined;
     }
 
     return admission;
