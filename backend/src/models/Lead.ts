@@ -76,6 +76,9 @@ export class LeadModel {
     if (scope.regionId) {
       conditions.push(eq(leads.regionId, scope.regionId));
     }
+    if (scope.partner) {
+      conditions.push(eq(leads.partner, scope.partner));
+    }
     return conditions;
   }
 
