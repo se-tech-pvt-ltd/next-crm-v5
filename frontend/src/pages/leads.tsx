@@ -15,9 +15,12 @@ import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { Lead } from '@/lib/types';
-import { Plus, UserPlus, Phone, Globe, Users, Target, TrendingUp, Filter, Calendar } from 'lucide-react';
+import { Plus, UserPlus, Phone, Globe, Users, XCircle, TrendingUp, Filter, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
+import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
@@ -86,6 +89,9 @@ export default function Leads() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
+  const [queryText, setQueryText] = useState('');
+  const [openFrom, setOpenFrom] = useState(false);
+  const [openTo, setOpenTo] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
@@ -235,9 +241,11 @@ export default function Leads() {
       ? true
       : statusFilter === 'converted'
         ? convertedLeadIds.has(lead.id)
-        : lead.status === statusFilter;
+        : statusFilter === 'lost'
+          ? (String((lead as any).isLost || '') === '1' || lead.status === 'lost')
+          : lead.status === statusFilter;
     const sourceMatch = sourceFilter === 'all' || lead.source === sourceFilter;
-    
+
     // Date range filter
     let dateMatch = true;
     if (dateFromFilter || dateToFilter) {
@@ -247,8 +255,15 @@ export default function Leads() {
         if (dateToFilter && leadDate > dateToFilter) dateMatch = false;
       }
     }
-    
-    return statusMatch && sourceMatch && dateMatch;
+
+    // Free text query filter (name, phone, email, city)
+    const q = String(queryText || '').trim().toLowerCase();
+    const matchesQuery = q === '' ? true : [lead.name, lead.phone, lead.email, lead.city].some(f => {
+      if (!f) return false;
+      return String(f).toLowerCase().includes(q);
+    });
+
+    return statusMatch && sourceMatch && dateMatch && matchesQuery;
   }) || [];
 
 
@@ -271,6 +286,13 @@ export default function Leads() {
 
 
   const [showConvertModal, setShowConvertModal] = useState(false);
+  const { data: leadsStats } = useQuery({
+    queryKey: ['/api/leads/stats'],
+    queryFn: async () => LeadsService.getLeadsStats(),
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
   const [addLeadInitialData, setAddLeadInitialData] = useState<any | undefined>(undefined);
 
@@ -348,9 +370,12 @@ export default function Leads() {
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
+            <CardContent className="p-2 pt-0 relative">
               <div className="text-base font-semibold">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : pagination.total || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (pagination.total || 0)}
+              </div>
+              <div className="absolute top-2 right-2 text-xs text-muted-foreground font-medium">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : ((pagination.total || 0) ? '100%' : '0%')}
               </div>
             </CardContent>
           </Card>
@@ -359,26 +384,41 @@ export default function Leads() {
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserPlus className="w-3 h-3 text-primary" />
-                New Leads
+                Active Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
-              <div className="text-base font-semibold text-blue-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'new').length || 0}
+            <CardContent className="p-2 pt-0 relative">
+              <div className="text-base font-semibold text-yellow-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.active ?? 0)}
+              </div>
+              <div className="absolute top-2 right-2 text-xs text-yellow-600 font-medium">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
+                  const total = (pagination.total || 0);
+                  const val = (leadsStats?.active ?? 0);
+                  return total ? `${Math.round((val / total) * 100)}%` : '0%';
+                })()}
               </div>
             </CardContent>
           </Card>
 
+
           <Card>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
-                <Target className="w-3 h-3 text-green-500" />
-                Qualified
+                <XCircle className="w-3 h-3 text-red-500" />
+                Lost Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
-              <div className="text-base font-semibold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : leads?.filter(l => l.status === 'qualified').length || 0}
+            <CardContent className="p-2 pt-0 relative">
+              <div className="text-base font-semibold text-red-600">
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.lost ?? 0)}
+              </div>
+              <div className="absolute top-2 right-2 text-xs text-red-600 font-medium">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
+                  const total = (pagination.total || 0);
+                  const val = (leadsStats?.lost ?? 0);
+                  return total ? `${Math.round((val / total) * 100)}%` : '0%';
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -387,12 +427,19 @@ export default function Leads() {
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
-                Converted
+                Converted Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0">
-              <div className="text-base font-semibold text-purple-600">
+            <CardContent className="p-2 pt-0 relative">
+              <div className="text-base font-semibold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
+              </div>
+              <div className="absolute top-2 right-2 text-xs text-green-600 font-medium">
+                {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
+                  const total = (pagination.total || 0);
+                  const val = convertedCount || 0;
+                  return total ? `${Math.round((val / total) * 100)}%` : '0%';
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -406,6 +453,18 @@ export default function Leads() {
                 <div className="flex items-center space-x-2">
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+
+                {/* Free text search for name, phone, email, city (moved to leftmost) */}
+                <div className="w-52">
+                  <InputWithIcon
+                    value={queryText}
+                    onChange={(e) => { setQueryText(e.target.value); setCurrentPage(1); }}
+                    placeholder="Search name, phone, email, city"
+                    leftIcon={<Search className="w-3 h-3" />}
+                    id="leads-filter-search"
+                    aria-label="Search leads"
+                  />
                 </div>
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
@@ -442,49 +501,83 @@ export default function Leads() {
 
                 {/* Date Range Filter */}
                 <div className="flex items-center space-x-2">
-                  <Popover>
+                  {/* Controlled popover with native date input for From */}
+                  <Popover open={openFrom} onOpenChange={setOpenFrom}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-28 h-7 text-xs">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}
+                      <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <CalendarComponent
-                        mode="single"
-                        selected={dateFromFilter}
-                        onSelect={(date) => {
-                          setDateFromFilter(date);
-                          setCurrentPage(1); // Reset to first page when filter changes
-                        }}
-                        initialFocus
-                      />
+                    <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
+                      <div className="w-full overflow-hidden">
+                        <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
+                          <CalendarComponent
+                            mode="single"
+                            selected={dateFromFilter}
+                            onSelect={(date) => {
+                              setDateFromFilter(date);
+                              setCurrentPage(1);
+                              setOpenFrom(false);
+                            }}
+                            className="w-full"
+                            showOutsideDays={false}
+                            classNames={{
+                              months: 'flex',
+                              month: 'grid grid-cols-7 gap-1 min-w-[260px]',
+                              table: 'w-full table-fixed',
+                              head_row: 'grid grid-cols-7',
+                              head_cell: 'text-muted-foreground text-center text-xs',
+                              row: 'grid grid-cols-7',
+                              cell: 'w-full h-10 text-center p-0',
+                              day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
+                            }}
+                          />
+                        </ErrorBoundary>
+                      </div>
                     </PopoverContent>
                   </Popover>
 
-                  <Popover>
+                  {/* Controlled popover with native date input for To */}
+                  <Popover open={openTo} onOpenChange={setOpenTo}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-28 h-7 text-xs">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {dateToFilter ? format(dateToFilter, "MM/dd") : "To"}
+                      <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <CalendarComponent
-                        mode="single"
-                        selected={dateToFilter}
-                        onSelect={(date) => {
-                          setDateToFilter(date);
-                          setCurrentPage(1); // Reset to first page when filter changes
-                        }}
-                        initialFocus
-                      />
+                    <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
+                      <div className="w-full overflow-hidden">
+                        <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
+                          <CalendarComponent
+                            mode="single"
+                            selected={dateToFilter}
+                            onSelect={(date) => {
+                              setDateToFilter(date);
+                              setCurrentPage(1);
+                              setOpenTo(false);
+                            }}
+                            className="w-full"
+                            showOutsideDays={false}
+                            classNames={{
+                              months: 'flex',
+                              month: 'grid grid-cols-7 gap-1 min-w-[260px]',
+                              table: 'w-full table-fixed',
+                              head_row: 'grid grid-cols-7',
+                              head_cell: 'text-muted-foreground text-center text-xs',
+                              row: 'grid grid-cols-7',
+                              cell: 'w-full h-10 text-center p-0',
+                              day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
+                            }}
+                          />
+                        </ErrorBoundary>
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
 
                 {/* Clear Filters */}
-                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter) && (
+                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -494,6 +587,7 @@ export default function Leads() {
                       setSourceFilter('all');
                       setDateFromFilter(undefined);
                       setDateToFilter(undefined);
+                      setQueryText('');
                       setCurrentPage(1); // Reset to first page when clearing filters
                     }}
                   >
@@ -585,8 +679,8 @@ export default function Leads() {
                     <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Converted</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
+                    <TableHead className="h-8 px-2 text-[11px]">Current Stage</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -618,9 +712,9 @@ export default function Leads() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        <span className="text-xs">
+                        <Badge className="bg-gray-100 text-gray-800">
                           {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell className="p-2 text-xs">
                         {lead.country ? (
@@ -633,16 +727,22 @@ export default function Leads() {
                         )}
                       </TableCell>
                       <TableCell className="p-2 text-xs">
-                        {convertedLeadIds.has(lead.id) ? (
-                          <Badge className="bg-green-100 text-green-800">Yes</Badge>
-                        ) : (
-                          <Badge className="bg-gray-100 text-gray-800">No</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(lead.status || 'new')}>
                           {getStatusDisplayName(lead.status || 'new')}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="p-2 text-xs">
+                        {(() => {
+                          const isConverted = Boolean((lead as any).isConverted || (lead as any).is_converted || convertedLeadIds.has(lead.id) || (lead.status === 'converted'));
+                          const isLost = Boolean((lead as any).isLost || (lead as any).is_lost || (lead.status === 'lost'));
+                          if (isConverted && !isLost) {
+                            return <Badge className="bg-green-100 text-green-800">Converted</Badge>;
+                          }
+                          if (!isConverted && isLost) {
+                            return <Badge className="bg-red-100 text-red-800">Lost</Badge>;
+                          }
+                          return <Badge className="bg-yellow-100 text-yellow-800">Active</Badge>;
+                        })()}
                       </TableCell>
                     </TableRow>
                   ))}
