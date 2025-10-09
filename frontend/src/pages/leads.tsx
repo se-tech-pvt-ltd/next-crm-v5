@@ -397,7 +397,7 @@ export default function Leads() {
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
-                Converted
+                Converted Leads
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0">
