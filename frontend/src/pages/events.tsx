@@ -2165,10 +2165,18 @@ export default function EventsPage() {
               // Clear any initial lead data we set for conversion
               try { setLeadInitialData(null); } catch {}
 
-              // Navigate to created lead if available; otherwise fall back to registrations list
+              // Ensure lead data is primed in the cache and related queries invalidated before navigation
               try {
                 const leadId = lead && ((lead as any).id || (lead as any).id === 0 ? (lead as any).id : null);
                 if (leadId) {
+                  try {
+                    // Prime individual lead cache so /leads/:id renders immediately with fresh data
+                    queryClient.setQueryData(['/api/leads', String(leadId)], lead);
+                    // Also invalidate list and related queries so other views refresh
+                    await queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+                    await queryClient.invalidateQueries({ queryKey: ['/api/students'] }).catch(() => {});
+                  } catch {}
+                  // Navigate to the created lead
                   navigate(`/leads/${leadId}`);
                 } else {
                   const eventIdToUse = evtId || selectedEvent?.id || filterEventId;
