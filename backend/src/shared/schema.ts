@@ -125,6 +125,13 @@ export const universities = mysqlTable("universities", {
   updatedBy: varchar("updated_by", { length: 36 }),
 });
 
+export const subPartners = mysqlTable("sub_partners", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  partnerId: varchar("partner_id", { length: 36 }).notNull(),
+  subPartnerId: varchar("sub_partner_id", { length: 36 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
 
 // Attachments table (for uploaded files/images)
 export const attachments = mysqlTable("attachments", {
@@ -605,3 +612,5 @@ export const usersResetTokenRelations = relations(usersResetTokens, ({ one }) =>
 
 export type BranchEmp = typeof branchEmps.$inferSelect;
 export type InsertBranchEmp = z.infer<typeof insertBranchEmpSchema>;
+export type SubPartner = typeof subPartners.$inferSelect;
+export type InsertSubPartner = typeof subPartners.$inferInsert;
