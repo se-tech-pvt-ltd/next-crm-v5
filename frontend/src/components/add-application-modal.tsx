@@ -171,6 +171,12 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const [subPartnerSearch, setSubPartnerSearch] = useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
 
+  // local state to ensure combobox value updates immediately
+  const [selectedSubPartnerLocal, setSelectedSubPartnerLocal] = useState<string>(() => (form.getValues('subPartnerId') as string) || '');
+  useEffect(() => {
+    if (open) setSelectedSubPartnerLocal((form.getValues('subPartnerId') as string) || '');
+  }, [open]);
+
   // Regions/Branches for access auto-fill
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), enabled: open, staleTime: 60_000 });
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), enabled: open, staleTime: 60_000 });
