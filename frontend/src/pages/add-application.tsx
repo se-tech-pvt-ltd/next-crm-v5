@@ -290,6 +290,11 @@ export default function AddApplication() {
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
+  // Current user role (for partner vs non-partner logic)
+  const { user } = useAuth() as any;
+  const currentRoleNormalized = String((user?.role || user?.role_name || user?.roleName) || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const isPartnerRole = String(currentRoleNormalized || '').includes('partner');
+
   const handlePickStudent = (id: string) => {
     if (!id) return;
     setSelectedStudentIdForModal(id);
