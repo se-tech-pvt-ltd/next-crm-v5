@@ -20,6 +20,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
 import { StudentPickerDialog } from '@/components/student-picker-dialog';
+import { useAuth } from '@/contexts/AuthContext';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
