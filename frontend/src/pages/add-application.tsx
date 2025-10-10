@@ -197,7 +197,47 @@ export default function AddApplication() {
     },
   });
 
-  const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
+  const onSubmit = (data: InsertApplication) => {
+    try {
+      // determine role from local auth_user or token
+      let roleName = '' as string;
+      try { const authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; roleName = authUser?.role || authUser?.role_name || authUser?.roleName || ''; } catch {}
+      if (!roleName) {
+        try {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            const parts = String(token).split('.');
+            if (parts.length >= 2) {
+              const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+              const pad = b64.length % 4;
+              const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+              const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const payload = JSON.parse(json) as any;
+              roleName = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+            }
+          }
+        } catch {}
+      }
+
+      const isPartnerRoleLocal = String(roleName || '').toLowerCase().includes('partner');
+      if (isPartnerRoleLocal) {
+        if (!data?.subPartnerId || String(data.subPartnerId).trim() === '') {
+          form.setError('subPartnerId' as any, { type: 'required', message: 'Sub partner is required for partner users' } as any);
+          toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
+          return;
+        }
+      } else {
+        const missing: string[] = [];
+        if (!data?.regionId || String(data.regionId).trim() === '') { form.setError('regionId' as any, { type: 'required', message: 'Region is required' } as any); missing.push('Region'); }
+        if (!data?.branchId || String(data.branchId).trim() === '') { form.setError('branchId' as any, { type: 'required', message: 'Branch is required' } as any); missing.push('Branch'); }
+        if (!data?.counsellorId || String(data.counsellorId).trim() === '') { form.setError('counsellorId' as any, { type: 'required', message: 'Counsellor is required' } as any); missing.push('Counsellor'); }
+        if (!data?.admissionOfficerId || String(data.admissionOfficerId).trim() === '') { form.setError('admissionOfficerId' as any, { type: 'required', message: 'Admission officer is required' } as any); missing.push('Admission officer'); }
+        if (missing.length) { toast({ title: 'Validation error', description: `${missing.join('; ')} are required`, variant: 'destructive' }); return; }
+      }
+    } catch (e) {}
+
+    createMutation.mutate(data);
+  };
 
   // Users for access assignment
   const { data: users = [] } = useQuery<any[]>({
