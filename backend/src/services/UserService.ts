@@ -15,6 +15,10 @@ export class UserService {
     return await UserModel.findAll();
   }
 
+  static async getSubPartnerUsers(partnerId: string): Promise<User[]> {
+    return await UserModel.findSubPartnersByPartnerId(partnerId);
+  }
+
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
     return await UserModel.searchUsers(searchQuery, roles, limit);
   }
