@@ -148,14 +148,6 @@ export default function Settings() {
           </>
         )}
 
-        {!authLoading && !rolesLoading && isPartner && category === 'partners' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Partners</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4"><UserSectionComp toast={toast} isPartnerView={true} /></CardContent>
-          </Card>
-        )}
       </div>
     </Layout>
   );
