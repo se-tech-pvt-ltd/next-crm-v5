@@ -95,11 +95,6 @@ export default function Settings() {
             </>
           )}
 
-          {!authLoading && !rolesLoading && isPartner && (
-            <Button type="button" variant={category === 'partners' ? 'default' : 'outline'} onClick={() => setCategory('partners')} className={`gap-2 ${category === 'partners' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
-              <ShieldCheck className="w-4 h-4" /> Partners
-            </Button>
-          )}
         </div>
 
         {/* Content area */}
