@@ -650,10 +650,11 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                 <TableRow>
                   <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
                   {!isPartnerView && (<TableHead className="h-8 px-2 text-[11px]">Region</TableHead>)}
                   {!isPartnerView && (<TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>)}
-                  <TableHead className="h-8 px-2 text-[11px]">Active</TableHead>
+                  {!isPartnerView && (<TableHead className="h-8 px-2 text-[11px]">Active</TableHead>)}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -691,6 +692,7 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                   }}>
                     <TableCell className="p-2 text-xs">{[(u.firstName ?? u.first_name), (u.lastName ?? u.last_name)].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
+                    <TableCell className="p-2 text-xs">{String(u.phoneNumber ?? u.phone_number ?? '—')}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
                     {!isPartnerView && (<TableCell className="p-2 text-xs">{(() => {
                       const roleName = String(u.role || '');
@@ -713,7 +715,7 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                       const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
                       return b ? String(b.name ?? b.branchName ?? b.branch_name ?? b.id) : '—';
                     })()}</TableCell>)}
-                    <TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>
+                    {!isPartnerView && (<TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>)}
                   </TableRow>
                 ))}
               </TableBody>
