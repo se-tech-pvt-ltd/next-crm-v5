@@ -98,7 +98,7 @@ export default function Settings() {
         </div>
 
         {/* Content area */}
-        {!authLoading && !rolesLoading && !isPartner && (
+        {!authLoading && !rolesLoading && (
           <>
             {category === 'branches' && (
               <Card>
