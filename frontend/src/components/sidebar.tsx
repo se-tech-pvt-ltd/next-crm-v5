@@ -108,7 +108,6 @@ export function Sidebar() {
     .map(String)
     .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const userRoleNormalized = userRoleCandidates[0] || '';
-  const isPartnerUser = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
 
   const isModuleVisible = useMemo(() => {
     return (label: string) => {
@@ -130,7 +129,7 @@ export function Sidebar() {
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
-    ...(isPartnerUser ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
+    { path: '/partners', label: 'Partners', icon: Handshake, count: undefined },
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ];
 
