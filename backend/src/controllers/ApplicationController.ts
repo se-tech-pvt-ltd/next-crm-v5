@@ -47,6 +47,7 @@ export class ApplicationController {
 
   static async createApplication(req: AuthenticatedRequest, res: Response) {
     try {
+      console.log('[CreateApplication] req.body:', req.body);
       // Allow partial input first, then apply role-based required checks
       const validatedData = insertApplicationSchema.partial().parse(req.body);
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
