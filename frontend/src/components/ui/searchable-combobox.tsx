@@ -123,9 +123,11 @@ export function SearchableCombobox({
           <div className="flex items-center space-x-2 flex-1 min-w-0">
             {selectedOption ? (
               <>
-                <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-3 h-3 text-primary" />
-                </div>
+                {showAvatar && (
+                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-3 h-3 text-primary" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="truncate text-sm font-medium">{selectedOption.label}</div>
                   {selectedOption.email && (
