@@ -388,26 +388,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
   }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps]);
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const getNormalizedRole = () => {
-    try {
-      const raw = user?.role || user?.role_name || user?.roleName || '';
-      if (raw) return normalizeRole(String(raw));
-      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
-      if (token) {
-        const parts = String(token).split('.');
-        if (parts.length >= 2) {
-          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-          const pad = b64.length % 4;
-          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
-          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-          const payload = JSON.parse(json) as any;
-          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
-          if (tokenRole) return normalizeRole(String(tokenRole));
-        }
-      }
-    } catch (e) {}
-    return '';
-  };
   const counsellorOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
     if (!bid) return [];
