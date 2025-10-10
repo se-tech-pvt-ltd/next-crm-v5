@@ -57,7 +57,7 @@ export class ApplicationController {
       const isPartner = String(roleName || '').includes('partner');
 
       if (isPartner) {
-        if (!validatedData.subPartner && !validatedData.subPartnerId && !validatedData.subPartnerId) {
+        if (!validatedData.subPartner && !validatedData.subPartnerId) {
           return res.status(400).json({ message: 'Sub partner is required for partner users' });
         }
         // ensure partner is set to current user if missing
@@ -72,6 +72,17 @@ export class ApplicationController {
           return res.status(400).json({ message: `${missing.join('; ')} are required` });
         }
       }
+
+      // Sanitize empty strings -> null to avoid foreign key constraint errors
+      ['branchId', 'regionId', 'counsellorId', 'admissionOfficerId'].forEach((k) => {
+        try {
+          const key = k as keyof typeof validatedData;
+          if (validatedData[key] !== undefined && String(validatedData[key]).trim() === '') {
+            // delete the property so it will become NULL / omitted in insert
+            delete (validatedData as any)[key];
+          }
+        } catch (e) {}
+      });
 
       const application = await ApplicationService.createApplication(validatedData, currentUser.id);
       res.status(201).json(application);
