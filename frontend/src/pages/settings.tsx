@@ -31,6 +31,31 @@ export default function Settings() {
     .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const isPartner = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
 
+  const renderedTabs: string[] = !authLoading
+    ? (isPartner
+      ? ['Partners']
+      : ['Region manager', 'Branch management', 'User management', 'Role access', 'Email (SMTP)']
+    )
+    : [];
+
+  useEffect(() => {
+    const debug = {
+      role: (user as any)?.role,
+      roleId: (user as any)?.roleId,
+      role_id: (user as any)?.role_id,
+      roleName: (user as any)?.roleName,
+      role_name: (user as any)?.role_name,
+      roleDetails_role: (user as any)?.roleDetails?.role,
+      roleDetails_role_name: (user as any)?.roleDetails?.role_name,
+      normalized: userRoleCandidates,
+      isPartner,
+      authLoading,
+      category,
+    };
+    console.log('[Settings] role debug:', debug);
+    console.log('[Settings] rendered tabs:', renderedTabs);
+  }, [user, isPartner, authLoading, category]);
+
   const [category, setCategory] = useState<AllowedCategory>(() => {
     // If partner, default to partners tab
     const saved = (localStorage.getItem('settings_category') as AllowedCategory | null) || (isPartner ? 'partners' : 'regions');
@@ -52,7 +77,7 @@ export default function Settings() {
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Manage branches, users and email settings">
       <div className="space-y-3">
         {/* Top bar tabs */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" data-testid="settings-tabs">
           {!authLoading && !isPartner && (
             <>
               <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className={`gap-2 ${category === 'regions' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
