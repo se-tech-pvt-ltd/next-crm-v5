@@ -62,30 +62,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
   const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
 
-  const getCurrentPartnerId = () => {
-    try {
-      const roleRaw = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
-      const roleNorm = String(roleRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
-      let pid = '';
-      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
-      if (token) {
-        const parts = String(token).split('.');
-        if (parts.length >= 2) {
-          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-          const pad = b64.length % 4;
-          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
-          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-          const payload = JSON.parse(json) as any;
-          pid = String(payload?.role_details?.partner_id || payload?.roleDetails?.partnerId || payload?.partner_id || payload?.partnerId || '').trim();
-        }
-      }
-      if (!pid && roleNorm === 'partner') pid = String((user as any)?.id || '');
-      return pid;
-    } catch { return ''; }
-  };
-  const partnerIdForQuery = React.useMemo(() => getCurrentPartnerId(), [open, (user as any)?.id, (user as any)?.role]);
   const [subPartnerSearch, setSubPartnerSearch] = React.useState('');
-  const { data: subPartners = [] } = useQuery({ queryKey: ['/api/users/sub-partners', partnerIdForQuery], queryFn: () => UsersService.getPartnerUsers(partnerIdForQuery), enabled: open && Boolean(partnerIdForQuery), staleTime: 60_000 });
+  const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners'], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
 
@@ -640,7 +618,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         searchPlaceholder="Search sub partners..."
                         onSearch={setSubPartnerSearch}
                         options={options}
-                        loading={false}
+                        loading={subPartnerLoading}
                         className="h-8 text-xs bg-white border border-gray-300"
                         emptyMessage="No sub partners found"
                       />
