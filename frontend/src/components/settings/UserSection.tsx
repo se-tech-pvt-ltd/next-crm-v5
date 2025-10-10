@@ -522,7 +522,7 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                         <div className="flex flex-col">
                           <Label>Department</Label>
                           <Select value={form.department} onValueChange={(v) => setForm((s) => ({ ...s, department: v, role: '', roleId: '' }))}>
-                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
+                            <SelectTrigger disabled={isPartnerView} className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Select department" /></SelectTrigger>
                             <SelectContent>
                               {departments.map((d: any) => (
                                 <SelectItem key={String(d.id)} value={String(d.id)}>{String(d.departmentName ?? d.department_name ?? d.departmentName)}</SelectItem>
