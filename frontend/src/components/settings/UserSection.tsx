@@ -538,7 +538,7 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                             const roleName = String(r?.roleName ?? r?.role_name ?? '').trim();
                             setForm((s) => ({ ...s, roleId: v, role: roleName }));
                           }}>
-                            <SelectTrigger className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
+                            <SelectTrigger disabled={isPartnerView} className="mt-2 h-10 focus:ring-primary focus:border-primary/40"><SelectValue placeholder="Please Select Role" /></SelectTrigger>
                             <SelectContent>
                               {(rolesForDept || []).map((r: any) => (
                                 <SelectItem key={String(r.id)} value={String(r.id)}>{String(r.roleName ?? r.role_name ?? r.id).replace(/_/g, ' ')}</SelectItem>
