@@ -38,7 +38,7 @@ export default defineConfig({
   },
   preview: {
     host: "0.0.0.0",
-    port: 4173,
+    port: 3000,
     allowedHosts: ["sales.crm-setech.cloud"], // optional (for `vite preview`)
   },
 });

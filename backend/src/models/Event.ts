@@ -10,6 +10,12 @@ export class EventModel {
     return event as any;
   }
 
+  static async findByName(name: string): Promise<Event | undefined> {
+    const rows = await db.select().from(events).where(eq(events.name, name));
+    const [event] = rows as any[];
+    return event as any;
+  }
+
   static async findAll(): Promise<Event[]> {
     return await db.select().from(events).orderBy(desc(events.createdAt));
   }

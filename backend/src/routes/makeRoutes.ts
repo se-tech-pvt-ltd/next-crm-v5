@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { LeadService } from '../services/LeadService.js';
+import { EventRegistrationService } from '../services/EventRegistrationService.js';
+import { EventModel } from '@/models/Event.js';
 
 export const makeRoutes = Router();
 
-// GET used to verify token
-makeRoutes.get('/lead', (req: any, res: any) => {
+makeRoutes.get('/registration', (req: any, res: any) => {
   try {
     const auth = (req.headers && req.headers.authorization) ? String(req.headers.authorization) : '';
     if (!auth.toLowerCase().startsWith('bearer ')) return res.status(401).json({ message: 'Unauthorized' });
@@ -18,7 +18,7 @@ makeRoutes.get('/lead', (req: any, res: any) => {
   }
 });
 
-makeRoutes.post('/lead', async (req: any, res: any) => {
+makeRoutes.post('/registration', async (req: any, res: any) => {
   try {
     const auth = (req.headers && req.headers.authorization) ? String(req.headers.authorization) : '';
     if (!auth.toLowerCase().startsWith('bearer ')) {
@@ -30,27 +30,36 @@ makeRoutes.post('/lead', async (req: any, res: any) => {
       return res.status(401).json({ message: 'Invalid token' });
     }
 
-    const { name, city, email, phone } = req.body || {};
-    if (!name || !email) {
-      return res.status(400).json({ message: 'Missing required fields: name and email' });
+    console.log('Creating event registration via Make integration:', req.body);
+    console.log('Creating event registration via Make integration:', JSON.stringify(req.body));
+
+    const { name, city, email, phone, eventName } = req.body || {};
+    if (!name || !email || !city || !phone || !eventName) {
+      return res.status(400).json({ message: 'Missing required fields: name, email, city, phone, or eventName' });
+    }
+
+    const event = await EventModel.findByName(eventName);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
     }
 
     const payload: any = {
       name: String(name),
       email: String(email).toLowerCase(),
-      phone: phone ? String(phone) : null,
+      number: phone ? String(phone) : null,
       city: city ? String(city) : null,
-      source: 'make',
-      status: 'new',
+      source: 'b75b4253-840f-11f0-a5b5-92e8d4b3yy3',
+      status: 'a576fe6c-8d7e-11f0-a5b5-92e8d4b3e6a5',
       createdBy: 'make',
       updatedBy: 'make',
+      eventId: event.id,
+      isConverted: 0,
     };
-
-    const lead = await LeadService.createLead(payload, 'make');
-    return res.status(201).json(lead);
+    const eventRegistration = await EventRegistrationService.createRegistration(payload);
+    return res.status(201).json(eventRegistration);
   } catch (error) {
-    console.error('Make lead error:', error);
-    return res.status(500).json({ message: 'Failed to create lead' });
+    console.error('Make registration error:', error);
+    return res.status(500).json({ message: 'Failed to create registration' });
   }
 });
 

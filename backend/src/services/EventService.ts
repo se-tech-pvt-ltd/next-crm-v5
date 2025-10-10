@@ -110,4 +110,10 @@ export class EventService {
   static async deleteEvent(id: string): Promise<boolean> {
     return await EventModel.delete(id);
   }
+
+  static async getEventByName(name: string): Promise<Event | undefined> {
+    const event = await EventModel.findByName(name);
+    if (!event) return undefined;
+    return event;
+  }
 }
