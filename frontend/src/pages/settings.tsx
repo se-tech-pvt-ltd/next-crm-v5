@@ -9,15 +9,28 @@ import RoleAccessSectionComp from '@/components/settings/RoleAccessSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
 import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 
 const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
 type AllowedCategory = typeof ALLOWED[number] | 'partners';
 
 export default function Settings() {
   const { toast } = useToast();
-  const { user } = useAuth() as any;
+  const { user, isLoading: authLoading } = useAuth() as any;
+  const roleIdVal = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
+  const { data: allRoles = [], isFetching: rolesLoading } = useQuery({
+    queryKey: ['/api/user-roles', 'all'],
+    queryFn: async () => {
+      const mod = await import('@/services/userRoles');
+      return mod.listRoles();
+    },
+    staleTime: 60_000,
+  });
+  const resolvedRoleName = (() => {
+    const r = (Array.isArray(allRoles) ? allRoles : []).find((rr: any) => String(rr.id) === roleIdVal);
+    return String(r?.roleName ?? r?.role_name ?? '').trim();
+  })();
   const userRoleCandidates = [
     (user as any)?.role,
     (user as any)?.roleId,
@@ -26,8 +39,22 @@ export default function Settings() {
     (user as any)?.role_name,
     (user as any)?.roleDetails?.role_name,
     (user as any)?.roleDetails?.role,
-  ].filter(Boolean).map(String).map(s => s.toLowerCase().replace(/\s+/g, '_'));
-  const isPartner = userRoleCandidates.includes('partner');
+    (user as any)?.role_details?.role_name,
+    (user as any)?.role_details?.role,
+    resolvedRoleName,
+  ]
+    .filter(Boolean)
+    .map(String)
+    .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
+  const isPartner = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
+
+  const renderedTabs: string[] = (!authLoading && !rolesLoading)
+    ? (isPartner
+      ? ['Partners']
+      : ['Region manager', 'Branch management', 'User management', 'Role access', 'Email (SMTP)']
+    )
+    : [];
+
 
   const [category, setCategory] = useState<AllowedCategory>(() => {
     // If partner, default to partners tab
@@ -38,20 +65,38 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    localStorage.setItem('settings_category', category);
+    try { localStorage.setItem('settings_category', category); } catch {}
   }, [category]);
 
   // When user role changes to partner ensure UI switches to partners
   useEffect(() => {
     if (isPartner && category !== 'partners') setCategory('partners');
-  }, [isPartner]);
+  }, [isPartner, category]);
+
+  useEffect(() => {
+    const debug = {
+      role: (user as any)?.role,
+      roleId: (user as any)?.roleId,
+      role_id: (user as any)?.role_id,
+      roleName: (user as any)?.roleName,
+      role_name: (user as any)?.role_name,
+      roleDetails_role: (user as any)?.roleDetails?.role,
+      roleDetails_role_name: (user as any)?.roleDetails?.role_name,
+      normalized: userRoleCandidates,
+      isPartner,
+      authLoading,
+      category,
+    };
+    console.log('[Settings] role debug:', { ...debug, resolvedRoleName, roleIdVal, rolesCount: Array.isArray(allRoles) ? allRoles.length : 0 });
+    console.log('[Settings] rendered tabs:', renderedTabs);
+  }, [user, isPartner, authLoading, category]);
 
   return (
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Manage branches, users and email settings">
       <div className="space-y-3">
         {/* Top bar tabs */}
-        <div className="flex flex-wrap items-center gap-2">
-          {!isPartner && (
+        <div className="flex flex-wrap items-center gap-2" data-testid="settings-tabs">
+          {!authLoading && !rolesLoading && !isPartner && (
             <>
               <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className={`gap-2 ${category === 'regions' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
                 <Globe2 className="w-4 h-4" /> Region manager
@@ -71,7 +116,7 @@ export default function Settings() {
             </>
           )}
 
-          {isPartner && (
+          {!authLoading && !rolesLoading && isPartner && (
             <Button type="button" variant={category === 'partners' ? 'default' : 'outline'} onClick={() => setCategory('partners')} className={`gap-2 ${category === 'partners' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
               <ShieldCheck className="w-4 h-4" /> Partners
             </Button>
@@ -79,7 +124,7 @@ export default function Settings() {
         </div>
 
         {/* Content area */}
-        {!isPartner && (
+        {!authLoading && !rolesLoading && !isPartner && (
           <>
             {category === 'branches' && (
               <Card>
@@ -129,7 +174,7 @@ export default function Settings() {
           </>
         )}
 
-        {isPartner && category === 'partners' && (
+        {!authLoading && !rolesLoading && isPartner && category === 'partners' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Partners</CardTitle>

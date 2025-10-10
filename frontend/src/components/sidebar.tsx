@@ -100,7 +100,12 @@ export function Sidebar() {
     (user as any)?.role_name,
     (user as any)?.roleDetails?.role_name,
     (user as any)?.roleDetails?.role,
-  ].filter(Boolean).map(String).map(s => s.toLowerCase().replace(/\s+/g, '_'));
+    (user as any)?.role_details?.role_name,
+    (user as any)?.role_details?.role,
+  ]
+    .filter(Boolean)
+    .map(String)
+    .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const userRoleNormalized = userRoleCandidates[0] || '';
 
   const isModuleVisible = useMemo(() => {
@@ -130,7 +135,6 @@ export function Sidebar() {
   navItems = navItems.filter(item => isModuleVisible(item.label));
 
   // Additional restriction: if user is a Partner, only show the partner-related modules
-  const userRoleNormalized = String((user as any)?.role || '').toLowerCase();
   if (userRoleNormalized === 'partner') {
     const allowed = new Set(['event','lead','leads','student','students','application','applications','admission','admissions']);
     navItems = navItems.filter(i => allowed.has(normalize(i.label)) || allowed.has(singularize(normalize(i.label))));
