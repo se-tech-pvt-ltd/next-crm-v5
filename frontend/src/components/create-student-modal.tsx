@@ -590,55 +590,77 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             <CardHeader className="py-2">
               <CardTitle className="text-sm flex items-center gap-2"><Users className="w-4 h-4" /> Access</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Region</Label>
-                <Select value={formData.regionId} onValueChange={(v) => {
-                  setFormData(prev => ({ ...prev, regionId: v, branchId: '', counsellor: '', admissionOfficer: '' }));
-                  setAutoRegionDisabled(false);
-                  setAutoBranchDisabled(false);
-                }} disabled={disabled || autoRegionDisabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select region" /></SelectTrigger>
-                  <SelectContent>
-                    {regionOptions.map((r: any) => (<SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Branch</Label>
-                <Select value={formData.branchId} onValueChange={(v) => {
-                  const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
-                  setFormData(prev => ({ ...prev, branchId: v, counsellor: '', admissionOfficer: '', regionId: prev.regionId || String(b?.regionId || '') }));
-                  const roleName = getNormalizedRole();
-                  const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
-                  setAutoBranchDisabled(!isRegional);
-                  setAutoRegionDisabled(isRegional ? true : !isRegional);
-                }} disabled={disabled || autoBranchDisabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select branch" /></SelectTrigger>
-                  <SelectContent>
-                    {branchOptions.map((b: any) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Counsellor</Label>
-                <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled || !formData.branchId}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                  <SelectContent>
-                    {counsellorList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Admission Officer</Label>
-                <Select value={formData.admissionOfficer} onValueChange={(v) => handleChange('admissionOfficer', v)} disabled={disabled || !formData.branchId}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select officer" /></SelectTrigger>
-                  <SelectContent>
-                    {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
+            {(() => {
+              const roleName = getNormalizedRole();
+              const isPartnerRole = roleName === 'partner';
+              if (isPartnerRole) {
+                const options = Array.isArray(subPartners) ? (subPartners as any[]).map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id })) : [];
+                return (
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label>Sub Partner</Label>
+                      <Select value={formData.subPartnerId} onValueChange={(v) => handleChange('subPartnerId', v)} disabled={disabled}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select sub partner" /></SelectTrigger>
+                        <SelectContent>
+                          {options.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                );
+              }
+              return (
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>Region</Label>
+                    <Select value={formData.regionId} onValueChange={(v) => {
+                      setFormData(prev => ({ ...prev, regionId: v, branchId: '', counsellor: '', admissionOfficer: '' }));
+                      setAutoRegionDisabled(false);
+                      setAutoBranchDisabled(false);
+                    }} disabled={disabled || autoRegionDisabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectContent>
+                        {regionOptions.map((r: any) => (<SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Branch</Label>
+                    <Select value={formData.branchId} onValueChange={(v) => {
+                      const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
+                      setFormData(prev => ({ ...prev, branchId: v, counsellor: '', admissionOfficer: '', regionId: prev.regionId || String(b?.regionId || '') }));
+                      const roleName = getNormalizedRole();
+                      const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+                      setAutoBranchDisabled(!isRegional);
+                      setAutoRegionDisabled(isRegional ? true : !isRegional);
+                    }} disabled={disabled || autoBranchDisabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectContent>
+                        {branchOptions.map((b: any) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Counsellor</Label>
+                    <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled || !formData.branchId}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectContent>
+                        {counsellorList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Admission Officer</Label>
+                    <Select value={formData.admissionOfficer} onValueChange={(v) => handleChange('admissionOfficer', v)} disabled={disabled || !formData.branchId}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectContent>
+                        {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              );
+            })()}
           </Card>
 
 
