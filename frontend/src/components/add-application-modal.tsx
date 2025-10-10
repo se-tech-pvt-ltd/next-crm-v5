@@ -171,6 +171,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   const [subPartnerSearch, setSubPartnerSearch] = useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
 
+  // Regions/Branches for access auto-fill
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), enabled: open, staleTime: 60_000 });
+  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), enabled: open, staleTime: 60_000 });
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
+
+  const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
+  const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
+
   // Universities-based dynamic data
   const { data: uniSummaries = [] } = useQuery({
     queryKey: ['/api/universities'],
