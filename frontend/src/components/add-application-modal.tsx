@@ -408,7 +408,25 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               <Button
                 type="button"
                 onClick={() => form.handleSubmit(onSubmit)()}
-                disabled={createApplicationMutation.isPending || !form.formState.isValid}
+                disabled={(() => {
+                  if (createApplicationMutation.isPending) return true;
+                  try {
+                    const roleName = getNormalizedRole();
+                    const isPartner = String(roleName || '').includes('partner');
+                    const values = form.getValues();
+                    const baseValid = Boolean(form.formState.isValid);
+                    if (!baseValid) return true;
+                    if (isPartner) {
+                      return !Boolean(values?.subPartnerId);
+                    }
+                    return !(
+                      (Boolean(values?.regionId) || Boolean(values?.branchId)) &&
+                      Boolean(values?.counsellorId) && Boolean(values?.admissionOfficerId)
+                    );
+                  } catch (e) {
+                    return true;
+                  }
+                })()}
                 className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
               >
                 {createApplicationMutation.isPending ? 'Creating…' : 'Create'}
