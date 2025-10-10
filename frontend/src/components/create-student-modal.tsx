@@ -84,6 +84,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     notes: '',
     regionId: '',
     branchId: '',
+    subPartnerId: '',
   };
 
   type FormFieldKey = keyof typeof initialFormData;
