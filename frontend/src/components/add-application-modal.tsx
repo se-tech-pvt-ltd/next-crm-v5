@@ -363,10 +363,13 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
 
   const onSubmit = (data: any) => {
     try {
+      // map subPartnerId -> subPartner for backend compatibility
+      try { if (data?.subPartnerId && !data.subPartner) data.subPartner = data.subPartnerId; } catch {}
+
       const roleName = getNormalizedRole();
       const isPartnerRole = String(roleName || '').includes('partner');
       if (isPartnerRole) {
-        if (!data?.subPartnerId || String(data.subPartnerId).trim() === '') {
+        if (!data?.subPartner && String(data.subPartner || '').trim() === '') {
           form.setError('subPartnerId', { type: 'required', message: 'Sub partner is required for partner users' });
           toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
           return;
