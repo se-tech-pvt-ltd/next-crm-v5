@@ -607,9 +607,6 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 return (
                   <CardContent className="grid grid-cols-1 gap-3">
                     <div className="space-y-2">
-                      <div className="flex items-center justify-end">
-                        <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => setLocation('/partners')}>Manage</Button>
-                      </div>
                       <SearchableCombobox
                         value={formData.subPartnerId}
                         onValueChange={(v) => handleChange('subPartnerId', v)}
@@ -618,7 +615,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         onSearch={setSubPartnerSearch}
                         options={options}
                         loading={subPartnerLoading}
-                        className="h-8 text-xs bg-white border border-gray-300"
+                        className="h-11 text-sm bg-white border-2 border-gray-300"
                         emptyMessage="No sub partners found"
                       />
                       <p className="text-[11px] text-muted-foreground">Students you create will be attributed to the selected sub partner for tracking and reports.</p>
