@@ -53,7 +53,7 @@ export default function Settings() {
       <div className="space-y-3">
         {/* Top bar tabs */}
         <div className="flex flex-wrap items-center gap-2">
-          {!isPartner && (
+          {!authLoading && !isPartner && (
             <>
               <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className={`gap-2 ${category === 'regions' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
                 <Globe2 className="w-4 h-4" /> Region manager
@@ -73,7 +73,7 @@ export default function Settings() {
             </>
           )}
 
-          {isPartner && (
+          {!authLoading && isPartner && (
             <Button type="button" variant={category === 'partners' ? 'default' : 'outline'} onClick={() => setCategory('partners')} className={`gap-2 ${category === 'partners' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
               <ShieldCheck className="w-4 h-4" /> Partners
             </Button>
@@ -81,7 +81,7 @@ export default function Settings() {
         </div>
 
         {/* Content area */}
-        {!isPartner && (
+        {!authLoading && !isPartner && (
           <>
             {category === 'branches' && (
               <Card>
@@ -131,7 +131,7 @@ export default function Settings() {
           </>
         )}
 
-        {isPartner && category === 'partners' && (
+        {!authLoading && isPartner && category === 'partners' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Partners</CardTitle>
