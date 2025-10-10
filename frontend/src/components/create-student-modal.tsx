@@ -197,6 +197,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     const notes = (formData.notes || '').trim();
     const regionId = (formData.regionId || '').trim();
     const branchId = (formData.branchId || '').trim();
+    const subPartnerId = (formData.subPartnerId || '').trim();
 
     const validationErrors: Record<string, string> = {};
 
@@ -212,8 +213,13 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     if (!expectation) validationErrors.expectation = 'Expectation is required';
     if (!status) validationErrors.status = 'Status is required';
     if (!Array.isArray(formData.targetCountries) || formData.targetCountries.length === 0) validationErrors.targetCountries = 'Select at least one target country';
-    if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
-    if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
+
+    const roleName = getNormalizedRole();
+    const isPartnerRole = roleName === 'partner';
+    if (!isPartnerRole) {
+      if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
+      if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
+    }
     if (!formData.consultancyFee) validationErrors.consultancyFee = 'Consultancy fee selection is required';
     if (!formData.scholarship) validationErrors.scholarship = 'Scholarship selection is required';
 
@@ -236,16 +242,22 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       targetCountry: normalizedTargetCountry,
       passportNumber,
       englishProficiency,
-      counsellorId,
-      counselorId: counsellorId,
-      admissionOfficerId,
       consultancyFree: formData.consultancyFee === 'Yes',
       scholarship: formData.scholarship === 'Yes',
     };
 
+    if (!isPartnerRole) {
+      if (counsellorId) { payload.counsellorId = counsellorId; payload.counselorId = counsellorId; }
+      if (admissionOfficerId) payload.admissionOfficerId = admissionOfficerId;
+      if (regionId) payload.regionId = regionId;
+      if (branchId) payload.branchId = branchId;
+    } else {
+      const currentUserId = String((user as any)?.id || '');
+      if (currentUserId) payload.partner = currentUserId;
+      if (subPartnerId) payload.subPartner = subPartnerId;
+    }
+
     if (notes) payload.notes = notes;
-    if (regionId) payload.regionId = regionId;
-    if (branchId) payload.branchId = branchId;
 
     try {
       const res = await StudentsService.getStudents();
