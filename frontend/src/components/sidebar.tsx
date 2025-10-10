@@ -100,6 +100,8 @@ export function Sidebar() {
     (user as any)?.role_name,
     (user as any)?.roleDetails?.role_name,
     (user as any)?.roleDetails?.role,
+    (user as any)?.role_details?.role_name,
+    (user as any)?.role_details?.role,
   ]
     .filter(Boolean)
     .map(String)

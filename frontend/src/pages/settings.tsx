@@ -25,6 +25,8 @@ export default function Settings() {
     (user as any)?.role_name,
     (user as any)?.roleDetails?.role_name,
     (user as any)?.roleDetails?.role,
+    (user as any)?.role_details?.role_name,
+    (user as any)?.role_details?.role,
   ]
     .filter(Boolean)
     .map(String)
