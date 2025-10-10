@@ -60,6 +60,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30_000 });
   const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
   const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
+  const { data: subPartners = [] } = useQuery({ queryKey: ['/api/users/sub-partners'], queryFn: () => UsersService.getPartnerUsers(), enabled: open });
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
 
