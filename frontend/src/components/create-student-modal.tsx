@@ -617,6 +617,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         loading={subPartnerLoading}
                         className="h-11 text-sm bg-white border-2 border-gray-300"
                         emptyMessage="No sub partners found"
+                        showAvatar={false}
                       />
                       <p className="text-[11px] text-muted-foreground">Students you create will be attributed to the selected sub partner for tracking and reports.</p>
                     </div>

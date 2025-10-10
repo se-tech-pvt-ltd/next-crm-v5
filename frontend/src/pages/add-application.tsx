@@ -20,6 +20,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import { useMemo, useEffect, useState } from 'react';
 import { StudentPickerDialog } from '@/components/student-picker-dialog';
+import { useAuth } from '@/contexts/AuthContext';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -196,7 +197,53 @@ export default function AddApplication() {
     },
   });
 
-  const onSubmit = (data: InsertApplication) => createMutation.mutate(data);
+  const onSubmit = (data: InsertApplication) => {
+    try {
+      // map subPartnerId -> subPartner for backend compatibility
+      try { if ((data as any)?.subPartnerId && !(data as any).subPartner) (data as any).subPartner = (data as any).subPartnerId; } catch {}
+
+      // determine role from local auth_user or token
+      let roleName = '' as string;
+      try { const authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; roleName = authUser?.role || authUser?.role_name || authUser?.roleName || ''; } catch {}
+      if (!roleName) {
+        try {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            const parts = String(token).split('.');
+            if (parts.length >= 2) {
+              const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+              const pad = b64.length % 4;
+              const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+              const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const payload = JSON.parse(json) as any;
+              roleName = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+            }
+          }
+        } catch {}
+      }
+
+      const isPartnerRoleLocal = String(roleName || '').toLowerCase().includes('partner');
+      if (isPartnerRoleLocal) {
+        const selectedSubPartner = (data as any)?.subPartner ?? (data as any)?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
+        console.log('[AddApplicationPage] onSubmit selectedSubPartner:', selectedSubPartner, 'data.subPartnerId=', (data as any)?.subPartnerId, 'form.getValues(subPartnerId)=', form.getValues('subPartnerId'));
+        if (!selectedSubPartner || String(selectedSubPartner || '').trim() === '') {
+          form.setError('subPartnerId' as any, { type: 'required', message: 'Sub partner is required for partner users' } as any);
+          toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
+          return;
+        }
+        if (!(data as any).subPartner) (data as any).subPartner = selectedSubPartner;
+      } else {
+        const missing: string[] = [];
+        if (!data?.regionId || String(data.regionId).trim() === '') { form.setError('regionId' as any, { type: 'required', message: 'Region is required' } as any); missing.push('Region'); }
+        if (!data?.branchId || String(data.branchId).trim() === '') { form.setError('branchId' as any, { type: 'required', message: 'Branch is required' } as any); missing.push('Branch'); }
+        if (!data?.counsellorId || String(data.counsellorId).trim() === '') { form.setError('counsellorId' as any, { type: 'required', message: 'Counsellor is required' } as any); missing.push('Counsellor'); }
+        if (!data?.admissionOfficerId || String(data.admissionOfficerId).trim() === '') { form.setError('admissionOfficerId' as any, { type: 'required', message: 'Admission officer is required' } as any); missing.push('Admission officer'); }
+        if (missing.length) { toast({ title: 'Validation error', description: `${missing.join('; ')} are required`, variant: 'destructive' }); return; }
+      }
+    } catch (e) {}
+
+    createMutation.mutate(data);
+  };
 
   // Users for access assignment
   const { data: users = [] } = useQuery<any[]>({
@@ -289,6 +336,11 @@ export default function AddApplication() {
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
 
+  // Current user role (for partner vs non-partner logic)
+  const { user } = useAuth() as any;
+  const currentRoleNormalized = String((user?.role || user?.role_name || user?.roleName) || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const isPartnerRole = String(currentRoleNormalized || '').includes('partner');
+
   const handlePickStudent = (id: string) => {
     if (!id) return;
     setSelectedStudentIdForModal(id);
@@ -361,7 +413,30 @@ export default function AddApplication() {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              try {
+                const extract = (obj:any, out:string[] = []) => {
+                  if (!obj || typeof obj !== 'object') return out;
+                  for (const k of Object.keys(obj)) {
+                    const v = obj[k];
+                    if (!v) continue;
+                    if (typeof v === 'string') out.push(v);
+                    else if (Array.isArray(v)) out.push(...v.map(String));
+                    else if (v?.message) out.push(String(v.message));
+                    else if (typeof v === 'object') extract(v, out);
+                  }
+                  return out;
+                };
+                const msgs = extract(errors).filter(Boolean);
+                if (msgs.length) {
+                  toast({ title: 'Validation error', description: msgs.join('; '), variant: 'destructive' });
+                } else {
+                  toast({ title: 'Validation error', description: 'Please fill required fields', variant: 'destructive' });
+                }
+              } catch (e) {
+                toast({ title: 'Validation error', description: 'Please check the form fields', variant: 'destructive' });
+              }
+            })} className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -669,7 +744,7 @@ export default function AddApplication() {
                   <span>Cancel</span>
                 </Button>
               </motion.div>
-              <Button type="submit" disabled={createMutation.isPending || !form.formState.isValid} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto">
+              <Button type="submit" disabled={createMutation.isPending} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto">
                 {createMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

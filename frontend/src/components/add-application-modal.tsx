@@ -19,12 +19,16 @@ import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { Check, ChevronsUpDown, PlusCircle, Link2, BookOpen, UserSquare, ExternalLink, StickyNote } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { StudentProfileModal } from './student-profile-modal-new';
 import { ApplicationDetailsModal } from './application-details-modal-new';
 import * as DropdownsService from '@/services/dropdowns';
+import * as RegionsService from '@/services/regions';
+import * as BranchesService from '@/services/branches';
+import * as BranchEmpsService from '@/services/branchEmps';
 
 interface AddApplicationModalProps {
   open: boolean;
@@ -61,6 +65,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     staleTime: 5 * 60 * 1000,
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const getNormalizedRole = () => {
+    try {
+      const raw = (localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null) as any;
+    } catch {};
+    try {
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          if (tokenRole) return normalizeRole(String(tokenRole));
+        }
+      }
+    } catch (e) {}
+    return '';
+  };
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -139,8 +164,26 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       admissionOfficerId: '',
       regionId: '',
       branchId: '',
+      subPartnerId: '',
     },
   });
+
+  const [subPartnerSearch, setSubPartnerSearch] = useState('');
+  const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
+
+  // local state to ensure combobox value updates immediately
+  const [selectedSubPartnerLocal, setSelectedSubPartnerLocal] = useState<string>(() => (form.getValues('subPartnerId') as string) || '');
+  useEffect(() => {
+    if (open) setSelectedSubPartnerLocal((form.getValues('subPartnerId') as string) || '');
+  }, [open]);
+
+  // Regions/Branches for access auto-fill
+  const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), enabled: open, staleTime: 60_000 });
+  const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), enabled: open, staleTime: 60_000 });
+  const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
+
+  const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
+  const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
 
   // Universities-based dynamic data
   const { data: uniSummaries = [] } = useQuery({
@@ -325,6 +368,34 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   });
 
   const onSubmit = (data: any) => {
+    try {
+      // map subPartnerId -> subPartner for backend compatibility
+      try { if (data?.subPartnerId && !data.subPartner) data.subPartner = data.subPartnerId; } catch {}
+
+      const roleName = getNormalizedRole();
+      const isPartnerRole = String(roleName || '').includes('partner');
+      if (isPartnerRole) {
+        const selectedSubPartner = data?.subPartner ?? data?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
+        console.log('[AddApplicationModal] onSubmit selectedSubPartner:', selectedSubPartner, 'data.subPartnerId=', data?.subPartnerId, 'form.getValues(subPartnerId)=', form.getValues('subPartnerId'));
+        if (!selectedSubPartner || String(selectedSubPartner).trim() === '') {
+          form.setError('subPartnerId', { type: 'required', message: 'Sub partner is required for partner users' });
+          toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
+          return;
+        }
+        // ensure backend key exists
+        if (!data.subPartner) data.subPartner = selectedSubPartner;
+      } else {
+        const missing: string[] = [];
+        if (!data?.regionId || String(data.regionId).trim() === '') { form.setError('regionId', { type: 'required', message: 'Region is required' }); missing.push('Region'); }
+        if (!data?.branchId || String(data.branchId).trim() === '') { form.setError('branchId', { type: 'required', message: 'Branch is required' }); missing.push('Branch'); }
+        if (!data?.counsellorId || String(data.counsellorId).trim() === '') { form.setError('counsellorId', { type: 'required', message: 'Counsellor is required' }); missing.push('Counsellor'); }
+        if (!data?.admissionOfficerId || String(data.admissionOfficerId).trim() === '') { form.setError('admissionOfficerId', { type: 'required', message: 'Admission officer is required' }); missing.push('Admission officer'); }
+        if (missing.length) { toast({ title: 'Validation error', description: `${missing.join('; ')} are required`, variant: 'destructive' }); return; }
+      }
+    } catch (e) {
+      // fallback to existing validation flow
+    }
+
     createApplicationMutation.mutate(data);
   };
 
@@ -337,6 +408,94 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       form.setValue('studentId', presetStudent.id);
     }
   }, [studentId, presetStudent]);
+
+  // Auto-select region/branch based on current user role/token (mirrors /students/new logic)
+  useEffect(() => {
+    try {
+      if (!open) return;
+      const currentRegion = String(form.getValues('regionId') || '');
+      const currentBranch = String(form.getValues('branchId') || '');
+      if (currentRegion && currentBranch) return;
+
+      const safeGetToken = () => { try { return localStorage.getItem('auth_token'); } catch { return null; } };
+      const token = safeGetToken();
+      let resolvedRegionId = '';
+      let resolvedBranchId = '';
+
+      if (token) {
+        try {
+          const parts = String(token).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            const rd = payload?.role_details || payload?.roleDetails || {};
+            const candidateRegion = rd.region_id ?? rd.regionId ?? payload?.region_id ?? payload?.regionId ?? payload?.region?.id ?? payload?.user?.region_id ?? payload?.user?.regionId;
+            const candidateBranch = rd.branch_id ?? rd.branchId ?? payload?.branch_id ?? payload?.branchId ?? payload?.branch?.id ?? payload?.user?.branch_id ?? payload?.user?.branchId;
+            if (candidateRegion) resolvedRegionId = String(candidateRegion);
+            if (candidateBranch) resolvedBranchId = String(candidateBranch);
+          }
+        } catch {}
+      }
+
+      const roleName = getNormalizedRole();
+
+      if (!resolvedRegionId) {
+        let authUser: any = null;
+        try { authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; } catch {}
+        const userRegionId = String(authUser?.regionId ?? authUser?.region_id ?? '');
+        if (userRegionId) {
+          resolvedRegionId = userRegionId;
+        } else if (roleName === 'regional_manager' || roleName === 'regional_head') {
+          const r = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.regionHeadId ?? rr.region_head_id) === String(authUser?.id));
+          if (r?.id) resolvedRegionId = String(r.id);
+        }
+      }
+
+      if (!resolvedBranchId && (roleName === 'branch_manager' || roleName === 'counselor' || roleName === 'counsellor' || roleName === 'admission_officer')) {
+        const branchesArr = Array.isArray(branches) ? branches : [];
+        const links = Array.isArray(branchEmps) ? branchEmps : [];
+        let userBranchId = '';
+        let authUser: any = null;
+        try { authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; } catch {}
+        const headBranch = branchesArr.find((b: any) => String(b.branchHeadId ?? b.branch_head_id) === String(authUser?.id));
+        if (headBranch) userBranchId = String(headBranch.id);
+        if (!userBranchId) {
+          const be = links.find((x: any) => String(x.userId ?? x.user_id) === String(authUser?.id));
+          if (be) userBranchId = String(be.branchId ?? be.branch_id);
+        }
+        if (userBranchId) {
+          resolvedBranchId = userBranchId;
+          if (!resolvedRegionId) {
+            const b = branchesArr.find((bb: any) => String(bb.id) === String(userBranchId));
+            if (b) resolvedRegionId = String(b.regionId ?? b.region_id ?? '');
+          }
+        }
+      }
+
+      if (resolvedRegionId) {
+        form.setValue('regionId', resolvedRegionId);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoRegionDisabled(isRegional ? true : !isRegional);
+      }
+
+      if (resolvedBranchId) {
+        form.setValue('branchId', resolvedBranchId);
+        const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+        setAutoBranchDisabled(!isRegional);
+      } else if (resolvedRegionId && !currentBranch) {
+        form.setValue('branchId', '');
+        setAutoBranchDisabled(false);
+      }
+
+      if (!(resolvedRegionId || resolvedBranchId)) {
+        setAutoRegionDisabled(false);
+        setAutoBranchDisabled(false);
+      }
+    } catch {}
+  }, [open]);
 
   const openStudentProfile = (sid?: string) => {
     if (!sid) return;
@@ -381,8 +540,31 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               </Button>
               <Button
                 type="button"
-                onClick={() => form.handleSubmit(onSubmit)()}
-                disabled={createApplicationMutation.isPending || !form.formState.isValid}
+                onClick={() => form.handleSubmit(onSubmit, (errors) => {
+                  try {
+                    const extract = (obj:any, out:string[] = []) => {
+                      if (!obj || typeof obj !== 'object') return out;
+                      for (const k of Object.keys(obj)) {
+                        const v = obj[k];
+                        if (!v) continue;
+                        if (typeof v === 'string') out.push(v);
+                        else if (Array.isArray(v)) out.push(...v.map(String));
+                        else if (v?.message) out.push(String(v.message));
+                        else if (typeof v === 'object') extract(v, out);
+                      }
+                      return out;
+                    };
+                    const msgs = extract(errors).filter(Boolean);
+                    if (msgs.length) {
+                      toast({ title: 'Validation error', description: msgs.join('; '), variant: 'destructive' });
+                    } else {
+                      toast({ title: 'Validation error', description: 'Please fill required fields', variant: 'destructive' });
+                    }
+                  } catch (e) {
+                    toast({ title: 'Validation error', description: 'Please check the form fields', variant: 'destructive' });
+                  }
+                })() }
+                disabled={createApplicationMutation.isPending}
                 className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
               >
                 {createApplicationMutation.isPending ? 'Creating…' : 'Create'}
@@ -679,55 +861,77 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <CardTitle className="text-sm flex items-center"><UserSquare className="w-4 h-4 mr-2" />Access</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="counsellorId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Counsellor <span className="text-red-600">*</span></FormLabel>
-                        <FormControl>
-                          <Select value={field.value || ''} onValueChange={field.onChange}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedBranchId ? 'Select counsellor' : 'No branch linked to student'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {counsellorOptionsRender.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {(() => {
+                  const roleName = getNormalizedRole();
+                  const isPartnerRole = String(roleName || '').includes('partner');
+                  if (isPartnerRole) {
+                    // fetch sub partners
+                    return (
+                      <FormField control={form.control} name="subPartnerId" render={() => (
+                        <FormItem>
+                          <FormLabel>Sub partner</FormLabel>
+                          <FormControl>
+                            <SearchableCombobox value={selectedSubPartnerLocal || ''} onValueChange={(v) => { form.setValue('subPartnerId', v, { shouldDirty: true, shouldValidate: true }); setSelectedSubPartnerLocal(v); }} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={setSubPartnerSearch} options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || (u.email||'User'), email: u.email }))} loading={subPartnerLoading} showAvatar={false} />
+                          </FormControl>
+                        </FormItem>
+                      )} />
+                    );
+                  }
 
-                  <FormField
-                    control={form.control}
-                    name="admissionOfficerId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Admission Officer <span className="text-red-600">*</span></FormLabel>
-                        <FormControl>
-                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                  return (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="counsellorId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Counsellor <span className="text-red-600">*</span></FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedBranchId ? 'Select admission officer' : 'No branch linked to student'} />
-                              </SelectTrigger>
+                              <Select value={field.value || ''} onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={selectedBranchId ? 'Select counsellor' : 'No branch linked to student'} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {counsellorOptionsRender.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </FormControl>
-                            <SelectContent>
-                              {officerOptionsRender.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="admissionOfficerId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Admission Officer <span className="text-red-600">*</span></FormLabel>
+                            <FormControl>
+                              <Select value={field.value || ''} onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={selectedBranchId ? 'Select admission officer' : 'No branch linked to student'} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {officerOptionsRender.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  );
+                })()}
                 </CardContent>
               </Card>
 

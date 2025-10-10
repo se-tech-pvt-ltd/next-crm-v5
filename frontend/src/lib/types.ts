@@ -231,11 +231,11 @@ export const insertApplicationSchema = z.object({
   intakeId: z.string().min(1, "Intake ID is required"),
   googleDriveLink: z.string().min(1, "Google Drive link is required").url("Invalid URL for Google Drive link"),
   notes: z.string().min(1, "Notes are required"),
-  // Access fields (required)
-  branchId: z.string().min(1, "Branch is required"),
-  regionId: z.string().min(1, "Region is required"),
-  counsellorId: z.string().min(1, "Counsellor is required"),
-  admissionOfficerId: z.string().min(1, "Admission officer is required"),
+  // Access fields (optional)
+  branchId: z.string().optional(),
+  regionId: z.string().optional(),
+  counsellorId: z.string().optional(),
+  admissionOfficerId: z.string().optional(),
 });
 
 export const insertAdmissionSchema = z.object({
