@@ -607,8 +607,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 return (
                   <CardContent className="grid grid-cols-1 gap-3">
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="flex items-center gap-2"><Users className="w-4 h-4" /> Assign to Sub Partner</Label>
+                      <div className="flex items-center justify-end">
                         <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => setLocation('/partners')}>Manage</Button>
                       </div>
                       <SearchableCombobox
