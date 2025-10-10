@@ -682,9 +682,29 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
               header={<CardTitle className="flex items-center space-x-2"><Users className="w-4 h-4 text-primary" /><span>Student Access</span></CardTitle>}
             >
               {(() => {
-                const normalizeRole = (v?: any) => String(v || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
-                const roleName = normalizeRole(authUser?.role || authUser?.role_name || authUser?.roleName || authUser?.role_details?.role_name || authUser?.roleDetails?.roleName);
-                const isPartnerRole = roleName.includes('partner');
+                const normalize = (v?: any) => String(v || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+                const getNormalizedRole = () => {
+                  try {
+                    const raw = authUser?.role || authUser?.role_name || authUser?.roleName || authUser?.role_details?.role_name || authUser?.roleDetails?.roleName || '';
+                    if (raw) return normalize(raw);
+                    const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+                    if (token) {
+                      const parts = String(token).split('.');
+                      if (parts.length >= 2) {
+                        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                        const pad = b64.length % 4;
+                        const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+                        const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                        const payload = JSON.parse(json) as any;
+                        const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+                        if (tokenRole) return normalize(tokenRole);
+                      }
+                    }
+                  } catch (e) {}
+                  return '';
+                };
+                const roleName = getNormalizedRole();
+                const isPartnerRole = String(roleName || '').includes('partner');
                 if (isPartnerRole) {
                   const spId = (student as any).subPartner || (student as any).sub_partner || (student as any).subPartnerId || (student as any).sub_partner_id || '';
                   const sp = spId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(spId)) : null;
