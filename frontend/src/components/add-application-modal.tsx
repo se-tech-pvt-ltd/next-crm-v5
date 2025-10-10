@@ -369,11 +369,14 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       const roleName = getNormalizedRole();
       const isPartnerRole = String(roleName || '').includes('partner');
       if (isPartnerRole) {
-        if (!data?.subPartner && String(data.subPartner || '').trim() === '') {
+        const selectedSubPartner = data?.subPartner ?? data?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
+        if (!selectedSubPartner || String(selectedSubPartner).trim() === '') {
           form.setError('subPartnerId', { type: 'required', message: 'Sub partner is required for partner users' });
           toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
           return;
         }
+        // ensure backend key exists
+        if (!data.subPartner) data.subPartner = selectedSubPartner;
       } else {
         const missing: string[] = [];
         if (!data?.regionId || String(data.regionId).trim() === '') { form.setError('regionId', { type: 'required', message: 'Region is required' }); missing.push('Region'); }
