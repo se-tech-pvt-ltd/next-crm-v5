@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
@@ -18,6 +19,7 @@ import * as StudentsService from '@/services/students';
 import * as DropdownsService from '@/services/dropdowns';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
+import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
@@ -60,6 +62,9 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
   const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
 
+  const [subPartnerSearch, setSubPartnerSearch] = React.useState('');
+  const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners'], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
+
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
 
 
@@ -83,6 +88,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     notes: '',
     regionId: '',
     branchId: '',
+    subPartnerId: '',
   };
 
   type FormFieldKey = keyof typeof initialFormData;
@@ -194,6 +200,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     const notes = (formData.notes || '').trim();
     const regionId = (formData.regionId || '').trim();
     const branchId = (formData.branchId || '').trim();
+    const subPartnerId = (formData.subPartnerId || '').trim();
 
     const validationErrors: Record<string, string> = {};
 
@@ -209,8 +216,13 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     if (!expectation) validationErrors.expectation = 'Expectation is required';
     if (!status) validationErrors.status = 'Status is required';
     if (!Array.isArray(formData.targetCountries) || formData.targetCountries.length === 0) validationErrors.targetCountries = 'Select at least one target country';
-    if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
-    if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
+
+    const roleName = getNormalizedRole();
+    const isPartnerRole = roleName === 'partner';
+    if (!isPartnerRole) {
+      if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
+      if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
+    }
     if (!formData.consultancyFee) validationErrors.consultancyFee = 'Consultancy fee selection is required';
     if (!formData.scholarship) validationErrors.scholarship = 'Scholarship selection is required';
 
@@ -233,16 +245,22 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       targetCountry: normalizedTargetCountry,
       passportNumber,
       englishProficiency,
-      counsellorId,
-      counselorId: counsellorId,
-      admissionOfficerId,
       consultancyFree: formData.consultancyFee === 'Yes',
       scholarship: formData.scholarship === 'Yes',
     };
 
+    if (!isPartnerRole) {
+      if (counsellorId) { payload.counsellorId = counsellorId; payload.counselorId = counsellorId; }
+      if (admissionOfficerId) payload.admissionOfficerId = admissionOfficerId;
+      if (regionId) payload.regionId = regionId;
+      if (branchId) payload.branchId = branchId;
+    } else {
+      const currentUserId = String((user as any)?.id || '');
+      if (currentUserId) payload.partner = currentUserId;
+      if (subPartnerId) payload.subPartner = subPartnerId;
+    }
+
     if (notes) payload.notes = notes;
-    if (regionId) payload.regionId = regionId;
-    if (branchId) payload.branchId = branchId;
 
     try {
       const res = await StudentsService.getStudents();
@@ -575,55 +593,88 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             <CardHeader className="py-2">
               <CardTitle className="text-sm flex items-center gap-2"><Users className="w-4 h-4" /> Access</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Region</Label>
-                <Select value={formData.regionId} onValueChange={(v) => {
-                  setFormData(prev => ({ ...prev, regionId: v, branchId: '', counsellor: '', admissionOfficer: '' }));
-                  setAutoRegionDisabled(false);
-                  setAutoBranchDisabled(false);
-                }} disabled={disabled || autoRegionDisabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select region" /></SelectTrigger>
-                  <SelectContent>
-                    {regionOptions.map((r: any) => (<SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Branch</Label>
-                <Select value={formData.branchId} onValueChange={(v) => {
-                  const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
-                  setFormData(prev => ({ ...prev, branchId: v, counsellor: '', admissionOfficer: '', regionId: prev.regionId || String(b?.regionId || '') }));
-                  const roleName = getNormalizedRole();
-                  const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
-                  setAutoBranchDisabled(!isRegional);
-                  setAutoRegionDisabled(isRegional ? true : !isRegional);
-                }} disabled={disabled || autoBranchDisabled}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select branch" /></SelectTrigger>
-                  <SelectContent>
-                    {branchOptions.map((b: any) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Counsellor</Label>
-                <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled || !formData.branchId}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
-                  <SelectContent>
-                    {counsellorList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Admission Officer</Label>
-                <Select value={formData.admissionOfficer} onValueChange={(v) => handleChange('admissionOfficer', v)} disabled={disabled || !formData.branchId}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select officer" /></SelectTrigger>
-                  <SelectContent>
-                    {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
+            {(() => {
+              const roleName = getNormalizedRole();
+              const isPartnerRole = roleName === 'partner';
+              if (isPartnerRole) {
+                const options = Array.isArray(subPartners)
+                  ? (subPartners as any[]).map((u: any) => ({
+                      value: String(u.id),
+                      label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'),
+                      email: u.email,
+                    }))
+                  : [];
+                return (
+                  <CardContent className="grid grid-cols-1 gap-3">
+                    <div className="space-y-2">
+                      <SearchableCombobox
+                        value={formData.subPartnerId}
+                        onValueChange={(v) => handleChange('subPartnerId', v)}
+                        placeholder="Select sub partner"
+                        searchPlaceholder="Search sub partners..."
+                        onSearch={setSubPartnerSearch}
+                        options={options}
+                        loading={subPartnerLoading}
+                        className="h-11 text-sm bg-white border-2 border-gray-300"
+                        emptyMessage="No sub partners found"
+                      />
+                      <p className="text-[11px] text-muted-foreground">Students you create will be attributed to the selected sub partner for tracking and reports.</p>
+                    </div>
+                  </CardContent>
+                );
+              }
+              return (
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>Region</Label>
+                    <Select value={formData.regionId} onValueChange={(v) => {
+                      setFormData(prev => ({ ...prev, regionId: v, branchId: '', counsellor: '', admissionOfficer: '' }));
+                      setAutoRegionDisabled(false);
+                      setAutoBranchDisabled(false);
+                    }} disabled={disabled || autoRegionDisabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select region" /></SelectTrigger>
+                      <SelectContent>
+                        {regionOptions.map((r: any) => (<SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Branch</Label>
+                    <Select value={formData.branchId} onValueChange={(v) => {
+                      const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
+                      setFormData(prev => ({ ...prev, branchId: v, counsellor: '', admissionOfficer: '', regionId: prev.regionId || String(b?.regionId || '') }));
+                      const roleName = getNormalizedRole();
+                      const isRegional = roleName === 'regional_manager' || roleName === 'regional_head';
+                      setAutoBranchDisabled(!isRegional);
+                      setAutoRegionDisabled(isRegional ? true : !isRegional);
+                    }} disabled={disabled || autoBranchDisabled}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select branch" /></SelectTrigger>
+                      <SelectContent>
+                        {branchOptions.map((b: any) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Counsellor</Label>
+                    <Select value={formData.counsellor} onValueChange={(v) => handleChange('counsellor', v)} disabled={disabled || !formData.branchId}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectContent>
+                        {counsellorList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Admission Officer</Label>
+                    <Select value={formData.admissionOfficer} onValueChange={(v) => handleChange('admissionOfficer', v)} disabled={disabled || !formData.branchId}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectContent>
+                        {admissionOfficerList.map((u: any) => (<SelectItem key={u.id} value={String(u.id)}>{[u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              );
+            })()}
           </Card>
 
 
