@@ -16,7 +16,7 @@ type AllowedCategory = typeof ALLOWED[number] | 'partners';
 
 export default function Settings() {
   const { toast } = useToast();
-  const { user } = useAuth() as any;
+  const { user, isLoading: authLoading } = useAuth() as any;
   const userRoleCandidates = [
     (user as any)?.role,
     (user as any)?.roleId,
