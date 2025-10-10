@@ -11,7 +11,8 @@ import {
   X,
   Calendar,
   GraduationCap as ToolkitIcon,
-  LifeBuoy
+  LifeBuoy,
+  Handshake
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -107,6 +108,7 @@ export function Sidebar() {
     .map(String)
     .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const userRoleNormalized = userRoleCandidates[0] || '';
+  const isPartnerUser = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
 
   const isModuleVisible = useMemo(() => {
     return (label: string) => {
@@ -128,6 +130,7 @@ export function Sidebar() {
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
+    ...(isPartnerUser ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ];
 
@@ -136,7 +139,7 @@ export function Sidebar() {
 
   // Additional restriction: if user is a Partner, only show the partner-related modules
   if (userRoleNormalized === 'partner') {
-    const allowed = new Set(['event','lead','leads','student','students','application','applications','admission','admissions']);
+    const allowed = new Set(['event','lead','leads','student','students','application','applications','admission','admissions','partner','partners']);
     navItems = navItems.filter(i => allowed.has(normalize(i.label)) || allowed.has(singularize(normalize(i.label))));
   }
 
