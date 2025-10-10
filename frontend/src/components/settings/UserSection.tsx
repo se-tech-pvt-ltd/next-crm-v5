@@ -356,6 +356,8 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
             value={filters.query}
             onChange={(e) => setFilters((s) => ({ ...s, query: e.target.value }))}
           />
+          {!isPartnerView && (
+            <>
           <Select value={filters.role} onValueChange={(v) => setFilters((s) => ({ ...s, role: v === '__all__' ? '' : v }))}>
             <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
@@ -391,6 +393,8 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
               loading={Boolean(branchFilterTrim.length > 0 && branchFilterIsFetching)}
             />
           </div>
+            </>
+          )}
         </div>
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
