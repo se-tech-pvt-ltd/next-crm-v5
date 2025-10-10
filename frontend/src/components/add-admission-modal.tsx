@@ -28,6 +28,7 @@ import { StudentProfileModal } from './student-profile-modal-new';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 
 interface AddAdmissionModalProps {
   open: boolean;
@@ -97,6 +98,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       admissionOfficerId: '',
       regionId: '',
       branchId: '',
+      subPartnerId: '',
     }
   });
 
@@ -280,6 +282,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     enabled: open,
   });
 
+  const [subPartnerSearch, setSubPartnerSearch] = useState('');
+  const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
+
   const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Applications'],
     queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
@@ -383,6 +388,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
   }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps]);
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const getNormalizedRole = () => {
+    try {
+      const raw = user?.role || user?.role_name || user?.roleName || '';
+      if (raw) return normalizeRole(String(raw));
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          if (tokenRole) return normalizeRole(String(tokenRole));
+        }
+      }
+    } catch (e) {}
+    return '';
+  };
   const counsellorOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
     if (!bid) return [];
@@ -891,68 +916,86 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                       <CardTitle className="flex items-center">Access</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <FormLabel>Region</FormLabel>
-                          <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select region" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {regionOptions.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      {(() => {
+                        const roleName = getNormalizedRole();
+                        const isPartnerRole = String(roleName || '').includes('partner');
+                        if (isPartnerRole) {
+                          const options = Array.isArray(subPartners) ? subPartners.map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'), email: u.email })) : [];
+                          return (
+                            <div>
+                              <FormLabel>Sub partner</FormLabel>
+                              <FormControl>
+                                <SearchableCombobox value={form.getValues('subPartnerId') || ''} onValueChange={(v) => form.setValue('subPartnerId', v)} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={setSubPartnerSearch} options={options} loading={subPartnerLoading} showAvatar={false} />
+                              </FormControl>
+                            </div>
+                          );
+                        }
 
-                        <div>
-                          <FormLabel>Branch</FormLabel>
-                          <Select value={form.watch('branchId') || ''} onValueChange={(v) => {
-                            const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
-                            form.setValue('branchId', v);
-                            form.setValue('counsellorId', '');
-                            form.setValue('admissionOfficerId', '');
-                            if (!form.getValues('regionId') && b) form.setValue('regionId', String(b.regionId || ''));
-                          }}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select branch" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {branchOptions.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <FormLabel>Region</FormLabel>
+                              <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select region" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {regionOptions.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                        <div>
-                          <FormLabel>Counsellor</FormLabel>
-                          <Select value={form.watch('counsellorId') || ''} onValueChange={(v) => form.setValue('counsellorId', v)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select counsellor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {counsellorOptions.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <FormLabel>Admission Officer</FormLabel>
-                          <Select value={form.watch('admissionOfficerId') || ''} onValueChange={(v) => form.setValue('admissionOfficerId', v)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select admission officer" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {officerOptions.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                            <div>
+                              <FormLabel>Branch</FormLabel>
+                              <Select value={form.watch('branchId') || ''} onValueChange={(v) => {
+                                const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
+                                form.setValue('branchId', v);
+                                form.setValue('counsellorId', '');
+                                form.setValue('admissionOfficerId', '');
+                                if (!form.getValues('regionId') && b) form.setValue('regionId', String(b.regionId || ''));
+                              }}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select branch" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {branchOptions.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <FormLabel>Counsellor</FormLabel>
+                              <Select value={form.watch('counsellorId') || ''} onValueChange={(v) => form.setValue('counsellorId', v)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select counsellor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {counsellorOptions.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <FormLabel>Admission Officer</FormLabel>
+                              <Select value={form.watch('admissionOfficerId') || ''} onValueChange={(v) => form.setValue('admissionOfficerId', v)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select admission officer" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {officerOptions.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
 
