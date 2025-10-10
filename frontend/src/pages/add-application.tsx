@@ -224,11 +224,13 @@ export default function AddApplication() {
 
       const isPartnerRoleLocal = String(roleName || '').toLowerCase().includes('partner');
       if (isPartnerRoleLocal) {
-        if (!(data as any)?.subPartner && String((data as any).subPartner || '').trim() === '') {
+        const selectedSubPartner = (data as any)?.subPartner ?? (data as any)?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
+        if (!selectedSubPartner || String(selectedSubPartner || '').trim() === '') {
           form.setError('subPartnerId' as any, { type: 'required', message: 'Sub partner is required for partner users' } as any);
           toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
           return;
         }
+        if (!(data as any).subPartner) (data as any).subPartner = selectedSubPartner;
       } else {
         const missing: string[] = [];
         if (!data?.regionId || String(data.regionId).trim() === '') { form.setError('regionId' as any, { type: 'required', message: 'Region is required' } as any); missing.push('Region'); }
