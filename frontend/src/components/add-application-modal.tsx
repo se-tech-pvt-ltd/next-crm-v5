@@ -362,6 +362,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
   });
 
   const onSubmit = (data: any) => {
+    try {
+      const roleName = getNormalizedRole();
+      const isPartnerRole = String(roleName || '').includes('partner');
+      if (isPartnerRole) {
+        if (!data?.subPartnerId || String(data.subPartnerId).trim() === '') {
+          form.setError('subPartnerId', { type: 'required', message: 'Sub partner is required for partner users' });
+          toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
+          return;
+        }
+      } else {
+        const missing: string[] = [];
+        if (!data?.regionId || String(data.regionId).trim() === '') { form.setError('regionId', { type: 'required', message: 'Region is required' }); missing.push('Region'); }
+        if (!data?.branchId || String(data.branchId).trim() === '') { form.setError('branchId', { type: 'required', message: 'Branch is required' }); missing.push('Branch'); }
+        if (!data?.counsellorId || String(data.counsellorId).trim() === '') { form.setError('counsellorId', { type: 'required', message: 'Counsellor is required' }); missing.push('Counsellor'); }
+        if (!data?.admissionOfficerId || String(data.admissionOfficerId).trim() === '') { form.setError('admissionOfficerId', { type: 'required', message: 'Admission officer is required' }); missing.push('Admission officer'); }
+        if (missing.length) { toast({ title: 'Validation error', description: `${missing.join('; ')} are required`, variant: 'destructive' }); return; }
+      }
+    } catch (e) {
+      // fallback to existing validation flow
+    }
+
     createApplicationMutation.mutate(data);
   };
 
