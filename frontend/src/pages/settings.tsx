@@ -64,28 +64,11 @@ export default function Settings() {
     try { localStorage.setItem('settings_category', category); } catch {}
   }, [category]);
 
-  // When user role changes to partner ensure UI switches to partners
   useEffect(() => {
-    if (isPartner && category !== 'partners') setCategory('partners');
-  }, [isPartner, category]);
-
-  useEffect(() => {
-    const debug = {
-      role: (user as any)?.role,
-      roleId: (user as any)?.roleId,
-      role_id: (user as any)?.role_id,
-      roleName: (user as any)?.roleName,
-      role_name: (user as any)?.role_name,
-      roleDetails_role: (user as any)?.roleDetails?.role,
-      roleDetails_role_name: (user as any)?.roleDetails?.role_name,
-      normalized: userRoleCandidates,
-      isPartner,
-      authLoading,
-      category,
-    };
-    console.log('[Settings] role debug:', { ...debug, resolvedRoleName, roleIdVal, rolesCount: Array.isArray(allRoles) ? allRoles.length : 0 });
-    console.log('[Settings] rendered tabs:', renderedTabs);
-  }, [user, isPartner, authLoading, category]);
+    if (!authLoading && !rolesLoading && isPartner) {
+      try { setLocation('/partners'); } catch {}
+    }
+  }, [authLoading, rolesLoading, isPartner, setLocation]);
 
   return (
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Manage branches, users and email settings">
