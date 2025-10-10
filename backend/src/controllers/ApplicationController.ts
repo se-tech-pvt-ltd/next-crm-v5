@@ -47,10 +47,33 @@ export class ApplicationController {
 
   static async createApplication(req: AuthenticatedRequest, res: Response) {
     try {
-      const validatedData = insertApplicationSchema.parse(req.body);
+      // Allow partial input first, then apply role-based required checks
+      const validatedData = insertApplicationSchema.partial().parse(req.body);
       const currentUser = (req && req.user) ? req.user : { id: 'admin1', role: 'admin_staff' };
-    const application = await ApplicationService.createApplication(validatedData, currentUser.id);
-    res.status(201).json(application);
+
+      const roleRaw = (currentUser as any)?.role || (currentUser as any)?.role_name || '';
+      const roleName = String(roleRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+      const isPartner = String(roleName || '').includes('partner');
+
+      if (isPartner) {
+        if (!validatedData.subPartner && !validatedData.subPartnerId && !validatedData.subPartnerId) {
+          return res.status(400).json({ message: 'Sub partner is required for partner users' });
+        }
+        // ensure partner is set to current user if missing
+        if (!validatedData.partner) validatedData.partner = String(currentUser.id);
+      } else {
+        const missing: string[] = [];
+        if (!validatedData.regionId) missing.push('region');
+        if (!validatedData.branchId) missing.push('branch');
+        if (!validatedData.counsellorId) missing.push('counsellor');
+        if (!validatedData.admissionOfficerId) missing.push('admissionOfficer');
+        if (missing.length) {
+          return res.status(400).json({ message: `${missing.join('; ')} are required` });
+        }
+      }
+
+      const application = await ApplicationService.createApplication(validatedData, currentUser.id);
+      res.status(201).json(application);
     } catch (error) {
       console.error("Create application error:", error);
       if (error instanceof z.ZodError) {
