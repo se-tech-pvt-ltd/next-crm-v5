@@ -119,6 +119,12 @@ export function Sidebar() {
     };
   }, [accessByRole]);
 
+  const canViewPartners = useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'partner');
+    if (entries.length === 0) return false;
+    return entries.some((entry: any) => normalize(entry.viewLevel ?? entry.view_level) !== 'none');
+  }, [accessByRole]);
+
   let navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
     { path: '/calendar', label: 'My Calendar', icon: Calendar, count: undefined },
@@ -129,7 +135,7 @@ export function Sidebar() {
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
-    { path: '/partners', label: 'Partners', icon: Handshake, count: undefined },
+    ...(canViewPartners ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ];
 
