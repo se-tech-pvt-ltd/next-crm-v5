@@ -5,6 +5,11 @@ export async function getUsers() {
   return (Array.isArray(res) ? res : []).filter((u: any) => String(u.role) !== 'system_admin');
 }
 
+export async function getPartnerUsers() {
+  const res = await http.get<any[]>('/api/users/sub-partners');
+  return Array.isArray(res) ? res : [];
+}
+
 export async function getUser(id: string) {
   if (!id) throw new Error('User ID is required');
   return http.get<any>(`/api/users/${id}`);
