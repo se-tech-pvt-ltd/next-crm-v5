@@ -165,6 +165,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     },
   });
 
+  const [subPartnerSearch, setSubPartnerSearch] = useState('');
+  const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
+
   // Universities-based dynamic data
   const { data: uniSummaries = [] } = useQuery({
     queryKey: ['/api/universities'],
