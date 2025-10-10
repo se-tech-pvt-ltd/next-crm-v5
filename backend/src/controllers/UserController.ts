@@ -97,7 +97,7 @@ export class UserController {
     }
   }
 
-  static async inviteUser(req: Request, res: Response) {
+  static async inviteUser(req: AuthenticatedRequest, res: Response) {
     try {
       const { email, firstName, lastName, phoneNumber, roleId, role, branchId, department, profileImageId, regionId } = req.body || {};
       if (!email || !roleId) {
@@ -129,6 +129,23 @@ export class UserController {
           const exists = Array.isArray(existing) && existing.length > 0;
           if (!exists) {
             await connection.query('INSERT INTO branch_emps (id, branch_id, user_id) VALUES (?, ?, ?)', [beId, String(branchId), id]);
+          }
+        }
+
+        // If the creator is a partner, link the new user as a sub partner
+        const authUser = req.user;
+        const normalize = (value: unknown) => String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+        const roleNorm = normalize(authUser?.role);
+        const isPartnerRole = roleNorm.includes('partner');
+        if (isPartnerRole) {
+          const partnerId = String(authUser?.roleDetails?.partner_id ?? authUser?.roleDetails?.partnerId ?? authUser?.id ?? '').trim();
+          if (partnerId) {
+            const spId = (await import('uuid')).v4();
+            const [spExisting] = await connection.query<any[]>('SELECT id FROM sub_partners WHERE partner_id = ? AND sub_partner_id = ? LIMIT 1', [partnerId, id]);
+            const spExists = Array.isArray(spExisting) && spExisting.length > 0;
+            if (!spExists) {
+              await connection.query('INSERT INTO sub_partners (id, partner_id, sub_partner_id) VALUES (?, ?, ?)', [spId, partnerId, id]);
+            }
           }
         }
       } catch (sideErr) {
