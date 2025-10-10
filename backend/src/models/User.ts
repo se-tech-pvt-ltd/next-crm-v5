@@ -74,6 +74,33 @@ export class UserModel {
     return (rows as any[]);
   }
 
+  static async findSubPartnersByPartnerId(partnerId: string): Promise<User[]> {
+    if (!partnerId) return [];
+    const [rows] = await connection.query<any[]>(
+      'SELECT u.*, COALESCE(ur.role_name, u.role_id) AS role, COALESCE(be.branch_id, hb.id) as branchId, COALESCE(b.branch_name, hb.branch_name) AS branchName, a.path AS profileImageUrl, sp.partner_id AS partnerId, sp.sub_partner_id AS subPartnerId FROM sub_partners sp INNER JOIN users u ON u.id = sp.sub_partner_id LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN attachments a ON a.id = u.profile_image_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id LEFT JOIN branches hb ON hb.branch_head_id = u.id WHERE sp.partner_id = ? AND COALESCE(ur.role_name, u.role_id) <> ? ORDER BY u.created_at DESC',
+      [partnerId, 'system_admin']
+    );
+    const deduped = new Map<string, any>();
+    for (const row of rows as any[]) {
+      const id = String(row.id);
+      if (!deduped.has(id)) {
+        deduped.set(id, row);
+        continue;
+      }
+      const existing = deduped.get(id);
+      const existingBranch = existing?.branchId ?? existing?.branch_id ?? '';
+      const incomingBranch = row?.branchId ?? row?.branch_id ?? '';
+      const existingBranchName = existing?.branchName ?? existing?.branch_name ?? '';
+      const incomingBranchName = row?.branchName ?? row?.branch_name ?? '';
+      const shouldReplaceBranch = (!existingBranch || existingBranch === 'null') && incomingBranch;
+      const shouldReplaceBranchName = (!existingBranchName || existingBranchName === 'null') && incomingBranchName;
+      if (shouldReplaceBranch || shouldReplaceBranchName) {
+        deduped.set(id, { ...existing, ...row });
+      }
+    }
+    return Array.from(deduped.values()) as any[];
+  }
+
   static async searchUsers(searchQuery: string, roles?: string[], limit?: number): Promise<User[]> {
     const params: any[] = [];
     let sql = 'SELECT u.*, COALESCE(ur.role_name, u.role_id) AS role, COALESCE(be.branch_id, hb.id) as branchId, COALESCE(b.branch_name, hb.branch_name) AS branchName, a.path AS profileImageUrl FROM users u LEFT JOIN user_roles ur ON ur.id = u.role_id LEFT JOIN attachments a ON a.id = u.profile_image_id LEFT JOIN branch_emps be ON be.user_id = u.id LEFT JOIN branches b ON be.branch_id = b.id LEFT JOIN branches hb ON hb.branch_head_id = u.id WHERE (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)';
