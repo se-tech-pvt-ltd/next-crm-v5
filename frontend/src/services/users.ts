@@ -1,13 +1,37 @@
 import { http } from './http';
 
+import { http } from '@/services/http';
+
 export async function getUsers() {
   const res = await http.get<any[]>('/api/users');
   return (Array.isArray(res) ? res : []).filter((u: any) => String(u.role) !== 'system_admin');
 }
 
-export async function getPartnerUsers() {
-  const res = await http.get<any[]>('/api/users/sub-partners');
-  return Array.isArray(res) ? res : [];
+export async function getPartnerUsers(partnerId?: string) {
+  try {
+    let pid = String(partnerId || '').trim();
+    if (!pid) {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          const parts = String(token).split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4;
+            const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+            const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(json) as any;
+            pid = String(payload?.role_details?.partner_id || payload?.roleDetails?.partnerId || payload?.partner_id || payload?.partnerId || payload?.id || '').trim();
+          }
+        }
+      } catch {}
+    }
+    const url = pid ? `/api/users/sub-partners?partnerId=${encodeURIComponent(pid)}` : '/api/users/sub-partners';
+    const res = await http.get<any[]>(url);
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getUser(id: string) {
