@@ -19,6 +19,7 @@ type AllowedCategory = typeof ALLOWED[number];
 export default function Settings() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth() as any;
+  const [, setLocation] = useLocation();
   const roleIdVal = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
   const { data: allRoles = [], isFetching: rolesLoading } = useQuery({
     queryKey: ['/api/user-roles', 'all'],
