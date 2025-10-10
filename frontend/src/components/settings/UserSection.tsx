@@ -19,7 +19,10 @@ import { Pagination } from '@/components/ui/pagination';
 import { queryClient } from '@/lib/queryClient';
 
 export default function UserSection({ toast, isPartnerView }: { toast: (v: any) => void; isPartnerView?: boolean }) {
-  const { data: users = [], refetch } = useQuery({ queryKey: ['/api/users'], queryFn: () => UsersService.getUsers() });
+  const { data: users = [], refetch } = useQuery({
+    queryKey: isPartnerView ? ['/api/users', 'sub-partners'] : ['/api/users'],
+    queryFn: () => (isPartnerView ? UsersService.getPartnerUsers() : UsersService.getUsers()),
+  });
   const { data: initialBranches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30000 });
 
   // Branch search hooks will be initialized after state declarations to ensure state variables are defined before use
