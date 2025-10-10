@@ -50,20 +50,14 @@ export default function Settings() {
     .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const isPartner = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
 
-  const renderedTabs: string[] = (!authLoading && !rolesLoading)
-    ? (isPartner
-      ? ['Partners']
-      : ['Region manager', 'Branch management', 'User management', 'Role access', 'Email (SMTP)']
-    )
-    : [];
-
-
   const [category, setCategory] = useState<AllowedCategory>(() => {
-    // If partner, default to partners tab
-    const saved = (localStorage.getItem('settings_category') as AllowedCategory | null) || (isPartner ? 'partners' : 'regions');
-    // Only allow saved if in ALLOWED or 'partners'
-    if (saved === 'partners') return 'partners';
-    return (ALLOWED as readonly string[]).includes(saved as string) ? (saved as AllowedCategory) : 'regions';
+    try {
+      const saved = localStorage.getItem('settings_category');
+      if (saved && (ALLOWED as readonly string[]).includes(saved)) {
+        return saved as AllowedCategory;
+      }
+    } catch {}
+    return 'regions';
   });
 
   useEffect(() => {
