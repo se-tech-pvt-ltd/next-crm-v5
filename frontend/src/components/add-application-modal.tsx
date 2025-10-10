@@ -407,7 +407,30 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
               </Button>
               <Button
                 type="button"
-                onClick={() => form.handleSubmit(onSubmit)()}
+                onClick={() => form.handleSubmit(onSubmit, (errors) => {
+                  try {
+                    const extract = (obj:any, out:string[] = []) => {
+                      if (!obj || typeof obj !== 'object') return out;
+                      for (const k of Object.keys(obj)) {
+                        const v = obj[k];
+                        if (!v) continue;
+                        if (typeof v === 'string') out.push(v);
+                        else if (Array.isArray(v)) out.push(...v.map(String));
+                        else if (v?.message) out.push(String(v.message));
+                        else if (typeof v === 'object') extract(v, out);
+                      }
+                      return out;
+                    };
+                    const msgs = extract(errors).filter(Boolean);
+                    if (msgs.length) {
+                      toast({ title: 'Validation error', description: msgs.join('; '), variant: 'destructive' });
+                    } else {
+                      toast({ title: 'Validation error', description: 'Please fill required fields', variant: 'destructive' });
+                    }
+                  } catch (e) {
+                    toast({ title: 'Validation error', description: 'Please check the form fields', variant: 'destructive' });
+                  }
+                })() }
                 disabled={createApplicationMutation.isPending}
                 className="px-3 h-8 text-xs bg-[#0071B0] hover:bg-[#00649D] text-white rounded-md"
               >
