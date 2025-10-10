@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { type Student } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
@@ -60,7 +61,31 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30_000 });
   const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
   const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
-  const { data: subPartners = [] } = useQuery({ queryKey: ['/api/users/sub-partners'], queryFn: () => UsersService.getPartnerUsers(), enabled: open });
+
+  const getCurrentPartnerId = () => {
+    try {
+      const roleRaw = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
+      const roleNorm = String(roleRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+      let pid = '';
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          pid = String(payload?.role_details?.partner_id || payload?.roleDetails?.partnerId || payload?.partner_id || payload?.partnerId || '').trim();
+        }
+      }
+      if (!pid && roleNorm === 'partner') pid = String((user as any)?.id || '');
+      return pid;
+    } catch { return ''; }
+  };
+  const partnerIdForQuery = React.useMemo(() => getCurrentPartnerId(), [open, (user as any)?.id, (user as any)?.role]);
+  const [subPartnerSearch, setSubPartnerSearch] = React.useState('');
+  const { data: subPartners = [] } = useQuery({ queryKey: ['/api/users/sub-partners', partnerIdForQuery], queryFn: () => UsersService.getPartnerUsers(partnerIdForQuery), enabled: open && Boolean(partnerIdForQuery), staleTime: 60_000 });
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
 
@@ -594,17 +619,32 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               const roleName = getNormalizedRole();
               const isPartnerRole = roleName === 'partner';
               if (isPartnerRole) {
-                const options = Array.isArray(subPartners) ? (subPartners as any[]).map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id })) : [];
+                const options = Array.isArray(subPartners)
+                  ? (subPartners as any[]).map((u: any) => ({
+                      value: String(u.id),
+                      label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'),
+                      email: u.email,
+                    }))
+                  : [];
                 return (
-                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label>Sub Partner</Label>
-                      <Select value={formData.subPartnerId} onValueChange={(v) => handleChange('subPartnerId', v)} disabled={disabled}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select sub partner" /></SelectTrigger>
-                        <SelectContent>
-                          {options.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
+                  <CardContent className="grid grid-cols-1 gap-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2"><Users className="w-4 h-4" /> Assign to Sub Partner</Label>
+                        <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => setLocation('/partners')}>Manage</Button>
+                      </div>
+                      <SearchableCombobox
+                        value={formData.subPartnerId}
+                        onValueChange={(v) => handleChange('subPartnerId', v)}
+                        placeholder="Select sub partner"
+                        searchPlaceholder="Search sub partners..."
+                        onSearch={setSubPartnerSearch}
+                        options={options}
+                        loading={false}
+                        className="h-8 text-xs bg-white border border-gray-300"
+                        emptyMessage="No sub partners found"
+                      />
+                      <p className="text-[11px] text-muted-foreground">Students you create will be attributed to the selected sub partner for tracking and reports.</p>
                     </div>
                   </CardContent>
                 );
