@@ -675,19 +675,7 @@ export default function AddApplication() {
                   <span>Cancel</span>
                 </Button>
               </motion.div>
-              <Button type="submit" disabled={(() => {
-                if (createMutation.isPending) return true;
-                try {
-                  const baseValid = Boolean(form.formState.isValid);
-                  if (!baseValid) return true;
-                  const values = form.getValues();
-                  if (isPartnerRole) {
-                    return !Boolean(values?.subPartnerId);
-                  }
-                  // For non-partners require branch, counsellor and admission officer
-                  return !(Boolean(selectedBranchId) && Boolean(values?.counsellorId) && Boolean(values?.admissionOfficerId));
-                } catch (e) { return true; }
-              })()} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto">
+              <Button type="submit" disabled={createMutation.isPending} className="flex items-center justify-center space-x-2 min-w-32 w-full sm:w-auto">
                 {createMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
