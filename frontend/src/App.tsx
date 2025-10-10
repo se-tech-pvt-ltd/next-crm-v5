@@ -16,6 +16,7 @@ import EventsPage from "@/pages/events";
 import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import PartnersPage from "@/pages/partners";
 import Forbidden from "@/pages/forbidden";
 import Login from "@/pages/login";
 import ForgotPassword from "@/pages/forgot-password";
@@ -133,6 +134,7 @@ function Router() {
       <Route path="/calendar" component={FollowUpsPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
+      <Route path="/partners" component={PartnersPage} />
       <Route path="/settings" component={SettingsGuard} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />

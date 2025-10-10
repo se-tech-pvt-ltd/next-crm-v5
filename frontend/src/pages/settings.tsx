@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -13,11 +14,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
 const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
-type AllowedCategory = typeof ALLOWED[number] | 'partners';
+type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth() as any;
+  const [, setLocation] = useLocation();
   const roleIdVal = String((user as any)?.roleId ?? (user as any)?.role_id ?? '');
   const { data: allRoles = [], isFetching: rolesLoading } = useQuery({
     queryKey: ['/api/user-roles', 'all'],
@@ -48,55 +50,32 @@ export default function Settings() {
     .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const isPartner = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
 
-  const renderedTabs: string[] = (!authLoading && !rolesLoading)
-    ? (isPartner
-      ? ['Partners']
-      : ['Region manager', 'Branch management', 'User management', 'Role access', 'Email (SMTP)']
-    )
-    : [];
-
-
   const [category, setCategory] = useState<AllowedCategory>(() => {
-    // If partner, default to partners tab
-    const saved = (localStorage.getItem('settings_category') as AllowedCategory | null) || (isPartner ? 'partners' : 'regions');
-    // Only allow saved if in ALLOWED or 'partners'
-    if (saved === 'partners') return 'partners';
-    return (ALLOWED as readonly string[]).includes(saved as string) ? (saved as AllowedCategory) : 'regions';
+    try {
+      const saved = localStorage.getItem('settings_category');
+      if (saved && (ALLOWED as readonly string[]).includes(saved)) {
+        return saved as AllowedCategory;
+      }
+    } catch {}
+    return 'regions';
   });
 
   useEffect(() => {
     try { localStorage.setItem('settings_category', category); } catch {}
   }, [category]);
 
-  // When user role changes to partner ensure UI switches to partners
   useEffect(() => {
-    if (isPartner && category !== 'partners') setCategory('partners');
-  }, [isPartner, category]);
-
-  useEffect(() => {
-    const debug = {
-      role: (user as any)?.role,
-      roleId: (user as any)?.roleId,
-      role_id: (user as any)?.role_id,
-      roleName: (user as any)?.roleName,
-      role_name: (user as any)?.role_name,
-      roleDetails_role: (user as any)?.roleDetails?.role,
-      roleDetails_role_name: (user as any)?.roleDetails?.role_name,
-      normalized: userRoleCandidates,
-      isPartner,
-      authLoading,
-      category,
-    };
-    console.log('[Settings] role debug:', { ...debug, resolvedRoleName, roleIdVal, rolesCount: Array.isArray(allRoles) ? allRoles.length : 0 });
-    console.log('[Settings] rendered tabs:', renderedTabs);
-  }, [user, isPartner, authLoading, category]);
+    if (!authLoading && !rolesLoading && isPartner) {
+      try { setLocation('/partners'); } catch {}
+    }
+  }, [authLoading, rolesLoading, isPartner, setLocation]);
 
   return (
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Manage branches, users and email settings">
       <div className="space-y-3">
         {/* Top bar tabs */}
         <div className="flex flex-wrap items-center gap-2" data-testid="settings-tabs">
-          {!authLoading && !rolesLoading && !isPartner && (
+          {!authLoading && !rolesLoading && (
             <>
               <Button type="button" variant={category === 'regions' ? 'default' : 'outline'} onClick={() => setCategory('regions')} className={`gap-2 ${category === 'regions' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
                 <Globe2 className="w-4 h-4" /> Region manager
@@ -116,15 +95,10 @@ export default function Settings() {
             </>
           )}
 
-          {!authLoading && !rolesLoading && isPartner && (
-            <Button type="button" variant={category === 'partners' ? 'default' : 'outline'} onClick={() => setCategory('partners')} className={`gap-2 ${category === 'partners' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
-              <ShieldCheck className="w-4 h-4" /> Partners
-            </Button>
-          )}
         </div>
 
         {/* Content area */}
-        {!authLoading && !rolesLoading && !isPartner && (
+        {!authLoading && !rolesLoading && (
           <>
             {category === 'branches' && (
               <Card>
@@ -174,14 +148,6 @@ export default function Settings() {
           </>
         )}
 
-        {!authLoading && !rolesLoading && isPartner && category === 'partners' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Partners</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4"><UserSectionComp toast={toast} isPartnerView={true} /></CardContent>
-          </Card>
-        )}
       </div>
     </Layout>
   );
