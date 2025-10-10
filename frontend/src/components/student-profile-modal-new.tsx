@@ -929,18 +929,18 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
               }
             >
               {(!applications || applications.length === 0) ? (
-                <div className="flex flex-col items-center justify-center p-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                    <FileText className="w-5 h-5 text-gray-400" />
+                <div className="flex items-center gap-3 p-2">
+                  <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-gray-400" />
                   </div>
-                  <div className="text-sm font-medium text-gray-800">No applications yet</div>
-                  <div className="text-xs text-gray-500 mt-1">This student has no applications.</div>
-                  <div className="mt-2">
-                    <Button variant="outline" size="xs" className="rounded-full px-3 py-1" onClick={() => { if (typeof onOpenAddApplication === 'function') { try { onOpenAddApplication(student?.id); } catch {} } try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); }}>
-                      <Plus className="w-3 h-3 mr-1" />
-                      <span>Add Application</span>
-                    </Button>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-800">No applications yet</div>
+                    <div className="text-xs text-gray-500">This student has no applications.</div>
                   </div>
+                  <Button variant="outline" size="xs" className="rounded-full px-2 py-1" onClick={() => { if (typeof onOpenAddApplication === 'function') { try { onOpenAddApplication(student?.id); } catch {} } try { setLocation(`/students/${student?.id}/application`); } catch {} onOpenChange(false); }}>
+                    <Plus className="w-3 h-3 mr-1" />
+                    <span>Add</span>
+                  </Button>
                 </div>
               ) : (
                 <div className="divide-y">
