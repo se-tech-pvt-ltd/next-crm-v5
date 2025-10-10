@@ -19,6 +19,7 @@ import * as StudentsService from '@/services/students';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { Check, ChevronsUpDown, PlusCircle, Link2, BookOpen, UserSquare, ExternalLink, StickyNote } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
@@ -61,6 +62,27 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     staleTime: 5 * 60 * 1000,
   });
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const getNormalizedRole = () => {
+    try {
+      const raw = (localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null) as any;
+    } catch {};
+    try {
+      const token = (() => { try { return localStorage.getItem('auth_token'); } catch { return null; } })();
+      if (token) {
+        const parts = String(token).split('.');
+        if (parts.length >= 2) {
+          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(json) as any;
+          const tokenRole = payload?.role_details?.role_name || payload?.role_name || payload?.role || '';
+          if (tokenRole) return normalizeRole(String(tokenRole));
+        }
+      }
+    } catch (e) {}
+    return '';
+  };
 
   const { data: applicationsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -139,6 +161,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       admissionOfficerId: '',
       regionId: '',
       branchId: '',
+      subPartnerId: '',
     },
   });
 
@@ -679,55 +702,77 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   <CardTitle className="text-sm flex items-center"><UserSquare className="w-4 h-4 mr-2" />Access</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="counsellorId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Counsellor <span className="text-red-600">*</span></FormLabel>
-                        <FormControl>
-                          <Select value={field.value || ''} onValueChange={field.onChange}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedBranchId ? 'Select counsellor' : 'No branch linked to student'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {counsellorOptionsRender.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {(() => {
+                  const roleName = getNormalizedRole();
+                  const isPartnerRole = String(roleName || '').includes('partner');
+                  if (isPartnerRole) {
+                    // fetch sub partners
+                    return (
+                      <FormField control={form.control} name="subPartnerId" render={() => (
+                        <FormItem>
+                          <FormLabel>Sub partner</FormLabel>
+                          <FormControl>
+                            <SearchableCombobox value={form.getValues('subPartnerId') || ''} onValueChange={(v) => form.setValue('subPartnerId', v)} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={(q)=>{}} options={[]} showAvatar={false} />
+                          </FormControl>
+                        </FormItem>
+                      )} />
+                    );
+                  }
 
-                  <FormField
-                    control={form.control}
-                    name="admissionOfficerId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Admission Officer <span className="text-red-600">*</span></FormLabel>
-                        <FormControl>
-                          <Select value={field.value || ''} onValueChange={field.onChange}>
+                  return (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="counsellorId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Counsellor <span className="text-red-600">*</span></FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedBranchId ? 'Select admission officer' : 'No branch linked to student'} />
-                              </SelectTrigger>
+                              <Select value={field.value || ''} onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={selectedBranchId ? 'Select counsellor' : 'No branch linked to student'} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {counsellorOptionsRender.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </FormControl>
-                            <SelectContent>
-                              {officerOptionsRender.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="admissionOfficerId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Admission Officer <span className="text-red-600">*</span></FormLabel>
+                            <FormControl>
+                              <Select value={field.value || ''} onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={selectedBranchId ? 'Select admission officer' : 'No branch linked to student'} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {officerOptionsRender.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  );
+                })()}
                 </CardContent>
               </Card>
 
