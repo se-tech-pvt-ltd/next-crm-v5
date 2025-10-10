@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
 const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
-type AllowedCategory = typeof ALLOWED[number] | 'partners';
+type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
   const { toast } = useToast();
