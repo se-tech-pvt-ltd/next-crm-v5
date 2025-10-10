@@ -647,8 +647,8 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                   <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Email</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Role</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Region</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>
+                  {!isPartnerView && (<TableHead className="h-8 px-2 text-[11px]">Region</TableHead>)}
+                  {!isPartnerView && (<TableHead className="h-8 px-2 text-[11px]">Branch</TableHead>)}
                   <TableHead className="h-8 px-2 text-[11px]">Active</TableHead>
                 </TableRow>
               </TableHeader>
@@ -688,7 +688,7 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                     <TableCell className="p-2 text-xs">{[(u.firstName ?? u.first_name), (u.lastName ?? u.last_name)].filter(Boolean).join(' ') || '—'}</TableCell>
                     <TableCell className="p-2 text-xs">{u.email}</TableCell>
                     <TableCell className="p-2 text-xs">{roleLabel(u.role)}</TableCell>
-                    <TableCell className="p-2 text-xs">{(() => {
+                    {!isPartnerView && (<TableCell className="p-2 text-xs">{(() => {
                       const roleName = String(u.role || '');
                       const nRole = normalizeRole(roleName);
                       // If regional manager, derive region by regionHeadId
@@ -702,13 +702,13 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
                       if (!b) return '—';
                       const reg = (Array.isArray(regions) ? regions : []).find((rr: any) => String(rr.id) === String(b.regionId ?? b.region_id));
                       return reg ? String(reg.name ?? reg.regionName ?? reg.region_name ?? reg.id) : '—';
-                    })()}</TableCell>
-                    <TableCell className="p-2 text-xs">{(() => {
+                    })()}</TableCell>)}
+                    {!isPartnerView && (<TableCell className="p-2 text-xs">{(() => {
                       const bId = String((u.branchId ?? u.branch_id) || '');
                       if (!bId) return '—';
                       const b = (Array.isArray(initialBranches) ? initialBranches : []).find((bb: any) => String(bb.id) === bId);
                       return b ? String(b.name ?? b.branchName ?? b.branch_name ?? b.id) : '—';
-                    })()}</TableCell>
+                    })()}</TableCell>)}
                     <TableCell className="p-2 text-xs">{(u.isActive ?? u.is_active) ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
