@@ -715,7 +715,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                         <FormItem>
                           <FormLabel>Sub partner</FormLabel>
                           <FormControl>
-                            <SearchableCombobox value={form.getValues('subPartnerId') || ''} onValueChange={(v) => form.setValue('subPartnerId', v)} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={(q)=>{}} options={[]} showAvatar={false} />
+                            <SearchableCombobox value={form.getValues('subPartnerId') || ''} onValueChange={(v) => form.setValue('subPartnerId', v)} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={setSubPartnerSearch} options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || (u.email||'User'), email: u.email }))} loading={subPartnerLoading} showAvatar={false} />
                           </FormControl>
                         </FormItem>
                       )} />
