@@ -16,6 +16,7 @@ import EventsPage from "@/pages/events";
 import StudentDetails from "@/pages/student-details";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import PartnersPage from "@/pages/partners";
 import Forbidden from "@/pages/forbidden";
 import Login from "@/pages/login";
 import ForgotPassword from "@/pages/forgot-password";
