@@ -370,6 +370,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       const isPartnerRole = String(roleName || '').includes('partner');
       if (isPartnerRole) {
         const selectedSubPartner = data?.subPartner ?? data?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
+        console.log('[AddApplicationModal] onSubmit selectedSubPartner:', selectedSubPartner, 'data.subPartnerId=', data?.subPartnerId, 'form.getValues(subPartnerId)=', form.getValues('subPartnerId'));
         if (!selectedSubPartner || String(selectedSubPartner).trim() === '') {
           form.setError('subPartnerId', { type: 'required', message: 'Sub partner is required for partner users' });
           toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
