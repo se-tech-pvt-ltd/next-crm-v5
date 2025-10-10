@@ -199,6 +199,9 @@ export default function AddApplication() {
 
   const onSubmit = (data: InsertApplication) => {
     try {
+      // map subPartnerId -> subPartner for backend compatibility
+      try { if ((data as any)?.subPartnerId && !(data as any).subPartner) (data as any).subPartner = (data as any).subPartnerId; } catch {}
+
       // determine role from local auth_user or token
       let roleName = '' as string;
       try { const authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; roleName = authUser?.role || authUser?.role_name || authUser?.roleName || ''; } catch {}
@@ -221,7 +224,7 @@ export default function AddApplication() {
 
       const isPartnerRoleLocal = String(roleName || '').toLowerCase().includes('partner');
       if (isPartnerRoleLocal) {
-        if (!data?.subPartnerId || String(data.subPartnerId).trim() === '') {
+        if (!(data as any)?.subPartner && String((data as any).subPartner || '').trim() === '') {
           form.setError('subPartnerId' as any, { type: 'required', message: 'Sub partner is required for partner users' } as any);
           toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
           return;
