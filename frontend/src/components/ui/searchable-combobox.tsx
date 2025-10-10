@@ -24,6 +24,8 @@ interface SearchableComboboxProps {
   loading?: boolean;
   className?: string;
   emptyMessage?: string;
+  // When false, hide avatar icons in trigger and list (useful for compact dropdowns)
+  showAvatar?: boolean;
 }
 
 export function SearchableCombobox({
@@ -35,7 +37,8 @@ export function SearchableCombobox({
   options,
   loading = false,
   className,
-  emptyMessage = "No results found."
+  emptyMessage = "No results found.",
+  showAvatar = true
 }: SearchableComboboxProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
