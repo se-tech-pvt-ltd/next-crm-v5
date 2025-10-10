@@ -38,23 +38,6 @@ export default function Settings() {
     )
     : [];
 
-  useEffect(() => {
-    const debug = {
-      role: (user as any)?.role,
-      roleId: (user as any)?.roleId,
-      role_id: (user as any)?.role_id,
-      roleName: (user as any)?.roleName,
-      role_name: (user as any)?.role_name,
-      roleDetails_role: (user as any)?.roleDetails?.role,
-      roleDetails_role_name: (user as any)?.roleDetails?.role_name,
-      normalized: userRoleCandidates,
-      isPartner,
-      authLoading,
-      category,
-    };
-    console.log('[Settings] role debug:', debug);
-    console.log('[Settings] rendered tabs:', renderedTabs);
-  }, [user, isPartner, authLoading, category]);
 
   const [category, setCategory] = useState<AllowedCategory>(() => {
     // If partner, default to partners tab
@@ -72,6 +55,24 @@ export default function Settings() {
   useEffect(() => {
     if (isPartner && category !== 'partners') setCategory('partners');
   }, [isPartner, category]);
+
+  useEffect(() => {
+    const debug = {
+      role: (user as any)?.role,
+      roleId: (user as any)?.roleId,
+      role_id: (user as any)?.role_id,
+      roleName: (user as any)?.roleName,
+      role_name: (user as any)?.role_name,
+      roleDetails_role: (user as any)?.roleDetails?.role,
+      roleDetails_role_name: (user as any)?.roleDetails?.role_name,
+      normalized: userRoleCandidates,
+      isPartner,
+      authLoading,
+      category,
+    };
+    console.log('[Settings] role debug:', debug);
+    console.log('[Settings] rendered tabs:', renderedTabs);
+  }, [user, isPartner, authLoading, category]);
 
   return (
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Manage branches, users and email settings">
