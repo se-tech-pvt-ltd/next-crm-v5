@@ -225,6 +225,7 @@ export default function AddApplication() {
       const isPartnerRoleLocal = String(roleName || '').toLowerCase().includes('partner');
       if (isPartnerRoleLocal) {
         const selectedSubPartner = (data as any)?.subPartner ?? (data as any)?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
+        console.log('[AddApplicationPage] onSubmit selectedSubPartner:', selectedSubPartner, 'data.subPartnerId=', (data as any)?.subPartnerId, 'form.getValues(subPartnerId)=', form.getValues('subPartnerId'));
         if (!selectedSubPartner || String(selectedSubPartner || '').trim() === '') {
           form.setError('subPartnerId' as any, { type: 'required', message: 'Sub partner is required for partner users' } as any);
           toast({ title: 'Validation error', description: 'Sub partner is required for partner users', variant: 'destructive' });
