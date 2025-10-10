@@ -100,7 +100,10 @@ export function Sidebar() {
     (user as any)?.role_name,
     (user as any)?.roleDetails?.role_name,
     (user as any)?.roleDetails?.role,
-  ].filter(Boolean).map(String).map(s => s.toLowerCase().replace(/\s+/g, '_'));
+  ]
+    .filter(Boolean)
+    .map(String)
+    .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
   const userRoleNormalized = userRoleCandidates[0] || '';
 
   const isModuleVisible = useMemo(() => {

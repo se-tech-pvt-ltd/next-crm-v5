@@ -25,8 +25,11 @@ export default function Settings() {
     (user as any)?.role_name,
     (user as any)?.roleDetails?.role_name,
     (user as any)?.roleDetails?.role,
-  ].filter(Boolean).map(String).map(s => s.toLowerCase().replace(/\s+/g, '_'));
-  const isPartner = userRoleCandidates.includes('partner');
+  ]
+    .filter(Boolean)
+    .map(String)
+    .map(s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'));
+  const isPartner = userRoleCandidates.some(s => s === 'partner' || s.startsWith('partner_') || s.endsWith('_partner') || s.includes('_partner_'));
 
   const [category, setCategory] = useState<AllowedCategory>(() => {
     // If partner, default to partners tab
@@ -37,13 +40,13 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    localStorage.setItem('settings_category', category);
+    try { localStorage.setItem('settings_category', category); } catch {}
   }, [category]);
 
   // When user role changes to partner ensure UI switches to partners
   useEffect(() => {
     if (isPartner && category !== 'partners') setCategory('partners');
-  }, [isPartner]);
+  }, [isPartner, category]);
 
   return (
     <Layout title="Settings" subtitle="Tailor the experience" helpText="Manage branches, users and email settings">
