@@ -30,11 +30,41 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
   const [form, setForm] = useState({ email: '', phoneNumber: '', firstName: '', lastName: '', role: '', roleId: '', branchId: '', department: '', regionId: '', profileImageUrl: '', profileImageId: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const normalizeName = (s: string) => String(s || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ');
+
   // Load departments from backend
   const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
 
   // Roles for add dialog
   const { data: rolesForDept = [] } = useQuery({ queryKey: ['/api/user-roles', form.department], queryFn: () => UserRolesService.listRoles(form.department || undefined), enabled: Boolean(form.department), staleTime: 60_000 });
+
+  // Auto-select department and role for Partners view when opening the dialog
+  useEffect(() => {
+    if (!isPartnerView || !modalOpen) return;
+    if (!Array.isArray(departments) || departments.length === 0) return;
+    const targetDept = (departments as any[]).find((d: any) => normalizeName(String(d.departmentName ?? d.department_name ?? '')) === 'partnerships');
+    if (targetDept) {
+      const deptId = String(targetDept.id);
+      if (String(form.department) !== deptId) {
+        setForm((s) => ({ ...s, department: deptId, role: '', roleId: '' }));
+      }
+    }
+  }, [isPartnerView, modalOpen, departments]);
+
+  useEffect(() => {
+    if (!isPartnerView || !modalOpen) return;
+    if (!form.department) return;
+    const roles = Array.isArray(rolesForDept) ? rolesForDept : [];
+    if (roles.length === 0) return;
+    const targetRole = roles.find((r: any) => normalizeName(String(r.roleName ?? r.role_name ?? '')) === 'partner sub user');
+    if (targetRole) {
+      const roleId = String(targetRole.id);
+      if (String(form.roleId) !== roleId) {
+        const roleName = String(targetRole.roleName ?? targetRole.role_name ?? '').trim();
+        setForm((s) => ({ ...s, roleId, role: roleName }));
+      }
+    }
+  }, [isPartnerView, modalOpen, form.department, rolesForDept]);
 
   // Regions list
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
@@ -362,7 +392,7 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
-            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title="Add User" type="button">
+            <Button size="icon" className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary" title={isPartnerView ? 'Add Sub Partner' : 'Add User'} type="button">
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
@@ -370,14 +400,14 @@ export default function UserSection({ toast, isPartnerView }: { toast: (v: any) 
             <div className="rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
               <DialogHeader className="p-0">
                 <div className="px-4 py-3 flex items-center justify-between bg-[#223E7D] text-white">
-                  <DialogTitle className="sr-only">Add User</DialogTitle>
+                  <DialogTitle className="sr-only">{isPartnerView ? 'Add Sub Partner' : 'Add User'}</DialogTitle>
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                       <UserPlus className="w-5 h-5 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-base sm:text-lg font-semibold leading-tight truncate">Add New User</div>
-                      <div className="text-xs opacity-90 truncate">Create a new team member</div>
+                      <div className="text-base sm:text-lg font-semibold leading-tight truncate">{isPartnerView ? 'Add New Sub Partner' : 'Add New User'}</div>
+                      <div className="text-xs opacity-90 truncate">{isPartnerView ? 'Create a new sub partner' : 'Create a new team member'}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
