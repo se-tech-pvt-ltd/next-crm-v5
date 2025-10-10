@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import type { Request, Response } from "express";
+import type { AuthenticatedRequest } from "../middlewares/auth.js";
 import { sanitizeUser } from "../utils/helpers.js";
 import { UserService } from "../services/UserService.js";
 import { NotificationService } from "../services/NotificationService.js";
@@ -123,6 +124,36 @@ export class UserController {
       const msg = String(error?.message || 'Failed to invite user');
       const status = (msg.includes('already assigned') || msg.includes('already exists') || msg.toLowerCase().includes('duplicate entry')) ? 409 : (msg.includes('required') ? 400 : 500);
       res.status(status).json({ message: msg });
+    }
+  }
+
+  static async getSubPartnerUsers(req: AuthenticatedRequest, res: Response) {
+    try {
+      const authUser = req.user;
+      const normalize = (value: unknown) => String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      const roleNorm = normalize(authUser?.role);
+      const isPartnerRole = roleNorm.includes('partner');
+      const partnerIdFromQuery = typeof req.query.partnerId === 'string' ? req.query.partnerId.trim() : '';
+      let partnerId = '';
+      if (isPartnerRole) {
+        partnerId = String(authUser?.roleDetails?.partner_id ?? authUser?.roleDetails?.partnerId ?? authUser?.id ?? '').trim();
+      } else if (partnerIdFromQuery) {
+        partnerId = partnerIdFromQuery;
+      } else {
+        partnerId = String(authUser?.roleDetails?.partner_id ?? authUser?.roleDetails?.partnerId ?? '').trim();
+      }
+      if (!partnerId) {
+        return res.status(400).json({ message: 'Partner ID is required' });
+      }
+      // Prevent partners from querying other partner ids
+      if (isPartnerRole) {
+        partnerId = String(authUser?.roleDetails?.partner_id ?? authUser?.roleDetails?.partnerId ?? authUser?.id ?? '').trim();
+      }
+      const users = await UserService.getSubPartnerUsers(partnerId);
+      res.json(users.map((user) => sanitizeUser(user)));
+    } catch (error) {
+      console.error('Get sub partner users error:', error);
+      res.status(500).json({ message: 'Failed to fetch partner users' });
     }
   }
 

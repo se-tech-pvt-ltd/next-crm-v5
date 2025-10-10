@@ -3,6 +3,7 @@ import { UserController } from "../controllers/UserController.js";
 
 export const userRoutes = Router();
 
+userRoutes.get("/sub-partners", UserController.getSubPartnerUsers);
 userRoutes.get("/", UserController.getUsers);
 userRoutes.post("/", UserController.createUser);
 userRoutes.post("/invite", UserController.inviteUser);
