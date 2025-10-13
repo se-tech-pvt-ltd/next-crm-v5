@@ -215,6 +215,15 @@ export default function Admissions() {
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
                 </div>
+                <div className="w-48">
+                  <InputWithIcon
+                    placeholder="Search by admission id"
+                    leftIcon={<Search className="w-3 h-3 text-gray-400" />}
+                    value={admissionSearchQuery}
+                    onChange={(e: any) => setAdmissionSearchQuery(e.target.value)}
+                    className="h-7 text-xs"
+                  />
+                </div>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>
                   <SelectTrigger className="w-28 h-7 text-xs">
                     <SelectValue placeholder="Filter by university" />
