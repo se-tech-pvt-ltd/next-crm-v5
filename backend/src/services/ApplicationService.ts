@@ -128,8 +128,12 @@ export class ApplicationService {
       return (await this.enrichDropdownFields(rows)) as any;
     }
 
-    // Partners see only applications tied to their partner id
-    if (userRole === 'partner' && userId) {
+    // Partners see only applications tied to their partner id.
+    // Also support "partner sub-user" roles which should be scoped by subPartner.
+    const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
+
+    if ((userRole === 'partner' || isPartnerSubUser) && userId) {
       const rows = await db
         .select({
           id: applications.id,
@@ -150,7 +154,7 @@ export class ApplicationService {
           updatedAt: applications.updatedAt,
         })
         .from(applications)
-        .where(eq(applications.partner, userId))
+        .where(isPartnerSubUser ? eq(applications.subPartner, userId) : eq(applications.partner, userId))
         .orderBy(desc(applications.createdAt));
       return (await this.enrichDropdownFields(rows)) as any;
     }
