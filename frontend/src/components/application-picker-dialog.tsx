@@ -100,8 +100,14 @@ export const ApplicationPickerDialog = ({
   }, [appsAll, appsPaged, studentsAll, search, pageSize]);
 
   useEffect(() => {
-    if (!open) setSearch("");
-  }, [open]);
+    if (!open) {
+      setSearch("");
+      return;
+    }
+    // Force refetch fresh data when picker opens
+    try { refetchAppsPaged && refetchAppsPaged(); } catch {}
+    try { refetchAppsAll && refetchAppsAll(); } catch {}
+  }, [open, refetchAppsPaged, refetchAppsAll]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
