@@ -196,9 +196,11 @@ export class StudentService {
         )
       );
     } else if (userRole === 'partner' && userId) {
+      const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
       rows = await db.select().from(students).where(
         and(
-          eq(students.partner, userId),
+          isPartnerSubUser ? eq(students.subPartner, userId) : eq(students.partner, userId),
           searchConditions
         )
       );
