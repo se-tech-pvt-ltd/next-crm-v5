@@ -462,12 +462,10 @@ export default function Applications() {
               <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">App</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Student</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">University</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Program</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Intake</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Created</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -479,17 +477,16 @@ export default function Applications() {
                       onClick={() => { setLocation(`/applications/${application.id}`); }}
                     >
                       <TableCell className="font-medium p-2 text-xs">
-                        {getStudentName(application.studentId)}
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="flex items-center text-xs">
-                          <School className="w-3 h-3 mr-1" />
-                          <span>{cleanLabel(application.university)}</span>
-                          {application.applicationCode && (
-                            <span className="ml-2 text-[11px] text-gray-500">({application.applicationCode})</span>
-                          )}
+                        <div className="flex flex-col">
+                          <div className="text-xs font-medium">{(application.applicationCode || application.id)}</div>
+                          <div className="text-[11px] text-gray-500">{cleanLabel(application.university)}</div>
                         </div>
                       </TableCell>
+
+                      <TableCell className="font-medium p-2 text-xs">
+                        {getStudentName(application.studentId)}
+                      </TableCell>
+
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">
                           {cleanLabel(application.program)}
@@ -498,22 +495,13 @@ export default function Applications() {
                           )}
                         </div>
                       </TableCell>
+
                       <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(cleanLabel(application.appStatus || 'Open') || 'Open')}>
                           {cleanLabel(application.appStatus || 'Open') || 'Open'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="text-xs">
-                          {cleanLabel(application.intake) || '—'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(application.createdAt)}
-                        </div>
-                      </TableCell>
+
                       <TableCell className="p-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
