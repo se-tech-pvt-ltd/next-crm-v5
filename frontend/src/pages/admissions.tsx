@@ -26,6 +26,7 @@ export default function Admissions() {
   const [matchNew] = useRoute('/admissions/new');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+  const [admissionSearchQuery, setAdmissionSearchQuery] = useState('');
 
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
