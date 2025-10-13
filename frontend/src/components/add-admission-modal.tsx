@@ -935,7 +935,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                                 <FormLabel>Sub partner</FormLabel>
                                 <FormControl>
                                   <SearchableCombobox
-                                    value={form.getValues('subPartnerId') || ''}
+                                    value={form.watch('subPartnerId') || ''}
                                     onValueChange={(v) => form.setValue('subPartnerId', v)}
                                     placeholder="Select sub partner"
                                     searchPlaceholder="Search sub partners..."
