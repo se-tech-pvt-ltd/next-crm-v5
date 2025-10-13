@@ -124,8 +124,9 @@ export default function Students() {
   const nonEnrolledIds = new Set(nonEnrolledStudents.map((s) => s.id));
 
   const activeCount = nonEnrolledStudents.length;
-  const appliedCount = applicationsArray.filter((a: any) => a && nonEnrolledIds.has(a.studentId)).length;
-  const admittedCount = admissionsArray.filter((a: any) => a && nonEnrolledIds.has(a.studentId)).length;
+  // Applied and Admitted should be global totals (not limited to non-enrolled students)
+  const appliedCount = applicationsArray ? applicationsArray.length : 0;
+  const admittedCount = admissionsArray ? admissionsArray.length : 0;
 
   // Utility to parse targetCountry value into array of ids or names
   const parseTargetCountries = (value: any): string[] => {
