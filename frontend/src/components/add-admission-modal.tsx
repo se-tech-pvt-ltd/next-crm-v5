@@ -900,13 +900,52 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         const roleName = getNormalizedRole();
                         const isPartnerRole = String(roleName || '').includes('partner');
                         if (isPartnerRole) {
-                          const options = Array.isArray(subPartners) ? subPartners.map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'), email: u.email })) : [];
+                          const options = Array.isArray(subPartners)
+                            ? subPartners.map((u: any) => ({
+                                value: String(u.id),
+                                label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'),
+                                email: u.email,
+                              }))
+                            : [];
                           return (
-                            <div>
-                              <FormLabel>Sub partner</FormLabel>
-                              <FormControl>
-                                <SearchableCombobox value={form.getValues('subPartnerId') || ''} onValueChange={(v) => form.setValue('subPartnerId', v)} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={setSubPartnerSearch} options={options} loading={subPartnerLoading} showAvatar={false} />
-                              </FormControl>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1.5">
+                                <FormLabel>Partner</FormLabel>
+                                <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                                  {(() => {
+                                    try {
+                                      const pid = String(((form as any).getValues?.('partnerId')) || (user as any)?.id || '').trim();
+                                      const p = pid && Array.isArray(users) ? (users as any[]).find((uu: any) => String(uu.id) === String(pid)) : null;
+                                      if (!p) return (pid || '—');
+                                      const full = [p.firstName || p.first_name, p.lastName || p.last_name].filter(Boolean).join(' ').trim() || p.email || p.id;
+                                      const email = p.email || '';
+                                      return (
+                                        <div>
+                                          <div className="font-medium text-xs">{full}</div>
+                                          {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                                        </div>
+                                      );
+                                    } catch {
+                                      return '—';
+                                    }
+                                  })()}
+                                </div>
+                              </div>
+                              <div className="space-y-1.5">
+                                <FormLabel>Sub partner</FormLabel>
+                                <FormControl>
+                                  <SearchableCombobox
+                                    value={form.getValues('subPartnerId') || ''}
+                                    onValueChange={(v) => form.setValue('subPartnerId', v)}
+                                    placeholder="Select sub partner"
+                                    searchPlaceholder="Search sub partners..."
+                                    onSearch={setSubPartnerSearch}
+                                    options={options}
+                                    loading={subPartnerLoading}
+                                    showAvatar={false}
+                                  />
+                                </FormControl>
+                              </div>
                             </div>
                           );
                         }
