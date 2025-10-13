@@ -80,6 +80,29 @@ export default function Students() {
     return (sCoun && sCoun === uid) || (sAdm && sAdm === uid);
   });
 
+  // Applications and Admissions for derived counts
+  const { data: applicationsResponse } = useQuery({
+    queryKey: ['/api/applications'],
+    queryFn: async () => ApplicationsService.getApplications(),
+    staleTime: 60000,
+  });
+  const { data: admissionsResponse } = useQuery({
+    queryKey: ['/api/admissions'],
+    queryFn: async () => AdmissionsService.getAdmissions(),
+    staleTime: 60000,
+  });
+
+  const applicationsArray: any[] = Array.isArray(applicationsResponse) ? applicationsResponse : (applicationsResponse as any)?.data || [];
+  const admissionsArray: any[] = Array.isArray(admissionsResponse) ? admissionsResponse : (admissionsResponse as any)?.data || [];
+
+  // Non-enrolled students are considered Active in this context
+  const nonEnrolledStudents: Student[] = (studentsArray || []).filter((s) => getStatusLabel(s.status).toLowerCase() !== 'enrolled');
+  const nonEnrolledIds = new Set(nonEnrolledStudents.map((s) => s.id));
+
+  const activeCount = nonEnrolledStudents.length;
+  const appliedCount = applicationsArray.filter((a: any) => a && nonEnrolledIds.has(a.studentId)).length;
+  const admittedCount = admissionsArray.filter((a: any) => a && nonEnrolledIds.has(a.studentId)).length;
+
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
