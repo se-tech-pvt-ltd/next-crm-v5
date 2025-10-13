@@ -63,9 +63,13 @@ export const ApplicationPickerDialog = ({
     const rawList = toArray(source);
     const list = rawList.filter((app: any) => {
       const v = app?.isConverted ?? app?.is_converted ?? app?.isconverted ?? app?.converted;
-      // Only include when the conversion flag is explicitly present and indicates not converted (0 / false)
+      // Only include when the conversion flag is explicitly present and indicates not converted
       if (v === undefined || v === null) return false;
-      return Number(v) === 0;
+      if (typeof v === 'boolean') return v === false;
+      if (typeof v === 'number') return v === 0;
+      // string forms: '0', 'false', 'no'
+      const sv = String(v).trim().toLowerCase();
+      return sv === '0' || sv === 'false' || sv === 'no';
     });
 
     const students = Array.isArray(studentsAll) ? studentsAll : (toArray(studentsAll) || []);
