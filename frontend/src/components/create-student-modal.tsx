@@ -625,18 +625,26 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   : [];
                 return (
                   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label>Partner</Label>
-                      <Select value={formData.partnerId} onValueChange={(v) => handleChange('partnerId', v)} disabled>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select partner" /></SelectTrigger>
-                        <SelectContent>
-                          {partnerOptions.map((opt: any) => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><User className="w-4 h-4" /><span>Partner</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const pid = String((formData as any).partnerId || (user as any)?.id || '').trim();
+                          const p = pid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(pid)) : null;
+                          if (!p) return (pid || '—');
+                          const full = [p.firstName || p.first_name, p.lastName || p.last_name].filter(Boolean).join(' ').trim() || p.email || p.id;
+                          const email = p.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{full}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><User className="w-4 h-4" /><span>Sub partner</span></Label>
                       <SearchableCombobox
                         value={formData.subPartnerId}
                         onValueChange={(v) => handleChange('subPartnerId', v)}
@@ -645,11 +653,10 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         onSearch={setSubPartnerSearch}
                         options={options}
                         loading={subPartnerLoading}
-                        className="h-11 text-sm bg-white border-2 border-gray-300"
+                        className="h-8 text-xs bg-white border border-gray-300"
                         emptyMessage="No sub partners found"
                         showAvatar={false}
                       />
-                      <p className="text-[11px] text-muted-foreground">Students you create will be attributed to the selected sub partner for tracking and reports.</p>
                     </div>
                   </CardContent>
                 );
