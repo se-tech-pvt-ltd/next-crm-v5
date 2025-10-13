@@ -865,16 +865,64 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                   const roleName = getNormalizedRole();
                   const isPartnerRole = String(roleName || '').includes('partner');
                   if (isPartnerRole) {
-                    // fetch sub partners
+                    // Show Partner (read-only) and Sub partner selection side-by-side
+                    const pidCandidates: string[] = [];
+                    try {
+                      const token = localStorage.getItem('auth_token');
+                      if (token) {
+                        const parts = String(token).split('.');
+                        if (parts.length >= 2) {
+                          const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                          const pad = b64.length % 4;
+                          const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+                          const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                          const payload = JSON.parse(json) as any;
+                          const tokPid = payload?.role_details?.partner_id || payload?.roleDetails?.partnerId || payload?.partner_id || payload?.partnerId || payload?.id;
+                          if (tokPid) pidCandidates.push(String(tokPid));
+                        }
+                      }
+                    } catch {}
+                    try {
+                      const s: any = selectedStudent || presetStudent || {};
+                      const sid = s.partner || s.partnerId || s.partner_id;
+                      if (sid) pidCandidates.push(String(sid));
+                    } catch {}
+                    const partnerId = pidCandidates.find(v => String(v || '').trim()) || '';
+                    const partnerUser = partnerId ? (Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(partnerId)) : null) : null;
+
                     return (
-                      <FormField control={form.control} name="subPartnerId" render={() => (
-                        <FormItem>
-                          <FormLabel>Sub partner</FormLabel>
-                          <FormControl>
-                            <SearchableCombobox value={selectedSubPartnerLocal || ''} onValueChange={(v) => { form.setValue('subPartnerId', v, { shouldDirty: true, shouldValidate: true }); setSelectedSubPartnerLocal(v); }} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={setSubPartnerSearch} options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || (u.email||'User'), email: u.email }))} loading={subPartnerLoading} showAvatar={false} />
-                          </FormControl>
-                        </FormItem>
-                      )} />
+                      <>
+                        <div className="space-y-1.5">
+                          <FormLabel className="flex items-center space-x-2"><UserSquare className="w-4 h-4" /><span>Partner</span></FormLabel>
+                          <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                            {partnerUser ? (
+                              <div>
+                                <div className="font-medium text-xs">{[partnerUser.firstName || (partnerUser as any).first_name, partnerUser.lastName || (partnerUser as any).last_name].filter(Boolean).join(' ').trim() || partnerUser.email || partnerUser.id}</div>
+                                {partnerUser.email ? <div className="text-[11px] text-muted-foreground">{partnerUser.email}</div> : null}
+                              </div>
+                            ) : (partnerId || '—')}
+                          </div>
+                        </div>
+
+                        <FormField control={form.control} name="subPartnerId" render={() => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2"><UserSquare className="w-4 h-4" /><span>Sub partner</span></FormLabel>
+                            <FormControl>
+                              <SearchableCombobox
+                                value={selectedSubPartnerLocal || ''}
+                                onValueChange={(v) => { form.setValue('subPartnerId', v, { shouldDirty: true, shouldValidate: true }); setSelectedSubPartnerLocal(v); }}
+                                placeholder="Select sub partner"
+                                searchPlaceholder="Search sub partners..."
+                                onSearch={setSubPartnerSearch}
+                                options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || (u.email||'User'), email: u.email }))}
+                                loading={subPartnerLoading}
+                                className="h-12 text-sm bg-white border rounded"
+                                showAvatar={false}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )} />
+                      </>
                     );
                   }
 

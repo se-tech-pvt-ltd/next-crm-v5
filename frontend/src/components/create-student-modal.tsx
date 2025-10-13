@@ -88,6 +88,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     notes: '',
     regionId: '',
     branchId: '',
+    partnerId: '',
     subPartnerId: '',
   };
 
@@ -255,8 +256,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       if (regionId) payload.regionId = regionId;
       if (branchId) payload.branchId = branchId;
     } else {
-      const currentUserId = String((user as any)?.id || '');
-      if (currentUserId) payload.partner = currentUserId;
+      const chosenPartnerId = String((formData as any)?.partnerId || (user as any)?.id || '');
+      if (chosenPartnerId) payload.partner = chosenPartnerId;
       if (subPartnerId) payload.subPartner = subPartnerId;
     }
 
@@ -422,6 +423,13 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     .filter((b: any) => !formData.regionId || String(b.regionId ?? b.region_id ?? '') === String(formData.regionId))
     .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') , headId: String(b.branchHeadId || b.managerId || '') })), [branches, formData.regionId]);
 
+  const partnerOptions = React.useMemo(() => {
+    const list = Array.isArray(users) ? (users as any[]) : [];
+    return list
+      .filter((u: any) => normalizeRole(u.role || u.role_name || u.roleName) === 'partner')
+      .map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id }));
+  }, [users]);
+
 
   React.useEffect(() => {
     if (!open) {
@@ -429,6 +437,17 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       setErrors({});
     }
   }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    try {
+      const roleName = getNormalizedRole();
+      if (roleName === 'partner') {
+        const id = String((user as any)?.id || '');
+        if (id && !formData.partnerId) setFormData(prev => ({ ...prev, partnerId: id }));
+      }
+    } catch {}
+  }, [open, user, formData.partnerId]);
 
   return (
     <DetailsDialogLayout
@@ -605,8 +624,27 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     }))
                   : [];
                 return (
-                  <CardContent className="grid grid-cols-1 gap-3">
-                    <div className="space-y-2">
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><User className="w-4 h-4" /><span>Partner</span></Label>
+                      <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                        {(() => {
+                          const pid = String((formData as any).partnerId || (user as any)?.id || '').trim();
+                          const p = pid && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(pid)) : null;
+                          if (!p) return (pid || '—');
+                          const full = [p.firstName || p.first_name, p.lastName || p.last_name].filter(Boolean).join(' ').trim() || p.email || p.id;
+                          const email = p.email || '';
+                          return (
+                            <div>
+                              <div className="font-medium text-xs">{full}</div>
+                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center space-x-2"><User className="w-4 h-4" /><span>Sub partner</span></Label>
                       <SearchableCombobox
                         value={formData.subPartnerId}
                         onValueChange={(v) => handleChange('subPartnerId', v)}
@@ -615,11 +653,10 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         onSearch={setSubPartnerSearch}
                         options={options}
                         loading={subPartnerLoading}
-                        className="h-11 text-sm bg-white border-2 border-gray-300"
+                        className="h-12 text-sm bg-white border rounded"
                         emptyMessage="No sub partners found"
                         showAvatar={false}
                       />
-                      <p className="text-[11px] text-muted-foreground">Students you create will be attributed to the selected sub partner for tracking and reports.</p>
                     </div>
                   </CardContent>
                 );
