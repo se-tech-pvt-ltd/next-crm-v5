@@ -439,7 +439,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-purple-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'admitted').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : admittedCount || 0}
               </div>
             </CardContent>
           </Card>
