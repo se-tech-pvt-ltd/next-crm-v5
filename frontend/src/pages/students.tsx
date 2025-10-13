@@ -18,7 +18,7 @@ import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
-import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus } from 'lucide-react';
+import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
