@@ -92,7 +92,6 @@ export default function Admissions() {
     }
 
     try { console.log('[Admissions] matchNew is true'); } catch {}
-    try { toast({ title: 'Route', description: 'matchNew detected, opening application picker', }); } catch {}
 
     const queryString = (() => {
       try {
