@@ -62,7 +62,9 @@ export const ApplicationPickerDialog = ({
     // Only include applications that are not yet converted (isConverted === 0)
     const rawList = toArray(source);
     const list = rawList.filter((app: any) => {
-      const v = app?.isConverted ?? app?.is_converted ?? app?.isconverted ?? app?.converted ?? 0;
+      const v = app?.isConverted ?? app?.is_converted ?? app?.isconverted ?? app?.converted;
+      // Only include when the conversion flag is explicitly present and indicates not converted (0 / false)
+      if (v === undefined || v === null) return false;
       return Number(v) === 0;
     });
 
