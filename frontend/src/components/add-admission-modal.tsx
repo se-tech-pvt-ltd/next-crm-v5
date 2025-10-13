@@ -159,6 +159,16 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
+      try {
+        const roleName = getNormalizedRole();
+        const isPartner = String(roleName || '').includes('partner');
+        if (isPartner) {
+          const partnerId = String((form.getValues('partnerId') || (user as any)?.id || '')).trim();
+          const subPartnerId = String(form.getValues('subPartnerId') || '').trim();
+          if (partnerId) (payload as any).partner = partnerId;
+          if (subPartnerId) (payload as any).subPartner = subPartnerId;
+        }
+      } catch {}
       console.log('[AddAdmissionModal] payload prepared:', payload);
       // Remove undefined fields (especially optional dates) so backend doesn't receive null/undefined
       Object.keys(payload).forEach((k) => { if (payload[k] === undefined) delete (payload as any)[k]; });
