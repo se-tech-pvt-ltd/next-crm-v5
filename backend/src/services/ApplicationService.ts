@@ -91,6 +91,7 @@ export class ApplicationService {
           intake: applications.intake,
           googleDriveLink: applications.googleDriveLink,
           notes: applications.notes,
+          isConverted: applications.isConverted,
           createdAt: applications.createdAt,
           updatedAt: applications.updatedAt,
         })
@@ -116,6 +117,7 @@ export class ApplicationService {
           intake: applications.intake,
           googleDriveLink: applications.googleDriveLink,
           notes: applications.notes,
+          isConverted: applications.isConverted,
           createdAt: applications.createdAt,
           updatedAt: applications.updatedAt,
         })
@@ -143,6 +145,7 @@ export class ApplicationService {
           intake: applications.intake,
           googleDriveLink: applications.googleDriveLink,
           notes: applications.notes,
+          isConverted: applications.isConverted,
           createdAt: applications.createdAt,
           updatedAt: applications.updatedAt,
         })
@@ -169,7 +172,8 @@ export class ApplicationService {
             intake: applications.intake,
             googleDriveLink: applications.googleDriveLink,
             notes: applications.notes,
-            createdAt: applications.createdAt,
+          isConverted: applications.isConverted,
+          createdAt: applications.createdAt,
             updatedAt: applications.updatedAt,
           })
           .from(applications)
@@ -198,7 +202,8 @@ export class ApplicationService {
             intake: applications.intake,
             googleDriveLink: applications.googleDriveLink,
             notes: applications.notes,
-            createdAt: applications.createdAt,
+          isConverted: applications.isConverted,
+          createdAt: applications.createdAt,
             updatedAt: applications.updatedAt,
           })
           .from(applications)
@@ -227,6 +232,7 @@ export class ApplicationService {
           intake: applications.intake,
           googleDriveLink: applications.googleDriveLink,
           notes: applications.notes,
+          isConverted: applications.isConverted,
           createdAt: applications.createdAt,
           updatedAt: applications.updatedAt,
         })
