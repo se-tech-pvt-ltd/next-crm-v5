@@ -801,12 +801,25 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                 const roleName = getNormalizedRole();
                 const isPartnerRole = String(roleName || '').includes('partner');
                 if (isPartnerRole) {
+                  const pId = (student as any).partner || (student as any).partnerId || (student as any).partner_id || (authUser as any)?.id || '';
                   const spId = (student as any).subPartner || (student as any).sub_partner || (student as any).subPartnerId || (student as any).sub_partner_id || '';
+                  const partner = pId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(pId)) : null;
                   const sp = spId && Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(spId)) : null;
                   return (
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <div className="space-y-1.5">
-                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span className="sr-only">Sub partner</span></Label>
+                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Partner</span></Label>
+                        <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                          {partner ? (
+                            <div>
+                              <div className="font-medium text-xs">{[partner.firstName || partner.first_name, partner.lastName || partner.last_name].filter(Boolean).join(' ') || partner.email || partner.id}</div>
+                              {partner.email ? <div className="text-[11px] text-muted-foreground">{partner.email}</div> : null}
+                            </div>
+                          ) : (pId ? pId : '—')}
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Sub partner</span></Label>
                         <div className="text-xs px-2 py-1.5 rounded border bg-white">
                           {sp ? (
                             <div>
