@@ -83,6 +83,8 @@ export default function Admissions() {
   }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
   // Open Add Admission modal or student picker when route matches /admissions/new
+  const { toast } = useToast();
+
   useEffect(() => {
     if (!matchNew) {
       setIsApplicationPickerOpen(false);
@@ -90,6 +92,9 @@ export default function Admissions() {
       setAddAdmissionAppIdState(undefined);
       return;
     }
+
+    try { console.log('[Admissions] matchNew is true'); } catch {}
+    try { toast({ title: 'Route', description: 'matchNew detected, opening application picker', }); } catch {}
 
     const queryString = (() => {
       try {
@@ -115,7 +120,7 @@ export default function Admissions() {
     }
 
     setIsApplicationPickerOpen(true);
-  }, [matchNew, addAdmissionAppIdState, isAddAdmissionModalOpen]);
+  }, [matchNew, addAdmissionAppIdState, isAddAdmissionModalOpen, toast]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
