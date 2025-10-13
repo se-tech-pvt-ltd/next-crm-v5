@@ -139,11 +139,11 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         decision: data.decision || 'pending',
         decisionDate: data.decisionDate ? new Date(data.decisionDate) : undefined,
         // Map UI fields to ORM fields
-        status: data.status || null,
-        caseStatus: data.caseStatus || null,
-        fullTuitionFee: data.fullTuitionFee || null,
-        scholarshipAmount: data.scholarshipAmount || null,
-        netTuitionFee: data.netTuitionFee || null,
+        status: data.status ? data.status : undefined,
+        caseStatus: data.caseStatus ? data.caseStatus : undefined,
+        fullTuitionFee: data.fullTuitionFee ? data.fullTuitionFee : undefined,
+        scholarshipAmount: data.scholarshipAmount ? data.scholarshipAmount : undefined,
+        netTuitionFee: data.netTuitionFee ? data.netTuitionFee : undefined,
         depositRequired: Boolean(data.depositRequired) || false,
         // Persist initialDeposit (frontend field) into DB column initial_deposit
         initialDeposit: data.initialDeposit ?? data.depositAmount ?? undefined,
@@ -153,15 +153,28 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         depositDeadline: data.depositDeadline ? new Date(data.depositDeadline) : undefined,
         visaDate: data.visaDate ? new Date(data.visaDate) : undefined,
         visaStatus: data.visaStatus || 'pending',
-        googleDriveLink: data.googleDriveLink || null,
+        googleDriveLink: data.googleDriveLink ? data.googleDriveLink : undefined,
         branchId: data.branchId || undefined,
         regionId: data.regionId || undefined,
         counsellorId: data.counsellorId || undefined,
         admissionOfficerId: data.admissionOfficerId || undefined,
       } as any;
+      try {
+        const roleName = getNormalizedRole();
+        const isPartner = String(roleName || '').includes('partner');
+        if (isPartner) {
+          const partnerId = String((form.getValues('partnerId') || (user as any)?.id || '')).trim();
+          const subPartnerId = String(form.getValues('subPartnerId') || '').trim();
+          if (partnerId) (payload as any).partner = partnerId;
+          if (subPartnerId) (payload as any).subPartner = subPartnerId;
+        }
+      } catch {}
       console.log('[AddAdmissionModal] payload prepared:', payload);
-      // Remove undefined fields (especially optional dates) so backend doesn't receive null/undefined
-      Object.keys(payload).forEach((k) => { if (payload[k] === undefined) delete (payload as any)[k]; });
+      // Remove undefined or empty-string fields so backend validation passes
+      Object.keys(payload).forEach((k) => {
+        const v = (payload as any)[k];
+        if (v === undefined || v === '') delete (payload as any)[k];
+      });
       try {
         const created = await AdmissionsService.createAdmission(payload as any);
         try {
@@ -833,13 +846,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                                 </Popover>
                               );
 
-                              const selectedApp = applications?.find((a) => String(a.id) === aid);
-                              if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
-                              return (
-                                <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => openApplicationDetails(selectedApp)}>
-                                  {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
-                                </Button>
-                              );
+                              const selectedApp = (applications?.find((a) => String(a.id) === aid) as any) || (currentApp as any) || (linkedApp as any);
+                              if (selectedApp) {
+                                return (
+                                  <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => openApplicationDetails(selectedApp)}>
+                                    {selectedApp.applicationCode || `${selectedApp.university ?? ''} — ${selectedApp.program ?? ''}`.trim() || String(selectedApp.id || aid)}
+                                  </Button>
+                                );
+                              }
+                              return <div className="text-sm text-gray-700">{aid}</div>;
                             })()}
                           </div>
                         </div>
@@ -900,13 +915,52 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         const roleName = getNormalizedRole();
                         const isPartnerRole = String(roleName || '').includes('partner');
                         if (isPartnerRole) {
-                          const options = Array.isArray(subPartners) ? subPartners.map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'), email: u.email })) : [];
+                          const options = Array.isArray(subPartners)
+                            ? subPartners.map((u: any) => ({
+                                value: String(u.id),
+                                label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || (u.email || 'User'),
+                                email: u.email,
+                              }))
+                            : [];
                           return (
-                            <div>
-                              <FormLabel>Sub partner</FormLabel>
-                              <FormControl>
-                                <SearchableCombobox value={form.getValues('subPartnerId') || ''} onValueChange={(v) => form.setValue('subPartnerId', v)} placeholder="Select sub partner" searchPlaceholder="Search sub partners..." onSearch={setSubPartnerSearch} options={options} loading={subPartnerLoading} showAvatar={false} />
-                              </FormControl>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1.5">
+                                <FormLabel>Partner</FormLabel>
+                                <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                                  {(() => {
+                                    try {
+                                      const pid = String(((form as any).getValues?.('partnerId')) || (user as any)?.id || '').trim();
+                                      const p = pid && Array.isArray(users) ? (users as any[]).find((uu: any) => String(uu.id) === String(pid)) : null;
+                                      if (!p) return (pid || '—');
+                                      const full = [p.firstName || p.first_name, p.lastName || p.last_name].filter(Boolean).join(' ').trim() || p.email || p.id;
+                                      const email = p.email || '';
+                                      return (
+                                        <div>
+                                          <div className="font-medium text-xs">{full}</div>
+                                          {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                                        </div>
+                                      );
+                                    } catch {
+                                      return '—';
+                                    }
+                                  })()}
+                                </div>
+                              </div>
+                              <div className="space-y-1.5">
+                                <FormLabel>Sub partner</FormLabel>
+                                <FormControl>
+                                  <SearchableCombobox
+                                    value={form.watch('subPartnerId') || ''}
+                                    onValueChange={(v) => form.setValue('subPartnerId', v)}
+                                    placeholder="Select sub partner"
+                                    searchPlaceholder="Search sub partners..."
+                                    onSearch={setSubPartnerSearch}
+                                    options={options}
+                                    loading={subPartnerLoading}
+                                    showAvatar={false}
+                                  />
+                                </FormControl>
+                              </div>
                             </div>
                           );
                         }
