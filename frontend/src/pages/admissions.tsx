@@ -47,8 +47,10 @@ export default function Admissions() {
   // Open details modal when route matches and ensure selected admission is set
   useEffect(() => {
     const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    // Ignore the special 'new' route -- handled separately by matchNew
+    const isNew = id === 'new';
     if (matchAd || matchEdit) {
-      if (id) {
+      if (id && !isNew) {
         const found = (admissions || []).find(a => a.id === id) as Admission | undefined;
         if (found) {
           setSelectedAdmission(found);
@@ -65,7 +67,8 @@ export default function Admissions() {
           }
         }
       }
-      setIsDetailsOpen(true);
+      // Open details modal for real ids; if it's 'new' we do not open details here.
+      if (!isNew) setIsDetailsOpen(true);
     }
   }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
 
