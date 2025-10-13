@@ -504,24 +504,49 @@ export default function ApplicationDetails() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {isPartnerRole ? (
-                    <div className="grid grid-cols-1 gap-2">
-                      <div className="space-y-1.5">
-                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span className="sr-only">Sub partner</span></Label>
-                        <div className="text-xs px-2 py-1.5 rounded border bg-white">
-                          {subPartnerUser ? (
-                            <div>
-                              <div className="font-medium text-xs">{
-                                [
-                                  subPartnerUser.firstName || (subPartnerUser as any).first_name,
-                                  subPartnerUser.lastName || (subPartnerUser as any).last_name,
-                                ].filter(Boolean).join(' ').trim() || subPartnerUser.email || subPartnerUser.id
-                              }</div>
-                              {subPartnerUser.email ? <div className="text-[11px] text-muted-foreground">{subPartnerUser.email}</div> : null}
+                    (() => {
+                      const pIdCandidates = [
+                        (application as any)?.partner,
+                        (application as any)?.partnerId,
+                        (application as any)?.partner_id,
+                        (student as any)?.partner,
+                        (student as any)?.partnerId,
+                        (student as any)?.partner_id,
+                        (authUser as any)?.id,
+                      ];
+                      let pId = '';
+                      for (const c of pIdCandidates) { const v = String(c ?? '').trim(); if (v) { pId = v; break; } }
+                      const partnerUser = pId ? (Array.isArray(users) ? (users as any[]).find((u: any) => String(u.id) === String(pId)) : null) : null;
+                      return (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <div className="space-y-1.5">
+                            <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Partner</span></Label>
+                            <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                              {partnerUser ? (
+                                <div>
+                                  <div className="font-medium text-xs">{[partnerUser.firstName || (partnerUser as any).first_name, partnerUser.lastName || (partnerUser as any).last_name].filter(Boolean).join(' ').trim() || partnerUser.email || partnerUser.id}</div>
+                                  {partnerUser.email ? <div className="text-[11px] text-muted-foreground">{partnerUser.email}</div> : null}
+                                </div>
+                              ) : (pId || '—')}
                             </div>
-                          ) : (subPartnerId || '—')}
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Sub partner</span></Label>
+                            <div className="text-xs px-2 py-1.5 rounded border bg-white">
+                              {subPartnerUser ? (
+                                <div>
+                                  <div className="font-medium text-xs">{[
+                                    subPartnerUser.firstName || (subPartnerUser as any).first_name,
+                                    subPartnerUser.lastName || (subPartnerUser as any).last_name,
+                                  ].filter(Boolean).join(' ').trim() || subPartnerUser.email || subPartnerUser.id}</div>
+                                  {subPartnerUser.email ? <div className="text-[11px] text-muted-foreground">{subPartnerUser.email}</div> : null}
+                                </div>
+                              ) : (subPartnerId || '—')}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                       <div className="space-y-1.5">
