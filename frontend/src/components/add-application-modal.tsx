@@ -897,7 +897,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(() => {
                   const roleName = getNormalizedRole();
-                  const isPartnerRole = String(roleName || '').includes('partner');
+                  const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
                   if (isPartnerRole) {
                     // Show Partner (read-only) and Sub partner selection side-by-side
                     const pidCandidates: string[] = [];
