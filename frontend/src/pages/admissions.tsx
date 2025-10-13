@@ -17,6 +17,7 @@ import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { ApplicationPickerDialog } from '@/components/application-picker-dialog';
 import { useLocation, useRoute } from 'wouter';
 import * as AdmissionsService from '@/services/admissions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Admissions() {
   const [universityFilter, setUniversityFilter] = useState('all');
