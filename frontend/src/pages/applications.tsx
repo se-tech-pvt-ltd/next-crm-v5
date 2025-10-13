@@ -155,7 +155,16 @@ export default function Applications() {
     const appStatusValue = cleanLabel(app.appStatus || '');
     const statusMatch = statusFilter === 'all' || appStatusValue === statusFilter;
     const universityMatch = universityFilter === 'all' || (cleanLabel(app.university || '') === universityFilter);
-    return statusMatch && universityMatch;
+
+    const q = (appSearchQuery || '').toString().trim().toLowerCase();
+    let searchMatch = true;
+    if (q) {
+      const idVal = String(app.id || '').toLowerCase();
+      const codeVal = String(app.applicationCode || app.application_code || '').toLowerCase();
+      searchMatch = idVal.includes(q) || codeVal.includes(q);
+    }
+
+    return statusMatch && universityMatch && searchMatch;
   }) || [];
 
   // If backend provides pagination, assume applicationsArray is already the page to display.
