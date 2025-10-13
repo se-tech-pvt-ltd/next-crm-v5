@@ -61,6 +61,9 @@ export const ApplicationPickerDialog = ({
     const source = search.trim().length > 0 ? appsAll : appsPaged;
     // Only include applications that are not yet converted (isConverted === 0)
     const rawList = toArray(source);
+    try { console.debug('[ApplicationPicker] source', source); } catch {}
+    try { console.debug('[ApplicationPicker] rawList length', rawList.length, 'sample', rawList.slice(0,3)); } catch {}
+
     const list = rawList.filter((app: any) => {
       const v = app?.isConverted ?? app?.is_converted ?? app?.isconverted ?? app?.converted;
       // Only include when the conversion flag is explicitly present and indicates not converted
@@ -71,6 +74,7 @@ export const ApplicationPickerDialog = ({
       const sv = String(v).trim().toLowerCase();
       return sv === '0' || sv === 'false' || sv === 'no';
     });
+    try { console.debug('[ApplicationPicker] filtered list length', list.length, 'sample', list.slice(0,3)); } catch {}
 
     const students = Array.isArray(studentsAll) ? studentsAll : (toArray(studentsAll) || []);
     const getStudentName = (sid: any) => {
