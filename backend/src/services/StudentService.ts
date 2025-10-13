@@ -64,7 +64,10 @@ export class StudentService {
     } else if (userRole === 'admission_officer' && userId) {
       rows = await StudentModel.findByAdmissionOfficer(userId);
     } else if (userRole === 'partner' && userId) {
-      rows = await db.select().from(students).where(eq(students.partner, userId)).orderBy(desc(students.createdAt));
+      // Support partner sub-users scoped by subPartner. Normalize role to detect "partner sub-user" variants.
+      const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
+      rows = await db.select().from(students).where(isPartnerSubUser ? eq(students.subPartner, userId) : eq(students.partner, userId)).orderBy(desc(students.createdAt));
     } else if (userRole === 'branch_manager') {
       if (branchId) {
         rows = await db.select().from(students).where(eq(students.branchId, branchId)).orderBy(desc(students.createdAt));
