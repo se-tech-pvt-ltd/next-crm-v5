@@ -14,7 +14,7 @@ import { useLocation, useRoute } from 'wouter';
 import { Application, Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
+import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap, Search } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentPickerDialog } from '@/components/student-picker-dialog';
