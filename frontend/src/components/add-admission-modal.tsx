@@ -833,13 +833,15 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                                 </Popover>
                               );
 
-                              const selectedApp = applications?.find((a) => String(a.id) === aid);
-                              if (!selectedApp) return <div className="text-sm text-gray-700">{aid}</div>;
-                              return (
-                                <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => openApplicationDetails(selectedApp)}>
-                                  {selectedApp.applicationCode || `${selectedApp.university} — ${selectedApp.program}`}
-                                </Button>
-                              );
+                              const selectedApp = (applications?.find((a) => String(a.id) === aid) as any) || (currentApp as any) || (linkedApp as any);
+                              if (selectedApp) {
+                                return (
+                                  <Button type="button" variant="link" className="p-0 h-8 text-sm" onClick={() => openApplicationDetails(selectedApp)}>
+                                    {selectedApp.applicationCode || `${selectedApp.university ?? ''} — ${selectedApp.program ?? ''}`.trim() || String(selectedApp.id || aid)}
+                                  </Button>
+                                );
+                              }
+                              return <div className="text-sm text-gray-700">{aid}</div>;
                             })()}
                           </div>
                         </div>
