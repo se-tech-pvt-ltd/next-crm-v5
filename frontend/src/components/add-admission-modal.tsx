@@ -949,7 +949,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     <CardContent>
                       {(() => {
                         const roleName = getNormalizedRole();
-                        const isPartnerRole = String(roleName || '').includes('partner');
+                        const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
                         if (isPartnerRole) {
                           const options = Array.isArray(subPartners)
                             ? subPartners.map((u: any) => ({
