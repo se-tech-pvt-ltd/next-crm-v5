@@ -622,7 +622,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             </CardHeader>
             {(() => {
               const roleName = getNormalizedRole();
-              const isPartnerRole = roleName === 'partner';
+              const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
               if (isPartnerRole) {
                 const options = Array.isArray(subPartners)
                   ? (subPartners as any[]).map((u: any) => ({
