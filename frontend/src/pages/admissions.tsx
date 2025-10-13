@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { Admission, Student } from '@/lib/types';
-import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter, Plus } from 'lucide-react';
+import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter, Plus, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { ApplicationPickerDialog } from '@/components/application-picker-dialog';
