@@ -506,7 +506,7 @@ export default function ApplicationDetails() {
                   {isPartnerRole ? (
                     <div className="grid grid-cols-1 gap-2">
                       <div className="space-y-1.5">
-                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span>Sub partner</span></Label>
+                        <Label className="flex items-center space-x-2"><UserIcon className="w-4 h-4" /><span className="sr-only">Sub partner</span></Label>
                         <div className="text-xs px-2 py-1.5 rounded border bg-white">
                           {subPartnerUser ? (
                             <div>
