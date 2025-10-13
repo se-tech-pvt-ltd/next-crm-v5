@@ -24,6 +24,8 @@ import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { CreateStudentModal } from '@/components/create-student-modal';
+import * as ApplicationsService from '@/services/applications';
+import * as AdmissionsService from '@/services/admissions';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
