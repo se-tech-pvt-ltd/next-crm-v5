@@ -407,7 +407,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       try { if (data?.subPartnerId && !data.subPartner) data.subPartner = data.subPartnerId; } catch {}
 
       const roleName = getNormalizedRole();
-      const isPartnerRole = String(roleName || '').includes('partner');
+      const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
       if (isPartnerRole) {
         const selectedSubPartner = data?.subPartner ?? data?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
         console.log('[AddApplicationModal] onSubmit selectedSubPartner:', selectedSubPartner, 'data.subPartnerId=', data?.subPartnerId, 'form.getValues(subPartnerId)=', form.getValues('subPartnerId'));
