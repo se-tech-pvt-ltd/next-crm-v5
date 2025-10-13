@@ -108,9 +108,12 @@ export class StudentService {
       return undefined;
     }
 
-    // Partner scoping
-    if (userRole === 'partner' && userId && (student as any).partner !== userId) {
-      return undefined;
+    // Partner scoping (support partner sub-user mapped to subPartner)
+    const normalizedRoleForSingle = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUserForSingle = normalizedRoleForSingle.includes('partner') && normalizedRoleForSingle.includes('sub');
+    if ((userRole === 'partner' || isPartnerSubUserForSingle) && userId) {
+      const allowed = isPartnerSubUserForSingle ? (student as any).subPartner === userId : (student as any).partner === userId;
+      if (!allowed) return undefined;
     }
 
     // Branch manager scoping
