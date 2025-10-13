@@ -20,6 +20,7 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
