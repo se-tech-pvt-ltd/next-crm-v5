@@ -57,6 +57,7 @@ export default function Applications() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [appSearchQuery, setAppSearchQuery] = useState('');
 
   const handleAddApplicationClick = () => {
     setIsNavigating(true);
