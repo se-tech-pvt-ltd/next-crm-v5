@@ -117,7 +117,7 @@ export default function Admissions() {
     }
 
     setIsApplicationPickerOpen(true);
-  }, [matchNew, addAdmissionAppIdState, isAddAdmissionModalOpen, toast]);
+  }, [matchNew, addAdmissionAppIdState, isAddAdmissionModalOpen]);
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
