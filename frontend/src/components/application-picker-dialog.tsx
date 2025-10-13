@@ -37,17 +37,21 @@ export const ApplicationPickerDialog = ({
   const [search, setSearch] = useState("");
   const page = 1;
 
-  const { data: appsPaged } = useQuery({
+  const { data: appsPaged, refetch: refetchAppsPaged } = useQuery({
     queryKey: ["/api/applications", { page, limit: pageSize }],
     queryFn: async () => ApplicationsService.getApplications({ page, limit: pageSize }),
     enabled: open && search.trim().length === 0,
+    // avoid using cached response when opening picker
+    staleTime: 0,
+    cacheTime: 0,
   });
 
-  const { data: appsAll } = useQuery({
+  const { data: appsAll, refetch: refetchAppsAll } = useQuery({
     queryKey: ["/api/applications", "all-for-picker"],
     queryFn: async () => ApplicationsService.getApplications(),
     enabled: open && search.trim().length > 0,
-    staleTime: 60_000,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const { data: studentsAll } = useQuery({
