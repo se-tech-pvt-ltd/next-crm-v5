@@ -14,13 +14,14 @@ import { useLocation, useRoute } from 'wouter';
 import { Application, Student } from '@/lib/types';
 import * as ApplicationsService from '@/services/applications';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap } from 'lucide-react';
+import { Plus, MoreHorizontal, Calendar, DollarSign, School, FileText, Clock, CheckCircle, AlertCircle, Filter, GraduationCap, Search } from 'lucide-react';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { AddApplicationModal } from '@/components/add-application-modal';
 import { StudentPickerDialog } from '@/components/student-picker-dialog';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import * as DropdownsService from '@/services/dropdowns';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,6 +57,7 @@ export default function Applications() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [appSearchQuery, setAppSearchQuery] = useState('');
 
   const handleAddApplicationClick = () => {
     setIsNavigating(true);
@@ -153,7 +155,16 @@ export default function Applications() {
     const appStatusValue = cleanLabel(app.appStatus || '');
     const statusMatch = statusFilter === 'all' || appStatusValue === statusFilter;
     const universityMatch = universityFilter === 'all' || (cleanLabel(app.university || '') === universityFilter);
-    return statusMatch && universityMatch;
+
+    const q = (appSearchQuery || '').toString().trim().toLowerCase();
+    let searchMatch = true;
+    if (q) {
+      const idVal = String(app.id || '').toLowerCase();
+      const codeVal = String(app.applicationCode || app.application_code || '').toLowerCase();
+      searchMatch = idVal.includes(q) || codeVal.includes(q);
+    }
+
+    return statusMatch && universityMatch && searchMatch;
   }) || [];
 
   // If backend provides pagination, assume applicationsArray is already the page to display.
@@ -340,6 +351,15 @@ export default function Applications() {
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
                 </div>
+                <div className="w-48">
+                  <InputWithIcon
+                    placeholder="Search by application id"
+                    leftIcon={<Search className="w-3 h-3 text-gray-400" />}
+                    value={appSearchQuery}
+                    onChange={(e: any) => setAppSearchQuery(e.target.value)}
+                    className="h-7 text-xs"
+                  />
+                </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-28 h-7 text-xs">
                     <SelectValue placeholder="Filter by status" />
@@ -442,12 +462,10 @@ export default function Applications() {
               <Table className="text-xs">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="h-8 px-2 text-[11px]">App</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Student</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">University</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Program</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Intake</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Created</TableHead>
                     <TableHead className="h-8 px-2 text-[11px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -459,17 +477,16 @@ export default function Applications() {
                       onClick={() => { setLocation(`/applications/${application.id}`); }}
                     >
                       <TableCell className="font-medium p-2 text-xs">
-                        {getStudentName(application.studentId)}
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="flex items-center text-xs">
-                          <School className="w-3 h-3 mr-1" />
-                          <span>{cleanLabel(application.university)}</span>
-                          {application.applicationCode && (
-                            <span className="ml-2 text-[11px] text-gray-500">({application.applicationCode})</span>
-                          )}
+                        <div className="flex flex-col">
+                          <div className="text-xs font-medium">{(application.applicationCode || application.id)}</div>
+                          <div className="text-[11px] text-gray-500">{cleanLabel(application.university)}</div>
                         </div>
                       </TableCell>
+
+                      <TableCell className="font-medium p-2 text-xs">
+                        {getStudentName(application.studentId)}
+                      </TableCell>
+
                       <TableCell className="p-2 text-xs">
                         <div className="text-xs">
                           {cleanLabel(application.program)}
@@ -478,22 +495,13 @@ export default function Applications() {
                           )}
                         </div>
                       </TableCell>
+
                       <TableCell className="p-2 text-xs">
                         <Badge className={getStatusColor(cleanLabel(application.appStatus || 'Open') || 'Open')}>
                           {cleanLabel(application.appStatus || 'Open') || 'Open'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="text-xs">
-                          {cleanLabel(application.intake) || '—'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(application.createdAt)}
-                        </div>
-                      </TableCell>
+
                       <TableCell className="p-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

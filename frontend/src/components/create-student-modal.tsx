@@ -219,7 +219,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     if (!Array.isArray(formData.targetCountries) || formData.targetCountries.length === 0) validationErrors.targetCountries = 'Select at least one target country';
 
     const roleName = getNormalizedRole();
-    const isPartnerRole = roleName === 'partner';
+    const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
     if (!isPartnerRole) {
       if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
       if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
@@ -442,12 +442,20 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     if (!open) return;
     try {
       const roleName = getNormalizedRole();
-      if (roleName === 'partner') {
-        const id = String((user as any)?.id || '');
+      const isPartnerSubUser = String(roleName || '').includes('partner') && String(roleName || '').includes('sub');
+
+      if (isPartnerSubUser) {
+        // If logged in as a partner sub-user, auto-select subPartner and parent partner (if available)
+        const subId = String((user as any)?.id || '').trim();
+        const parentPartnerId = String((user as any)?.partnerId || (user as any)?.partner_id || (user as any)?.parentPartnerId || (user as any)?.parent_partner_id || '').trim();
+        if (subId && !formData.subPartnerId) setFormData(prev => ({ ...prev, subPartnerId: subId }));
+        if (parentPartnerId && !formData.partnerId) setFormData(prev => ({ ...prev, partnerId: parentPartnerId }));
+      } else if (roleName === 'partner') {
+        const id = String((user as any)?.id || '').trim();
         if (id && !formData.partnerId) setFormData(prev => ({ ...prev, partnerId: id }));
       }
     } catch {}
-  }, [open, user, formData.partnerId]);
+  }, [open, user, formData.partnerId, formData.subPartnerId]);
 
   return (
     <DetailsDialogLayout
@@ -614,7 +622,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
             </CardHeader>
             {(() => {
               const roleName = getNormalizedRole();
-              const isPartnerRole = roleName === 'partner';
+              const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
               if (isPartnerRole) {
                 const options = Array.isArray(subPartners)
                   ? (subPartners as any[]).map((u: any) => ({

@@ -59,12 +59,14 @@ export class StudentService {
 
   static async getStudents(userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Student[]> {
     let rows: any[];
+    const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
     if (userRole === 'counselor' && userId) {
       rows = await StudentModel.findByCounselor(userId);
     } else if (userRole === 'admission_officer' && userId) {
       rows = await StudentModel.findByAdmissionOfficer(userId);
-    } else if (userRole === 'partner' && userId) {
-      rows = await db.select().from(students).where(eq(students.partner, userId)).orderBy(desc(students.createdAt));
+    } else if ((userRole === 'partner' || isPartnerSubUser) && userId) {
+      rows = await db.select().from(students).where(isPartnerSubUser ? eq(students.subPartner, userId) : eq(students.partner, userId)).orderBy(desc(students.createdAt));
     } else if (userRole === 'branch_manager') {
       if (branchId) {
         rows = await db.select().from(students).where(eq(students.branchId, branchId)).orderBy(desc(students.createdAt));
@@ -105,9 +107,12 @@ export class StudentService {
       return undefined;
     }
 
-    // Partner scoping
-    if (userRole === 'partner' && userId && (student as any).partner !== userId) {
-      return undefined;
+    // Partner scoping (support partner sub-user mapped to subPartner)
+    const normalizedRoleForSingle = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUserForSingle = normalizedRoleForSingle.includes('partner') && normalizedRoleForSingle.includes('sub');
+    if ((userRole === 'partner' || isPartnerSubUserForSingle) && userId) {
+      const allowed = isPartnerSubUserForSingle ? (student as any).subPartner === userId : (student as any).partner === userId;
+      if (!allowed) return undefined;
     }
 
     // Branch manager scoping
@@ -139,6 +144,12 @@ export class StudentService {
     }
     if (userRole === 'admission_officer' && userId && (student as any).admissionOfficerId !== userId) {
       return undefined;
+    }
+    const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
+    if ((userRole === 'partner' || isPartnerSubUser) && userId) {
+      const allowed = isPartnerSubUser ? (student as any).subPartner === userId : (student as any).partner === userId;
+      if (!allowed) return undefined;
     }
     const [enriched] = await this.enrichDropdownFields([student]);
     const dropdowns = await DropdownModel.findByModule('students');
@@ -175,6 +186,8 @@ export class StudentService {
     );
 
     let rows: any[];
+    const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
     if (userRole === 'counselor' && userId) {
       rows = await db.select().from(students).where(
         and(
@@ -189,10 +202,10 @@ export class StudentService {
           searchConditions
         )
       );
-    } else if (userRole === 'partner' && userId) {
+    } else if ((userRole === 'partner' || isPartnerSubUser) && userId) {
       rows = await db.select().from(students).where(
         and(
-          eq(students.partner, userId),
+          isPartnerSubUser ? eq(students.subPartner, userId) : eq(students.partner, userId),
           searchConditions
         )
       );

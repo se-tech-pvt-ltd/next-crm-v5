@@ -16,8 +16,11 @@ export class AdmissionService {
       if (!userRole && !regionId && !branchId && !userId) return all;
 
       // If partner role, filter by admission.partner
-      if (userRole === 'partner' && userId) {
-        return all.filter(a => (a as any).partner === userId);
+      // Also support 'partner sub-user' roles which should be scoped by subPartner
+      const normalizedRole = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const isPartnerSubUser = normalizedRole.includes('partner') && normalizedRole.includes('sub');
+      if ((userRole === 'partner' || isPartnerSubUser) && userId) {
+        return all.filter(a => (isPartnerSubUser ? (a as any).subPartner === userId : (a as any).partner === userId));
       }
 
       // Helper to fetch student for matching
@@ -89,9 +92,12 @@ export class AdmissionService {
       }
     }
 
-    // Partner scoping
-    if (userRole === 'partner' && userId && (admission as any).partner !== userId) {
-      return undefined;
+    // Partner scoping (support partner sub-user mapped to subPartner)
+    const normalizedRoleForSingle = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUserForSingle = normalizedRoleForSingle.includes('partner') && normalizedRoleForSingle.includes('sub');
+    if ((userRole === 'partner' || isPartnerSubUserForSingle) && userId) {
+      const allowed = isPartnerSubUserForSingle ? (admission as any).subPartner === userId : (admission as any).partner === userId;
+      if (!allowed) return undefined;
     }
 
     return admission;

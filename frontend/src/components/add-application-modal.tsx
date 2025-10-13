@@ -177,6 +177,40 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     if (open) setSelectedSubPartnerLocal((form.getValues('subPartnerId') as string) || '');
   }, [open]);
 
+  // Auto-select partner/sub-partner when logged in as partner sub-user
+  useEffect(() => {
+    if (!open) return;
+    try {
+      const roleName = getNormalizedRole();
+      const isPartnerSubUser = String(roleName || '').includes('partner') && String(roleName || '').includes('sub');
+      if (isPartnerSubUser) {
+        // Try auth_user first
+        let authUser: any = null;
+        try { authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; } catch {}
+        const subId = String(authUser?.id ?? authUser?.userId ?? authUser?.user_id ?? '') || '';
+        let parentPartnerId = String(authUser?.partnerId ?? authUser?.partner_id ?? '') || '';
+        if (!parentPartnerId) {
+          try {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+              const parts = String(token).split('.');
+              if (parts.length >= 2) {
+                const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const pad = b64.length % 4;
+                const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+                const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                const payload = JSON.parse(json) as any;
+                parentPartnerId = String(payload?.role_details?.partner_id || payload?.roleDetails?.partnerId || payload?.partner_id || payload?.partnerId || payload?.id || '') || parentPartnerId;
+              }
+            }
+          } catch {}
+        }
+        if (subId && !form.getValues('subPartnerId')) { form.setValue('subPartnerId', subId); setSelectedSubPartnerLocal(subId); }
+        if (parentPartnerId && !form.getValues('partnerId')) form.setValue('partnerId', parentPartnerId);
+      }
+    } catch {}
+  }, [open, subPartners, users]);
+
   // Regions/Branches for access auto-fill
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), enabled: open, staleTime: 60_000 });
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), enabled: open, staleTime: 60_000 });
@@ -373,7 +407,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
       try { if (data?.subPartnerId && !data.subPartner) data.subPartner = data.subPartnerId; } catch {}
 
       const roleName = getNormalizedRole();
-      const isPartnerRole = String(roleName || '').includes('partner');
+      const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
       if (isPartnerRole) {
         const selectedSubPartner = data?.subPartner ?? data?.subPartnerId ?? form.getValues('subPartnerId') ?? form.getValues('subPartner');
         console.log('[AddApplicationModal] onSubmit selectedSubPartner:', selectedSubPartner, 'data.subPartnerId=', data?.subPartnerId, 'form.getValues(subPartnerId)=', form.getValues('subPartnerId'));
@@ -863,7 +897,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(() => {
                   const roleName = getNormalizedRole();
-                  const isPartnerRole = String(roleName || '').includes('partner');
+                  const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
                   if (isPartnerRole) {
                     // Show Partner (read-only) and Sub partner selection side-by-side
                     const pidCandidates: string[] = [];

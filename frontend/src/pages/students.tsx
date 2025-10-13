@@ -18,12 +18,15 @@ import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
-import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus } from 'lucide-react';
+import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { useLocation, useRoute } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { CreateStudentModal } from '@/components/create-student-modal';
+import * as ApplicationsService from '@/services/applications';
+import * as AdmissionsService from '@/services/admissions';
 
 export default function Students() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -45,6 +48,7 @@ export default function Students() {
   const [pageSize] = useState(8); // 8 records per page
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { accessByRole, user } = useAuth() as any;
   const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => s.replace(/s$/i, '');
@@ -78,6 +82,7 @@ export default function Students() {
     return (sCoun && sCoun === uid) || (sAdm && sAdm === uid);
   });
 
+
   // Fetch dropdowns for Students module (for status labels)
   const { data: studentDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/students'],
@@ -100,6 +105,30 @@ export default function Students() {
     const match = list.find((o: any) => o.id === s || o.key === s || (o.value && String(o.value).toLowerCase() === String(s).toLowerCase()));
     return (match?.value || s || '').toString();
   }
+
+  // Applications and Admissions for derived counts (moved after dropdowns to avoid TDZ)
+  const { data: applicationsResponse } = useQuery({
+    queryKey: ['/api/applications'],
+    queryFn: async () => ApplicationsService.getApplications(),
+    staleTime: 60000,
+  });
+  const { data: admissionsResponse } = useQuery({
+    queryKey: ['/api/admissions'],
+    queryFn: async () => AdmissionsService.getAdmissions(),
+    staleTime: 60000,
+  });
+
+  const applicationsArray: any[] = Array.isArray(applicationsResponse) ? applicationsResponse : (applicationsResponse as any)?.data || [];
+  const admissionsArray: any[] = Array.isArray(admissionsResponse) ? admissionsResponse : (admissionsResponse as any)?.data || [];
+
+  // Non-enrolled students are considered Active in this context
+  const nonEnrolledStudents: Student[] = (studentsArray || []).filter((s) => getStatusLabel(s.status).toLowerCase() !== 'enrolled');
+  const nonEnrolledIds = new Set(nonEnrolledStudents.map((s) => s.id));
+
+  const activeCount = nonEnrolledStudents.length;
+  // Applied and Admitted should be global totals (not limited to non-enrolled students)
+  const appliedCount = applicationsArray ? applicationsArray.length : 0;
+  const admittedCount = admissionsArray ? admissionsArray.length : 0;
 
   // Utility to parse targetCountry value into array of ids or names
   const parseTargetCountries = (value: any): string[] => {
@@ -166,7 +195,16 @@ export default function Students() {
     const statusMatch = statusFilter === 'all' || label === statusFilter;
     const countryDisplay = getTargetCountryDisplay(student);
     const countryMatch = countryFilter === 'all' || countryDisplay === countryFilter;
-    return statusMatch && countryMatch;
+
+    const q = (searchQuery || '').toString().trim().toLowerCase();
+    let searchMatch = true;
+    if (q) {
+      const idVal = String(student.student_id || student.id || '').toLowerCase();
+      const nameVal = String(student.name || '').toLowerCase();
+      searchMatch = idVal.includes(q) || nameVal.includes(q);
+    }
+
+    return statusMatch && countryMatch && searchMatch;
   }) || [];
 
   // Detect if server returned pagination metadata
@@ -386,7 +424,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'active').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : activeCount || 0}
               </div>
             </CardContent>
           </Card>
@@ -400,7 +438,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-blue-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'applied').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : appliedCount || 0}
               </div>
             </CardContent>
           </Card>
@@ -414,7 +452,7 @@ export default function Students() {
             </CardHeader>
             <CardContent className="p-2 pt-0">
               <div className="text-base font-semibold text-purple-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : studentsArray?.filter(s => s.status === 'admitted').length || 0}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : admittedCount || 0}
               </div>
             </CardContent>
           </Card>
@@ -428,6 +466,15 @@ export default function Students() {
                 <div className="flex items-center space-x-2">
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+                <div className="w-48">
+                  <InputWithIcon
+                    placeholder="Search by ID or name"
+                    leftIcon={<Search className="w-3 h-3 text-gray-400" />}
+                    value={searchQuery}
+                    onChange={(e: any) => setSearchQuery(e.target.value)}
+                    className="h-7 text-xs"
+                  />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-28 h-7 text-xs">

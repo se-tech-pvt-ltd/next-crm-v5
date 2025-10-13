@@ -298,6 +298,42 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [subPartnerSearch, setSubPartnerSearch] = useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
 
+  // Auto-select partner/sub-partner when logged in as partner sub-user
+  useEffect(() => {
+    if (!open) return;
+    try {
+      const roleName = ((): string => {
+        try { return JSON.parse(localStorage.getItem('auth_user') || 'null')?.role || ''; } catch { return ''; }
+      })();
+      const normalized = String(roleName || '').toLowerCase();
+      const isPartnerSubUser = normalized.includes('partner') && normalized.includes('sub');
+      if (isPartnerSubUser) {
+        let authUser: any = null;
+        try { authUser = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null; } catch {}
+        const subId = String(authUser?.id ?? authUser?.userId ?? authUser?.user_id ?? '') || '';
+        let parentPartnerId = String(authUser?.partnerId ?? authUser?.partner_id ?? '') || '';
+        if (!parentPartnerId) {
+          try {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+              const parts = String(token).split('.');
+              if (parts.length >= 2) {
+                const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const pad = b64.length % 4;
+                const b64p = b64 + (pad ? '='.repeat(4 - pad) : '');
+                const json = decodeURIComponent(atob(b64p).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                const payload = JSON.parse(json) as any;
+                parentPartnerId = String(payload?.role_details?.partner_id || payload?.roleDetails?.partnerId || payload?.partner_id || payload?.partnerId || payload?.id || '') || parentPartnerId;
+              }
+            }
+          } catch {}
+        }
+        if (subId && !form.getValues('subPartnerId')) form.setValue('subPartnerId', subId);
+        if (parentPartnerId && !form.getValues('partnerId')) form.setValue('partnerId', parentPartnerId);
+      }
+    } catch {}
+  }, [open, subPartners]);
+
   const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Applications'],
     queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
@@ -913,7 +949,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     <CardContent>
                       {(() => {
                         const roleName = getNormalizedRole();
-                        const isPartnerRole = String(roleName || '').includes('partner');
+                        const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
                         if (isPartnerRole) {
                           const options = Array.isArray(subPartners)
                             ? subPartners.map((u: any) => ({

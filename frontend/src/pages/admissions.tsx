@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { Admission, Student } from '@/lib/types';
-import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter, Plus } from 'lucide-react';
+import { MoreHorizontal, Trophy, DollarSign, School, CheckCircle, Clock, Filter, Plus, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { AdmissionDetailsModal } from '@/components/admission-details-modal-new';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { ApplicationPickerDialog } from '@/components/application-picker-dialog';
@@ -25,6 +26,7 @@ export default function Admissions() {
   const [matchNew] = useRoute('/admissions/new');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+  const [admissionSearchQuery, setAdmissionSearchQuery] = useState('');
 
   const [isAddAdmissionModalOpen, setIsAddAdmissionModalOpen] = useState(false);
   const [addAdmissionAppId, setAddAdmissionAppId] = useState<string | undefined>(undefined);
@@ -45,8 +47,10 @@ export default function Admissions() {
   // Open details modal when route matches and ensure selected admission is set
   useEffect(() => {
     const id = (matchEdit ? editParams?.id : adParams?.id) || null;
+    // Ignore the special 'new' route -- handled separately by matchNew
+    const isNew = id === 'new';
     if (matchAd || matchEdit) {
-      if (id) {
+      if (id && !isNew) {
         const found = (admissions || []).find(a => a.id === id) as Admission | undefined;
         if (found) {
           setSelectedAdmission(found);
@@ -63,7 +67,8 @@ export default function Admissions() {
           }
         }
       }
-      setIsDetailsOpen(true);
+      // Open details modal for real ids; if it's 'new' we do not open details here.
+      if (!isNew) setIsDetailsOpen(true);
     }
   }, [matchAd, matchEdit, adParams?.id, editParams?.id, admissions]);
 
@@ -77,6 +82,7 @@ export default function Admissions() {
   }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
   // Open Add Admission modal or student picker when route matches /admissions/new
+
   useEffect(() => {
     if (!matchNew) {
       setIsApplicationPickerOpen(false);
@@ -84,6 +90,8 @@ export default function Admissions() {
       setAddAdmissionAppIdState(undefined);
       return;
     }
+
+    try { console.log('[Admissions] matchNew is true'); } catch {}
 
     const queryString = (() => {
       try {
@@ -117,7 +125,15 @@ export default function Admissions() {
 
   const filteredAdmissions = admissions?.filter(admission => {
     const universityMatch = universityFilter === 'all' || admission.university === universityFilter;
-    return universityMatch;
+
+    const q = (admissionSearchQuery || '').toString().trim().toLowerCase();
+    let searchMatch = true;
+    if (q) {
+      const admId = String((admission as any).admissionId || admission.id || '').toLowerCase();
+      searchMatch = admId.includes(q);
+    }
+
+    return universityMatch && searchMatch;
   }) || [];
 
   // Get unique universities for filter dropdown
@@ -212,6 +228,15 @@ export default function Admissions() {
                 <div className="flex items-center space-x-2">
                   <Filter className="w-3 h-3 text-gray-500" />
                   <span className="text-xs font-medium text-gray-700">Filters:</span>
+                </div>
+                <div className="w-48">
+                  <InputWithIcon
+                    placeholder="Search by admission id"
+                    leftIcon={<Search className="w-3 h-3 text-gray-400" />}
+                    value={admissionSearchQuery}
+                    onChange={(e: any) => setAdmissionSearchQuery(e.target.value)}
+                    className="h-7 text-xs"
+                  />
                 </div>
                 <Select value={universityFilter} onValueChange={setUniversityFilter}>
                   <SelectTrigger className="w-28 h-7 text-xs">
