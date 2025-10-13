@@ -624,7 +624,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                     }))
                   : [];
                 return (
-                  <CardContent className="grid grid-cols-1 gap-3">
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label>Partner</Label>
                       <Select value={formData.partnerId} onValueChange={(v) => handleChange('partnerId', v)} disabled>
@@ -636,7 +636,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <SearchableCombobox
                         value={formData.subPartnerId}
                         onValueChange={(v) => handleChange('subPartnerId', v)}
