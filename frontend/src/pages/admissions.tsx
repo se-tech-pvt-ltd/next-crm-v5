@@ -82,7 +82,6 @@ export default function Admissions() {
   }, [queryClient, adParams?.id, editParams?.id, matchAd, matchEdit]);
 
   // Open Add Admission modal or student picker when route matches /admissions/new
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!matchNew) {
