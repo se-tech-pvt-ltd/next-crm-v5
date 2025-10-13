@@ -195,7 +195,16 @@ export default function Students() {
     const statusMatch = statusFilter === 'all' || label === statusFilter;
     const countryDisplay = getTargetCountryDisplay(student);
     const countryMatch = countryFilter === 'all' || countryDisplay === countryFilter;
-    return statusMatch && countryMatch;
+
+    const q = (searchQuery || '').toString().trim().toLowerCase();
+    let searchMatch = true;
+    if (q) {
+      const idVal = String(student.student_id || student.id || '').toLowerCase();
+      const nameVal = String(student.name || '').toLowerCase();
+      searchMatch = idVal.includes(q) || nameVal.includes(q);
+    }
+
+    return statusMatch && countryMatch && searchMatch;
   }) || [];
 
   // Detect if server returned pagination metadata
