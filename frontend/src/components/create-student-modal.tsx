@@ -88,6 +88,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     notes: '',
     regionId: '',
     branchId: '',
+    partnerId: '',
     subPartnerId: '',
   };
 
@@ -255,8 +256,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       if (regionId) payload.regionId = regionId;
       if (branchId) payload.branchId = branchId;
     } else {
-      const currentUserId = String((user as any)?.id || '');
-      if (currentUserId) payload.partner = currentUserId;
+      const chosenPartnerId = String((formData as any)?.partnerId || (user as any)?.id || '');
+      if (chosenPartnerId) payload.partner = chosenPartnerId;
       if (subPartnerId) payload.subPartner = subPartnerId;
     }
 
@@ -422,6 +423,13 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     .filter((b: any) => !formData.regionId || String(b.regionId ?? b.region_id ?? '') === String(formData.regionId))
     .map((b: any) => ({ value: String(b.id), label: String(b.branchName || b.name || b.code || b.id), regionId: String(b.regionId ?? b.region_id ?? '') , headId: String(b.branchHeadId || b.managerId || '') })), [branches, formData.regionId]);
 
+  const partnerOptions = React.useMemo(() => {
+    const list = Array.isArray(users) ? (users as any[]) : [];
+    return list
+      .filter((u: any) => normalizeRole(u.role || u.role_name || u.roleName) === 'partner')
+      .map((u: any) => ({ value: String(u.id), label: [u.firstName || u.first_name, u.lastName || u.last_name].filter(Boolean).join(' ') || u.email || u.id }));
+  }, [users]);
+
 
   React.useEffect(() => {
     if (!open) {
@@ -429,6 +437,17 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       setErrors({});
     }
   }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    try {
+      const roleName = getNormalizedRole();
+      if (roleName === 'partner') {
+        const id = String((user as any)?.id || '');
+        if (id && !formData.partnerId) setFormData(prev => ({ ...prev, partnerId: id }));
+      }
+    } catch {}
+  }, [open, user, formData.partnerId]);
 
   return (
     <DetailsDialogLayout
@@ -606,6 +625,17 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                   : [];
                 return (
                   <CardContent className="grid grid-cols-1 gap-3">
+                    <div className="space-y-1">
+                      <Label>Partner</Label>
+                      <Select value={formData.partnerId} onValueChange={(v) => handleChange('partnerId', v)} disabled>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select partner" /></SelectTrigger>
+                        <SelectContent>
+                          {partnerOptions.map((opt: any) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="space-y-2">
                       <SearchableCombobox
                         value={formData.subPartnerId}
