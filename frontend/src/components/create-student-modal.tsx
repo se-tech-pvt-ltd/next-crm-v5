@@ -653,7 +653,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                         onSearch={setSubPartnerSearch}
                         options={options}
                         loading={subPartnerLoading}
-                        className="h-10 text-xs bg-white rounded"
+                        className="h-12 text-sm bg-white border rounded"
                         emptyMessage="No sub partners found"
                         showAvatar={false}
                       />
