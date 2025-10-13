@@ -447,7 +447,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       if (isPartnerSubUser) {
         // If logged in as a partner sub-user, auto-select subPartner and parent partner (if available)
         const subId = String((user as any)?.id || '').trim();
-        const parentPartnerId = String((user as any)?.partnerId ?? (user as any)?.partner_id ?? (user as any)?.parentPartnerId ?? (user as any)?.parent_partner_id || '').trim();
+        const parentPartnerId = String((user as any)?.partnerId || (user as any)?.partner_id || (user as any)?.parentPartnerId || (user as any)?.parent_partner_id || '').trim();
         if (subId && !formData.subPartnerId) setFormData(prev => ({ ...prev, subPartnerId: subId }));
         if (parentPartnerId && !formData.partnerId) setFormData(prev => ({ ...prev, partnerId: parentPartnerId }));
       } else if (roleName === 'partner') {
