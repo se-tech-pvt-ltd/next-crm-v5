@@ -119,7 +119,15 @@ export default function Admissions() {
 
   const filteredAdmissions = admissions?.filter(admission => {
     const universityMatch = universityFilter === 'all' || admission.university === universityFilter;
-    return universityMatch;
+
+    const q = (admissionSearchQuery || '').toString().trim().toLowerCase();
+    let searchMatch = true;
+    if (q) {
+      const admId = String((admission as any).admissionId || admission.id || '').toLowerCase();
+      searchMatch = admId.includes(q);
+    }
+
+    return universityMatch && searchMatch;
   }) || [];
 
   // Get unique universities for filter dropdown
