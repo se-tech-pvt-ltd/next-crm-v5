@@ -219,7 +219,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     if (!Array.isArray(formData.targetCountries) || formData.targetCountries.length === 0) validationErrors.targetCountries = 'Select at least one target country';
 
     const roleName = getNormalizedRole();
-    const isPartnerRole = roleName === 'partner';
+    const isPartnerRole = roleName === 'partner' || (String(roleName || '').includes('partner') && String(roleName || '').includes('sub'));
     if (!isPartnerRole) {
       if (!counsellorId) validationErrors.counsellor = 'Counsellor is required';
       if (!admissionOfficerId) validationErrors.admissionOfficer = 'Admission officer is required';
