@@ -92,9 +92,12 @@ export class AdmissionService {
       }
     }
 
-    // Partner scoping
-    if (userRole === 'partner' && userId && (admission as any).partner !== userId) {
-      return undefined;
+    // Partner scoping (support partner sub-user mapped to subPartner)
+    const normalizedRoleForSingle = String(userRole || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const isPartnerSubUserForSingle = normalizedRoleForSingle.includes('partner') && normalizedRoleForSingle.includes('sub');
+    if ((userRole === 'partner' || isPartnerSubUserForSingle) && userId) {
+      const allowed = isPartnerSubUserForSingle ? (admission as any).subPartner === userId : (admission as any).partner === userId;
+      if (!allowed) return undefined;
     }
 
     return admission;
