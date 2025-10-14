@@ -219,7 +219,7 @@ function DashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Button onClick={() => navigate('/lead/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Lead</Button>
+              <Button onClick={() => navigate('/leads/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Lead</Button>
               <Button onClick={() => navigate('/students/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Student</Button>
               <Button onClick={() => navigate('/applications/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Create Application</Button>
             </div>
