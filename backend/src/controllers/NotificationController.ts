@@ -157,4 +157,28 @@ export class NotificationController {
       return res.status(500).json({ message: 'Failed to fetch notifications' });
     }
   }
+
+  static async listUpdates(req: Request, res: Response) {
+    try {
+      const { UpdateModel } = await import('../models/Update.js');
+      const items = await UpdateModel.findAll();
+      res.json(items);
+    } catch (e) {
+      console.error('[NotificationController] listUpdates error:', e);
+      res.status(500).json({ message: 'Failed to list updates' });
+    }
+  }
+
+  static async createUpdate(req: Request, res: Response) {
+    try {
+      const { UpdateModel } = await import('../models/Update.js');
+      const { subject, subjectDesc, body } = req.body as any;
+      if (!subject || !subjectDesc || !body) return res.status(400).json({ message: 'Missing fields' });
+      const created = await UpdateModel.create({ subject, subjectDesc, body });
+      res.status(201).json(created);
+    } catch (e) {
+      console.error('[NotificationController] createUpdate error:', e);
+      res.status(500).json({ message: 'Failed to create update' });
+    }
+  }
 }
