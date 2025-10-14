@@ -13,14 +13,14 @@ import {
   Plus,
   Calendar,
 } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Activity, FollowUp, Application, Lead, Student, Admission } from '@/lib/types';
 import React from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { getFollowUps } from '@/services/followUps';
-import { AddLeadModal } from '@/components/add-lead-modal';
-import { AddStudentModal } from '@/components/add-student-modal';
-import { AddApplicationModal } from '@/components/add-application-modal';
+// removed AddLeadModal import
+// removed AddStudentModal import
+// removed AddApplicationModal import
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ResponsiveContainer,
@@ -57,6 +57,7 @@ function inCurrentMonth(dateLike: unknown): boolean {
 
 function DashboardContent() {
   const { user } = useAuth();
+  const [, navigate] = useLocation();
 
   const { data: leads, isLoading: leadsLoading } = useQuery({ queryKey: ['/api/leads'] });
   const { data: students, isLoading: studentsLoading } = useQuery({ queryKey: ['/api/students'] });
@@ -174,9 +175,7 @@ function DashboardContent() {
     return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
   }, []);
 
-  const [addLeadOpen, setAddLeadOpen] = React.useState(false);
-  const [addStudentOpen, setAddStudentOpen] = React.useState(false);
-  const [addApplicationOpen, setAddApplicationOpen] = React.useState(false);
+  // quick action modals removed in favor of route redirects
 
   const Stat = ({ title, value, icon, bubbleClass }: { title: string; value: number | string; icon: React.ReactNode; bubbleClass: string; }) => (
     <Card className="overflow-hidden rounded-xl border-gray-200 shadow-sm">
@@ -220,9 +219,9 @@ function DashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Button onClick={() => setAddLeadOpen(true)} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Lead</Button>
-              <Button onClick={() => setAddStudentOpen(true)} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Student</Button>
-              <Button onClick={() => setAddApplicationOpen(true)} className="w-full"><Plus className="w-4 h-4 mr-2" /> Create Application</Button>
+              <Button onClick={() => navigate('/leads/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Lead</Button>
+              <Button onClick={() => navigate('/students/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Add New Student</Button>
+              <Button onClick={() => navigate('/applications/new')} className="w-full"><Plus className="w-4 h-4 mr-2" /> Create Application</Button>
             </div>
           </CardContent>
         </Card>
@@ -351,10 +350,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Modals */}
-      <AddLeadModal open={addLeadOpen} onOpenChange={setAddLeadOpen} />
-      <AddStudentModal open={addStudentOpen} onOpenChange={setAddStudentOpen} leadId={undefined as any} />
-      <AddApplicationModal open={addApplicationOpen} onOpenChange={setAddApplicationOpen} studentId={undefined as any} />
+      {/* Modals removed: actions now redirect to dedicated pages */}
     </Layout>
   );
 }
