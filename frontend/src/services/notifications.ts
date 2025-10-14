@@ -16,3 +16,11 @@ export async function updateNotificationStatus(id: string, status: NotificationS
 
   return http.patch(`/api/notifications/${id}/status`, { status });
 }
+
+export async function listUpdates() {
+  return http.get('/api/notifications/updates');
+}
+
+export async function createUpdate(payload: { title: string; body: string; excerpt?: string; scheduledAt?: string }) {
+  return http.post('/api/notifications/updates', payload);
+}
