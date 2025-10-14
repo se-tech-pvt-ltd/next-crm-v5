@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 
 export type NotificationRecord = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+export type NotificationStatus = NotificationRecord["status"];
 
 export class NotificationModel {
   static async create(notificationData: InsertNotification): Promise<NotificationRecord> {
@@ -32,5 +33,46 @@ export class NotificationModel {
     }
 
     return created;
+  }
+
+  static async updateStatus(
+    id: string,
+    status: NotificationStatus,
+    options?: { sentAt?: Date | null }
+  ): Promise<NotificationRecord | null> {
+    const now = new Date();
+    const payload: Partial<InsertNotification> = {
+      status,
+      updatedAt: now,
+    };
+
+    if (status === "sent") {
+      payload.sentAt = options?.sentAt ?? now;
+    } else if (options?.sentAt !== undefined) {
+      payload.sentAt = options.sentAt;
+    }
+
+    const result = await db
+      .update(notifications)
+      .set(payload)
+      .where(eq(notifications.id, id));
+
+    const affected =
+      (result as any)?.affectedRows ??
+      (result as any)?.rowCount ??
+      (result as any)?.rowsAffected ??
+      0;
+
+    if (!affected) {
+      return null;
+    }
+
+    const [updated] = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.id, id))
+      .limit(1);
+
+    return updated ?? null;
   }
 }
