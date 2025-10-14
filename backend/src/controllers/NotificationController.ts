@@ -6,7 +6,7 @@ import type { NotificationStatus } from '../models/Notification.js';
 
 import { db } from '../config/database.js';
 import { notifications } from '../shared/schema.js';
-import { eq, and, or, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 
 export class NotificationController {
   static async forgotPassword(req: Request, res: Response) {
@@ -101,10 +101,6 @@ export class NotificationController {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
-      const user = await UserModel.findById(String(userId)).catch(() => undefined);
-      const userEmail = (user as any)?.email ? String((user as any).email) : '';
-      const userPhone = (user as any)?.phoneNumber ? String((user as any).phoneNumber) : '';
-
       const { templates } = await import('../shared/schema.js');
       const rows = await db
         .select({
@@ -123,14 +119,9 @@ export class NotificationController {
         .where(and(
           eq(notifications.channel, 'notification'),
           eq(notifications.status, 'pending'),
-          or(
-            eq(notifications.recipientAddress, userEmail),
-            eq(notifications.recipientAddress, userPhone),
-            eq(notifications.recipientAddress, String(userId)),
-            and(eq(notifications.entityType, 'user'), eq(notifications.entityId, String(userId)))
-          )
+          eq(notifications.recipientAddress, String(userId))
         ))
-        .orderBy(desc(notifications.createdAt));
+        .orderBy(desc(notifications.scheduledAt));
 
       const processed = (rows || []).map((r: any) => {
         const vars = r.variables || {};
