@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertStudentSchema, type Lead } from '@/lib/types';
@@ -148,7 +150,16 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Phone Number *</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Enter phone number" required {...field} />
+                      <div className="relative">
+                        <PhoneInput
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          defaultCountry="pk"
+                          className="w-full"
+                          inputClassName="w-full !h-9 text-sm"
+                          buttonClassName="!h-9"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
