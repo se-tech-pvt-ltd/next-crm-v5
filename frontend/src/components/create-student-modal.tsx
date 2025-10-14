@@ -2,6 +2,8 @@ import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
@@ -521,7 +523,18 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1">
                 <Label>Phone</Label>
-                <Input type="tel" placeholder="Enter phone number" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
+                <div className="relative">
+                  <PhoneInput
+                    value={formData.phone}
+                    onChange={(value) => handleChange('phone', value)}
+                    defaultCountry="pk"
+                    placeholder="Enter phone number"
+                    disabled={disabled}
+                    className="w-full"
+                    inputClassName="w-full !h-9 text-sm"
+                    buttonClassName="!h-9"
+                  />
+                </div>
                 {errors.phone && <p className="text-[11px] text-red-600">{errors.phone}</p>}
               </div>
               <div className="space-y-1">
