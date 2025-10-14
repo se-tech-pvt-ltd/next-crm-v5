@@ -61,6 +61,38 @@ export class NotificationController {
     }
   }
 
+  static async updateStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      if (!id || typeof id !== 'string') {
+        return res.status(400).json({ message: 'Notification ID is required' });
+      }
+
+      const { status } = req.body as { status?: unknown };
+      if (typeof status !== 'string' || !status.trim()) {
+        return res.status(400).json({ message: 'Valid status is required' });
+      }
+
+      const normalized = status.trim().toLowerCase();
+      const validStatuses = new Set<NotificationStatus>(['pending', 'sent', 'failed']);
+      if (!validStatuses.has(normalized as NotificationStatus)) {
+        return res.status(400).json({ message: 'Invalid status value' });
+      }
+
+      const normalizedStatus = normalized as NotificationStatus;
+      const updated = await NotificationService.updateStatus(id, normalizedStatus);
+
+      if (!updated) {
+        return res.status(404).json({ message: 'Notification not found' });
+      }
+
+      return res.json(updated);
+    } catch (error) {
+      console.error('[NotificationController] updateStatus error:', error);
+      return res.status(500).json({ message: 'Failed to update notification status' });
+    }
+  }
+
   static async pending(req: Request, res: Response) {
     try {
       const { templates } = await import('../shared/schema.js');
