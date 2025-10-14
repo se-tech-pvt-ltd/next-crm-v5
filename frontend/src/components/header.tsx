@@ -16,6 +16,7 @@ import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import * as AdmissionsService from '@/services/admissions';
 import * as ApplicationsService from '@/services/applications';
 import * as NotificationsService from '@/services/notifications';
+import * as UpdatesService from '@/services/updates';
 import type { Admission, Application } from '@/lib/types';
 import { useLocation } from 'wouter';
 import { formatDistanceToNow } from 'date-fns';
@@ -82,6 +83,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [, navigate] = useLocation();
 
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [updatesCount, setUpdatesCount] = useState(0);
   const pendingCount = notifications.length;
 
   const handleNotificationNavigation = useCallback((target: string) => {
@@ -103,6 +105,15 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
     }
   }, []);
 
+  const fetchUpdatesCount = React.useCallback(async () => {
+    try {
+      const updates = await UpdatesService.listUpdates();
+      setUpdatesCount(Array.isArray(updates) ? updates.length : 0);
+    } catch (err) {
+      // ignore
+    }
+  }, []);
+
   const markNotificationAsSent = useCallback(async (notificationId: string) => {
     if (!notificationId) return;
     try {
@@ -121,9 +132,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   React.useEffect(() => {
     fetchPending();
-    const id = setInterval(fetchPending, 30000);
-    return () => clearInterval(id);
-  }, [fetchPending]);
+    fetchUpdatesCount();
+    const id1 = setInterval(fetchPending, 30000);
+    const id2 = setInterval(fetchUpdatesCount, 60000);
+    return () => { clearInterval(id1); clearInterval(id2); };
+  }, [fetchPending, fetchUpdatesCount]);
 
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -276,8 +289,8 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
               onClick={() => setIsUpdatesOpen(true)}
             >
               <Megaphone size={18} aria-hidden="true" />
-              <Badge aria-label="2 new updates" className="absolute top-0 right-0 bg-accent text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
-                2
+              <Badge aria-label={`${updatesCount} updates`} className="absolute top-0 right-0 bg-accent text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -translate-y-1/3 translate-x-1/3">
+                {updatesCount}
               </Badge>
             </Button>
 

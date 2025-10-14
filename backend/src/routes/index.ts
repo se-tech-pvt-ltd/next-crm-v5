@@ -16,6 +16,7 @@ import eventRegistrationRoutes from "./eventRegistrationRoutes.js";
 import branchRoutes from "./branchRoutes.js";
 import universityRoutes from "./universityRoutes.js";
 import followUpRoutes from "./followUpRoutes.js";
+import updatesRoutes from "./updatesRoutes.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create uploads directory if it doesn't exist and serve uploaded files statically (repo root)
@@ -34,10 +35,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register auth route first (public)
   try {
-    const { notificationRoutes } = await import('./notificationRoutes.js');
-    app.use('/api/notifications', notificationRoutes);
+    const notifMod = await import('./notificationRoutes.js');
+    const notificationRoutes = notifMod.notificationRoutes ?? notifMod.default;
+    if (notificationRoutes) {
+      app.use('/api/notifications', notificationRoutes);
+      console.log('[routes] /api/notifications registered');
+    } else {
+      console.warn('[routes] notificationRoutes module did not export routes');
+    }
   } catch (e) {
-    // notification routes not available
+    console.error('[routes] failed to register notificationRoutes:', e);
   }
   app.use('/api/auth', authRoutes);
 
@@ -67,6 +74,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/event-registrations', eventRegistrationRoutes);
   app.use('/api/universities', universityRoutes);
   app.use('/api/configurations', (await import('./configurationRoutes.js')).default);
+  if (updatesRoutes) {
+    app.use('/api/updates', updatesRoutes);
+    console.log('[routes] /api/updates registered');
+  } else {
+    console.warn('[routes] updatesRoutes not available');
+  }
 
   // Branches
   app.use('/api/branches', branchRoutes);

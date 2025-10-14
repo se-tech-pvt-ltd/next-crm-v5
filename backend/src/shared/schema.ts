@@ -12,6 +12,15 @@ const NotificationStatusEnum = mysqlEnum("status", [
   "failed",
 ]);
 
+export const updates = mysqlTable("updates", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  subject: varchar("subject", { length: 250 }).notNull(),
+  body: text("body").notNull(),
+  subjectDesc: varchar("subject_desc", { length: 255 }).notNull(),
+  createdOn: timestamp("created_on").defaultNow().notNull(),
+  updatedOn: timestamp("updated_on").defaultNow().notNull(),
+});
+
 export const followUps = mysqlTable("follow_ups", {
   id: varchar("id", { length: 36 }).primaryKey().notNull(),
   userId: varchar("user_id", { length: 36 }).notNull(),
