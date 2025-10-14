@@ -2,6 +2,8 @@ import React from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import * as UpdatesService from '@/services/updates';
+import { useQuery } from '@tanstack/react-query';
 
 interface UpdateItem {
   id: string;
@@ -16,62 +18,42 @@ interface UpdatesModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const updates: UpdateItem[] = [
-  {
-    id: 'team-privacy',
-    title: 'Team privacy settings',
-    date: '09.08.2025',
-    excerpt: 'Added team-level privacy controls for tasks.',
-    body: (
-      <div className="space-y-3">
-        <p>We\'ve added a new Team Privacy Settings option to give you more control over what tasks are visible at the team level.</p>
-        <p>By default, teams can see all tasks assigned to their members across all projects. Now, you can turn this off for more privacy, showing only the tasks created within that specific team.</p>
-        <p>This way, you decide whether your team\'s view is wide and collaborative or focused and private.</p>
-        <div className="border rounded-md overflow-hidden">
-          <div className="px-4 py-2 border-b font-semibold">Team settings</div>
-          <div className="p-4 space-y-3">
-            <label className="block text-sm text-muted-foreground">Team name</label>
-            <input className="w-full h-10 px-3 rounded-md border bg-white" placeholder="Team name" />
-            <div className="pt-1">
-              <Button className="h-9 px-4">Save</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: 'number-format',
-    title: 'Number format settings',
-    date: '09.08.2025',
-    excerpt: 'Choose locales and separators for numbers and currency.',
-    body: (
-      <div className="space-y-3">
-        <p>You can now configure number and currency formats per workspace. Choose locale, thousand and decimal separators.</p>
-      </div>
-    ),
-  },
-  {
-    id: 'faster-loading',
-    title: 'Faster web app loading',
-    date: '09.08.2025',
-    excerpt: 'Startup time improved across pages.',
-    body: (
-      <div className="space-y-3">
-        <p>We\'ve reduced bundle sizes and optimized queries to make navigation snappier.</p>
-      </div>
-    ),
-  },
-];
+const formatDate = (d: string | Date) => {
+  try {
+    const date = d instanceof Date ? d : new Date(d);
+    return date.toLocaleDateString();
+  } catch {
+    return String(d);
+  }
+};
+
+function mapUpdate(u: any): UpdateItem {
+  return {
+    id: u.id,
+    title: u.subject || '',
+    date: u.createdOn ? formatDate(u.createdOn) : '',
+    excerpt: u.subjectDesc || '',
+    body: (<div className="prose prose-sm max-w-none whitespace-pre-wrap">{u.body}</div>),
+  };
+}
 
 export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }) => {
   const [active, setActive] = React.useState(0);
+
+  const { data: fetched = [], isFetching } = useQuery({
+    queryKey: ['/api/updates'],
+    queryFn: UpdatesService.listUpdates,
+    enabled: open,
+    staleTime: 30_000,
+  });
+
+  const items = Array.isArray(fetched) ? fetched.map(mapUpdate) : [];
 
   React.useEffect(() => {
     if (!open) setActive(0);
   }, [open]);
 
-  const next = () => setActive((i) => (i + 1) % updates.length);
+  const next = () => setActive((i) => (i + 1) % (items.length || 1));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,7 +81,10 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
             <div className="border rounded-md overflow-hidden bg-gray-50 h-full">
               <ScrollArea className="h-full">
                 <ul>
-                  {updates.map((u, idx) => (
+                  {items.length === 0 && !isFetching && (
+                    <li className="px-4 py-6 text-sm text-gray-500">No updates yet.</li>
+                  )}
+                  {items.map((u, idx) => (
                     <li key={u.id}>
                       <button
                         onClick={() => setActive(idx)}
@@ -117,10 +102,14 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
             {/* Right panel (independent scroll) */}
             <div className="border rounded-md p-4 h-full overflow-auto min-h-0">
-              <h3 className="text-xl font-semibold mb-2">{updates[active].title}</h3>
-              <div className="prose prose-sm max-w-none">
-                {updates[active].body}
-              </div>
+              {items[active] ? (
+                <>
+                  <h3 className="text-xl font-semibold mb-2">{items[active].title}</h3>
+                  <div className="prose prose-sm max-w-none">{items[active].body}</div>
+                </>
+              ) : (
+                <div className="text-sm text-gray-500">Select an update to view details.</div>
+              )}
             </div>
           </div>
         </div>
