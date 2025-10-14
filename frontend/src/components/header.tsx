@@ -113,10 +113,11 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
           return String(itemId) !== notificationId;
         })
       );
+      await fetchPending();
     } catch {
       // ignore errors silently
     }
-  }, [setNotifications]);
+  }, [setNotifications, fetchPending]);
 
   React.useEffect(() => {
     fetchPending();
