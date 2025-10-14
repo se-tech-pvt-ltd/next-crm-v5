@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
+import { sanitizePassportNumber } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertStudentSchema, type Lead } from '@/lib/types';
@@ -200,7 +201,13 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Passport Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter passport number" required {...field} />
+                      <Input
+                        placeholder="Enter passport number"
+                        required
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(sanitizePassportNumber(e.target.value))}
+                        onBlur={(e) => field.onChange(sanitizePassportNumber(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
