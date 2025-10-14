@@ -1,5 +1,9 @@
-import { NotificationModel, type InsertNotification } from "../models/Notification.js";
-import { NotificationModel, type InsertNotification } from "../models/Notification.js";
+import {
+  NotificationModel,
+  type InsertNotification,
+  type NotificationRecord,
+  type NotificationStatus,
+} from "../models/Notification.js";
 import { type Lead } from "../shared/schema.js";
 
 const LEAD_CREATION_TEMPLATE_ID = "nxtcrm_lead_creation";
