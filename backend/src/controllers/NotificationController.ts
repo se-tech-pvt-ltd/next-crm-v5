@@ -122,7 +122,7 @@ export class NotificationController {
         })
         .from(notifications)
         .leftJoin(templates, eq(templates.name, notifications.templateId))
-        .where(and(eq(notifications.channel, 'notification'), eq(notifications.status, 'pending')))
+        .where(and(eq(notifications.channel, 'notification'), eq(notifications.status, 'pending'), eq(notifications.recipientAddress, userEmail)))
         .orderBy(desc(notifications.createdAt));
 
       const processed = (rows || []).map((r: any) => {
