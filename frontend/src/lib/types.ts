@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export type NotificationStatus = 'pending' | 'sent' | 'failed';
+
 // Pure TypeScript types for frontend use (no database dependencies)
 export interface User {
   id: string;
