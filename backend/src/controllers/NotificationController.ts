@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { NotificationService } from '../services/NotificationService.js';
 import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
+import type { NotificationStatus } from '../models/Notification.js';
 
 import { db } from '../config/database.js';
 import { notifications } from '../shared/schema.js';
