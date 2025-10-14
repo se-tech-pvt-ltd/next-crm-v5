@@ -61,6 +61,7 @@ function DashboardContent() {
   const { data: students, isLoading: studentsLoading } = useQuery({ queryKey: ['/api/students'] });
   const { data: applications, isLoading: applicationsLoading } = useQuery({ queryKey: ['/api/applications'] });
   const { data: admissions, isLoading: admissionsLoading } = useQuery({ queryKey: ['/api/admissions'] });
+  const { data: applicationsDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Applications'] });
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
@@ -90,16 +91,38 @@ function DashboardContent() {
     admissions: depositsThisMonth.length,
   };
 
-  // Applications by Stage (current month)
+  // Applications by Stage (current month) - includes zero-count statuses from dropdowns
   const applicationsByStage = React.useMemo(() => {
-    const map = new Map<string, number>();
+    const counts = new Map<string, number>();
     for (const app of applicationsThisMonth) {
-      const stage = String((app as any).appStatus || (app as any).status || (app as any).caseStatus || 'Unknown');
+      const stage = String((app as any).appStatus || (app as any).status || (app as any).caseStatus || 'Unknown').trim();
       const key = stage || 'Unknown';
-      map.set(key, (map.get(key) || 0) + 1);
+      counts.set(key, (counts.get(key) || 0) + 1);
     }
-    return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
-  }, [applicationsThisMonth]);
+
+    // Derive full status list from Applications module dropdowns (various possible keys)
+    const dd: any = applicationsDropdowns as any;
+    let labels: string[] = [];
+    if (dd && typeof dd === 'object') {
+      const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const keyMap: Record<string, string> = {};
+      for (const k of Object.keys(dd)) keyMap[normalizeKey(k)] = k;
+      const candidates = ['App Status','Application Status','Status','AppStatus','app status','App status'];
+      let list: any[] = [];
+      for (const raw of candidates) {
+        const foundKey = keyMap[normalizeKey(raw)];
+        if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
+      }
+      list = Array.isArray(list) ? [...list] : [];
+      list.sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+      labels = list.map((o: any) => String(o.value || o.label || '').trim()).filter(Boolean);
+    }
+
+    if (labels.length > 0) {
+      return labels.map((name) => ({ name, value: counts.get(name) || 0 }));
+    }
+    return Array.from(counts.entries()).map(([name, value]) => ({ name, value }));
+  }, [applicationsThisMonth, applicationsDropdowns]);
 
   // Recent updates: mix of newly created entities this month
   const recentUpdates: Activity[] = React.useMemo(() => {
