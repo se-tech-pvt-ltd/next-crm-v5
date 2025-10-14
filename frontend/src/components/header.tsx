@@ -116,7 +116,7 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
     } catch {
       // ignore errors silently
     }
-  }, []);
+  }, [setNotifications]);
 
   React.useEffect(() => {
     fetchPending();
