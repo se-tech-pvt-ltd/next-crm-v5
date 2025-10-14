@@ -13,6 +13,7 @@ import {
   Plus,
   Calendar,
 } from 'lucide-react';
+import { Link } from 'wouter';
 import { Activity, FollowUp, Application, Lead, Student, Admission } from '@/lib/types';
 import React from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
@@ -84,12 +85,6 @@ function DashboardContent() {
     successRate: applicationsThisMonth.length ? (depositsThisMonth.length / applicationsThisMonth.length) * 100 : 0,
   };
 
-  const pipelineData = {
-    newLeads: leadsThisMonth.length,
-    qualifiedStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).trim().toLowerCase() !== 'closed').length,
-    applicationsSubmitted: applicationsThisMonth.length,
-    admissions: depositsThisMonth.length,
-  };
 
   // Applications by Stage (current month) - includes zero-count statuses from dropdowns
   const applicationsByStage = React.useMemo(() => {
@@ -144,19 +139,40 @@ function DashboardContent() {
     return { start: now, end };
   }, []);
 
-  const { data: followUpsResp } = useQuery({
+  const { data: followUpsResp, isLoading: followUpsLoading } = useQuery({
     queryKey: ['dashboard-follow-ups', monthRange.start.toISOString(), monthRange.end.toISOString(), user?.id || 'anon'],
     queryFn: () => getFollowUps({ start: monthRange.start, end: monthRange.end, userId: (user as any)?.id }),
     enabled: !!user,
   });
   const upcomingFollowUps: FollowUp[] = React.useMemo(() => {
-    const list = followUpsResp?.data ?? [];
+    const rawList = followUpsResp?.data ?? (Array.isArray((followUpsResp as any)?.results) ? (followUpsResp as any).results : []);
+    const list: FollowUp[] = Array.isArray(rawList) ? rawList as FollowUp[] : [];
     const now = Date.now();
     return list
-      .filter(fu => new Date(fu.followUpOn).getTime() >= now)
+      .filter(fu => {
+        const followUpTime = new Date(fu.followUpOn).getTime();
+        return Number.isNaN(followUpTime) ? false : followUpTime >= now;
+      })
       .sort((a, b) => new Date(a.followUpOn).getTime() - new Date(b.followUpOn).getTime())
       .slice(0, 6);
   }, [followUpsResp]);
+
+  const formatEntityType = React.useCallback((value: string | null | undefined) => {
+    if (!value) return 'Unknown';
+    return value
+      .replace(/[_-]+/g, ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
+  }, []);
+
+  const formatDateTime = React.useCallback((value: string | null | undefined) => {
+    if (!value) return 'Unknown date';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  }, []);
 
   const [addLeadOpen, setAddLeadOpen] = React.useState(false);
   const [addStudentOpen, setAddStudentOpen] = React.useState(false);
@@ -249,17 +265,53 @@ function DashboardContent() {
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Pipeline (This Month)</CardTitle>
-                <HelpTooltip content="From leads to deposits" />
+                <CardTitle className="text-base">Upcoming Follow-ups</CardTitle>
+                <HelpTooltip content="Follow-ups scheduled for the remainder of this month" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">New Leads</span><span className="text-sm font-medium text-gray-900">{pipelineData.newLeads}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Active Students</span><span className="text-sm font-medium text-gray-900">{pipelineData.qualifiedStudents}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Applications</span><span className="text-sm font-medium text-gray-900">{pipelineData.applicationsSubmitted}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Deposits</span><span className="text-sm font-medium text-gray-900">{pipelineData.admissions}</span></div>
-              </div>
+              {followUpsLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : upcomingFollowUps.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/80 p-6 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-gray-900">You’re all caught up</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    No follow-ups are scheduled for the remainder of this month. Plan your next outreach or review past activity.
+                  </p>
+                  <Button asChild variant="outline" size="sm" className="mt-4">
+                    <Link href="/calendar">Open follow-up calendar</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {upcomingFollowUps.map((followUp) => (
+                    <div key={followUp.id} className="flex items-start gap-3 rounded-lg border border-gray-100 p-3">
+                      <div className="mt-0.5">
+                        <Calendar className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-medium text-gray-900">{formatEntityType(followUp.entityType)}</span>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${followUp.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {followUp.status === 'overdue' ? 'Overdue' : 'Upcoming'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{formatDateTime(followUp.followUpOn)}</div>
+                        {followUp.comments ? (
+                          <div className="text-xs text-gray-600 mt-1 break-words">{followUp.comments}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
