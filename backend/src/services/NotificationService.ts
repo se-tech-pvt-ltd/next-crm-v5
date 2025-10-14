@@ -1,5 +1,9 @@
-import { NotificationModel, type InsertNotification } from "../models/Notification.js";
-import { NotificationModel, type InsertNotification } from "../models/Notification.js";
+import {
+  NotificationModel,
+  type InsertNotification,
+  type NotificationRecord,
+  type NotificationStatus,
+} from "../models/Notification.js";
 import { type Lead } from "../shared/schema.js";
 
 const LEAD_CREATION_TEMPLATE_ID = "nxtcrm_lead_creation";
@@ -38,6 +42,16 @@ export class NotificationService {
       });
     } catch (error) {
       console.error("[NotificationService] Failed to queue notification:", error);
+    }
+  }
+
+  static async updateStatus(id: string, status: NotificationStatus): Promise<NotificationRecord | null> {
+    try {
+      const sentAt = status === "sent" ? new Date() : undefined;
+      return await NotificationModel.updateStatus(id, status, { sentAt });
+    } catch (error) {
+      console.error("[NotificationService] Failed to update notification status:", error);
+      throw error;
     }
   }
 
