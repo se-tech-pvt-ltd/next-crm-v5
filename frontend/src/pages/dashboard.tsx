@@ -210,8 +210,8 @@ function DashboardContent() {
         </Card>
 
         {/* Charts + Lists */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <Card className="xl:col-span-2">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Applications by Stage</CardTitle>
@@ -241,28 +241,17 @@ function DashboardContent() {
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Upcoming Follow Ups</CardTitle>
-                <HelpTooltip content="Your next scheduled follow ups for this month" />
+                <CardTitle className="text-base">Pipeline (This Month)</CardTitle>
+                <HelpTooltip content="From leads to deposits" />
               </div>
             </CardHeader>
             <CardContent>
-              {(!upcomingFollowUps || upcomingFollowUps.length === 0) ? (
-                <div className="text-sm text-muted-foreground">No upcoming follow ups</div>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingFollowUps.map((fu) => (
-                    <div key={fu.id} className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{fu.entityType} • {new Date(fu.followUpOn).toLocaleString()}</div>
-                        <div className="text-xs text-gray-600 truncate">{fu.comments}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">New Leads</span><span className="text-sm font-medium text-gray-900">{pipelineData.newLeads}</span></div>
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Active Students</span><span className="text-sm font-medium text-gray-900">{pipelineData.qualifiedStudents}</span></div>
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Applications</span><span className="text-sm font-medium text-gray-900">{pipelineData.applicationsSubmitted}</span></div>
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Deposits</span><span className="text-sm font-medium text-gray-900">{pipelineData.admissions}</span></div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -300,21 +289,31 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          {/* Pipeline summary (current month) */}
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Pipeline (This Month)</CardTitle>
-                <HelpTooltip content="From leads to deposits" />
+                <CardTitle className="text-base">Upcoming Follow Ups</CardTitle>
+                <HelpTooltip content="Your next scheduled follow ups for this month" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">New Leads</span><span className="text-sm font-medium text-gray-900">{pipelineData.newLeads}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Active Students</span><span className="text-sm font-medium text-gray-900">{pipelineData.qualifiedStudents}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Applications</span><span className="text-sm font-medium text-gray-900">{pipelineData.applicationsSubmitted}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Deposits</span><span className="text-sm font-medium text-gray-900">{pipelineData.admissions}</span></div>
-              </div>
+              {(!upcomingFollowUps || upcomingFollowUps.length === 0) ? (
+                <div className="text-sm text-muted-foreground">No upcoming follow ups</div>
+              ) : (
+                <div className="space-y-3">
+                  {upcomingFollowUps.map((fu) => (
+                    <div key={fu.id} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">{fu.entityType} • {new Date(fu.followUpOn).toLocaleString()}</div>
+                        <div className="text-xs text-gray-600 truncate">{fu.comments}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
