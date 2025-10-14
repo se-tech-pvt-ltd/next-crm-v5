@@ -296,34 +296,6 @@ function DashboardContent() {
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Upcoming Follow Ups</CardTitle>
-                <HelpTooltip content="Your next scheduled follow ups for this month" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {(!upcomingFollowUps || upcomingFollowUps.length === 0) ? (
-                <div className="text-sm text-muted-foreground">No upcoming follow ups</div>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingFollowUps.map((fu) => (
-                    <div key={fu.id} className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{fu.entityType} • {new Date(fu.followUpOn).toLocaleString()}</div>
-                        <div className="text-xs text-gray-600 truncate">{fu.comments}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
