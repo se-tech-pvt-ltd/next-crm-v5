@@ -23,11 +23,11 @@ import { AddApplicationModal } from '@/components/add-application-modal';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  PieChart,
+  Pie,
+  Cell,
   Tooltip,
+  Legend,
 } from 'recharts';
 
 function DashboardFallback({ error }: FallbackProps) {
@@ -61,6 +61,7 @@ function DashboardContent() {
   const { data: students, isLoading: studentsLoading } = useQuery({ queryKey: ['/api/students'] });
   const { data: applications, isLoading: applicationsLoading } = useQuery({ queryKey: ['/api/applications'] });
   const { data: admissions, isLoading: admissionsLoading } = useQuery({ queryKey: ['/api/admissions'] });
+  const { data: applicationsDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Applications'] });
 
   const isLoading = leadsLoading || studentsLoading || applicationsLoading || admissionsLoading;
 
@@ -76,7 +77,7 @@ function DashboardContent() {
 
   const metrics = {
     totalLeads: leadsThisMonth.length,
-    activeStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).toLowerCase() === 'active').length,
+    activeStudents: studentsArray.filter((s: any) => String((s.status || '')).trim().toLowerCase() !== 'closed').length,
     applications: applicationsThisMonth.length,
     admissions: depositsThisMonth.length,
     conversionRate: leadsThisMonth.length ? (studentsThisMonth.length / leadsThisMonth.length) * 100 : 0,
@@ -85,21 +86,45 @@ function DashboardContent() {
 
   const pipelineData = {
     newLeads: leadsThisMonth.length,
-    qualifiedStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).toLowerCase() === 'active').length,
+    qualifiedStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).trim().toLowerCase() !== 'closed').length,
     applicationsSubmitted: applicationsThisMonth.length,
     admissions: depositsThisMonth.length,
   };
 
-  // Applications by Stage (current month)
+  // Applications by Stage (current month) - includes zero-count statuses from dropdowns
   const applicationsByStage = React.useMemo(() => {
-    const map = new Map<string, number>();
+    const counts = new Map<string, number>();
     for (const app of applicationsThisMonth) {
-      const stage = String((app as any).appStatus || (app as any).status || (app as any).caseStatus || 'Unknown');
+      const stage = String((app as any).appStatus || (app as any).status || (app as any).caseStatus || 'Unknown').trim();
       const key = stage || 'Unknown';
-      map.set(key, (map.get(key) || 0) + 1);
+      counts.set(key, (counts.get(key) || 0) + 1);
     }
-    return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
-  }, [applicationsThisMonth]);
+
+    // Derive full status list from Applications module dropdowns (various possible keys)
+    const dd: any = applicationsDropdowns as any;
+    let labels: string[] = [];
+    if (dd && typeof dd === 'object') {
+      const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const keyMap: Record<string, string> = {};
+      for (const k of Object.keys(dd)) keyMap[normalizeKey(k)] = k;
+      const candidates = ['App Status','Application Status','Status','AppStatus','app status','App status'];
+      let list: any[] = [];
+      for (const raw of candidates) {
+        const foundKey = keyMap[normalizeKey(raw)];
+        if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
+      }
+      list = Array.isArray(list) ? [...list] : [];
+      list.sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
+      labels = list.map((o: any) => String(o.value || o.label || '').trim()).filter(Boolean);
+    }
+
+    if (labels.length > 0) {
+      return labels.map((name) => ({ name, value: counts.get(name) || 0 }));
+    }
+    return Array.from(counts.entries()).map(([name, value]) => ({ name, value }));
+  }, [applicationsThisMonth, applicationsDropdowns]);
+
+  const chartColors = ['#4f46e5', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16', '#8b5cf6', '#eab308', '#14b8a6', '#f97316'];
 
   // Recent updates: mix of newly created entities this month
   const recentUpdates: Activity[] = React.useMemo(() => {
@@ -187,8 +212,8 @@ function DashboardContent() {
         </Card>
 
         {/* Charts + Lists */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <Card className="xl:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Applications by Stage</CardTitle>
@@ -202,12 +227,18 @@ function DashboardContent() {
                 <ResizeObserverErrorBoundary>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={applicationsByStage}>
-                        <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-15} textAnchor="end" height={50} />
-                        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <PieChart>
                         <Tooltip />
-                        <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-                      </BarChart>
+                        <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 12 }} />
+                        <Pie data={applicationsByStage} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} minAngle={1}
+                          label={({ name, value }) => (Number(value) > 0 ? `${name}: ${value}` : null)}
+                          labelLine={false}
+                        >
+                          {applicationsByStage.map((entry, idx) => (
+                            <Cell key={`cell-${entry.name}-${idx}`} fill={chartColors[idx % chartColors.length]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </ResizeObserverErrorBoundary>
@@ -218,28 +249,17 @@ function DashboardContent() {
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Upcoming Follow Ups</CardTitle>
-                <HelpTooltip content="Your next scheduled follow ups for this month" />
+                <CardTitle className="text-base">Pipeline (This Month)</CardTitle>
+                <HelpTooltip content="From leads to deposits" />
               </div>
             </CardHeader>
             <CardContent>
-              {(!upcomingFollowUps || upcomingFollowUps.length === 0) ? (
-                <div className="text-sm text-muted-foreground">No upcoming follow ups</div>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingFollowUps.map((fu) => (
-                    <div key={fu.id} className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{fu.entityType} • {new Date(fu.followUpOn).toLocaleString()}</div>
-                        <div className="text-xs text-gray-600 truncate">{fu.comments}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">New Leads</span><span className="text-sm font-medium text-gray-900">{pipelineData.newLeads}</span></div>
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Active Students</span><span className="text-sm font-medium text-gray-900">{pipelineData.qualifiedStudents}</span></div>
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Applications</span><span className="text-sm font-medium text-gray-900">{pipelineData.applicationsSubmitted}</span></div>
+                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Deposits</span><span className="text-sm font-medium text-gray-900">{pipelineData.admissions}</span></div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -273,24 +293,6 @@ function DashboardContent() {
                     </div>
                   ))
                 )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Pipeline summary (current month) */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Pipeline (This Month)</CardTitle>
-                <HelpTooltip content="From leads to deposits" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">New Leads</span><span className="text-sm font-medium text-gray-900">{pipelineData.newLeads}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Active Students</span><span className="text-sm font-medium text-gray-900">{pipelineData.qualifiedStudents}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Applications</span><span className="text-sm font-medium text-gray-900">{pipelineData.applicationsSubmitted}</span></div>
-                <div className="flex items-center justify-between"><span className="text-sm text-gray-600">Deposits</span><span className="text-sm font-medium text-gray-900">{pipelineData.admissions}</span></div>
               </div>
             </CardContent>
           </Card>
