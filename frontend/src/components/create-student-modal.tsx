@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { type Student } from '@/lib/types';
+import { sanitizePassportNumber } from '@/lib/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
@@ -152,7 +153,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   }, [users, branchEmps, formData.branchId]);
 
   const handleChange = (key: FormFieldKey, value: any) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    const nextValue = key === 'passport' ? sanitizePassportNumber(String(value || '')) : value;
+    setFormData(prev => ({ ...prev, [key]: nextValue }));
     setErrors(prev => {
       if (!(key in prev)) return prev;
       const next = { ...prev };
@@ -192,7 +194,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     const normalizedEmail = (formData.email || '').trim().toLowerCase();
     const normalizedPhone = (formData.phone || '').trim();
     const normalizedPhoneDigits = normalizedPhone.replace(/\D/g, '');
-    const passportNumber = (formData.passport || '').trim();
+    const passportNumber = sanitizePassportNumber(formData.passport || '');
     const dateOfBirth = (formData.dateOfBirth || '').trim();
     const address = (formData.address || '').trim();
     const englishProficiency = (formData.englishProficiency || '').trim();
@@ -539,7 +541,13 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1">
                 <Label>Passport Number</Label>
-                <Input placeholder="Enter passport number" value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
+                <Input
+                  placeholder="Enter passport number"
+                  value={formData.passport}
+                  onChange={(e) => handleChange('passport', e.target.value)}
+                  onBlur={(e) => handleChange('passport', e.target.value)}
+                  disabled={disabled}
+                />
                 {errors.passport && <p className="text-[11px] text-red-600">{errors.passport}</p>}
               </div>
               <div className="space-y-1">
