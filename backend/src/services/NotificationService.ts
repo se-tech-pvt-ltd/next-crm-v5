@@ -45,6 +45,16 @@ export class NotificationService {
     }
   }
 
+  static async updateStatus(id: string, status: NotificationStatus): Promise<NotificationRecord | null> {
+    try {
+      const sentAt = status === "sent" ? new Date() : undefined;
+      return await NotificationModel.updateStatus(id, status, { sentAt });
+    } catch (error) {
+      console.error("[NotificationService] Failed to update notification status:", error);
+      throw error;
+    }
+  }
+
   static async queueLeadCreationNotification(lead: Lead): Promise<void> {
     try {
       if (!lead?.id) {
