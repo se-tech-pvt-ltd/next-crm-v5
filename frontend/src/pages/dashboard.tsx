@@ -13,6 +13,7 @@ import {
   Plus,
   Calendar,
 } from 'lucide-react';
+import { Link } from 'wouter';
 import { Activity, FollowUp, Application, Lead, Student, Admission } from '@/lib/types';
 import React from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
@@ -276,7 +277,18 @@ function DashboardContent() {
                   <Skeleton className="h-12 w-full" />
                 </div>
               ) : upcomingFollowUps.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No upcoming follow-ups</div>
+                <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/80 p-6 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-gray-900">You’re all caught up</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    No follow-ups are scheduled for the remainder of this month. Plan your next outreach or review past activity.
+                  </p>
+                  <Button asChild variant="outline" size="sm" className="mt-4">
+                    <Link href="/calendar">Open follow-up calendar</Link>
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {upcomingFollowUps.map((followUp) => (
