@@ -6,6 +6,6 @@ export const notificationRoutes = Router();
 
 notificationRoutes.post('/forgot-password', NotificationController.forgotPassword);
 notificationRoutes.patch('/:id/status', requireAuth, NotificationController.updateStatus);
-notificationRoutes.get('/pending', NotificationController.pending);
+notificationRoutes.get('/pending', requireAuth, NotificationController.pending);
 
 export default notificationRoutes;
