@@ -76,7 +76,7 @@ function DashboardContent() {
 
   const metrics = {
     totalLeads: leadsThisMonth.length,
-    activeStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).toLowerCase() === 'active').length,
+    activeStudents: studentsArray.filter((s: any) => String((s.status || '')).trim().toLowerCase() !== 'closed').length,
     applications: applicationsThisMonth.length,
     admissions: depositsThisMonth.length,
     conversionRate: leadsThisMonth.length ? (studentsThisMonth.length / leadsThisMonth.length) * 100 : 0,
@@ -85,7 +85,7 @@ function DashboardContent() {
 
   const pipelineData = {
     newLeads: leadsThisMonth.length,
-    qualifiedStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).toLowerCase() === 'active').length,
+    qualifiedStudents: studentsThisMonth.filter((s: any) => String((s.status || '')).trim().toLowerCase() !== 'closed').length,
     applicationsSubmitted: applicationsThisMonth.length,
     admissions: depositsThisMonth.length,
   };
