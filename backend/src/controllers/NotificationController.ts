@@ -95,6 +95,18 @@ export class NotificationController {
 
   static async pending(req: Request, res: Response) {
     try {
+      const authReq = req as Request & { user?: { id?: string } };
+      const userId = authReq?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const user = await UserModel.findById(String(userId)).catch(() => undefined);
+      const userEmail = (user as any)?.email ? String((user as any).email) : '';
+      if (!userEmail) {
+        return res.status(200).json([]);
+      }
+
       const { templates } = await import('../shared/schema.js');
       const rows = await db
         .select({
