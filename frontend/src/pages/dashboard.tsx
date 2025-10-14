@@ -225,9 +225,9 @@ function DashboardContent() {
                 <ResizeObserverErrorBoundary>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={applicationsByStage} layout="vertical" margin={{ left: 16, right: 16, top: 8, bottom: 8 }} barCategoryGap="60%">
+                      <BarChart data={applicationsByStage} layout="vertical" margin={{ left: 4, right: 8, top: 8, bottom: 8 }} barCategoryGap="60%">
                         <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
-                        <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={120} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} tickMargin={2} width={90} />
                         <Tooltip />
                         <Bar dataKey="value" fill="#4f46e5" radius={[0, 8, 8, 0]} barSize={10} />
                       </BarChart>
