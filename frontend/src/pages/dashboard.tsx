@@ -230,7 +230,8 @@ function DashboardContent() {
                       <PieChart>
                         <Tooltip />
                         <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 12 }} />
-                        <Pie data={applicationsByStage} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={(e) => `${e.name}: ${e.value}`}
+                        <Pie data={applicationsByStage} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} minAngle={1}
+                          label={({ name, value }) => (Number(value) > 0 ? `${name}: ${value}` : null)}
                           labelLine={false}
                         >
                           {applicationsByStage.map((entry, idx) => (
