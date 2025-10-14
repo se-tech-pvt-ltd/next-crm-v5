@@ -2,6 +2,8 @@ import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DobPicker } from '@/components/ui/dob-picker';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelectV4 as MultiSelect } from '@/components/ui/multi-select-v4';
@@ -12,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import { type Student } from '@/lib/types';
+import { sanitizePassportNumber } from '@/lib/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
@@ -150,7 +153,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   }, [users, branchEmps, formData.branchId]);
 
   const handleChange = (key: FormFieldKey, value: any) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    const nextValue = key === 'passport' ? sanitizePassportNumber(String(value || '')) : value;
+    setFormData(prev => ({ ...prev, [key]: nextValue }));
     setErrors(prev => {
       if (!(key in prev)) return prev;
       const next = { ...prev };
@@ -190,7 +194,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     const normalizedEmail = (formData.email || '').trim().toLowerCase();
     const normalizedPhone = (formData.phone || '').trim();
     const normalizedPhoneDigits = normalizedPhone.replace(/\D/g, '');
-    const passportNumber = (formData.passport || '').trim();
+    const passportNumber = sanitizePassportNumber(formData.passport || '');
     const dateOfBirth = (formData.dateOfBirth || '').trim();
     const address = (formData.address || '').trim();
     const englishProficiency = (formData.englishProficiency || '').trim();
@@ -521,12 +525,29 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
               </div>
               <div className="space-y-1">
                 <Label>Phone</Label>
-                <Input type="tel" placeholder="Enter phone number" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} disabled={disabled} />
+                <div className="relative">
+                  <PhoneInput
+                    value={formData.phone}
+                    onChange={(value) => handleChange('phone', value)}
+                    defaultCountry="pk"
+                    placeholder="Enter phone number"
+                    disabled={disabled}
+                    className="w-full"
+                    inputClassName="w-full !h-9 text-sm"
+                    buttonClassName="!h-9"
+                  />
+                </div>
                 {errors.phone && <p className="text-[11px] text-red-600">{errors.phone}</p>}
               </div>
               <div className="space-y-1">
                 <Label>Passport Number</Label>
-                <Input placeholder="Enter passport number" value={formData.passport} onChange={(e) => handleChange('passport', e.target.value)} disabled={disabled} />
+                <Input
+                  placeholder="Enter passport number"
+                  value={formData.passport}
+                  onChange={(e) => handleChange('passport', e.target.value)}
+                  onBlur={(e) => handleChange('passport', e.target.value)}
+                  disabled={disabled}
+                />
                 {errors.passport && <p className="text-[11px] text-red-600">{errors.passport}</p>}
               </div>
               <div className="space-y-1">

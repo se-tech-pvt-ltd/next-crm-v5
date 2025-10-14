@@ -18,3 +18,8 @@ export function formatStatus(status: string): string {
     .map(word => capitalizeFirst(word))
     .join(' ');
 }
+
+export function sanitizePassportNumber(value: string): string {
+  if (!value) return '';
+  return value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+}

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 console.log('[modal] loaded: frontend/src/components/add-student-modal.tsx');
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
+import { sanitizePassportNumber } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { insertStudentSchema, type Lead } from '@/lib/types';
@@ -148,7 +150,16 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Phone Number *</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Enter phone number" required {...field} />
+                      <div className="relative">
+                        <PhoneInput
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          defaultCountry="pk"
+                          className="w-full"
+                          inputClassName="w-full !h-9 text-sm"
+                          buttonClassName="!h-9"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,7 +201,13 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                   <FormItem>
                     <FormLabel>Passport Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter passport number" required {...field} />
+                      <Input
+                        placeholder="Enter passport number"
+                        required
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(sanitizePassportNumber(e.target.value))}
+                        onBlur={(e) => field.onChange(sanitizePassportNumber(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
