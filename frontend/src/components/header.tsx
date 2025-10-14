@@ -103,6 +103,21 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
     }
   }, []);
 
+  const markNotificationAsSent = useCallback(async (notificationId: string) => {
+    if (!notificationId) return;
+    try {
+      await NotificationsService.updateNotificationStatus(notificationId, 'sent');
+      setNotifications((prev) =>
+        prev.filter((item) => {
+          const itemId = item?.id;
+          return String(itemId) !== notificationId;
+        })
+      );
+    } catch {
+      // ignore errors silently
+    }
+  }, []);
+
   React.useEffect(() => {
     fetchPending();
     const id = setInterval(fetchPending, 30000);
@@ -297,6 +312,9 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                               if (!redirectTarget) {
                                 event.preventDefault();
                                 return;
+                              }
+                              if (isPending && n.id) {
+                                void markNotificationAsSent(String(n.id));
                               }
                               handleNotificationNavigation(redirectTarget);
                             }}
