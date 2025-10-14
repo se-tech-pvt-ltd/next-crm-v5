@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
@@ -19,6 +19,44 @@ import * as NotificationsService from '@/services/notifications';
 import type { Admission, Application } from '@/lib/types';
 import { useLocation } from 'wouter';
 import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+const PLACEHOLDER_REGEX = /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g;
+
+const parseVariables = (value: unknown): Record<string, unknown> => {
+  if (value == null) return {};
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
+    }
+  }
+  if (typeof value === 'object') {
+    return value as Record<string, unknown>;
+  }
+  return {};
+};
+
+const getNestedValue = (vars: Record<string, unknown>, path: string): unknown => {
+  return path.split('.').reduce<unknown>((current, segment) => {
+    if (current == null) return undefined;
+    if (typeof current !== 'object') return undefined;
+    const container = current as Record<string, unknown>;
+    return container[segment];
+  }, vars);
+};
+
+const resolveRedirectUrl = (raw: unknown, vars: unknown): string | null => {
+  if (!raw || typeof raw !== 'string') return null;
+  const variables = parseVariables(vars);
+  const replaced = raw.replace(PLACEHOLDER_REGEX, (_, key: string) => {
+    const value = getNestedValue(variables, key);
+    return value == null ? '' : String(value);
+  });
+  return replaced.trim() ? replaced : null;
+};
 
 interface HeaderProps {
   title: string;
@@ -45,6 +83,16 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const pendingCount = notifications.length;
+
+  const handleNotificationNavigation = useCallback((target: string) => {
+    if (!target) return;
+    if (/^https?:\/\//i.test(target)) {
+      window.open(target, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    const normalized = target.startsWith('/') ? target : `/${target}`;
+    navigate(normalized.replace(/\/{2,}/g, '/'));
+  }, [navigate]);
 
   const fetchPending = React.useCallback(async () => {
     try {
@@ -240,21 +288,40 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
                         const contentSnippet = n.content ? String(n.content).slice(0, 200) : '';
                         const time = n.createdAt ? formatDistanceToNow(new Date(n.createdAt)) + ' ago' : '';
                         const isPending = String(n.status).toLowerCase() === 'pending';
+                        const redirectTarget = resolveRedirectUrl(n?.redirect_url ?? n?.redirectUrl, n?.variables);
                         return (
-                          <div key={n.id} className={`p-2 rounded-md ${isPending ? 'bg-yellow-50' : 'bg-white'} flex justify-between items-start`}>
-                            <div className="flex-1">
-                              <p className={`text-xs ${isPending ? 'text-yellow-800' : 'text-gray-800'} font-medium`}>{title}</p>
-                              <p className="text-xs text-gray-500 mt-1">{contentSnippet}</p>
-                              <p className="text-xs text-gray-400 mt-1">{time}</p>
+                          <DropdownMenuItem
+                            key={n.id}
+                            disabled={!redirectTarget}
+                            onSelect={(event) => {
+                              if (!redirectTarget) {
+                                event.preventDefault();
+                                return;
+                              }
+                              handleNotificationNavigation(redirectTarget);
+                            }}
+                            className={cn(
+                              'h-auto items-start whitespace-normal rounded-md px-3 py-2',
+                              isPending
+                                ? 'bg-yellow-50 data-[highlighted]:bg-yellow-100'
+                                : 'bg-white data-[highlighted]:bg-gray-100'
+                            )}
+                          >
+                            <div className="flex w-full items-start justify-between gap-3 text-left">
+                              <div className="flex-1">
+                                <p className={cn('text-xs font-medium', isPending ? 'text-yellow-800' : 'text-gray-800')}>{title}</p>
+                                <p className="text-xs text-gray-500 mt-1">{contentSnippet}</p>
+                                <p className="text-xs text-gray-400 mt-1">{time}</p>
+                              </div>
+                              <div className="shrink-0">
+                                {isPending ? (
+                                  <Badge className="bg-yellow-200 text-yellow-800 text-xs">Unread</Badge>
+                                ) : (
+                                  <Badge className="bg-green-100 text-green-800 text-xs">Read</Badge>
+                                )}
+                              </div>
                             </div>
-                            <div className="ml-3">
-                              {isPending ? (
-                                <Badge className="bg-yellow-200 text-yellow-800 text-xs">Unread</Badge>
-                              ) : (
-                                <Badge className="bg-green-100 text-green-800 text-xs">Read</Badge>
-                              )}
-                            </div>
-                          </div>
+                          </DropdownMenuItem>
                         );
                       })
                     )}
