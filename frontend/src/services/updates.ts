@@ -5,6 +5,7 @@ export interface Update {
   subject: string;
   subjectDesc: string;
   body: string;
+  imageIds: string[];
   createdOn: string;
   updatedOn: string;
 }
@@ -13,6 +14,7 @@ export type CreateUpdateInput = {
   subject: string;
   subjectDesc: string;
   body: string;
+  imageIds?: string[];
 };
 
 export async function listUpdates(): Promise<Update[]> {
