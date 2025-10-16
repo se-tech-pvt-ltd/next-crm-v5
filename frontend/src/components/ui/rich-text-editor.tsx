@@ -7,7 +7,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import DOMPurify from 'dompurify';
-import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -128,7 +128,7 @@ export const RichTextEditor = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Extend Image to carry attachment metadata
+  // Extend Image to carry attachment metadata and sizing
   const ImageWithMeta = Image.extend({
     addAttributes() {
       return {
@@ -140,6 +140,30 @@ export const RichTextEditor = ({
             return { 'data-attachment-id': attributes['data-attachment-id'] };
           },
           parseHTML: (element: HTMLElement) => element.getAttribute('data-attachment-id'),
+        },
+        width: {
+          default: null,
+          renderHTML: (attributes: any) => {
+            if (!attributes.width) return {};
+            return { style: `width: ${attributes.width}` };
+          },
+          parseHTML: (element: HTMLElement) => {
+            const style = element.getAttribute('style') || '';
+            const match = style.match(/width:\s*(\d+(?:px|%|em)?)/);
+            return match ? match[1] : null;
+          },
+        },
+        float: {
+          default: null,
+          renderHTML: (attributes: any) => {
+            if (!attributes.float) return {};
+            return { style: `float: ${attributes.float}; margin: 8px;` };
+          },
+          parseHTML: (element: HTMLElement) => {
+            const style = element.getAttribute('style') || '';
+            const match = style.match(/float:\s*(left|right|none)?/);
+            return match ? match[1] : null;
+          },
         },
       } as any;
     },
