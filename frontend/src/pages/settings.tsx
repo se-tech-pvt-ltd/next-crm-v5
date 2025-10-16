@@ -9,8 +9,7 @@ import UserSectionComp from '@/components/settings/UserSection';
 import RoleAccessSectionComp from '@/components/settings/RoleAccessSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
-import UpdatesSectionComp from '@/components/settings/UpdatesSection';
-import { Database, ShieldCheck, Mail, Globe2, Megaphone } from 'lucide-react';
+import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
