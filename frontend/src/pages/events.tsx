@@ -689,6 +689,11 @@ export default function EventsPage() {
     return rn === 'admission_officer' || rn === 'admission' || rn === 'admissionofficer' || rn === 'admission_officer';
   })();
 
+  const isCounsellor = (() => {
+    const rn = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || tokenPayload?.role_details?.role_name || '');
+    return rn === 'counselor' || rn === 'counsellor' || rn === 'counsellor';
+  })();
+
   const filteredBranches = Array.isArray(branches)
     ? branches.filter((b: any) => !eventAccess.regionId || String(b.regionId ?? b.region_id ?? '') === String(eventAccess.regionId))
     : [];
