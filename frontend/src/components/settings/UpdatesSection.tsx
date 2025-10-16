@@ -108,13 +108,15 @@ const UpdatesSection: React.FC = () => {
 
       {showForm && (
         <div className="border rounded-md p-3 mb-3 space-y-2">
-          <div>
-            <label className="block text-sm mb-1">Subject</label>
-            <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Subject description</label>
-            <Input value={subjectDesc} onChange={e => setSubjectDesc(e.target.value)} placeholder="Short description" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm mb-1">Subject</label>
+              <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject" />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Subject description</label>
+              <Input value={subjectDesc} onChange={e => setSubjectDesc(e.target.value)} placeholder="Short description" />
+            </div>
           </div>
           <div>
             <label className="block text-sm mb-1">Body</label>
