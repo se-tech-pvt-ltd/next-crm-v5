@@ -65,7 +65,7 @@ const ToolbarButton = ({ onClick, disabled, active, icon: Icon, label }: Toolbar
 const EMPTY_DOCUMENT = '<p></p>';
 
 const sanitizeForEditor = (html?: string) => {
-  const sanitized = html ? DOMPurify.sanitize(html) : '';
+  const sanitized = html ? DOMPurify.sanitize(html, { ADD_ATTR: ['data-attachment-id'] }) : '';
   if (!sanitized || isHtmlContentEmpty(sanitized)) {
     return EMPTY_DOCUMENT;
   }
@@ -83,6 +83,23 @@ export const RichTextEditor = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Extend Image to carry attachment metadata
+  const ImageWithMeta = Image.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        'data-attachment-id': {
+          default: null,
+          renderHTML: (attributes: any) => {
+            if (!attributes['data-attachment-id']) return {};
+            return { 'data-attachment-id': attributes['data-attachment-id'] };
+          },
+          parseHTML: (element: HTMLElement) => element.getAttribute('data-attachment-id'),
+        },
+      } as any;
+    },
+  });
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -91,13 +108,13 @@ export const RichTextEditor = ({
       }),
       Underline,
       Link.configure({ openOnClick: false, linkOnPaste: true, HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' } }),
-      Image.configure({ allowBase64: false }),
+      ImageWithMeta.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder }),
     ],
     content: sanitizeForEditor(value),
     editable: !disabled,
     onUpdate: ({ editor: current }) => {
-      const sanitized = DOMPurify.sanitize(current.getHTML());
+      const sanitized = DOMPurify.sanitize(current.getHTML(), { ADD_ATTR: ['data-attachment-id'] });
       if (isHtmlContentEmpty(sanitized)) {
         onChange('');
         return;
@@ -141,7 +158,8 @@ export const RichTextEditor = ({
         throw new Error('Upload did not return a file URL');
       }
       const url = DOMPurify.sanitize(response.fileUrl);
-      editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+      const attachmentId = response.attachmentId || '';
+      editor.chain().focus().setImage({ src: url, alt: file.name, 'data-attachment-id': attachmentId } as any).run();
       toast({ title: 'Image uploaded', description: 'Image added to the content.' });
     } catch (error: any) {
       const message = error?.message || 'Failed to upload image';
