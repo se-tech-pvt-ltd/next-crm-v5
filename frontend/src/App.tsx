@@ -135,6 +135,7 @@ function Router() {
       <Route path="/calendar" component={FollowUpsPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
+      <Route path="/updates" component={UpdatesPage} />
       <Route path="/partners" component={PartnersPage} />
       <Route path="/settings" component={SettingsGuard} />
       <Route path="/forgot-password" component={ForgotPassword} />
