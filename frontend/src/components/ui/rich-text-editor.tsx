@@ -259,6 +259,22 @@ export const RichTextEditor = ({
     editor.chain().focus().extendMarkRange('link').setLink({ href: sanitized, target: '_blank', rel: 'noopener noreferrer' }).run();
   };
 
+  const handleImageResize = () => {
+    if (!editor) return;
+    const currentWidth = editor.getAttributes('image').width || '100%';
+    const width = window.prompt('Enter image width (e.g., 300px, 50%):', currentWidth);
+    if (width === null) return;
+    if (width.trim()) {
+      editor.chain().focus().setImage({ width: width.trim() }).run();
+    }
+  };
+
+  const handleImageAlign = (alignment: 'left' | 'center' | 'right') => {
+    if (!editor) return;
+    const floatValue = alignment === 'center' ? 'none' : alignment === 'left' ? 'left' : 'right';
+    editor.chain().focus().setImage({ float: floatValue }).run();
+  };
+
   return (
     <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
       <div className="flex items-center gap-2 border-b bg-gray-50 px-2 py-1 flex-shrink-0">
