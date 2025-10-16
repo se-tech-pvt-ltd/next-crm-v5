@@ -7,7 +7,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import DOMPurify from 'dompurify';
-import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Check } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
