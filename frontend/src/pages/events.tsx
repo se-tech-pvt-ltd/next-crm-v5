@@ -1536,7 +1536,7 @@ export default function EventsPage() {
                           <div className="flex items-center text-xs text-gray-700">
                             <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
                             <span>{formatEventDate(e.date)}</span>
-                            {e.time ? (<><span className="mx-2 text-gray-300">��</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                            {e.time ? (<><span className="mx-2 text-gray-300">·</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
                           </div>
                           <div className="flex items-center text-xs text-gray-700">
                             <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
