@@ -223,6 +223,13 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     } catch { return false; }
   })();
 
+  const isCounsellor = (() => {
+    try {
+      const rn = getNormalizedRole();
+      return rn === 'counselor' || rn === 'counsellor' || rn === 'counsellor';
+    } catch { return false; }
+  })();
+
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
     value: String(r.id),
