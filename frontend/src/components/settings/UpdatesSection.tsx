@@ -131,7 +131,11 @@ const UpdatesSection: React.FC = () => {
             <>
               <h3 className="text-lg font-semibold mb-2">{updates[active].subject}</h3>
               <div className="text-[11px] text-gray-500 mb-2">{formatDate(updates[active].createdOn)}</div>
-              <div className="prose prose-sm max-w-none whitespace-pre-wrap">{updates[active].body}</div>
+              {isHtmlContentEmpty(sanitizedActiveBody) ? (
+                <div className="text-sm text-gray-500">No details provided.</div>
+              ) : (
+                <div className="prose prose-sm max-w-none break-words" dangerouslySetInnerHTML={{ __html: sanitizedActiveBody }} />
+              )}
             </>
           ) : (
             <div className="text-sm text-gray-500">Select an update to view details.</div>
