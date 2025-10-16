@@ -38,11 +38,18 @@ export async function uploadFile(file: File, options?: { baseApiUrl?: string }):
     const base = options.baseApiUrl.replace(/\/$/, '');
     const baseDomain = base.replace(/\/api\/?$/, '');
     if (!/^https?:\/\//i.test(fileUrl)) {
-      const absolute = fileUrl.startsWith('/api/')
-        ? `${baseDomain}${fileUrl}`
-        : fileUrl.startsWith('/')
-          ? `${base}${fileUrl}`
-          : `${base}/${fileUrl}`;
+      let absolute: string;
+      // Prefer asset domain for uploads path: convert "/api/uploads/..." to "https://domain/uploads/..."
+      if (fileUrl.startsWith('/api/uploads')) {
+        absolute = `${baseDomain}${fileUrl.replace(/^\/api/, '')}`;
+      } else if (fileUrl.startsWith('/api/')) {
+        // keep api prefix for other API-returned paths
+        absolute = `${baseDomain}${fileUrl}`;
+      } else if (fileUrl.startsWith('/')) {
+        absolute = `${base}${fileUrl}`;
+      } else {
+        absolute = `${base}/${fileUrl}`;
+      }
       json.fileUrl = absolute;
     }
   }
