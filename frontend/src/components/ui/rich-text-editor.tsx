@@ -303,8 +303,15 @@ export const RichTextEditor = ({
 
   const handleImageAlign = (alignment: 'left' | 'center' | 'right') => {
     if (!editor) return;
-    const floatValue = alignment === 'center' ? 'none' : alignment === 'left' ? 'left' : 'right';
-    editor.chain().focus().updateAttributes('image', { float: floatValue }).run();
+    let imageClass = null;
+    if (alignment === 'left') {
+      imageClass = 'image-left';
+    } else if (alignment === 'right') {
+      imageClass = 'image-right';
+    } else if (alignment === 'center') {
+      imageClass = 'image-center';
+    }
+    editor.chain().focus().updateAttributes('image', { imageClass }).run();
   };
 
   return (
