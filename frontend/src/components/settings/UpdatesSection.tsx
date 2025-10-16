@@ -59,18 +59,33 @@ const UpdatesSection: React.FC = () => {
     if (active >= updates.length) setActive(0);
   }, [updates, active]);
 
-  const API_BASE = 'https://sales.crm-setech.cloud/api';
+  const UPLOAD_API_BASE = 'https://sales.crm-setech.cloud/api';
+  const ASSET_BASE = 'https://sales.crm-setech.cloud';
+
   const rewriteImageSrcs = React.useCallback((html: string) => {
     try {
       const container = document.createElement('div');
       container.innerHTML = html || '';
       const imgs = Array.from(container.querySelectorAll('img'));
-      const base = API_BASE.replace(/\/$/, '');
-      const baseDomain = base.replace(/\/api\/?$/, '');
+      const uploadBase = UPLOAD_API_BASE.replace(/\/$/, '');
+      const assetBase = ASSET_BASE.replace(/\/$/, '');
+      const assetDomain = assetBase.replace(/\/api\/?$/, '');
       for (const img of imgs) {
         const src = img.getAttribute('src') || '';
         if (/^https?:\/\//i.test(src)) continue;
-        const abs = src.startsWith('/api/') ? `${baseDomain}${src}` : (src.startsWith('/') ? `${base}${src}` : `${base}/${src}`);
+        let abs = src;
+        if (src.startsWith('/api/uploads')) {
+          abs = `${assetDomain}${src.replace(/^\/api/, '')}`;
+        } else if (src.startsWith('/uploads')) {
+          abs = `${assetDomain}${src}`;
+        } else if (src.startsWith('/api/')) {
+          // other api paths -> keep domain but keep api
+          abs = `${assetDomain}${src}`;
+        } else if (src.startsWith('/')) {
+          abs = `${uploadBase}${src}`;
+        } else {
+          abs = `${uploadBase}/${src}`;
+        }
         img.setAttribute('src', abs);
       }
       return container.innerHTML;
