@@ -23,7 +23,9 @@ interface RichTextEditorProps {
   assetBaseApiUrl?: string;
   uploadBaseApiUrl?: string;
   // Optional action buttons to display in the toolbar
-  actions?: React.ReactNode;
+  onCancel?: () => void;
+  onCreate?: () => void;
+  canCreate?: boolean;
 }
 
 const HTML_IMAGE_REGEX = /<img\b[^>]*>/i;
