@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { InputWithIcon } from '@/components/ui/input-with-icon';
 import DateTimeField from '@/components/ui/date-time-field';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { CollapsibleCard } from '@/components/collapsible-card';
