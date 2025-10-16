@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
+import { Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
-import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
@@ -78,7 +76,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-  const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [, navigate] = useLocation();
 
