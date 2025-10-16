@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { ZodError } from 'zod';
 import { NotificationService } from '../services/NotificationService.js';
 import { UserResetTokenService } from '../services/UserResetTokenService.js';
 import { UserModel } from '../models/User.js';
@@ -7,6 +8,7 @@ import type { NotificationStatus } from '../models/Notification.js';
 import { db } from '../config/database.js';
 import { notifications } from '../shared/schema.js';
 import { eq, and, desc } from 'drizzle-orm';
+import { updatePayloadSchema } from './UpdatesController.js';
 
 export class NotificationController {
   static async forgotPassword(req: Request, res: Response) {
@@ -172,11 +174,13 @@ export class NotificationController {
   static async createUpdate(req: Request, res: Response) {
     try {
       const { UpdateModel } = await import('../models/Update.js');
-      const { subject, subjectDesc, body } = req.body as any;
-      if (!subject || !subjectDesc || !body) return res.status(400).json({ message: 'Missing fields' });
-      const created = await UpdateModel.create({ subject, subjectDesc, body });
+      const payload = updatePayloadSchema.parse(req.body);
+      const created = await UpdateModel.create(payload);
       res.status(201).json(created);
     } catch (e) {
+      if (e instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: e.errors });
+      }
       console.error('[NotificationController] createUpdate error:', e);
       res.status(500).json({ message: 'Failed to create update' });
     }
