@@ -125,32 +125,42 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = ({ value, onChange, m
           <span className={cn('truncate text-left grow', display ? 'text-foreground' : 'text-muted-foreground')}>{display || placeholder}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[18rem] p-3" align="start">
-        <div className="space-y-3">
-          <Calendar
-            selected={draftDate}
-            onSelect={handleDateSelect}
-            showOutsideDays
-            minDate={minDate || undefined}
-          />
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-gray-500" />
-            <select
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              value={draftTime}
-              onChange={(e) => handleTimeSelect(e.target.value)}
-            >
-              <option value="" disabled>Select time</option>
-              {filteredTimes.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+      <PopoverContent className="w-[22rem] p-3" align="start">
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <Calendar
+              selected={draftDate}
+              onSelect={handleDateSelect}
+              showOutsideDays
+              minDate={minDate || undefined}
+              className="!w-48"
+            />
           </div>
-          <div className="flex justify-between">
-            <button type="button" className="text-xs text-muted-foreground underline" onClick={() => { onChange(''); setDraftDate(null); setDraftTime(''); setOpen(false); }}>Clear</button>
-            {minDate && draftDate && draftDate < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate()) && (
-              <span className="text-xs text-red-600">Select a date on/after {toDatePart(minDate)}</span>
-            )}
+          <div className="flex-1 min-w-[8rem] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-gray-500" />
+                <select
+                  className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  value={draftTime}
+                  onChange={(e) => handleTimeSelect(e.target.value)}
+                >
+                  <option value="" disabled>Select time</option>
+                  {filteredTimes.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              {minDate && draftDate && draftDate < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate()) && (
+                <div className="text-xs text-red-600 mb-2">Select a date on/after {toDatePart(minDate)}</div>
+              )}
+            </div>
+            <div className="flex justify-between">
+              <button type="button" className="text-xs text-muted-foreground underline" onClick={() => { onChange(''); setDraftDate(null); setDraftTime(''); setOpen(false); }}>Clear</button>
+              <div>
+                <button type="button" className="ml-2 inline-flex items-center rounded bg-[#223E7D] text-white px-3 py-1 text-sm" onClick={() => commit(draftDate, draftTime)} disabled={!draftDate || !draftTime}>Save</button>
+              </div>
+            </div>
           </div>
         </div>
       </PopoverContent>
