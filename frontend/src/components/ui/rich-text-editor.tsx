@@ -169,7 +169,7 @@ export const RichTextEditor = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[180px] focus:outline-none',
+        class: 'prose prose-sm max-w-none h-full focus:outline-none',
       },
     },
   });
@@ -353,8 +353,8 @@ export const RichTextEditor = ({
           </div>
         )}
       </div>
-      <div className="flex-1 overflow-hidden px-2 py-1">
-        <EditorContent editor={editor} />
+      <div className="flex-1 overflow-hidden px-2 py-1 h-full">
+        <EditorContent editor={editor} className="h-full" />
       </div>
     </div>
   );
