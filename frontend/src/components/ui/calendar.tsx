@@ -49,6 +49,8 @@ function Calendar({ selected, onSelect, showOutsideDays = true, className, minDa
         }}
         tileContent={null}
         showNeighboringMonth={Boolean(showOutsideDays)}
+        minDate={minDate}
+        maxDate={maxDate}
       />
     </div>
   );
