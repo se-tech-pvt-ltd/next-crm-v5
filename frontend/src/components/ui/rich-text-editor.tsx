@@ -169,7 +169,7 @@ export const RichTextEditor = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none h-full focus:outline-none',
+        class: 'prose prose-sm max-w-none h-full min-h-[305px] focus:outline-none',
       },
     },
   });
