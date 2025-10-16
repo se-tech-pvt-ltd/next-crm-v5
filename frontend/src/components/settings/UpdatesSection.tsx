@@ -1,8 +1,10 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor, isHtmlContentEmpty } from '@/components/ui/rich-text-editor';
+import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as UpdatesService from '@/services/updates';
 
