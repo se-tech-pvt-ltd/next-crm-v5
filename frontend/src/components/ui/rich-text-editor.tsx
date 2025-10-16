@@ -353,7 +353,7 @@ export const RichTextEditor = ({
           </div>
         )}
       </div>
-      <div className="max-h-[340px] overflow-y-auto px-2 py-1">
+      <div className="max-h-[340px] overflow-y-auto px-2" style={{ paddingBottom: 0, marginBottom: "82px" }}>
         <EditorContent editor={editor} />
       </div>
     </div>
