@@ -64,11 +64,18 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ onClick, disabled, active
 
 const EMPTY_DOCUMENT = '<p></p>';
 
+const sanitizeForEditor = (html?: string) => {
+  const sanitized = html ? DOMPurify.sanitize(html) : '';
+  if (!sanitized || isHtmlContentEmpty(sanitized)) {
+    return EMPTY_DOCUMENT;
+  }
+  return sanitized;
+};
+
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
-  placeholder = 'Write your content...'
-  ,
+  placeholder = 'Write your content...',
   disabled = false,
   className,
 }) => {
