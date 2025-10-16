@@ -1,8 +1,10 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor, isHtmlContentEmpty } from '@/components/ui/rich-text-editor';
+import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as UpdatesService from '@/services/updates';
 
@@ -15,6 +17,7 @@ const formatDate = (d: string | Date) => {
 
 const UpdatesSection: React.FC = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { data: updates = [], isFetching } = useQuery({
     queryKey: ['/api/updates'],
     queryFn: UpdatesService.listUpdates,
@@ -27,16 +30,31 @@ const UpdatesSection: React.FC = () => {
   const [body, setBody] = React.useState('');
 
   const createMutation = useMutation({
-    mutationFn: async () => UpdatesService.createUpdate({ subject, subjectDesc, body }),
+    mutationFn: async () => {
+      const sanitizedBody = DOMPurify.sanitize(body);
+      return UpdatesService.createUpdate({
+        subject: subject.trim(),
+        subjectDesc: subjectDesc.trim(),
+        body: sanitizedBody,
+      });
+    },
     onSuccess: () => {
       setSubject(''); setSubjectDesc(''); setBody(''); setShowForm(false);
       queryClient.invalidateQueries({ queryKey: ['/api/updates'] });
+      toast({ title: 'Update created', description: 'New update published successfully.' });
+    },
+    onError: (error: any) => {
+      const message = error?.message || 'Failed to create update';
+      toast({ title: 'Could not create update', description: message, variant: 'destructive' });
     },
   });
 
   React.useEffect(() => {
     if (active >= updates.length) setActive(0);
   }, [updates, active]);
+
+  const sanitizedActiveBody = React.useMemo(() => DOMPurify.sanitize(updates[active]?.body ?? ''), [updates, active]);
+  const canSubmit = React.useMemo(() => subject.trim().length > 0 && subjectDesc.trim().length > 0 && !isHtmlContentEmpty(body), [subject, subjectDesc, body]);
 
   return (
     <div className="bg-white px-0 sm:px-0 py-0 overflow-hidden min-h-0">
@@ -57,11 +75,29 @@ const UpdatesSection: React.FC = () => {
           </div>
           <div>
             <label className="block text-sm mb-1">Body</label>
-            <Textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Details" rows={5} />
+            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={() => { setShowForm(false); }}>Cancel</Button>
-            <Button size="sm" onClick={() => createMutation.mutate()} disabled={!subject || !subjectDesc || !body || createMutation.isPending}>Create</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setShowForm(false);
+                setSubject('');
+                setSubjectDesc('');
+                setBody('');
+              }}
+              disabled={createMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => createMutation.mutate()}
+              disabled={!canSubmit || createMutation.isPending}
+            >
+              Create
+            </Button>
           </div>
         </div>
       )}
@@ -95,7 +131,11 @@ const UpdatesSection: React.FC = () => {
             <>
               <h3 className="text-lg font-semibold mb-2">{updates[active].subject}</h3>
               <div className="text-[11px] text-gray-500 mb-2">{formatDate(updates[active].createdOn)}</div>
-              <div className="prose prose-sm max-w-none whitespace-pre-wrap">{updates[active].body}</div>
+              {isHtmlContentEmpty(sanitizedActiveBody) ? (
+                <div className="text-sm text-gray-500">No details provided.</div>
+              ) : (
+                <div className="prose prose-sm max-w-none break-words" dangerouslySetInnerHTML={{ __html: sanitizedActiveBody }} />
+              )}
             </>
           ) : (
             <div className="text-sm text-gray-500">Select an update to view details.</div>
