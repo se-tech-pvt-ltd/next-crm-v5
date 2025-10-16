@@ -317,11 +317,17 @@ export const RichTextEditor = ({
   return (
     <>
       <style>{`
+        .ProseMirror {
+          overflow: auto;
+          word-wrap: break-word;
+        }
         .ProseMirror img {
           cursor: grab;
           transition: opacity 0.2s ease;
           max-width: 100%;
           height: auto;
+          display: inline-block;
+          vertical-align: middle;
         }
         .ProseMirror img:hover {
           opacity: 0.8;
@@ -332,10 +338,12 @@ export const RichTextEditor = ({
         .ProseMirror img.image-left {
           float: left;
           margin: 0 15px 10px 0;
+          display: block;
         }
         .ProseMirror img.image-right {
           float: right;
           margin: 0 0 10px 15px;
+          display: block;
         }
         .ProseMirror img.image-center {
           display: block;
@@ -343,8 +351,14 @@ export const RichTextEditor = ({
           float: none;
           width: 100%;
         }
-        .ProseMirror {
-          overflow: auto;
+        .ProseMirror p {
+          margin: 0.75em 0;
+        }
+        .ProseMirror p:first-child {
+          margin-top: 0;
+        }
+        .ProseMirror p:last-child {
+          margin-bottom: 0;
         }
       `}</style>
       <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
