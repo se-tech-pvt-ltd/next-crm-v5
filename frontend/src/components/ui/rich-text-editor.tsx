@@ -22,6 +22,8 @@ interface RichTextEditorProps {
   // When provided, images in HTML will be fetched from this API base (also used for uploads)
   assetBaseApiUrl?: string;
   uploadBaseApiUrl?: string;
+  // Optional action buttons to display in the toolbar
+  actions?: React.ReactNode;
 }
 
 const HTML_IMAGE_REGEX = /<img\b[^>]*>/i;
