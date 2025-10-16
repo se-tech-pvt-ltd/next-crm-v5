@@ -202,6 +202,22 @@ export const RichTextEditor = ({
       attributes: {
         class: 'prose prose-sm max-w-none h-full min-h-[305px] focus:outline-none',
       },
+      handleDOMEvents: {
+        dragover: (view, event) => {
+          if (!event.dataTransfer) return false;
+          event.dataTransfer.dropEffect = 'move';
+          event.preventDefault();
+          return true;
+        },
+        drop: (view, event) => {
+          if (!event.dataTransfer) return false;
+          event.preventDefault();
+          const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+          if (!pos) return false;
+          view.dispatch(view.state.tr.insertText('', pos.pos, pos.pos));
+          return true;
+        },
+      },
     },
   });
 
