@@ -129,7 +129,7 @@ export const RichTextEditor = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Extend Image to carry attachment metadata and sizing
+  // Extend Image to carry attachment metadata and sizing with drag-and-drop support
   const ImageWithMeta = Image.extend({
     addAttributes() {
       return {
@@ -167,6 +167,12 @@ export const RichTextEditor = ({
           },
         },
       } as any;
+    },
+    addNodeView() {
+      return {
+        selectable: true,
+        draggable: true,
+      };
     },
   });
 
