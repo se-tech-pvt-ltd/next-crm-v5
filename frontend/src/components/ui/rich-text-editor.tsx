@@ -1,4 +1,5 @@
 import React from 'react';
+import React from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -19,6 +20,22 @@ interface RichTextEditorProps {
   disabled?: boolean;
   className?: string;
 }
+
+const HTML_IMAGE_REGEX = /<img\b[^>]*>/i;
+
+export const isHtmlContentEmpty = (html: string): boolean => {
+  if (!html) return true;
+  if (HTML_IMAGE_REGEX.test(html)) return false;
+  const textContent = html
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/<br\s*\/?>(?=\s|$)/gi, ' ')
+    .replace(/<\/p>/gi, ' ')
+    .replace(/<p[^>]*>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return textContent.length === 0;
+};
 
 type ToolbarButtonProps = {
   onClick: () => void;
