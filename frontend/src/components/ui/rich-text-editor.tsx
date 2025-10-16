@@ -19,6 +19,9 @@ interface RichTextEditorProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  // When provided, images in HTML will be fetched from this API base (also used for uploads)
+  assetBaseApiUrl?: string;
+  uploadBaseApiUrl?: string;
 }
 
 const HTML_IMAGE_REGEX = /<img\b[^>]*>/i;
@@ -72,12 +75,42 @@ const sanitizeForEditor = (html?: string) => {
   return sanitized;
 };
 
+const absolutizeUrl = (url: string, baseApiUrl?: string) => {
+  if (!baseApiUrl) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = baseApiUrl.replace(/\/$/, '');
+  const baseDomain = base.replace(/\/api\/?$/, '');
+  if (url.startsWith('/api/')) return `${baseDomain}${url}`;
+  if (url.startsWith('/')) return `${base}${url}`;
+  return `${base}/${url}`;
+};
+
+const rewriteImageSrcs = (html: string, baseApiUrl?: string) => {
+  if (!baseApiUrl || !html) return html;
+  try {
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const imgs = Array.from(container.querySelectorAll('img'));
+    for (const img of imgs) {
+      const src = img.getAttribute('src');
+      if (!src) continue;
+      const abs = absolutizeUrl(src, baseApiUrl);
+      img.setAttribute('src', abs);
+    }
+    return container.innerHTML;
+  } catch {
+    return html;
+  }
+};
+
 export const RichTextEditor = ({
   value,
   onChange,
   placeholder = 'Write your content...',
   disabled = false,
   className,
+  assetBaseApiUrl,
+  uploadBaseApiUrl,
 }: RichTextEditorProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +144,7 @@ export const RichTextEditor = ({
       ImageWithMeta.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder }),
     ],
-    content: sanitizeForEditor(value),
+    content: rewriteImageSrcs(sanitizeForEditor(value), assetBaseApiUrl),
     editable: !disabled,
     onUpdate: ({ editor: current }) => {
       const sanitized = DOMPurify.sanitize(current.getHTML(), { ADD_ATTR: ['data-attachment-id'] });
@@ -119,7 +152,8 @@ export const RichTextEditor = ({
         onChange('');
         return;
       }
-      onChange(sanitized);
+      const rewritten = rewriteImageSrcs(sanitized, assetBaseApiUrl);
+      onChange(rewritten);
     },
     editorProps: {
       attributes: {
@@ -130,7 +164,7 @@ export const RichTextEditor = ({
 
   useEffect(() => {
     if (!editor) return;
-    const sanitized = sanitizeForEditor(value);
+    const sanitized = rewriteImageSrcs(sanitizeForEditor(value), assetBaseApiUrl);
     if (sanitized !== editor.getHTML()) {
       editor.commands.setContent(sanitized, false);
     }
@@ -153,13 +187,14 @@ export const RichTextEditor = ({
 
     setIsUploading(true);
     try {
-      const response = await uploadFile(file);
+      const response = await uploadFile(file, { baseApiUrl: uploadBaseApiUrl || assetBaseApiUrl });
       if (!response.fileUrl) {
         throw new Error('Upload did not return a file URL');
       }
       const url = DOMPurify.sanitize(response.fileUrl);
+      const finalUrl = absolutizeUrl(url, assetBaseApiUrl || uploadBaseApiUrl);
       const attachmentId = response.attachmentId || '';
-      editor.chain().focus().setImage({ src: url, alt: file.name, 'data-attachment-id': attachmentId } as any).run();
+      editor.chain().focus().setImage({ src: finalUrl, alt: file.name, 'data-attachment-id': attachmentId } as any).run();
       toast({ title: 'Image uploaded', description: 'Image added to the content.' });
     } catch (error: any) {
       const message = error?.message || 'Failed to upload image';
