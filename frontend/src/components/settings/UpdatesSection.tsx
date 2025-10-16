@@ -53,6 +53,9 @@ const UpdatesSection: React.FC = () => {
     if (active >= updates.length) setActive(0);
   }, [updates, active]);
 
+  const sanitizedActiveBody = React.useMemo(() => DOMPurify.sanitize(updates[active]?.body ?? ''), [updates, active]);
+  const canSubmit = React.useMemo(() => subject.trim().length > 0 && subjectDesc.trim().length > 0 && !isHtmlContentEmpty(body), [subject, subjectDesc, body]);
+
   return (
     <div className="bg-white px-0 sm:px-0 py-0 overflow-hidden min-h-0">
       <div className="flex items-center justify-between mb-2">
