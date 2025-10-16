@@ -537,6 +537,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         // ensure counsellor/admission values are applied (in case options are available)
         if (values.counsellorId) form.setValue('counsellorId', values.counsellorId);
         if (values.admissionOfficerId) form.setValue('admissionOfficerId', values.admissionOfficerId);
+
+        // If a counsellor is provided but branch is not, attempt to resolve branch from branchEmps and set it
+        try {
+          if (values.counsellorId && !values.branchId) {
+            const links = Array.isArray(branchEmps) ? branchEmps : [];
+            const match = links.find((x: any) => String(x.userId ?? x.user_id) === String(values.counsellorId));
+            if (match) {
+              const bid = String(match.branchId ?? match.branch_id || '');
+              if (bid) {
+                form.setValue('branchId', bid);
+                // also try to set region from branchesList
+                const b = (Array.isArray(branchesList) ? branchesList : []).find((bb: any) => String(bb.id) === bid);
+                if (b) form.setValue('regionId', String(b.regionId ?? b.region_id ?? ''), { shouldDirty: true, shouldValidate: true });
+              }
+            }
+          }
+        } catch {}
       } catch {}
     } else if (dropdownData) {
       // No initial data: apply default selections from dropdownData if present
