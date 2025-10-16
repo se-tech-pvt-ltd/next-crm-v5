@@ -2592,26 +2592,12 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Date & Time</Label>
-                    {canUseNativePicker ? (
-                      <InputWithIcon
-                        leftIcon={<Calendar className="w-4 h-4" />}
-                        type="datetime-local"
-                        step={TIME_STEP_SECONDS}
-                        min={minEventDateTime}
-                        value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                        onChange={(e) => handleNewEventDateTimeChange(e.target.value)}
-                        readOnly={canUseNativePicker}
-                        onFocus={(e) => openNativePicker(e.currentTarget)}
-                        onClick={(e) => openNativePicker(e.currentTarget)}
-                      />
-                    ) : (
-                      <DateTimeField
-                        value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                        onChange={(v) => handleNewEventDateTimeChange(v)}
-                        min={minEventDateTime}
-                        stepSeconds={TIME_STEP_SECONDS}
-                      />
-                    )}
+                    <DateTimeField
+                      value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                      onChange={(v) => handleNewEventDateTimeChange(v)}
+                      min={minEventDateTime}
+                      stepSeconds={TIME_STEP_SECONDS}
+                    />
                   </div>
                   <div>
                     <Label>Venue</Label>
