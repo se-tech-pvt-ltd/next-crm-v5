@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useRef, useState, type ChangeEvent, type ComponentType, type SVGProps } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ComponentType, type SVGProps } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
