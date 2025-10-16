@@ -237,8 +237,9 @@ export const RichTextEditor = ({
 
   return (
     <div className={cn('rounded-md border bg-white', className, disabled && 'opacity-60')}>
-      <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-2 py-1 justify-between">
-        <ToolbarButton
+      <div className="flex items-center gap-2 border-b bg-gray-50 px-2 py-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <ToolbarButton
           onClick={() => editor?.chain().focus().toggleBold().run()}
           disabled={disabled || !editor}
           active={editor?.isActive('bold')}
@@ -314,9 +315,9 @@ export const RichTextEditor = ({
           onChange={handleImageSelection}
           className="hidden"
         />
+        </div>
         {(onCancel || onCreate) && (
-          <>
-            <div className="mx-1 h-6 w-px bg-gray-200" aria-hidden="true" />
+          <div className="ml-auto flex items-center gap-2">
             {onCancel && (
               <button
                 type="button"
@@ -343,13 +344,13 @@ export const RichTextEditor = ({
                   canCreate ? 'hover:bg-gray-100' : '',
                   (disabled || !canCreate) && 'cursor-not-allowed opacity-50 hover:bg-transparent'
                 )}
-                aria-label="Create"
-                title="Create"
+                aria-label="Save"
+                title="Save"
               >
-                <Check className="h-4 w-4" />
+                <Save className="h-4 w-4" />
               </button>
             )}
-          </>
+          </div>
         )}
       </div>
       <div className="max-h-[340px] overflow-y-auto px-2 py-1">
