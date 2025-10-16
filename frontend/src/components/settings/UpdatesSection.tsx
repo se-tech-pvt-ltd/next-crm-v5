@@ -121,29 +121,38 @@ const UpdatesSection: React.FC = () => {
           </div>
           <div>
             <label className="block text-sm mb-1">Body</label>
-            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} assetBaseApiUrl={ASSET_BASE} uploadBaseApiUrl={UPLOAD_API_BASE} />
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setShowForm(false);
-                setSubject('');
-                setSubjectDesc('');
-                setBody('');
-              }}
+            <RichTextEditor
+              value={body}
+              onChange={setBody}
+              placeholder="Details"
               disabled={createMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => createMutation.mutate()}
-              disabled={!canSubmit || createMutation.isPending}
-            >
-              Create
-            </Button>
+              assetBaseApiUrl={ASSET_BASE}
+              uploadBaseApiUrl={UPLOAD_API_BASE}
+              actions={
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowForm(false);
+                      setSubject('');
+                      setSubjectDesc('');
+                      setBody('');
+                    }}
+                    disabled={createMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => createMutation.mutate()}
+                    disabled={!canSubmit || createMutation.isPending}
+                  >
+                    Create
+                  </Button>
+                </div>
+              }
+            />
           </div>
         </div>
       )}
