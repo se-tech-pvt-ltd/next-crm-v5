@@ -31,11 +31,17 @@ const UpdatesSection: React.FC = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const sanitizedBody = DOMPurify.sanitize(body);
+      const sanitizedBody = DOMPurify.sanitize(body, { ADD_ATTR: ['data-attachment-id'] });
+      const tmp = document.createElement('div');
+      tmp.innerHTML = sanitizedBody;
+      const ids = Array.from(tmp.querySelectorAll('img'))
+        .map((img) => (img.getAttribute('data-attachment-id') || '').trim())
+        .filter((v, i, a) => v.length > 0 && a.indexOf(v) === i);
       return UpdatesService.createUpdate({
         subject: subject.trim(),
         subjectDesc: subjectDesc.trim(),
         body: sanitizedBody,
+        imageIds: ids,
       });
     },
     onSuccess: () => {
