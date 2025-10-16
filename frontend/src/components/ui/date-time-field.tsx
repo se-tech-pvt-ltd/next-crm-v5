@@ -88,14 +88,14 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = ({ value, onChange, m
     return '';
   }, [parsedDate, parsedDatePart, parsedTimePart]);
 
-  const commit = React.useCallback((d: Date | null, t: string) => {
+  const commit = React.useCallback((d: Date | null, t: string, close = true) => {
     if (!d || !t) return;
     const [hh, mm] = t.split(':').map(Number);
     const newDate = new Date(d);
     newDate.setHours(hh || 0, mm || 0, 0, 0);
     const valueStr = formatDateTimeLocalValue(newDate);
     onChange(valueStr);
-    setOpen(false);
+    if (close) setOpen(false);
   }, [onChange]);
 
   const handleDateSelect = (d: Date | null) => {
@@ -109,15 +109,12 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = ({ value, onChange, m
       const clamped = clampToStep(new Date(), stepSeconds);
       const t = `${String(clamped.getHours()).padStart(2, '0')}:${String(clamped.getMinutes()).padStart(2, '0')}`;
       setDraftTime(t);
-      commit(next, t);
-    } else {
-      commit(next, draftTime);
+      // Do not auto-commit: allow user to adjust time and explicitly save
     }
   };
 
   const handleTimeSelect = (t: string) => {
     setDraftTime(t);
-    if (draftDate) commit(draftDate, t);
   };
 
   return (
