@@ -168,12 +168,6 @@ export const RichTextEditor = ({
         },
       } as any;
     },
-    addNodeView() {
-      return {
-        selectable: true,
-        draggable: true,
-      };
-    },
   });
 
   const editor = useEditor({
