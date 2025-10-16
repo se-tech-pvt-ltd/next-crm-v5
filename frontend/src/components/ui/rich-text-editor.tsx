@@ -355,6 +355,38 @@ export const RichTextEditor = ({
           onChange={handleImageSelection}
           className="hidden"
         />
+        <div className="mx-1 h-6 w-px bg-gray-200" aria-hidden="true" />
+        <ToolbarButton
+          onClick={handleImageResize}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          icon={() => (
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-5.04-6.71l-2.75 3.54h2.86v2h-4v-4h2v1.13l1.96-2.36 2.05 1.61 2.79-3.54h-2.74v-2h4v4h-2v-1.13l-1.96 2.36z" />
+            </svg>
+          )}
+          label="Resize image"
+        />
+        <ToolbarButton
+          onClick={() => handleImageAlign('left')}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          active={editor?.getAttributes('image').float === 'left'}
+          icon={AlignLeft}
+          label="Align left"
+        />
+        <ToolbarButton
+          onClick={() => handleImageAlign('center')}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          active={editor?.getAttributes('image').float === 'none' || !editor?.getAttributes('image').float}
+          icon={AlignCenter}
+          label="Align center"
+        />
+        <ToolbarButton
+          onClick={() => handleImageAlign('right')}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          active={editor?.getAttributes('image').float === 'right'}
+          icon={AlignRight}
+          label="Align right"
+        />
         </div>
         {(onCancel || onCreate) && (
           <div className="ml-auto flex items-center gap-2">
