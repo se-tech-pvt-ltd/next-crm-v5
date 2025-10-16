@@ -2596,11 +2596,15 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Date & Time</Label>
-                    <DateTimeField
-                      value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                      onChange={(v) => handleNewEventDateTimeChange(v)}
+                    <InputWithIcon
+                      leftIcon={<Calendar className="w-4 h-4" />}
+                      type="datetime-local"
+                      step={TIME_STEP_SECONDS}
                       min={minEventDateTime}
-                      stepSeconds={TIME_STEP_SECONDS}
+                      value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                      onChange={(e) => handleNewEventDateTimeChange((e as React.ChangeEvent<HTMLInputElement>).target.value)}
+                      onFocus={(e) => openNativePicker(e.currentTarget as HTMLInputElement)}
+                      onClick={(e) => openNativePicker(e.currentTarget as HTMLInputElement)}
                     />
                   </div>
                   <div>
