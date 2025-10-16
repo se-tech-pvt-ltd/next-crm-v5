@@ -1118,7 +1118,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Counsellor *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounsellors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={isCounsellor && String(form.getValues('counsellorId') || form.getValues('counselorId') || '') === String((user as any)?.id || '')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
