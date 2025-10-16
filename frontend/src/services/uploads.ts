@@ -11,10 +11,16 @@ export interface UploadResponse {
 export async function uploadFile(file: File): Promise<UploadResponse> {
   const form = new FormData();
   form.append('file', file);
+  const headers: Record<string, string> = {};
+  try {
+    const t = localStorage.getItem('auth_token');
+    if (t) headers['Authorization'] = `Bearer ${t}`;
+  } catch {}
   const res = await fetch('/api/upload/file', {
     method: 'POST',
     body: form,
     credentials: 'include',
+    headers,
   });
   const json = await res.json();
   if (!res.ok || !json?.success) {
@@ -27,10 +33,16 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
 export async function uploadProfilePicture(file: File): Promise<UploadResponse> {
   const form = new FormData();
   form.append('profilePicture', file);
+  const headers: Record<string, string> = {};
+  try {
+    const t = localStorage.getItem('auth_token');
+    if (t) headers['Authorization'] = `Bearer ${t}`;
+  } catch {}
   const res = await fetch('/api/upload/profile-picture', {
     method: 'POST',
     body: form,
     credentials: 'include',
+    headers,
   });
   const json = await res.json();
   if (!res.ok || !json?.success) {
