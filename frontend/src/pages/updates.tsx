@@ -11,9 +11,6 @@ export default function UpdatesPage() {
   return (
     <Layout title="Updates" subtitle="System updates and announcements" helpText="View and manage application updates">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Megaphone className="w-4 h-4" /> Updates</CardTitle>
-        </CardHeader>
         <CardContent className="space-y-4"><UpdatesSectionComp /></CardContent>
       </Card>
     </Layout>
