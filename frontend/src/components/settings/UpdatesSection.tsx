@@ -119,7 +119,7 @@ const UpdatesSection: React.FC = () => {
               <Input value={subjectDesc} onChange={e => setSubjectDesc(e.target.value)} placeholder="Short description" />
             </div>
           </div>
-          <div>
+          <div className="flex-1 flex flex-col overflow-hidden">
             <label className="block text-sm mb-1">Body</label>
             <RichTextEditor
               value={body}
