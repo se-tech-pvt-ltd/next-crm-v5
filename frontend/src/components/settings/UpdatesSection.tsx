@@ -145,8 +145,8 @@ const UpdatesSection: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4 min-h-0">
-        <div className="border rounded-md overflow-hidden bg-gray-50 h-[360px]">
+      <div className={`grid gap-4 min-h-0 ${showForm ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-[240px_1fr]'}`}>
+        <div className={`border rounded-md overflow-hidden bg-gray-50 h-[360px] ${showForm ? 'hidden' : ''}`}>
           <ScrollArea className="h-full">
             <ul>
               {updates.map((u, idx) => (
