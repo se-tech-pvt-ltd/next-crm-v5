@@ -380,3 +380,20 @@
   height: 16px !important;
   width: auto !important;
 }
+
+/* Image wrapping styles for rich text editor */
+.image-left {
+  float: left;
+  margin: 0 15px 10px 0;
+}
+
+.image-right {
+  float: right;
+  margin: 0 0 10px 15px;
+}
+
+.image-center {
+  display: block;
+  margin: 10px auto;
+  float: none;
+}

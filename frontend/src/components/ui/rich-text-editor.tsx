@@ -6,8 +6,9 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Extension } from '@tiptap/core';
 import DOMPurify from 'dompurify';
-import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -128,7 +129,7 @@ export const RichTextEditor = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Extend Image to carry attachment metadata
+  // Extend Image to carry attachment metadata and sizing with drag-and-drop support
   const ImageWithMeta = Image.extend({
     addAttributes() {
       return {
@@ -140,6 +141,30 @@ export const RichTextEditor = ({
             return { 'data-attachment-id': attributes['data-attachment-id'] };
           },
           parseHTML: (element: HTMLElement) => element.getAttribute('data-attachment-id'),
+        },
+        width: {
+          default: null,
+          renderHTML: (attributes: any) => {
+            if (!attributes.width) return {};
+            return { style: `width: ${attributes.width}` };
+          },
+          parseHTML: (element: HTMLElement) => {
+            const style = element.getAttribute('style') || '';
+            const match = style.match(/width:\s*(\d+(?:px|%|em)?)/);
+            return match ? match[1] : null;
+          },
+        },
+        float: {
+          default: null,
+          renderHTML: (attributes: any) => {
+            if (!attributes.float) return {};
+            return { style: `float: ${attributes.float}; margin: 8px;` };
+          },
+          parseHTML: (element: HTMLElement) => {
+            const style = element.getAttribute('style') || '';
+            const match = style.match(/float:\s*(left|right|none)?/);
+            return match ? match[1] : null;
+          },
         },
       } as any;
     },
@@ -169,7 +194,23 @@ export const RichTextEditor = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[180px] focus:outline-none',
+        class: 'prose prose-sm max-w-none h-full min-h-[305px] focus:outline-none',
+      },
+      handleDOMEvents: {
+        dragover: (view, event) => {
+          if (!event.dataTransfer) return false;
+          event.dataTransfer.dropEffect = 'move';
+          event.preventDefault();
+          return true;
+        },
+        drop: (view, event) => {
+          if (!event.dataTransfer) return false;
+          event.preventDefault();
+          const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+          if (!pos) return false;
+          view.dispatch(view.state.tr.insertText('', pos.pos, pos.pos));
+          return true;
+        },
       },
     },
   });
@@ -235,8 +276,38 @@ export const RichTextEditor = ({
     editor.chain().focus().extendMarkRange('link').setLink({ href: sanitized, target: '_blank', rel: 'noopener noreferrer' }).run();
   };
 
+  const handleImageResize = () => {
+    if (!editor) return;
+    const currentAttrs = editor.getAttributes('image');
+    const currentWidth = currentAttrs.width || '100%';
+    const width = window.prompt('Enter image width (e.g., 300px, 50%):', currentWidth);
+    if (width === null) return;
+    if (width.trim()) {
+      editor.chain().focus().updateAttributes('image', { width: width.trim() }).run();
+    }
+  };
+
+  const handleImageAlign = (alignment: 'left' | 'center' | 'right') => {
+    if (!editor) return;
+    const floatValue = alignment === 'center' ? 'none' : alignment === 'left' ? 'left' : 'right';
+    editor.chain().focus().updateAttributes('image', { float: floatValue }).run();
+  };
+
   return (
-    <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
+    <>
+      <style>{`
+        .ProseMirror img {
+          cursor: grab;
+          transition: opacity 0.2s ease;
+        }
+        .ProseMirror img:hover {
+          opacity: 0.8;
+        }
+        .ProseMirror img:active {
+          cursor: grabbing;
+        }
+      `}</style>
+      <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
       <div className="flex items-center gap-2 border-b bg-gray-50 px-2 py-1 flex-shrink-0">
         <div className="flex flex-wrap items-center gap-2">
           <ToolbarButton
@@ -315,6 +386,38 @@ export const RichTextEditor = ({
           onChange={handleImageSelection}
           className="hidden"
         />
+        <div className="mx-1 h-6 w-px bg-gray-200" aria-hidden="true" />
+        <ToolbarButton
+          onClick={handleImageResize}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          icon={() => (
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-5.04-6.71l-2.75 3.54h2.86v2h-4v-4h2v1.13l1.96-2.36 2.05 1.61 2.79-3.54h-2.74v-2h4v4h-2v-1.13l-1.96 2.36z" />
+            </svg>
+          )}
+          label="Resize image"
+        />
+        <ToolbarButton
+          onClick={() => handleImageAlign('left')}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          active={editor?.getAttributes('image').float === 'left'}
+          icon={AlignLeft}
+          label="Align left"
+        />
+        <ToolbarButton
+          onClick={() => handleImageAlign('center')}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          active={editor?.getAttributes('image').float === 'none' || !editor?.getAttributes('image').float}
+          icon={AlignCenter}
+          label="Align center"
+        />
+        <ToolbarButton
+          onClick={() => handleImageAlign('right')}
+          disabled={disabled || !editor || !editor.isActive('image')}
+          active={editor?.getAttributes('image').float === 'right'}
+          icon={AlignRight}
+          label="Align right"
+        />
         </div>
         {(onCancel || onCreate) && (
           <div className="ml-auto flex items-center gap-2">
@@ -353,10 +456,11 @@ export const RichTextEditor = ({
           </div>
         )}
       </div>
-      <div className="flex-1 overflow-hidden px-2 py-1">
+      <div className="flex-1 overflow-auto px-2 py-1">
         <EditorContent editor={editor} />
       </div>
     </div>
+    </>
   );
 };
 

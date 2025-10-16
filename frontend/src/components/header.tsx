@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
+import { Bell, UserPlus, GraduationCap, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
-import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useSearch } from '@/hooks/use-search';
 import { AddLeadModal } from './add-lead-modal';
 import { AddApplicationModal } from './add-application-modal';
 import { ApplicationDetailsModal } from './application-details-modal-new';
@@ -78,7 +76,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-  const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [, navigate] = useLocation();
 
@@ -234,51 +231,6 @@ export function Header({ title, subtitle, showSearch = true, helpText }: HeaderP
           </div>
 
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            {/* Search */}
-            {showSearch && (
-              <div className="relative hidden sm:block" role="search" aria-label="Global search">
-                <div className="relative">
-                  <label htmlFor="global-search" className="sr-only">Search</label>
-                  <InputWithIcon
-                    id="global-search"
-                    type="text"
-                    placeholder="Search students, leads..."
-                    className="w-36 lg:w-48"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    aria-controls={searchQuery && searchResults.length > 0 ? 'search-results' : undefined}
-                    leftIcon={<Search size={14} aria-hidden="true" />}
-                  />
-                </div>
-
-                {/* Search Results */}
-                {searchQuery && searchResults.length > 0 && (
-                  <div id="search-results" role="listbox" className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-                    {searchResults.map((result) => (
-                      <div key={`${result.type}-${result.id}`} role="option" className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center" aria-hidden="true">
-                            {result.type === 'lead' && <UserPlus size={14} />}
-                            {result.type === 'student' && <GraduationCap size={14} />}
-                            {result.type === 'application' && <GraduationCap size={14} />}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{result.name}</p>
-                            <p className="text-xs text-gray-500">{result.email}</p>
-                            {result.additionalInfo && (
-                              <p className="text-xs text-gray-400">{result.additionalInfo}</p>
-                            )}
-                          </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {result.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
             
             {/* Updates */}
             <Button
