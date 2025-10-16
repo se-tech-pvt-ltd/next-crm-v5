@@ -92,9 +92,6 @@ export default function Settings() {
               <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className={`gap-2 ${category === 'smtp' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
                 <Mail className="w-4 h-4" /> Email (SMTP)
               </Button>
-              <Button type="button" variant={category === 'updates' ? 'default' : 'outline'} onClick={() => setCategory('updates')} className={`gap-2 ${category === 'updates' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
-                <Megaphone className="w-4 h-4" /> Updates
-              </Button>
             </>
           )}
 
