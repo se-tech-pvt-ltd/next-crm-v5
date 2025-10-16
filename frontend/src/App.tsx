@@ -24,6 +24,7 @@ import UniversityPage from "@/pages/university";
 import ResetPassword from "@/pages/reset-password";
 import CalendarPage from "@/pages/calendar";
 import FollowUpsPage from '@/pages/follow-ups';
+import UpdatesPage from "@/pages/updates";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
