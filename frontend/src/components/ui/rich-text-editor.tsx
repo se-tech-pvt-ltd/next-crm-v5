@@ -154,6 +154,20 @@ export const RichTextEditor = ({
             return match ? match[1] : null;
           },
         },
+        imageClass: {
+          default: null,
+          renderHTML: (attributes: any) => {
+            if (!attributes.imageClass) return {};
+            return { class: attributes.imageClass };
+          },
+          parseHTML: (element: HTMLElement) => {
+            const classAttr = element.getAttribute('class') || '';
+            if (classAttr.includes('image-left')) return 'image-left';
+            if (classAttr.includes('image-right')) return 'image-right';
+            if (classAttr.includes('image-center')) return 'image-center';
+            return null;
+          },
+        },
         float: {
           default: null,
           renderHTML: (attributes: any) => {
