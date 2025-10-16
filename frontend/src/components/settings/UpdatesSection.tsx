@@ -108,7 +108,7 @@ const UpdatesSection: React.FC = () => {
       )}
 
       {showForm && (
-        <div className="border rounded-md space-y-2 flex-1 flex flex-col overflow-hidden" style={{ padding: "12px 12px 0" }}>
+        <div className="border rounded-md space-y-2 flex flex-col overflow-hidden" style={{ padding: "12px 12px 0" }}>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm mb-1">Subject</label>
