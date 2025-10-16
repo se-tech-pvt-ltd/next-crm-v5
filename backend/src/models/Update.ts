@@ -6,17 +6,33 @@ import { desc, eq } from "drizzle-orm";
 export type UpdateRecord = typeof updates.$inferSelect;
 export type InsertUpdate = typeof updates.$inferInsert;
 
+export type CreateUpdateInput = Omit<InsertUpdate, "id" | "createdOn" | "updatedOn"> &
+  Partial<Pick<InsertUpdate, "id" | "createdOn" | "updatedOn">>;
+
+const normalizeImageIds = (ids: InsertUpdate["imageIds"] | undefined): InsertUpdate["imageIds"] => {
+  if (!Array.isArray(ids)) {
+    return [];
+  }
+  const filtered = ids
+    .map((id) => (typeof id === "string" ? id.trim() : ""))
+    .filter((id): id is string => id.length > 0);
+  return Array.from(new Set(filtered));
+};
+
 export class UpdateModel {
-  static async create(data: InsertUpdate): Promise<UpdateRecord> {
+  static async create(data: CreateUpdateInput): Promise<UpdateRecord> {
     const id = data.id ?? uuidv4();
     const now = new Date();
+
+    const imageIds = normalizeImageIds(data.imageIds);
 
     const toInsert: InsertUpdate = {
       ...data,
       id,
-      createdOn: data.createdOn ?? (now as any),
-      updatedOn: data.updatedOn ?? (now as any),
-    } as InsertUpdate;
+      imageIds,
+      createdOn: (data.createdOn as InsertUpdate["createdOn"]) ?? (now as any),
+      updatedOn: (data.updatedOn as InsertUpdate["updatedOn"]) ?? (now as any),
+    };
 
     await db.insert(updates).values(toInsert);
 
