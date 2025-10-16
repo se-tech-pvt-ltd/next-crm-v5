@@ -100,7 +100,7 @@ const UpdatesSection: React.FC = () => {
   const canSubmit = React.useMemo(() => subject.trim().length > 0 && subjectDesc.trim().length > 0 && !isHtmlContentEmpty(body), [subject, subjectDesc, body]);
 
   return (
-    <div className="bg-white px-0 sm:px-0 py-0 overflow-hidden flex flex-col h-screen">
+    <div className="bg-white px-0 sm:px-0 py-0 flex flex-col">
       {!showForm && (
         <div className="flex justify-end mb-2">
           <Button size="sm" onClick={() => setShowForm(s => !s)}>New update</Button>
