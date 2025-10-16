@@ -30,10 +30,22 @@ const UpdatesSection: React.FC = () => {
   const [body, setBody] = React.useState('');
 
   const createMutation = useMutation({
-    mutationFn: async () => UpdatesService.createUpdate({ subject, subjectDesc, body }),
+    mutationFn: async () => {
+      const sanitizedBody = DOMPurify.sanitize(body);
+      return UpdatesService.createUpdate({
+        subject: subject.trim(),
+        subjectDesc: subjectDesc.trim(),
+        body: sanitizedBody,
+      });
+    },
     onSuccess: () => {
       setSubject(''); setSubjectDesc(''); setBody(''); setShowForm(false);
       queryClient.invalidateQueries({ queryKey: ['/api/updates'] });
+      toast({ title: 'Update created', description: 'New update published successfully.' });
+    },
+    onError: (error: any) => {
+      const message = error?.message || 'Failed to create update';
+      toast({ title: 'Could not create update', description: message, variant: 'destructive' });
     },
   });
 
