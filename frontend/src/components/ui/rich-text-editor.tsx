@@ -421,21 +421,21 @@ export const RichTextEditor = ({
         <ToolbarButton
           onClick={() => handleImageAlign('left')}
           disabled={disabled || !editor || !editor.isActive('image')}
-          active={editor?.getAttributes('image').float === 'left'}
+          active={editor?.getAttributes('image').imageClass === 'image-left'}
           icon={AlignLeft}
           label="Align left"
         />
         <ToolbarButton
           onClick={() => handleImageAlign('center')}
           disabled={disabled || !editor || !editor.isActive('image')}
-          active={editor?.getAttributes('image').float === 'none' || !editor?.getAttributes('image').float}
+          active={editor?.getAttributes('image').imageClass === 'image-center'}
           icon={AlignCenter}
           label="Align center"
         />
         <ToolbarButton
           onClick={() => handleImageAlign('right')}
           disabled={disabled || !editor || !editor.isActive('image')}
-          active={editor?.getAttributes('image').float === 'right'}
+          active={editor?.getAttributes('image').imageClass === 'image-right'}
           icon={AlignRight}
           label="Align right"
         />
