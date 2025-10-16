@@ -120,7 +120,9 @@ export const RichTextEditor = ({
   className,
   assetBaseApiUrl,
   uploadBaseApiUrl,
-  actions,
+  onCancel,
+  onCreate,
+  canCreate = false,
 }: RichTextEditorProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
