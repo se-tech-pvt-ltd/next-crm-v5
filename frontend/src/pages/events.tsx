@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import DateTimeField from '@/components/ui/date-time-field';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import * as RegionsService from '@/services/regions';
@@ -2445,16 +2446,25 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Date & Time</Label>
-                    <Input
-                      type="datetime-local"
-                      step={TIME_STEP_SECONDS}
-                      min={minEventDateTime}
-                      value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
-                      onChange={(e) => handleEditEventDateTimeChange(e.target.value)}
-                      readOnly={canUseNativePicker}
-                      onFocus={(e) => openNativePicker(e.currentTarget)}
-                      onClick={(e) => openNativePicker(e.currentTarget)}
-                    />
+                    {canUseNativePicker ? (
+                      <Input
+                        type="datetime-local"
+                        step={TIME_STEP_SECONDS}
+                        min={minEventDateTime}
+                        value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
+                        onChange={(e) => handleEditEventDateTimeChange(e.target.value)}
+                        readOnly={canUseNativePicker}
+                        onFocus={(e) => openNativePicker(e.currentTarget)}
+                        onClick={(e) => openNativePicker(e.currentTarget)}
+                      />
+                    ) : (
+                      <DateTimeField
+                        value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
+                        onChange={(v) => handleEditEventDateTimeChange(v)}
+                        min={minEventDateTime}
+                        stepSeconds={TIME_STEP_SECONDS}
+                      />
+                    )}
                   </div>
                   <div>
                     <Label>Venue</Label>
@@ -2594,16 +2604,25 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Date & Time</Label>
-                    <Input
-                      type="datetime-local"
-                      step={TIME_STEP_SECONDS}
-                      min={minEventDateTime}
-                      value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                      onChange={(e) => handleNewEventDateTimeChange(e.target.value)}
-                      readOnly={canUseNativePicker}
-                      onFocus={(e) => openNativePicker(e.currentTarget)}
-                      onClick={(e) => openNativePicker(e.currentTarget)}
-                    />
+                    {canUseNativePicker ? (
+                      <Input
+                        type="datetime-local"
+                        step={TIME_STEP_SECONDS}
+                        min={minEventDateTime}
+                        value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                        onChange={(e) => handleNewEventDateTimeChange(e.target.value)}
+                        readOnly={canUseNativePicker}
+                        onFocus={(e) => openNativePicker(e.currentTarget)}
+                        onClick={(e) => openNativePicker(e.currentTarget)}
+                      />
+                    ) : (
+                      <DateTimeField
+                        value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
+                        onChange={(v) => handleNewEventDateTimeChange(v)}
+                        min={minEventDateTime}
+                        stepSeconds={TIME_STEP_SECONDS}
+                      />
+                    )}
                   </div>
                   <div>
                     <Label>Venue</Label>
