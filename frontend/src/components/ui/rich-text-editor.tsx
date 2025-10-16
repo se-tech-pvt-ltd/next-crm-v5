@@ -320,12 +320,31 @@ export const RichTextEditor = ({
         .ProseMirror img {
           cursor: grab;
           transition: opacity 0.2s ease;
+          max-width: 100%;
+          height: auto;
         }
         .ProseMirror img:hover {
           opacity: 0.8;
         }
         .ProseMirror img:active {
           cursor: grabbing;
+        }
+        .ProseMirror img.image-left {
+          float: left;
+          margin: 0 15px 10px 0;
+        }
+        .ProseMirror img.image-right {
+          float: right;
+          margin: 0 0 10px 15px;
+        }
+        .ProseMirror img.image-center {
+          display: block;
+          margin: 10px auto;
+          float: none;
+          width: 100%;
+        }
+        .ProseMirror {
+          overflow: auto;
         }
       `}</style>
       <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
