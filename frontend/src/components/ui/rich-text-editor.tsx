@@ -338,21 +338,20 @@ export const RichTextEditor = ({
         .ProseMirror img.image-left {
           float: left;
           margin: 0 15px 10px 0;
-          display: block;
         }
         .ProseMirror img.image-right {
           float: right;
           margin: 0 0 10px 15px;
-          display: block;
         }
         .ProseMirror img.image-center {
           display: block;
           margin: 10px auto;
           float: none;
-          width: 100%;
         }
         .ProseMirror p {
           margin: 0.75em 0;
+          display: flow-root;
+          word-break: break-word;
         }
         .ProseMirror p:first-child {
           margin-top: 0;
