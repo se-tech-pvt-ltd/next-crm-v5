@@ -59,7 +59,29 @@ const UpdatesSection: React.FC = () => {
     if (active >= updates.length) setActive(0);
   }, [updates, active]);
 
-  const sanitizedActiveBody = React.useMemo(() => DOMPurify.sanitize(updates[active]?.body ?? ''), [updates, active]);
+  const API_BASE = 'https://sales.crm-setech.cloud/api';
+  const rewriteImageSrcs = React.useCallback((html: string) => {
+    try {
+      const container = document.createElement('div');
+      container.innerHTML = html || '';
+      const imgs = Array.from(container.querySelectorAll('img'));
+      const base = API_BASE.replace(/\/$/, '');
+      const baseDomain = base.replace(/\/api\/?$/, '');
+      for (const img of imgs) {
+        const src = img.getAttribute('src') || '';
+        if (/^https?:\/\//i.test(src)) continue;
+        const abs = src.startsWith('/api/') ? `${baseDomain}${src}` : (src.startsWith('/') ? `${base}${src}` : `${base}/${src}`);
+        img.setAttribute('src', abs);
+      }
+      return container.innerHTML;
+    } catch { return html; }
+  }, []);
+
+  const sanitizedActiveBody = React.useMemo(() => {
+    const clean = DOMPurify.sanitize(updates[active]?.body ?? '');
+    return rewriteImageSrcs(clean);
+  }, [updates, active, rewriteImageSrcs]);
+
   const canSubmit = React.useMemo(() => subject.trim().length > 0 && subjectDesc.trim().length > 0 && !isHtmlContentEmpty(body), [subject, subjectDesc, body]);
 
   return (
@@ -81,7 +103,7 @@ const UpdatesSection: React.FC = () => {
           </div>
           <div>
             <label className="block text-sm mb-1">Body</label>
-            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} />
+            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} assetBaseApiUrl={API_BASE} uploadBaseApiUrl={API_BASE} />
           </div>
           <div className="flex gap-2 justify-end">
             <Button
