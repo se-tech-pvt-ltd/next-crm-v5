@@ -310,6 +310,14 @@ export const RichTextEditor = ({
           onChange={handleImageSelection}
           className="hidden"
         />
+        {actions && (
+          <>
+            <div className="mx-1 h-6 w-px bg-gray-200" aria-hidden="true" />
+            <div className="flex items-center gap-1">
+              {actions}
+            </div>
+          </>
+        )}
       </div>
       <div className="max-h-[340px] overflow-y-auto px-2 py-1">
         <EditorContent editor={editor} />
