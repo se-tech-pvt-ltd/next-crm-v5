@@ -236,8 +236,8 @@ export const RichTextEditor = ({
   };
 
   return (
-    <div className={cn('rounded-md border bg-white', className, disabled && 'opacity-60')}> 
-      <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-2 py-1">
+    <div className={cn('rounded-md border bg-white', className, disabled && 'opacity-60')}>
+      <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-2 py-1 justify-between">
         <ToolbarButton
           onClick={() => editor?.chain().focus().toggleBold().run()}
           disabled={disabled || !editor}
