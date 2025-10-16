@@ -544,7 +544,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
             const links = Array.isArray(branchEmps) ? branchEmps : [];
             const match = links.find((x: any) => String(x.userId ?? x.user_id) === String(values.counsellorId));
             if (match) {
-              const bid = String(match.branchId ?? match.branch_id || '');
+              const bid = String(match.branchId ?? match.branch_id ?? '');
               if (bid) {
                 form.setValue('branchId', bid);
                 // also try to set region from branchesList
