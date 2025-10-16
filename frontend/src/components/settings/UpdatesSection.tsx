@@ -118,7 +118,7 @@ const UpdatesSection: React.FC = () => {
           </div>
           <div>
             <label className="block text-sm mb-1">Body</label>
-            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} assetBaseApiUrl={API_BASE} uploadBaseApiUrl={API_BASE} />
+            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} assetBaseApiUrl={ASSET_BASE} uploadBaseApiUrl={UPLOAD_API_BASE} />
           </div>
           <div className="flex gap-2 justify-end">
             <Button
