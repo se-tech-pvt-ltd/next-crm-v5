@@ -80,7 +80,12 @@ const absolutizeUrl = (url: string, baseApiUrl?: string) => {
   if (/^https?:\/\//i.test(url)) return url;
   const base = baseApiUrl.replace(/\/$/, '');
   const baseDomain = base.replace(/\/api\/?$/, '');
+  // Map /api/uploads/... -> https://domain/uploads/...
+  if (url.startsWith('/api/uploads')) return `${baseDomain}${url.replace(/^\/api/, '')}`;
+  // Keep other api paths if necessary
   if (url.startsWith('/api/')) return `${baseDomain}${url}`;
+  // If url already points to uploads, use base domain
+  if (url.startsWith('/uploads')) return `${baseDomain}${url}`;
   if (url.startsWith('/')) return `${base}${url}`;
   return `${base}/${url}`;
 };
