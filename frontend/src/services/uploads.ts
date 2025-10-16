@@ -8,7 +8,7 @@ export interface UploadResponse {
   error?: string;
 }
 
-export async function uploadFile(file: File): Promise<UploadResponse> {
+export async function uploadFile(file: File, options?: { baseApiUrl?: string }): Promise<UploadResponse> {
   const form = new FormData();
   form.append('file', file);
   const headers: Record<string, string> = {};
@@ -16,17 +16,71 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     const t = localStorage.getItem('auth_token');
     if (t) headers['Authorization'] = `Bearer ${t}`;
   } catch {}
-  const res = await fetch('/api/upload/file', {
+
+  const baseApi = (options?.baseApiUrl || '').replace(/\/$/, '');
+  const endpoint = baseApi ? `${baseApi}/upload/file` : '/api/upload/file';
+
+  const res = await fetch(endpoint, {
     method: 'POST',
     body: form,
     credentials: 'include',
     headers,
   });
-  const json = await res.json();
-  if (!res.ok || !json?.success) {
-    const message = json?.error || `Upload failed with status ${res.status}`;
+  const json: UploadResponse = await res.json();
+  if (!res.ok || !(json as any)?.success) {
+    const message = (json as any)?.error || `Upload failed with status ${res.status}`;
     throw new Error(message);
   }
+
+  // Ensure returned fileUrl is absolute when a baseApiUrl is provided
+  if (options?.baseApiUrl && json?.fileUrl) {
+    let fileUrl = String(json.fileUrl);
+    const base = options.baseApiUrl.replace(/\/$/, '');
+    const baseDomain = base.replace(/\/api\/?$/, '');
+
+    // If server returned a full URL that includes the API prefix for uploads
+    try {
+      const lowerFileUrl = fileUrl.toLowerCase();
+      const normalizedBase = base.toLowerCase();
+      if (lowerFileUrl.startsWith(normalizedBase)) {
+        // e.g. https://sales.crm-setech.cloud/api/uploads/...
+        // convert to asset domain: https://sales.crm-setech.cloud/uploads/...
+        fileUrl = baseDomain + fileUrl.substring(base.length).replace(/^\/api/, '');
+      }
+    } catch {}
+
+    if (!/^https?:\/\//i.test(fileUrl)) {
+      let absolute: string;
+      // Prefer asset domain for uploads path: convert "/api/uploads/..." to "https://domain/uploads/..."
+      if (fileUrl.startsWith('/api/uploads')) {
+        absolute = `${baseDomain}${fileUrl.replace(/^\/api/, '')}`;
+      } else if (fileUrl.startsWith('/api/')) {
+        // keep api prefix for other API-returned paths
+        absolute = `${baseDomain}${fileUrl}`;
+      } else if (fileUrl.startsWith('/uploads')) {
+        absolute = `${baseDomain}${fileUrl}`;
+      } else if (fileUrl.startsWith('/')) {
+        absolute = `${base}${fileUrl}`;
+      } else {
+        absolute = `${base}/${fileUrl}`;
+      }
+      json.fileUrl = absolute;
+    } else {
+      // fileUrl is absolute (https://...); ensure if it contains /api/uploads it's rewritten to asset path
+      try {
+        const urlObj = new URL(fileUrl);
+        if (urlObj.pathname.startsWith('/api/uploads')) {
+          urlObj.pathname = urlObj.pathname.replace('/api/uploads', '/uploads');
+          json.fileUrl = urlObj.toString();
+        } else {
+          json.fileUrl = fileUrl;
+        }
+      } catch {
+        json.fileUrl = fileUrl;
+      }
+    }
+  }
+
   return json;
 }
 
