@@ -314,12 +314,41 @@ export const RichTextEditor = ({
           onChange={handleImageSelection}
           className="hidden"
         />
-        {actions && (
+        {(onCancel || onCreate) && (
           <>
             <div className="mx-1 h-6 w-px bg-gray-200" aria-hidden="true" />
-            <div className="flex items-center gap-1">
-              {actions}
-            </div>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={disabled}
+                className={cn(
+                  'inline-flex h-8 w-8 items-center justify-center rounded text-gray-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                  'hover:bg-gray-100',
+                  disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent'
+                )}
+                aria-label="Cancel"
+                title="Cancel"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+            {onCreate && (
+              <button
+                type="button"
+                onClick={onCreate}
+                disabled={disabled || !canCreate}
+                className={cn(
+                  'inline-flex h-8 w-8 items-center justify-center rounded text-gray-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                  canCreate ? 'hover:bg-gray-100' : '',
+                  (disabled || !canCreate) && 'cursor-not-allowed opacity-50 hover:bg-transparent'
+                )}
+                aria-label="Create"
+                title="Create"
+              >
+                <Check className="h-4 w-4" />
+              </button>
+            )}
           </>
         )}
       </div>
