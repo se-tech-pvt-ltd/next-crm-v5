@@ -34,9 +34,21 @@ export async function uploadFile(file: File, options?: { baseApiUrl?: string }):
 
   // Ensure returned fileUrl is absolute when a baseApiUrl is provided
   if (options?.baseApiUrl && json?.fileUrl) {
-    const fileUrl = String(json.fileUrl);
+    let fileUrl = String(json.fileUrl);
     const base = options.baseApiUrl.replace(/\/$/, '');
     const baseDomain = base.replace(/\/api\/?$/, '');
+
+    // If server returned a full URL that includes the API prefix for uploads
+    try {
+      const lowerFileUrl = fileUrl.toLowerCase();
+      const normalizedBase = base.toLowerCase();
+      if (lowerFileUrl.startsWith(normalizedBase)) {
+        // e.g. https://sales.crm-setech.cloud/api/uploads/...
+        // convert to asset domain: https://sales.crm-setech.cloud/uploads/...
+        fileUrl = baseDomain + fileUrl.substring(base.length).replace(/^\/api/, '');
+      }
+    } catch {}
+
     if (!/^https?:\/\//i.test(fileUrl)) {
       let absolute: string;
       // Prefer asset domain for uploads path: convert "/api/uploads/..." to "https://domain/uploads/..."
@@ -45,12 +57,27 @@ export async function uploadFile(file: File, options?: { baseApiUrl?: string }):
       } else if (fileUrl.startsWith('/api/')) {
         // keep api prefix for other API-returned paths
         absolute = `${baseDomain}${fileUrl}`;
+      } else if (fileUrl.startsWith('/uploads')) {
+        absolute = `${baseDomain}${fileUrl}`;
       } else if (fileUrl.startsWith('/')) {
         absolute = `${base}${fileUrl}`;
       } else {
         absolute = `${base}/${fileUrl}`;
       }
       json.fileUrl = absolute;
+    } else {
+      // fileUrl is absolute (https://...); ensure if it contains /api/uploads it's rewritten to asset path
+      try {
+        const urlObj = new URL(fileUrl);
+        if (urlObj.pathname.startsWith('/api/uploads')) {
+          urlObj.pathname = urlObj.pathname.replace('/api/uploads', '/uploads');
+          json.fileUrl = urlObj.toString();
+        } else {
+          json.fileUrl = fileUrl;
+        }
+      } catch {
+        json.fileUrl = fileUrl;
+      }
     }
   }
 
