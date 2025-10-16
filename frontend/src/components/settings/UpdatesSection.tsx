@@ -75,11 +75,29 @@ const UpdatesSection: React.FC = () => {
           </div>
           <div>
             <label className="block text-sm mb-1">Body</label>
-            <Textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Details" rows={5} />
+            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={() => { setShowForm(false); }}>Cancel</Button>
-            <Button size="sm" onClick={() => createMutation.mutate()} disabled={!subject || !subjectDesc || !body || createMutation.isPending}>Create</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setShowForm(false);
+                setSubject('');
+                setSubjectDesc('');
+                setBody('');
+              }}
+              disabled={createMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => createMutation.mutate()}
+              disabled={!canSubmit || createMutation.isPending}
+            >
+              Create
+            </Button>
           </div>
         </div>
       )}
