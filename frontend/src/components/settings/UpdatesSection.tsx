@@ -169,7 +169,7 @@ const UpdatesSection: React.FC = () => {
           </ScrollArea>
         </div>
 
-        <div className="border rounded-md p-4 h-[360px] overflow-auto min-h-0">
+        <div className={`border rounded-md p-4 h-[360px] overflow-auto min-h-0 ${showForm ? 'hidden' : ''}`}>
           {updates[active] ? (
             <>
               <h3 className="text-lg font-semibold mb-2">{updates[active].subject}</h3>
