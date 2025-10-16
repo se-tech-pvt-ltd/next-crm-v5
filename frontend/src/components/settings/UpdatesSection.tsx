@@ -101,6 +101,10 @@ const UpdatesSection: React.FC = () => {
 
   return (
     <div className="bg-white px-0 sm:px-0 py-0 overflow-hidden min-h-0">
+      <div className="flex justify-end mb-2">
+        <Button size="sm" onClick={() => setShowForm(s => !s)}>{showForm ? 'Close' : 'New update'}</Button>
+      </div>
+
       {showForm && (
         <div className="border rounded-md p-3 mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-3">
