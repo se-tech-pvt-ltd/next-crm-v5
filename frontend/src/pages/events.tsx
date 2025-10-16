@@ -2672,7 +2672,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Admission Officer</Label>
                     <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer && !( ( (String((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '')).toLowerCase().includes('admission') ) && isCreateRoute ) }><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={(isCreateRoute && isAdmissionOfficer && String(eventAccess.admissionOfficerId || '') === String((user as any)?.id || tokenSub)) || disableByView.admissionOfficer }><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
