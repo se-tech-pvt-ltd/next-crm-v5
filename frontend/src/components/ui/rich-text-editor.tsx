@@ -353,8 +353,8 @@ export const RichTextEditor = ({
           </div>
         )}
       </div>
-      <div className="flex-1 overflow-hidden px-2 py-1 h-full">
-        <EditorContent editor={editor} className="h-full" />
+      <div className="flex-1 overflow-auto px-2 py-1">
+        <EditorContent editor={editor} />
       </div>
     </div>
   );
