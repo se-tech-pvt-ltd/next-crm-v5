@@ -78,12 +78,11 @@ export default function EventsPage() {
   const canUseNativePicker = useMemo(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return false;
     try {
-      if (window.self !== window.top) return false;
+      const testInput = document.createElement('input');
+      return typeof (testInput as HTMLInputElement).showPicker === 'function';
     } catch {
       return false;
     }
-    const testInput = document.createElement('input');
-    return typeof (testInput as HTMLInputElement).showPicker === 'function';
   }, []);
 
   const openNativePicker = useCallback((element: HTMLInputElement | null) => {
