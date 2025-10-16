@@ -15,16 +15,6 @@ export const updatePayloadSchema = z.object({
 
 export type UpdatePayload = z.infer<typeof updatePayloadSchema>;
 
-export const normalizeUpdatePayload = (payload: UpdatePayload): UpdatePayload => {
-  const uniqueIds = Array.from(
-    new Set(payload.imageIds.map((id) => id.trim()).filter((id) => id.length > 0)),
-  );
-  return {
-    ...payload,
-    imageIds: uniqueIds,
-  };
-};
-
 export class UpdatesController {
   static async list(req: Request, res: Response) {
     try {
@@ -38,8 +28,7 @@ export class UpdatesController {
 
   static async create(req: Request, res: Response) {
     try {
-      const parsed = updatePayloadSchema.parse(req.body);
-      const payload = normalizeUpdatePayload(parsed);
+      const payload = updatePayloadSchema.parse(req.body);
       const created = await UpdateModel.create(payload);
       res.status(201).json(created);
     } catch (e: any) {
