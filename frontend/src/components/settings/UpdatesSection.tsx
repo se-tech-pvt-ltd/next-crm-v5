@@ -100,53 +100,49 @@ const UpdatesSection: React.FC = () => {
   const canSubmit = React.useMemo(() => subject.trim().length > 0 && subjectDesc.trim().length > 0 && !isHtmlContentEmpty(body), [subject, subjectDesc, body]);
 
   return (
-    <div className="bg-white px-0 sm:px-0 py-0 overflow-hidden min-h-0">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-sm text-gray-600">{updates.length} update{updates.length === 1 ? '' : 's'}</div>
-        <Button size="sm" onClick={() => setShowForm(s => !s)}>{showForm ? 'Close' : 'New update'}</Button>
-      </div>
+    <div className="bg-white px-0 sm:px-0 py-0 overflow-hidden flex flex-col h-screen">
+      {!showForm && (
+        <div className="flex justify-end mb-2">
+          <Button size="sm" onClick={() => setShowForm(s => !s)}>New update</Button>
+        </div>
+      )}
 
       {showForm && (
-        <div className="border rounded-md p-3 mb-3 space-y-2">
-          <div>
-            <label className="block text-sm mb-1">Subject</label>
-            <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject" />
+        <div className="border rounded-md space-y-2 flex-1 flex flex-col overflow-hidden" style={{ padding: "12px 12px 0" }}>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm mb-1">Subject</label>
+              <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject" />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Subject description</label>
+              <Input value={subjectDesc} onChange={e => setSubjectDesc(e.target.value)} placeholder="Short description" />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm mb-1">Subject description</label>
-            <Input value={subjectDesc} onChange={e => setSubjectDesc(e.target.value)} placeholder="Short description" />
-          </div>
-          <div>
+          <div className="flex-1 flex flex-col overflow-hidden">
             <label className="block text-sm mb-1">Body</label>
-            <RichTextEditor value={body} onChange={setBody} placeholder="Details" disabled={createMutation.isPending} assetBaseApiUrl={ASSET_BASE} uploadBaseApiUrl={UPLOAD_API_BASE} />
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
+            <RichTextEditor
+              value={body}
+              onChange={setBody}
+              placeholder="Details"
+              disabled={createMutation.isPending}
+              assetBaseApiUrl={ASSET_BASE}
+              uploadBaseApiUrl={UPLOAD_API_BASE}
+              onCancel={() => {
                 setShowForm(false);
                 setSubject('');
                 setSubjectDesc('');
                 setBody('');
               }}
-              disabled={createMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => createMutation.mutate()}
-              disabled={!canSubmit || createMutation.isPending}
-            >
-              Create
-            </Button>
+              onCreate={() => createMutation.mutate()}
+              canCreate={canSubmit && !createMutation.isPending}
+            />
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4 min-h-0">
-        <div className="border rounded-md overflow-hidden bg-gray-50 h-[360px]">
+      <div className={`grid gap-4 min-h-0 ${showForm ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-[240px_1fr]'}`}>
+        <div className={`border rounded-md overflow-hidden bg-gray-50 h-[360px] ${showForm ? 'hidden' : ''}`}>
           <ScrollArea className="h-full">
             <ul>
               {updates.map((u, idx) => (
@@ -169,7 +165,7 @@ const UpdatesSection: React.FC = () => {
           </ScrollArea>
         </div>
 
-        <div className="border rounded-md p-4 h-[360px] overflow-auto min-h-0">
+        <div className={`border rounded-md p-4 h-[360px] overflow-auto min-h-0 ${showForm ? 'hidden' : ''}`}>
           {updates[active] ? (
             <>
               <h3 className="text-lg font-semibold mb-2">{updates[active].subject}</h3>

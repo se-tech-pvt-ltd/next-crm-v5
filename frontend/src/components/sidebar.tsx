@@ -12,7 +12,8 @@ import {
   Calendar,
   GraduationCap as ToolkitIcon,
   LifeBuoy,
-  Handshake
+  Handshake,
+  Megaphone
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -136,6 +137,7 @@ export function Sidebar() {
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     ...(canViewPartners ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
+    { path: '/updates', label: 'Updates', icon: Megaphone, count: undefined },
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ];
 

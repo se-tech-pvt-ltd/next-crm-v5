@@ -7,7 +7,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import DOMPurify from 'dompurify';
-import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +22,10 @@ interface RichTextEditorProps {
   // When provided, images in HTML will be fetched from this API base (also used for uploads)
   assetBaseApiUrl?: string;
   uploadBaseApiUrl?: string;
+  // Optional action buttons to display in the toolbar
+  onCancel?: () => void;
+  onCreate?: () => void;
+  canCreate?: boolean;
 }
 
 const HTML_IMAGE_REGEX = /<img\b[^>]*>/i;
@@ -116,6 +120,9 @@ export const RichTextEditor = ({
   className,
   assetBaseApiUrl,
   uploadBaseApiUrl,
+  onCancel,
+  onCreate,
+  canCreate = false,
 }: RichTextEditorProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -229,9 +236,10 @@ export const RichTextEditor = ({
   };
 
   return (
-    <div className={cn('rounded-md border bg-white', className, disabled && 'opacity-60')}> 
-      <div className="flex flex-wrap items-center gap-2 border-b bg-gray-50 px-2 py-1">
-        <ToolbarButton
+    <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
+      <div className="flex items-center gap-2 border-b bg-gray-50 px-2 py-1 flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <ToolbarButton
           onClick={() => editor?.chain().focus().toggleBold().run()}
           disabled={disabled || !editor}
           active={editor?.isActive('bold')}
@@ -307,8 +315,45 @@ export const RichTextEditor = ({
           onChange={handleImageSelection}
           className="hidden"
         />
+        </div>
+        {(onCancel || onCreate) && (
+          <div className="ml-auto flex items-center gap-2">
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={disabled}
+                className={cn(
+                  'inline-flex h-8 w-8 items-center justify-center rounded text-gray-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                  'hover:bg-gray-100',
+                  disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent'
+                )}
+                aria-label="Cancel"
+                title="Cancel"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+            {onCreate && (
+              <button
+                type="button"
+                onClick={onCreate}
+                disabled={disabled || !canCreate}
+                className={cn(
+                  'inline-flex h-8 w-8 items-center justify-center rounded text-gray-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                  canCreate ? 'hover:bg-gray-100' : '',
+                  (disabled || !canCreate) && 'cursor-not-allowed opacity-50 hover:bg-transparent'
+                )}
+                aria-label="Save"
+                title="Save"
+              >
+                <Save className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
-      <div className="max-h-[340px] overflow-y-auto px-2 py-1">
+      <div className="flex-1 overflow-hidden px-2 py-1">
         <EditorContent editor={editor} />
       </div>
     </div>

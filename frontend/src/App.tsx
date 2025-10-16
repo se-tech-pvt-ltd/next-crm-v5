@@ -24,6 +24,7 @@ import UniversityPage from "@/pages/university";
 import ResetPassword from "@/pages/reset-password";
 import CalendarPage from "@/pages/calendar";
 import FollowUpsPage from '@/pages/follow-ups';
+import UpdatesPage from "@/pages/updates";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
@@ -134,6 +135,7 @@ function Router() {
       <Route path="/calendar" component={FollowUpsPage} />
       <Route path="/university" component={UniversityPage} />
       <Route path="/reports" component={Reports} />
+      <Route path="/updates" component={UpdatesPage} />
       <Route path="/partners" component={PartnersPage} />
       <Route path="/settings" component={SettingsGuard} />
       <Route path="/forgot-password" component={ForgotPassword} />

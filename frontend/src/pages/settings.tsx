@@ -9,12 +9,11 @@ import UserSectionComp from '@/components/settings/UserSection';
 import RoleAccessSectionComp from '@/components/settings/RoleAccessSection';
 import SmtpSectionComp from '@/components/settings/SmtpSection';
 import RegionSectionComp from '@/components/settings/RegionSection';
-import UpdatesSectionComp from '@/components/settings/UpdatesSection';
-import { Database, ShieldCheck, Mail, Globe2, Megaphone } from 'lucide-react';
+import { Database, ShieldCheck, Mail, Globe2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
-const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp', 'updates'] as const;
+const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
 type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
@@ -93,9 +92,6 @@ export default function Settings() {
               <Button type="button" variant={category === 'smtp' ? 'default' : 'outline'} onClick={() => setCategory('smtp')} className={`gap-2 ${category === 'smtp' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
                 <Mail className="w-4 h-4" /> Email (SMTP)
               </Button>
-              <Button type="button" variant={category === 'updates' ? 'default' : 'outline'} onClick={() => setCategory('updates')} className={`gap-2 ${category === 'updates' ? 'bg-[#223E7D] text-white hover:bg-[#1e366e]' : ''}`}>
-                <Megaphone className="w-4 h-4" /> Updates
-              </Button>
             </>
           )}
 
@@ -147,15 +143,6 @@ export default function Settings() {
                   <CardTitle className="flex items-center gap-2"><Mail className="w-4 h-4" /> SMTP Settings</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4"><SmtpSectionComp toast={toast} /></CardContent>
-              </Card>
-            )}
-
-            {category === 'updates' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Megaphone className="w-4 h-4" /> Updates</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4"><UpdatesSectionComp /></CardContent>
               </Card>
             )}
           </>
