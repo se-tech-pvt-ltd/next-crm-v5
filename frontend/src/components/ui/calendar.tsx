@@ -7,9 +7,11 @@ export type CalendarProps = {
   onSelect?: (d: Date | null) => void;
   showOutsideDays?: boolean;
   className?: string;
+  minDate?: Date;
+  maxDate?: Date;
 };
 
-function Calendar({ selected, onSelect, showOutsideDays = true, className }: CalendarProps) {
+function Calendar({ selected, onSelect, showOutsideDays = true, className, minDate, maxDate }: CalendarProps) {
   const [Cal, setCal] = useState<any | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -47,6 +49,8 @@ function Calendar({ selected, onSelect, showOutsideDays = true, className }: Cal
         }}
         tileContent={null}
         showNeighboringMonth={Boolean(showOutsideDays)}
+        minDate={minDate}
+        maxDate={maxDate}
       />
     </div>
   );

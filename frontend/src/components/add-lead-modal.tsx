@@ -63,6 +63,11 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
         base.admissionOfficerId = String(user.id);
         base.admission_officer_id = String(user.id);
       }
+      if ((normalized === 'counselor' || normalized === 'counsellor') && !base.counselorId && !base.counsellor_id && user?.id) {
+        base.counselorId = String(user.id);
+        base.counsellorId = String(user.id);
+        base.counsellor_id = String(user.id);
+      }
       return base;
     } catch (e) {
       return initialData;

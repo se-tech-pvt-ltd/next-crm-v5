@@ -223,6 +223,13 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     } catch { return false; }
   })();
 
+  const isCounsellor = (() => {
+    try {
+      const rn = getNormalizedRole();
+      return rn === 'counselor' || rn === 'counsellor' || rn === 'counsellor';
+    } catch { return false; }
+  })();
+
   const regionOptions = (Array.isArray(regionsList) ? regionsList : []).map((r: any) => ({
     label: String(r.regionName || r.name || 'Unknown'),
     value: String(r.id),
@@ -530,6 +537,23 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         // ensure counsellor/admission values are applied (in case options are available)
         if (values.counsellorId) form.setValue('counsellorId', values.counsellorId);
         if (values.admissionOfficerId) form.setValue('admissionOfficerId', values.admissionOfficerId);
+
+        // If a counsellor is provided but branch is not, attempt to resolve branch from branchEmps and set it
+        try {
+          if (values.counsellorId && !values.branchId) {
+            const links = Array.isArray(branchEmps) ? branchEmps : [];
+            const match = links.find((x: any) => String(x.userId ?? x.user_id) === String(values.counsellorId));
+            if (match) {
+              const bid = String(match.branchId ?? match.branch_id ?? '');
+              if (bid) {
+                form.setValue('branchId', bid);
+                // also try to set region from branchesList
+                const b = (Array.isArray(branchesList) ? branchesList : []).find((bb: any) => String(bb.id) === bid);
+                if (b) form.setValue('regionId', String(b.regionId ?? b.region_id ?? ''), { shouldDirty: true, shouldValidate: true });
+              }
+            }
+          }
+        } catch {}
       } catch {}
     } else if (dropdownData) {
       // No initial data: apply default selections from dropdownData if present
@@ -1111,7 +1135,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Counsellor *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
+                      <SearchableCombobox value={field.value} onValueChange={field.onChange} onSearch={handleCounselorSearch} options={counselorOptions} loading={searchingCounselors || usersLoading} placeholder="Search and select counsellor..." searchPlaceholder="Type to search counsellors..." emptyMessage={counselorSearchQuery ? 'No counsellors found.' : 'Start typing to search counsellors...'} className="h-10 text-sm leading-5 shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={isCounsellor && String(form.getValues('counsellorId') || form.getValues('counselorId') || '') === String((user as any)?.id || '')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

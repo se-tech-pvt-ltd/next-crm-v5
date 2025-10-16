@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { CollapsibleCard } from '@/components/collapsible-card';
 import * as RegionsService from '@/services/regions';
@@ -76,12 +77,11 @@ export default function EventsPage() {
   const canUseNativePicker = useMemo(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return false;
     try {
-      if (window.self !== window.top) return false;
+      const testInput = document.createElement('input');
+      return typeof (testInput as HTMLInputElement).showPicker === 'function';
     } catch {
       return false;
     }
-    const testInput = document.createElement('input');
-    return typeof (testInput as HTMLInputElement).showPicker === 'function';
   }, []);
 
   const openNativePicker = useCallback((element: HTMLInputElement | null) => {
@@ -682,6 +682,16 @@ export default function EventsPage() {
   const isRegionalManager = (() => {
     const rn = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName);
     return rn === 'regional_manager' || rn === 'region_manager' || rn === 'regionalmanager' || rn === 'regionmanager';
+  })();
+
+  const isAdmissionOfficer = (() => {
+    const rn = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || tokenPayload?.role_details?.role_name || '');
+    return rn === 'admission_officer' || rn === 'admission' || rn === 'admissionofficer' || rn === 'admission_officer';
+  })();
+
+  const isCounsellor = (() => {
+    const rn = normalizeRole((user as any)?.role || (user as any)?.role_name || (user as any)?.roleName || tokenPayload?.role_details?.role_name || '');
+    return rn === 'counselor' || rn === 'counsellor' || rn === 'counsellor';
   })();
 
   const filteredBranches = Array.isArray(branches)
@@ -1535,7 +1545,7 @@ export default function EventsPage() {
                           <div className="flex items-center text-xs text-gray-700">
                             <Calendar className="w-3.5 h-3.5 mr-2 text-gray-500" />
                             <span>{formatEventDate(e.date)}</span>
-                            {e.time ? (<><span className="mx-2 text-gray-300">��</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
+                            {e.time ? (<><span className="mx-2 text-gray-300">·</span><Clock className="w-3.5 h-3.5 mr-1 text-gray-500" /><span>{formatEventTime(e.time)}</span></>) : null}
                           </div>
                           <div className="flex items-center text-xs text-gray-700">
                             <MapPin className="w-3.5 h-3.5 mr-2 text-gray-500" />
@@ -2445,15 +2455,15 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Date & Time</Label>
-                    <Input
+                    <InputWithIcon
+                      leftIcon={<Calendar className="w-4 h-4" />}
                       type="datetime-local"
                       step={TIME_STEP_SECONDS}
                       min={minEventDateTime}
                       value={editEvent.date && editEvent.time ? `${editEvent.date}T${editEvent.time}` : ''}
-                      onChange={(e) => handleEditEventDateTimeChange(e.target.value)}
-                      readOnly={canUseNativePicker}
-                      onFocus={(e) => openNativePicker(e.currentTarget)}
-                      onClick={(e) => openNativePicker(e.currentTarget)}
+                      onChange={(e) => handleEditEventDateTimeChange((e as React.ChangeEvent<HTMLInputElement>).target.value)}
+                      onFocus={(e) => openNativePicker(e.currentTarget as HTMLInputElement)}
+                      onClick={(e) => openNativePicker(e.currentTarget as HTMLInputElement)}
                     />
                   </div>
                   <div>
@@ -2594,15 +2604,15 @@ export default function EventsPage() {
                   </div>
                   <div>
                     <Label>Date & Time</Label>
-                    <Input
+                    <InputWithIcon
+                      leftIcon={<Calendar className="w-4 h-4" />}
                       type="datetime-local"
                       step={TIME_STEP_SECONDS}
                       min={minEventDateTime}
                       value={newEvent.date && newEvent.time ? `${newEvent.date}T${newEvent.time}` : ''}
-                      onChange={(e) => handleNewEventDateTimeChange(e.target.value)}
-                      readOnly={canUseNativePicker}
-                      onFocus={(e) => openNativePicker(e.currentTarget)}
-                      onClick={(e) => openNativePicker(e.currentTarget)}
+                      onChange={(e) => handleNewEventDateTimeChange((e as React.ChangeEvent<HTMLInputElement>).target.value)}
+                      onFocus={(e) => openNativePicker(e.currentTarget as HTMLInputElement)}
+                      onClick={(e) => openNativePicker(e.currentTarget as HTMLInputElement)}
                     />
                   </div>
                   <div>
@@ -2656,7 +2666,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Counsellor</Label>
                     <Select value={eventAccess.counsellorId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, counsellorId: v }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor && !( ( (String((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '')).toLowerCase().includes('counsel') ) && isCreateRoute ) }><SelectValue placeholder="Select counsellor" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={(isCreateRoute && isCounsellor && String(eventAccess.counsellorId || '') === String((user as any)?.id || tokenSub)) || disableByView.counsellor }><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
                         {counselorOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
@@ -2667,7 +2677,7 @@ export default function EventsPage() {
                   <div>
                     <Label>Admission Officer</Label>
                     <Select value={eventAccess.admissionOfficerId || ''} onValueChange={(v) => setEventAccess((a) => ({ ...a, admissionOfficerId: v }))}>
-                      <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer && !( ( (String((user as any)?.role || (user as any)?.role_name || tokenPayload?.role_details?.role_name || '')).toLowerCase().includes('admission') ) && isCreateRoute ) }><SelectValue placeholder="Select officer" /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm" disabled={(isCreateRoute && isAdmissionOfficer && String(eventAccess.admissionOfficerId || '') === String((user as any)?.id || tokenSub)) || disableByView.admissionOfficer }><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptions.map((u: any) => (
                           <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
