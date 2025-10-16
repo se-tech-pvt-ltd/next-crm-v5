@@ -14,7 +14,7 @@ import { Database, ShieldCheck, Mail, Globe2, Megaphone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
-const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp', 'updates'] as const;
+const ALLOWED = ['regions', 'branches', 'users', 'role-access', 'smtp'] as const;
 type AllowedCategory = typeof ALLOWED[number];
 
 export default function Settings() {
