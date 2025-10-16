@@ -134,7 +134,6 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = ({ value, onChange, m
             selected={draftDate}
             onSelect={handleDateSelect}
             showOutsideDays
-            // @ts-ignore allow passing through props to underlying react-calendar
             minDate={minDate || undefined}
           />
           <div className="flex items-center gap-2">
