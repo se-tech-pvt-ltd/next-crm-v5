@@ -300,7 +300,20 @@ export const RichTextEditor = ({
   };
 
   return (
-    <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
+    <>
+      <style>{`
+        .ProseMirror img {
+          cursor: grab;
+          transition: opacity 0.2s ease;
+        }
+        .ProseMirror img:hover {
+          opacity: 0.8;
+        }
+        .ProseMirror img:active {
+          cursor: grabbing;
+        }
+      `}</style>
+      <div className={cn('rounded-md border bg-white flex flex-col overflow-hidden', className, disabled && 'opacity-60')}>
       <div className="flex items-center gap-2 border-b bg-gray-50 px-2 py-1 flex-shrink-0">
         <div className="flex flex-wrap items-center gap-2">
           <ToolbarButton
@@ -453,6 +466,7 @@ export const RichTextEditor = ({
         <EditorContent editor={editor} />
       </div>
     </div>
+    </>
   );
 };
 
