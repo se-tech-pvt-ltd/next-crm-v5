@@ -261,18 +261,19 @@ export const RichTextEditor = ({
 
   const handleImageResize = () => {
     if (!editor) return;
-    const currentWidth = editor.getAttributes('image').width || '100%';
+    const currentAttrs = editor.getAttributes('image');
+    const currentWidth = currentAttrs.width || '100%';
     const width = window.prompt('Enter image width (e.g., 300px, 50%):', currentWidth);
     if (width === null) return;
     if (width.trim()) {
-      editor.chain().focus().setImage({ width: width.trim() }).run();
+      editor.chain().focus().updateAttributes('image', { width: width.trim() }).run();
     }
   };
 
   const handleImageAlign = (alignment: 'left' | 'center' | 'right') => {
     if (!editor) return;
     const floatValue = alignment === 'center' ? 'none' : alignment === 'left' ? 'left' : 'right';
-    editor.chain().focus().setImage({ float: floatValue }).run();
+    editor.chain().focus().updateAttributes('image', { float: floatValue }).run();
   };
 
   return (
