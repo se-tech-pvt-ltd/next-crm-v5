@@ -94,22 +94,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       Image.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder }),
     ],
-    content: value ? DOMPurify.sanitize(value) : EMPTY_DOCUMENT,
+    content: sanitizeForEditor(value),
     editable: !disabled,
     onUpdate: ({ editor: current }) => {
-      const html = DOMPurify.sanitize(current.getHTML());
-      onChange(html);
+      const sanitized = DOMPurify.sanitize(current.getHTML());
+      if (isHtmlContentEmpty(sanitized)) {
+        onChange('');
+        return;
+      }
+      onChange(sanitized);
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[180px] focus:outline-none'
+        class: 'prose prose-sm max-w-none min-h-[180px] focus:outline-none',
       },
     },
   });
 
   React.useEffect(() => {
     if (!editor) return;
-    const sanitized = value ? DOMPurify.sanitize(value) : EMPTY_DOCUMENT;
+    const sanitized = sanitizeForEditor(value);
     if (sanitized !== editor.getHTML()) {
       editor.commands.setContent(sanitized, false);
     }
