@@ -1,5 +1,5 @@
 import React from 'react';
-import React from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentType, type SVGProps } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -41,11 +41,11 @@ type ToolbarButtonProps = {
   onClick: () => void;
   disabled?: boolean;
   active?: boolean;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   label: string;
 };
 
-const ToolbarButton: React.FC<ToolbarButtonProps> = ({ onClick, disabled, active, icon: Icon, label }) => (
+const ToolbarButton = ({ onClick, disabled, active, icon: Icon, label }: ToolbarButtonProps) => (
   <button
     type="button"
     onClick={onClick}
@@ -72,16 +72,16 @@ const sanitizeForEditor = (html?: string) => {
   return sanitized;
 };
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({
+export const RichTextEditor = ({
   value,
   onChange,
   placeholder = 'Write your content...',
   disabled = false,
   className,
-}) => {
+}: RichTextEditorProps) => {
   const { toast } = useToast();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -111,7 +111,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!editor) return;
     const sanitized = sanitizeForEditor(value);
     if (sanitized !== editor.getHTML()) {
@@ -119,7 +119,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [editor, value]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!editor) return;
     editor.setEditable(!disabled);
   }, [editor, disabled]);
@@ -129,7 +129,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleImageSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelection = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file || !editor) return;
