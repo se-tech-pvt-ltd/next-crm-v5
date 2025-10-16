@@ -17,6 +17,7 @@ const formatDate = (d: string | Date) => {
 
 const UpdatesSection: React.FC = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { data: updates = [], isFetching } = useQuery({
     queryKey: ['/api/updates'],
     queryFn: UpdatesService.listUpdates,
