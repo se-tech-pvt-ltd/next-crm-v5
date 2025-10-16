@@ -6,6 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Extension } from '@tiptap/core';
 import DOMPurify from 'dompurify';
 import { Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, X, Save, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
