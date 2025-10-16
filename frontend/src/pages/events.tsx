@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { InputWithIcon } from '@/components/ui/input-with-icon';
 import DateTimeField from '@/components/ui/date-time-field';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 import { CollapsibleCard } from '@/components/collapsible-card';
@@ -2447,7 +2448,8 @@ export default function EventsPage() {
                   <div>
                     <Label>Date & Time</Label>
                     {canUseNativePicker ? (
-                      <Input
+                      <InputWithIcon
+                        leftIcon={<Calendar className="w-4 h-4" />}
                         type="datetime-local"
                         step={TIME_STEP_SECONDS}
                         min={minEventDateTime}
@@ -2605,7 +2607,8 @@ export default function EventsPage() {
                   <div>
                     <Label>Date & Time</Label>
                     {canUseNativePicker ? (
-                      <Input
+                      <InputWithIcon
+                        leftIcon={<Calendar className="w-4 h-4" />}
                         type="datetime-local"
                         step={TIME_STEP_SECONDS}
                         min={minEventDateTime}
