@@ -783,7 +783,7 @@ export default function Leads() {
               <EmptyState
                 icon={<UserPlus className="h-10 w-10" />}
                 title="No leads found"
-                description={statusFilter === 'all' ? 'Get started by adding your first lead.' : `No leads with status "${statusFilter}".`}
+                description="Get started by adding your first lead."
                 action={canCreateLead ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
