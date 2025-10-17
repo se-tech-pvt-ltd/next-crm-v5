@@ -170,11 +170,10 @@ export class LeadModel {
       )
     );
 
-    const [totalRows, lostRows, convertedRows, activeRows] = await Promise.all([
+    const [totalRows, lostRows, convertedRows] = await Promise.all([
       this.countWithConditions(scopeConditions),
       this.countWithConditions(scopeConditions, [lostCondition]),
       this.countWithConditions(scopeConditions, [convertedCondition]),
-      this.countWithConditions(scopeConditions, [not(lostCondition), not(convertedCondition)]),
     ]);
 
     const normalizeCount = (rows: Array<{ count: number | bigint | string }>): number => {
@@ -186,11 +185,7 @@ export class LeadModel {
     const total = normalizeCount(totalRows);
     const lost = normalizeCount(lostRows);
     const converted = normalizeCount(convertedRows);
-    let active = normalizeCount(activeRows);
-
-    if (active > total) {
-      active = Math.max(total - lost - converted, 0);
-    }
+    const active = Math.max(total - lost - converted, 0);
 
     return {
       total,
