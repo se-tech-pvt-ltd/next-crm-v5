@@ -485,7 +485,11 @@ export class LeadModel {
     };
   }
 
-  static async findByRegion(regionId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+  static async findByRegion(regionId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.regionId, regionId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
     const baseQuery = db
       .select({
         id: leads.id,
@@ -516,13 +520,12 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
-      .where(eq(leads.regionId, regionId));
+      .where(whereClause);
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.regionId, regionId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
