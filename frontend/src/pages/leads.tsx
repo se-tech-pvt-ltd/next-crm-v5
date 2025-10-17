@@ -480,12 +480,12 @@ export default function Leads() {
 
         {/* Leads Table */}
         <Card>
-          <CardHeader className="p-3 pb-2">
-            <div className="flex flex-col gap-3">
+          <CardHeader className="p-4 pb-3">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Filter className="w-3 h-3 text-gray-500" />
-                  <span className="text-xs font-medium text-gray-700">Filters:</span>
+                  <Filter className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-semibold text-gray-800">Filters</span>
                 </div>
 
                 {/* Clear Filters */}
@@ -493,7 +493,7 @@ export default function Leads() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs"
+                    className="h-8 text-xs px-3"
                     onClick={() => {
                       setStatusFilter('all');
                       setSourceFilter('all');
@@ -501,7 +501,7 @@ export default function Leads() {
                       setDateFromFilter(undefined);
                       setDateToFilter(undefined);
                       setQueryText('');
-                      setCurrentPage(1); // Reset to first page when clearing filters
+                      setCurrentPage(1);
                     }}
                   >
                     Clear All
