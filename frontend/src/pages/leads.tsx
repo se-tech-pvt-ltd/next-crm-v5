@@ -510,9 +510,9 @@ export default function Leads() {
               </div>
 
               {/* Filter Row 1: Search and Dropdowns */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3">
                 {/* Free text search for name, phone, email, city */}
-                <div className="w-52">
+                <div className="flex-1 min-w-52">
                   <InputWithIcon
                     value={queryText}
                     onChange={(e) => { setQueryText(e.target.value); setCurrentPage(1); }}
@@ -524,9 +524,9 @@ export default function Leads() {
                 </div>
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1);
                 }}>
-                  <SelectTrigger className="w-28 h-7 text-xs">
+                  <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -540,9 +540,9 @@ export default function Leads() {
                 </Select>
                 <Select value={sourceFilter} onValueChange={(value) => {
                   setSourceFilter(value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1);
                 }}>
-                  <SelectTrigger className="w-28 h-7 text-xs">
+                  <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Filter by source" />
                   </SelectTrigger>
                   <SelectContent>
@@ -557,9 +557,9 @@ export default function Leads() {
 
                 <Select value={lastUpdatedFilter} onValueChange={(value) => {
                   setLastUpdatedFilter(value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1);
                 }}>
-                  <SelectTrigger className="w-32 h-7 text-xs">
+                  <SelectTrigger className="w-36 h-8 text-xs">
                     <SelectValue placeholder="Last updated" />
                   </SelectTrigger>
                   <SelectContent>
@@ -574,81 +574,120 @@ export default function Leads() {
                 </Select>
               </div>
 
-              {/* Filter Row 2: Date Range */}
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Controlled popover with native date input for From */}
-                <Popover open={openFrom} onOpenChange={setOpenFrom}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
-                      <Calendar className="w-3 h-3 mr-2" />
-                      <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
-                    <div className="w-full overflow-hidden">
-                      <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
-                        <CalendarComponent
-                          mode="single"
-                          selected={dateFromFilter}
-                          onSelect={(date) => {
-                            setDateFromFilter(date);
-                            setCurrentPage(1);
-                            setOpenFrom(false);
-                          }}
-                          className="w-full"
-                          showOutsideDays={false}
-                          classNames={{
-                            months: 'flex',
-                            month: 'grid grid-cols-7 gap-1 min-w-[260px]',
-                            table: 'w-full table-fixed',
-                            head_row: 'grid grid-cols-7',
-                            head_cell: 'text-muted-foreground text-center text-xs',
-                            row: 'grid grid-cols-7',
-                            cell: 'w-full h-10 text-center p-0',
-                            day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
-                          }}
-                        />
-                      </ErrorBoundary>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+              {/* Filter Row 2: Date Range and Create Button */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Controlled popover with native date input for From */}
+                  <Popover open={openFrom} onOpenChange={setOpenFrom}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32 h-8 text-xs flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
+                      <div className="w-full overflow-hidden">
+                        <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
+                          <CalendarComponent
+                            mode="single"
+                            selected={dateFromFilter}
+                            onSelect={(date) => {
+                              setDateFromFilter(date);
+                              setCurrentPage(1);
+                              setOpenFrom(false);
+                            }}
+                            className="w-full"
+                            showOutsideDays={false}
+                            classNames={{
+                              months: 'flex',
+                              month: 'grid grid-cols-7 gap-1 min-w-[260px]',
+                              table: 'w-full table-fixed',
+                              head_row: 'grid grid-cols-7',
+                              head_cell: 'text-muted-foreground text-center text-xs',
+                              row: 'grid grid-cols-7',
+                              cell: 'w-full h-10 text-center p-0',
+                              day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
+                            }}
+                          />
+                        </ErrorBoundary>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
 
-                {/* Controlled popover with native date input for To */}
-                <Popover open={openTo} onOpenChange={setOpenTo}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
-                      <Calendar className="w-3 h-3 mr-2" />
-                      <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
+                  {/* Controlled popover with native date input for To */}
+                  <Popover open={openTo} onOpenChange={setOpenTo}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-32 h-8 text-xs flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
+                      <div className="w-full overflow-hidden">
+                        <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
+                          <CalendarComponent
+                            mode="single"
+                            selected={dateToFilter}
+                            onSelect={(date) => {
+                              setDateToFilter(date);
+                              setCurrentPage(1);
+                              setOpenTo(false);
+                            }}
+                            className="w-full"
+                            showOutsideDays={false}
+                            classNames={{
+                              months: 'flex',
+                              month: 'grid grid-cols-7 gap-1 min-w-[260px]',
+                              table: 'w-full table-fixed',
+                              head_row: 'grid grid-cols-7',
+                              head_cell: 'text-muted-foreground text-center text-xs',
+                              row: 'grid grid-cols-7',
+                              cell: 'w-full h-10 text-center p-0',
+                              day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
+                            }}
+                          />
+                        </ErrorBoundary>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Create Button */}
+                {canCreateLead && (
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                  >
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-8 px-3 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary flex items-center gap-2"
+                      onClick={handleAddLeadClick}
+                      disabled={isNavigating}
+                      title="Add New Lead"
+                    >
+                      {isNavigating ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ rotate: 0 }}
+                          whileHover={{ rotate: 90 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </motion.div>
+                      )}
+                      <span className="text-xs">Add Lead</span>
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
-                    <div className="w-full overflow-hidden">
-                      <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
-                        <CalendarComponent
-                          mode="single"
-                          selected={dateToFilter}
-                          onSelect={(date) => {
-                            setDateToFilter(date);
-                            setCurrentPage(1);
-                            setOpenTo(false);
-                          }}
-                          className="w-full"
-                          showOutsideDays={false}
-                          classNames={{
-                            months: 'flex',
-                            month: 'grid grid-cols-7 gap-1 min-w-[260px]',
-                            table: 'w-full table-fixed',
-                            head_row: 'grid grid-cols-7',
-                            head_cell: 'text-muted-foreground text-center text-xs',
-                            row: 'grid grid-cols-7',
-                            cell: 'w-full h-10 text-center p-0',
-                            day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
-                          }}
-                        />
-                      </ErrorBoundary>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                  </motion.div>
+                )}
               </div>
 
               <div className="flex items-center gap-2 justify-end">
