@@ -83,17 +83,56 @@ export default function Leads() {
   const [matchConvert, convertParams] = useRoute('/leads/:id/student');
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Initialize filter state from URL query parameters
+  const getInitialFilterState = () => {
+    const params = new URLSearchParams(location?.split('?')[1] || '');
+    return {
+      status: params.get('status') || 'all',
+      source: params.get('source') || 'all',
+      lastUpdated: params.get('lastUpdated') || 'all',
+      page: parseInt(params.get('page') || '1'),
+    };
+  };
+
+  const initialFilters = getInitialFilterState();
+  const [statusFilter, setStatusFilter] = useState(initialFilters.status);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [sourceFilter, setSourceFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState(initialFilters.source);
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
-  const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
+  const [lastUpdatedFilter, setLastUpdatedFilter] = useState(initialFilters.lastUpdated);
   const [queryText, setQueryText] = useState('');
   const [openDateRange, setOpenDateRange] = useState(false);
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialFilters.page);
+
+  // Helper function to update URL with filter query strings
+  const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; page?: number }) => {
+    const params = new URLSearchParams();
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+    if (filters.source && filters.source !== 'all') params.set('source', filters.source);
+    if (filters.lastUpdated && filters.lastUpdated !== 'all') params.set('lastUpdated', filters.lastUpdated);
+    if (filters.page && filters.page > 1) params.set('page', String(filters.page));
+
+    const queryString = params.toString();
+    setLocation(queryString ? `/leads?${queryString}` : '/leads');
+  };
+
+  // Sync URL parameters with filter state whenever location changes
+  React.useEffect(() => {
+    const params = new URLSearchParams(location?.split('?')[1] || '');
+    const urlStatus = params.get('status');
+    const urlSource = params.get('source');
+    const urlLastUpdated = params.get('lastUpdated');
+    const urlPage = parseInt(params.get('page') || '1');
+
+    if (urlStatus) setStatusFilter(urlStatus);
+    if (urlSource) setSourceFilter(urlSource);
+    if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
+    if (urlPage) setCurrentPage(urlPage);
+  }, [location]);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
   const { accessByRole } = useAuth() as any;
@@ -243,37 +282,15 @@ export default function Leads() {
     },
   });
 
-  const getLastUpdatedThreshold = (filterValue: string): Date | null => {
-    const now = new Date();
-    switch (filterValue) {
-      case '1':
-        return new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000); // 1 day ago
-      case '3':
-        return new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // 3 days ago
-      case '5':
-        return new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000); // 5 days ago
-      case '7':
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
-      case '15':
-        return new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000); // 15 days ago
-      case '30':
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
-      default:
-        return null;
-    }
-  };
-
   const filteredLeads = leads?.filter(lead => {
-    const statusMatch = statusFilter === 'all'
-      ? true
-      : statusFilter === 'converted'
-        ? convertedLeadIds.has(lead.id)
-        : statusFilter === 'lost'
-          ? (String((lead as any).isLost || '') === '1' || lead.status === 'lost')
-          : lead.status === statusFilter;
-    const sourceMatch = sourceFilter === 'all' || lead.source === sourceFilter;
+    // Free text query filter (name, phone, email, city) - only client-side filtering for search
+    const q = String(queryText || '').trim().toLowerCase();
+    const matchesQuery = q === '' ? true : [lead.name, lead.phone, lead.email, lead.city].some(f => {
+      if (!f) return false;
+      return String(f).toLowerCase().includes(q);
+    });
 
-    // Date range filter
+    // Date range filter (client-side only for date range picker)
     let dateMatch = true;
     if (dateFromFilter || dateToFilter) {
       const leadDate = lead.createdAt ? new Date(lead.createdAt) : null;
@@ -283,26 +300,7 @@ export default function Leads() {
       }
     }
 
-    // Last updated filter
-    let lastUpdatedMatch = true;
-    if (lastUpdatedFilter !== 'all') {
-      const threshold = getLastUpdatedThreshold(lastUpdatedFilter);
-      if (threshold) {
-        const leadUpdatedDate = lead.updatedAt ? new Date(lead.updatedAt) : null;
-        if (!leadUpdatedDate || leadUpdatedDate < threshold) {
-          lastUpdatedMatch = false;
-        }
-      }
-    }
-
-    // Free text query filter (name, phone, email, city)
-    const q = String(queryText || '').trim().toLowerCase();
-    const matchesQuery = q === '' ? true : [lead.name, lead.phone, lead.email, lead.city].some(f => {
-      if (!f) return false;
-      return String(f).toLowerCase().includes(q);
-    });
-
-    return statusMatch && sourceMatch && dateMatch && lastUpdatedMatch && matchesQuery;
+    return dateMatch && matchesQuery;
   }) || [];
 
 
@@ -509,6 +507,7 @@ export default function Leads() {
                         setDateToFilter(undefined);
                         setQueryText('');
                         setCurrentPage(1);
+                        setLocation('/leads');
                       }}
                     >
                       Clear All
@@ -570,6 +569,7 @@ export default function Leads() {
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
                   setCurrentPage(1);
+                  updateUrlWithFilters({ status: value, source: sourceFilter, lastUpdated: lastUpdatedFilter, page: 1 });
                 }}>
                   <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Select Status" />
@@ -586,6 +586,7 @@ export default function Leads() {
                 <Select value={sourceFilter} onValueChange={(value) => {
                   setSourceFilter(value);
                   setCurrentPage(1);
+                  updateUrlWithFilters({ status: statusFilter, source: value, lastUpdated: lastUpdatedFilter, page: 1 });
                 }}>
                   <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Select Source" />
@@ -603,6 +604,7 @@ export default function Leads() {
                 <Select value={lastUpdatedFilter} onValueChange={(value) => {
                   setLastUpdatedFilter(value);
                   setCurrentPage(1);
+                  updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: value, page: 1 });
                 }}>
                   <SelectTrigger className="w-36 h-8 text-xs">
                     <SelectValue placeholder="Last Updated at" />
@@ -611,9 +613,8 @@ export default function Leads() {
                     <SelectItem value="all">Last Updated at</SelectItem>
                     <SelectItem value="1">1 day ago</SelectItem>
                     <SelectItem value="3">3 days ago</SelectItem>
-                    <SelectItem value="5">5 days ago</SelectItem>
                     <SelectItem value="7">7 days ago</SelectItem>
-                    <SelectItem value="15">15 days ago</SelectItem>
+                    <SelectItem value="14">14 days ago</SelectItem>
                     <SelectItem value="30">30 days ago</SelectItem>
                   </SelectContent>
                 </Select>
@@ -860,7 +861,10 @@ export default function Leads() {
                 <Pagination
                   currentPage={pagination.page}
                   totalPages={pagination.totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, page });
+                  }}
                   hasNextPage={pagination.hasNextPage}
                   hasPrevPage={pagination.hasPrevPage}
                 />

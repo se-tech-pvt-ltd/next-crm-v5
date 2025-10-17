@@ -1,4 +1,4 @@
-import { eq, desc, and, not, exists, count, or, type SQL } from "drizzle-orm";
+import { eq, desc, and, not, exists, count, or, gte, lte, type SQL } from "drizzle-orm";
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
@@ -7,6 +7,12 @@ interface PaginationOptions {
   page: number;
   limit: number;
   offset: number;
+}
+
+interface FilterOptions {
+  status?: string;
+  source?: string;
+  lastUpdated?: string;
 }
 
 interface PaginatedLeadsResult {
@@ -30,6 +36,57 @@ interface LeadScope {
 }
 
 export class LeadModel {
+  // Helper function to combine multiple conditions with AND
+  private static combineConditions(conditions: SQL<unknown>[]): SQL<unknown> | undefined {
+    if (conditions.length === 0) return undefined;
+    if (conditions.length === 1) return conditions[0];
+    return and(...conditions) as SQL<unknown>;
+  }
+
+  // Helper function to build filter conditions based on filter options
+  private static buildFilterConditions(filters?: FilterOptions): SQL<unknown>[] {
+    const conditions: SQL<unknown>[] = [];
+
+    if (filters?.status && filters.status !== 'all') {
+      conditions.push(eq(leads.status, filters.status));
+    }
+
+    if (filters?.source && filters.source !== 'all') {
+      conditions.push(eq(leads.source, filters.source));
+    }
+
+    if (filters?.lastUpdated && filters.lastUpdated !== 'all') {
+      const now = new Date();
+      let daysAgo: number;
+
+      switch (filters.lastUpdated) {
+        case '1':
+          daysAgo = 1;
+          break;
+        case '3':
+          daysAgo = 3;
+          break;
+        case '7':
+          daysAgo = 7;
+          break;
+        case '14':
+          daysAgo = 14;
+          break;
+        case '30':
+          daysAgo = 30;
+          break;
+        default:
+          return conditions;
+      }
+
+      const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+
+      conditions.push(lte(leads.updatedAt, cutoffDate) as SQL<unknown>);
+    }
+
+    return conditions;
+  }
+
   // Helper function to parse JSON fields back to arrays for frontend consumption
   private static parseLeadFields(lead: Lead): Lead {
     const parsedLead = { ...lead };
@@ -178,8 +235,11 @@ export class LeadModel {
     return lead ? (LeadModel.parseLeadFields(lead as unknown as Lead)) : undefined;
   }
 
-  static async findAll(pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db
+  static async findAll(pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const whereClause = this.combineConditions(filterConditions);
+
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -206,12 +266,16 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads);
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
@@ -233,8 +297,12 @@ export class LeadModel {
     };
   }
 
-  static async findByCounselor(counselorId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db
+  static async findByCounselor(counselorId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.counselorId, counselorId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -261,14 +329,16 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(eq(leads.counselorId, counselorId));
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.counselorId, counselorId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
@@ -290,8 +360,12 @@ export class LeadModel {
     };
   }
 
-  static async findByAdmissionOfficer(admissionOfficerId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db
+  static async findByAdmissionOfficer(admissionOfficerId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.admissionOfficerId, admissionOfficerId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -318,14 +392,16 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(eq(leads.admissionOfficerId, admissionOfficerId));
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.admissionOfficerId, admissionOfficerId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
@@ -347,8 +423,12 @@ export class LeadModel {
     };
   }
 
-  static async findByPartner(partnerId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db
+  static async findByPartner(partnerId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.partner, partnerId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -377,14 +457,16 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(eq(leads.partner, partnerId));
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.partner, partnerId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
@@ -406,8 +488,12 @@ export class LeadModel {
     };
   }
 
-  static async findByRegion(regionId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db
+  static async findByRegion(regionId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.regionId, regionId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -436,14 +522,16 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(eq(leads.regionId, regionId));
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.regionId, regionId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
@@ -465,8 +553,12 @@ export class LeadModel {
     };
   }
 
-  static async findByBranch(branchId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
-    const baseQuery = db
+  static async findByBranch(branchId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.branchId, branchId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -495,13 +587,16 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(eq(leads.branchId, branchId));
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.branchId, branchId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       const paginatedLeads = await baseQuery
         .orderBy(desc(leads.createdAt))
