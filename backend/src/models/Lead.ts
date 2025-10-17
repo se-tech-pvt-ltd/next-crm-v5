@@ -302,7 +302,7 @@ export class LeadModel {
     const allConditions = [eq(leads.counselorId, counselorId), ...filterConditions];
     const whereClause = this.combineConditions(allConditions);
 
-    const baseQuery = db
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -329,8 +329,11 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(whereClause);
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
       // Get total count with filters
