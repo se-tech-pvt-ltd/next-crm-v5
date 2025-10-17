@@ -585,7 +585,7 @@ export default function Leads() {
                     <SelectValue placeholder="Select Source" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="all">Select Source</SelectItem>
                     {dropdownData?.Source?.map((source: any) => (
                       <SelectItem key={source.key} value={source.key}>
                         {source.value}
