@@ -50,43 +50,31 @@ export class LeadModel {
 
     if (filters?.lastUpdated && filters.lastUpdated !== 'all') {
       const now = new Date();
-      let startDaysAgo: number;
-      let endDaysAgo: number;
+      let daysAgo: number;
 
       switch (filters.lastUpdated) {
         case '1':
-          startDaysAgo = 2;
-          endDaysAgo = 1;
+          daysAgo = 1;
           break;
         case '3':
-          startDaysAgo = 4;
-          endDaysAgo = 3;
+          daysAgo = 3;
           break;
         case '7':
-          startDaysAgo = 8;
-          endDaysAgo = 7;
+          daysAgo = 7;
           break;
         case '14':
-          startDaysAgo = 15;
-          endDaysAgo = 14;
+          daysAgo = 14;
           break;
         case '30':
-          startDaysAgo = 31;
-          endDaysAgo = 30;
+          daysAgo = 30;
           break;
         default:
           return conditions;
       }
 
-      const endDate = new Date(now.getTime() - endDaysAgo * 24 * 60 * 60 * 1000);
-      const startDate = new Date(now.getTime() - startDaysAgo * 24 * 60 * 60 * 1000);
+      const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
 
-      conditions.push(
-        and(
-          gte(leads.updatedAt, startDate),
-          lte(leads.updatedAt, endDate)
-        ) as SQL<unknown>
-      );
+      conditions.push(lte(leads.updatedAt, cutoffDate) as SQL<unknown>);
     }
 
     return conditions;
