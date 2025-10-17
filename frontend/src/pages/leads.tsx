@@ -149,18 +149,22 @@ export default function Leads() {
     const urlLastUpdated = params.get('lastUpdated');
     const urlPage = parseInt(params.get('page') || '1');
 
-    if (urlStatus) {
-      // Convert ID to key if necessary
-      const statusList = (dropdownData as any)?.Status || [];
-      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
-      setStatusFilter(statusItem?.key || urlStatus);
+    // Only process filters if dropdown data is loaded
+    if (dropdownData) {
+      if (urlStatus) {
+        // Convert ID to key if necessary
+        const statusList = (dropdownData as any)?.Status || [];
+        const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
+        setStatusFilter(statusItem?.key || urlStatus);
+      }
+      if (urlSource) {
+        // Convert ID to key if necessary
+        const sourceList = (dropdownData as any)?.Source || [];
+        const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
+        setSourceFilter(sourceItem?.key || urlSource);
+      }
     }
-    if (urlSource) {
-      // Convert ID to key if necessary
-      const sourceList = (dropdownData as any)?.Source || [];
-      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
-      setSourceFilter(sourceItem?.key || urlSource);
-    }
+
     if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
     if (urlPage) setCurrentPage(urlPage);
   }, [location, dropdownData]);
