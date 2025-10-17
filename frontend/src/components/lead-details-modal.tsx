@@ -122,6 +122,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async (data: Partial<Lead>) => LeadsService.updateLead(lead?.id, data),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/leads/stats'] });
       try {
         const key = [`/api/activities/lead/${String(lead?.id)}`];
         queryClient.invalidateQueries({ queryKey: key });
@@ -156,6 +157,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async ({ reason }: { reason: string }) => LeadsService.markLeadAsLost(lead?.id, reason),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/leads/stats'] });
       try {
         const key = [`/api/activities/lead/${String(lead?.id)}`];
         queryClient.invalidateQueries({ queryKey: key });
@@ -279,6 +281,7 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     mutationFn: async (status: string) => LeadsService.updateLead(lead?.id, { status }),
     onSuccess: (updatedLead) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/leads/stats'] });
       try {
         const key = [`/api/activities/lead/${String(lead?.id)}`];
         queryClient.invalidateQueries({ queryKey: key });

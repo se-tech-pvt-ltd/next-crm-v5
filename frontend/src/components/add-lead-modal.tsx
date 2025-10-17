@@ -155,6 +155,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
     mutationFn: async (data: any) => LeadsService.createLead(data),
     onSuccess: async (createdLead: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/leads/stats'] });
       toast({
         title: "Success! 🎉",
         description: "Lead has been created successfully and added to your pipeline.",

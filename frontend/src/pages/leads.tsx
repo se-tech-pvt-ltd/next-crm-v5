@@ -107,6 +107,28 @@ export default function Leads() {
   const [openDateRange, setOpenDateRange] = useState(false);
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
   const [currentPage, setCurrentPage] = useState(initialFilters.page);
+  const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
+  const initializedFromUrlRef = React.useRef(false); // Track if we've initialized from URL params
+
+  // Access control for Leads: show Create button only if allowed
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateLead = React.useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  }, [accessByRole]);
+
+  // Removed no activity filter since we don't have activities API configured
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Get dropdown data for mapping IDs to display values (fetch early so it can be used in effects)
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
+  });
 
   // Helper function to update URL with filter query strings
   const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; page?: number }) => {
@@ -120,32 +142,69 @@ export default function Leads() {
     setLocation(queryString ? `/leads?${queryString}` : '/leads');
   };
 
-  // Sync URL parameters with filter state whenever location changes
+  // Initialize filters from URL params once dropdown data is loaded
   React.useEffect(() => {
+    if (!dropdownData) return; // Wait for dropdown data to load
+    if (initializedFromUrlRef.current) return; // Only initialize once
+
     const params = new URLSearchParams(location?.split('?')[1] || '');
     const urlStatus = params.get('status');
     const urlSource = params.get('source');
     const urlLastUpdated = params.get('lastUpdated');
     const urlPage = parseInt(params.get('page') || '1');
 
-    if (urlStatus) setStatusFilter(urlStatus);
-    if (urlSource) setSourceFilter(urlSource);
+    if (urlStatus) {
+      // Convert ID to key if necessary
+      const statusList = (dropdownData as any)?.Status || [];
+      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
+      setStatusFilter(statusItem?.key || urlStatus);
+    }
+    if (urlSource) {
+      // Convert ID to key if necessary
+      const sourceList = (dropdownData as any)?.Source || [];
+      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
+      setSourceFilter(sourceItem?.key || urlSource);
+    }
     if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
+    if (urlPage > 1) setCurrentPage(urlPage);
+
+    initializedFromUrlRef.current = true;
+  }, [dropdownData]);
+
+  // Handle subsequent URL changes (navigation between pages while on leads)
+  React.useEffect(() => {
+    if (!initializedFromUrlRef.current) return; // Skip if we haven't initialized yet
+
+    const params = new URLSearchParams(location?.split('?')[1] || '');
+    const urlStatus = params.get('status');
+    const urlSource = params.get('source');
+    const urlLastUpdated = params.get('lastUpdated');
+    const urlPage = parseInt(params.get('page') || '1');
+
+    if (urlStatus) {
+      const statusList = (dropdownData as any)?.Status || [];
+      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
+      setStatusFilter(statusItem?.key || urlStatus);
+    } else {
+      setStatusFilter('all');
+    }
+
+    if (urlSource) {
+      const sourceList = (dropdownData as any)?.Source || [];
+      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
+      setSourceFilter(sourceItem?.key || urlSource);
+    } else {
+      setSourceFilter('all');
+    }
+
+    if (urlLastUpdated) {
+      setLastUpdatedFilter(urlLastUpdated);
+    } else {
+      setLastUpdatedFilter('all');
+    }
+
     if (urlPage) setCurrentPage(urlPage);
-  }, [location]);
-  const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
-  // Access control for Leads: show Create button only if allowed
-  const { accessByRole } = useAuth() as any;
-  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const singularize = (s: string) => s.replace(/s$/i, '');
-  const canCreateLead = React.useMemo(() => {
-    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
-    if (entries.length === 0) return true;
-    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
-  }, [accessByRole]);
-  // Removed no activity filter since we don't have activities API configured
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  }, [location, dropdownData]);
 
   const handleAddLeadClick = () => {
     setLocation('/leads/new');
@@ -162,19 +221,21 @@ export default function Leads() {
     }, 200);
   };
 
-  // Get dropdown data for mapping IDs to display values
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
-  });
+  // Helper function to convert dropdown ID to key
+  const resolveFilterValue = (fieldName: 'Status' | 'Source', value: string): string => {
+    if (!value || value === 'all') return value;
+    const dropdownList = (dropdownData as any)?.[fieldName] || [];
+    const item = dropdownList.find((d: any) => d.id === value);
+    return item?.key || value;
+  };
 
   const { data: leadsResponse, isLoading } = useQuery({
     queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter }],
     queryFn: async () => LeadsService.getLeads({
       page: currentPage,
       limit: pageSize,
-      status: statusFilter !== 'all' ? statusFilter : undefined,
-      source: sourceFilter !== 'all' ? sourceFilter : undefined,
+      status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : undefined,
+      source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : undefined,
       lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : undefined,
     }),
     staleTime: 0,
@@ -469,12 +530,12 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-3 pt-0 relative">
               <div className="text-lg font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.converted ?? 0)}
               </div>
               <div className="absolute top-3 right-3 text-xs text-green-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
-                  const val = convertedCount || 0;
+                  const val = (leadsStats?.converted ?? 0);
                   return total ? `${Math.round((val / total) * 100)}%` : '0%';
                 })()}
               </div>

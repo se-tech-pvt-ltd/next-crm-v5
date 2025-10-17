@@ -154,27 +154,13 @@ export class LeadModel {
   static async getStats(scope?: LeadScope): Promise<LeadStats> {
     const scopeConditions = this.buildScopeConditions(scope);
 
-    const lostCondition = or(
-      eq(leads.isLost, 1),
-      eq(leads.status, 'lost')
-    );
+    const lostCondition = eq(leads.isLost, 1);
+    const convertedCondition = eq(leads.isConverted, 1);
 
-    const convertedCondition = or(
-      eq(leads.isConverted, 1),
-      eq(leads.status, 'converted'),
-      exists(
-        db
-          .select({ id: students.id })
-          .from(students)
-          .where(eq(students.leadId, leads.id))
-      )
-    );
-
-    const [totalRows, lostRows, convertedRows, activeRows] = await Promise.all([
+    const [totalRows, lostRows, convertedRows] = await Promise.all([
       this.countWithConditions(scopeConditions),
       this.countWithConditions(scopeConditions, [lostCondition]),
       this.countWithConditions(scopeConditions, [convertedCondition]),
-      this.countWithConditions(scopeConditions, [not(lostCondition), not(convertedCondition)]),
     ]);
 
     const normalizeCount = (rows: Array<{ count: number | bigint | string }>): number => {
@@ -186,11 +172,7 @@ export class LeadModel {
     const total = normalizeCount(totalRows);
     const lost = normalizeCount(lostRows);
     const converted = normalizeCount(convertedRows);
-    let active = normalizeCount(activeRows);
-
-    if (active > total) {
-      active = Math.max(total - lost - converted, 0);
-    }
+    const active = Math.max(total - lost - converted, 0);
 
     return {
       total,

@@ -440,6 +440,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
     mutationFn: async (data: AddLeadFormData) => LeadsService.createLead(data),
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/leads/stats'] });
       toast({
         title: 'Success! 🎉',
         description: 'Lead has been created successfully and added to your pipeline.',
