@@ -107,6 +107,27 @@ export default function Leads() {
   const [openDateRange, setOpenDateRange] = useState(false);
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
   const [currentPage, setCurrentPage] = useState(initialFilters.page);
+  const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
+
+  // Access control for Leads: show Create button only if allowed
+  const { accessByRole } = useAuth() as any;
+  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const singularize = (s: string) => s.replace(/s$/i, '');
+  const canCreateLead = React.useMemo(() => {
+    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
+    if (entries.length === 0) return true;
+    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
+  }, [accessByRole]);
+
+  // Removed no activity filter since we don't have activities API configured
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Get dropdown data for mapping IDs to display values (fetch early so it can be used in effects)
+  const { data: dropdownData } = useQuery({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
+  });
 
   // Helper function to update URL with filter query strings
   const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; page?: number }) => {
@@ -143,19 +164,6 @@ export default function Leads() {
     if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
     if (urlPage) setCurrentPage(urlPage);
   }, [location, dropdownData]);
-  const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
-  // Access control for Leads: show Create button only if allowed
-  const { accessByRole } = useAuth() as any;
-  const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const singularize = (s: string) => s.replace(/s$/i, '');
-  const canCreateLead = React.useMemo(() => {
-    const entries = (Array.isArray(accessByRole) ? accessByRole : []).filter((a: any) => singularize(normalize(a.moduleName ?? a.module_name)) === 'lead');
-    if (entries.length === 0) return true;
-    return entries.some((e: any) => (e.canCreate ?? e.can_create) === true);
-  }, [accessByRole]);
-  // Removed no activity filter since we don't have activities API configured
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const handleAddLeadClick = () => {
     setLocation('/leads/new');
@@ -171,12 +179,6 @@ export default function Leads() {
       setIsNavigating(false);
     }, 200);
   };
-
-  // Get dropdown data for mapping IDs to display values
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
-  });
 
   // Helper function to convert dropdown ID to key
   const resolveFilterValue = (fieldName: 'Status' | 'Source', value: string): string => {
