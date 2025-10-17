@@ -168,13 +168,21 @@ export default function Leads() {
     queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
   });
 
+  // Helper function to convert dropdown ID to key
+  const resolveFilterValue = (fieldName: 'Status' | 'Source', value: string): string => {
+    if (!value || value === 'all') return value;
+    const dropdownList = (dropdownData as any)?.[fieldName] || [];
+    const item = dropdownList.find((d: any) => d.id === value);
+    return item?.key || value;
+  };
+
   const { data: leadsResponse, isLoading } = useQuery({
     queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter }],
     queryFn: async () => LeadsService.getLeads({
       page: currentPage,
       limit: pageSize,
-      status: statusFilter !== 'all' ? statusFilter : undefined,
-      source: sourceFilter !== 'all' ? sourceFilter : undefined,
+      status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : undefined,
+      source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : undefined,
       lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : undefined,
     }),
     staleTime: 0,
