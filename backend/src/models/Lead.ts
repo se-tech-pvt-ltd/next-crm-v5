@@ -239,7 +239,7 @@ export class LeadModel {
     const filterConditions = this.buildFilterConditions(filters);
     const whereClause = this.combineConditions(filterConditions);
 
-    const baseQuery = db
+    let baseQuery = db
       .select({
         id: leads.id,
         name: leads.name,
@@ -266,8 +266,11 @@ export class LeadModel {
         createdAt: leads.createdAt,
         updatedAt: leads.updatedAt,
       })
-      .from(leads)
-      .where(whereClause)
+      .from(leads);
+
+    if (whereClause) {
+      baseQuery = baseQuery.where(whereClause);
+    }
 
     if (pagination) {
       // Get total count with filters
