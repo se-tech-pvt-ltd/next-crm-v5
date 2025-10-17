@@ -131,8 +131,8 @@ export default function Leads() {
     setLocation(queryString ? `/leads?${queryString}` : '/leads');
   };
 
-  // Helper to sync state from URL params
-  const syncFiltersFromUrl = React.useCallback(() => {
+  // Initialize and sync filters from URL params
+  React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlStatus = params.get('status');
     const urlSource = params.get('source');
@@ -170,22 +170,7 @@ export default function Leads() {
     } else {
       setCurrentPage(1);
     }
-  }, [dropdownData]);
-
-  // Initialize filters from URL on mount
-  React.useEffect(() => {
-    if (!initializedFromUrlRef.current) {
-      syncFiltersFromUrl();
-      initializedFromUrlRef.current = true;
-    }
-  }, [syncFiltersFromUrl]);
-
-  // Sync filters when URL location changes
-  React.useEffect(() => {
-    if (initializedFromUrlRef.current) {
-      syncFiltersFromUrl();
-    }
-  }, [location, syncFiltersFromUrl]);
+  }, [location, dropdownData]);
 
   const handleAddLeadClick = () => {
     setLocation('/leads/new');
