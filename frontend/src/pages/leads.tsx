@@ -532,6 +532,24 @@ export default function Leads() {
                   </SelectContent>
                 </Select>
 
+                <Select value={lastUpdatedFilter} onValueChange={(value) => {
+                  setLastUpdatedFilter(value);
+                  setCurrentPage(1); // Reset to first page when filter changes
+                }}>
+                  <SelectTrigger className="w-32 h-7 text-xs">
+                    <SelectValue placeholder="Last updated" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="1">Last 1 Day</SelectItem>
+                    <SelectItem value="3">Last 3 Days</SelectItem>
+                    <SelectItem value="5">Last 5 Days</SelectItem>
+                    <SelectItem value="7">Last 7 Days</SelectItem>
+                    <SelectItem value="15">Last 15 Days</SelectItem>
+                    <SelectItem value="30">Last 30 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 {/* Date Range Filter */}
                 <div className="flex items-center space-x-2">
                   {/* Controlled popover with native date input for From */}
