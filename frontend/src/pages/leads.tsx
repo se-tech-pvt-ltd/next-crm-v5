@@ -85,28 +85,17 @@ export default function Leads() {
   const [addLeadOpen, setAddLeadOpen] = useState(false);
 
   // Initialize filter state from URL query parameters
-  const getInitialFilterState = () => {
-    const params = new URLSearchParams(location?.split('?')[1] || '');
-    return {
-      status: params.get('status') || 'all',
-      source: params.get('source') || 'all',
-      lastUpdated: params.get('lastUpdated') || 'all',
-      page: parseInt(params.get('page') || '1'),
-    };
-  };
-
-  const initialFilters = getInitialFilterState();
-  const [statusFilter, setStatusFilter] = useState(initialFilters.status);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [sourceFilter, setSourceFilter] = useState(initialFilters.source);
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
-  const [lastUpdatedFilter, setLastUpdatedFilter] = useState(initialFilters.lastUpdated);
   const [queryText, setQueryText] = useState('');
   const [openDateRange, setOpenDateRange] = useState(false);
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
-  const [currentPage, setCurrentPage] = useState(initialFilters.page);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   const initializedFromUrlRef = React.useRef(false); // Track if we've initialized from URL params
 
