@@ -119,6 +119,20 @@ export default function Leads() {
     const queryString = params.toString();
     setLocation(queryString ? `/leads?${queryString}` : '/leads');
   };
+
+  // Sync URL parameters with filter state whenever location changes
+  React.useEffect(() => {
+    const params = new URLSearchParams(location?.split('?')[1] || '');
+    const urlStatus = params.get('status');
+    const urlSource = params.get('source');
+    const urlLastUpdated = params.get('lastUpdated');
+    const urlPage = parseInt(params.get('page') || '1');
+
+    if (urlStatus) setStatusFilter(urlStatus);
+    if (urlSource) setSourceFilter(urlSource);
+    if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
+    if (urlPage) setCurrentPage(urlPage);
+  }, [location]);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
   const { accessByRole } = useAuth() as any;
