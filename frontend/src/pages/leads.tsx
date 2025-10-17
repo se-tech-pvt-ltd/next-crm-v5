@@ -83,17 +83,42 @@ export default function Leads() {
   const [matchConvert, convertParams] = useRoute('/leads/:id/student');
   const [isNavigating, setIsNavigating] = useState(false);
   const [addLeadOpen, setAddLeadOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Initialize filter state from URL query parameters
+  const getInitialFilterState = () => {
+    const params = new URLSearchParams(location?.split('?')[1] || '');
+    return {
+      status: params.get('status') || 'all',
+      source: params.get('source') || 'all',
+      lastUpdated: params.get('lastUpdated') || 'all',
+      page: parseInt(params.get('page') || '1'),
+    };
+  };
+
+  const initialFilters = getInitialFilterState();
+  const [statusFilter, setStatusFilter] = useState(initialFilters.status);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [sourceFilter, setSourceFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState(initialFilters.source);
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
-  const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
+  const [lastUpdatedFilter, setLastUpdatedFilter] = useState(initialFilters.lastUpdated);
   const [queryText, setQueryText] = useState('');
   const [openDateRange, setOpenDateRange] = useState(false);
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialFilters.page);
+
+  // Helper function to update URL with filter query strings
+  const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; page?: number }) => {
+    const params = new URLSearchParams();
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+    if (filters.source && filters.source !== 'all') params.set('source', filters.source);
+    if (filters.lastUpdated && filters.lastUpdated !== 'all') params.set('lastUpdated', filters.lastUpdated);
+    if (filters.page && filters.page > 1) params.set('page', String(filters.page));
+
+    const queryString = params.toString();
+    setLocation(queryString ? `/leads?${queryString}` : '/leads');
+  };
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
   const { accessByRole } = useAuth() as any;
