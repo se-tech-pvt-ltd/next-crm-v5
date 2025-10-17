@@ -29,12 +29,13 @@ const formatDate = (d: string | Date) => {
 };
 
 function mapUpdate(u: any): UpdateItem {
+  const sanitizedBody = DOMPurify.sanitize(u.body || '', { ADD_ATTR: ['data-attachment-id'] });
   return {
     id: u.id,
     title: u.subject || '',
     date: u.createdOn ? formatDate(u.createdOn) : '',
     excerpt: u.subjectDesc || '',
-    body: (<div className="prose prose-sm max-w-none whitespace-pre-wrap">{u.body}</div>),
+    body: (<div className="prose prose-sm max-w-none break-words" dangerouslySetInnerHTML={{ __html: sanitizedBody }} />),
   };
 }
 
