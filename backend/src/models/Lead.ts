@@ -244,7 +244,10 @@ export class LeadModel {
     return lead ? (LeadModel.parseLeadFields(lead as unknown as Lead)) : undefined;
   }
 
-  static async findAll(pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+  static async findAll(pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const whereClause = this.combineConditions(filterConditions);
+
     const baseQuery = db
       .select({
         id: leads.id,
@@ -273,11 +276,12 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
+      .where(whereClause)
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads);
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
