@@ -130,8 +130,14 @@ export default function Leads() {
   });
 
   const { data: leadsResponse, isLoading } = useQuery({
-    queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
-    queryFn: async () => LeadsService.getLeads({ page: currentPage, limit: pageSize }),
+    queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter }],
+    queryFn: async () => LeadsService.getLeads({
+      page: currentPage,
+      limit: pageSize,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      source: sourceFilter !== 'all' ? sourceFilter : undefined,
+      lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : undefined,
+    }),
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
