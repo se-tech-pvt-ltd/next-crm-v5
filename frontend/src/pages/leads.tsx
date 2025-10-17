@@ -395,36 +395,36 @@ export default function Leads() {
       <div className="space-y-3">
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card>
-            <CardHeader className="pb-1 p-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (pagination.total || 0)}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-muted-foreground font-medium">
+              <div className="absolute top-3 right-3 text-xs text-muted-foreground font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : ((pagination.total || 0) ? '100%' : '0%')}
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-1 p-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserPlus className="w-3 h-3 text-primary" />
                 Active Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold text-yellow-600">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold text-yellow-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.active ?? 0)}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-yellow-600 font-medium">
+              <div className="absolute top-3 right-3 text-xs text-yellow-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = (leadsStats?.active ?? 0);
@@ -436,17 +436,17 @@ export default function Leads() {
 
 
           <Card>
-            <CardHeader className="pb-1 p-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <XCircle className="w-3 h-3 text-red-500" />
                 Lost Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold text-red-600">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold text-red-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.lost ?? 0)}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-red-600 font-medium">
+              <div className="absolute top-3 right-3 text-xs text-red-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = (leadsStats?.lost ?? 0);
@@ -456,18 +456,18 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
-            <CardHeader className="pb-1 p-2">
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
                 Converted Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold text-green-600">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-green-600 font-medium">
+              <div className="absolute top-3 right-3 text-xs text-green-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = convertedCount || 0;
