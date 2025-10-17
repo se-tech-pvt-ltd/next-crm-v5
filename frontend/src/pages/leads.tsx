@@ -507,6 +507,7 @@ export default function Leads() {
                         setDateToFilter(undefined);
                         setQueryText('');
                         setCurrentPage(1);
+                        setLocation('/leads');
                       }}
                     >
                       Clear All
