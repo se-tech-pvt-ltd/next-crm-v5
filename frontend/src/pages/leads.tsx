@@ -692,15 +692,15 @@ export default function Leads() {
 
             </div>
           </CardHeader>
-          <CardContent className="p-3 pt-0">
+          <CardContent className="p-4 pt-0">
             {isLoading ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-3 w-40" />
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-16" />
                   </div>
                 ))}
               </div>
@@ -712,14 +712,14 @@ export default function Leads() {
                 action={canCreateLead ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="h-8" onClick={handleAddLeadClick} disabled={isNavigating}>
+                      <Button className="h-8 px-4" onClick={handleAddLeadClick} disabled={isNavigating}>
                         {isNavigating ? (
-                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 mr-1">
-                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 mr-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
                           </motion.div>
                         ) : (
                           <motion.div initial={{ rotate: 0 }} animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
-                            <Plus className="w-3 h-3 mr-1" />
+                            <Plus className="w-4 h-4 mr-2" />
                           </motion.div>
                         )}
                         <span className="text-sm">{isNavigating ? 'Opening...' : 'Add Lead'}</span>
@@ -729,22 +729,22 @@ export default function Leads() {
                 ) : undefined}
               />
             ) : (
-              <Table className="text-xs">
+              <Table className="text-sm">
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Current Stage</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Name</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Phone</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Source</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Interested Country</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Status</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Current Stage</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLeads.map((lead) => (
                     <TableRow
                       key={lead.id}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => {
                         setLocation(`/leads/${lead.id}`);
                         setSelectedLead(lead);
@@ -757,48 +757,48 @@ export default function Leads() {
                         }
                       }}
                     >
-                      <TableCell className="font-medium p-2 text-xs">{lead.name}</TableCell>
-                      <TableCell className="p-2 text-xs">
+                      <TableCell className="font-medium p-3 text-sm">{lead.name}</TableCell>
+                      <TableCell className="p-3 text-sm">
                         {lead.phone ? (
-                          <div className="flex items-center text-xs">
-                            <Phone className="w-3 h-3 mr-1" />
+                          <div className="flex items-center text-sm">
+                            <Phone className="w-3 h-3 mr-2 text-gray-500" />
                             {lead.phone}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">No phone</span>
+                          <span className="text-sm text-gray-400">No phone</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Badge className="bg-gray-100 text-gray-800">
+                      <TableCell className="p-3 text-sm">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs">
                           {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
+                      <TableCell className="p-3 text-sm">
                         {lead.country ? (
-                          <div className="flex items-center text-xs">
-                            <Globe className="w-3 h-3 mr-1" />
+                          <div className="flex items-center text-sm">
+                            <Globe className="w-3 h-3 mr-2 text-gray-500" />
                             {getCountryDisplayName(lead.country)}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">Not specified</span>
+                          <span className="text-sm text-gray-400">Not specified</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Badge className={getStatusColor(lead.status || 'new')}>
+                      <TableCell className="p-3 text-sm">
+                        <Badge className={getStatusColor(lead.status || 'new')} variant="secondary">
                           {getStatusDisplayName(lead.status || 'new')}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
+                      <TableCell className="p-3 text-sm">
                         {(() => {
                           const isConverted = Boolean((lead as any).isConverted || (lead as any).is_converted || convertedLeadIds.has(lead.id) || (lead.status === 'converted'));
                           const isLost = Boolean((lead as any).isLost || (lead as any).is_lost || (lead.status === 'lost'));
                           if (isConverted && !isLost) {
-                            return <Badge className="bg-green-100 text-green-800">Converted</Badge>;
+                            return <Badge className="bg-green-100 text-green-800 text-xs">Converted</Badge>;
                           }
                           if (!isConverted && isLost) {
-                            return <Badge className="bg-red-100 text-red-800">Lost</Badge>;
+                            return <Badge className="bg-red-100 text-red-800 text-xs">Lost</Badge>;
                           }
-                          return <Badge className="bg-yellow-100 text-yellow-800">Active</Badge>;
+                          return <Badge className="bg-yellow-100 text-yellow-800 text-xs">Active</Badge>;
                         })()}
                       </TableCell>
                     </TableRow>
@@ -809,7 +809,7 @@ export default function Leads() {
 
             {/* Pagination */}
             {!isLoading && pagination.total > pageSize && (
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-6 pt-4 border-t">
                 <Pagination
                   currentPage={pagination.page}
                   totalPages={pagination.totalPages}
