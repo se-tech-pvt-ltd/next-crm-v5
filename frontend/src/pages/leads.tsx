@@ -469,12 +469,12 @@ export default function Leads() {
             </CardHeader>
             <CardContent className="p-3 pt-0 relative">
               <div className="text-lg font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
+                {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.converted ?? 0)}
               </div>
               <div className="absolute top-3 right-3 text-xs text-green-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
-                  const val = convertedCount || 0;
+                  const val = (leadsStats?.converted ?? 0);
                   return total ? `${Math.round((val / total) * 100)}%` : '0%';
                 })()}
               </div>
