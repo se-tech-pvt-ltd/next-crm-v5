@@ -628,7 +628,7 @@ export default function Leads() {
                 </div>
 
                 {/* Clear Filters */}
-                {(statusFilter !== 'all' || sourceFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
+                {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -636,6 +636,7 @@ export default function Leads() {
                     onClick={() => {
                       setStatusFilter('all');
                       setSourceFilter('all');
+                      setLastUpdatedFilter('all');
                       setDateFromFilter(undefined);
                       setDateToFilter(undefined);
                       setQueryText('');
