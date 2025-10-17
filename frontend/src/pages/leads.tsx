@@ -89,6 +89,7 @@ export default function Leads() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
+  const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
   const [queryText, setQueryText] = useState('');
   const [openFrom, setOpenFrom] = useState(false);
   const [openTo, setOpenTo] = useState(false);
