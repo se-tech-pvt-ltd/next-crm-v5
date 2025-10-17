@@ -82,6 +82,19 @@ export class ActivityService {
 
     const activity = await ActivityModel.create(activityWithUser);
 
+    // Update the related lead's updatedAt and updatedBy if activity is for a lead
+    if (String(activityWithUser.entityType).toLowerCase() === 'lead') {
+      const leadId = String(activityWithUser.entityId);
+      try {
+        await LeadModel.update(leadId, {
+          updatedAt: new Date(),
+          updatedBy: userId || null,
+        });
+      } catch (error) {
+        console.warn(`Failed to update lead ${leadId} after activity creation:`, error);
+      }
+    }
+
     const rawType = String(activityWithUser.activityType ?? "").toLowerCase();
     const normalizedType = rawType.replace(/[\s_-]/g, "");
     if (normalizedType === "followup") {
