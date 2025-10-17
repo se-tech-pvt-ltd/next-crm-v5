@@ -3,6 +3,7 @@ import { ActivityModel } from "../models/Activity.js";
 import { AttachmentModel } from "../models/Attachment.js";
 import { FollowUpModel } from "../models/FollowUp.js";
 import { UserModel } from "../models/User.js";
+import { LeadModel } from "../models/Lead.js";
 import { type Activity, type InsertActivity } from "../shared/schema.js";
 import { connection } from "../config/database.js";
 
