@@ -554,6 +554,7 @@ export default function Leads() {
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
                   setCurrentPage(1);
+                  updateUrlWithFilters({ status: value, source: sourceFilter, lastUpdated: lastUpdatedFilter, page: 1 });
                 }}>
                   <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Select Status" />
