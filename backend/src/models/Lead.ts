@@ -303,7 +303,11 @@ export class LeadModel {
     };
   }
 
-  static async findByCounselor(counselorId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+  static async findByCounselor(counselorId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.counselorId, counselorId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
     const baseQuery = db
       .select({
         id: leads.id,
@@ -332,13 +336,12 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
-      .where(eq(leads.counselorId, counselorId));
+      .where(whereClause);
 
     if (pagination) {
-      // Get total count
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.counselorId, counselorId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       // Get paginated results
       const paginatedLeads = await baseQuery
