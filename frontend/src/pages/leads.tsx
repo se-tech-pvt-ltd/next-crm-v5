@@ -603,12 +603,12 @@ export default function Leads() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Last Updated at</SelectItem>
-                    <SelectItem value="1">Last 1 Day</SelectItem>
-                    <SelectItem value="3">Last 3 Days</SelectItem>
-                    <SelectItem value="5">Last 5 Days</SelectItem>
-                    <SelectItem value="7">Last 7 Days</SelectItem>
-                    <SelectItem value="15">Last 15 Days</SelectItem>
-                    <SelectItem value="30">Last 30 Days</SelectItem>
+                    <SelectItem value="1">1 day ago</SelectItem>
+                    <SelectItem value="3">3 days ago</SelectItem>
+                    <SelectItem value="5">5 days ago</SelectItem>
+                    <SelectItem value="7">7 days ago</SelectItem>
+                    <SelectItem value="15">15 days ago</SelectItem>
+                    <SelectItem value="30">30 days ago</SelectItem>
                   </SelectContent>
                 </Select>
 
