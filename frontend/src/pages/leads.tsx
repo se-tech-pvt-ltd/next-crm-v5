@@ -611,10 +611,7 @@ export default function Leads() {
                     <SelectItem value="30">Last 30 Days</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
 
-              {/* Filter Row 2: Date Range */}
-              <div className="flex flex-wrap items-center gap-3">
                 {/* Combined Date Range Popover */}
                 <Popover open={openDateRange} onOpenChange={(open) => {
                   setOpenDateRange(open);
@@ -623,15 +620,15 @@ export default function Leads() {
                   }
                 }}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-48 h-8 text-xs flex items-center justify-between">
+                    <Button variant="outline" className="h-8 text-xs flex items-center justify-between whitespace-nowrap">
                       <div className="flex items-center">
                         <Calendar className="w-3 h-3 mr-2" />
-                        <span className="leading-none">
+                        <span className="leading-none text-xs">
                           {dateFromFilter && dateToFilter
                             ? `${format(dateFromFilter, "MM/dd")} - ${format(dateToFilter, "MM/dd")}`
                             : dateFromFilter
                             ? `From ${format(dateFromFilter, "MM/dd")}`
-                            : "Select date range"}
+                            : "Date range"}
                         </span>
                       </div>
                       {(dateFromFilter || dateToFilter) && (
