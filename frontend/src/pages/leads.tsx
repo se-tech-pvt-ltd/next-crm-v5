@@ -351,8 +351,12 @@ export default function Leads() {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const { data: leadsStats } = useQuery({
-    queryKey: ['/api/leads/stats'],
-    queryFn: async () => LeadsService.getLeadsStats(),
+    queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter],
+    queryFn: async () => LeadsService.getLeadsStats({
+      status: statusFilter,
+      source: sourceFilter,
+      lastUpdated: lastUpdatedFilter,
+    }),
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
