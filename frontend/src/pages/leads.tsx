@@ -237,6 +237,26 @@ export default function Leads() {
     },
   });
 
+  const getLastUpdatedThreshold = (filterValue: string): Date | null => {
+    const now = new Date();
+    switch (filterValue) {
+      case '1':
+        return new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000); // 1 day ago
+      case '3':
+        return new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // 3 days ago
+      case '5':
+        return new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000); // 5 days ago
+      case '7':
+        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+      case '15':
+        return new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000); // 15 days ago
+      case '30':
+        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+      default:
+        return null;
+    }
+  };
+
   const filteredLeads = leads?.filter(lead => {
     const statusMatch = statusFilter === 'all'
       ? true
@@ -257,6 +277,18 @@ export default function Leads() {
       }
     }
 
+    // Last updated filter
+    let lastUpdatedMatch = true;
+    if (lastUpdatedFilter !== 'all') {
+      const threshold = getLastUpdatedThreshold(lastUpdatedFilter);
+      if (threshold) {
+        const leadUpdatedDate = lead.updatedAt ? new Date(lead.updatedAt) : null;
+        if (!leadUpdatedDate || leadUpdatedDate < threshold) {
+          lastUpdatedMatch = false;
+        }
+      }
+    }
+
     // Free text query filter (name, phone, email, city)
     const q = String(queryText || '').trim().toLowerCase();
     const matchesQuery = q === '' ? true : [lead.name, lead.phone, lead.email, lead.city].some(f => {
@@ -264,7 +296,7 @@ export default function Leads() {
       return String(f).toLowerCase().includes(q);
     });
 
-    return statusMatch && sourceMatch && dateMatch && matchesQuery;
+    return statusMatch && sourceMatch && dateMatch && lastUpdatedMatch && matchesQuery;
   }) || [];
 
 
