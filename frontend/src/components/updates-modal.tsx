@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -28,12 +29,13 @@ const formatDate = (d: string | Date) => {
 };
 
 function mapUpdate(u: any): UpdateItem {
+  const sanitizedBody = DOMPurify.sanitize(u.body || '', { ADD_ATTR: ['data-attachment-id'] });
   return {
     id: u.id,
     title: u.subject || '',
     date: u.createdOn ? formatDate(u.createdOn) : '',
     excerpt: u.subjectDesc || '',
-    body: (<div className="prose prose-sm max-w-none whitespace-pre-wrap">{u.body}</div>),
+    body: (<div className="prose prose-sm max-w-none break-words" dangerouslySetInnerHTML={{ __html: sanitizedBody }} />),
   };
 }
 
@@ -57,7 +59,7 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="p-0 sm:max-w-2xl md:max-w-3xl w-[86vw] h-[460px] sm:h-[500px] grid grid-rows-[auto_1fr_auto]">
+      <DialogContent hideClose className="p-0 sm:max-w-4xl md:max-w-6xl w-[92vw] h-[460px] sm:h-[500px] grid grid-rows-[auto_1fr_auto]">
         <DialogTitle className="sr-only">Latest Updates</DialogTitle>
         {/* Top bar */}
         <div className="bg-[#223E7D] text-white px-5 py-3 rounded-t-md flex items-center justify-between">
