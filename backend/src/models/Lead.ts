@@ -36,6 +36,66 @@ interface LeadScope {
 }
 
 export class LeadModel {
+  // Helper function to build filter conditions based on filter options
+  private static buildFilterConditions(filters?: FilterOptions): SQL<unknown>[] {
+    const conditions: SQL<unknown>[] = [];
+
+    if (filters?.status && filters.status !== 'all') {
+      conditions.push(eq(leads.status, filters.status));
+    }
+
+    if (filters?.source && filters.source !== 'all') {
+      conditions.push(eq(leads.source, filters.source));
+    }
+
+    if (filters?.lastUpdated && filters.lastUpdated !== 'all') {
+      const now = new Date();
+      let startDaysAgo: number;
+      let endDaysAgo: number;
+
+      switch (filters.lastUpdated) {
+        case '1':
+          startDaysAgo = 2;
+          endDaysAgo = 1;
+          break;
+        case '3':
+          startDaysAgo = 4;
+          endDaysAgo = 3;
+          break;
+        case '5':
+          startDaysAgo = 6;
+          endDaysAgo = 5;
+          break;
+        case '7':
+          startDaysAgo = 8;
+          endDaysAgo = 7;
+          break;
+        case '15':
+          startDaysAgo = 16;
+          endDaysAgo = 15;
+          break;
+        case '30':
+          startDaysAgo = 31;
+          endDaysAgo = 30;
+          break;
+        default:
+          return conditions;
+      }
+
+      const endDate = new Date(now.getTime() - endDaysAgo * 24 * 60 * 60 * 1000);
+      const startDate = new Date(now.getTime() - startDaysAgo * 24 * 60 * 60 * 1000);
+
+      conditions.push(
+        and(
+          gte(leads.updatedAt, startDate),
+          lte(leads.updatedAt, endDate)
+        ) as SQL<unknown>
+      );
+    }
+
+    return conditions;
+  }
+
   // Helper function to parse JSON fields back to arrays for frontend consumption
   private static parseLeadFields(lead: Lead): Lead {
     const parsedLead = { ...lead };
