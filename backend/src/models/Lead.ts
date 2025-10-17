@@ -154,21 +154,8 @@ export class LeadModel {
   static async getStats(scope?: LeadScope): Promise<LeadStats> {
     const scopeConditions = this.buildScopeConditions(scope);
 
-    const lostCondition = or(
-      eq(leads.isLost, 1),
-      eq(leads.status, 'lost')
-    );
-
-    const convertedCondition = or(
-      eq(leads.isConverted, 1),
-      eq(leads.status, 'converted'),
-      exists(
-        db
-          .select({ id: students.id })
-          .from(students)
-          .where(eq(students.leadId, leads.id))
-      )
-    );
+    const lostCondition = eq(leads.isLost, 1);
+    const convertedCondition = eq(leads.isConverted, 1);
 
     const [totalRows, lostRows, convertedRows] = await Promise.all([
       this.countWithConditions(scopeConditions),
