@@ -131,7 +131,7 @@ export default function Leads() {
     setLocation(queryString ? `/leads?${queryString}` : '/leads');
   };
 
-  // Initialize and sync filters from URL params
+  // Initialize and sync filters from URL params when location changes
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlStatus = params.get('status');
@@ -139,7 +139,14 @@ export default function Leads() {
     const urlLastUpdated = params.get('lastUpdated');
     const urlPage = parseInt(params.get('page') || '1');
 
-    // Update status filter
+    // Update lastUpdated filter (direct value, no mapping needed)
+    if (urlLastUpdated) {
+      setLastUpdatedFilter(urlLastUpdated);
+    } else {
+      setLastUpdatedFilter('all');
+    }
+
+    // Update status filter (with dropdown mapping if available)
     if (urlStatus) {
       const statusList = (dropdownData as any)?.Status || [];
       const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
@@ -148,7 +155,7 @@ export default function Leads() {
       setStatusFilter('all');
     }
 
-    // Update source filter
+    // Update source filter (with dropdown mapping if available)
     if (urlSource) {
       const sourceList = (dropdownData as any)?.Source || [];
       const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
@@ -157,20 +164,13 @@ export default function Leads() {
       setSourceFilter('all');
     }
 
-    // Update lastUpdated filter (no dropdown mapping needed - direct value)
-    if (urlLastUpdated) {
-      setLastUpdatedFilter(urlLastUpdated);
-    } else {
-      setLastUpdatedFilter('all');
-    }
-
     // Update page
     if (urlPage > 1) {
       setCurrentPage(urlPage);
     } else {
       setCurrentPage(1);
     }
-  }, [location, dropdownData]);
+  }, [location]);
 
   const handleAddLeadClick = () => {
     setLocation('/leads/new');
