@@ -569,7 +569,7 @@ export default function Leads() {
                     <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="all">Select Status</SelectItem>
                     {dropdownData?.Status?.map((status: any) => (
                       <SelectItem key={status.key} value={status.key}>
                         {status.value}
