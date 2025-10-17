@@ -846,7 +846,10 @@ export default function Leads() {
                 <Pagination
                   currentPage={pagination.page}
                   totalPages={pagination.totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, page });
+                  }}
                   hasNextPage={pagination.hasNextPage}
                   hasPrevPage={pagination.hasPrevPage}
                 />
