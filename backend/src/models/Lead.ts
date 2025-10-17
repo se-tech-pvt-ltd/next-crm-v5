@@ -62,17 +62,13 @@ export class LeadModel {
           startDaysAgo = 4;
           endDaysAgo = 3;
           break;
-        case '5':
-          startDaysAgo = 6;
-          endDaysAgo = 5;
-          break;
         case '7':
           startDaysAgo = 8;
           endDaysAgo = 7;
           break;
-        case '15':
-          startDaysAgo = 16;
-          endDaysAgo = 15;
+        case '14':
+          startDaysAgo = 15;
+          endDaysAgo = 14;
           break;
         case '30':
           startDaysAgo = 31;
