@@ -690,43 +690,6 @@ export default function Leads() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 justify-end">
-                {canCreateLead && (
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    animate={{ scale: [1, 1.08, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
-                    className="ml-2"
-                  >
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
-                      onClick={handleAddLeadClick}
-                      disabled={isNavigating}
-                      title="Add New Lead"
-                    >
-                      {isNavigating ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
-                        >
-                          <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ rotate: 0 }}
-                          whileHover={{ rotate: 90 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </motion.div>
-                      )}
-                    </Button>
-                  </motion.div>
-                )}
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-3 pt-0">
