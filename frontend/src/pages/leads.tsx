@@ -85,28 +85,17 @@ export default function Leads() {
   const [addLeadOpen, setAddLeadOpen] = useState(false);
 
   // Initialize filter state from URL query parameters
-  const getInitialFilterState = () => {
-    const params = new URLSearchParams(location?.split('?')[1] || '');
-    return {
-      status: params.get('status') || 'all',
-      source: params.get('source') || 'all',
-      lastUpdated: params.get('lastUpdated') || 'all',
-      page: parseInt(params.get('page') || '1'),
-    };
-  };
-
-  const initialFilters = getInitialFilterState();
-  const [statusFilter, setStatusFilter] = useState(initialFilters.status);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [sourceFilter, setSourceFilter] = useState(initialFilters.source);
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
-  const [lastUpdatedFilter, setLastUpdatedFilter] = useState(initialFilters.lastUpdated);
   const [queryText, setQueryText] = useState('');
   const [openDateRange, setOpenDateRange] = useState(false);
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
-  const [currentPage, setCurrentPage] = useState(initialFilters.page);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   const initializedFromUrlRef = React.useRef(false); // Track if we've initialized from URL params
 
@@ -142,45 +131,22 @@ export default function Leads() {
     setLocation(queryString ? `/leads?${queryString}` : '/leads');
   };
 
-  // Initialize filters from URL params once dropdown data is loaded
+  // Initialize and sync filters from URL params when location changes
   React.useEffect(() => {
-    if (!dropdownData) return; // Wait for dropdown data to load
-    if (initializedFromUrlRef.current) return; // Only initialize once
-
-    const params = new URLSearchParams(location?.split('?')[1] || '');
+    const params = new URLSearchParams(window.location.search);
     const urlStatus = params.get('status');
     const urlSource = params.get('source');
     const urlLastUpdated = params.get('lastUpdated');
     const urlPage = parseInt(params.get('page') || '1');
 
-    if (urlStatus) {
-      // Convert ID to key if necessary
-      const statusList = (dropdownData as any)?.Status || [];
-      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
-      setStatusFilter(statusItem?.key || urlStatus);
+    // Update lastUpdated filter (direct value, no mapping needed)
+    if (urlLastUpdated) {
+      setLastUpdatedFilter(urlLastUpdated);
+    } else {
+      setLastUpdatedFilter('all');
     }
-    if (urlSource) {
-      // Convert ID to key if necessary
-      const sourceList = (dropdownData as any)?.Source || [];
-      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
-      setSourceFilter(sourceItem?.key || urlSource);
-    }
-    if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
-    if (urlPage > 1) setCurrentPage(urlPage);
 
-    initializedFromUrlRef.current = true;
-  }, [dropdownData]);
-
-  // Handle subsequent URL changes (navigation between pages while on leads)
-  React.useEffect(() => {
-    if (!initializedFromUrlRef.current) return; // Skip if we haven't initialized yet
-
-    const params = new URLSearchParams(location?.split('?')[1] || '');
-    const urlStatus = params.get('status');
-    const urlSource = params.get('source');
-    const urlLastUpdated = params.get('lastUpdated');
-    const urlPage = parseInt(params.get('page') || '1');
-
+    // Update status filter (with dropdown mapping if available)
     if (urlStatus) {
       const statusList = (dropdownData as any)?.Status || [];
       const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
@@ -189,6 +155,7 @@ export default function Leads() {
       setStatusFilter('all');
     }
 
+    // Update source filter (with dropdown mapping if available)
     if (urlSource) {
       const sourceList = (dropdownData as any)?.Source || [];
       const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
@@ -197,14 +164,13 @@ export default function Leads() {
       setSourceFilter('all');
     }
 
-    if (urlLastUpdated) {
-      setLastUpdatedFilter(urlLastUpdated);
+    // Update page
+    if (urlPage > 1) {
+      setCurrentPage(urlPage);
     } else {
-      setLastUpdatedFilter('all');
+      setCurrentPage(1);
     }
-
-    if (urlPage) setCurrentPage(urlPage);
-  }, [location, dropdownData]);
+  }, [location]);
 
   const handleAddLeadClick = () => {
     setLocation('/leads/new');
@@ -385,8 +351,12 @@ export default function Leads() {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const { data: leadsStats } = useQuery({
-    queryKey: ['/api/leads/stats'],
-    queryFn: async () => LeadsService.getLeadsStats(),
+    queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter],
+    queryFn: async () => LeadsService.getLeadsStats({
+      status: statusFilter,
+      source: sourceFilter,
+      lastUpdated: lastUpdatedFilter,
+    }),
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
@@ -817,7 +787,7 @@ export default function Leads() {
               <EmptyState
                 icon={<UserPlus className="h-10 w-10" />}
                 title="No leads found"
-                description={statusFilter === 'all' ? 'Get started by adding your first lead.' : `No leads with status "${statusFilter}".`}
+                description="Get started by adding your first lead."
                 action={canCreateLead ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

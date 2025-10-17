@@ -52,7 +52,13 @@ export class LeadController {
   static async getStats(req: Request, res: Response) {
     try {
       const currentUser = (req && req.user) ? req.user : LeadController.getFallbackUser();
-      const stats = await LeadService.getStats(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId);
+
+      // Parse filter parameters
+      const status = req.query.status as string | undefined;
+      const source = req.query.source as string | undefined;
+      const lastUpdated = req.query.lastUpdated as string | undefined;
+
+      const stats = await LeadService.getStats(currentUser.id, currentUser.role, (currentUser as any).regionId, (currentUser as any).branchId, { status, source, lastUpdated });
       res.json(stats);
     } catch (error) {
       console.error("Get leads stats error:", error);
