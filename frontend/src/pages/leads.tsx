@@ -566,7 +566,7 @@ export default function Leads() {
                   setCurrentPage(1);
                 }}>
                   <SelectTrigger className="w-32 h-8 text-xs">
-                    <SelectValue placeholder="Filter by status" />
+                    <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
@@ -582,7 +582,7 @@ export default function Leads() {
                   setCurrentPage(1);
                 }}>
                   <SelectTrigger className="w-32 h-8 text-xs">
-                    <SelectValue placeholder="Filter by source" />
+                    <SelectValue placeholder="Select Source" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Sources</SelectItem>
@@ -599,7 +599,7 @@ export default function Leads() {
                   setCurrentPage(1);
                 }}>
                   <SelectTrigger className="w-36 h-8 text-xs">
-                    <SelectValue placeholder="Last updated" />
+                    <SelectValue placeholder="Last Updated at" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Time</SelectItem>
