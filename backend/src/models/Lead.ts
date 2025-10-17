@@ -1,4 +1,4 @@
-import { eq, desc, and, not, exists, count, or, type SQL } from "drizzle-orm";
+import { eq, desc, and, not, exists, count, or, gte, lte, type SQL } from "drizzle-orm";
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
@@ -7,6 +7,12 @@ interface PaginationOptions {
   page: number;
   limit: number;
   offset: number;
+}
+
+interface FilterOptions {
+  status?: string;
+  source?: string;
+  lastUpdated?: string;
 }
 
 interface PaginatedLeadsResult {
