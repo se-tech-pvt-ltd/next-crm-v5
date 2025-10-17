@@ -488,25 +488,64 @@ export default function Leads() {
                   <span className="text-sm font-semibold text-gray-800">Filters</span>
                 </div>
 
-                {/* Clear Filters */}
-                {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs px-3"
-                    onClick={() => {
-                      setStatusFilter('all');
-                      setSourceFilter('all');
-                      setLastUpdatedFilter('all');
-                      setDateFromFilter(undefined);
-                      setDateToFilter(undefined);
-                      setQueryText('');
-                      setCurrentPage(1);
-                    }}
-                  >
-                    Clear All
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* Clear Filters */}
+                  {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs px-3"
+                      onClick={() => {
+                        setStatusFilter('all');
+                        setSourceFilter('all');
+                        setLastUpdatedFilter('all');
+                        setDateFromFilter(undefined);
+                        setDateToFilter(undefined);
+                        setQueryText('');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+
+                  {/* Create Lead Button */}
+                  {canCreateLead && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      animate={{ scale: [1, 1.08, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                    >
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="h-8 px-3 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary flex items-center gap-2"
+                        onClick={handleAddLeadClick}
+                        disabled={isNavigating}
+                        title="Add New Lead"
+                      >
+                        {isNavigating ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                          >
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            initial={{ rotate: 0 }}
+                            whileHover={{ rotate: 90 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </motion.div>
+                        )}
+                        <span className="text-xs">Add Lead</span>
+                      </Button>
+                    </motion.div>
+                  )}
+                </div>
               </div>
 
               {/* Filter Row 1: Search and Dropdowns */}
