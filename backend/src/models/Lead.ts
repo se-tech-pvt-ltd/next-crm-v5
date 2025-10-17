@@ -36,6 +36,13 @@ interface LeadScope {
 }
 
 export class LeadModel {
+  // Helper function to combine multiple conditions with AND
+  private static combineConditions(conditions: SQL<unknown>[]): SQL<unknown> | undefined {
+    if (conditions.length === 0) return undefined;
+    if (conditions.length === 1) return conditions[0];
+    return and(...conditions) as SQL<unknown>;
+  }
+
   // Helper function to build filter conditions based on filter options
   private static buildFilterConditions(filters?: FilterOptions): SQL<unknown>[] {
     const conditions: SQL<unknown>[] = [];
