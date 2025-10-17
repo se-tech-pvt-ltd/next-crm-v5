@@ -318,6 +318,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     mutationFn: async (studentData: any) => StudentsService.convertFromLead(lead?.id, studentData),
     onSuccess: (student: Student) => {
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/leads/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       toast({
         title: "Success",
