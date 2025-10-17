@@ -1,8 +1,21 @@
 import { http, HttpError } from './http';
 import type { Lead, Student } from '@/lib/types';
 
-export async function getLeads(params?: { page?: number; limit?: number }) {
-  const query = params?.page ? `?page=${params.page}&limit=${params?.limit ?? ''}` : '';
+export async function getLeads(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  source?: string;
+  lastUpdated?: string;
+}) {
+  const searchParams = new URLSearchParams();
+  if (params?.page) searchParams.append('page', String(params.page));
+  if (params?.limit) searchParams.append('limit', String(params.limit));
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.source) searchParams.append('source', params.source);
+  if (params?.lastUpdated) searchParams.append('lastUpdated', params.lastUpdated);
+
+  const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
   return http.get<{ data?: Lead[]; pagination?: any } | Lead[]>(`/api/leads${query}`);
 }
 

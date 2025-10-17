@@ -91,8 +91,8 @@ export default function Leads() {
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
   const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
   const [queryText, setQueryText] = useState('');
-  const [openFrom, setOpenFrom] = useState(false);
-  const [openTo, setOpenTo] = useState(false);
+  const [openDateRange, setOpenDateRange] = useState(false);
+  const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
@@ -130,8 +130,14 @@ export default function Leads() {
   });
 
   const { data: leadsResponse, isLoading } = useQuery({
-    queryKey: ['/api/leads', { page: currentPage, limit: pageSize }],
-    queryFn: async () => LeadsService.getLeads({ page: currentPage, limit: pageSize }),
+    queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter }],
+    queryFn: async () => LeadsService.getLeads({
+      page: currentPage,
+      limit: pageSize,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      source: sourceFilter !== 'all' ? sourceFilter : undefined,
+      lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : undefined,
+    }),
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -395,36 +401,36 @@ export default function Leads() {
       <div className="space-y-3">
 
         {/* Leads Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card>
-            <CardHeader className="pb-1 p-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
                 Total Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (pagination.total || 0)}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-muted-foreground font-medium">
+              <div className="absolute top-3 right-3 text-xs text-muted-foreground font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : ((pagination.total || 0) ? '100%' : '0%')}
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-1 p-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserPlus className="w-3 h-3 text-primary" />
                 Active Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold text-yellow-600">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold text-yellow-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.active ?? 0)}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-yellow-600 font-medium">
+              <div className="absolute top-3 right-3 text-xs text-yellow-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = (leadsStats?.active ?? 0);
@@ -436,17 +442,17 @@ export default function Leads() {
 
 
           <Card>
-            <CardHeader className="pb-1 p-2">
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <XCircle className="w-3 h-3 text-red-500" />
                 Lost Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold text-red-600">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold text-red-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : (leadsStats?.lost ?? 0)}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-red-600 font-medium">
+              <div className="absolute top-3 right-3 text-xs text-red-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = (leadsStats?.lost ?? 0);
@@ -456,18 +462,18 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
-            <CardHeader className="pb-1 p-2">
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
+            <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
                 Converted Leads
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 pt-0 relative">
-              <div className="text-base font-semibold text-green-600">
+            <CardContent className="p-3 pt-0 relative">
+              <div className="text-lg font-bold text-green-600">
                 {isLoading ? <Skeleton className="h-6 w-12" /> : convertedCount}
               </div>
-              <div className="absolute top-2 right-2 text-xs text-green-600 font-medium">
+              <div className="absolute top-3 right-3 text-xs text-green-600 font-medium">
                 {isLoading ? <Skeleton className="h-3 w-8" /> : (() => {
                   const total = (pagination.total || 0);
                   const val = convertedCount || 0;
@@ -480,39 +486,78 @@ export default function Leads() {
 
         {/* Leads Table */}
         <Card>
-          <CardHeader className="p-3 pb-2">
-            <div className="flex flex-col gap-3">
+          <CardHeader className="p-4 pb-3">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Filter className="w-3 h-3 text-gray-500" />
-                  <span className="text-xs font-medium text-gray-700">Filters:</span>
+                  <Filter className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-semibold text-gray-800">Filters</span>
                 </div>
 
-                {/* Clear Filters */}
-                {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => {
-                      setStatusFilter('all');
-                      setSourceFilter('all');
-                      setLastUpdatedFilter('all');
-                      setDateFromFilter(undefined);
-                      setDateToFilter(undefined);
-                      setQueryText('');
-                      setCurrentPage(1); // Reset to first page when clearing filters
-                    }}
-                  >
-                    Clear All
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* Clear Filters */}
+                  {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs px-3"
+                      onClick={() => {
+                        setStatusFilter('all');
+                        setSourceFilter('all');
+                        setLastUpdatedFilter('all');
+                        setDateFromFilter(undefined);
+                        setDateToFilter(undefined);
+                        setQueryText('');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+
+                  {/* Create Lead Button */}
+                  {canCreateLead && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      animate={{ scale: [1, 1.08, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+                    >
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="h-8 px-3 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary flex items-center gap-2"
+                        onClick={handleAddLeadClick}
+                        disabled={isNavigating}
+                        title="Add New Lead"
+                      >
+                        {isNavigating ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                          >
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            initial={{ rotate: 0 }}
+                            whileHover={{ rotate: 90 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </motion.div>
+                        )}
+                        <span className="text-xs">Add Lead</span>
+                      </Button>
+                    </motion.div>
+                  )}
+                </div>
               </div>
 
               {/* Filter Row 1: Search and Dropdowns */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3">
                 {/* Free text search for name, phone, email, city */}
-                <div className="w-52">
+                <div className="flex-1 min-w-52">
                   <InputWithIcon
                     value={queryText}
                     onChange={(e) => { setQueryText(e.target.value); setCurrentPage(1); }}
@@ -524,13 +569,13 @@ export default function Leads() {
                 </div>
                 <Select value={statusFilter} onValueChange={(value) => {
                   setStatusFilter(value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1);
                 }}>
-                  <SelectTrigger className="w-28 h-7 text-xs">
-                    <SelectValue placeholder="Filter by status" />
+                  <SelectTrigger className="w-32 h-8 text-xs">
+                    <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="all">Select Status</SelectItem>
                     {dropdownData?.Status?.map((status: any) => (
                       <SelectItem key={status.key} value={status.key}>
                         {status.value}
@@ -540,13 +585,13 @@ export default function Leads() {
                 </Select>
                 <Select value={sourceFilter} onValueChange={(value) => {
                   setSourceFilter(value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1);
                 }}>
-                  <SelectTrigger className="w-28 h-7 text-xs">
-                    <SelectValue placeholder="Filter by source" />
+                  <SelectTrigger className="w-32 h-8 text-xs">
+                    <SelectValue placeholder="Select Source" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="all">Select Source</SelectItem>
                     {dropdownData?.Source?.map((source: any) => (
                       <SelectItem key={source.key} value={source.key}>
                         {source.value}
@@ -557,148 +602,152 @@ export default function Leads() {
 
                 <Select value={lastUpdatedFilter} onValueChange={(value) => {
                   setLastUpdatedFilter(value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1);
                 }}>
-                  <SelectTrigger className="w-32 h-7 text-xs">
-                    <SelectValue placeholder="Last updated" />
+                  <SelectTrigger className="w-36 h-8 text-xs">
+                    <SelectValue placeholder="Last Updated at" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="1">Last 1 Day</SelectItem>
-                    <SelectItem value="3">Last 3 Days</SelectItem>
-                    <SelectItem value="5">Last 5 Days</SelectItem>
-                    <SelectItem value="7">Last 7 Days</SelectItem>
-                    <SelectItem value="15">Last 15 Days</SelectItem>
-                    <SelectItem value="30">Last 30 Days</SelectItem>
+                    <SelectItem value="all">Last Updated at</SelectItem>
+                    <SelectItem value="1">1 day ago</SelectItem>
+                    <SelectItem value="3">3 days ago</SelectItem>
+                    <SelectItem value="5">5 days ago</SelectItem>
+                    <SelectItem value="7">7 days ago</SelectItem>
+                    <SelectItem value="15">15 days ago</SelectItem>
+                    <SelectItem value="30">30 days ago</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
 
-              {/* Filter Row 2: Date Range */}
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Controlled popover with native date input for From */}
-                <Popover open={openFrom} onOpenChange={setOpenFrom}>
+                {/* Combined Date Range Popover */}
+                <Popover open={openDateRange} onOpenChange={(open) => {
+                  setOpenDateRange(open);
+                  if (!open) {
+                    setDateRangeStep('from');
+                  }
+                }}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
-                      <Calendar className="w-3 h-3 mr-2" />
-                      <span className="leading-none">{dateFromFilter ? format(dateFromFilter, "MM/dd") : "From"}</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
-                    <div className="w-full overflow-hidden">
-                      <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
-                        <CalendarComponent
-                          mode="single"
-                          selected={dateFromFilter}
-                          onSelect={(date) => {
-                            setDateFromFilter(date);
-                            setCurrentPage(1);
-                            setOpenFrom(false);
+                    <Button variant="outline" className="h-8 text-xs flex items-center justify-between whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Calendar className="w-3 h-3 mr-2" />
+                        <span className="leading-none text-xs">
+                          {dateFromFilter && dateToFilter
+                            ? `${format(dateFromFilter, "MM/dd")} - ${format(dateToFilter, "MM/dd")}`
+                            : dateFromFilter
+                            ? `From ${format(dateFromFilter, "MM/dd")}`
+                            : "Date range"}
+                        </span>
+                      </div>
+                      {(dateFromFilter || dateToFilter) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDateFromFilter(undefined);
+                            setDateToFilter(undefined);
                           }}
-                          className="w-full"
-                          showOutsideDays={false}
-                          classNames={{
-                            months: 'flex',
-                            month: 'grid grid-cols-7 gap-1 min-w-[260px]',
-                            table: 'w-full table-fixed',
-                            head_row: 'grid grid-cols-7',
-                            head_cell: 'text-muted-foreground text-center text-xs',
-                            row: 'grid grid-cols-7',
-                            cell: 'w-full h-10 text-center p-0',
-                            day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
-                          }}
-                        />
-                      </ErrorBoundary>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-
-                {/* Controlled popover with native date input for To */}
-                <Popover open={openTo} onOpenChange={setOpenTo}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-28 h-7 text-xs flex items-center">
-                      <Calendar className="w-3 h-3 mr-2" />
-                      <span className="leading-none">{dateToFilter ? format(dateToFilter, "MM/dd") : "To"}</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-3" align="start" sideOffset={6}>
-                    <div className="w-full overflow-hidden">
-                      <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
-                        <CalendarComponent
-                          mode="single"
-                          selected={dateToFilter}
-                          onSelect={(date) => {
-                            setDateToFilter(date);
-                            setCurrentPage(1);
-                            setOpenTo(false);
-                          }}
-                          className="w-full"
-                          showOutsideDays={false}
-                          classNames={{
-                            months: 'flex',
-                            month: 'grid grid-cols-7 gap-1 min-w-[260px]',
-                            table: 'w-full table-fixed',
-                            head_row: 'grid grid-cols-7',
-                            head_cell: 'text-muted-foreground text-center text-xs',
-                            row: 'grid grid-cols-7',
-                            cell: 'w-full h-10 text-center p-0',
-                            day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
-                          }}
-                        />
-                      </ErrorBoundary>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex items-center gap-2 justify-end">
-                {canCreateLead && (
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    animate={{ scale: [1, 1.08, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
-                    className="ml-2"
-                  >
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="h-7 w-7 p-0 bg-primary text-white shadow ring-2 ring-primary/40 hover:ring-primary"
-                      onClick={handleAddLeadClick}
-                      disabled={isNavigating}
-                      title="Add New Lead"
-                    >
-                      {isNavigating ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                          className="ml-2 text-gray-400 hover:text-gray-600"
                         >
-                          <div className="w-4 h-4 border-2 border-gray-400 border-t-blue-600 rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ rotate: 0 }}
-                          whileHover={{ rotate: 90 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </motion.div>
+                          ✕
+                        </button>
                       )}
                     </Button>
-                  </motion.div>
-                )}
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[320px] p-4" align="start" sideOffset={6}>
+                    <div className="space-y-3">
+                      <div className="text-sm font-medium">
+                        {dateRangeStep === 'from' ? 'Select start date' : 'Select end date'}
+                      </div>
+                      <div className="w-full overflow-hidden">
+                        <ErrorBoundary fallback={<div className="p-2 text-sm">Calendar failed to render.</div>}>
+                          <CalendarComponent
+                            mode="single"
+                            selected={dateRangeStep === 'from' ? dateFromFilter : dateToFilter}
+                            onSelect={(date) => {
+                              if (dateRangeStep === 'from') {
+                                setDateFromFilter(date);
+                                setCurrentPage(1);
+                                setDateRangeStep('to');
+                              } else {
+                                if (date && dateFromFilter && date < dateFromFilter) {
+                                  toast({
+                                    title: "Invalid date range",
+                                    description: "End date must be after start date.",
+                                    variant: "destructive",
+                                  });
+                                  return;
+                                }
+                                setDateToFilter(date);
+                                setCurrentPage(1);
+                                setOpenDateRange(false);
+                                setDateRangeStep('from');
+                              }
+                            }}
+                            disabled={(date) => {
+                              if (dateRangeStep === 'to' && dateFromFilter) {
+                                return date < dateFromFilter;
+                              }
+                              return false;
+                            }}
+                            className="w-full"
+                            showOutsideDays={false}
+                            classNames={{
+                              months: 'flex',
+                              month: 'grid grid-cols-7 gap-1 min-w-[260px]',
+                              table: 'w-full table-fixed',
+                              head_row: 'grid grid-cols-7',
+                              head_cell: 'text-muted-foreground text-center text-xs',
+                              row: 'grid grid-cols-7',
+                              cell: 'w-full h-10 text-center p-0',
+                              day: 'w-full h-full p-0 text-sm leading-tight whitespace-nowrap',
+                            }}
+                          />
+                        </ErrorBoundary>
+                      </div>
+                      {dateRangeStep === 'from' && dateFromFilter && (
+                        <div className="text-xs text-muted-foreground">
+                          Start date: {format(dateFromFilter, "MMMM d, yyyy")}
+                        </div>
+                      )}
+                      {dateRangeStep === 'to' && (
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-7 text-xs"
+                            onClick={() => {
+                              setDateRangeStep('from');
+                            }}
+                          >
+                            Back
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-7 text-xs"
+                            onClick={() => {
+                              setOpenDateRange(false);
+                              setDateRangeStep('from');
+                            }}
+                          >
+                            Done
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
+
             </div>
           </CardHeader>
-          <CardContent className="p-3 pt-0">
+          <CardContent className="p-4 pt-0">
             {isLoading ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-3 w-40" />
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-16" />
                   </div>
                 ))}
               </div>
@@ -710,14 +759,14 @@ export default function Leads() {
                 action={canCreateLead ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="h-8" onClick={handleAddLeadClick} disabled={isNavigating}>
+                      <Button className="h-8 px-4" onClick={handleAddLeadClick} disabled={isNavigating}>
                         {isNavigating ? (
-                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 mr-1">
-                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 mr-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
                           </motion.div>
                         ) : (
                           <motion.div initial={{ rotate: 0 }} animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
-                            <Plus className="w-3 h-3 mr-1" />
+                            <Plus className="w-4 h-4 mr-2" />
                           </motion.div>
                         )}
                         <span className="text-sm">{isNavigating ? 'Opening...' : 'Add Lead'}</span>
@@ -727,22 +776,22 @@ export default function Leads() {
                 ) : undefined}
               />
             ) : (
-              <Table className="text-xs">
+              <Table className="text-sm">
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-8 px-2 text-[11px]">Name</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Phone</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Source</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Interested Country</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Status</TableHead>
-                    <TableHead className="h-8 px-2 text-[11px]">Current Stage</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Name</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Phone</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Source</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Interested Country</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Status</TableHead>
+                    <TableHead className="h-10 px-3 text-xs font-semibold">Current Stage</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLeads.map((lead) => (
                     <TableRow
                       key={lead.id}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => {
                         setLocation(`/leads/${lead.id}`);
                         setSelectedLead(lead);
@@ -755,48 +804,48 @@ export default function Leads() {
                         }
                       }}
                     >
-                      <TableCell className="font-medium p-2 text-xs">{lead.name}</TableCell>
-                      <TableCell className="p-2 text-xs">
+                      <TableCell className="font-medium p-3 text-sm">{lead.name}</TableCell>
+                      <TableCell className="p-3 text-sm">
                         {lead.phone ? (
-                          <div className="flex items-center text-xs">
-                            <Phone className="w-3 h-3 mr-1" />
+                          <div className="flex items-center text-sm">
+                            <Phone className="w-3 h-3 mr-2 text-gray-500" />
                             {lead.phone}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">No phone</span>
+                          <span className="text-sm text-gray-400">No phone</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Badge className="bg-gray-100 text-gray-800">
+                      <TableCell className="p-3 text-sm">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs">
                           {lead.source ? getSourceDisplayName(lead.source) : 'Unknown'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
+                      <TableCell className="p-3 text-sm">
                         {lead.country ? (
-                          <div className="flex items-center text-xs">
-                            <Globe className="w-3 h-3 mr-1" />
+                          <div className="flex items-center text-sm">
+                            <Globe className="w-3 h-3 mr-2 text-gray-500" />
                             {getCountryDisplayName(lead.country)}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">Not specified</span>
+                          <span className="text-sm text-gray-400">Not specified</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
-                        <Badge className={getStatusColor(lead.status || 'new')}>
+                      <TableCell className="p-3 text-sm">
+                        <Badge className={getStatusColor(lead.status || 'new')} variant="secondary">
                           {getStatusDisplayName(lead.status || 'new')}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-2 text-xs">
+                      <TableCell className="p-3 text-sm">
                         {(() => {
                           const isConverted = Boolean((lead as any).isConverted || (lead as any).is_converted || convertedLeadIds.has(lead.id) || (lead.status === 'converted'));
                           const isLost = Boolean((lead as any).isLost || (lead as any).is_lost || (lead.status === 'lost'));
                           if (isConverted && !isLost) {
-                            return <Badge className="bg-green-100 text-green-800">Converted</Badge>;
+                            return <Badge className="bg-green-100 text-green-800 text-xs">Converted</Badge>;
                           }
                           if (!isConverted && isLost) {
-                            return <Badge className="bg-red-100 text-red-800">Lost</Badge>;
+                            return <Badge className="bg-red-100 text-red-800 text-xs">Lost</Badge>;
                           }
-                          return <Badge className="bg-yellow-100 text-yellow-800">Active</Badge>;
+                          return <Badge className="bg-yellow-100 text-yellow-800 text-xs">Active</Badge>;
                         })()}
                       </TableCell>
                     </TableRow>
@@ -807,7 +856,7 @@ export default function Leads() {
 
             {/* Pagination */}
             {!isLoading && pagination.total > pageSize && (
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-6 pt-4 border-t">
                 <Pagination
                   currentPage={pagination.page}
                   totalPages={pagination.totalPages}

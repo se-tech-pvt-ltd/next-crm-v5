@@ -13,35 +13,41 @@ interface PaginationOptions {
   offset: number;
 }
 
+interface FilterOptions {
+  status?: string;
+  source?: string;
+  lastUpdated?: string;
+}
+
 interface PaginatedLeadsResult {
   leads: Lead[];
   total: number;
 }
 
 export class LeadService {
-  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions, regionId?: string, branchId?: string): Promise<PaginatedLeadsResult> {
+  static async getLeads(userId?: string, userRole?: string, pagination?: PaginationOptions, regionId?: string, branchId?: string, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
     if (userRole === 'counselor' && userId) {
-      return await LeadModel.findByCounselor(userId, pagination);
+      return await LeadModel.findByCounselor(userId, pagination, filters);
     }
     if (userRole === 'admission_officer' && userId) {
-      return await LeadModel.findByAdmissionOfficer(userId, pagination);
+      return await LeadModel.findByAdmissionOfficer(userId, pagination, filters);
     }
 
     // Partners see only leads attached to their partner id
     if (userRole === 'partner' && userId) {
-      return await LeadModel.findByPartner(userId, pagination);
+      return await LeadModel.findByPartner(userId, pagination, filters);
     }
 
     if (userRole === 'branch_manager') {
       if (branchId) {
-        return await LeadModel.findByBranch(branchId, pagination);
+        return await LeadModel.findByBranch(branchId, pagination, filters);
       }
       return { leads: [], total: 0 };
     }
 
     if (userRole === 'regional_manager') {
       if (regionId) {
-        return await LeadModel.findByRegion(regionId, pagination);
+        return await LeadModel.findByRegion(regionId, pagination, filters);
       }
       // If regional manager role but no region assigned, return empty result to avoid exposing all records
       return { leads: [], total: 0 };
@@ -49,10 +55,10 @@ export class LeadService {
 
     // Default: if user has a region, scope by region unless super_admin
     if (regionId && userRole !== 'super_admin') {
-      return await LeadModel.findByRegion(regionId, pagination);
+      return await LeadModel.findByRegion(regionId, pagination, filters);
     }
 
-    return await LeadModel.findAll(pagination);
+    return await LeadModel.findAll(pagination, filters);
   }
 
   static async getStats(userId?: string, userRole?: string, regionId?: string, branchId?: string) {
