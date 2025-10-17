@@ -142,31 +142,67 @@ export default function Leads() {
     setLocation(queryString ? `/leads?${queryString}` : '/leads');
   };
 
-  // Sync URL parameters with filter state whenever location changes
+  // Initialize filters from URL params once dropdown data is loaded
   React.useEffect(() => {
+    if (!dropdownData) return; // Wait for dropdown data to load
+    if (initializedFromUrlRef.current) return; // Only initialize once
+
     const params = new URLSearchParams(location?.split('?')[1] || '');
     const urlStatus = params.get('status');
     const urlSource = params.get('source');
     const urlLastUpdated = params.get('lastUpdated');
     const urlPage = parseInt(params.get('page') || '1');
 
-    // Only process filters if dropdown data is loaded
-    if (dropdownData) {
-      if (urlStatus) {
-        // Convert ID to key if necessary
-        const statusList = (dropdownData as any)?.Status || [];
-        const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
-        setStatusFilter(statusItem?.key || urlStatus);
-      }
-      if (urlSource) {
-        // Convert ID to key if necessary
-        const sourceList = (dropdownData as any)?.Source || [];
-        const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
-        setSourceFilter(sourceItem?.key || urlSource);
-      }
+    if (urlStatus) {
+      // Convert ID to key if necessary
+      const statusList = (dropdownData as any)?.Status || [];
+      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
+      setStatusFilter(statusItem?.key || urlStatus);
+    }
+    if (urlSource) {
+      // Convert ID to key if necessary
+      const sourceList = (dropdownData as any)?.Source || [];
+      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
+      setSourceFilter(sourceItem?.key || urlSource);
+    }
+    if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
+    if (urlPage > 1) setCurrentPage(urlPage);
+
+    initializedFromUrlRef.current = true;
+  }, [dropdownData]);
+
+  // Handle subsequent URL changes (navigation between pages while on leads)
+  React.useEffect(() => {
+    if (!initializedFromUrlRef.current) return; // Skip if we haven't initialized yet
+
+    const params = new URLSearchParams(location?.split('?')[1] || '');
+    const urlStatus = params.get('status');
+    const urlSource = params.get('source');
+    const urlLastUpdated = params.get('lastUpdated');
+    const urlPage = parseInt(params.get('page') || '1');
+
+    if (urlStatus) {
+      const statusList = (dropdownData as any)?.Status || [];
+      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
+      setStatusFilter(statusItem?.key || urlStatus);
+    } else {
+      setStatusFilter('all');
     }
 
-    if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
+    if (urlSource) {
+      const sourceList = (dropdownData as any)?.Source || [];
+      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
+      setSourceFilter(sourceItem?.key || urlSource);
+    } else {
+      setSourceFilter('all');
+    }
+
+    if (urlLastUpdated) {
+      setLastUpdatedFilter(urlLastUpdated);
+    } else {
+      setLastUpdatedFilter('all');
+    }
+
     if (urlPage) setCurrentPage(urlPage);
   }, [location, dropdownData]);
 
