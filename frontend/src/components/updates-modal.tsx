@@ -59,7 +59,7 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="p-0 sm:max-w-2xl md:max-w-3xl w-[86vw] h-[460px] sm:h-[500px] grid grid-rows-[auto_1fr_auto]">
+      <DialogContent hideClose className="p-0 sm:max-w-4xl md:max-w-6xl w-[92vw] h-[460px] sm:h-[500px] grid grid-rows-[auto_1fr_auto]">
         <DialogTitle className="sr-only">Latest Updates</DialogTitle>
         {/* Top bar */}
         <div className="bg-[#223E7D] text-white px-5 py-3 rounded-t-md flex items-center justify-between">
