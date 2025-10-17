@@ -570,9 +570,8 @@ export default function Leads() {
                     <SelectItem value="all">Last Updated at</SelectItem>
                     <SelectItem value="1">1 day ago</SelectItem>
                     <SelectItem value="3">3 days ago</SelectItem>
-                    <SelectItem value="5">5 days ago</SelectItem>
                     <SelectItem value="7">7 days ago</SelectItem>
-                    <SelectItem value="15">15 days ago</SelectItem>
+                    <SelectItem value="14">14 days ago</SelectItem>
                     <SelectItem value="30">30 days ago</SelectItem>
                   </SelectContent>
                 </Select>
