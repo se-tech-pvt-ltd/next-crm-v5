@@ -128,11 +128,21 @@ export default function Leads() {
     const urlLastUpdated = params.get('lastUpdated');
     const urlPage = parseInt(params.get('page') || '1');
 
-    if (urlStatus) setStatusFilter(urlStatus);
-    if (urlSource) setSourceFilter(urlSource);
+    if (urlStatus) {
+      // Convert ID to key if necessary
+      const statusList = (dropdownData as any)?.Status || [];
+      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
+      setStatusFilter(statusItem?.key || urlStatus);
+    }
+    if (urlSource) {
+      // Convert ID to key if necessary
+      const sourceList = (dropdownData as any)?.Source || [];
+      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
+      setSourceFilter(sourceItem?.key || urlSource);
+    }
     if (urlLastUpdated) setLastUpdatedFilter(urlLastUpdated);
     if (urlPage) setCurrentPage(urlPage);
-  }, [location]);
+  }, [location, dropdownData]);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
   // Access control for Leads: show Create button only if allowed
   const { accessByRole } = useAuth() as any;
