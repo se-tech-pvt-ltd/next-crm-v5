@@ -108,6 +108,7 @@ export default function Leads() {
   const [dateRangeStep, setDateRangeStep] = useState<'from' | 'to'>('from');
   const [currentPage, setCurrentPage] = useState(initialFilters.page);
   const [pageSize] = useState(8); // 8 records per page (paginate after 8 records)
+  const initializedFromUrlRef = React.useRef(false); // Track if we've initialized from URL params
 
   // Access control for Leads: show Create button only if allowed
   const { accessByRole } = useAuth() as any;
