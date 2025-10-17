@@ -547,7 +547,11 @@ export class LeadModel {
     };
   }
 
-  static async findByBranch(branchId: string, pagination?: PaginationOptions): Promise<PaginatedLeadsResult> {
+  static async findByBranch(branchId: string, pagination?: PaginationOptions, filters?: FilterOptions): Promise<PaginatedLeadsResult> {
+    const filterConditions = this.buildFilterConditions(filters);
+    const allConditions = [eq(leads.branchId, branchId), ...filterConditions];
+    const whereClause = this.combineConditions(allConditions);
+
     const baseQuery = db
       .select({
         id: leads.id,
@@ -578,12 +582,12 @@ export class LeadModel {
         updatedAt: leads.updatedAt,
       })
       .from(leads)
-      .where(eq(leads.branchId, branchId));
+      .where(whereClause);
 
     if (pagination) {
-      const [totalResult] = await db.select({ count: count() })
-        .from(leads)
-        .where(eq(leads.branchId, branchId));
+      // Get total count with filters
+      const totalQuery = db.select({ count: count() }).from(leads);
+      const [totalResult] = await (whereClause ? totalQuery.where(whereClause) : totalQuery);
 
       const paginatedLeads = await baseQuery
         .orderBy(desc(leads.createdAt))
