@@ -602,7 +602,7 @@ export default function Leads() {
                     <SelectValue placeholder="Last Updated at" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="all">Last Updated at</SelectItem>
                     <SelectItem value="1">Last 1 Day</SelectItem>
                     <SelectItem value="3">Last 3 Days</SelectItem>
                     <SelectItem value="5">Last 5 Days</SelectItem>
