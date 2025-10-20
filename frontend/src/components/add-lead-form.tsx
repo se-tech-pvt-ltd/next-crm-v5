@@ -615,33 +615,19 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         } catch {}
       } catch {}
     } else if (dropdownData) {
-      // No initial data: apply default selections from dropdownData if present
+      // No initial data: apply only the dropdown's isDefault selection for status, source and type (if any)
       try {
         const statusList = (dropdownData as any).Status || [];
         const defaultStatus = statusList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultStatus && !form.getValues('status')) {
+        if (defaultStatus) {
           form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
-        }
-        // Fallback: if no default is set in dropdowns, prefer 'Raw' as the initial priority
-        if (!form.getValues('status')) {
-          const rawOption = statusList.find((s: any) => {
-            const val = String(s.value || '').toLowerCase();
-            const key = String(s.key || s.id || '').toLowerCase();
-            return val === 'raw' || key === 'raw' || val.includes('raw');
-          });
-          if (rawOption) {
-            form.setValue('status', rawOption.key || rawOption.id || rawOption.value);
-          } else {
-            // As a last resort, set literal 'Raw' so validation passes and backend stores a sensible default
-            form.setValue('status', 'Raw');
-          }
         }
       } catch {}
 
       try {
         const sourceList = (dropdownData as any).Source || [];
         const defaultSource = sourceList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultSource && !form.getValues('source')) {
+        if (defaultSource) {
           form.setValue('source', defaultSource.key || defaultSource.id || defaultSource.value);
         }
       } catch {}
@@ -649,7 +635,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       try {
         const typeList = (dropdownData as any).Type || [];
         const defaultType = typeList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultType && !form.getValues('type')) {
+        if (defaultType) {
           form.setValue('type', defaultType.key || defaultType.id || defaultType.value);
         }
       } catch {}
