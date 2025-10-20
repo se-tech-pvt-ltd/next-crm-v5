@@ -622,8 +622,14 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         if (defaultStatus) {
           form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
         } else if (Array.isArray(statusList) && statusList.length > 0) {
-          const first = statusList[0];
-          form.setValue('status', first.key || first.id || first.value);
+          // pick first option that has a non-empty key/id/value
+          const firstValid = statusList.find((s: any) => {
+            const v = String(s.key ?? s.id ?? s.value ?? '').trim();
+            return v.length > 0;
+          });
+          if (firstValid) {
+            form.setValue('status', firstValid.key || firstValid.id || firstValid.value);
+          }
         }
       } catch {}
 
