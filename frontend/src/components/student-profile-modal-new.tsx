@@ -369,7 +369,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const counselorOptions = () => {
     const opts = dropdownsForStudent();
     if (opts.length > 0) return opts.map((o: any) => ({ id: o.key || o.id || o.value, value: o.value }));
-    return (users as User[]).map((u) => ({ id: u.id, value: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || 'User' }));
+    return (users as User[]).map((u) => ({ id: u.id, value: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
   };
 
   const updateStudentMutation = useMutation({
