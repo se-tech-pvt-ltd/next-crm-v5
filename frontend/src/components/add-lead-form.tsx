@@ -173,6 +173,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       email: '',
       city: '',
       source: '',
+      medium: '',
       country: [],
       studyLevel: '',
       studyPlan: '',
