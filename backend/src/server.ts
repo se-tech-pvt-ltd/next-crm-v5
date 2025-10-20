@@ -4,6 +4,7 @@ import cors, { type CorsOptions } from "cors";
 import { registerRoutes } from "./routes/index.js";
 import { requestLogger, log } from "./middlewares/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import { apiLogger, errorLoggerHandler } from "./middlewares/apiLogger.js";
 
 const app = express();
 
@@ -85,8 +86,14 @@ app.use(express.urlencoded({ extended: false }));
 // Request logging middleware
 app.use(requestLogger);
 
+// API file logging middleware (logs to user-specific log files)
+app.use(apiLogger);
+
 // Register all routes
 const server = await registerRoutes(app);
+
+// Error logger middleware (before main error handler)
+app.use(errorLoggerHandler);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

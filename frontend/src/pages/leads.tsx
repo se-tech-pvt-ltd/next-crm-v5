@@ -88,6 +88,7 @@ export default function Leads() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
+  const [filterType, setFilterType] = useState<'active' | 'lost' | 'converted' | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -120,11 +121,12 @@ export default function Leads() {
   });
 
   // Helper function to update URL with filter query strings
-  const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; page?: number }) => {
+  const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; filterType?: 'active' | 'lost' | 'converted'; page?: number }) => {
     const params = new URLSearchParams();
     if (filters.status && filters.status !== 'all') params.set('status', filters.status);
     if (filters.source && filters.source !== 'all') params.set('source', filters.source);
     if (filters.lastUpdated && filters.lastUpdated !== 'all') params.set('lastUpdated', filters.lastUpdated);
+    if (filters.filterType) params.set('filterType', filters.filterType);
     if (filters.page && filters.page > 1) params.set('page', String(filters.page));
 
     const queryString = params.toString();
@@ -137,7 +139,15 @@ export default function Leads() {
     const urlStatus = params.get('status');
     const urlSource = params.get('source');
     const urlLastUpdated = params.get('lastUpdated');
+    const urlFilterType = params.get('filterType') as 'active' | 'lost' | 'converted' | null;
     const urlPage = parseInt(params.get('page') || '1');
+
+    // Update filterType
+    if (urlFilterType && ['active', 'lost', 'converted'].includes(urlFilterType)) {
+      setFilterType(urlFilterType as 'active' | 'lost' | 'converted');
+    } else {
+      setFilterType(undefined);
+    }
 
     // Update lastUpdated filter (direct value, no mapping needed)
     if (urlLastUpdated) {
@@ -196,13 +206,14 @@ export default function Leads() {
   };
 
   const { data: leadsResponse, isLoading } = useQuery({
-    queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter }],
+    queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType }],
     queryFn: async () => LeadsService.getLeads({
       page: currentPage,
       limit: pageSize,
       status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : undefined,
       source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : undefined,
       lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : undefined,
+      filterType,
     }),
     staleTime: 0,
     refetchOnMount: true,
@@ -351,11 +362,12 @@ export default function Leads() {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const { data: leadsStats } = useQuery({
-    queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter],
+    queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter, filterType],
     queryFn: async () => LeadsService.getLeadsStats({
-      status: statusFilter,
-      source: sourceFilter,
-      lastUpdated: lastUpdatedFilter,
+      status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : 'all',
+      source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : 'all',
+      lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : 'all',
+      filterType,
     }),
     staleTime: 0,
     refetchOnMount: true,
@@ -431,7 +443,7 @@ export default function Leads() {
 
         {/* Leads Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType(undefined); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
@@ -448,7 +460,7 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('active'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'active', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserPlus className="w-3 h-3 text-primary" />
@@ -470,7 +482,7 @@ export default function Leads() {
           </Card>
 
 
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('lost'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'lost', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <XCircle className="w-3 h-3 text-red-500" />
@@ -491,7 +503,7 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('converted'); setCurrentPage(1); }}>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('converted'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'converted', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
@@ -525,7 +537,7 @@ export default function Leads() {
 
                 <div className="flex items-center gap-2">
                   {/* Clear Filters */}
-                  {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
+                  {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText || filterType) && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -534,6 +546,7 @@ export default function Leads() {
                         setStatusFilter('all');
                         setSourceFilter('all');
                         setLastUpdatedFilter('all');
+                        setFilterType(undefined);
                         setDateFromFilter(undefined);
                         setDateToFilter(undefined);
                         setQueryText('');

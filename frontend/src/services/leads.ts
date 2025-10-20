@@ -7,6 +7,7 @@ export async function getLeads(params?: {
   status?: string;
   source?: string;
   lastUpdated?: string;
+  filterType?: 'active' | 'lost' | 'converted';
 }) {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.append('page', String(params.page));
@@ -14,6 +15,7 @@ export async function getLeads(params?: {
   if (params?.status) searchParams.append('status', params.status);
   if (params?.source) searchParams.append('source', params.source);
   if (params?.lastUpdated) searchParams.append('lastUpdated', params.lastUpdated);
+  if (params?.filterType) searchParams.append('filterType', params.filterType);
 
   const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
   return http.get<{ data?: Lead[]; pagination?: any } | Lead[]>(`/api/leads${query}`);
@@ -52,11 +54,13 @@ export async function getLeadsStats(params?: {
   status?: string;
   source?: string;
   lastUpdated?: string;
+  filterType?: 'active' | 'lost' | 'converted';
 }) {
   const searchParams = new URLSearchParams();
   if (params?.status && params.status !== 'all') searchParams.append('status', params.status);
   if (params?.source && params.source !== 'all') searchParams.append('source', params.source);
   if (params?.lastUpdated && params.lastUpdated !== 'all') searchParams.append('lastUpdated', params.lastUpdated);
+  if (params?.filterType) searchParams.append('filterType', params.filterType);
 
   const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
   return http.get<any>(`/api/leads/stats${query}`);

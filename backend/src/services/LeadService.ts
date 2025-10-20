@@ -61,37 +61,37 @@ export class LeadService {
     return await LeadModel.findAll(pagination, filters);
   }
 
-  static async getStats(userId?: string, userRole?: string, regionId?: string, branchId?: string) {
+  static async getStats(userId?: string, userRole?: string, regionId?: string, branchId?: string, filters?: FilterOptions) {
     if (userRole === 'counselor' && userId) {
-      return await LeadModel.getStats({ counselorId: userId });
+      return await LeadModel.getStats({ counselorId: userId }, filters);
     }
     if (userRole === 'admission_officer' && userId) {
-      return await LeadModel.getStats({ admissionOfficerId: userId });
+      return await LeadModel.getStats({ admissionOfficerId: userId }, filters);
     }
 
     if (userRole === 'partner' && userId) {
-      return await LeadModel.getStats({ partner: userId });
+      return await LeadModel.getStats({ partner: userId }, filters);
     }
 
     if (userRole === 'branch_manager') {
       if (branchId) {
-        return await LeadModel.getStats({ branchId });
+        return await LeadModel.getStats({ branchId }, filters);
       }
       return { total: 0, active: 0, lost: 0, converted: 0 };
     }
 
     if (userRole === 'regional_manager') {
       if (regionId) {
-        return await LeadModel.getStats({ regionId });
+        return await LeadModel.getStats({ regionId }, filters);
       }
       return { total: 0, active: 0, lost: 0, converted: 0 };
     }
 
     if (regionId && userRole !== 'super_admin') {
-      return await LeadModel.getStats({ regionId });
+      return await LeadModel.getStats({ regionId }, filters);
     }
 
-    return await LeadModel.getStats();
+    return await LeadModel.getStats(undefined, filters);
   }
 
   static async getLead(id: string, userId?: string, userRole?: string, regionId?: string, branchId?: string): Promise<Lead | undefined> {

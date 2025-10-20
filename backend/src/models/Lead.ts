@@ -13,6 +13,7 @@ interface FilterOptions {
   status?: string;
   source?: string;
   lastUpdated?: string;
+  filterType?: 'active' | 'lost' | 'converted';
 }
 
 interface PaginatedLeadsResult {
@@ -84,6 +85,19 @@ export class LeadModel {
       conditions.push(lte(leads.updatedAt, cutoffDate) as SQL<unknown>);
     }
 
+    // Handle custom filter types
+    if (filters?.filterType === 'active') {
+      // Active: NOT lost AND NOT converted
+      conditions.push(ne(leads.isLost, 1));
+      conditions.push(ne(leads.isConverted, 1));
+    } else if (filters?.filterType === 'lost') {
+      // Lost: isLost = 1
+      conditions.push(eq(leads.isLost, 1));
+    } else if (filters?.filterType === 'converted') {
+      // Converted: isConverted = 1
+      conditions.push(eq(leads.isConverted, 1));
+    }
+
     return conditions;
   }
 
@@ -151,16 +165,18 @@ export class LeadModel {
     return whereClause ? query.where(whereClause) : query;
   }
 
-  static async getStats(scope?: LeadScope): Promise<LeadStats> {
+  static async getStats(scope?: LeadScope, filters?: FilterOptions): Promise<LeadStats> {
     const scopeConditions = this.buildScopeConditions(scope);
+    const filterConditions = this.buildFilterConditions(filters);
+    const allScopeAndFilterConditions = [...scopeConditions, ...filterConditions];
 
     const lostCondition = eq(leads.isLost, 1);
     const convertedCondition = eq(leads.isConverted, 1);
 
     const [totalRows, lostRows, convertedRows] = await Promise.all([
-      this.countWithConditions(scopeConditions),
-      this.countWithConditions(scopeConditions, [lostCondition]),
-      this.countWithConditions(scopeConditions, [convertedCondition]),
+      this.countWithConditions(allScopeAndFilterConditions),
+      this.countWithConditions(allScopeAndFilterConditions, [lostCondition]),
+      this.countWithConditions(allScopeAndFilterConditions, [convertedCondition]),
     ]);
 
     const normalizeCount = (rows: Array<{ count: number | bigint | string }>): number => {
