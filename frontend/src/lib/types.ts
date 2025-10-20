@@ -181,6 +181,7 @@ export const insertLeadSchema = z.object({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
   source: z.string().optional(),
+  medium: z.string().optional(),
   status: z.string().default("new"),
   expectation: z.string().optional(),
   type: z.string().optional(),
