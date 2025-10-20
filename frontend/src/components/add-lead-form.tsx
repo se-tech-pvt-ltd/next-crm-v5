@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { insertLeadSchema } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
+import * as EventsService from '@/services/events';
 import * as StudentsService from '@/services/students';
 import * as BranchesService from '@/services/branches';
 import * as RegionsService from '@/services/regions';
