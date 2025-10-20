@@ -488,7 +488,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
       // For status, if opening from event registration, find the default status with isDefault=true and use its key/id directly
       let defaultStatusKey: string | undefined = undefined;
-      if ((initialData as any).eventRegId && !((initialData as any).status)) {
+      if ((initialData as any).eventRegId && !((initialData as any).status) && dropdownData) {
         const statusList = (dropdownData as any).Status || [];
         const defaultStatusOption = Array.isArray(statusList) ? statusList.find((s: any) => Boolean(s.isDefault || s.is_default)) : null;
         if (defaultStatusOption) {
