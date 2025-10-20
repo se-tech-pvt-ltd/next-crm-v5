@@ -948,7 +948,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                                 placeholder="Select sub partner"
                                 searchPlaceholder="Search sub partners..."
                                 onSearch={setSubPartnerSearch}
-                                options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || (u.email||'User'), email: u.email }))}
+                                options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || 'Unknown' }))}
                                 loading={subPartnerLoading}
                                 className="h-12 text-sm bg-white border rounded"
                                 showAvatar={false}
