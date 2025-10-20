@@ -362,11 +362,12 @@ export default function Leads() {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const { data: leadsStats } = useQuery({
-    queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter],
+    queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter, filterType],
     queryFn: async () => LeadsService.getLeadsStats({
       status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : 'all',
       source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : 'all',
       lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : 'all',
+      filterType,
     }),
     staleTime: 0,
     refetchOnMount: true,
