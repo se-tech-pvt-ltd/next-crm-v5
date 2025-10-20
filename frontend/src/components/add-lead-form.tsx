@@ -374,18 +374,13 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         })
         .filter((u: any) =>
           counselorSearchQuery === '' ||
-          String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
-          String(u.email || '').toLowerCase().includes(counselorSearchQuery.toLowerCase())
+          String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase())
         )
         .map((u: any) => {
           const displayName = (`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim()) || String(u.full_name || u.fullName || u.name || '');
-          const email = String(u.email || '');
-          const subtitle = email && email !== displayName ? email : undefined;
           return {
-            label: displayName || email,
+            label: displayName,
             value: String(u.id),
-            email: subtitle,
-            subtitle,
           };
         })
     : [];
@@ -410,13 +405,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         })
         .map((u: any) => {
           const displayName = (`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim()) || String(u.full_name || u.fullName || u.name || '');
-          const email = String(u.email || '');
-          const subtitle = email && email !== displayName ? email : undefined;
           return {
-            label: displayName || email,
+            label: displayName,
             value: String(u.id),
-            email: subtitle,
-            subtitle,
           };
         })
     : [];
@@ -486,7 +477,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       // If opened from an event registration, prefer the specified defaults
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
-      const defaultStatusLabel = (initialData as any).eventRegId ? 'Raw' : undefined;
+      // For status, if opening from event registration, find the default status with isDefault=true and use its key/id directly
+      let defaultStatusKey: string | undefined = undefined;
+      if ((initialData as any).eventRegId && !((initialData as any).status) && dropdownData) {
+        const statusList = (dropdownData as any).Status || [];
+        const defaultStatusOption = Array.isArray(statusList) ? statusList.find((s: any) => Boolean(s.isDefault || s.is_default)) : null;
+        if (defaultStatusOption) {
+          // Use the same value format as SelectItem: key || id || value
+          defaultStatusKey = defaultStatusOption.key || defaultStatusOption.id || defaultStatusOption.value;
+        }
+      }
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
 
       const mapLabelToKeyRobust = (group: string, label?: string) => {
@@ -517,7 +517,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         phone: initialData.phone || '',
         city: initialData.city || '',
         source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
-        status: mapLabelToKeyRobust('Status', initialData.status || defaultStatusLabel),
+        status: initialData.status ? mapLabelToKeyRobust('Status', initialData.status) : defaultStatusKey,
         counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',

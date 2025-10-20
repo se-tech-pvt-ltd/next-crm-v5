@@ -114,7 +114,6 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
           label: counselor.firstName && counselor.lastName
             ? `${counselor.firstName} ${counselor.lastName}`
             : (typeof counselor.email === 'string' ? (counselor.email.includes('@') ? counselor.email.split('@')[0] : counselor.email) : 'Unknown'),
-          email: counselor.email,
           role: counselor.role === 'admin_staff' ? 'Admin' : 'Counselor'
         }))
     : [];

@@ -339,7 +339,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             String(u.branchId || '') === String(selectedBranchId || '')
           );
         })
-        .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+        .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }))
     : [];
   const officerOptions = Array.isArray(users) && selectedBranchId
     ? users
@@ -350,7 +350,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
             String(u.branchId || '') === String(selectedBranchId || '')
           );
         })
-        .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }))
+        .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }))
     : [];
 
   // Ensure options include student's assigned users even if filtered out
@@ -359,7 +359,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     const sel = studentCounsellorId;
     if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
       const u = (users as any[]).find((x: any) => String(x.id) === sel);
-      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }, ...list];
+      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }, ...list];
     }
     return list;
   }, [counsellorOptions, users, studentCounsellorId]);
@@ -369,7 +369,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     const sel = studentAdmissionOfficerId;
     if (sel && !list.some((o) => String(o.value) === sel) && Array.isArray(users)) {
       const u = (users as any[]).find((x: any) => String(x.id) === sel);
-      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }, ...list];
+      if (u) list = [{ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }, ...list];
     }
     return list;
   }, [officerOptions, users, studentAdmissionOfficerId]);
@@ -948,7 +948,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
                                 placeholder="Select sub partner"
                                 searchPlaceholder="Search sub partners..."
                                 onSearch={setSubPartnerSearch}
-                                options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || (u.email||'User'), email: u.email }))}
+                                options={(Array.isArray(subPartners) ? subPartners : []).map((u:any)=>({ value: String(u.id), label: [u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(' ') || 'Unknown' }))}
                                 loading={subPartnerLoading}
                                 className="h-12 text-sm bg-white border rounded"
                                 showAvatar={false}

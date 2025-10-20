@@ -305,7 +305,7 @@ export default function EventsPage() {
       city: reg.city,
       // ensure source defaults to Events for conversion flow
       source: 'Events',
-      status: 'new',
+      // Don't set status here - let the form's default status logic in add-lead-form.tsx handle it
       eventRegId: reg.id,
       eventId: eventId,
     };
@@ -2519,7 +2519,7 @@ export default function EventsPage() {
                       <SelectTrigger className="h-8 text-sm" disabled={disableByView.counsellor}><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
                         {counselorOptionsEdit.map((u: any) => (
-                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || 'Unknown'}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -2530,7 +2530,7 @@ export default function EventsPage() {
                       <SelectTrigger className="h-8 text-sm" disabled={disableByView.admissionOfficer}><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptionsEdit.map((u: any) => (
-                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || 'Unknown'}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -2669,7 +2669,7 @@ export default function EventsPage() {
                       <SelectTrigger className="h-8 text-sm" disabled={(isCreateRoute && isCounsellor && String(eventAccess.counsellorId || '') === String((user as any)?.id || tokenSub)) || disableByView.counsellor }><SelectValue placeholder="Select counsellor" /></SelectTrigger>
                       <SelectContent>
                         {counselorOptions.map((u: any) => (
-                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || 'Unknown'}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -2680,7 +2680,7 @@ export default function EventsPage() {
                       <SelectTrigger className="h-8 text-sm" disabled={(isCreateRoute && isAdmissionOfficer && String(eventAccess.admissionOfficerId || '') === String((user as any)?.id || tokenSub)) || disableByView.admissionOfficer }><SelectValue placeholder="Select officer" /></SelectTrigger>
                       <SelectContent>
                         {admissionOfficerOptions.map((u: any) => (
-                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || (u.email || 'User')}</SelectItem>
+                          <SelectItem key={u.id} value={String(u.id)}>{`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || 'Unknown'}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
