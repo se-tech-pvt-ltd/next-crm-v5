@@ -86,6 +86,9 @@ app.use(express.urlencoded({ extended: false }));
 // Request logging middleware
 app.use(requestLogger);
 
+// API file logging middleware (logs to user-specific log files)
+app.use(apiLogger);
+
 // Register all routes
 const server = await registerRoutes(app);
 
