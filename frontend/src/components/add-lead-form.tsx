@@ -615,12 +615,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         } catch {}
       } catch {}
     } else if (dropdownData) {
-      // No initial data: apply only the dropdown's isDefault selection for status, source and type (if any)
+      // No initial data: apply only the dropdown's isDefault selection for source and type, and for status prefer isDefault otherwise use first option
       try {
         const statusList = (dropdownData as any).Status || [];
         const defaultStatus = statusList.find((s: any) => Boolean(s.isDefault || s.is_default));
         if (defaultStatus) {
           form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
+        } else if (Array.isArray(statusList) && statusList.length > 0) {
+          const first = statusList[0];
+          form.setValue('status', first.key || first.id || first.value);
         }
       } catch {}
 
