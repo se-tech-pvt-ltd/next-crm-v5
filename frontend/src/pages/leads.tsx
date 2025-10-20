@@ -537,7 +537,7 @@ export default function Leads() {
 
                 <div className="flex items-center gap-2">
                   {/* Clear Filters */}
-                  {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText) && (
+                  {(statusFilter !== 'all' || sourceFilter !== 'all' || lastUpdatedFilter !== 'all' || dateFromFilter || dateToFilter || queryText || filterType) && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -546,6 +546,7 @@ export default function Leads() {
                         setStatusFilter('all');
                         setSourceFilter('all');
                         setLastUpdatedFilter('all');
+                        setFilterType(undefined);
                         setDateFromFilter(undefined);
                         setDateToFilter(undefined);
                         setQueryText('');
