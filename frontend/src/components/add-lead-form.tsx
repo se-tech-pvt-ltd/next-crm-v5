@@ -1084,7 +1084,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   control={form.control}
                   name="source"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className={mediumOptions.length === 0 ? 'md:col-span-2' : ''}>
                       <FormLabel className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4" />
                         <span>Lead Source *</span>
