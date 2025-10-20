@@ -139,7 +139,15 @@ export default function Leads() {
     const urlStatus = params.get('status');
     const urlSource = params.get('source');
     const urlLastUpdated = params.get('lastUpdated');
+    const urlFilterType = params.get('filterType') as 'active' | 'lost' | 'converted' | null;
     const urlPage = parseInt(params.get('page') || '1');
+
+    // Update filterType
+    if (urlFilterType && ['active', 'lost', 'converted'].includes(urlFilterType)) {
+      setFilterType(urlFilterType as 'active' | 'lost' | 'converted');
+    } else {
+      setFilterType(undefined);
+    }
 
     // Update lastUpdated filter (direct value, no mapping needed)
     if (urlLastUpdated) {
