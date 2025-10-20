@@ -92,6 +92,9 @@ app.use(apiLogger);
 // Register all routes
 const server = await registerRoutes(app);
 
+// Error logger middleware (before main error handler)
+app.use(errorLoggerHandler);
+
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
