@@ -189,6 +189,61 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const selectedRegionId = (form?.watch?.('regionId') || '') as string;
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
+  const selectedSourceKey = (form?.watch?.('source') || '') as string;
+
+  const { data: eventsListRaw } = useQuery({
+    queryKey: ['/api/events'],
+    queryFn: () => EventsService.getEvents(),
+    staleTime: 60000,
+  });
+
+  const resolveSourceLabel = useCallback((key: string) => {
+    try {
+      const list = (dropdownData as any)?.Source || [];
+      const item = list.find((o: any) => String(o.key ?? o.id ?? o.value) === String(key));
+      const val = String(item?.value ?? key ?? '').toLowerCase();
+      return val;
+    } catch {
+      return String(key || '').toLowerCase();
+    }
+  }, [dropdownData]);
+
+  const mediumOptions = useMemo(() => {
+    const label = resolveSourceLabel(selectedSourceKey);
+    const eventsList = Array.isArray(eventsListRaw) ? eventsListRaw : (eventsListRaw as any)?.data;
+    if (label.includes('paid')) {
+      return [
+        { label: 'Meta', value: 'meta' },
+        { label: 'TikTok', value: 'tiktok' },
+        { label: 'YouTube', value: 'youtube' },
+        { label: 'Google Ads', value: 'google ads' },
+      ];
+    }
+    if (label.includes('social')) {
+      return [
+        { label: 'Facebook', value: 'facebook' },
+        { label: 'Instagram', value: 'instagram' },
+        { label: 'TikTok', value: 'tiktok' },
+        { label: 'YouTube', value: 'youtube' },
+      ];
+    }
+    if (label.includes('event')) {
+      const names = (Array.isArray(eventsList) ? eventsList : []).map((e: any) => String(e.name || e.eventName || e.title || '')).filter((s) => s);
+      return names.map((n) => ({ label: n, value: n }));
+    }
+    if (label.includes('outdoor')) {
+      return [
+        { label: 'Billboard', value: 'billboard' },
+        { label: 'Streamers', value: 'streamers' },
+      ];
+    }
+    return [] as { label: string; value: string }[];
+  }, [selectedSourceKey, resolveSourceLabel, eventsListRaw]);
+
+  useEffect(() => {
+    // Clear medium when source changes
+    form.setValue('medium', '');
+  }, [selectedSourceKey]);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
   const getNormalizedRole = () => {
