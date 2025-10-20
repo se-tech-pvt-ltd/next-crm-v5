@@ -486,13 +486,14 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       // If opened from an event registration, prefer the specified defaults
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
-      // For status, if opening from event registration, find the default status with isDefault=true
-      let defaultStatusLabel: string | undefined = undefined;
+      // For status, if opening from event registration, find the default status with isDefault=true and use its key/id directly
+      let defaultStatusKey: string | undefined = undefined;
       if ((initialData as any).eventRegId && !((initialData as any).status)) {
         const statusList = (dropdownData as any).Status || [];
         const defaultStatusOption = Array.isArray(statusList) ? statusList.find((s: any) => Boolean(s.isDefault || s.is_default)) : null;
         if (defaultStatusOption) {
-          defaultStatusLabel = defaultStatusOption.value || defaultStatusOption.label || '';
+          // Use the same value format as SelectItem: key || id || value
+          defaultStatusKey = defaultStatusOption.key || defaultStatusOption.id || defaultStatusOption.value;
         }
       }
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
