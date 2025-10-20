@@ -353,9 +353,9 @@ export default function Leads() {
   const { data: leadsStats } = useQuery({
     queryKey: ['/api/leads/stats', statusFilter, sourceFilter, lastUpdatedFilter],
     queryFn: async () => LeadsService.getLeadsStats({
-      status: statusFilter,
-      source: sourceFilter,
-      lastUpdated: lastUpdatedFilter,
+      status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : 'all',
+      source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : 'all',
+      lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : 'all',
     }),
     staleTime: 0,
     refetchOnMount: true,
