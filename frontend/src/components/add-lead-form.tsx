@@ -374,18 +374,13 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         })
         .filter((u: any) =>
           counselorSearchQuery === '' ||
-          String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase()) ||
-          String(u.email || '').toLowerCase().includes(counselorSearchQuery.toLowerCase())
+          String((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase().includes(counselorSearchQuery.toLowerCase())
         )
         .map((u: any) => {
           const displayName = (`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim()) || String(u.full_name || u.fullName || u.name || '');
-          const email = String(u.email || '');
-          const subtitle = email && email !== displayName ? email : undefined;
           return {
-            label: displayName || email,
+            label: displayName,
             value: String(u.id),
-            email: subtitle,
-            subtitle,
           };
         })
     : [];
@@ -410,13 +405,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         })
         .map((u: any) => {
           const displayName = (`${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim()) || String(u.full_name || u.fullName || u.name || '');
-          const email = String(u.email || '');
-          const subtitle = email && email !== displayName ? email : undefined;
           return {
-            label: displayName || email,
+            label: displayName,
             value: String(u.id),
-            email: subtitle,
-            subtitle,
           };
         })
     : [];
