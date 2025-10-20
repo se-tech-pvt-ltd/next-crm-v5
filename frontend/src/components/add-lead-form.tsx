@@ -810,11 +810,16 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       return lbl.includes('paid') || lbl.includes('social') || lbl.includes('event') || lbl.includes('outdoor');
     })();
     if (needsMedium && !data.medium) {
+      try { form.setError('medium' as any, { type: 'required', message: 'Lead Medium is required' }); } catch {}
       toast({ title: 'Lead Medium required', description: 'Please select a Lead Medium for the chosen Lead Source.', variant: 'destructive' });
       return;
     }
 
     const payload: any = { ...data };
+    // If medium is not required/visible, explicitly send null so backend doesn't receive empty string
+    if (!needsMedium) {
+      payload.medium = null;
+    }
     if (initialData && (initialData as any).eventRegId) {
       payload.eventRegId = (initialData as any).eventRegId;
     }
