@@ -298,7 +298,10 @@ export default function EventsPage() {
     const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
     const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(eventId)) || selectedEvent;
 
-    const defaultStatus = statusOptions.find((o: any) => o.isDefault);
+    // Get the default status from raw dropdown data to match form's SelectItem value structure
+    const rawStatusList = (eventsDropdowns as any)?.Status || (eventsDropdowns as any)?.Statuses || [];
+    const rawDefaultStatus = Array.isArray(rawStatusList) ? rawStatusList.find((o: any) => Boolean(o.isDefault || o.is_default)) : null;
+
     const initialData: any = {
       name: reg.name,
       email: reg.email,
@@ -306,7 +309,7 @@ export default function EventsPage() {
       city: reg.city,
       // ensure source defaults to Events for conversion flow
       source: 'Events',
-      status: defaultStatus ? defaultStatus.value : 'new',
+      status: rawDefaultStatus ? (rawDefaultStatus.key || rawDefaultStatus.id || rawDefaultStatus.value) : 'new',
       eventRegId: reg.id,
       eventId: eventId,
     };
