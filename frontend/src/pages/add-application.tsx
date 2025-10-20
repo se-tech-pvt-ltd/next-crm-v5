@@ -318,7 +318,7 @@ export default function AddApplication() {
           String(u.branchId || '') === String(selectedBranchId || '')
         );
       })
-      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
   }, [users, selectedBranchId]);
 
   const officerOptions = useMemo(() => {
@@ -331,7 +331,7 @@ export default function AddApplication() {
           String(u.branchId || '') === String(selectedBranchId || '')
         );
       })
-      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || (u.email || 'User') }));
+      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
   }, [users, selectedBranchId]);
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
