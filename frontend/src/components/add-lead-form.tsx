@@ -486,8 +486,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       // If opened from an event registration, prefer the specified defaults
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
-      // For status, if opening from event registration and initialData has a status, use it; otherwise let it fall back to dropdown default
-      const defaultStatusLabel = (initialData as any).eventRegId ? (initialData as any).status : undefined;
+      // For status, if opening from event registration, find the default status with isDefault=true
+      let defaultStatusLabel: string | undefined = undefined;
+      if ((initialData as any).eventRegId && !((initialData as any).status)) {
+        const statusList = (dropdownData as any).Status || [];
+        const defaultStatusOption = Array.isArray(statusList) ? statusList.find((s: any) => Boolean(s.isDefault || s.is_default)) : null;
+        if (defaultStatusOption) {
+          defaultStatusLabel = defaultStatusOption.value || defaultStatusOption.label || '';
+        }
+      }
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
 
       const mapLabelToKeyRobust = (group: string, label?: string) => {
