@@ -13,6 +13,7 @@ interface FilterOptions {
   status?: string;
   source?: string;
   lastUpdated?: string;
+  filterType?: 'active' | 'lost' | 'converted';
 }
 
 interface PaginatedLeadsResult {
