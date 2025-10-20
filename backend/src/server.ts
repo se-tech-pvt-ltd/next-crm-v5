@@ -4,6 +4,7 @@ import cors, { type CorsOptions } from "cors";
 import { registerRoutes } from "./routes/index.js";
 import { requestLogger, log } from "./middlewares/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import { apiLogger, errorLoggerHandler } from "./middlewares/apiLogger.js";
 
 const app = express();
 
