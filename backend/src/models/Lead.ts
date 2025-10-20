@@ -85,6 +85,19 @@ export class LeadModel {
       conditions.push(lte(leads.updatedAt, cutoffDate) as SQL<unknown>);
     }
 
+    // Handle custom filter types
+    if (filters?.filterType === 'active') {
+      // Active: NOT lost AND NOT converted
+      conditions.push(ne(leads.isLost, 1));
+      conditions.push(ne(leads.isConverted, 1));
+    } else if (filters?.filterType === 'lost') {
+      // Lost: isLost = 1
+      conditions.push(eq(leads.isLost, 1));
+    } else if (filters?.filterType === 'converted') {
+      // Converted: isConverted = 1
+      conditions.push(eq(leads.isConverted, 1));
+    }
+
     return conditions;
   }
 
