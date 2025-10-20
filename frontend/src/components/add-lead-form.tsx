@@ -526,7 +526,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         phone: initialData.phone || '',
         city: initialData.city || '',
         source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
-        status: mapLabelToKeyRobust('Status', initialData.status || defaultStatusLabel),
+        status: initialData.status ? mapLabelToKeyRobust('Status', initialData.status) : defaultStatusKey,
         counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
