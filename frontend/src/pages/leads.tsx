@@ -206,13 +206,14 @@ export default function Leads() {
   };
 
   const { data: leadsResponse, isLoading } = useQuery({
-    queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter }],
+    queryKey: ['/api/leads', { page: currentPage, limit: pageSize, status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType }],
     queryFn: async () => LeadsService.getLeads({
       page: currentPage,
       limit: pageSize,
       status: statusFilter !== 'all' ? resolveFilterValue('Status', statusFilter) : undefined,
       source: sourceFilter !== 'all' ? resolveFilterValue('Source', sourceFilter) : undefined,
       lastUpdated: lastUpdatedFilter !== 'all' ? lastUpdatedFilter : undefined,
+      filterType,
     }),
     staleTime: 0,
     refetchOnMount: true,
