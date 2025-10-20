@@ -298,6 +298,7 @@ export default function EventsPage() {
     const eventId = selectedEvent?.id || reg.eventId || reg.event_id;
     const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(eventId)) || selectedEvent;
 
+    const defaultStatus = statusOptions.find((o: any) => o.isDefault);
     const initialData: any = {
       name: reg.name,
       email: reg.email,
@@ -305,7 +306,7 @@ export default function EventsPage() {
       city: reg.city,
       // ensure source defaults to Events for conversion flow
       source: 'Events',
-      status: 'new',
+      status: defaultStatus ? defaultStatus.value : 'new',
       eventRegId: reg.id,
       eventId: eventId,
     };
