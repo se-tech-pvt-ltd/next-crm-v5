@@ -1106,6 +1106,34 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   )}
                 />
 
+                {mediumOptions.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="medium"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>Lead Medium</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select medium" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mediumOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="status"
