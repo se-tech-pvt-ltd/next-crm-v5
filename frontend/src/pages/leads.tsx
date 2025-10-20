@@ -88,6 +88,7 @@ export default function Leads() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [lastUpdatedFilter, setLastUpdatedFilter] = useState('all');
+  const [filterType, setFilterType] = useState<'active' | 'lost' | 'converted' | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
