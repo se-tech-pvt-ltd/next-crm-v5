@@ -121,11 +121,12 @@ export default function Leads() {
   });
 
   // Helper function to update URL with filter query strings
-  const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; page?: number }) => {
+  const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; filterType?: 'active' | 'lost' | 'converted'; page?: number }) => {
     const params = new URLSearchParams();
     if (filters.status && filters.status !== 'all') params.set('status', filters.status);
     if (filters.source && filters.source !== 'all') params.set('source', filters.source);
     if (filters.lastUpdated && filters.lastUpdated !== 'all') params.set('lastUpdated', filters.lastUpdated);
+    if (filters.filterType) params.set('filterType', filters.filterType);
     if (filters.page && filters.page > 1) params.set('page', String(filters.page));
 
     const queryString = params.toString();
