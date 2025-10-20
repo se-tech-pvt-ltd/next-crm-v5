@@ -54,11 +54,13 @@ export async function getLeadsStats(params?: {
   status?: string;
   source?: string;
   lastUpdated?: string;
+  filterType?: 'active' | 'lost' | 'converted';
 }) {
   const searchParams = new URLSearchParams();
   if (params?.status && params.status !== 'all') searchParams.append('status', params.status);
   if (params?.source && params.source !== 'all') searchParams.append('source', params.source);
   if (params?.lastUpdated && params.lastUpdated !== 'all') searchParams.append('lastUpdated', params.lastUpdated);
+  if (params?.filterType) searchParams.append('filterType', params.filterType);
 
   const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
   return http.get<any>(`/api/leads/stats${query}`);
