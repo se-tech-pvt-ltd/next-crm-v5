@@ -27,6 +27,7 @@ export interface Lead {
   country: string | null;
   program: string | null;
   source: string | null;
+  medium: string | null;
   status: string;
   expectation: string | null;
   type: string | null;
