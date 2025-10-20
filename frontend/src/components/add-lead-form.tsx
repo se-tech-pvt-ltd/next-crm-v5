@@ -241,8 +241,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   }, [selectedSourceKey, resolveSourceLabel, eventsListRaw]);
 
   useEffect(() => {
-    // Clear medium when source changes
-    form.setValue('medium', '');
+    // Clear medium and its validation errors when source changes
+    try { form.setValue('medium', ''); form.clearErrors('medium'); } catch {}
   }, [selectedSourceKey]);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
