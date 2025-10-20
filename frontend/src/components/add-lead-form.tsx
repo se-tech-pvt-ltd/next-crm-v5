@@ -805,6 +805,15 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       return;
     }
 
+    const needsMedium = (() => {
+      const lbl = resolveSourceLabel(data.source);
+      return lbl.includes('paid') || lbl.includes('social') || lbl.includes('event') || lbl.includes('outdoor');
+    })();
+    if (needsMedium && !data.medium) {
+      toast({ title: 'Lead Medium required', description: 'Please select a Lead Medium for the chosen Lead Source.', variant: 'destructive' });
+      return;
+    }
+
     const payload: any = { ...data };
     if (initialData && (initialData as any).eventRegId) {
       payload.eventRegId = (initialData as any).eventRegId;
