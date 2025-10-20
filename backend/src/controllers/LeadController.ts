@@ -21,10 +21,11 @@ export class LeadController {
       const status = req.query.status as string | undefined;
       const source = req.query.source as string | undefined;
       const lastUpdated = req.query.lastUpdated as string | undefined;
+      const filterType = req.query.filterType as 'active' | 'lost' | 'converted' | undefined;
 
       console.log(`Getting leads: page=${page}, limit=${limit}, offset=${offset}, user=${currentUser.id}, role=${currentUser.role}`);
 
-      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId, (currentUser as any).branchId, { status, source, lastUpdated });
+      const result = await LeadService.getLeads(currentUser.id, currentUser.role, { page, limit, offset }, (currentUser as any).regionId, (currentUser as any).branchId, { status, source, lastUpdated, filterType });
 
       console.log(`Lead results: total=${result.total}, leads count=${result.leads.length}`);
 
