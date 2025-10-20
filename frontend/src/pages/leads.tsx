@@ -443,7 +443,7 @@ export default function Leads() {
 
         {/* Leads Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType(undefined); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
