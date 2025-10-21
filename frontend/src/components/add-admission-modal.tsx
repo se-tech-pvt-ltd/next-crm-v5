@@ -611,7 +611,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (autoBranchDisabled !== false) setAutoBranchDisabled(false);
       }
     } catch {}
-  }, [open, memoizedUserId, memoizedUserRole, regions, branches, branchEmps, users, form, getNormalizedRole, autoRegionDisabled, autoBranchDisabled]);
+  }, [open, user, regions, branches, branchEmps, users, form, getNormalizedRole, autoRegionDisabled, autoBranchDisabled]);
 
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
