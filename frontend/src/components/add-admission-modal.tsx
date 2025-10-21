@@ -340,7 +340,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     enabled: open,
   });
 
-  const getOptions = (name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
+  const getOptions = React.useCallback((name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
   // Debug: inspect loaded dropdown payloads when modal open
   try { if (open) { console.log('[AddAdmissionModal] admissionDropdowns =', admissionDropdowns); console.log('[AddAdmissionModal] applicationsDropdowns =', applicationsDropdowns); } } catch {}
     const normalize = (s: string) => String(s || '').toLowerCase().trim();
@@ -370,7 +370,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
 
     return [] as {label:string;value:string}[];
-  };
+  }, [open, admissionDropdowns, applicationsDropdowns]);
 
   const statusOptions = getOptions('Status', ['Admissions','Applications']);
   const caseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
