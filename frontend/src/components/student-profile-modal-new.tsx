@@ -379,7 +379,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         title: "Success",
         description: "Student updated successfully.",
       });
+      // Ensure both the student detail and the main students list are refreshed
       queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       setIsEditing(false);
       try { setLocation(`/students/${student?.id}`); } catch {}
     },
