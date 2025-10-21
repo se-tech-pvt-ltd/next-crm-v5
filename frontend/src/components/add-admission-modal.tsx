@@ -680,7 +680,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
       if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
     } catch {}
-  }, [branchId, branchEmps, users]);
+  }, [branchId, branchEmps, users, form]);
 
   const handleSubmitClick = () => {
     try {
