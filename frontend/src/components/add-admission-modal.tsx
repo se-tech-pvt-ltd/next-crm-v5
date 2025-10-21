@@ -66,6 +66,14 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
   const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
 
+  // Users for access assignment (declared early to avoid temporal dead zone in useEffect)
+  const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: branchEmps = [], isFetched: branchEmpsFetched = false } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
 
   const form = useForm<any>({
@@ -110,7 +118,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       try { form.trigger(); } catch {};
     }, 50);
     return () => clearTimeout(t);
-  }, [open]);
+  }, [open, form]);
 
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
@@ -126,7 +134,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       const curr = form.getValues('netTuitionFee');
       if (String(curr) !== String(net)) form.setValue('netTuitionFee', String(net));
     }
-  }, [watchedFull, watchedScholarship]);
+  }, [watchedFull, watchedScholarship, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -287,7 +295,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         }
       } catch {}
     }
-  }, [applicationId, studentId, linkedApp]);
+  }, [applicationId, studentId, linkedApp, form, users, branchEmps, getOptions]);
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -332,7 +340,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (parentPartnerId && !form.getValues('partnerId')) form.setValue('partnerId', parentPartnerId);
       }
     } catch {}
-  }, [open, subPartners]);
+  }, [open, subPartners, form]);
 
   const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -340,7 +348,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     enabled: open,
   });
 
-  const getOptions = (name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
+  const getOptions = React.useCallback((name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
   // Debug: inspect loaded dropdown payloads when modal open
   try { if (open) { console.log('[AddAdmissionModal] admissionDropdowns =', admissionDropdowns); console.log('[AddAdmissionModal] applicationsDropdowns =', applicationsDropdowns); } } catch {}
     const normalize = (s: string) => String(s || '').toLowerCase().trim();
@@ -370,7 +378,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
 
     return [] as {label:string;value:string}[];
-  };
+  }, [open, admissionDropdowns, applicationsDropdowns]);
 
   const statusOptions = getOptions('Status', ['Admissions','Applications']);
   const caseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
@@ -389,15 +397,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (def) form.setValue('caseStatus', def.value as any);
       }
     } catch {}
-  }, [open, statusOptions, caseStatusOptions]);
-
-  // Users for access assignment
-  const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
-    queryKey: ['/api/users'],
-    queryFn: async () => UsersService.getUsers(),
-    enabled: open,
-    staleTime: 5 * 60 * 1000,
-  });
+  }, [open, statusOptions, caseStatusOptions, form]);
 
   // When modal is opened for a specific application, only populate access fields after users & branch mappings are fetched
   useEffect(() => {
@@ -435,7 +435,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch (e) {
       console.error('[AddAdmissionModal] linkedApp sync error', e);
     }
-  }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps]);
+  }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps, form]);
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const counsellorOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -456,7 +456,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return opts;
-  }, [users, branchEmps, branchId]);
+  }, [users, branchEmps, form]);
 
   const officerOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -476,7 +476,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return opts;
-  }, [users, branchEmps, branchId]);
+  }, [users, branchEmps, form]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => (RegionsService.listRegions ? RegionsService.listRegions() : RegionsService.getRegions ? RegionsService.getRegions() : Promise.resolve([])), enabled: open });
@@ -611,7 +611,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (autoBranchDisabled !== false) setAutoBranchDisabled(false);
       }
     } catch {}
-  }, [open, (user as any)?.id, (user as any)?.role, regions, branches, branchEmps, users]);
+  }, [open, user, regions, branches, branchEmps, users, form, getNormalizedRole, autoRegionDisabled, autoBranchDisabled]);
 
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
@@ -654,12 +654,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const openApplicationDetails = (app: Application) => {
     setCurrentApplicationObj(app);
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); }
+    setIsAppDetailsOpen(true);
   };
 
   const openStudentProfile = (sid: string) => {
     setCurrentStudentIdLocal(sid);
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
+    setIsStudentProfileOpen(true);
   };
 
   // Populate counsellor/admission officer only after branch is selected
@@ -680,7 +680,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (counsellor && !form.getValues('counsellorId')) form.setValue('counsellorId', String(counsellor.id));
       if (officer && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', String(officer.id));
     } catch {}
-  }, [branchId, branchEmps, users]);
+  }, [branchId, branchEmps, users, form]);
 
   const handleSubmitClick = () => {
     try {
@@ -732,7 +732,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (!String(form.getValues('scholarshipAmount') || '').trim() && (scholarship || scholarship === 0)) form.setValue('scholarshipAmount', String(scholarship));
       if (!String(form.getValues('initialDeposit') || '').trim() && (initDeposit || initDeposit === 0)) form.setValue('initialDeposit', String(initDeposit));
     } catch {}
-  }, [uniDetail, open]);
+  }, [uniDetail, open, form]);
 
   // Fallback: if application provides only university name (no universityId), try to find the university by name and autofill fees
   useEffect(() => {
@@ -767,7 +767,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     })();
 
     return () => { cancelled = true; };
-  }, [currentApp, open, uniDetail]);
+  }, [currentApp, open, uniDetail, form]);
 
 
   return (

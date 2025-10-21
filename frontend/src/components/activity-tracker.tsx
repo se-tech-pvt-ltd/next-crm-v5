@@ -140,7 +140,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       setActivityType('comment');
       setFollowUpDateTimeValue('');
     }
-  }, [entityType]);
+  }, [entityType, activityType]);
 
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
@@ -297,10 +297,10 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   };
 
   // Create a lookup function for user profile images
-  const getUserProfileImage = (userId: string) => {
+  const getUserProfileImage = React.useCallback((userId: string) => {
     const user = users.find((u: UserType) => String(u.id) === String(userId));
     return (user as any)?.profileImageUrl || (user as any)?.profileImage || null;
-  };
+  }, [users]);
 
   // Image viewer modal state
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -355,7 +355,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         setFetchedProfiles(prev => ({ ...prev, [id]: null }));
       }
     });
-  }, [activities, users, fetchedProfiles]);
+  }, [activities, users, fetchedProfiles, getUserProfileImage]);
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string; followUpAt?: string | null }) => {

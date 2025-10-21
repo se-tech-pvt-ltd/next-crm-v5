@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const FILE_NAME = fileURLToPath(import.meta.url);
+const DIR_NAME = path.dirname(FILE_NAME);
 
-const LOGS_DIR = path.join(__dirname, '../../logs');
+const LOGS_DIR = path.join(DIR_NAME, '../../logs');
 
 // Ensure logs directory exists
 if (!fs.existsSync(LOGS_DIR)) {

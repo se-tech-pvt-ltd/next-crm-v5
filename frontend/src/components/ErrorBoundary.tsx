@@ -1,36 +1,27 @@
-import React from 'react';
+import React, { ReactNode, useState } from 'react';
 
 interface Props {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
-interface State {
-  hasError: boolean;
-  error?: Error | null;
-}
+const ErrorBoundary = ({ children, fallback }: Props) => {
+  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-export class ErrorBoundary extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, error: null };
+  // Handle synchronous errors during rendering
+  if (hasError && error) {
+    return fallback || <div className="p-2 text-sm text-red-600">Something went wrong.</div>;
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
+  try {
+    return <>{children}</>;
+  } catch (err) {
+    const typedError = err instanceof Error ? err : new Error(String(err));
+    setHasError(true);
+    setError(typedError);
+    return fallback || <div className="p-2 text-sm text-red-600">Something went wrong.</div>;
   }
-
-  componentDidCatch(error: Error, info: any) {
-    // Log if desired
-    // console.error('ErrorBoundary caught error', error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <div className="p-2 text-sm text-red-600">Something went wrong.</div>;
-    }
-    return this.props.children;
-  }
-}
+};
 
 export default ErrorBoundary;
