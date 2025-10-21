@@ -445,6 +445,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       try {
         setCurrentStatus(updatedStudent.status);
         queryClient.setQueryData([`/api/students/${studentId}`], updatedStudent);
+        // Also invalidate the main students list so list views reflect this status change
+        queryClient.invalidateQueries({ queryKey: ['/api/students'] });
         // Compose content using previous status from context when available
         const previousStatus = context?.previousStatus ?? '';
         const newStatus = updatedStudent.status ?? '';
