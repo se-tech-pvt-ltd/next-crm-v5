@@ -343,12 +343,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
   }, [applicationId, studentId, linkedApp, form, users, branchEmps, getOptions]);
 
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
-    enabled: open,
-  });
-
   const [subPartnerSearch, setSubPartnerSearch] = useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
 
@@ -387,44 +381,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
   }, [open, subPartners, form]);
-
-  const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
-    enabled: open,
-  });
-
-  const getOptions = React.useCallback((name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
-  // Debug: inspect loaded dropdown payloads when modal open
-  try { if (open) { console.log('[AddAdmissionModal] admissionDropdowns =', admissionDropdowns); console.log('[AddAdmissionModal] applicationsDropdowns =', applicationsDropdowns); } } catch {}
-    const normalize = (s: string) => String(s || '').toLowerCase().trim();
-    const variants = (n: string) => [n, n.toLowerCase(), n.replace(/\s+/g, ''), n.replace(/\s+/g, '').toLowerCase(), n.replace(/\s+/g, '_'), n.replace(/\s+/g, '').replace(/_/g,'')];
-
-    const moduleMap: Record<string, Record<string, any[]>|undefined> = {
-      'Admissions': admissionDropdowns as any,
-      'Applications': applicationsDropdowns as any,
-    };
-
-    for (const mod of preferredModules) {
-      const dd = moduleMap[mod];
-      if (!dd || typeof dd !== 'object') continue;
-      // try exact key matches with variants
-      for (const v of variants(name)) {
-        if (Object.prototype.hasOwnProperty.call(dd, v)) {
-          const list = Array.isArray((dd as any)[v]) ? [...(dd as any)[v]] : [];
-          return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
-        }
-      }
-      // try case-insensitive match on keys
-      const foundKey = Object.keys(dd).find(k => normalize(k) === normalize(name) || normalize(k).replace(/\s+/g,'') === normalize(name).replace(/\s+/g,''));
-      if (foundKey) {
-        const list = Array.isArray((dd as any)[foundKey]) ? [...(dd as any)[foundKey]] : [];
-        return list.sort((a: any,b:any)=>Number(a.sequence??0)-Number(b.sequence??0)).map((o:any)=>({ label: o.value, value: o.id||o.key||o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
-      }
-    }
-
-    return [] as {label:string;value:string}[];
-  }, [open, admissionDropdowns, applicationsDropdowns]);
 
   const statusOptions = getOptions('Status', ['Admissions','Applications']);
   const caseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
