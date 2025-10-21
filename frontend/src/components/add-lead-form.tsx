@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { insertLeadSchema } from '@/lib/types';
 import * as DropdownsService from '@/services/dropdowns';
 import * as LeadsService from '@/services/leads';
+import * as EventsService from '@/services/events';
 import * as StudentsService from '@/services/students';
 import * as BranchesService from '@/services/branches';
 import * as RegionsService from '@/services/regions';
@@ -54,6 +55,7 @@ const addLeadFormSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Valid email is required'),
   city: z.string().min(1, 'City is required'),
   source: z.string().min(1, 'Source is required'),
+  medium: z.string().optional(),
   country: z.array(z.string()).min(1, 'At least one country is required'),
   studyLevel: z.string().min(1, 'Study level is required'),
   studyPlan: z.string().min(1, 'Study plan is required'),
@@ -171,6 +173,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       email: '',
       city: '',
       source: '',
+      medium: '',
       country: [],
       studyLevel: '',
       studyPlan: '',
@@ -186,6 +189,61 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   const selectedRegionId = (form?.watch?.('regionId') || '') as string;
   const selectedBranchId = (form?.watch?.('branchId') || '') as string;
+  const selectedSourceKey = (form?.watch?.('source') || '') as string;
+
+  const { data: eventsListRaw } = useQuery({
+    queryKey: ['/api/events'],
+    queryFn: () => EventsService.getEvents(),
+    staleTime: 60000,
+  });
+
+  const resolveSourceLabel = useCallback((key: string) => {
+    try {
+      const list = (dropdownData as any)?.Source || [];
+      const item = list.find((o: any) => String(o.key ?? o.id ?? o.value) === String(key));
+      const val = String(item?.value ?? key ?? '').toLowerCase();
+      return val;
+    } catch {
+      return String(key || '').toLowerCase();
+    }
+  }, [dropdownData]);
+
+  const mediumOptions = useMemo(() => {
+    const label = resolveSourceLabel(selectedSourceKey);
+    const eventsList = Array.isArray(eventsListRaw) ? eventsListRaw : (eventsListRaw as any)?.data;
+    if (label.includes('paid')) {
+      return [
+        { label: 'Meta', value: 'meta' },
+        { label: 'TikTok', value: 'tiktok' },
+        { label: 'YouTube', value: 'youtube' },
+        { label: 'Google Ads', value: 'google ads' },
+      ];
+    }
+    if (label.includes('social')) {
+      return [
+        { label: 'Facebook', value: 'facebook' },
+        { label: 'Instagram', value: 'instagram' },
+        { label: 'TikTok', value: 'tiktok' },
+        { label: 'YouTube', value: 'youtube' },
+      ];
+    }
+    if (label.includes('event')) {
+      const names = (Array.isArray(eventsList) ? eventsList : []).map((e: any) => String(e.name || e.eventName || e.title || '')).filter((s) => s);
+      return names.map((n) => ({ label: n, value: n }));
+    }
+    if (label.includes('outdoor')) {
+      return [
+        { label: 'Billboard', value: 'billboard' },
+        { label: 'Streamers', value: 'streamers' },
+      ];
+    }
+    return [] as { label: string; value: string }[];
+  }, [selectedSourceKey, resolveSourceLabel, eventsListRaw]);
+
+  useEffect(() => {
+    // Clear medium and its validation errors when source changes
+    try { form.setValue('medium', ''); form.clearErrors('medium'); } catch {}
+  }, [selectedSourceKey]);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
   const getNormalizedRole = () => {
@@ -557,25 +615,20 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         } catch {}
       } catch {}
     } else if (dropdownData) {
-      // No initial data: apply default selections from dropdownData if present
+      // No initial data: apply only the dropdown's isDefault selection for source and type, and for status prefer isDefault otherwise use first option
       try {
         const statusList = (dropdownData as any).Status || [];
         const defaultStatus = statusList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultStatus && !form.getValues('status')) {
+        if (defaultStatus) {
           form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
-        }
-        // Fallback: if no default is set in dropdowns, prefer 'Raw' as the initial priority
-        if (!form.getValues('status')) {
-          const rawOption = statusList.find((s: any) => {
-            const val = String(s.value || '').toLowerCase();
-            const key = String(s.key || s.id || '').toLowerCase();
-            return val === 'raw' || key === 'raw' || val.includes('raw');
+        } else if (Array.isArray(statusList) && statusList.length > 0) {
+          // pick first option that has a non-empty key/id/value
+          const firstValid = statusList.find((s: any) => {
+            const v = String(s.key ?? s.id ?? s.value ?? '').trim();
+            return v.length > 0;
           });
-          if (rawOption) {
-            form.setValue('status', rawOption.key || rawOption.id || rawOption.value);
-          } else {
-            // As a last resort, set literal 'Raw' so validation passes and backend stores a sensible default
-            form.setValue('status', 'Raw');
+          if (firstValid) {
+            form.setValue('status', firstValid.key || firstValid.id || firstValid.value);
           }
         }
       } catch {}
@@ -583,7 +636,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       try {
         const sourceList = (dropdownData as any).Source || [];
         const defaultSource = sourceList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultSource && !form.getValues('source')) {
+        if (defaultSource) {
           form.setValue('source', defaultSource.key || defaultSource.id || defaultSource.value);
         }
       } catch {}
@@ -591,7 +644,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       try {
         const typeList = (dropdownData as any).Type || [];
         const defaultType = typeList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultType && !form.getValues('type')) {
+        if (defaultType) {
           form.setValue('type', defaultType.key || defaultType.id || defaultType.value);
         }
       } catch {}
@@ -747,7 +800,21 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       return;
     }
 
+    const needsMedium = (() => {
+      const lbl = resolveSourceLabel(data.source);
+      return lbl.includes('paid') || lbl.includes('social') || lbl.includes('event') || lbl.includes('outdoor');
+    })();
+    if (needsMedium && !data.medium) {
+      try { form.setError('medium' as any, { type: 'required', message: 'Lead Medium is required' }); } catch {}
+      toast({ title: 'Lead Medium required', description: 'Please select a Lead Medium for the chosen Lead Source.', variant: 'destructive' });
+      return;
+    }
+
     const payload: any = { ...data };
+    // If medium is not required/visible, explicitly send null so backend doesn't receive empty string
+    if (!needsMedium) {
+      payload.medium = null;
+    }
     if (initialData && (initialData as any).eventRegId) {
       payload.eventRegId = (initialData as any).eventRegId;
     }
@@ -1012,17 +1079,17 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="source"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className={mediumOptions.length === 0 ? 'md:col-span-2' : ''}>
                       <FormLabel className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4" />
                         <span>Lead Source *</span>
                       </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={(v) => { field.onChange(v); try { form.setValue('medium', ''); } catch {} }} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                             <SelectValue placeholder="How did they find us?" />
@@ -1038,6 +1105,34 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                     </FormItem>
                   )}
                 />
+
+                {mediumOptions.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="medium"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>Lead Medium</span>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select medium" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mediumOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}

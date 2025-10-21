@@ -40,6 +40,37 @@ export default function Students() {
   const queryClient = useQueryClient();
 
   const [location, setLocation] = useLocation();
+
+  // Helper to update URL with student filters
+  const updateUrlWithFilters = (filters: { status?: string; country?: string; page?: number }) => {
+    const params = new URLSearchParams();
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+    if (filters.country && filters.country !== 'all') params.set('country', filters.country);
+    if (filters.page && filters.page > 1) params.set('page', String(filters.page));
+
+    const queryString = params.toString();
+    try {
+      setLocation(queryString ? `/students?${queryString}` : '/students');
+    } catch (e) {
+      // fallback
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', queryString ? `/students?${queryString}` : '/students');
+      }
+    }
+  };
+
+  // Sync filters from URL when location changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const urlStatus = params.get('status');
+    const urlCountry = params.get('country');
+    const urlPage = parseInt(params.get('page') || '1');
+
+    setStatusFilter(urlStatus || 'all');
+    setCountryFilter(urlCountry || 'all');
+    setCurrentPage(urlPage > 0 ? urlPage : 1);
+  }, [location]);
   const [matchStudent, studentParams] = useRoute('/students/:id');
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
   const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
@@ -59,8 +90,16 @@ export default function Students() {
   })();
 
   const { data: studentsResponse, isLoading } = useQuery({
-    queryKey: ['/api/students', { page: currentPage, limit: pageSize }],
-    queryFn: async () => StudentsService.getStudents({ page: currentPage, limit: pageSize }),
+    queryKey: ['/api/students', { page: currentPage, limit: pageSize, statusFilter, countryFilter, searchQuery }],
+    queryFn: async () => {
+      // If no client-side filters/search applied, request server-paginated results for current page.
+      const noFilters = (!searchQuery || String(searchQuery).trim() === '') && statusFilter === 'all' && countryFilter === 'all';
+      if (noFilters) {
+        return StudentsService.getStudents({ page: currentPage, limit: pageSize });
+      }
+      // When filters/search active, fetch all students (no pagination) and apply filters client-side so counts and matches are accurate.
+      return StudentsService.getStudents();
+    },
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -401,7 +440,7 @@ export default function Students() {
       <div className="space-y-3">
         {/* Students Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setCountryFilter('all'); setCurrentPage(1); updateUrlWithFilters({ status: 'all', country: 'all', page: 1 }); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
@@ -415,7 +454,7 @@ export default function Students() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('active'); setCountryFilter('all'); setCurrentPage(1); updateUrlWithFilters({ status: 'active', country: 'all', page: 1 }); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserCheck className="w-3 h-3 text-green-500" />
@@ -429,7 +468,7 @@ export default function Students() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('applied'); setCountryFilter('all'); setCurrentPage(1); updateUrlWithFilters({ status: 'applied', country: 'all', page: 1 }); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Target className="w-3 h-3 text-primary" />
@@ -443,7 +482,7 @@ export default function Students() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('admitted'); setCountryFilter('all'); setCurrentPage(1); updateUrlWithFilters({ status: 'admitted', country: 'all', page: 1 }); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />

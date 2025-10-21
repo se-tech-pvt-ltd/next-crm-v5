@@ -443,7 +443,7 @@ export default function Leads() {
 
         {/* Leads Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType(undefined); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, page: 1 }); }}>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setSourceFilter('all'); setLastUpdatedFilter('all'); setFilterType(undefined); setCurrentPage(1); updateUrlWithFilters({ status: 'all', source: 'all', lastUpdated: 'all', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
@@ -460,7 +460,7 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('active'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'active', page: 1 }); }}>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setSourceFilter('all'); setLastUpdatedFilter('all'); setFilterType('active'); setCurrentPage(1); updateUrlWithFilters({ status: 'all', source: 'all', lastUpdated: 'all', filterType: 'active', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserPlus className="w-3 h-3 text-primary" />
@@ -482,7 +482,7 @@ export default function Leads() {
           </Card>
 
 
-          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('lost'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'lost', page: 1 }); }}>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setSourceFilter('all'); setLastUpdatedFilter('all'); setFilterType('lost'); setCurrentPage(1); updateUrlWithFilters({ status: 'all', source: 'all', lastUpdated: 'all', filterType: 'lost', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <XCircle className="w-3 h-3 text-red-500" />
@@ -503,7 +503,7 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('converted'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'converted', page: 1 }); }}>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setSourceFilter('all'); setLastUpdatedFilter('all'); setFilterType('converted'); setCurrentPage(1); updateUrlWithFilters({ status: 'all', source: 'all', lastUpdated: 'all', filterType: 'converted', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />

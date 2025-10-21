@@ -379,7 +379,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         title: "Success",
         description: "Student updated successfully.",
       });
+      // Ensure both the student detail and the main students list are refreshed
       queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/students'] });
       setIsEditing(false);
       try { setLocation(`/students/${student?.id}`); } catch {}
     },
@@ -443,6 +445,8 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       try {
         setCurrentStatus(updatedStudent.status);
         queryClient.setQueryData([`/api/students/${studentId}`], updatedStudent);
+        // Also invalidate the main students list so list views reflect this status change
+        queryClient.invalidateQueries({ queryKey: ['/api/students'] });
         // Compose content using previous status from context when available
         const previousStatus = context?.previousStatus ?? '';
         const newStatus = updatedStudent.status ?? '';
@@ -849,7 +853,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           return (
                             <div>
                               <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
                             </div>
                           );
                         })()}
@@ -871,7 +874,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           return (
                             <div>
                               <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
                             </div>
                           );
                         })()}
@@ -891,8 +893,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           const email = officer.email || '';
                           return (
                             <div>
-                              <div className="font-medium text-xs">{fullName || email || officer.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                              <div className="font-medium text-xs">{fullName || officer.id}</div>
                             </div>
                           );
                         })()}
@@ -910,8 +911,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
                           const email = c.email || '';
                           return (
                             <div>
-                              <div className="font-medium text-xs">{fullName || email || c.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                              <div className="font-medium text-xs">{fullName || c.id}</div>
                             </div>
                           );
                         })()}

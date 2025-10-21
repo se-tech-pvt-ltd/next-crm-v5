@@ -27,6 +27,7 @@ export interface Lead {
   country: string | null;
   program: string | null;
   source: string | null;
+  medium: string | null;
   status: string;
   expectation: string | null;
   type: string | null;
@@ -180,6 +181,7 @@ export const insertLeadSchema = z.object({
   country: z.union([z.string(), z.array(z.string())]).optional(),
   program: z.union([z.string(), z.array(z.string())]).optional(),
   source: z.string().optional(),
+  medium: z.string().optional(),
   status: z.string().default("new"),
   expectation: z.string().optional(),
   type: z.string().optional(),

@@ -596,7 +596,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                           return (
                             <div>
                               <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
                             </div>
                           );
                         })()}
@@ -618,7 +617,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                           return (
                             <div>
                               <div className="font-medium text-xs">{`${branchName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
                             </div>
                           );
                         })()}
@@ -636,8 +634,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                           const email = officer.email || '';
                           return (
                             <div>
-                              <div className="font-medium text-xs">{fullName || email || officer.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                              <div className="font-medium text-xs">{fullName || officer.id}</div>
                             </div>
                           );
                         })()}
@@ -655,8 +652,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                           const email = c.email || '';
                           return (
                             <div>
-                              <div className="font-medium text-xs">{fullName || email || c.id}</div>
-                              {email ? <div className="text-[11px] text-muted-foreground">{email}</div> : null}
+                              <div className="font-medium text-xs">{fullName || c.id}</div>
                             </div>
                           );
                         })()}

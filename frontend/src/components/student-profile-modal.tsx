@@ -67,7 +67,9 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAddAp
           title: 'Success',
           description: 'Student updated successfully.',
         });
+        // Refresh both the student detail and the main students list
         queryClient.invalidateQueries({ queryKey: [`/api/students/${studentId}`] });
+        queryClient.invalidateQueries({ queryKey: ['/api/students'] });
         setIsEditing(false);
         // Server will log status change activities; just refresh activities cache if needed.
       } catch (err) {

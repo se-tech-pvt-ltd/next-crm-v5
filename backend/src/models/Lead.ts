@@ -2,6 +2,7 @@ import { eq, desc, and, not, exists, count, or, gte, lte, type SQL } from "drizz
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "../config/database.js";
 import { leads, students, type Lead, type InsertLead } from "../shared/schema.js";
+import { eq, ne, and, or, lte, count, sql } from "drizzle-orm";
 
 interface PaginationOptions {
   page: number;
@@ -87,9 +88,9 @@ export class LeadModel {
 
     // Handle custom filter types
     if (filters?.filterType === 'active') {
-      // Active: NOT lost AND NOT converted
-      conditions.push(ne(leads.isLost, 1));
-      conditions.push(ne(leads.isConverted, 1));
+      // Active: NOT lost AND NOT converted — treat NULL as 0 using COALESCE
+      conditions.push(sql`COALESCE(${leads.isLost}, 0) != 1` as unknown as SQL<unknown>);
+      conditions.push(sql`COALESCE(${leads.isConverted}, 0) != 1` as unknown as SQL<unknown>);
     } else if (filters?.filterType === 'lost') {
       // Lost: isLost = 1
       conditions.push(eq(leads.isLost, 1));
