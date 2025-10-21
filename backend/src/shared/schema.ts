@@ -241,7 +241,6 @@ export const leads = mysqlTable("leads", {
   elt: text("elt"),
   isLost: tinyint("is_lost").default(0),
   lostReason: text("lost_reason"),
-  isLost: tinyint("is_lost").default(0),
   notes: text("notes"),
   counselorId: varchar("counsellor_id", { length: 255 }),
   admissionOfficerId: varchar("admission_officer_id", { length: 50 }),

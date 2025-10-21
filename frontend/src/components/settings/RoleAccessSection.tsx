@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import * as UserAccessService from '@/services/userAccess';
@@ -16,7 +15,7 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
   const { data: roles = [] } = useQuery({ queryKey: ['/api/user-roles'], queryFn: () => UserRolesService.listRoles(), staleTime: 60_000 });
   const { data: departments = [] } = useQuery({ queryKey: ['/api/user-departments'], queryFn: () => UserRolesService.listDepartments(), staleTime: 60_000 });
 
-  const [activeDept, setActiveDept] = useState<string | 'all'>('all');
+  const [activeDept] = useState<string | 'all'>('all');
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -45,8 +44,6 @@ export default function RoleAccessSection({ toast }: { toast: (v: any) => void }
     setForm({ moduleName: item.moduleName || '', roleId: item.roleId || '', viewLevel: item.viewLevel || '', canCreate: Boolean(item.canCreate), canEdit: Boolean(item.canEdit) });
     setFormOpen(true);
   }
-
-  const filteredRoles = (roles as any[]).filter((r: any) => activeDept === 'all' ? true : String(r.departmentId) === String(activeDept));
 
   return (
     <div className="space-y-4">

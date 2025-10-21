@@ -20,12 +20,13 @@ const allowedOriginsFromEnv = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-const frontendUrl = (process.env.FRONTEND_URL || '').trim();
-const defaultLocalhosts = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const frontendUrl = (process.env.FRONTEND_URL || "https://sales.crm-setech.cloud").trim();
+
 const allowedOrigins = new Set<string>([
-  ...(frontendUrl ? [frontendUrl] : []),
-  ...allowedOriginsFromEnv,
-  ...(isProd ? [] : defaultLocalhosts),
+  frontendUrl,
+  "https://sales.crm-setech.cloud",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
 ]);
 
 app.use(

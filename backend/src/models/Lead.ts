@@ -154,11 +154,7 @@ export class LeadModel {
     return conditions;
   }
 
-  private static combineConditions(conditions: SQL<unknown>[]): SQL<unknown> | undefined {
-    if (conditions.length === 0) return undefined;
-    if (conditions.length === 1) return conditions[0];
-    return and(...conditions);
-  }
+  
 
   private static countWithConditions(scopeConditions: SQL<unknown>[], extraConditions: SQL<unknown>[] = []) {
     const whereClause = this.combineConditions([...scopeConditions, ...extraConditions]);
