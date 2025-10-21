@@ -66,6 +66,14 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
   const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
 
+  // Users for access assignment (declared early to avoid temporal dead zone in useEffect)
+  const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
+    queryKey: ['/api/users'],
+    queryFn: async () => UsersService.getUsers(),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: branchEmps = [], isFetched: branchEmpsFetched = false } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), enabled: open, staleTime: 60_000 });
 
   const form = useForm<any>({
