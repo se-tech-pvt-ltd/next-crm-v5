@@ -40,6 +40,37 @@ export default function Students() {
   const queryClient = useQueryClient();
 
   const [location, setLocation] = useLocation();
+
+  // Helper to update URL with student filters
+  const updateUrlWithFilters = (filters: { status?: string; country?: string; page?: number }) => {
+    const params = new URLSearchParams();
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+    if (filters.country && filters.country !== 'all') params.set('country', filters.country);
+    if (filters.page && filters.page > 1) params.set('page', String(filters.page));
+
+    const queryString = params.toString();
+    try {
+      setLocation(queryString ? `/students?${queryString}` : '/students');
+    } catch (e) {
+      // fallback
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', queryString ? `/students?${queryString}` : '/students');
+      }
+    }
+  };
+
+  // Sync filters from URL when location changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const urlStatus = params.get('status');
+    const urlCountry = params.get('country');
+    const urlPage = parseInt(params.get('page') || '1');
+
+    setStatusFilter(urlStatus || 'all');
+    setCountryFilter(urlCountry || 'all');
+    setCurrentPage(urlPage > 0 ? urlPage : 1);
+  }, [location]);
   const [matchStudent, studentParams] = useRoute('/students/:id');
   const [matchEdit, editParams] = useRoute('/students/:id/edit');
   const [matchCreateApp, createAppParams] = useRoute('/students/:id/application');
