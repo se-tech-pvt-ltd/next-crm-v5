@@ -25,3 +25,5 @@ export class UniversityController {
     }
   }
 }
+
+export const universityController = UniversityController;
