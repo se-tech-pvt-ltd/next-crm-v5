@@ -503,7 +503,7 @@ export default function Leads() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setFilterType('converted'); setCurrentPage(1); updateUrlWithFilters({ status: statusFilter, source: sourceFilter, lastUpdated: lastUpdatedFilter, filterType: 'converted', page: 1 }); }}>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setSourceFilter('all'); setLastUpdatedFilter('all'); setFilterType('converted'); setCurrentPage(1); updateUrlWithFilters({ status: 'all', source: 'all', lastUpdated: 'all', filterType: 'converted', page: 1 }); }}>
             <CardHeader className="pb-2 p-3">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <TrendingUp className="w-3 h-3 text-purple-500" />
