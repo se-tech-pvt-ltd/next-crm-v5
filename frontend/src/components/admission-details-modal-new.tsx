@@ -596,7 +596,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                           return (
                             <div>
                               <div className="font-medium text-xs">{`${regionName}${headName ? ` - Head: ${headName}` : ''}`}</div>
-                              {headEmail ? <div className="text-[11px] text-muted-foreground">{headEmail}</div> : null}
                             </div>
                           );
                         })()}
