@@ -110,7 +110,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       try { form.trigger(); } catch {};
     }, 50);
     return () => clearTimeout(t);
-  }, [open]);
+  }, [open, form]);
 
   const watchedFull = form.watch('fullTuitionFee');
   const watchedScholarship = form.watch('scholarshipAmount');
@@ -126,7 +126,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       const curr = form.getValues('netTuitionFee');
       if (String(curr) !== String(net)) form.setValue('netTuitionFee', String(net));
     }
-  }, [watchedFull, watchedScholarship]);
+  }, [watchedFull, watchedScholarship, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -287,7 +287,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         }
       } catch {}
     }
-  }, [applicationId, studentId, linkedApp]);
+  }, [applicationId, studentId, linkedApp, form, users, branchEmps]);
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -332,7 +332,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (parentPartnerId && !form.getValues('partnerId')) form.setValue('partnerId', parentPartnerId);
       }
     } catch {}
-  }, [open, subPartners]);
+  }, [open, subPartners, form]);
 
   const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Applications'],
@@ -389,7 +389,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (def) form.setValue('caseStatus', def.value as any);
       }
     } catch {}
-  }, [open, statusOptions, caseStatusOptions]);
+  }, [open, statusOptions, caseStatusOptions, form]);
 
   // Users for access assignment
   const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
@@ -435,7 +435,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch (e) {
       console.error('[AddAdmissionModal] linkedApp sync error', e);
     }
-  }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps]);
+  }, [open, linkedApp, usersFetched, branchEmpsFetched, users, branchEmps, form]);
   const normalizeRole = (r: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
   const counsellorOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -456,7 +456,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return opts;
-  }, [users, branchEmps, branchId]);
+  }, [users, branchEmps, branchId, form]);
 
   const officerOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -476,7 +476,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return opts;
-  }, [users, branchEmps, branchId]);
+  }, [users, branchEmps, branchId, form]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => (RegionsService.listRegions ? RegionsService.listRegions() : RegionsService.getRegions ? RegionsService.getRegions() : Promise.resolve([])), enabled: open });
@@ -654,12 +654,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
 
   const openApplicationDetails = (app: Application) => {
     setCurrentApplicationObj(app);
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsAppDetailsOpen(true)); } catch { setIsAppDetailsOpen(true); }
+    setIsAppDetailsOpen(true);
   };
 
   const openStudentProfile = (sid: string) => {
     setCurrentStudentIdLocal(sid);
-    try { const { useModalManager } = require('@/contexts/ModalManagerContext'); const { openModal } = useModalManager(); openModal(() => setIsStudentProfileOpen(true)); } catch { setIsStudentProfileOpen(true); }
+    setIsStudentProfileOpen(true);
   };
 
   // Populate counsellor/admission officer only after branch is selected

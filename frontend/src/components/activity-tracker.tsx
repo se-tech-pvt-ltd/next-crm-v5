@@ -140,7 +140,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
       setActivityType('comment');
       setFollowUpDateTimeValue('');
     }
-  }, [entityType]);
+  }, [entityType, activityType]);
 
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
@@ -355,7 +355,7 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
         setFetchedProfiles(prev => ({ ...prev, [id]: null }));
       }
     });
-  }, [activities, users, fetchedProfiles]);
+  }, [activities, users, fetchedProfiles, getUserProfileImage]);
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: { type: string; content: string; followUpAt?: string | null }) => {

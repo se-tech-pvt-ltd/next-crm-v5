@@ -1,7 +1,7 @@
 import { UniversityService } from "../services/UniversityService.js";
 import { Request, Response } from "express";
 
-export class universityController {
+export class UniversityController {
   static async list(req: Request, res: Response) {
     try {
       const items = await UniversityService.getUniversities();
