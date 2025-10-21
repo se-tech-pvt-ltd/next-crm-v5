@@ -297,10 +297,10 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   };
 
   // Create a lookup function for user profile images
-  const getUserProfileImage = (userId: string) => {
+  const getUserProfileImage = React.useCallback((userId: string) => {
     const user = users.find((u: UserType) => String(u.id) === String(userId));
     return (user as any)?.profileImageUrl || (user as any)?.profileImage || null;
-  };
+  }, [users]);
 
   // Image viewer modal state
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

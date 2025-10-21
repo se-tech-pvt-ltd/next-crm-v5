@@ -287,7 +287,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         }
       } catch {}
     }
-  }, [applicationId, studentId, linkedApp, form, users, branchEmps]);
+  }, [applicationId, studentId, linkedApp, form, users, branchEmps, getOptions]);
 
   const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
     queryKey: ['/api/dropdowns/module/Admissions'],
@@ -456,7 +456,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return opts;
-  }, [users, branchEmps, branchId, form]);
+  }, [users, branchEmps, form]);
 
   const officerOptions = React.useMemo(() => {
     const bid = String(form.getValues('branchId') || '');
@@ -476,7 +476,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return opts;
-  }, [users, branchEmps, branchId, form]);
+  }, [users, branchEmps, form]);
 
   // Regions & branches for Access panel (copied behavior from create-student-modal / add-lead-form)
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => (RegionsService.listRegions ? RegionsService.listRegions() : RegionsService.getRegions ? RegionsService.getRegions() : Promise.resolve([])), enabled: open });
