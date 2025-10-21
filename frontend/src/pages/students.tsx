@@ -446,7 +446,7 @@ export default function Students() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('active'); setCountryFilter('all'); setCurrentPage(1); updateUrlWithFilters({ status: 'active', country: 'all', page: 1 }); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <UserCheck className="w-3 h-3 text-green-500" />
