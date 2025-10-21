@@ -90,8 +90,16 @@ export default function Students() {
   })();
 
   const { data: studentsResponse, isLoading } = useQuery({
-    queryKey: ['/api/students', { page: currentPage, limit: pageSize }],
-    queryFn: async () => StudentsService.getStudents({ page: currentPage, limit: pageSize }),
+    queryKey: ['/api/students', { page: currentPage, limit: pageSize, statusFilter, countryFilter, searchQuery }],
+    queryFn: async () => {
+      // If no client-side filters/search applied, request server-paginated results for current page.
+      const noFilters = (!searchQuery || String(searchQuery).trim() === '') && statusFilter === 'all' && countryFilter === 'all';
+      if (noFilters) {
+        return StudentsService.getStudents({ page: currentPage, limit: pageSize });
+      }
+      // When filters/search active, fetch all students (no pagination) and apply filters client-side so counts and matches are accurate.
+      return StudentsService.getStudents();
+    },
     staleTime: 0,
     refetchOnMount: true,
   });
