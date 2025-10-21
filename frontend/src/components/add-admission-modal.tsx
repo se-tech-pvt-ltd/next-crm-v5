@@ -399,14 +399,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [open, statusOptions, caseStatusOptions, form]);
 
-  // Users for access assignment
-  const { data: users = [], isFetched: usersFetched = false } = useQuery<any[]>({
-    queryKey: ['/api/users'],
-    queryFn: async () => UsersService.getUsers(),
-    enabled: open,
-    staleTime: 5 * 60 * 1000,
-  });
-
   // When modal is opened for a specific application, only populate access fields after users & branch mappings are fetched
   useEffect(() => {
     if (!open) return;
