@@ -432,7 +432,7 @@ export default function Students() {
       <div className="space-y-3">
         {/* Students Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-          <Card>
+          <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={() => { setStatusFilter('all'); setCountryFilter('all'); setCurrentPage(1); updateUrlWithFilters({ status: 'all', country: 'all', page: 1 }); }}>
             <CardHeader className="pb-1 p-2">
               <CardTitle className="text-xs font-medium flex items-center gap-2">
                 <Users className="w-3 h-3 text-gray-500" />
