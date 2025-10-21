@@ -732,7 +732,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       if (!String(form.getValues('scholarshipAmount') || '').trim() && (scholarship || scholarship === 0)) form.setValue('scholarshipAmount', String(scholarship));
       if (!String(form.getValues('initialDeposit') || '').trim() && (initDeposit || initDeposit === 0)) form.setValue('initialDeposit', String(initDeposit));
     } catch {}
-  }, [uniDetail, open]);
+  }, [uniDetail, open, form]);
 
   // Fallback: if application provides only university name (no universityId), try to find the university by name and autofill fees
   useEffect(() => {
@@ -767,7 +767,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     })();
 
     return () => { cancelled = true; };
-  }, [currentApp, open, uniDetail]);
+  }, [currentApp, open, uniDetail, form]);
 
 
   return (
