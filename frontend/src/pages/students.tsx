@@ -513,9 +513,9 @@ export default function Students() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    {(studentDropdowns as any)?.Status?.map((status: any) => (
-                      <SelectItem key={status.key || status.id || status.value} value={(status.value || '').toLowerCase()}>
-                        {status.value}
+                    {STATUS_OPTIONS.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
