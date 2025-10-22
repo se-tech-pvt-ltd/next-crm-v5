@@ -87,60 +87,9 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     return '';
   };
 
-  const { data: applicationsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
-    enabled: open,
-  });
-
-  const makeOptions = (dd: any, candidates: string[]) => {
-    if (!dd || typeof dd !== 'object') return [];
-    const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    // Build a map of normalized keys -> original key
-    const keyMap: Record<string, string> = {};
-    for (const k of Object.keys(dd || {})) {
-      keyMap[normalizeKey(k)] = k;
-    }
-
-    let list: any[] = [];
-    for (const raw of candidates) {
-      const nk = normalizeKey(raw);
-      const foundKey = keyMap[nk];
-      if (foundKey && Array.isArray(dd[foundKey]) && dd[foundKey].length) {
-        list = dd[foundKey];
-        break;
-      }
-    }
-
-    // Fallback: try to find any candidate by more relaxed matching
-    if ((!Array.isArray(list) || list.length === 0)) {
-      for (const k of Object.keys(dd || {})) {
-        const nk = normalizeKey(k);
-        for (const raw of candidates) {
-          if (nk === normalizeKey(raw)) {
-            if (Array.isArray(dd[k]) && dd[k].length) { list = dd[k]; break; }
-          }
-        }
-        if (Array.isArray(list) && list.length) break;
-      }
-    }
-
-    if (!Array.isArray(list)) list = [];
-    const sorted = [...list].sort((a: any, b: any) => {
-      const sa = Number(a.sequence ?? Infinity);
-      const sb = Number(b.sequence ?? Infinity);
-      if (sa !== sb) return sa - sb;
-      const da = (a.isDefault || a.is_default) ? 0 : 1;
-      const db = (b.isDefault || b.is_default) ? 0 : 1;
-      return da - db;
-    });
-    return sorted.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
-  };
-
-  const appStatusOptions = makeOptions(applicationsDropdowns, ['Application Status','App Status','Status','AppStatus','status']);
-  const caseStatusOptions = makeOptions(applicationsDropdowns, ['Case Status','caseStatus','CaseStatus','case_status']);
-  const channelPartnerOptions = makeOptions(applicationsDropdowns, ['Channel Partner', 'ChannelPartners', 'channelPartner', 'channel_partners']);
+  const appStatusOptions = APP_STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value, isDefault: false }));
+  const caseStatusOptions = CASE_STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value, isDefault: false }));
+  const channelPartnerOptions = CHANNEL_PARTNER_OPTIONS.map((o) => ({ label: o.label, value: o.value, isDefault: false }));
 
   const form = useForm({
     resolver: zodResolver(insertApplicationSchema),
