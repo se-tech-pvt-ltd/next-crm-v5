@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
-import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS, labelFrom } from '@/constants/leads-dropdowns';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -254,27 +254,15 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     updateLeadMutation.mutate(dataToSave);
   };
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-  });
+  // Hardcoded leads dropdowns are used; no API fetch needed
 
   const getStatusDisplayName = (statusId: string) => {
-    const list: any[] = (dropdownData as any)?.Status || [];
-    const byId = list.find((o: any) => o.id === statusId);
-    if (byId?.value) return byId.value;
-    const byKey = list.find((o: any) => o.key === statusId);
-    if (byKey?.value) return byKey.value;
-    const byValue = list.find((o: any) => o.value === statusId);
-    if (byValue?.value) return byValue.value;
-    return statusId;
+    return labelFrom('status', statusId);
   };
 
   const statusSequence = useMemo<string[]>(() => {
-    const list: any[] = (dropdownData as any)?.Status || [];
-    if (!Array.isArray(list) || list.length === 0) return [];
-    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
-  }, [dropdownData]);
+    return STATUS_OPTIONS.map((o: any) => o.value);
+  }, []);
 
   const prevStatusRef = useRef<string>('');
   const statusUpdateMutation = useMutation({

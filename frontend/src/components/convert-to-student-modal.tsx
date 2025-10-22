@@ -15,7 +15,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
-import * as DropdownsService from '@/services/dropdowns';
+import { LEADS_DROPDOWNS, labelFrom, keyFromLabel } from '@/constants/leads-dropdowns';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import {
@@ -72,11 +72,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     staleTime: 60_000,
   });
 
-  // Dropdowns for mapping keys -> labels
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
-  });
+  // Hardcoded leads dropdowns are used; no API fetch needed
 
   // Student module dropdowns (Status, Expectation, ELT Test, etc.)
   const { data: studentDropdowns } = useQuery({
@@ -189,71 +185,63 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     return String(value);
   }, []);
 
-  // Map dropdown keys/ids to labels using dropdownData
+  // Map dropdown keys/ids to labels using hardcoded constants
   const mapDropdownToLabels = useCallback((raw: unknown, fieldName: string): string => {
-    try {
-      const options: any[] = dropdownData?.[fieldName] || [];
-      const byKey = new Map(options.map(o => [o.key, o.value]));
-      const byId = new Map(options.map(o => [o.id, o.value]));
+    const sectionMap: Record<string, keyof typeof LEADS_DROPDOWNS> = {
+      'Type': 'type', 'type': 'type',
+      'Source': 'source', 'source': 'source',
+      'Interested Country': 'interested_country', 'interested_country': 'interested_country',
+      'Study Level': 'study_level', 'study_level': 'study_level',
+      'Study Plan': 'study_plan', 'study_plan': 'study_plan',
+    };
+    const section = sectionMap[fieldName];
 
-      const toArray = (v: unknown): string[] => {
-        if (!v) return [];
-        if (Array.isArray(v)) return v.map(String);
-        if (typeof v === 'string') {
-          const t = v.trim();
-          if (t.startsWith('[')) {
-            try {
-              const parsed = JSON.parse(t);
-              if (Array.isArray(parsed)) return parsed.map(String);
-            } catch {}
-          }
-          return t.split(',').map(s => s.trim()).filter(Boolean);
+    const toArray = (v: unknown): string[] => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v.map(String);
+      if (typeof v === 'string') {
+        const t = v.trim();
+        if (t.startsWith('[')) {
+          try { const parsed = JSON.parse(t); if (Array.isArray(parsed)) return parsed.map(String); } catch {}
         }
-        return [String(v)];
-      };
+        return t.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return [String(v)];
+    };
 
-      const items = toArray(raw);
-      const labels = items.map(i => byKey.get(i) || byId.get(i) || i);
-      return labels.filter(Boolean).join(', ');
-    } catch {
-      return normalizeToText(raw);
-    }
-  }, [dropdownData, normalizeToText]);
+    const items = toArray(raw);
+    const labels = items.map(i => section ? labelFrom(section, i) : i);
+    return labels.filter(Boolean).join(', ');
+  }, [normalizeToText]);
 
-  // Map raw lead dropdown values to dropdown keys (ids) so backend receives UUIDs
+  // Map raw lead dropdown values to dropdown keys using hardcoded constants
   const mapDropdownToKeys = useCallback((raw: unknown, fieldName: string): string[] => {
-    try {
-      const options: any[] = dropdownData?.[fieldName] || [];
-      const byKey = new Map(options.map(o => [String(o.key).toLowerCase(), o.key || o.id || o.value]));
-      const byId = new Map(options.map(o => [String(o.id).toLowerCase(), o.key || o.id || o.value]));
-      const byValue = new Map(options.map(o => [String(o.value).toLowerCase(), o.key || o.id || o.value]));
+    const sectionMap: Record<string, keyof typeof LEADS_DROPDOWNS> = {
+      'Type': 'type', 'type': 'type',
+      'Source': 'source', 'source': 'source',
+      'Interested Country': 'interested_country', 'interested_country': 'interested_country',
+      'Study Level': 'study_level', 'study_level': 'study_level',
+      'Study Plan': 'study_plan', 'study_plan': 'study_plan',
+    };
+    const section = sectionMap[fieldName];
 
-      const toArray = (v: unknown): string[] => {
-        if (!v) return [];
-        if (Array.isArray(v)) return v.map(String);
-        if (typeof v === 'string') {
-          const t = v.trim();
-          if (t.startsWith('[')) {
-            try {
-              const parsed = JSON.parse(t);
-              if (Array.isArray(parsed)) return parsed.map(String);
-            } catch {}
-          }
-          return t.split(',').map(s => s.trim()).filter(Boolean);
+    const toArray = (v: unknown): string[] => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v.map(String);
+      if (typeof v === 'string') {
+        const t = v.trim();
+        if (t.startsWith('[')) {
+          try { const parsed = JSON.parse(t); if (Array.isArray(parsed)) return parsed.map(String); } catch {}
         }
-        return [String(v)];
-      };
+        return t.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return [String(v)];
+    };
 
-      const items = toArray(raw);
-      const keys = items.map(item => {
-        const li = String(item).toLowerCase();
-        return byKey.get(li) || byId.get(li) || byValue.get(li) || item;
-      }).filter(Boolean);
-      return Array.from(new Set(keys.map(String)));
-    } catch {
-      return Array.isArray(raw) ? raw.map(String) : raw ? [String(raw)] : [];
-    }
-  }, [dropdownData]);
+    const items = toArray(raw);
+    const keys = items.map(item => section ? (keyFromLabel(section, item) || item) : item).filter(Boolean);
+    return Array.from(new Set(keys.map(String)));
+  }, []);
 
 
   // Pre-populate form when lead changes
@@ -278,7 +266,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
         counsellor: (lead as any)?.counselorId || (lead as any)?.counsellor || (lead as any)?.counselor || '',
       }));
     }
-  }, [lead, dropdownData, mapDropdownToLabels, normalizeToText]);
+  }, [lead, mapDropdownToLabels, normalizeToText]);
 
   // When student dropdowns load, pick defaults where is_default/isDefault === 1. If none, leave value empty so placeholder shows "Please select"
   useEffect(() => {

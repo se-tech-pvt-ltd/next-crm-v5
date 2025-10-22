@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
-import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS, SOURCE_OPTIONS, INTERESTED_COUNTRY_OPTIONS, labelFrom } from '@/constants/leads-dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as StudentsService from '@/services/students';
 import { Lead } from '@/lib/types';
@@ -32,7 +32,6 @@ const useState = React.useState;
 export default function Leads() {
   // Helper functions for display names using dropdown data
   const getCountryDisplayName = (countryData: string | string[]): string => {
-    if (!dropdownData?.["Interested Country"]) return String(countryData);
 
     // Handle array of country IDs (either as array or JSON string)
     let countryIds: string[] = [];
@@ -58,8 +57,8 @@ export default function Leads() {
     // Map IDs to country names
     const countryNames = countryIds
       .map(id => {
-        const country = dropdownData["Interested Country"].find((item: any) => item.key === id);
-        return country?.value || id;
+        const country = INTERESTED_COUNTRY_OPTIONS.find((item: any) => item.value === id);
+        return country?.label || id;
       })
       .filter(Boolean);
 
@@ -67,15 +66,11 @@ export default function Leads() {
   };
 
   const getSourceDisplayName = (sourceId: string): string => {
-    if (!dropdownData?.Source) return sourceId;
-    const source = dropdownData.Source.find((item: any) => item.key === sourceId);
-    return source?.value || sourceId;
+    return labelFrom('source', sourceId);
   };
 
   const getStatusDisplayName = (statusId: string): string => {
-    if (!dropdownData?.Status) return statusId;
-    const status = dropdownData.Status.find((item: any) => item.key === statusId);
-    return status?.value || statusId;
+    return labelFrom('status', statusId);
   };
   const [location, setLocation] = useLocation();
   const [matchLead, leadParams] = useRoute('/leads/:id');
@@ -114,11 +109,7 @@ export default function Leads() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get dropdown data for mapping IDs to display values (fetch early so it can be used in effects)
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
 
   // Helper function to update URL with filter query strings
   const updateUrlWithFilters = (filters: { status?: string; source?: string; lastUpdated?: string; filterType?: 'active' | 'lost' | 'converted'; page?: number }) => {
@@ -156,20 +147,16 @@ export default function Leads() {
       setLastUpdatedFilter('all');
     }
 
-    // Update status filter (with dropdown mapping if available)
+    // Update status filter
     if (urlStatus) {
-      const statusList = (dropdownData as any)?.Status || [];
-      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
-      setStatusFilter(statusItem?.key || urlStatus);
+      setStatusFilter(urlStatus);
     } else {
       setStatusFilter('all');
     }
 
-    // Update source filter (with dropdown mapping if available)
+    // Update source filter
     if (urlSource) {
-      const sourceList = (dropdownData as any)?.Source || [];
-      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
-      setSourceFilter(sourceItem?.key || urlSource);
+      setSourceFilter(urlSource);
     } else {
       setSourceFilter('all');
     }
@@ -198,11 +185,8 @@ export default function Leads() {
   };
 
   // Helper function to convert dropdown ID to key
-  const resolveFilterValue = (fieldName: 'Status' | 'Source', value: string): string => {
-    if (!value || value === 'all') return value;
-    const dropdownList = (dropdownData as any)?.[fieldName] || [];
-    const item = dropdownList.find((d: any) => d.id === value);
-    return item?.key || value;
+  const resolveFilterValue = (_fieldName: 'Status' | 'Source', value: string): string => {
+    return value;
   };
 
   const { data: leadsResponse, isLoading } = useQuery({
@@ -620,9 +604,9 @@ export default function Leads() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Select Status</SelectItem>
-                    {dropdownData?.Status?.map((status: any) => (
-                      <SelectItem key={status.key} value={status.key}>
-                        {status.value}
+                    {STATUS_OPTIONS.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -637,9 +621,9 @@ export default function Leads() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Select Source</SelectItem>
-                    {dropdownData?.Source?.map((source: any) => (
-                      <SelectItem key={source.key} value={source.key}>
-                        {source.value}
+                    {SOURCE_OPTIONS.map((source) => (
+                      <SelectItem key={source.value} value={source.value}>
+                        {source.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
