@@ -22,9 +22,9 @@ import { AddAdmissionModal } from '@/components/add-admission-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
-import * as DropdownsService from '@/services/dropdowns';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { APP_STATUS_OPTIONS, labelFrom } from '@/constants/applications-dropdowns';
 
 export default function Applications() {
   const [statusFilter, setStatusFilter] = useState('all');
