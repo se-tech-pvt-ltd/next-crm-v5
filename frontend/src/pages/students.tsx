@@ -281,18 +281,16 @@ export default function Students() {
     if (!values.length) return '-';
 
     const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dd: any = (studentDropdowns as any) || {};
     const ld: any = (leadsDropdowns as any) || {};
 
-    // Build normalized maps for field lookup from both Students and Leads modules
+    // Build normalized map for field lookup from Leads module
     const buildMap = (src: any) => Object.keys(src || {}).reduce((acc: Record<string, any[]>, k) => { acc[normalize(k)] = src[k]; return acc; }, {} as Record<string, any[]>);
-    const ddMap = buildMap(dd);
     const ldMap = buildMap(ld);
 
     const candidates = ['target_program','target program','targetprogram','program','study plan','studyplan','course','program name'];
     let options: any[] = [];
     for (const c of candidates.map(normalize)) {
-      const list = ddMap[c] || ldMap[c];
+      const list = ldMap[c];
       if (Array.isArray(list) && list.length > 0) { options = list; break; }
     }
 
