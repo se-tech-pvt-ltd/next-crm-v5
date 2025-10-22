@@ -801,18 +801,16 @@ export default function EventsPage() {
       return;
     }
     if (!canCreateEvent) { toast({ title: 'You do not have permission to create registrations', variant: 'destructive' }); return; }
-    const defaultStatus = statusOptions.find((o: any) => o.isDefault);
-    const defaultSource = sourceOptions.find((o: any) => o.isDefault);
     // find the linked event (selected event)
     const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(filterEventId)) || selectedEvent;
 
     const initial: any = {
-      status: defaultStatus ? defaultStatus.value : '',
+      status: 'not_sure',
       name: '',
       number: '',
       email: '',
       city: '',
-      source: defaultSource ? String(defaultSource.value) : '',
+      source: 'events',
       eventId: filterEventId,
     };
 
