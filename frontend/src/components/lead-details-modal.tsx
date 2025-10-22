@@ -254,27 +254,17 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     updateLeadMutation.mutate(dataToSave);
   };
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-  });
+  // Hardcoded leads dropdowns are used; no API fetch needed
 
+  const { labelFrom } = require('@/constants/leads-dropdowns');
   const getStatusDisplayName = (statusId: string) => {
-    const list: any[] = (dropdownData as any)?.Status || [];
-    const byId = list.find((o: any) => o.id === statusId);
-    if (byId?.value) return byId.value;
-    const byKey = list.find((o: any) => o.key === statusId);
-    if (byKey?.value) return byKey.value;
-    const byValue = list.find((o: any) => o.value === statusId);
-    if (byValue?.value) return byValue.value;
-    return statusId;
+    return labelFrom('status', statusId);
   };
 
+  const { STATUS_OPTIONS } = require('@/constants/leads-dropdowns');
   const statusSequence = useMemo<string[]>(() => {
-    const list: any[] = (dropdownData as any)?.Status || [];
-    if (!Array.isArray(list) || list.length === 0) return [];
-    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
-  }, [dropdownData]);
+    return STATUS_OPTIONS.map((o: any) => o.value);
+  }, []);
 
   const prevStatusRef = useRef<string>('');
   const statusUpdateMutation = useMutation({
