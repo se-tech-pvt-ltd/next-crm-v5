@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { insertLeadSchema } from '@/lib/types';
-import * as DropdownsService from '@/services/dropdowns';
+import { LEADS_DROPDOWNS, TYPE_OPTIONS, STATUS_OPTIONS, SOURCE_OPTIONS, INTERESTED_COUNTRY_OPTIONS, STUDY_LEVEL_OPTIONS, STUDY_PLAN_OPTIONS, keyFromLabel, labelFrom } from '@/constants/leads-dropdowns';
 import * as LeadsService from '@/services/leads';
 import * as EventsService from '@/services/events';
 import * as StudentsService from '@/services/students';
@@ -102,10 +102,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   const [autoRegionDisabled, setAutoRegionDisabled] = useState(false);
   const [autoBranchDisabled, setAutoBranchDisabled] = useState(false);
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads')
-  });
+  const dropdownData = null as any;
 
   const { data: existingLeads } = useQuery({
     queryKey: ['/api/leads'],
@@ -198,15 +195,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   });
 
   const resolveSourceLabel = useCallback((key: string) => {
-    try {
-      const list = (dropdownData as any)?.Source || [];
-      const item = list.find((o: any) => String(o.key ?? o.id ?? o.value) === String(key));
-      const val = String(item?.value ?? key ?? '').toLowerCase();
-      return val;
-    } catch {
-      return String(key || '').toLowerCase();
-    }
-  }, [dropdownData]);
+    const val = labelFrom('source', String(key));
+    return String(val || key || '').toLowerCase();
+  }, []);
 
   const mediumOptions = useMemo(() => {
     const label = resolveSourceLabel(selectedSourceKey);
@@ -520,52 +511,22 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
   // Reset form values when initialData provided
   useEffect(() => {
     if (initialData) {
-      // helper to map display label to dropdown key
-      const mapLabelToKey = (group: string, label?: string) => {
+      const mapLabelToKeyHardcoded = (section: 'type' | 'status' | 'source' | 'interested_country' | 'study_level' | 'study_plan', label?: string) => {
         if (!label) return '';
-        const list = (dropdownData && (dropdownData as any)[group]) || [];
-        const found = list.find((opt: any) => {
-          if (!opt) return false;
-          const val = String(opt.value || opt.label || '').toLowerCase();
-          const key = String(opt.key || opt.id || '').toLowerCase();
-          return val === String(label).toLowerCase() || key === String(label).toLowerCase();
-        });
-        return found ? (found.key || found.id || found.value) : label;
+        const key = keyFromLabel(section, label);
+        return key || label;
       };
 
-      // If opened from an event registration, prefer the specified defaults
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
-      // For status, if opening from event registration, find the default status with isDefault=true and use its key/id directly
       let defaultStatusKey: string | undefined = undefined;
-      if ((initialData as any).eventRegId && !((initialData as any).status) && dropdownData) {
-        const statusList = (dropdownData as any).Status || [];
-        const defaultStatusOption = Array.isArray(statusList) ? statusList.find((s: any) => Boolean(s.isDefault || s.is_default)) : null;
-        if (defaultStatusOption) {
-          // Use the same value format as SelectItem: key || id || value
-          defaultStatusKey = defaultStatusOption.key || defaultStatusOption.id || defaultStatusOption.value;
-        }
+      if ((initialData as any).eventRegId && !((initialData as any).status)) {
+        defaultStatusKey = 'raw';
       }
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
 
-      const mapLabelToKeyRobust = (group: string, label?: string) => {
-        const mapped = mapLabelToKey(group, label);
+      const mapLabelToKeyRobust = (section: 'type' | 'status' | 'source' | 'interested_country' | 'study_level' | 'study_plan', label?: string) => {
+        const mapped = mapLabelToKeyHardcoded(section, label);
         if (mapped && mapped !== label) return mapped;
-        // try case-insensitive contains match
-        if (!dropdownData) return label || '';
-        const list = (dropdownData as any)[group] || [];
-        const lname = (label || '').toLowerCase();
-        // first exact match on value or key
-        for (const opt of list) {
-          const val = String(opt.value || opt.label || '').toLowerCase();
-          const key = String(opt.key || opt.id || '').toLowerCase();
-          if (val === lname || key === lname) return opt.key || opt.id || opt.value;
-        }
-        // then contains
-        for (const opt of list) {
-          const val = String(opt.value || opt.label || '').toLowerCase();
-          const key = String(opt.key || opt.id || '').toLowerCase();
-          if (val.includes(lname) || key.includes(lname)) return opt.key || opt.id || opt.value;
-        }
         return label || '';
       };
 
@@ -574,12 +535,12 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         email: initialData.email || '',
         phone: initialData.phone || '',
         city: initialData.city || '',
-        source: mapLabelToKeyRobust('Source', initialData.source || defaultSourceLabel),
-        status: initialData.status ? mapLabelToKeyRobust('Status', initialData.status) : defaultStatusKey,
+        source: mapLabelToKeyRobust('source', initialData.source || defaultSourceLabel),
+        status: initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey,
         counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
-        type: mapLabelToKeyRobust('Type', initialData.type || defaultTypeLabel),
+        type: mapLabelToKeyRobust('type', initialData.type || defaultTypeLabel),
         // populate region/branch/counsellor/admission defaults when provided (usually from an event)
         regionId: initialData.regionId || initialData.region_id || '',
         branchId: initialData.branchId || initialData.branch_id || '',
@@ -614,39 +575,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           }
         } catch {}
       } catch {}
-    } else if (dropdownData) {
-      // No initial data: apply only the dropdown's isDefault selection for source and type, and for status prefer isDefault otherwise use first option
+    } else {
       try {
-        const statusList = (dropdownData as any).Status || [];
-        const defaultStatus = statusList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultStatus) {
-          form.setValue('status', defaultStatus.key || defaultStatus.id || defaultStatus.value);
-        } else if (Array.isArray(statusList) && statusList.length > 0) {
-          // pick first option that has a non-empty key/id/value
-          const firstValid = statusList.find((s: any) => {
-            const v = String(s.key ?? s.id ?? s.value ?? '').trim();
-            return v.length > 0;
-          });
-          if (firstValid) {
-            form.setValue('status', firstValid.key || firstValid.id || firstValid.value);
-          }
-        }
-      } catch {}
-
-      try {
-        const sourceList = (dropdownData as any).Source || [];
-        const defaultSource = sourceList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultSource) {
-          form.setValue('source', defaultSource.key || defaultSource.id || defaultSource.value);
-        }
-      } catch {}
-
-      try {
-        const typeList = (dropdownData as any).Type || [];
-        const defaultType = typeList.find((s: any) => Boolean(s.isDefault || s.is_default));
-        if (defaultType) {
-          form.setValue('type', defaultType.key || defaultType.id || defaultType.value);
-        }
+        form.setValue('status', 'raw');
       } catch {}
     }
   }, [initialData, dropdownData]);
@@ -1013,7 +944,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Interested Countries *</span>
                     </FormLabel>
                     <FormControl>
-                      <MultiSelect value={field.value || []} onValueChange={field.onChange} placeholder="Select countries" searchPlaceholder="Search countries..." options={dropdownData?.['Interested Country']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No countries found" maxDisplayItems={2} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
+                      <MultiSelect value={field.value || []} onValueChange={field.onChange} placeholder="Select countries" searchPlaceholder="Search countries..." options={INTERESTED_COUNTRY_OPTIONS} emptyMessage="No countries found" maxDisplayItems={2} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1026,7 +957,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Study Level *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study level" searchPlaceholder="Search study levels..." options={dropdownData?.['Study Level']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study levels found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
+                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study level" searchPlaceholder="Search study levels..." options={STUDY_LEVEL_OPTIONS} emptyMessage="No study levels found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1062,7 +993,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       <span>Study Plan *</span>
                     </FormLabel>
                     <FormControl>
-                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study plan" searchPlaceholder="Search study plans..." options={dropdownData?.['Study Plan']?.map((option: any) => ({ value: option.key, label: option.value })) || []} emptyMessage="No study plans found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
+                      <SearchableSelect value={field.value} onValueChange={field.onChange} placeholder="Select study plan" searchPlaceholder="Search study plans..." options={STUDY_PLAN_OPTIONS} emptyMessage="No study plans found" className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1096,9 +1027,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Array.isArray((dropdownData as any)?.Source) ? ((dropdownData as any).Source).map((option: any) => (
-                            <SelectItem key={option.key || option.id || option.value} value={option.key || option.id || option.value}>{option.value}</SelectItem>
-                          )) : null}
+                          {SOURCE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -1150,9 +1081,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Array.isArray((dropdownData as any)?.Status) ? ((dropdownData as any).Status).map((option: any) => (
-                            <SelectItem key={option.key || option.id || option.value} value={option.key || option.id || option.value}>{option.value}</SelectItem>
-                          )) : null}
+                          {STATUS_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -1176,9 +1107,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Array.isArray((dropdownData as any)?.Type) ? ((dropdownData as any).Type).map((option: any) => (
-                            <SelectItem key={option.key || option.id || option.value} value={option.key || option.id || option.value}>{option.value}</SelectItem>
-                          )) : null}
+                          {TYPE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
