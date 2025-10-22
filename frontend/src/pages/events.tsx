@@ -19,7 +19,7 @@ import { EmptyState } from '@/components/empty-state';
 import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
-import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS, SOURCE_OPTIONS, labelFrom } from '@/constants/events-dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, UserPlus, Users, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
