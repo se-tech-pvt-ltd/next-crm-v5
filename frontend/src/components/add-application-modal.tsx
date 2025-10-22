@@ -231,7 +231,7 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         if (def) form.setValue('channelPartner', def.value as any);
       }
     } catch {}
-  }, [applicationsDropdowns]);
+  }, [appStatusOptions, caseStatusOptions, channelPartnerOptions, form]);
 
 
   // Determine selected student's branch (depends on form)
