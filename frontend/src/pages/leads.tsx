@@ -147,20 +147,16 @@ export default function Leads() {
       setLastUpdatedFilter('all');
     }
 
-    // Update status filter (with dropdown mapping if available)
+    // Update status filter
     if (urlStatus) {
-      const statusList = (dropdownData as any)?.Status || [];
-      const statusItem = statusList.find((s: any) => s.id === urlStatus || s.key === urlStatus);
-      setStatusFilter(statusItem?.key || urlStatus);
+      setStatusFilter(urlStatus);
     } else {
       setStatusFilter('all');
     }
 
-    // Update source filter (with dropdown mapping if available)
+    // Update source filter
     if (urlSource) {
-      const sourceList = (dropdownData as any)?.Source || [];
-      const sourceItem = sourceList.find((s: any) => s.id === urlSource || s.key === urlSource);
-      setSourceFilter(sourceItem?.key || urlSource);
+      setSourceFilter(urlSource);
     } else {
       setSourceFilter('all');
     }
