@@ -19,7 +19,7 @@ import { EmptyState } from '@/components/empty-state';
 import { toast } from '@/hooks/use-toast';
 import * as EventsService from '@/services/events';
 import * as RegService from '@/services/event-registrations';
-import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS, SOURCE_OPTIONS, labelFrom } from '@/constants/events-dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, UserPlus, Users, Trash2, Calendar, Upload, MapPin, Clock, ArrowRight, ChevronLeft, Filter, Search, X, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -104,7 +104,7 @@ export default function EventsPage() {
 
   const StatusProgressBarReg = () => {
     if (!viewReg) return null;
-    const sequence = statusOptions.map(s => s.value);
+    const sequence = STATUS_OPTIONS.map(s => s.value);
     const currentIndex = sequence.findIndex(v => v === viewReg.status);
 
     const getLabel = (value: string) => getStatusLabel(value) || value;
@@ -173,56 +173,8 @@ export default function EventsPage() {
         : RegService.getRegistrations(),
   });
 
-  const { data: eventsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Events'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Events'),
-  });
-
-  const sourceOptions = useMemo(() => {
-    const dd: any = eventsDropdowns as any;
-    let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
-    if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => {
-      const sa = typeof a.sequence === 'number' ? a.sequence : Number(a.sequence ?? 0);
-      const sb = typeof b.sequence === 'number' ? b.sequence : Number(b.sequence ?? 0);
-      return sa - sb;
-    });
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
-  }, [eventsDropdowns]);
-
-  const statusOptions = useMemo(() => {
-    const dd: any = eventsDropdowns as any;
-    let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
-    if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
-  }, [eventsDropdowns]);
-
-  const getStatusLabel = useMemo(() => {
-    const dd: any = eventsDropdowns as any;
-    let list: any[] = dd?.Status || dd?.Statuses || dd?.status || [];
-    if (!Array.isArray(list)) list = [];
-    const map = new Map<string, string>();
-    for (const o of list) {
-      if (o?.id) map.set(String(o.id), o.value);
-      if (o?.key) map.set(String(o.key), o.value);
-      if (o?.value) map.set(String(o.value), o.value);
-    }
-    return (val?: string) => (val ? (map.get(String(val)) || val) : '');
-  }, [eventsDropdowns]);
-
-  const getSourceLabel = useMemo(() => {
-    const dd: any = eventsDropdowns as any;
-    let list: any[] = dd?.Source || dd?.Sources || dd?.source || [];
-    if (!Array.isArray(list)) list = [];
-    const map = new Map<string, string>();
-    for (const o of list) {
-      if (o?.id) map.set(String(o.id), o.value);
-      if (o?.key) map.set(String(o.key), o.value);
-      if (o?.value) map.set(String(o.value), o.value);
-    }
-    return (val?: string) => (val ? (map.get(String(val)) || val) : '');
-  }, [eventsDropdowns]);
+  const getStatusLabel = (val?: string) => val ? labelFrom('status', val) : '';
+  const getSourceLabel = (val?: string) => val ? labelFrom('source', val) : '';
 
   const [location, navigate] = useLocation();
   const [isCreateRoute] = useRoute('/events/new');
@@ -675,7 +627,7 @@ export default function EventsPage() {
     } catch {}
   }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
 
-  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: 'attending', name: '', number: '', email: '', city: '', source: '', eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: 'not_sure', name: '', number: '', email: '', city: '', source: 'events', eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const [emailError, setEmailError] = useState(false);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -849,18 +801,16 @@ export default function EventsPage() {
       return;
     }
     if (!canCreateEvent) { toast({ title: 'You do not have permission to create registrations', variant: 'destructive' }); return; }
-    const defaultStatus = statusOptions.find((o: any) => o.isDefault);
-    const defaultSource = sourceOptions.find((o: any) => o.isDefault);
     // find the linked event (selected event)
     const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(filterEventId)) || selectedEvent;
 
     const initial: any = {
-      status: defaultStatus ? defaultStatus.value : '',
+      status: 'not_sure',
       name: '',
       number: '',
       email: '',
       city: '',
-      source: defaultSource ? String(defaultSource.value) : '',
+      source: 'events',
       eventId: filterEventId,
     };
 
@@ -926,9 +876,9 @@ export default function EventsPage() {
   const normalizeStatus = (s: string) => {
     const v = String(s || '').trim();
     if (!v) return '';
-    const byValue = statusOptions.find(o => String(o.value).toLowerCase() === v.toLowerCase());
+    const byValue = STATUS_OPTIONS.find(o => String(o.value).toLowerCase() === v.toLowerCase());
     if (byValue) return byValue.value;
-    const byLabel = statusOptions.find(o => String(o.label).toLowerCase() === v.toLowerCase());
+    const byLabel = STATUS_OPTIONS.find(o => String(o.label).toLowerCase() === v.toLowerCase());
     return byLabel ? byLabel.value : '';
   };
 
@@ -969,9 +919,9 @@ export default function EventsPage() {
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
 
-    // Use fixed defaults for imports as requested
-    const defaultStatusValue = 'a576fe6c-8d7e-11f0-a5b5-92e8d4b3e6a5'; // NOT SURE
-    const defaultSourceValue = 'b75b4253-840f-11f0-a5b5-92e8d4b3yy5'; // Events
+    // Use fixed defaults for imports
+    const defaultStatusValue = 'not_sure';
+    const defaultSourceValue = 'events';
 
     const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
 
@@ -1889,7 +1839,7 @@ export default function EventsPage() {
                   <Select value={editingReg.status} onValueChange={(v) => setEditingReg({ ...editingReg, status: v })}>
                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                      {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1898,7 +1848,7 @@ export default function EventsPage() {
                   <Select value={editingReg.source || ''} onValueChange={(v) => setEditingReg({ ...editingReg, source: v })}>
                     <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Please select" /></SelectTrigger>
                     <SelectContent>
-                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                      {SOURCE_OPTIONS.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2113,7 +2063,7 @@ export default function EventsPage() {
               <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
                 <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
                 <SelectContent>
-                  {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                  {SOURCE_OPTIONS.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             ) : (

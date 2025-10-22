@@ -19,11 +19,11 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
-import * as DropdownsService from '@/services/dropdowns';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
+import { STATUS_OPTIONS, EXPECTATION_OPTIONS, ELT_TEST_OPTIONS, CONSULTANCY_FEE_OPTIONS, SCHOLARSHIP_OPTIONS, type Option } from '@/constants/students-dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
 import {
@@ -62,8 +62,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), staleTime: 60_000 });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30_000 });
-  const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
-  const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
+  const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => { const { http } = await import('@/services/http'); return http.get('/api/dropdowns/module/Leads'); } });
 
   const [subPartnerSearch, setSubPartnerSearch] = React.useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners'], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
@@ -309,11 +308,17 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     return key ? (d[key] as any[]) : [];
   };
 
-  const getStudentList = (name: string): any[] => {
-    const d = studentDropdowns as any;
-    if (!d) return [];
-    const key = Object.keys(d).find(k => String(k).toLowerCase().replace(/[^a-z0-9]/g, '') === String(name).toLowerCase().replace(/[^a-z0-9]/g, ''));
-    return key ? (d[key] as any[]) : [];
+  const getStudentList = (name: string): Option[] => {
+    const normalized = String(name).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (normalized === 'elttest' || normalized === 'englishproficiency') {
+      return ELT_TEST_OPTIONS;
+    } else if (normalized === 'expectation') {
+      return EXPECTATION_OPTIONS;
+    } else if (normalized === 'status') {
+      return STATUS_OPTIONS;
+    }
+    return [];
   };
 
   const disabled = createStudentMutation.isPending;
@@ -572,8 +577,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.englishProficiency} onValueChange={(v) => handleChange('englishProficiency', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
                   <SelectContent>
-                    {(getStudentList('English Proficiency').length ? getStudentList('English Proficiency') : getStudentList('ELT Test')).map((o: any) => (
-                      <SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>
+                    {ELT_TEST_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -583,7 +588,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.expectation} onValueChange={(v) => handleChange('expectation', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select expectation" /></SelectTrigger>
                   <SelectContent>
-                    {getStudentList('Expectation').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
+                    {EXPECTATION_OPTIONS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -592,7 +597,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
                   <SelectContent>
-                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
+                    {STATUS_OPTIONS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>

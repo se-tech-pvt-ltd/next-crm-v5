@@ -14,9 +14,9 @@ import { StudentDetailsModal } from '@/components/student-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { Student } from '@/lib/types';
-import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import * as StudentsService from '@/services/students';
+import { STATUS_OPTIONS, labelFrom } from '@/constants/students-dropdowns';
 import { useToast } from '@/hooks/use-toast';
 import { MoreHorizontal, GraduationCap, Phone, Mail, Globe, Users, UserCheck, Target, TrendingUp, Filter, BookOpen, Plus, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -122,15 +122,10 @@ export default function Students() {
   });
 
 
-  // Fetch dropdowns for Students module (for status labels)
-  const { data: studentDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
   // Fallback to Leads module for fields that may live there (e.g., Program/Study Plan)
   const { data: leadsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+    queryFn: async () => { return http.get<any>('/api/dropdowns/module/Leads'); },
   });
   // Global fallback: pull all dropdowns to handle mismatched field names
   const { data: allDropdowns } = useQuery({
@@ -139,10 +134,7 @@ export default function Students() {
   });
 
   function getStatusLabel(raw?: string) {
-    const list: any[] = (studentDropdowns as any)?.Status || [];
-    const s = raw || '';
-    const match = list.find((o: any) => o.id === s || o.key === s || (o.value && String(o.value).toLowerCase() === String(s).toLowerCase()));
-    return (match?.value || s || '').toString();
+    return labelFrom('status', raw || '') || (raw || '');
   }
 
   // Applications and Admissions for derived counts (moved after dropdowns to avoid TDZ)
@@ -194,18 +186,18 @@ export default function Students() {
     if (!values.length) return '-';
 
     const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dd: any = (studentDropdowns as any) || {};
+    const ld: any = (leadsDropdowns as any) || {};
 
     // Build a normalized map of fieldName -> options[]
-    const ddMap: Record<string, any[]> = Object.keys(dd).reduce((acc: Record<string, any[]>, k) => {
-      acc[normalize(k)] = dd[k];
+    const ldMap: Record<string, any[]> = Object.keys(ld).reduce((acc: Record<string, any[]>, k) => {
+      acc[normalize(k)] = ld[k];
       return acc;
     }, {});
 
     const candidatesNorm = ['target_country','targetcountry','target country','interested country','country'].map(normalize);
     let options: any[] = [];
     for (const c of candidatesNorm) {
-      if (Array.isArray(ddMap[c]) && ddMap[c].length > 0) { options = ddMap[c]; break; }
+      if (Array.isArray(ldMap[c]) && ldMap[c].length > 0) { options = ldMap[c]; break; }
     }
 
     // Fallback: search all dropdowns for country-like fields
@@ -289,18 +281,16 @@ export default function Students() {
     if (!values.length) return '-';
 
     const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dd: any = (studentDropdowns as any) || {};
     const ld: any = (leadsDropdowns as any) || {};
 
-    // Build normalized maps for field lookup from both Students and Leads modules
+    // Build normalized map for field lookup from Leads module
     const buildMap = (src: any) => Object.keys(src || {}).reduce((acc: Record<string, any[]>, k) => { acc[normalize(k)] = src[k]; return acc; }, {} as Record<string, any[]>);
-    const ddMap = buildMap(dd);
     const ldMap = buildMap(ld);
 
     const candidates = ['target_program','target program','targetprogram','program','study plan','studyplan','course','program name'];
     let options: any[] = [];
     for (const c of candidates.map(normalize)) {
-      const list = ddMap[c] || ldMap[c];
+      const list = ldMap[c];
       if (Array.isArray(list) && list.length > 0) { options = list; break; }
     }
 
@@ -521,9 +511,9 @@ export default function Students() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    {(studentDropdowns as any)?.Status?.map((status: any) => (
-                      <SelectItem key={status.key || status.id || status.value} value={(status.value || '').toLowerCase()}>
-                        {status.value}
+                    {STATUS_OPTIONS.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
