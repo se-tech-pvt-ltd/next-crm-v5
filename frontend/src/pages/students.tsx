@@ -122,15 +122,10 @@ export default function Students() {
   });
 
 
-  // Fetch dropdowns for Students module (for status labels)
-  const { data: studentDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
   // Fallback to Leads module for fields that may live there (e.g., Program/Study Plan)
   const { data: leadsDropdowns } = useQuery({
     queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+    queryFn: async () => { return http.get<any>('/api/dropdowns/module/Leads'); },
   });
   // Global fallback: pull all dropdowns to handle mismatched field names
   const { data: allDropdowns } = useQuery({
@@ -139,10 +134,7 @@ export default function Students() {
   });
 
   function getStatusLabel(raw?: string) {
-    const list: any[] = (studentDropdowns as any)?.Status || [];
-    const s = raw || '';
-    const match = list.find((o: any) => o.id === s || o.key === s || (o.value && String(o.value).toLowerCase() === String(s).toLowerCase()));
-    return (match?.value || s || '').toString();
+    return labelFrom('status', raw || '') || (raw || '');
   }
 
   // Applications and Admissions for derived counts (moved after dropdowns to avoid TDZ)
