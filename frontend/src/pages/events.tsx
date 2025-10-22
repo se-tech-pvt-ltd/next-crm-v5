@@ -1839,7 +1839,7 @@ export default function EventsPage() {
                   <Select value={editingReg.status} onValueChange={(v) => setEditingReg({ ...editingReg, status: v })}>
                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {statusOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                      {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1848,7 +1848,7 @@ export default function EventsPage() {
                   <Select value={editingReg.source || ''} onValueChange={(v) => setEditingReg({ ...editingReg, source: v })}>
                     <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Please select" /></SelectTrigger>
                     <SelectContent>
-                      {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                      {SOURCE_OPTIONS.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2063,7 +2063,7 @@ export default function EventsPage() {
               <Select value={viewEditData.source || ''} onValueChange={(v) => setViewEditData(d => ({ ...d, source: v }))}>
                 <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white"><SelectValue placeholder="Please select" /></SelectTrigger>
                 <SelectContent>
-                  {sourceOptions.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                  {SOURCE_OPTIONS.map(opt => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             ) : (
