@@ -308,11 +308,17 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
     return key ? (d[key] as any[]) : [];
   };
 
-  const getStudentList = (name: string): any[] => {
-    const d = studentDropdowns as any;
-    if (!d) return [];
-    const key = Object.keys(d).find(k => String(k).toLowerCase().replace(/[^a-z0-9]/g, '') === String(name).toLowerCase().replace(/[^a-z0-9]/g, ''));
-    return key ? (d[key] as any[]) : [];
+  const getStudentList = (name: string): Option[] => {
+    const normalized = String(name).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (normalized === 'elttest' || normalized === 'englishproficiency') {
+      return ELT_TEST_OPTIONS;
+    } else if (normalized === 'expectation') {
+      return EXPECTATION_OPTIONS;
+    } else if (normalized === 'status') {
+      return STATUS_OPTIONS;
+    }
+    return [];
   };
 
   const disabled = createStudentMutation.isPending;
