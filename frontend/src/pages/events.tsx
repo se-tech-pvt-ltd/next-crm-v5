@@ -878,9 +878,9 @@ export default function EventsPage() {
   const normalizeStatus = (s: string) => {
     const v = String(s || '').trim();
     if (!v) return '';
-    const byValue = statusOptions.find(o => String(o.value).toLowerCase() === v.toLowerCase());
+    const byValue = STATUS_OPTIONS.find(o => String(o.value).toLowerCase() === v.toLowerCase());
     if (byValue) return byValue.value;
-    const byLabel = statusOptions.find(o => String(o.label).toLowerCase() === v.toLowerCase());
+    const byLabel = STATUS_OPTIONS.find(o => String(o.label).toLowerCase() === v.toLowerCase());
     return byLabel ? byLabel.value : '';
   };
 
