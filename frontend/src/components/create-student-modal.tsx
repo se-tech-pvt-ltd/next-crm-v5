@@ -23,7 +23,7 @@ import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
-import { STATUS_OPTIONS, EXPECTATION_OPTIONS, ELT_TEST_OPTIONS, CONSULTANCY_FEE_OPTIONS, SCHOLARSHIP_OPTIONS } from '@/constants/students-dropdowns';
+import { STATUS_OPTIONS, EXPECTATION_OPTIONS, ELT_TEST_OPTIONS, CONSULTANCY_FEE_OPTIONS, SCHOLARSHIP_OPTIONS, type Option } from '@/constants/students-dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
 import {
