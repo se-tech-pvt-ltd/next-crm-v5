@@ -577,8 +577,8 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.englishProficiency} onValueChange={(v) => handleChange('englishProficiency', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select proficiency" /></SelectTrigger>
                   <SelectContent>
-                    {(getStudentList('English Proficiency').length ? getStudentList('English Proficiency') : getStudentList('ELT Test')).map((o: any) => (
-                      <SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>
+                    {ELT_TEST_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -588,7 +588,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.expectation} onValueChange={(v) => handleChange('expectation', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select expectation" /></SelectTrigger>
                   <SelectContent>
-                    {getStudentList('Expectation').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
+                    {EXPECTATION_OPTIONS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -597,7 +597,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                 <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} disabled={disabled}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select status" /></SelectTrigger>
                   <SelectContent>
-                    {getStudentList('Status').map((o: any) => (<SelectItem key={o.key || o.id || o.value} value={(o.key || o.id || o.value) as string}>{o.value}</SelectItem>))}
+                    {STATUS_OPTIONS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
