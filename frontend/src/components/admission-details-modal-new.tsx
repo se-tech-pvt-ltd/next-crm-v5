@@ -57,17 +57,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     staleTime: 5 * 60 * 1000,
   });
 
-  const statusSequence = useMemo(() => {
-    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list)) return [];
-    return list.map((o: any) => (o.key || o.id || o.value)).filter(Boolean);
-  }, [admissionDropdowns]);
+  // Use hardcoded status sequence and display names for admissions
+  const statusSequence = useMemo(() => ADMISSION_STATUS_OPTIONS.map(o => String(o.value)), []);
 
   const getStatusDisplayName = (statusId: string) => {
-    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    const byId = list.find((o: any) => o.id === statusId || o.key === statusId || o.value === statusId);
-    if (byId && byId.value) return byId.value;
-    return statusId;
+    const found = ADMISSION_STATUS_OPTIONS.find(o => String(o.value) === String(statusId));
+    return found ? found.label : statusId;
   };
 
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
