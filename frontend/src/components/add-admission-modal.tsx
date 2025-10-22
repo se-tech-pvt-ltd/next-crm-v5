@@ -383,8 +383,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [open, subPartners, form]);
 
-  const statusOptions = getOptions('Status', ['Admissions','Applications']);
-  const caseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
+  // Use hardcoded admission dropdowns for status and case status (do not fetch from DB)
+  const statusOptions = ADMISSION_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false }));
+  const caseStatusOptions = ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false }));
 
   useEffect(() => {
     if (!open) return;
