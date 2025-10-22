@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
-import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS, labelFrom } from '@/constants/leads-dropdowns';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -256,12 +256,10 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
   // Hardcoded leads dropdowns are used; no API fetch needed
 
-  const { labelFrom } = require('@/constants/leads-dropdowns');
   const getStatusDisplayName = (statusId: string) => {
     return labelFrom('status', statusId);
   };
 
-  const { STATUS_OPTIONS } = require('@/constants/leads-dropdowns');
   const statusSequence = useMemo<string[]>(() => {
     return STATUS_OPTIONS.map((o: any) => o.value);
   }, []);
