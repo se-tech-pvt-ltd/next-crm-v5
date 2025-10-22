@@ -19,7 +19,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import * as BranchEmpsService from '@/services/branchEmps';
 import { queryClient } from '@/lib/queryClient';
 import * as StudentsService from '@/services/students';
-import * as DropdownsService from '@/services/dropdowns';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
