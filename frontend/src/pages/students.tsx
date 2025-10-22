@@ -186,18 +186,18 @@ export default function Students() {
     if (!values.length) return '-';
 
     const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dd: any = (studentDropdowns as any) || {};
+    const ld: any = (leadsDropdowns as any) || {};
 
     // Build a normalized map of fieldName -> options[]
-    const ddMap: Record<string, any[]> = Object.keys(dd).reduce((acc: Record<string, any[]>, k) => {
-      acc[normalize(k)] = dd[k];
+    const ldMap: Record<string, any[]> = Object.keys(ld).reduce((acc: Record<string, any[]>, k) => {
+      acc[normalize(k)] = ld[k];
       return acc;
     }, {});
 
     const candidatesNorm = ['target_country','targetcountry','target country','interested country','country'].map(normalize);
     let options: any[] = [];
     for (const c of candidatesNorm) {
-      if (Array.isArray(ddMap[c]) && ddMap[c].length > 0) { options = ddMap[c]; break; }
+      if (Array.isArray(ldMap[c]) && ldMap[c].length > 0) { options = ldMap[c]; break; }
     }
 
     // Fallback: search all dropdowns for country-like fields
