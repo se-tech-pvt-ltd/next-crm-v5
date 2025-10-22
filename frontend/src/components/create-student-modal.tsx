@@ -62,8 +62,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
   const { data: branchEmps = [] } = useQuery({ queryKey: ['/api/branch-emps'], queryFn: () => BranchEmpsService.listBranchEmps(), staleTime: 60_000 });
   const { data: regions = [] } = useQuery({ queryKey: ['/api/regions'], queryFn: () => RegionsService.listRegions(), staleTime: 60_000 });
   const { data: branches = [] } = useQuery({ queryKey: ['/api/branches'], queryFn: () => BranchesService.listBranches(), staleTime: 30_000 });
-  const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => DropdownsService.getModuleDropdowns('Leads') });
-  const { data: studentDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/students'], queryFn: async () => DropdownsService.getModuleDropdowns('students') });
+  const { data: leadDropdowns } = useQuery({ queryKey: ['/api/dropdowns/module/Leads'], queryFn: async () => { const { http } = await import('@/services/http'); return http.get('/api/dropdowns/module/Leads'); } });
 
   const [subPartnerSearch, setSubPartnerSearch] = React.useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners'], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
