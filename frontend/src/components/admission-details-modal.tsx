@@ -163,10 +163,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   };
 
   const getCaseStatusOptions = () => {
-    const dd = admissionDropdowns || {};
-    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
-    if (!Array.isArray(list)) list = [];
-    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
+    return ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value }));
   };
 
   if (!admission) return null;
