@@ -50,12 +50,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     }
   }, [matchEdit, canEditAdmission, admission?.id, setLocation]);
 
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
-    enabled: !!admission,
-    staleTime: 5 * 60 * 1000,
-  });
 
   // Use hardcoded status sequence and display names for admissions
   const statusSequence = useMemo(() => ADMISSION_STATUS_OPTIONS.map(o => String(o.value)), []);
