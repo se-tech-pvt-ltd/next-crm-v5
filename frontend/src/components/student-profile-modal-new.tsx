@@ -117,12 +117,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     map['ELT_Test'] = map['ELT Test'];
     return map;
   }, [open]);
-  // Fallback to Leads module for target country options if needed
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-    enabled: open,
-  });
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/users'],

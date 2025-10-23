@@ -35,24 +35,9 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
 
   const selectedLead = leadId ? leads?.find(l => l.id === leadId) : null;
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
-
-  const dropdownsForStudents = () => {
-    return (dropdownData as any)?.Counsellor || (dropdownData as any)?.Counselor || (dropdownData as any)?.counsellor || [];
-  };
 
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
   const toStringValue = (value: unknown) => (value == null ? '' : String(value));
-  const getFieldOptions = (fieldName: string): any[] => {
-    const data = dropdownData as any;
-    if (!data) return [];
-    const target = normalize(fieldName);
-    const entry = Object.entries(data).find(([k]) => normalize(String(k)) === target);
-    return (entry?.[1] as any[]) || [];
-  };
 
   const form = useForm({
     resolver: zodResolver(insertStudentSchema),
