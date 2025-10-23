@@ -11,6 +11,7 @@ import { Admission } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
+import * as UniversitiesService from "@/services/universities";
 import * as DropdownsService from '@/services/dropdowns';
 import { STATUS_OPTIONS as ADMISSION_STATUS_OPTIONS, CASE_STATUS_OPTIONS as ADMISSION_CASE_STATUS_OPTIONS } from '@/constants/admissions-dropdowns';
 import * as ActivitiesService from '@/services/activities';
@@ -104,6 +105,40 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     queryFn: async () => ApplicationsService.getApplication(admission?.applicationId as string),
     enabled: !!admission?.applicationId,
   });
+
+  const currentUniversityId = useMemo(() => {
+    const a: any = application as any;
+    return String(a?.universityId ?? a?.university_id ?? '') || '';
+  }, [application]);
+
+  const { data: uniDetail } = useQuery({
+    queryKey: ['/api/universities', currentUniversityId],
+    queryFn: async () => currentUniversityId ? UniversitiesService.getUniversity(currentUniversityId) : undefined,
+    enabled: !!currentUniversityId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const universityCountry = useMemo(() => {
+    const a: any = application as any;
+    const c = (uniDetail as any)?.country || a?.country || '';
+    return String(c || '').trim();
+  }, [uniDetail, application]);
+
+  const { data: currencyRow } = useQuery({
+    queryKey: ['/api/currencies', universityCountry],
+    queryFn: async () => {
+      if (!universityCountry) return null as any;
+      const svc = await import('@/services/currencies');
+      return svc.getCurrencyByCountry(universityCountry);
+    },
+    enabled: !!universityCountry,
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const currencyCode = useMemo(() => {
+    const row = currencyRow as any;
+    return (row?.currencyCode || row?.currency_code || '').toString();
+  }, [currencyRow]);
 
   const { data: users = [] } = useQuery({
     queryKey: ['/api/users'],
@@ -470,26 +505,26 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
                   </div>
                 </div>
                 <div>
-                  <Label>Net Tuition Fee</Label>
+                  <Label>Net Tuition Fee{currencyCode ? ` (${currencyCode})` : ''}</Label>
                   <div className="mt-1">
                     <Input value={String(admission.netTuitionFee ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Initial Deposit</Label>
+                  <Label>Initial Deposit{currencyCode ? ` (${currencyCode})` : ''}</Label>
                   <div className="mt-1">
                     <Input value={String(admission.initialDeposit ?? admission.depositAmount ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
                 <div>
-                  <Label>Full Tuition Fee</Label>
+                  <Label>Full Tuition Fee{currencyCode ? ` (${currencyCode})` : ''}</Label>
                   <div className="mt-1">
                     <Input value={String(admission.fullTuitionFee ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>
                 </div>
                 <div>
-                  <Label>Scholarship Amount</Label>
+                  <Label>Scholarship Amount{currencyCode ? ` (${currencyCode})` : ''}</Label>
                   <div className="mt-1">
                     <Input value={String(admission.scholarshipAmount ?? '')} placeholder="Not specified" disabled readOnly className="text-xs" />
                   </div>

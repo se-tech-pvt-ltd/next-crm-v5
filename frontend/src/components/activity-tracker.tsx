@@ -169,6 +169,21 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     }
   };
   const moduleName = moduleNameForEntity(entityType);
+
+  // Module-specific dropdowns for current entity (e.g., Status mapping)
+  const { data: moduleDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module', moduleName],
+    queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
+    enabled: Boolean(moduleName),
+    staleTime: 5 * 60 * 1000,
+  });
+  // Leads module dropdowns as a robust fallback (many activities reuse Leads statuses)
+  const { data: leadsModuleDropdowns } = useQuery<Record<string, any[]>>({
+    queryKey: ['/api/dropdowns/module/Leads'],
+    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Global fallback: fetch all dropdowns to build an id->label map
   const { data: allDropdowns = [] } = useQuery({
     queryKey: ['/api/dropdowns'],

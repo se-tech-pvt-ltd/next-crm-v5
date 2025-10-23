@@ -181,7 +181,7 @@ export default function Students() {
     if (!values.length) return '-';
 
     const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const ld: any = (leadsDropdowns as any) || {};
+    const ld: any = (((globalThis as any)?.leadsDropdowns) as any) || {};
 
     // Build a normalized map of fieldName -> options[]
     const ldMap: Record<string, any[]> = Object.keys(ld).reduce((acc: Record<string, any[]>, k) => {
@@ -276,7 +276,7 @@ export default function Students() {
     if (!values.length) return '-';
 
     const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const ld: any = (leadsDropdowns as any) || {};
+    const ld: any = (((globalThis as any)?.leadsDropdowns) as any) || {};
 
     // Build normalized map for field lookup from Leads module
     const buildMap = (src: any) => Object.keys(src || {}).reduce((acc: Record<string, any[]>, k) => { acc[normalize(k)] = src[k]; return acc; }, {} as Record<string, any[]>);

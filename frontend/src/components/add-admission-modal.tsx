@@ -191,11 +191,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       try {
         const created = await AdmissionsService.createAdmission(payload as any);
         try {
-          if (data.caseStatus && data.applicationId) {
-            await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
-            queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-            try { const actKey = `/api/activities/application/${String(data.applicationId)}`; queryClient.invalidateQueries({ queryKey: [actKey] }); queryClient.refetchQueries({ queryKey: [actKey] }); } catch {}
-          }
+          // Do not sync admission caseStatus back to linked application
           if (data.googleDriveLink && data.applicationId) {
             await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
             queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
@@ -272,15 +268,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (resolvedC && !form.getValues('counsellorId')) form.setValue('counsellorId', resolvedC);
         if (resolvedO && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', resolvedO);
 
-        // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
-        if (!form.getValues('caseStatus') && (anyApp.caseStatus || anyApp.case_status)) {
-          const raw = String(anyApp.caseStatus ?? anyApp.case_status);
-          form.setValue('caseStatus', raw);
-        }
-        if (!form.getValues('status') && (anyApp.status || anyApp.appStatus || anyApp.app_status)) {
-          const raw = String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status);
-          form.setValue('status', raw);
-        }
+        // Do not carry forward status or caseStatus from application. Admission status defaults to Open; caseStatus defaults to empty (Please Select).
       } catch {}
     }
   }, [applicationId, studentId, linkedApp, form, users, branchEmps]);
@@ -651,6 +639,27 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     staleTime: 5 * 60 * 1000,
   });
 
+  const universityCountry = React.useMemo(() => {
+    const c = (uniDetail as any)?.country || (currentApp as any)?.country || '';
+    return String(c || '').trim();
+  }, [uniDetail, currentApp]);
+
+  const { data: currencyRow } = useQuery({
+    queryKey: ['/api/currencies', universityCountry],
+    queryFn: async () => {
+      if (!universityCountry) return null as any;
+      const svc = await import('@/services/currencies');
+      return svc.getCurrencyByCountry(universityCountry);
+    },
+    enabled: open && !!universityCountry,
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const currencyCode = React.useMemo(() => {
+    const row = currencyRow as any;
+    return (row?.currencyCode || row?.currency_code || '').toString();
+  }, [currencyRow]);
+
   // Auto-fill financials when university detail is loaded and fields are empty
   useEffect(() => {
     if (!open) return;
@@ -1009,7 +1018,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <FormLabel>Full Tuition Fee</FormLabel>
+                          <FormLabel>Full Tuition Fee{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input
                             type="number"
                             inputMode="decimal"
@@ -1021,7 +1030,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         </div>
 
                         <div>
-                          <FormLabel>Scholarship</FormLabel>
+                          <FormLabel>Scholarship{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input
                             type="number"
                             inputMode="decimal"
@@ -1033,12 +1042,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         </div>
 
                         <div>
-                          <FormLabel>Net Tuition</FormLabel>
+                          <FormLabel>Net Tuition{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input value={form.watch('netTuitionFee') || ''} disabled />
                         </div>
 
                         <div>
-                          <FormLabel>Initial Deposit</FormLabel>
+                          <FormLabel>Initial Deposit{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input
                             type="number"
                             inputMode="decimal"

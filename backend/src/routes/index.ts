@@ -71,6 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/events', eventRoutes);
   app.use('/api/event-registrations', eventRegistrationRoutes);
   app.use('/api/universities', universityRoutes);
+  app.use('/api/currencies', (await import('./currencyRoutes.js')).default);
   app.use('/api/configurations', (await import('./configurationRoutes.js')).default);
   if (updatesRoutes) {
     app.use('/api/updates', updatesRoutes);
