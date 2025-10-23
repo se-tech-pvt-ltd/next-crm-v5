@@ -156,6 +156,16 @@ export default function AddApplication() {
       }
     } catch {}
 
+    // Fallback explicit defaults when dropdown data doesn't provide isDefault
+    try {
+      const cur = form.getValues('appStatus');
+      if (!cur) form.setValue('appStatus', 'Open');
+    } catch {}
+    try {
+      const curCase = form.getValues('caseStatus');
+      if (!curCase) form.setValue('caseStatus', 'Raw');
+    } catch {}
+
   }, [appStatusOptions, caseStatusOptions, courseTypeOptions, countryOptions, channelPartnerOptions]);
 
   const form = useForm<InsertApplication>({
