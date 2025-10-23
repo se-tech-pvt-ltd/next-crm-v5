@@ -151,38 +151,8 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     queryKey: ['/api/users'],
   });
 
-  // Fetch module-specific dropdowns (for mapping status IDs/keys to display names)
-  const moduleNameForEntity = (et: string) => {
-    const t = (et || '').toLowerCase();
-    switch (t) {
-      case 'lead':
-        return 'Leads';
-      case 'student':
-        return 'students';
-      case 'application':
-        return 'applications';
-      case 'admission':
-        return 'admissions';
-      default:
-        return t.endsWith('s') ? t : `${t}s`;
-    }
-  };
-  const moduleName = moduleNameForEntity(entityType);
-  const { data: moduleDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module', moduleName],
-    queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
-  });
-  // Fallback: some shared options (like Country) may live under Leads module
-  const { data: leadsModuleDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module', 'Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-  });
-  // Global fallback: fetch all dropdowns to build an id->label map
-  const { data: allDropdowns = [] } = useQuery({
-    queryKey: ['/api/dropdowns'],
-    queryFn: async () => DropdownsService.getAllDropdowns(),
-    staleTime: 5 * 60 * 1000,
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const allDropdowns: any[] = [];
   const globalLabelById = React.useMemo(() => {
     const map = new Map<string, string>();
     (allDropdowns as any[]).forEach((d: any) => {
