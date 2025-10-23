@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
-import { STATUS_OPTIONS, labelFrom } from '@/constants/leads-dropdowns';
+import {
+  STATUS_OPTIONS,
+  labelFrom,
+  TYPE_OPTIONS,
+  SOURCE_OPTIONS,
+  STUDY_LEVEL_OPTIONS,
+  STUDY_PLAN_OPTIONS,
+  INTERESTED_COUNTRY_OPTIONS,
+} from '@/constants/leads-dropdowns';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
