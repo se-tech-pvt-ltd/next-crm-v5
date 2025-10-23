@@ -25,7 +25,6 @@ import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { StudentProfileModal } from './student-profile-modal-new';
 import { ApplicationDetailsModal } from './application-details-modal-new';
-import * as DropdownsService from '@/services/dropdowns';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import * as BranchEmpsService from '@/services/branchEmps';
