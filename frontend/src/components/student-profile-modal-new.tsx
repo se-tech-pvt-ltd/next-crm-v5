@@ -117,12 +117,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     map['ELT_Test'] = map['ELT Test'];
     return map;
   }, [open]);
-  // Fallback to Leads module for target country options if needed
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-    enabled: open,
-  });
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/users'],
@@ -148,7 +142,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
   const getFieldOptions = (fieldName: string): any[] => {
     const data = dropdownData as any;
-    const leadsData = leadsDropdowns as any;
     const target = normalize(fieldName);
     const candidates = [target];
     if (target === 'englishproficiency') {
@@ -164,7 +157,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     };
     const opts = findIn(data);
     if (opts.length > 0) return opts;
-    return findIn(leadsData);
+    return [];
   };
   const getDropdownLabel = (fieldName: string, value?: string | string[] | null) => {
     if (value == null) return '';

@@ -122,11 +122,6 @@ export default function Students() {
   });
 
 
-  // Fallback to Leads module for fields that may live there (e.g., Program/Study Plan)
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => { return http.get<any>('/api/dropdowns/module/Leads'); },
-  });
   // Global fallback: pull all dropdowns to handle mismatched field names
   const { data: allDropdowns } = useQuery({
     queryKey: ['/api/dropdowns'],
