@@ -56,10 +56,6 @@ export default function AddApplication() {
     enabled: !!presetStudentId,
   });
 
-  const { data: applicationsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
-  });
 
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const { data: allDropdowns } = useQuery({
