@@ -922,9 +922,9 @@ export default function EventsPage() {
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
 
-    // Use fixed defaults for imports
-    const defaultStatusValue = 'not_sure';
-    const defaultSourceValue = 'events';
+    // Use fixed defaults for imports (pick from constants)
+    const defaultStatusValue = (STATUS_OPTIONS && STATUS_OPTIONS.length > 0) ? (STATUS_OPTIONS.find(o => String(o.label).toLowerCase() === 'not sure' || String(o.value).toLowerCase() === 'not sure')?.value ?? STATUS_OPTIONS[0].value) : 'Not sure';
+    const defaultSourceValue = (SOURCE_OPTIONS && SOURCE_OPTIONS.length > 0) ? (SOURCE_OPTIONS.find(o => String(o.label).toLowerCase() === 'events' || String(o.value).toLowerCase() === 'events')?.value ?? SOURCE_OPTIONS[0].value) : 'Events';
 
     const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
 
