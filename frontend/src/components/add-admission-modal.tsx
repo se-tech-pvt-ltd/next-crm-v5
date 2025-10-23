@@ -509,7 +509,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const [currentApplicationObj, setCurrentApplicationObj] = useState<Application | null>(null);
   const [currentStudentIdLocal, setCurrentStudentIdLocal] = useState<string | null>(null);
 
-  const getNormalizedRole = () => {
+  const getNormalizedRole = React.useCallback(() => {
     try {
       const rawRole = (user as any)?.role || (user as any)?.role_name || (user as any)?.roleName;
       if (rawRole) return String(rawRole).trim().toLowerCase().replace(/\s+/g, '_');
@@ -528,7 +528,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       }
     } catch {}
     return '';
-  };
+  }, [user]);
 
   // Auto-select region/branch based on role
   React.useEffect(() => {
