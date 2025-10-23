@@ -540,7 +540,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         city: initialData.city || '',
         source: mapLabelToKeyRobust('source', initialData.source || defaultSourceLabel),
         // If this is from an event registration, force status to 'raw' regardless of incoming value
-        status: (initialData && (initialData as any).eventRegId) ? 'raw' : (initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey),
+        status: (initialData && (initialData as any).eventRegId) ? 'Raw' : (initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey),
         counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
