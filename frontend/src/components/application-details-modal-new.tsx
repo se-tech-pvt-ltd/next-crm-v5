@@ -120,11 +120,8 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
     setIsEditing(Boolean(startInEdit));
   }, [currentApp?.id, startInEdit]);
 
-  const { data: applicationsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
-    enabled: open,
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const applicationsDropdowns: Record<string, any[]> = {};
 
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
