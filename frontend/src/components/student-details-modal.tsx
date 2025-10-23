@@ -61,10 +61,8 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
     queryFn: async () => UsersService.getUsers(),
   });
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const dropdownData = {};
 
   const getStatusDisplayName = (statusId: string) => {
     const list: any[] = (dropdownData as any)?.Status || [];
