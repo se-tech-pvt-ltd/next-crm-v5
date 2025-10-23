@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 console.log('[modal] loaded: frontend/src/components/student-details-modal.tsx');
 import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS as STUDENT_STATUS_OPTIONS, EXPECTATION_OPTIONS as STUDENT_EXPECTATION_OPTIONS, ELT_TEST_OPTIONS as STUDENT_ELT_TEST_OPTIONS } from '@/constants/students-dropdowns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
