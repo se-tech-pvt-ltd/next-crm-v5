@@ -807,13 +807,16 @@ export default function EventsPage() {
     // find the linked event (selected event)
     const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(filterEventId)) || selectedEvent;
 
+    const statusDefault = (STATUS_OPTIONS && STATUS_OPTIONS.length > 0) ? (STATUS_OPTIONS.find(o => String(o.label).toLowerCase() === 'not sure' || String(o.value).toLowerCase() === 'not_sure')?.value ?? STATUS_OPTIONS[0].value) : 'Not sure';
+    const sourceDefault = (SOURCE_OPTIONS && SOURCE_OPTIONS.length > 0) ? (SOURCE_OPTIONS.find(o => String(o.label).toLowerCase() === 'events' || String(o.value).toLowerCase() === 'events')?.value ?? SOURCE_OPTIONS[0].value) : 'Events';
+
     const initial: any = {
-      status: 'not_sure',
+      status: statusDefault,
       name: '',
       number: '',
       email: '',
       city: '',
-      source: 'events',
+      source: sourceDefault,
       eventId: filterEventId,
     };
 
