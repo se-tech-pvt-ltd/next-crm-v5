@@ -308,8 +308,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         };
         {
           // Clear to avoid showing stale values while async lookups complete
-          form.setValue('counsellorId', '');
-          form.setValue('admissionOfficerId', '');
+          if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+          if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
           const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
           const resolvedC = resolveUserIdFromApp(sourceCounsellor);
           console.log('[AddAdmissionModal] linkedApp counsellor source:', { sourceCounsellor, resolvedC, usersCount: Array.isArray(users) ? users.length : 0, branchEmpsCount: Array.isArray(branchEmps) ? branchEmps.length : 0 });
@@ -417,8 +417,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     if (!usersFetched || !branchEmpsFetched) return;
     try {
       // reset to avoid stale values
-      form.setValue('counsellorId', '');
-      form.setValue('admissionOfficerId', '');
+      if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+      if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
       if (linkedApp.regionId) form.setValue('regionId', String(linkedApp.regionId));
       if (linkedApp.branchId) form.setValue('branchId', String(linkedApp.branchId));
 
@@ -645,8 +645,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           return undefined;
         };
         // Clear to avoid stale selections while lookups happen
-        form.setValue('counsellorId', '');
-        form.setValue('admissionOfficerId', '');
+        if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+        if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
         const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
         const resolvedC = resolveUserIdFromApp(sourceCounsellor);
         console.log('[AddAdmissionModal] handleApplicationChange counsellor source:', { sourceCounsellor, resolvedC });
@@ -656,9 +656,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         console.log('[AddAdmissionModal] handleApplicationChange officer source:', { sourceOfficer, resolvedO });
         if (resolvedO) { form.setValue('admissionOfficerId', resolvedO); console.log('[AddAdmissionModal] handleApplicationChange set admissionOfficerId to', resolvedO); }
         // Reset financials; will be auto-filled from university data if available
-        form.setValue('fullTuitionFee', '');
-        form.setValue('scholarshipAmount', '');
-        form.setValue('initialDeposit', '');
+        if (form.getValues('fullTuitionFee') !== '') form.setValue('fullTuitionFee', '');
+        if (form.getValues('scholarshipAmount') !== '') form.setValue('scholarshipAmount', '');
+        if (form.getValues('initialDeposit') !== '') form.setValue('initialDeposit', '');
       } catch {}
     }
   };
@@ -679,8 +679,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       const bid = String(form.getValues('branchId') || '');
       if (!bid) {
         // clear selections when branch cleared
-        if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
-        if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
+        if (form.getValues('counsellorId') !== '') if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+        if (form.getValues('admissionOfficerId') !== '') if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
         return;
       }
       const links = Array.isArray(branchEmps) ? branchEmps : [];
@@ -1016,7 +1016,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <FormLabel>Region</FormLabel>
-                              <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); form.setValue('counsellorId', ''); form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
+                              <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', ''); if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select region" />
                                 </SelectTrigger>
@@ -1033,8 +1033,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                               <Select value={form.watch('branchId') || ''} onValueChange={(v) => {
                                 const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
                                 form.setValue('branchId', v);
-                                form.setValue('counsellorId', '');
-                                form.setValue('admissionOfficerId', '');
+                                if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
+                                if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
                                 if (!form.getValues('regionId') && b) form.setValue('regionId', String(b.regionId || ''));
                               }}>
                                 <SelectTrigger>
