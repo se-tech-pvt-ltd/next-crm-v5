@@ -6,12 +6,11 @@ export const ADMISSIONS_DROPDOWNS = {
   },
   case_status: {
     'Deposit': 'Deposit',
-    'Deposit Verified': 'Deposit Verified',
-    'CAS Requested': 'CAS Requested',
-    'CAS Received': 'CAS Received',
-    'Visa Requested': 'Visa Requested',
-    'Successful': 'Successful',
-    'Dropped': 'Dropped',
+    'CAS': 'CAS',
+    'Visa': 'Visa',
+    'Enrolled': 'Enrolled',
+    'Deferred': 'Deferred',
+    'Closed': 'Closed',
   },
 } as const;
 
