@@ -523,7 +523,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
       let defaultStatusKey: string | undefined = undefined;
       if ((initialData as any).eventRegId && !((initialData as any).status)) {
-        defaultStatusKey = 'raw';
+        defaultStatusKey = 'Raw';
       }
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
 
