@@ -1823,27 +1823,9 @@ export default function EventsPage() {
 
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <Label>Status</Label>
-                          <Select value={regForm.status || ''} onValueChange={(v) => setRegForm((s) => ({ ...s, status: v }))}>
-                            <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label>Source</Label>
-                          <Select value={regForm.source || ''} onValueChange={(v) => setRegForm((s) => ({ ...s, source: v }))}>
-                            <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Please select" /></SelectTrigger>
-                            <SelectContent>
-                              {SOURCE_OPTIONS.map(opt => <SelectItem key={String(opt.value)} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                      {/* Status and Source are hidden on creation — defaults are applied in openAddRegistration */}
+                      <input type="hidden" name="status" value={regForm.status || ''} />
+                      <input type="hidden" name="source" value={regForm.source || ''} />
 
                     </form>
                   </CardContent>
