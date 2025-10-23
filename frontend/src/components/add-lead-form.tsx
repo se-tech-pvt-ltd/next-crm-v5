@@ -1141,7 +1141,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                             </FormLabel>
                             <Select onValueChange={field.onChange} value={field.value} disabled={shouldDisable}>
                               <FormControl>
-                                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={shouldDisable}>
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                               </FormControl>
