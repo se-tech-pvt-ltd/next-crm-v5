@@ -1,28 +1,28 @@
 export const STUDENTS_DROPDOWNS = {
   status: {
-    open: 'Open',
-    closed: 'Closed',
-    enrolled: 'Enrolled',
+    'Open': 'Open',
+    'Needs Attention': 'Needs Attention',
+    'Closed': 'Closed'
   },
   expectation: {
-    high: 'High',
-    average: 'Average',
+    'High': 'High',
+    'Average': 'Average',
   },
   elt_test: {
-    ielts: 'IELTS',
-    pte: 'PTE',
-    oidi: 'OIDI',
-    toefl: 'Toefl',
-    passwords: 'Passwords',
-    no_test: 'No Test',
+    'IELTS': 'IELTS',
+    'PTE': 'PTE',
+    'OIDI': 'OIDI',
+    'Toefl': 'Toefl',
+    'Passwords': 'Passwords',
+    'No Test': 'No Test',
   },
   consultancy_fee: {
-    yes: 'Yes',
-    no: 'No',
+    'Yes': 'Yes',
+    'No': 'No',
   },
   scholarship: {
-    yes: 'Yes',
-    no: 'No',
+    'Yes': 'Yes',
+    'No': 'No',
   },
 } as const;
 

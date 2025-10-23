@@ -510,7 +510,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   // Reset form values when initialData provided
   useEffect(() => {
-    if (initialData) {
+    const hasInitial = Boolean(initialData && Object.keys(initialData || {}).length > 0);
+    const isFromEvent = Boolean(initialData && (initialData as any).eventRegId);
+
+    if (hasInitial) {
       const mapLabelToKeyHardcoded = (section: 'type' | 'status' | 'source' | 'interested_country' | 'study_level' | 'study_plan', label?: string) => {
         if (!label) return '';
         const key = keyFromLabel(section, label);
@@ -520,7 +523,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
       const defaultTypeLabel = (initialData as any).eventRegId ? 'Direct' : undefined;
       let defaultStatusKey: string | undefined = undefined;
       if ((initialData as any).eventRegId && !((initialData as any).status)) {
-        defaultStatusKey = 'raw';
+        defaultStatusKey = 'Raw';
       }
       const defaultSourceLabel = (initialData as any).eventRegId ? 'Events' : undefined;
 
@@ -536,7 +539,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         phone: initialData.phone || '',
         city: initialData.city || '',
         source: mapLabelToKeyRobust('source', initialData.source || defaultSourceLabel),
-        status: initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey,
+        // If this is from an event registration, force status to 'raw' regardless of incoming value
+        status: (initialData && (initialData as any).eventRegId) ? 'Raw' : (initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey),
         counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
@@ -548,6 +552,26 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         admissionOfficerId: initialData.admissionOfficerId || initialData.admission_officer_id || '',
       };
       form.reset(values);
+
+      // If this is from an event registration, try to auto-select the event name as medium
+      try {
+        if (initialData && (initialData as any).eventRegId) {
+          const evtId = (initialData as any).eventId || (initialData as any).event_id;
+          const eventsList = Array.isArray(eventsListRaw) ? eventsListRaw : (eventsListRaw as any)?.data || [];
+          let eventName: string | undefined = undefined;
+          if (evtId) {
+            const found = (eventsList || []).find((e: any) => String(e.id) === String(evtId));
+            if (found) eventName = String(found.name || found.eventName || found.title || '');
+          }
+          // fallback: if registration has an event name directly
+          if (!eventName && ((initialData as any).eventName || (initialData as any).event_name)) {
+            eventName = String((initialData as any).eventName || (initialData as any).event_name);
+          }
+          if (eventName) {
+            try { form.setValue('medium', eventName); } catch {}
+          }
+        }
+      } catch {}
       // If initial data provides region/branch defaults (from an event), ensure selects are enabled so values show
       try {
         const hasRegion = Boolean(values.regionId);
@@ -575,9 +599,17 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           }
         } catch {}
       } catch {}
+
+      // If this initial data is from an event registration and no explicit status/type provided, ensure defaults
+      if (isFromEvent) {
+        try { if (!form.getValues('status')) form.setValue('status', 'Raw'); } catch {}
+        try { if (!form.getValues('type')) form.setValue('type', 'Direct'); } catch {}
+      }
     } else {
+      // Creation flow (/leads/new) - hide fields and set defaults
       try {
-        form.setValue('status', 'raw');
+        form.setValue('status', 'Raw');
+        form.setValue('type', 'Direct');
       } catch {}
     }
   }, [initialData, dropdownData]);
@@ -1020,9 +1052,9 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         <MapPin className="w-4 h-4" />
                         <span>Lead Source *</span>
                       </FormLabel>
-                      <Select onValueChange={(v) => { field.onChange(v); try { form.setValue('medium', ''); } catch {} }} value={field.value}>
+                      <Select onValueChange={(v) => { field.onChange(v); try { form.setValue('medium', ''); } catch {} }} value={field.value} disabled={Boolean(initialData && (initialData as any).eventRegId)}>
                         <FormControl>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={Boolean(initialData && (initialData as any).eventRegId)}>
                             <SelectValue placeholder="How did they find us?" />
                           </SelectTrigger>
                         </FormControl>
@@ -1049,7 +1081,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                            <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={Boolean(initialData && (initialData as any).eventRegId)}>
                               <SelectValue placeholder="Select medium" />
                             </SelectTrigger>
                           </FormControl>
@@ -1065,57 +1097,67 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   />
                 )}
 
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <Target className="w-4 h-4" />
-                        <span>Status *</span>
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              {/* Hide Status and Type when creating a new lead or converting from an event registration */}
+                {(() => {
+                  const hasInitial = Boolean(initialData && Object.keys(initialData || {}).length > 0);
+                  const isFromEvent = Boolean(initialData && (initialData as any).eventRegId);
+                  const shouldDisable = isFromEvent;
+                  return (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2">
+                              <Target className="w-4 h-4" />
+                              <span>Status *</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={shouldDisable}>
+                              <FormControl>
+                                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={shouldDisable}>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {STATUS_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4" />
-                        <span>Lead Type *</span>
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {TYPE_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <FormField
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2">
+                              <FileText className="w-4 h-4" />
+                              <span>Lead Type *</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={shouldDisable}>
+                              <FormControl>
+                                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={shouldDisable}>
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {TYPE_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>

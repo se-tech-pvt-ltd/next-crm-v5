@@ -627,7 +627,10 @@ export default function EventsPage() {
     } catch {}
   }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
 
-  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: 'not_sure', name: '', number: '', email: '', city: '', source: 'events', eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+  const defaultStatusValue = (STATUS_OPTIONS && STATUS_OPTIONS.length > 0) ? STATUS_OPTIONS[0].value : 'Not sure';
+  const defaultSourceValue = (SOURCE_OPTIONS && SOURCE_OPTIONS.length > 0) ? (SOURCE_OPTIONS.find(s => String(s.value).toLowerCase() === 'events' || String(s.label).toLowerCase() === 'events')?.value ?? SOURCE_OPTIONS[0].value) : 'Events';
+
+  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: defaultStatusValue, name: '', number: '', email: '', city: '', source: defaultSourceValue, eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const [emailError, setEmailError] = useState(false);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -804,13 +807,16 @@ export default function EventsPage() {
     // find the linked event (selected event)
     const ev = (Array.isArray(visibleEvents) ? visibleEvents : []).find((e: any) => String(e.id) === String(filterEventId)) || selectedEvent;
 
+    const statusDefault = (STATUS_OPTIONS && STATUS_OPTIONS.length > 0) ? (STATUS_OPTIONS.find(o => String(o.label).toLowerCase() === 'not sure' || String(o.value).toLowerCase() === 'not_sure')?.value ?? STATUS_OPTIONS[0].value) : 'Not sure';
+    const sourceDefault = (SOURCE_OPTIONS && SOURCE_OPTIONS.length > 0) ? (SOURCE_OPTIONS.find(o => String(o.label).toLowerCase() === 'events' || String(o.value).toLowerCase() === 'events')?.value ?? SOURCE_OPTIONS[0].value) : 'Events';
+
     const initial: any = {
-      status: 'not_sure',
+      status: statusDefault,
       name: '',
       number: '',
       email: '',
       city: '',
-      source: 'events',
+      source: sourceDefault,
       eventId: filterEventId,
     };
 
@@ -919,9 +925,9 @@ export default function EventsPage() {
     const seenEmails = new Map<string, number>();
     const seenNumbers = new Map<string, number>();
 
-    // Use fixed defaults for imports
-    const defaultStatusValue = 'not_sure';
-    const defaultSourceValue = 'events';
+    // Use fixed defaults for imports (pick from constants)
+    const defaultStatusValue = (STATUS_OPTIONS && STATUS_OPTIONS.length > 0) ? (STATUS_OPTIONS.find(o => String(o.label).toLowerCase() === 'not sure' || String(o.value).toLowerCase() === 'not sure')?.value ?? STATUS_OPTIONS[0].value) : 'Not sure';
+    const defaultSourceValue = (SOURCE_OPTIONS && SOURCE_OPTIONS.length > 0) ? (SOURCE_OPTIONS.find(o => String(o.label).toLowerCase() === 'events' || String(o.value).toLowerCase() === 'events')?.value ?? SOURCE_OPTIONS[0].value) : 'Events';
 
     const allRows: Array<{ row: number; name: string; number: string; email: string; city: string; source: string; status: string; errors: string[] }> = [];
 
@@ -1226,7 +1232,7 @@ export default function EventsPage() {
           city: match2.city,
           // ensure lead source is set to Events when opening via /lead route
           source: 'Events',
-          status: 'new',
+          status: 'Raw',
           eventRegId: match2.id,
           eventId: eventIdForMatch,
         };
@@ -1816,6 +1822,10 @@ export default function EventsPage() {
                         </div>
 
                       </div>
+
+                      {/* Status and Source are hidden on creation — defaults are applied in openAddRegistration */}
+                      <input type="hidden" name="status" value={regForm.status || ''} />
+                      <input type="hidden" name="source" value={regForm.source || ''} />
 
                     </form>
                   </CardContent>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { DetailsDialogLayout } from '@/components/ui/details-dialog';
 console.log('[modal] loaded: frontend/src/components/student-details-modal.tsx');
 import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS as STUDENT_STATUS_OPTIONS, EXPECTATION_OPTIONS as STUDENT_EXPECTATION_OPTIONS, ELT_TEST_OPTIONS as STUDENT_ELT_TEST_OPTIONS } from '@/constants/students-dropdowns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -62,10 +63,18 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
     queryFn: async () => UsersService.getUsers(),
   });
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
+  const dropdownData = React.useMemo(() => {
+    const map: Record<string, any[]> = {};
+    const toItems = (opts: { value: string; label: string }[]) => (opts || []).map(o => ({ key: o.value, value: o.label }));
+    map['Status'] = toItems(STUDENT_STATUS_OPTIONS);
+    map['status'] = map['Status'];
+    map['Expectation'] = toItems(STUDENT_EXPECTATION_OPTIONS);
+    map['expectation'] = map['Expectation'];
+    map['ELT Test'] = toItems(STUDENT_ELT_TEST_OPTIONS);
+    map['ELTTest'] = map['ELT Test'];
+    map['ELT_Test'] = map['ELT Test'];
+    return map;
+  }, []);
 
   const getStatusDisplayName = (statusId: string) => {
     const list: any[] = (dropdownData as any)?.Status || [];

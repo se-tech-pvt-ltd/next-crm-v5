@@ -1,17 +1,17 @@
 export const EVENTS_DROPDOWNS = {
   status: {
-    not_sure: 'Not sure',
-    unable_to_contact: 'Unable to contact',
-    not_attending: 'Not Attending',
-    attending: 'Attending',
+    'Not sure': 'Not sure',
+    'Unable to contact': 'Unable to contact',
+    'Not Attending': 'Not Attending',
+    'Attending': 'Attending',
   },
   source: {
-    paid_ads: 'Paid Ads',
-    outdoor: 'Outdoor',
-    social_media: 'Social Media',
-    walk_in: 'Walk-in',
-    events: 'Events',
-    official_phone: 'Official Phone',
+    'Paid Ads': 'Paid Ads',
+    'Outdoor': 'Outdoor',
+    'Social Media': 'Social Media',
+    'Walk-in': 'Walk-in',
+    'Events': 'Events',
+    'Official Phone': 'Official Phone',
   },
 } as const;
 

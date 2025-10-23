@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 console.log('[modal] loaded: frontend/src/components/lead-details-modal.tsx');
-import { STATUS_OPTIONS, labelFrom } from '@/constants/leads-dropdowns';
+import { STATUS_OPTIONS, TYPE_OPTIONS, SOURCE_OPTIONS, INTERESTED_COUNTRY_OPTIONS, STUDY_LEVEL_OPTIONS, STUDY_PLAN_OPTIONS, labelFrom } from '@/constants/leads-dropdowns';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -254,7 +254,14 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     updateLeadMutation.mutate(dataToSave);
   };
 
-  // Hardcoded leads dropdowns are used; no API fetch needed
+  // Hardcoded leads dropdowns are used; build dropdownData from constants so selects can render
+  const dropdownData = {
+    Type: (TYPE_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    Source: (SOURCE_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    'Study Level': (STUDY_LEVEL_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    'Study Plan': (STUDY_PLAN_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    'Interested Country': (INTERESTED_COUNTRY_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+  } as Record<string, { key:string; value:string }[]>;
 
   const getStatusDisplayName = (statusId: string) => {
     return labelFrom('status', statusId);
