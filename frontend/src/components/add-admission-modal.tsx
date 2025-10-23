@@ -349,7 +349,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         }
       } catch {}
     }
-  }, [applicationId, studentId, linkedApp, form, users, branchEmps, getOptions]);
+  }, [applicationId, studentId, linkedApp, form, users, branchEmps, admissionDropdowns, applicationsDropdowns]);
 
   const [subPartnerSearch, setSubPartnerSearch] = useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
