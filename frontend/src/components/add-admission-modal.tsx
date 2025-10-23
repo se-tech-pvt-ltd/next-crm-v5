@@ -387,8 +387,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   }, [open, subPartners, form]);
 
   // Use hardcoded admission dropdowns for status and case status (do not fetch from DB)
-  const statusOptions = ADMISSION_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false }));
-  const caseStatusOptions = ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false }));
+  const statusOptions = React.useMemo(() => ADMISSION_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false })), []);
+  const caseStatusOptions = React.useMemo(() => ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false })), []);
 
   useEffect(() => {
     if (!open) return;
