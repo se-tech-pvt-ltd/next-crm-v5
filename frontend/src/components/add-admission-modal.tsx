@@ -639,6 +639,27 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     staleTime: 5 * 60 * 1000,
   });
 
+  const universityCountry = React.useMemo(() => {
+    const c = (uniDetail as any)?.country || (currentApp as any)?.country || '';
+    return String(c || '').trim();
+  }, [uniDetail, currentApp]);
+
+  const { data: currencyRow } = useQuery({
+    queryKey: ['/api/currencies', universityCountry],
+    queryFn: async () => {
+      if (!universityCountry) return null as any;
+      const svc = await import('@/services/currencies');
+      return svc.getCurrencyByCountry(universityCountry);
+    },
+    enabled: open && !!universityCountry,
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const currencyCode = React.useMemo(() => {
+    const row = currencyRow as any;
+    return (row?.currencyCode || row?.currency_code || '').toString();
+  }, [currencyRow]);
+
   // Auto-fill financials when university detail is loaded and fields are empty
   useEffect(() => {
     if (!open) return;
@@ -997,7 +1018,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <FormLabel>Full Tuition Fee</FormLabel>
+                          <FormLabel>Full Tuition Fee{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input
                             type="number"
                             inputMode="decimal"
@@ -1009,7 +1030,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         </div>
 
                         <div>
-                          <FormLabel>Scholarship</FormLabel>
+                          <FormLabel>Scholarship{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input
                             type="number"
                             inputMode="decimal"
@@ -1021,12 +1042,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                         </div>
 
                         <div>
-                          <FormLabel>Net Tuition</FormLabel>
+                          <FormLabel>Net Tuition{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input value={form.watch('netTuitionFee') || ''} disabled />
                         </div>
 
                         <div>
-                          <FormLabel>Initial Deposit</FormLabel>
+                          <FormLabel>Initial Deposit{currencyCode ? ` (${currencyCode})` : ''}</FormLabel>
                           <Input
                             type="number"
                             inputMode="decimal"
