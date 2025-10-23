@@ -72,13 +72,8 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
     staleTime: 60_000,
   });
 
-  // Hardcoded leads dropdowns are used; no API fetch needed
-
-  // Student module dropdowns (Status, Expectation, ELT Test, etc.)
-  const { data: studentDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const studentDropdowns = {};
 
   // Role + branch filtering helpers
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
