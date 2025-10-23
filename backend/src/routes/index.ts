@@ -68,7 +68,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/follow-ups', followUpRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/upload', uploadRoutes);
-  app.use('/api/dropdowns', dropdownRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/event-registrations', eventRegistrationRoutes);
   app.use('/api/universities', universityRoutes);
