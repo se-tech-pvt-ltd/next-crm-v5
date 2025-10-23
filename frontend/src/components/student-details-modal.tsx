@@ -63,10 +63,18 @@ export function StudentDetailsModal({ open, onOpenChange, student, onStudentUpda
     queryFn: async () => UsersService.getUsers(),
   });
 
-  const { data: dropdownData } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
+  const dropdownData = React.useMemo(() => {
+    const map: Record<string, any[]> = {};
+    const toItems = (opts: { value: string; label: string }[]) => (opts || []).map(o => ({ key: o.value, value: o.label }));
+    map['Status'] = toItems(STUDENT_STATUS_OPTIONS);
+    map['status'] = map['Status'];
+    map['Expectation'] = toItems(STUDENT_EXPECTATION_OPTIONS);
+    map['expectation'] = map['Expectation'];
+    map['ELT Test'] = toItems(STUDENT_ELT_TEST_OPTIONS);
+    map['ELTTest'] = map['ELT Test'];
+    map['ELT_Test'] = map['ELT Test'];
+    return map;
+  }, []);
 
   const getStatusDisplayName = (statusId: string) => {
     const list: any[] = (dropdownData as any)?.Status || [];
