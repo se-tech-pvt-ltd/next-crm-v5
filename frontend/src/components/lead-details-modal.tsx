@@ -254,7 +254,14 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
     updateLeadMutation.mutate(dataToSave);
   };
 
-  // Hardcoded leads dropdowns are used; no API fetch needed
+  // Hardcoded leads dropdowns are used; build dropdownData from constants so selects can render
+  const dropdownData = {
+    Type: (TYPE_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    Source: (SOURCE_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    'Study Level': (STUDY_LEVEL_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    'Study Plan': (STUDY_PLAN_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+    'Interested Country': (INTERESTED_COUNTRY_OPTIONS || []).map(o => ({ key: o.value, value: o.label })),
+  } as Record<string, { key:string; value:string }[]>;
 
   const getStatusDisplayName = (statusId: string) => {
     return labelFrom('status', statusId);
