@@ -1,8 +1,8 @@
 export const STUDENTS_DROPDOWNS = {
   status: {
     'Open': 'Open',
-    'Closed': 'Closed',
-    'Enrolled': 'Enrolled',
+    'Needs Attention': 'Needs Attention',
+    'Closed': 'Closed'
   },
   expectation: {
     'High': 'High',
