@@ -298,6 +298,11 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         setCurrentApp((prevApp) => (prevApp ? { ...prevApp, appStatus: updated.appStatus } as Application : prevApp));
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
+        try {
+          const actKey = `/api/activities/application/${String(updated.id || currentApp?.id || '')}`;
+          queryClient.invalidateQueries({ queryKey: [actKey] });
+          queryClient.refetchQueries({ queryKey: [actKey] });
+        } catch {}
         toast({ title: 'Status updated' });
       } catch (err) {
         console.error('Error handling application status success', err);
@@ -319,6 +324,11 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         const prevApp = context?.previousApp as Application | null;
         setCurrentApp((prev) => (prev ? { ...prev, ...updated } : updated));
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        try {
+          const actKey = `/api/activities/application/${String(updated.id || currentApp?.id || '')}`;
+          queryClient.invalidateQueries({ queryKey: [actKey] });
+          queryClient.refetchQueries({ queryKey: [actKey] });
+        } catch {}
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
         // If appStatus changed, server will log activity; just notify and refresh.
