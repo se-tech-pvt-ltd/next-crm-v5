@@ -75,11 +75,19 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
 
   // Hardcoded leads dropdowns are used; no API fetch needed
 
-  // Student module dropdowns (Status, Expectation, ELT Test, etc.)
-  const { data: studentDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
+  // Student dropdowns from constants (Status, Expectation, ELT Test)
+  const studentDropdowns = React.useMemo(() => {
+    const map: Record<string, any[]> = {};
+    const toItems = (opts: { value: string; label: string }[]) => (opts || []).map(o => ({ key: o.value, value: o.label }));
+    map['Status'] = toItems(STUDENT_STATUS_OPTIONS);
+    map['status'] = map['Status'];
+    map['Expectation'] = toItems(STUDENT_EXPECTATION_OPTIONS);
+    map['expectation'] = map['Expectation'];
+    map['ELT Test'] = toItems(STUDENT_ELT_TEST_OPTIONS);
+    map['ELTTest'] = map['ELT Test'];
+    map['ELT_Test'] = map['ELT Test'];
+    return map;
+  }, []);
 
   // Role + branch filtering helpers
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
