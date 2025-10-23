@@ -10,7 +10,6 @@ import { admissionRoutes } from "./admissionRoutes.js";
 import { activityRoutes } from "./activityRoutes.js";
 import { userRoutes } from "./userRoutes.js";
 import uploadRoutes from "./uploadRoutes.js";
-import { dropdownRoutes } from "./dropdownRoutes.js";
 import eventRoutes from "./eventRoutes.js";
 import eventRegistrationRoutes from "./eventRegistrationRoutes.js";
 import branchRoutes from "./branchRoutes.js";
