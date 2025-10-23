@@ -231,6 +231,19 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
         if (def) form.setValue('channelPartner', def.value as any);
       }
     } catch {}
+
+    // Fallback explicit defaults when dropdown data doesn't provide isDefault
+    try {
+      if (!form.getValues('appStatus')) {
+        form.setValue('appStatus', 'Open');
+      }
+    } catch {}
+
+    try {
+      if (!form.getValues('caseStatus')) {
+        form.setValue('caseStatus', 'Raw');
+      }
+    } catch {}
   }, [appStatusOptions, caseStatusOptions, channelPartnerOptions, form]);
 
 
