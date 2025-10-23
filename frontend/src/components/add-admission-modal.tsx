@@ -122,6 +122,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   }, [open, form]);
 
   const watchedFull = form.watch('fullTuitionFee');
+  // track whether we've applied linkedApp assignments already
+  const assignedLinkedAppRef = React.useRef<string | null>(null);
   const watchedScholarship = form.watch('scholarshipAmount');
   const watchedAppId = form.watch('applicationId');
   const branchId = form.watch('branchId');
