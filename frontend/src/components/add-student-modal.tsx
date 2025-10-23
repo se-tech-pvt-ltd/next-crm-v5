@@ -16,8 +16,6 @@ import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
-import * as DropdownsService from '@/services/dropdowns';
-
 interface AddStudentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
