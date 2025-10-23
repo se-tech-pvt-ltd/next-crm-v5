@@ -298,7 +298,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
         setEditData(buildEditState(student));
       }
     }
-  }, [student, dropdownData, leadsDropdowns, isEditing]);
+  }, [student, dropdownData, isEditing]);
 
   const normalizeModule = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const singularize = (s: string) => String(s || '').replace(/s$/i, '');
@@ -400,7 +400,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       return editData.targetCountry;
     }
     return mapToOptionValues('targetCountry', editData.targetCountry ?? null);
-  }, [editData.targetCountry, dropdownData, leadsDropdowns]);
+  }, [editData.targetCountry, dropdownData]);
 
   const targetCountryOptions = useMemo(() => {
     const rawOptions = getFieldOptions('targetCountry');
@@ -422,7 +422,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
       });
     }
     return normalized;
-  }, [dropdownData, leadsDropdowns, targetCountrySelection]);
+  }, [dropdownData, targetCountrySelection]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatusKey: string) => StudentsService.updateStudent(student?.id, { status: newStatusKey }),
