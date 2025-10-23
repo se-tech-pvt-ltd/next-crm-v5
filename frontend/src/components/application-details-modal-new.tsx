@@ -12,7 +12,7 @@ import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
 import * as DropdownsService from '@/services/dropdowns';
-import { CHANNEL_PARTNER_OPTIONS } from '@/constants/applications-dropdowns';
+import { CHANNEL_PARTNER_OPTIONS, CASE_STATUS_OPTIONS } from '@/constants/applications-dropdowns';
 import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
@@ -131,6 +131,13 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   const caseStatusOptions = useMemo(() => {
+    // Prefer frontend constant list when available
+    try {
+      if (Array.isArray(CASE_STATUS_OPTIONS) && CASE_STATUS_OPTIONS.length) {
+        return CASE_STATUS_OPTIONS.map((o: any) => ({ label: o.label, value: o.value, isDefault: false }));
+      }
+    } catch {}
+
     const dd: any = applicationsDropdowns as any;
     if (!dd || typeof dd !== 'object') return [];
     const keyMap: Record<string, string> = {};
