@@ -308,6 +308,14 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           if (be) return String(be.userId ?? be.user_id);
           return undefined;
         };
+        // Pre-populate counsellor and admission officer from the linked application
+        const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
+        const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
+        const resolvedC = resolveUserIdFromApp(sourceCounsellor);
+        const resolvedO = resolveUserIdFromApp(sourceOfficer);
+        if (resolvedC && !form.getValues('counsellorId')) form.setValue('counsellorId', resolvedC);
+        if (resolvedO && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', resolvedO);
+
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
         const localCaseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
         const localStatusOptions = getOptions('Status', ['Admissions','Applications']);
