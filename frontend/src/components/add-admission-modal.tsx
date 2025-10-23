@@ -273,24 +273,17 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (resolvedO && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', resolvedO);
 
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
-        const localCaseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
-        const localStatusOptions = getOptions('Status', ['Admissions','Applications']);
         if (!form.getValues('caseStatus') && (anyApp.caseStatus || anyApp.case_status)) {
           const raw = String(anyApp.caseStatus ?? anyApp.case_status);
-          // Try to map to caseStatusOptions value (match by label or value)
-          const match = (localCaseStatusOptions || []).find((o: any) => String(o.value) === raw || String(o.label).toLowerCase() === raw.toLowerCase());
-          if (match) form.setValue('caseStatus', match.value);
-          else form.setValue('caseStatus', raw);
+          form.setValue('caseStatus', raw);
         }
         if (!form.getValues('status') && (anyApp.status || anyApp.appStatus || anyApp.app_status)) {
           const raw = String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status);
-          const match = (localStatusOptions || []).find((o: any) => String(o.value) === raw || String(o.label).toLowerCase() === raw.toLowerCase());
-          if (match) form.setValue('status', match.value);
-          else form.setValue('status', raw);
+          form.setValue('status', raw);
         }
       } catch {}
     }
-  }, [applicationId, studentId, linkedApp, form, users, branchEmps, admissionDropdowns, applicationsDropdowns]);
+  }, [applicationId, studentId, linkedApp, form, users, branchEmps]);
 
   const [subPartnerSearch, setSubPartnerSearch] = useState('');
   const { data: subPartners = [], isFetching: subPartnerLoading } = useQuery({ queryKey: ['/api/users/sub-partners', subPartnerSearch], queryFn: () => UsersService.getPartnerUsers(), enabled: open, staleTime: 60_000 });
