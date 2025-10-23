@@ -126,41 +126,12 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   const caseStatusOptions = useMemo(() => {
-    // Prefer frontend constant list when available
-    try {
-      if (Array.isArray(CASE_STATUS_OPTIONS) && CASE_STATUS_OPTIONS.length) {
-        return CASE_STATUS_OPTIONS.map((o: any) => ({ label: o.label, value: o.value, isDefault: false }));
-      }
-    } catch {}
-
-    const dd: any = applicationsDropdowns as any;
-    if (!dd || typeof dd !== 'object') return [];
-    const keyMap: Record<string, string> = {};
-    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
-    const candidates = ['Case Status','caseStatus','CaseStatus','case_status','Case status'];
-    let list: any[] = [];
-    for (const raw of candidates) {
-      const foundKey = keyMap[normalizeKey(raw)];
-      if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
-    }
-    if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    return list.map((o: any) => ({ label: o.value, value: o.id || o.key || o.value, isDefault: Boolean(o.isDefault || o.is_default) }));
-  }, [applicationsDropdowns]);
+    return CASE_STATUS_OPTIONS.map((o: any) => ({ label: o.label, value: o.value, isDefault: false }));
+  }, []);
 
   const makeOptions = useCallback((keys: string[]) => {
-    const dd: any = applicationsDropdowns as any;
-    if (!dd || typeof dd !== 'object') return [] as {label:string;value:string}[];
-    const keyMap: Record<string, string> = {};
-    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
-    let list: any[] = [];
-    for (const raw of keys) {
-      const foundKey = keyMap[normalizeKey(raw)];
-      if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
-    }
-    if (!Array.isArray(list)) list = [];
-    return [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0))).map((o: any) => ({ label: o.value, value: o.id || o.key || o.value }));
-  }, [applicationsDropdowns]);
+    return [] as {label:string;value:string}[];
+  }, []);
 
   const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
   const countryOptions = useMemo(() => makeOptions(['Country','country']), [makeOptions]);
