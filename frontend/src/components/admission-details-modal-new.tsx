@@ -48,12 +48,8 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     }
   }, [matchEdit, canEditAdmission, admission?.id, setLocation]);
 
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
-    enabled: !!admission,
-    staleTime: 5 * 60 * 1000,
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const admissionDropdowns: Record<string, any[]> = {};
 
   const statusSequence = useMemo(() => {
     const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
