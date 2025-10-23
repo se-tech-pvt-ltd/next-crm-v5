@@ -36,12 +36,6 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     enabled: !!admission?.studentId,
   });
 
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
-    enabled: !!admission,
-    staleTime: 5 * 60 * 1000,
-  });
 
   const { data: users = [] } = useQuery({
     queryKey: ['/api/users'],
