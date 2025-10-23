@@ -450,13 +450,13 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }) : [];
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
+    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${(u.firstName || u.first_name || '')} ${(u.lastName || u.last_name || '')}`.trim() || String(u.full_name || u.fullName || u.name || '') || 'Unknown' }));
     // Ensure selected value is present in options so Select shows correct label
     try {
       const sel = String(form.getValues('counsellorId') || '');
       if (sel && !opts.some((o:any) => String(o.value) === sel) && Array.isArray(users)) {
         const su = users.find((x:any) => String(x.id) === sel);
-        if (su) opts.unshift({ value: String(su.id), label: `${su.firstName || ''} ${su.lastName || ''}`.trim() || 'Unknown' });
+        if (su) opts.unshift({ value: String(su.id), label: `${(su.firstName || su.first_name || '')} ${(su.lastName || su.last_name || '')}`.trim() || String(su.full_name || su.fullName || su.name || '') || 'Unknown' });
       }
     } catch {}
     return opts;
@@ -471,12 +471,12 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }) : [];
     const links = Array.isArray(branchEmps) ? branchEmps : [];
     const allowed = new Set((links as any[]).filter((be: any) => String(be.branchId ?? be.branch_id) === bid).map((be: any) => String(be.userId ?? be.user_id)));
-    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
+    const opts = base.filter((u: any) => allowed.has(String(u.id))).map((u: any) => ({ value: String(u.id), label: `${(u.firstName || u.first_name || '')} ${(u.lastName || u.last_name || '')}`.trim() || String(u.full_name || u.fullName || u.name || '') || 'Unknown' }));
     try {
       const sel = String(form.getValues('admissionOfficerId') || '');
       if (sel && !opts.some((o:any) => String(o.value) === sel) && Array.isArray(users)) {
         const su = users.find((x:any) => String(x.id) === sel);
-        if (su) opts.unshift({ value: String(su.id), label: `${su.firstName || ''} ${su.lastName || ''}`.trim() || 'Unknown' });
+        if (su) opts.unshift({ value: String(su.id), label: `${(su.firstName || su.first_name || '')} ${(su.lastName || su.last_name || '')}`.trim() || String(su.full_name || su.fullName || su.name || '') || 'Unknown' });
       }
     } catch {}
     return opts;
