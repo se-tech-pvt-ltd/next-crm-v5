@@ -1052,7 +1052,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                         <MapPin className="w-4 h-4" />
                         <span>Lead Source *</span>
                       </FormLabel>
-                      <Select onValueChange={(v) => { field.onChange(v); try { form.setValue('medium', ''); } catch {} }} value={field.value}>
+                      <Select onValueChange={(v) => { field.onChange(v); try { form.setValue('medium', ''); } catch {} }} value={field.value} disabled={Boolean(initialData && (initialData as any).eventRegId)}>
                         <FormControl>
                           <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                             <SelectValue placeholder="How did they find us?" />
