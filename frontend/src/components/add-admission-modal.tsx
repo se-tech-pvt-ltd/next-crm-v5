@@ -633,14 +633,14 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   const handleApplicationChange = (appId: string) => {
     const selectedApp = applications?.find(app => String(app.id) === String(appId));
     if (selectedApp) {
-      form.setValue('applicationId', String(selectedApp.id));
-      form.setValue('studentId', selectedApp.studentId);
-      form.setValue('university', selectedApp.university || '');
-      form.setValue('program', selectedApp.program || '');
+      if (form.getValues('applicationId') !== String(selectedApp.id)) form.setValue('applicationId', String(selectedApp.id));
+      if (form.getValues('studentId') !== String(selectedApp.studentId)) form.setValue('studentId', selectedApp.studentId);
+      if (form.getValues('university') !== (selectedApp.university || '')) form.setValue('university', selectedApp.university || '');
+      if (form.getValues('program') !== (selectedApp.program || '')) form.setValue('program', selectedApp.program || '');
       try {
         const anyApp: any = selectedApp as any;
-        if (anyApp.regionId) form.setValue('regionId', String(anyApp.regionId));
-        if (anyApp.branchId) form.setValue('branchId', String(anyApp.branchId));
+        if (anyApp.regionId && form.getValues('regionId') !== String(anyApp.regionId)) form.setValue('regionId', String(anyApp.regionId));
+        if (anyApp.branchId && form.getValues('branchId') !== String(anyApp.branchId)) form.setValue('branchId', String(anyApp.branchId));
         const resolveUserIdFromApp = (appId:any) => {
           if (!appId) return undefined;
           const idStr = String(appId);
@@ -1022,7 +1022,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <FormLabel>Region</FormLabel>
-                              <Select value={form.watch('regionId') || ''} onValueChange={(v) => { form.setValue('regionId', v); form.setValue('branchId', ''); if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', ''); if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
+                              <Select value={form.watch('regionId') || ''} onValueChange={(v) => { if (form.getValues('regionId') !== v) form.setValue('regionId', v); if (form.getValues('branchId') !== '') form.setValue('branchId', ''); if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', ''); if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', ''); }} disabled={autoRegionDisabled || ['regional_manager','branch_manager','counselor','counsellor','admission_officer'].includes(getNormalizedRole())}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select region" />
                                 </SelectTrigger>
@@ -1038,10 +1038,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                               <FormLabel>Branch</FormLabel>
                               <Select value={form.watch('branchId') || ''} onValueChange={(v) => {
                                 const b = (branchOptions as any[]).find((x: any) => String(x.value) === String(v));
-                                form.setValue('branchId', v);
+                                if (form.getValues('branchId') !== v) form.setValue('branchId', v);
                                 if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
                                 if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
-                                if (!form.getValues('regionId') && b) form.setValue('regionId', String(b.regionId || ''));
+                                if (!form.getValues('regionId') && b && form.getValues('regionId') !== String(b.regionId || '')) form.setValue('regionId', String(b.regionId || ''));
                               }}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select branch" />
