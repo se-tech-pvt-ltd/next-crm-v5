@@ -71,7 +71,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
 
   const initialFormData = {
-    status: '',
+    status: 'Open',
     expectation: '',
     name: '',
     phone: '',
