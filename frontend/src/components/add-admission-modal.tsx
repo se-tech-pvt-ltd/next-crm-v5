@@ -191,11 +191,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
       try {
         const created = await AdmissionsService.createAdmission(payload as any);
         try {
-          if (data.caseStatus && data.applicationId) {
-            await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
-            queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
-            try { const actKey = `/api/activities/application/${String(data.applicationId)}`; queryClient.invalidateQueries({ queryKey: [actKey] }); queryClient.refetchQueries({ queryKey: [actKey] }); } catch {}
-          }
+          // Do not sync admission caseStatus back to linked application
           if (data.googleDriveLink && data.applicationId) {
             await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
             queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
@@ -272,15 +268,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (resolvedC && !form.getValues('counsellorId')) form.setValue('counsellorId', resolvedC);
         if (resolvedO && !form.getValues('admissionOfficerId')) form.setValue('admissionOfficerId', resolvedO);
 
-        // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
-        if (!form.getValues('caseStatus') && (anyApp.caseStatus || anyApp.case_status)) {
-          const raw = String(anyApp.caseStatus ?? anyApp.case_status);
-          form.setValue('caseStatus', raw);
-        }
-        if (!form.getValues('status') && (anyApp.status || anyApp.appStatus || anyApp.app_status)) {
-          const raw = String(anyApp.status ?? anyApp.appStatus ?? anyApp.app_status);
-          form.setValue('status', raw);
-        }
+        // Do not carry forward status or caseStatus from application. Admission status defaults to Open; caseStatus defaults to empty (Please Select).
       } catch {}
     }
   }, [applicationId, studentId, linkedApp, form, users, branchEmps]);
