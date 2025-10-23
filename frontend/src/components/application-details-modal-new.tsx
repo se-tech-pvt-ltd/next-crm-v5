@@ -12,6 +12,7 @@ import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
 import * as DropdownsService from '@/services/dropdowns';
+import { CHANNEL_PARTNER_OPTIONS } from '@/constants/applications-dropdowns';
 import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
@@ -162,7 +163,15 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
   const countryOptions = useMemo(() => makeOptions(['Country','country']), [makeOptions]);
   const intakeOptions = useMemo(() => makeOptions(['Intake','intake']), [makeOptions]);
-  const channelPartnerOptions = useMemo(() => makeOptions(['Channel Partner','ChannelPartners','channelPartner','channel_partners','Channel Partner(s)','ChannelPartner']), [makeOptions]);
+  const channelPartnerOptions = useMemo(() => {
+    // Prefer frontend constant list when available
+    try {
+      if (Array.isArray(CHANNEL_PARTNER_OPTIONS) && CHANNEL_PARTNER_OPTIONS.length) {
+        return CHANNEL_PARTNER_OPTIONS.map((o: any) => ({ label: o.label, value: o.value }));
+      }
+    } catch {}
+    return makeOptions(['Channel Partner','ChannelPartners','channelPartner','channel_partners','Channel Partner(s)','ChannelPartner']);
+  }, [makeOptions]);
 
   const mapToOptionValue = useCallback((raw: string | undefined, options: {label:string;value:string}[]) => {
     if (!raw) return '';
