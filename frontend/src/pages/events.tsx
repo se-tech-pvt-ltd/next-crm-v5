@@ -1226,7 +1226,7 @@ export default function EventsPage() {
           city: match2.city,
           // ensure lead source is set to Events when opening via /lead route
           source: 'Events',
-          status: 'new',
+          status: 'Raw',
           eventRegId: match2.id,
           eventId: eventIdForMatch,
         };
