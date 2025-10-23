@@ -236,16 +236,19 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           if (data.caseStatus && data.applicationId) {
             await ApplicationsService.updateApplication(String(data.applicationId), { caseStatus: data.caseStatus });
             queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+            try { const actKey = `/api/activities/application/${String(data.applicationId)}`; queryClient.invalidateQueries({ queryKey: [actKey] }); queryClient.refetchQueries({ queryKey: [actKey] }); } catch {}
           }
           if (data.googleDriveLink && data.applicationId) {
             await ApplicationsService.updateApplication(String(data.applicationId), { googleDriveLink: data.googleDriveLink });
             queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+            try { const actKey = `/api/activities/application/${String(data.applicationId)}`; queryClient.invalidateQueries({ queryKey: [actKey] }); queryClient.refetchQueries({ queryKey: [actKey] }); } catch {}
           }
           // Mark application as converted when admission is created
           if (data.applicationId) {
             try {
               await ApplicationsService.updateApplication(String(data.applicationId), { isConverted: 1 as any });
               queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+              try { const actKey = `/api/activities/application/${String(data.applicationId)}`; queryClient.invalidateQueries({ queryKey: [actKey] }); queryClient.refetchQueries({ queryKey: [actKey] }); } catch {}
             } catch (err) {
               console.warn('[AddAdmissionModal] failed to mark application converted', err);
             }
