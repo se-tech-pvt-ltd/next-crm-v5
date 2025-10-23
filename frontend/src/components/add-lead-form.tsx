@@ -510,7 +510,10 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
   // Reset form values when initialData provided
   useEffect(() => {
-    if (initialData) {
+    const hasInitial = Boolean(initialData && Object.keys(initialData || {}).length > 0);
+    const isFromEvent = Boolean(initialData && (initialData as any).eventRegId);
+
+    if (hasInitial) {
       const mapLabelToKeyHardcoded = (section: 'type' | 'status' | 'source' | 'interested_country' | 'study_level' | 'study_plan', label?: string) => {
         if (!label) return '';
         const key = keyFromLabel(section, label);
@@ -575,9 +578,17 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
           }
         } catch {}
       } catch {}
+
+      // If this initial data is from an event registration and no explicit status/type provided, ensure defaults
+      if (isFromEvent) {
+        try { if (!form.getValues('status')) form.setValue('status', 'raw'); } catch {}
+        try { if (!form.getValues('type')) form.setValue('type', 'direct'); } catch {}
+      }
     } else {
+      // Creation flow (/leads/new) - hide fields and set defaults
       try {
         form.setValue('status', 'raw');
+        form.setValue('type', 'direct');
       } catch {}
     }
   }, [initialData, dropdownData]);
@@ -1065,57 +1076,71 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                   />
                 )}
 
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <Target className="w-4 h-4" />
-                        <span>Status *</span>
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              {/* Hide Status and Type when creating a new lead or converting from an event registration */}
+                {(() => {
+                  const hasInitial = Boolean(initialData && Object.keys(initialData || {}).length > 0);
+                  const isFromEvent = Boolean(initialData && (initialData as any).eventRegId);
+                  const hideFields = (!hasInitial) || isFromEvent;
+                  if (hideFields) {
+                    return null;
+                  }
 
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4" />
-                        <span>Lead Type *</span>
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {TYPE_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  return (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2">
+                              <Target className="w-4 h-4" />
+                              <span>Status *</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {STATUS_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2">
+                              <FileText className="w-4 h-4" />
+                              <span>Lead Type *</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {TYPE_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
