@@ -393,15 +393,19 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   useEffect(() => {
     if (!open) return;
     try {
-      if ((!form.getValues('status') || form.getValues('status') === '') && Array.isArray(statusOptions) && statusOptions.length > 0) {
-        const def = statusOptions.find((o:any) => o.isDefault || o.is_default || o.default) || statusOptions[0];
-        if (def) form.setValue('status', def.value as any);
+      // Explicit default: status should be Open when creating an admission from application
+      const curStatus = form.getValues('status');
+      if (!curStatus || curStatus === '') {
+        const foundOpen = (statusOptions || []).find((o:any) => String(o.value).toLowerCase() === 'open' || String(o.label).toLowerCase() === 'open');
+        if (foundOpen) form.setValue('status', foundOpen.value as any);
+        else if (Array.isArray(statusOptions) && statusOptions.length > 0) form.setValue('status', (statusOptions[0] as any).value as any);
       }
     } catch {}
     try {
-      if ((!form.getValues('caseStatus') || form.getValues('caseStatus') === '') && Array.isArray(caseStatusOptions) && caseStatusOptions.length > 0) {
-        const def = (caseStatusOptions as any).find((o:any) => o.isDefault || o.is_default || o.default) || (caseStatusOptions as any)[0];
-        if (def) form.setValue('caseStatus', def.value as any);
+      // Case status should default to empty so UI shows a "Please Select." placeholder
+      const curCase = form.getValues('caseStatus');
+      if (!curCase || curCase === '') {
+        form.setValue('caseStatus', '');
       }
     } catch {}
   }, [open, statusOptions, caseStatusOptions, form]);
@@ -935,7 +939,7 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
                           <FormLabel>Case Status</FormLabel>
                           <Select value={form.watch('caseStatus') || ''} onValueChange={(v) => form.setValue('caseStatus', v)}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Please select" />
+                              <SelectValue placeholder="Please Select." />
                             </SelectTrigger>
                             <SelectContent>
                               {caseStatusOptions?.map((opt: any) => (
