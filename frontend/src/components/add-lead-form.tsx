@@ -1054,7 +1054,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                       </FormLabel>
                       <Select onValueChange={(v) => { field.onChange(v); try { form.setValue('medium', ''); } catch {} }} value={field.value} disabled={Boolean(initialData && (initialData as any).eventRegId)}>
                         <FormControl>
-                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
+                          <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20" disabled={Boolean(initialData && (initialData as any).eventRegId)}>
                             <SelectValue placeholder="How did they find us?" />
                           </SelectTrigger>
                         </FormControl>
