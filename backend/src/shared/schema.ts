@@ -516,15 +516,6 @@ export const activities = mysqlTable("activities", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const dropdowns = mysqlTable("dropdown", {
-  id: varchar("id", { length: 255 }).primaryKey().notNull(),
-  moduleName: varchar("module_name", { length: 255 }).notNull(),
-  fieldName: varchar("field_name", { length: 255 }).notNull(),
-  value: varchar("value", { length: 255 }).notNull(),
-  sequence: int("sequence"),
-  isDefault: boolean("is_default").notNull().default(false),
-});
-
 export const insertActivitySchema = createInsertSchema(activities).omit({
   id: true,
   createdAt: true,
@@ -541,12 +532,8 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
   }),
 });
 
-export const insertDropdownSchema = createInsertSchema(dropdowns);
-
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
-export type InsertDropdown = z.infer<typeof insertDropdownSchema>;
-export type Dropdown = typeof dropdowns.$inferSelect & { key?: string };
 
 export type User = typeof users.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
