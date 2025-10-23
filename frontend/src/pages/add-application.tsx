@@ -318,7 +318,7 @@ export default function AddApplication() {
           String(u.branchId || '') === String(selectedBranchId || '')
         );
       })
-      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
+      .map((u: any) => ({ value: String(u.id), label: `${(u.firstName || u.first_name || '')} ${(u.lastName || u.last_name || '')}`.trim() || String(u.full_name || u.fullName || u.name || '') || 'Unknown' }));
   }, [users, selectedBranchId]);
 
   const officerOptions = useMemo(() => {
@@ -331,7 +331,7 @@ export default function AddApplication() {
           String(u.branchId || '') === String(selectedBranchId || '')
         );
       })
-      .map((u: any) => ({ value: String(u.id), label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown' }));
+      .map((u: any) => ({ value: String(u.id), label: `${(u.firstName || u.first_name || '')} ${(u.lastName || u.last_name || '')}`.trim() || String(u.full_name || u.fullName || u.name || '') || 'Unknown' }));
   }, [users, selectedBranchId]);
 
   const goBack = () => setLocation(presetStudentId ? `/students?studentId=${presetStudentId}` : '/applications');
