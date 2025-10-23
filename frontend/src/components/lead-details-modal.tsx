@@ -264,13 +264,17 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
 
   // Hardcoded leads dropdowns are used; no API fetch needed
 
-  const dropdownData = useMemo(() => ({
-    Type: TYPE_OPTIONS.map(o => ({ key: o.value, value: o.label })),
-    Source: SOURCE_OPTIONS.map(o => ({ key: o.value, value: o.label })),
-    ['Study Level']: STUDY_LEVEL_OPTIONS.map(o => ({ key: o.value, value: o.label })),
-    ['Study Plan']: STUDY_PLAN_OPTIONS.map(o => ({ key: o.value, value: o.label })),
-    ['Interested Country']: INTERESTED_COUNTRY_OPTIONS.map(o => ({ key: o.value, value: o.label })),
-  }), []);
+  const dropdownData = useMemo(() => {
+    const data = {
+      Type: TYPE_OPTIONS.map(o => ({ key: o.value, value: o.label })),
+      Source: SOURCE_OPTIONS.map(o => ({ key: o.value, value: o.label })),
+      ['Study Level']: STUDY_LEVEL_OPTIONS.map(o => ({ key: o.value, value: o.label })),
+      ['Study Plan']: STUDY_PLAN_OPTIONS.map(o => ({ key: o.value, value: o.label })),
+      ['Interested Country']: INTERESTED_COUNTRY_OPTIONS.map(o => ({ key: o.value, value: o.label })),
+    };
+    console.log('[LeadDetailsModal] dropdownData:', data);
+    return data;
+  }, []);
 
   const getStatusDisplayName = (statusId: string) => {
     return labelFrom('status', statusId);
