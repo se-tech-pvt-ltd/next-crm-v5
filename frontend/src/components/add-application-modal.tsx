@@ -86,11 +86,8 @@ export function AddApplicationModal({ open, onOpenChange, studentId }: AddApplic
     return '';
   };
 
-  const { data: applicationsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
-    enabled: open,
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const applicationsDropdowns = {};
 
   const makeOptions = (dd: any, candidates: string[]) => {
     if (!dd || typeof dd !== 'object') return [];
