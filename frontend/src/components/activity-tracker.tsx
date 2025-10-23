@@ -169,15 +169,6 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     }
   };
   const moduleName = moduleNameForEntity(entityType);
-  const { data: moduleDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module', moduleName],
-    queryFn: async () => DropdownsService.getModuleDropdowns(moduleName),
-  });
-  // Fallback: some shared options (like Country) may live under Leads module
-  const { data: leadsModuleDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module', 'Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-  });
   // Global fallback: fetch all dropdowns to build an id->label map
   const { data: allDropdowns = [] } = useQuery({
     queryKey: ['/api/dropdowns'],
