@@ -392,7 +392,6 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   }, [open, statusOptions, caseStatusOptions, form]);
 
   // When modal is opened for a specific application, only populate access fields after users & branch mappings are fetched
-  const assignedLinkedAppRef = React.useRef<string | null>(null);
   useEffect(() => {
     if (!open) {
       assignedLinkedAppRef.current = null;
