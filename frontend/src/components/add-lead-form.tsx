@@ -539,7 +539,8 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         phone: initialData.phone || '',
         city: initialData.city || '',
         source: mapLabelToKeyRobust('source', initialData.source || defaultSourceLabel),
-        status: initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey,
+        // If this is from an event registration, force status to 'raw' regardless of incoming value
+        status: (initialData && (initialData as any).eventRegId) ? 'raw' : (initialData.status ? mapLabelToKeyRobust('status', initialData.status) : defaultStatusKey),
         counselorId: initialData.counselorId || initialData.counsellorId || '',
         country: Array.isArray(initialData.country) ? initialData.country : (initialData.country ? [initialData.country] : []),
         program: initialData.program || '',
@@ -551,6 +552,26 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
         admissionOfficerId: initialData.admissionOfficerId || initialData.admission_officer_id || '',
       };
       form.reset(values);
+
+      // If this is from an event registration, try to auto-select the event name as medium
+      try {
+        if (initialData && (initialData as any).eventRegId) {
+          const evtId = (initialData as any).eventId || (initialData as any).event_id;
+          const eventsList = Array.isArray(eventsListRaw) ? eventsListRaw : (eventsListRaw as any)?.data || [];
+          let eventName: string | undefined = undefined;
+          if (evtId) {
+            const found = (eventsList || []).find((e: any) => String(e.id) === String(evtId));
+            if (found) eventName = String(found.name || found.eventName || found.title || '');
+          }
+          // fallback: if registration has an event name directly
+          if (!eventName && ((initialData as any).eventName || (initialData as any).event_name)) {
+            eventName = String((initialData as any).eventName || (initialData as any).event_name);
+          }
+          if (eventName) {
+            try { form.setValue('medium', eventName); } catch {}
+          }
+        }
+      } catch {}
       // If initial data provides region/branch defaults (from an event), ensure selects are enabled so values show
       try {
         const hasRegion = Boolean(values.regionId);
