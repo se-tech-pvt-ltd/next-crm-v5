@@ -11,7 +11,6 @@ import { AddAdmissionModal } from '@/components/add-admission-modal';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
-import * as DropdownsService from '@/services/dropdowns';
 import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
