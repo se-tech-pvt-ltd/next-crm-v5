@@ -46,11 +46,7 @@ export default function ConvertLeadToStudent() {
     staleTime: 60_000,
   });
 
-  // Fetch dropdowns for Students module (status, expectation, ELT Test)
-  const { data: studentDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
 
   // Helpers for role + branch filtering
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
