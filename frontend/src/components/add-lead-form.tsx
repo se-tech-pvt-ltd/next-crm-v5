@@ -1101,7 +1101,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                 {(() => {
                   const hasInitial = Boolean(initialData && Object.keys(initialData || {}).length > 0);
                   const isFromEvent = Boolean(initialData && (initialData as any).eventRegId);
-                  const shouldDisable = (!hasInitial) || isFromEvent;
+                  const shouldDisable = isFromEvent;
                   return (
                     <>
                       <FormField
