@@ -312,23 +312,19 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
           if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
           const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
           const resolvedC = resolveUserIdFromApp(sourceCounsellor);
-          console.log('[AddAdmissionModal] linkedApp counsellor source:', { sourceCounsellor, resolvedC, usersCount: Array.isArray(users) ? users.length : 0, branchEmpsCount: Array.isArray(branchEmps) ? branchEmps.length : 0 });
-          if (resolvedC) {
+                    if (resolvedC) {
             if (form.getValues('counsellorId') !== String(resolvedC)) {
               form.setValue('counsellorId', resolvedC);
-              console.log('[AddAdmissionModal] set counsellorId to', resolvedC);
-            }
+                          }
           }
         }
         {
           const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
           const resolvedO = resolveUserIdFromApp(sourceOfficer);
-          console.log('[AddAdmissionModal] linkedApp admissionOfficer source:', { sourceOfficer, resolvedO });
-          if (resolvedO) {
+                    if (resolvedO) {
             if (form.getValues('admissionOfficerId') !== String(resolvedO)) {
               form.setValue('admissionOfficerId', resolvedO);
-              console.log('[AddAdmissionModal] set admissionOfficerId to', resolvedO);
-            }
+                          }
           }
         }
         // If application has a caseStatus or status, prefill admission's caseStatus where appropriate
@@ -667,12 +663,10 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
         const sourceCounsellor = anyApp.counsellorId ?? anyApp.counselorId ?? anyApp.counsellor_id ?? anyApp.counselor_id;
         const resolvedC = resolveUserIdFromApp(sourceCounsellor);
-        console.log('[AddAdmissionModal] handleApplicationChange counsellor source:', { sourceCounsellor, resolvedC });
-        if (resolvedC) { if (form.getValues('counsellorId') !== String(resolvedC)) { form.setValue('counsellorId', resolvedC); console.log('[AddAdmissionModal] handleApplicationChange set counsellorId to', resolvedC); } }
+                if (resolvedC) { if (form.getValues('counsellorId') !== String(resolvedC)) { form.setValue('counsellorId', resolvedC); } }
         const sourceOfficer = anyApp.admissionOfficerId ?? anyApp.admission_officer_id ?? anyApp.officerId ?? anyApp.officer_id;
         const resolvedO = resolveUserIdFromApp(sourceOfficer);
-        console.log('[AddAdmissionModal] handleApplicationChange officer source:', { sourceOfficer, resolvedO });
-        if (resolvedO) { if (form.getValues('admissionOfficerId') !== String(resolvedO)) { form.setValue('admissionOfficerId', resolvedO); console.log('[AddAdmissionModal] handleApplicationChange set admissionOfficerId to', resolvedO); } }
+                if (resolvedO) { if (form.getValues('admissionOfficerId') !== String(resolvedO)) { form.setValue('admissionOfficerId', resolvedO); } }
         // Reset financials; will be auto-filled from university data if available
         if (form.getValues('fullTuitionFee') !== '') form.setValue('fullTuitionFee', '');
         if (form.getValues('scholarshipAmount') !== '') form.setValue('scholarshipAmount', '');
