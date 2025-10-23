@@ -90,28 +90,8 @@ export default function Applications() {
   const rawPagination = applicationsResponse && !Array.isArray(applicationsResponse) ? (applicationsResponse as any).pagination : undefined;
   const serverPaginated = Boolean(rawPagination);
 
-  const { data: applicationsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
-  });
-
-  const statusOptions = useMemo(() => {
-    const dd: any = applicationsDropdowns as any;
-    if (!dd || typeof dd !== 'object') return [];
-    const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const keyMap: Record<string, string> = {};
-    for (const k of Object.keys(dd || {})) keyMap[normalizeKey(k)] = k;
-    const candidates = ['App Status','Application Status','Status','AppStatus','app status','App status'];
-    let list: any[] = [];
-    for (const raw of candidates) {
-      const foundKey = keyMap[normalizeKey(raw)];
-      if (foundKey && Array.isArray(dd[foundKey])) { list = dd[foundKey]; break; }
-    }
-    if (!Array.isArray(list)) list = [];
-    list = [...list].sort((a: any, b: any) => (Number(a.sequence ?? 0) - Number(b.sequence ?? 0)));
-    // Use the human label as the filter value to match enriched appStatus values
-    return list.map((o: any) => ({ label: o.value, value: o.value }));
-  }, [applicationsDropdowns]);
+  // Hardcoded dropdowns are used; no API fetch needed
+  const statusOptions: any[] = [];
 
   const { data: students } = useQuery<Student[]>({
     queryKey: ['/api/students'],
