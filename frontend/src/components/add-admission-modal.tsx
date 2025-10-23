@@ -135,18 +135,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     }
   }, [watchedFull, watchedScholarship, form]);
 
-  // Get dropdowns data first
-  const { data: admissionDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Admissions'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Admissions'),
-    enabled: open,
-  });
-
-  const { data: applicationsDropdowns } = useQuery<Record<string, any[]>>({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications'),
-    enabled: open,
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
+  const admissionDropdowns: Record<string, any[]> = {};
+  const applicationsDropdowns: Record<string, any[]> = {};
 
   // Define getOptions early, before it's used in any effects
   const getOptions = React.useCallback((name: string, preferredModules: ('Admissions'|'Applications')[] = ['Admissions','Applications']) => {
