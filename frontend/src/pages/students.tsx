@@ -121,21 +121,7 @@ export default function Students() {
   });
 
 
-  // Fetch dropdowns for Students module (for status labels)
-  const { data: studentDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/students'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('students'),
-  });
-  // Fallback to Leads module for fields that may live there (e.g., Program/Study Plan)
-  const { data: leadsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Leads'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Leads'),
-  });
-  // Global fallback: pull all dropdowns to handle mismatched field names
-  const { data: allDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns'],
-    queryFn: async () => http.get<any[]>('/api/dropdowns'),
-  });
+  // Hardcoded dropdowns are used; no API fetch needed
 
   function getStatusLabel(raw?: string) {
     const list: any[] = (studentDropdowns as any)?.Status || [];
