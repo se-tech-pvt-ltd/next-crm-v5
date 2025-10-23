@@ -14,7 +14,6 @@ import { StudentDetailsModal } from '@/components/student-details-modal';
 import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import { ApplicationDetailsModal } from '@/components/application-details-modal-new';
 import { Student } from '@/lib/types';
-import * as DropdownsService from '@/services/dropdowns';
 import { http } from '@/services/http';
 import * as StudentsService from '@/services/students';
 import { useToast } from '@/hooks/use-toast';
