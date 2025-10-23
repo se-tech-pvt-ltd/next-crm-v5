@@ -11,7 +11,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageSquare, Activity as ActivityIcon, Plus, User as UserIcon, Calendar as CalendarIcon, CalendarClock, Info, Upload, Bot, Check, Edit, UserPlus, FileText, Award, Settings, AlertCircle, Users } from "lucide-react";
 import { Activity, User as UserType } from "@/lib/types";
-import * as DropdownsService from "@/services/dropdowns";
 import * as ActivitiesService from "@/services/activities";
 import * as UsersService from '@/services/users';
 import * as LeadsService from '@/services/leads';
