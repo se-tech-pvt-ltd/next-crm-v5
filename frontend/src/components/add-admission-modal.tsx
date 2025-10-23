@@ -415,16 +415,26 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
   }, [open, statusOptions, caseStatusOptions, form]);
 
   // When modal is opened for a specific application, only populate access fields after users & branch mappings are fetched
+  const assignedLinkedAppRef = React.useRef<string | null>(null);
   useEffect(() => {
-    if (!open) return;
-    if (!linkedApp) return;
+    if (!open) {
+      assignedLinkedAppRef.current = null;
+      return;
+    }
+    if (!linkedApp) {
+      assignedLinkedAppRef.current = null;
+      return;
+    }
+    // only assign once per linkedApp to avoid repeating on re-renders
+    const linkedIdStr = String(linkedApp.id || '');
+    if (assignedLinkedAppRef.current === linkedIdStr) return;
     if (!usersFetched || !branchEmpsFetched) return;
     try {
-      // reset to avoid stale values
+      // reset to avoid stale values (only if different)
       if (form.getValues('counsellorId') !== '') form.setValue('counsellorId', '');
       if (form.getValues('admissionOfficerId') !== '') form.setValue('admissionOfficerId', '');
-      if (linkedApp.regionId) form.setValue('regionId', String(linkedApp.regionId));
-      if (linkedApp.branchId) form.setValue('branchId', String(linkedApp.branchId));
+      if (linkedApp.regionId && form.getValues('regionId') !== String(linkedApp.regionId)) form.setValue('regionId', String(linkedApp.regionId));
+      if (linkedApp.branchId && form.getValues('branchId') !== String(linkedApp.branchId)) form.setValue('branchId', String(linkedApp.branchId));
 
       const resolveUserIdFromApp = (appId:any) => {
         if (!appId) return undefined;
@@ -446,6 +456,8 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
         try {
           if (resolvedC && form.getValues('counsellorId') !== String(resolvedC)) form.setValue('counsellorId', resolvedC);
           if (resolvedO && form.getValues('admissionOfficerId') !== String(resolvedO)) form.setValue('admissionOfficerId', resolvedO);
+          // mark assigned so we don't repeat
+          assignedLinkedAppRef.current = linkedIdStr;
         } catch {}
       }, 20);
 
