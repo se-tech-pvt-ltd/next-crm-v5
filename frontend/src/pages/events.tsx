@@ -627,7 +627,10 @@ export default function EventsPage() {
     } catch {}
   }, [disableByView.branch, eventAccess.regionId, eventAccess.branchId, user, branches, branchEmps]);
 
-  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: 'not_sure', name: '', number: '', email: '', city: '', source: 'events', eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
+  const defaultStatusValue = (STATUS_OPTIONS && STATUS_OPTIONS.length > 0) ? STATUS_OPTIONS[0].value : 'Not sure';
+  const defaultSourceValue = (SOURCE_OPTIONS && SOURCE_OPTIONS.length > 0) ? (SOURCE_OPTIONS.find(s => String(s.value).toLowerCase() === 'events' || String(s.label).toLowerCase() === 'events')?.value ?? SOURCE_OPTIONS[0].value) : 'Events';
+
+  const [regForm, setRegForm] = useState<RegService.RegistrationPayload & { regionId?: string; branchId?: string; counsellorId?: string; admissionOfficerId?: string }>({ status: defaultStatusValue, name: '', number: '', email: '', city: '', source: defaultSourceValue, eventId: '', regionId: '', branchId: '', counsellorId: '', admissionOfficerId: '' });
   const [emailError, setEmailError] = useState(false);
 
   const normalizeRole = (r?: string) => String(r || '').trim().toLowerCase().replace(/\s+/g, '_');
