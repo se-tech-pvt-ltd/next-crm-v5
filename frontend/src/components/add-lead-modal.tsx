@@ -127,7 +127,7 @@ export function AddLeadModal({ open, onOpenChange, initialData, onCreated }: Add
       country: '',
       program: '',
       source: '',
-      status: 'new',
+      status: 'Raw',
       counselorId: '',
     },
   });
