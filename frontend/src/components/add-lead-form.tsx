@@ -1080,11 +1080,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                 {(() => {
                   const hasInitial = Boolean(initialData && Object.keys(initialData || {}).length > 0);
                   const isFromEvent = Boolean(initialData && (initialData as any).eventRegId);
-                  const hideFields = (!hasInitial) || isFromEvent;
-                  if (hideFields) {
-                    return null;
-                  }
-
+                  const shouldDisable = (!hasInitial) || isFromEvent;
                   return (
                     <>
                       <FormField
@@ -1096,7 +1092,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                               <Target className="w-4 h-4" />
                               <span>Status *</span>
                             </FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={shouldDisable}>
                               <FormControl>
                                 <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                                   <SelectValue placeholder="Select status" />
@@ -1122,7 +1118,7 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
                               <FileText className="w-4 h-4" />
                               <span>Lead Type *</span>
                             </FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={shouldDisable}>
                               <FormControl>
                                 <SelectTrigger className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white focus:ring-2 focus:ring-primary/20">
                                   <SelectValue placeholder="Select type" />
