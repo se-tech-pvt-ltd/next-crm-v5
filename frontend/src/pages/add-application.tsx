@@ -54,28 +54,9 @@ export default function AddApplication() {
     enabled: !!presetStudentId,
   });
 
-  const { data: applicationsDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/module/Applications'],
-    queryFn: async () => DropdownsService.getModuleDropdowns('Applications')
-  });
-
+  // Hardcoded dropdowns are used; no API fetch needed
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const { data: allDropdowns } = useQuery({
-    queryKey: ['/api/dropdowns/all'],
-    queryFn: async () => http.get<any[]>('/api/dropdowns'),
-    enabled: true
-  });
-
-  const groupedFromAll = useMemo(() => {
-    const map: Record<string, any[]> = {};
-    if (!Array.isArray(allDropdowns)) return map;
-    for (const d of allDropdowns) {
-      const key = d.fieldName || d.field_name || d.field || d.fieldname || 'unknown';
-      if (!map[key]) map[key] = [];
-      map[key].push(d);
-    }
-    return map;
-  }, [allDropdowns]);
+  const groupedFromAll: Record<string, any[]> = {};
 
   const makeOptions = (dd: any, candidates: string[]) => {
     const source = dd && Object.keys(dd || {}).length ? dd : groupedFromAll;
