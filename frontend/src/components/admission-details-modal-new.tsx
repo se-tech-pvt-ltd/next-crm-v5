@@ -12,6 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ApplicationsService from "@/services/applications";
 import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS as ADMISSION_STATUS_OPTIONS, CASE_STATUS_OPTIONS as ADMISSION_CASE_STATUS_OPTIONS } from '@/constants/admissions-dropdowns';
 import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
@@ -56,17 +57,12 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     staleTime: 5 * 60 * 1000,
   });
 
-  const statusSequence = useMemo(() => {
-    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list)) return [];
-    return list.map((o: any) => (o.key || o.id || o.value)).filter(Boolean);
-  }, [admissionDropdowns]);
+  // Use hardcoded status sequence and display names for admissions
+  const statusSequence = useMemo(() => ADMISSION_STATUS_OPTIONS.map(o => String(o.value)), []);
 
   const getStatusDisplayName = (statusId: string) => {
-    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    const byId = list.find((o: any) => o.id === statusId || o.key === statusId || o.value === statusId);
-    if (byId && byId.value) return byId.value;
-    return statusId;
+    const found = ADMISSION_STATUS_OPTIONS.find(o => String(o.value) === String(statusId));
+    return found ? found.label : statusId;
   };
 
   const AdmissionStatusBar = ({ currentStatus, onChange }: { currentStatus: string; onChange: (s: string) => void }) => {
@@ -133,12 +129,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission }: Admissi
     staleTime: 60_000,
   });
 
-  const getCaseStatusOptions = () => {
-    const dd = admissionDropdowns || {};
-    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
-    if (!Array.isArray(list)) list = [];
-    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
-  };
+  const getCaseStatusOptions = () => ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value }));
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {

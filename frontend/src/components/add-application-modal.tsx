@@ -28,7 +28,7 @@ import { ApplicationDetailsModal } from './application-details-modal-new';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import * as BranchEmpsService from '@/services/branchEmps';
-import { CASE_STATUS_OPTIONS, CHANNEL_PARTNER_OPTIONS, type Option } from '@/constants/applications-dropdowns';
+import { APP_STATUS_OPTIONS, CASE_STATUS_OPTIONS, CHANNEL_PARTNER_OPTIONS, type Option } from '@/constants/applications-dropdowns';
 
 interface AddApplicationModalProps {
   open: boolean;

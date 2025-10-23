@@ -20,6 +20,7 @@ import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
 import * as BranchEmpsService from '@/services/branchEmps';
 import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS as ADMISSION_STATUS_OPTIONS, CASE_STATUS_OPTIONS as ADMISSION_CASE_STATUS_OPTIONS } from '@/constants/admissions-dropdowns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Check, ChevronsUpDown, PlusCircle, Users } from 'lucide-react';
@@ -382,8 +383,9 @@ export function AddAdmissionModal({ open, onOpenChange, applicationId, studentId
     } catch {}
   }, [open, subPartners, form]);
 
-  const statusOptions = getOptions('Status', ['Admissions','Applications']);
-  const caseStatusOptions = getOptions('Case Status', ['Admissions','Applications']);
+  // Use hardcoded admission dropdowns for status and case status (do not fetch from DB)
+  const statusOptions = ADMISSION_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false }));
+  const caseStatusOptions = ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value, isDefault: false }));
 
   useEffect(() => {
     if (!open) return;

@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as AdmissionsService from "@/services/admissions";
 import * as ActivitiesService from '@/services/activities';
 import * as DropdownsService from '@/services/dropdowns';
+import { STATUS_OPTIONS as ADMISSION_STATUS_OPTIONS, CASE_STATUS_OPTIONS as ADMISSION_CASE_STATUS_OPTIONS } from '@/constants/admissions-dropdowns';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
 import * as BranchesService from '@/services/branches';
@@ -65,17 +66,14 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
     setCaseStatus(admission?.caseStatus || '');
   }, [admission]);
 
+  // Use hardcoded status sequence and display names for admissions
   const statusSequence = useMemo<string[]>(() => {
-    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    if (!Array.isArray(list)) return [];
-    return list.map((o: any) => o.key || o.id || o.value).filter(Boolean);
-  }, [admissionDropdowns]);
+    return ADMISSION_STATUS_OPTIONS.map(o => String(o.value));
+  }, []);
 
   const getStatusDisplayName = (statusId: string) => {
-    const list: any[] = (admissionDropdowns as any)?.Status || (admissionDropdowns as any)?.status || [];
-    const byId = list.find((o: any) => o.id === statusId || o.key === statusId || o.value === statusId);
-    if (byId?.value) return byId.value;
-    return statusId;
+    const found = ADMISSION_STATUS_OPTIONS.find(o => String(o.value) === String(statusId));
+    return found ? found.label : statusId;
   };
 
   const formatDateOrdinal = (d: any) => {
@@ -165,10 +163,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
   };
 
   const getCaseStatusOptions = () => {
-    const dd = admissionDropdowns || {};
-    let list: any[] = dd?.['Case Status'] || dd?.caseStatus || dd?.CaseStatus || dd?.case_status || [];
-    if (!Array.isArray(list)) list = [];
-    return list.map(o => ({ label: o.value, value: o.id ?? o.key ?? o.value }));
+    return ADMISSION_CASE_STATUS_OPTIONS.map(o => ({ label: o.label, value: o.value }));
   };
 
   if (!admission) return null;
