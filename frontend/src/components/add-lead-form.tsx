@@ -602,14 +602,14 @@ export default function AddLeadForm({ onCancel, onSuccess, showBackButton = fals
 
       // If this initial data is from an event registration and no explicit status/type provided, ensure defaults
       if (isFromEvent) {
-        try { if (!form.getValues('status')) form.setValue('status', 'raw'); } catch {}
-        try { if (!form.getValues('type')) form.setValue('type', 'direct'); } catch {}
+        try { if (!form.getValues('status')) form.setValue('status', 'Raw'); } catch {}
+        try { if (!form.getValues('type')) form.setValue('type', 'Direct'); } catch {}
       }
     } else {
       // Creation flow (/leads/new) - hide fields and set defaults
       try {
-        form.setValue('status', 'raw');
-        form.setValue('type', 'direct');
+        form.setValue('status', 'Raw');
+        form.setValue('type', 'Direct');
       } catch {}
     }
   }, [initialData, dropdownData]);
