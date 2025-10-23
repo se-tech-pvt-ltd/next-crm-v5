@@ -12,6 +12,13 @@ const NotificationStatusEnum = mysqlEnum("status", [
   "failed",
 ]);
 
+
+export const currencies = mysqlTable("currencies", {
+  countryName: varchar("country_name", { length: 255 }).primaryKey().notNull(),
+  currencySign: text("currency_sign").notNull(),
+  currencyCode: varchar("currency_code", { length: 3 }).notNull()
+});
+
 export const updates = mysqlTable("updates", {
   id: varchar("id", { length: 36 }).primaryKey().notNull(),
   subject: varchar("subject", { length: 250 }).notNull(),

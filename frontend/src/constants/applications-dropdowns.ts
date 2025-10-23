@@ -6,18 +6,10 @@ export const APPLICATIONS_DROPDOWNS = {
   },
   case_status: {
     'Raw': 'Raw',
-    'Not Eligible': 'Not Eligible',
-    'Documents Pending': 'Documents Pending',
-    'Supervisor': 'Supervisor',
-    'Ready to Apply': 'Ready to Apply',
-    'Submitted': 'Submitted',
-    'Rejected': 'Rejected',
-    'COL Received': 'COL Received',
-    'UOL Requested': 'UOL Requested',
-    'UOL Received': 'UOL Received',
-    'Interview Outcome Awaiting': 'Interview Outcome Awaiting',
-    'Deposit': 'Deposit',
-    'Deferred': 'Deferred',
+    'Processing' : 'Processing',
+    'Offered': 'Offered',
+    'Deposited': 'Deposited',
+    'Closed': 'Closed'
   },
   channel_partner: {
     'Scorp': 'Scorp',

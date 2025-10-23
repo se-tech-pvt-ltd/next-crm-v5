@@ -12,6 +12,7 @@ import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
 import * as DropdownsService from '@/services/dropdowns';
+import { CHANNEL_PARTNER_OPTIONS, CASE_STATUS_OPTIONS } from '@/constants/applications-dropdowns';
 import * as ActivitiesService from '@/services/activities';
 import * as UsersService from '@/services/users';
 import * as RegionsService from '@/services/regions';
@@ -130,6 +131,13 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const normalizeKey = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   const caseStatusOptions = useMemo(() => {
+    // Prefer frontend constant list when available
+    try {
+      if (Array.isArray(CASE_STATUS_OPTIONS) && CASE_STATUS_OPTIONS.length) {
+        return CASE_STATUS_OPTIONS.map((o: any) => ({ label: o.label, value: o.value, isDefault: false }));
+      }
+    } catch {}
+
     const dd: any = applicationsDropdowns as any;
     if (!dd || typeof dd !== 'object') return [];
     const keyMap: Record<string, string> = {};
@@ -162,7 +170,15 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
   const courseTypeOptions = useMemo(() => makeOptions(['Course Type','courseType','course_type','CourseType']), [makeOptions]);
   const countryOptions = useMemo(() => makeOptions(['Country','country']), [makeOptions]);
   const intakeOptions = useMemo(() => makeOptions(['Intake','intake']), [makeOptions]);
-  const channelPartnerOptions = useMemo(() => makeOptions(['Channel Partner','ChannelPartners','channelPartner','channel_partners','Channel Partner(s)','ChannelPartner']), [makeOptions]);
+  const channelPartnerOptions = useMemo(() => {
+    // Prefer frontend constant list when available
+    try {
+      if (Array.isArray(CHANNEL_PARTNER_OPTIONS) && CHANNEL_PARTNER_OPTIONS.length) {
+        return CHANNEL_PARTNER_OPTIONS.map((o: any) => ({ label: o.label, value: o.value }));
+      }
+    } catch {}
+    return makeOptions(['Channel Partner','ChannelPartners','channelPartner','channel_partners','Channel Partner(s)','ChannelPartner']);
+  }, [makeOptions]);
 
   const mapToOptionValue = useCallback((raw: string | undefined, options: {label:string;value:string}[]) => {
     if (!raw) return '';
@@ -282,6 +298,11 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         setCurrentApp((prevApp) => (prevApp ? { ...prevApp, appStatus: updated.appStatus } as Application : prevApp));
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
         queryClient.refetchQueries({ queryKey: ['/api/applications'] });
+        try {
+          const actKey = `/api/activities/application/${String(updated.id || currentApp?.id || '')}`;
+          queryClient.invalidateQueries({ queryKey: [actKey] });
+          queryClient.refetchQueries({ queryKey: [actKey] });
+        } catch {}
         toast({ title: 'Status updated' });
       } catch (err) {
         console.error('Error handling application status success', err);
@@ -303,6 +324,11 @@ export function ApplicationDetailsModal({ open, onOpenChange, application, onOpe
         const prevApp = context?.previousApp as Application | null;
         setCurrentApp((prev) => (prev ? { ...prev, ...updated } : updated));
         queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+        try {
+          const actKey = `/api/activities/application/${String(updated.id || currentApp?.id || '')}`;
+          queryClient.invalidateQueries({ queryKey: [actKey] });
+          queryClient.refetchQueries({ queryKey: [actKey] });
+        } catch {}
         setIsEditing(false);
         setCurrentStatus(updated.appStatus || 'Open');
         // If appStatus changed, server will log activity; just notify and refresh.
