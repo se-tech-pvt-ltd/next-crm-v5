@@ -142,7 +142,6 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
   const normalize = (s: string) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
   const getFieldOptions = (fieldName: string): any[] => {
     const data = dropdownData as any;
-    const leadsData = leadsDropdowns as any;
     const target = normalize(fieldName);
     const candidates = [target];
     if (target === 'englishproficiency') {
@@ -158,7 +157,7 @@ export function StudentProfileModal({ open, onOpenChange, studentId, onOpenAppli
     };
     const opts = findIn(data);
     if (opts.length > 0) return opts;
-    return findIn(leadsData);
+    return [];
   };
   const getDropdownLabel = (fieldName: string, value?: string | string[] | null) => {
     if (value == null) return '';
