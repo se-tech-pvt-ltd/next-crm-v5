@@ -611,7 +611,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                       onValueChange={(vals) => handleChange('targetCountries', vals)}
                       placeholder="Select countries"
                       searchPlaceholder="Search countries..."
-                      options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
+                      options={INTERESTED_COUNTRY_OPTIONS}
                       emptyMessage="No countries found"
                       maxDisplayItems={3}
                       className="text-[11px] shadow-sm border border-gray-300 bg-white"
