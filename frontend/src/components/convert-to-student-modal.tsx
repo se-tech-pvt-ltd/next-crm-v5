@@ -718,7 +718,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <SelectContent>
                       {counsellorRenderList.map((user: any) => (
                         <SelectItem key={user.id} value={String(user.id)}>
-                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
+                          {(user.firstName || '')} {(user.lastName || '')}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -737,7 +737,7 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                     <SelectContent>
                       {admissionOfficerRenderList.map((user: any) => (
                         <SelectItem key={user.id} value={String(user.id)}>
-                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
+                          {(user.firstName || '')} {(user.lastName || '')}
                         </SelectItem>
                       ))}
                     </SelectContent>
