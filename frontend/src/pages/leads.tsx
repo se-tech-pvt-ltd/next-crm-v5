@@ -228,6 +228,13 @@ export default function Leads() {
     staleTime: 0,
   });
 
+  const { data: studentByLeadId } = useQuery({
+    queryKey: ['/api/students/by-lead', convertParams?.id],
+    queryFn: async () => StudentsService.getStudentByLeadId(convertParams?.id),
+    enabled: Boolean(matchConvert && convertParams?.id),
+    staleTime: 0,
+  });
+
   const { data: students } = useQuery({
     queryKey: ['/api/students'],
     staleTime: 0,
