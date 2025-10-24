@@ -716,11 +716,15 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                       <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {counsellorRenderList.map((user: any) => (
-                        <SelectItem key={user.id} value={String(user.id)}>
-                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
-                        </SelectItem>
-                      ))}
+                      {counsellorRenderList.map((user: any) => {
+                        const fullName = [user.firstName || user.first_name, user.lastName || user.last_name].filter(Boolean).join(' ').trim();
+                        const displayName = fullName || user.email || user.id;
+                        return (
+                          <SelectItem key={user.id} value={String(user.id)}>
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -735,11 +739,15 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
                       <SelectValue placeholder={selectedBranchId ? 'Please select' : 'No branch linked to lead'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {admissionOfficerRenderList.map((user: any) => (
-                        <SelectItem key={user.id} value={String(user.id)}>
-                          {(user.firstName || '')} {(user.lastName || '')} ({user.email})
-                        </SelectItem>
-                      ))}
+                      {admissionOfficerRenderList.map((user: any) => {
+                        const fullName = [user.firstName || user.first_name, user.lastName || user.last_name].filter(Boolean).join(' ').trim();
+                        const displayName = fullName || user.email || user.id;
+                        return (
+                          <SelectItem key={user.id} value={String(user.id)}>
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
