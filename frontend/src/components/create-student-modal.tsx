@@ -238,6 +238,10 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
 
     const normalizedTargetCountry = JSON.stringify(formData.targetCountries.map((value) => String(value)));
 
+    const statusMap: Record<string, string> = {
+      'Open': 'active',
+    };
+
     const payload: any = {
       name: trimmedName,
       email: normalizedEmail,
@@ -245,7 +249,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
       dateOfBirth,
       address,
       expectation,
-      status,
+      status: statusMap[status] || status || 'active',
       targetCountry: normalizedTargetCountry,
       passportNumber,
       englishProficiency,
