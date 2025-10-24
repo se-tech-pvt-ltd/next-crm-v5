@@ -23,3 +23,8 @@ export async function createStudent(data: Partial<Student>) {
 export async function convertFromLead(leadId: string | undefined, data: any) {
   return http.post<Student>('/api/students/convert-from-lead', { ...data, leadId });
 }
+
+export async function getStudentByLeadId(leadId: string | undefined) {
+  if (!leadId) throw new Error('Lead ID is required');
+  return http.get<Student>(`/api/students/by-lead/${leadId}`);
+}

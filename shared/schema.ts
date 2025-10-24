@@ -57,7 +57,7 @@ export const students = mysqlTable("students", {
   targetCountry: text("target_country"),
   targetProgram: text("target_program"),
   budget: text("budget"),
-  status: text("status").notNull().default("active"),
+  status: text("status").notNull().default("Open"),
   notes: text("notes"),
   counselorId: varchar("counsellor_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),

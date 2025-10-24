@@ -24,6 +24,7 @@ import * as BranchesService from '@/services/branches';
 import * as UsersService from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
 import { STATUS_OPTIONS, EXPECTATION_OPTIONS, ELT_TEST_OPTIONS, CONSULTANCY_FEE_OPTIONS, SCHOLARSHIP_OPTIONS, type Option } from '@/constants/students-dropdowns';
+import { INTERESTED_COUNTRY_OPTIONS } from '@/constants/leads-dropdowns';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
 import {
@@ -610,7 +611,7 @@ export function CreateStudentModal({ open, onOpenChange, onSuccess }: CreateStud
                       onValueChange={(vals) => handleChange('targetCountries', vals)}
                       placeholder="Select countries"
                       searchPlaceholder="Search countries..."
-                      options={(getStudentList('Target Country').length ? getStudentList('Target Country') : getList('Interested Country')).map((o: any) => ({ value: String(o.key || o.id || o.value), label: String(o.value) }))}
+                      options={INTERESTED_COUNTRY_OPTIONS}
                       emptyMessage="No countries found"
                       maxDisplayItems={3}
                       className="text-[11px] shadow-sm border border-gray-300 bg-white"

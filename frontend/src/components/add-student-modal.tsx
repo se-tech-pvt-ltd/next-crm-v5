@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import * as DropdownsService from '@/services/dropdowns';
+import { INTERESTED_COUNTRY_OPTIONS } from '@/constants/leads-dropdowns';
 
 interface AddStudentModalProps {
   open: boolean;
@@ -296,14 +297,11 @@ export function AddStudentModal({ open, onOpenChange, leadId }: AddStudentModalP
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="USA">United States</SelectItem>
-                        <SelectItem value="Canada">Canada</SelectItem>
-                        <SelectItem value="UK">United Kingdom</SelectItem>
-                        <SelectItem value="Australia">Australia</SelectItem>
-                        <SelectItem value="Germany">Germany</SelectItem>
-                        <SelectItem value="France">France</SelectItem>
-                        <SelectItem value="Netherlands">Netherlands</SelectItem>
-                        <SelectItem value="New Zealand">New Zealand</SelectItem>
+                        {INTERESTED_COUNTRY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

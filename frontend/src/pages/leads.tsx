@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 const useState = React.useState;
@@ -87,6 +88,8 @@ export default function Leads() {
   const [currentPage, setCurrentPage] = useState(1);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [studentModalOpen, setStudentModalOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [dateFromFilter, setDateFromFilter] = useState<Date | undefined>(undefined);
   const [dateToFilter, setDateToFilter] = useState<Date | undefined>(undefined);
   const [queryText, setQueryText] = useState('');
@@ -222,6 +225,13 @@ export default function Leads() {
     queryKey: ['/api/leads', editParams?.id],
     queryFn: async () => LeadsService.getLead(editParams?.id),
     enabled: Boolean(matchEdit && editParams?.id),
+    staleTime: 0,
+  });
+
+  const { data: studentByLeadId } = useQuery({
+    queryKey: ['/api/students/by-lead', convertParams?.id],
+    queryFn: async () => StudentsService.getStudentByLeadId(convertParams?.id),
+    enabled: Boolean(matchConvert && convertParams?.id),
     staleTime: 0,
   });
 
@@ -391,20 +401,30 @@ export default function Leads() {
 
   React.useEffect(() => {
     if (matchConvert) {
-      setShowConvertModal(true);
       const id = convertParams?.id;
       if (id) {
-        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
-        if (leadByIdForConvert) {
-          setSelectedLead(leadByIdForConvert as any);
-          setConvertLead(leadByIdForConvert as any);
-        } else if (found) {
-          setSelectedLead(found as any);
-          setConvertLead(found as any);
+        // Check if a student already exists for this lead
+        if (studentByLeadId && studentByLeadId.id) {
+          // Student already exists, open student modal instead
+          setShowConvertModal(false);
+          setStudentModalOpen(true);
+          setSelectedStudentId(String(studentByLeadId.id));
+        } else if (studentByLeadId === null || studentByLeadId === undefined) {
+          // No student exists, show convert modal
+          setShowConvertModal(true);
+          setStudentModalOpen(false);
+          const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+          if (leadByIdForConvert) {
+            setSelectedLead(leadByIdForConvert as any);
+            setConvertLead(leadByIdForConvert as any);
+          } else if (found) {
+            setSelectedLead(found as any);
+            setConvertLead(found as any);
+          }
         }
       }
     }
-  }, [matchConvert, convertParams, leads, leadByIdForConvert]);
+  }, [matchConvert, convertParams, leads, leadByIdForConvert, studentByLeadId]);
 
   React.useEffect(() => {
     if (matchEdit) {
@@ -940,6 +960,18 @@ export default function Leads() {
           setConvertLead(null);
         }
       }} lead={convertLead} />
+
+      <StudentProfileModal
+        open={studentModalOpen}
+        onOpenChange={(open) => {
+          setStudentModalOpen(open);
+          if (!open) {
+            if (matchConvert && convertParams?.id) setLocation(`/leads/${convertParams.id}`);
+            setSelectedStudentId(null);
+          }
+        }}
+        studentId={selectedStudentId}
+      />
     </Layout>
   );
 }
