@@ -439,8 +439,15 @@ export function ConvertToStudentModal({ open, onOpenChange, lead, onSuccess }: C
       return value;
     };
 
+    const statusMap: Record<string, string> = {
+      'Open': 'active',
+      'Needs Attention': 'applied',
+      'Closed': 'enrolled',
+    };
+
     const payload = {
       ...formData,
+      status: statusMap[formData.status] || formData.status,
       dateOfBirth: normalizeDate(formData.dateOfBirth),
     };
 
