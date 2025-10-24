@@ -401,20 +401,30 @@ export default function Leads() {
 
   React.useEffect(() => {
     if (matchConvert) {
-      setShowConvertModal(true);
       const id = convertParams?.id;
       if (id) {
-        const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
-        if (leadByIdForConvert) {
-          setSelectedLead(leadByIdForConvert as any);
-          setConvertLead(leadByIdForConvert as any);
-        } else if (found) {
-          setSelectedLead(found as any);
-          setConvertLead(found as any);
+        // Check if a student already exists for this lead
+        if (studentByLeadId && studentByLeadId.id) {
+          // Student already exists, open student modal instead
+          setShowConvertModal(false);
+          setStudentModalOpen(true);
+          setSelectedStudentId(String(studentByLeadId.id));
+        } else if (studentByLeadId === null || studentByLeadId === undefined) {
+          // No student exists, show convert modal
+          setShowConvertModal(true);
+          setStudentModalOpen(false);
+          const found = Array.isArray(leads) ? (leads as any[]).find((l: any) => String(l.id) === String(id)) : undefined;
+          if (leadByIdForConvert) {
+            setSelectedLead(leadByIdForConvert as any);
+            setConvertLead(leadByIdForConvert as any);
+          } else if (found) {
+            setSelectedLead(found as any);
+            setConvertLead(found as any);
+          }
         }
       }
     }
-  }, [matchConvert, convertParams, leads, leadByIdForConvert]);
+  }, [matchConvert, convertParams, leads, leadByIdForConvert, studentByLeadId]);
 
   React.useEffect(() => {
     if (matchEdit) {
