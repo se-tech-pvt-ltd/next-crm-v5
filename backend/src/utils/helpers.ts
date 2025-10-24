@@ -109,7 +109,7 @@ export function mapStudentFromLeadPayload(studentData: any) {
       }
       return undefined;
     })(),
-    status: (studentData.status === 'Open' ? 'active' : studentData.status) || 'active',
+    status: studentData.status || 'Open',
     counsellorId: studentData.counsellor || studentData.counsellorId || studentData.counselorId || undefined,
     admissionOfficerId: studentData.admissionOfficer || studentData.admissionOfficerId || undefined,
     // optionally accept branch/region if frontend sends them
