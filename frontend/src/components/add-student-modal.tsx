@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HelpTooltip } from './help-tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import * as DropdownsService from '@/services/dropdowns';
+import { INTERESTED_COUNTRY_OPTIONS } from '@/constants/leads-dropdowns';
 
 interface AddStudentModalProps {
   open: boolean;
