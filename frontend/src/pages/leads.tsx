@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { AddLeadModal } from '@/components/add-lead-modal';
 import { LeadDetailsModal } from '@/components/lead-details-modal';
 import { ConvertToStudentModal } from '@/components/convert-to-student-modal';
+import { StudentProfileModal } from '@/components/student-profile-modal-new';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 const useState = React.useState;
