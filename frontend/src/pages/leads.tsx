@@ -960,6 +960,18 @@ export default function Leads() {
           setConvertLead(null);
         }
       }} lead={convertLead} />
+
+      <StudentProfileModal
+        open={studentModalOpen}
+        onOpenChange={(open) => {
+          setStudentModalOpen(open);
+          if (!open) {
+            if (matchConvert && convertParams?.id) setLocation(`/leads/${convertParams.id}`);
+            setSelectedStudentId(null);
+          }
+        }}
+        studentId={selectedStudentId}
+      />
     </Layout>
   );
 }
