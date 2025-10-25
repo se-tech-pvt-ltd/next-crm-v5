@@ -495,11 +495,7 @@ export default function ApplicationDetails() {
               </Card>
 
 
-              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center"><Users className="w-5 h-5 mr-2" />Access</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
+              <CollapsibleCard defaultOpen={false} persistKey={`application-details:${application.id}:access`} header={<CardTitle className="text-sm flex items-center"><Users className="w-5 h-5 mr-2" />Access</CardTitle>} cardClassName="w-full shadow-sm hover:shadow-md transition-shadow">
                   {isPartnerRole ? (
                     (() => {
                       const pIdCandidates = [
@@ -624,8 +620,7 @@ export default function ApplicationDetails() {
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </CollapsibleCard>
 
 
             </div>
