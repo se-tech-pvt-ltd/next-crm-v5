@@ -23,6 +23,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation, useRoute } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { CollapsibleCard } from '@/components/collapsible-card';
 
 interface AdmissionDetailsModalProps {
   open: boolean;
