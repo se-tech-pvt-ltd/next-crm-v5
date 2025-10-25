@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InputWithIcon } from '@/components/ui/input-with-icon';
-import { Search } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/ui/pagination';
 import { useQuery } from '@tanstack/react-query';
 import * as CoursesService from '@/services/courses';
+import { Button } from '@/components/ui/button';
 
 export default function CoursesPage() {
   const [queryText, setQueryText] = React.useState('');
