@@ -489,7 +489,37 @@ export function LeadDetailsModal({ open, onOpenChange, lead, onLeadUpdate, onOpe
                     <Input id="email" type="email" value={displayData.email || ''} onChange={(e) => setEditData({ ...editData, email: e.target.value })} disabled={!isEditing || updateLeadMutation.isPending} className="h-7 text-[11px] shadow-sm border border-gray-300 bg-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="flex items-center space-x-2"><Phone className="w-4 h-4" /><span>Phone Number</span></Label>
+                    <Label htmlFor="phone" className="flex items-center space-x-2">
+                      {/* WhatsApp icon placed in the label (black) when phone exists and not editing */}
+                      {!isEditing && String(displayData.phone || '').trim() !== '' ? (
+                        <a
+                          href={(() => {
+                            try {
+                              const raw = String(displayData.phone || '');
+                              const digits = raw.replace(/[^0-9+]/g, '');
+                              const cleaned = digits.replace(/^\+/, '');
+                              return `https://web.whatsapp.com/send?phone=${encodeURIComponent(cleaned)}`;
+                            } catch (e) {
+                              return '#';
+                            }
+                          })()}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center justify-center h-4 w-4 text-black"
+                          title="Open WhatsApp chat"
+                        >
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden>
+                            <path d="M20.52 3.48A11.9 11.9 0 0012 1C6 1 1 5.92 1 12c0 2.11.55 4.09 1.6 5.86L1 23l5.42-1.42A11.94 11.94 0 0012 23c6 0 11-4.92 11-11 0-1.97-.54-3.81-1.48-5.52zM12 21c-1.9 0-3.74-.5-5.32-1.44l-.38-.23-3.22.84.86-3.14-.25-.4A9 9 0 113 12a8.93 8.93 0 0115.47-5.99A8.93 8.93 0 0121 12c0 4.97-4.03 9-9 9zm4.03-6.9c-.22-.11-1.3-.64-1.5-.71-.2-.07-.35-.11-.5.11-.15.23-.6.71-.73.86-.13.14-.26.16-.48.05-.22-.11-.93-.34-1.77-1.09-.65-.58-1.09-1.29-1.22-1.51-.13-.22-.01-.34.09-.45.09-.09.2-.22.3-.33.1-.11.13-.19.2-.32.07-.13.03-.24-.02-.35-.05-.11-.5-1.2-.68-1.64-.18-.43-.36-.37-.5-.37-.13 0-.28 0-.43 0-.15 0-.39.06-.59.28-.2.22-.78.76-.78 1.86s.8 2.16.91 2.31c.11.15 1.57 2.4 3.8 3.36 2.22.95 2.22.63 2.62.59.4-.04 1.3-.53 1.48-1.04.18-.51.18-.95.13-1.04-.05-.09-.18-.14-.4-.25z" />
+                          </svg>
+                        </a>
+                      ) : (
+                        // Fallback icon when editing or phone not present
+                        <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                          <path d="M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.57.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.24.2 2.45.57 3.57.13.4.04.85-.25 1.16l-2.2 2.2z" />
+                        </svg>
+                      )}
+                      <span>Phone Number</span>
+                    </Label>
                     <div className="relative phone-compact">
                       <PhoneInput
                         value={String(displayData.phone || '')}

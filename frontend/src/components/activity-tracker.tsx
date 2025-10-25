@@ -31,19 +31,31 @@ interface ActivityTrackerProps {
 }
 
 const getActivityTypes = (entityType?: string) => {
+  // Default activity types for most entities
   const base = [
     { value: 'comment', label: 'Comment', icon: MessageSquare },
-    { value: 'note', label: 'Note', icon: FileText },
     { value: 'call', label: 'Call', icon: UserIcon },
+    { value: 'meeting', label: 'Meeting', icon: CalendarClock },
   ];
   const t = (entityType || '').toLowerCase();
-  if (t === 'lead') {
+
+  // Leads get a special set including follow_up
+  if (t.includes('lead')) {
     return [
-      ...base.slice(0, 2),
+      { value: 'comment', label: 'Comment', icon: MessageSquare },
       { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
-      ...base.slice(2),
+      { value: 'call', label: 'Call', icon: UserIcon },
+      { value: 'meeting', label: 'Meeting', icon: CalendarClock },
     ];
   }
+
+  // Students, applications, and admissions are comment-only
+  if (t.includes('student') || t.includes('application') || t.includes('admission')) {
+    return [
+      { value: 'comment', label: 'Comment', icon: MessageSquare },
+    ];
+  }
+
   return base;
 };
 
@@ -56,6 +68,15 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+
+  // Compute activity options once per render so we can disable the select when only one option exists
+  const activityOptions = React.useMemo(() => getActivityTypes(entityType), [entityType]);
+  // Debug logging to verify options for given entityType
+  React.useEffect(() => {
+    try {
+      console.log('[ActivityTracker] entityType:', entityType, 'activityOptions:', activityOptions.map(o=>o.value));
+    } catch (e) {}
+  }, [entityType, activityOptions]);
 
   const toInputDateTimeValue = React.useCallback((date: Date) => {
     return format(date, "yyyy-MM-dd'T'HH:mm");
@@ -139,6 +160,16 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     if ((activityType === 'follow_up' || activityType === 'follow-up') && String((entityType || '').toLowerCase()) !== 'lead') {
       setActivityType('comment');
       setFollowUpDateTimeValue('');
+    }
+  }, [entityType, activityType]);
+
+  // For certain entity types (student, application, admission), activity type must be comment-only
+  useEffect(() => {
+    const t = String((entityType || '').toLowerCase());
+    if (['student', 'application', 'admission'].includes(t)) {
+      if (activityType !== 'comment') {
+        setActivityType('comment');
+      }
     }
   }, [entityType, activityType]);
 
@@ -600,24 +631,31 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                 </Button>
               ) : (
                 <div className="space-y-3">
-                  <Select value={activityType} onValueChange={handleActivityTypeChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select activity type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getActivityTypes(entityType).map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex items-center gap-2">
-                              <IconComponent className="h-4 w-4" />
-                              {type.label}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                  {activityOptions.length === 1 ? (
+                    <div className="h-10 flex items-center px-3 rounded-md border border-input bg-background text-sm text-gray-700">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      {activityOptions[0].label}
+                    </div>
+                  ) : (
+                    <Select value={activityType} onValueChange={handleActivityTypeChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select activity type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activityOptions.map((type) => {
+                          const IconComponent = type.icon;
+                          return (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div className="flex items-center gap-2">
+                                <IconComponent className="h-4 w-4" />
+                                {type.label}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
 
                   {activityType === 'follow_up' && (
                     <div className="space-y-2">

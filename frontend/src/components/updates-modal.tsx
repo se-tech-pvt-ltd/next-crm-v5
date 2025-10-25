@@ -118,7 +118,6 @@ export const UpdatesModal: React.FC<UpdatesModalProps> = ({ open, onOpenChange }
 
         {/* Footer */}
         <div className="px-5 py-3 bg-gray-50 rounded-b-md flex items-center justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
           <Button onClick={next}>Next</Button>
         </div>
       </DialogContent>
