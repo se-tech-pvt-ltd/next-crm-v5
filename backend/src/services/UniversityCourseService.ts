@@ -1,5 +1,4 @@
 import { db } from "../config/database.js";
-import { db } from "../config/database.js";
 import { universities, universityCourses } from "../shared/schema.js";
 import { and, or, like, eq, desc, sql } from "drizzle-orm";
 
@@ -99,5 +98,10 @@ export class UniversityCourseService {
         hasPrevPage: page > 1,
       },
     };
+  }
+
+  static async listAll() {
+    const result = await UniversityCourseService.list({ limit: 1000, page: 1 });
+    return result.data;
   }
 }
