@@ -135,6 +135,8 @@ export default function CoursesPage() {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
+                hasNextPage={Boolean(data?.pagination?.hasNextPage)}
+                hasPrevPage={Boolean(data?.pagination?.hasPrevPage)}
               />
             </div>
           </CardContent>
