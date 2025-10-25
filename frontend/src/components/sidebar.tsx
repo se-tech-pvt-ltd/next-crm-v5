@@ -143,10 +143,10 @@ export function Sidebar() {
   let navItems: any[] = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
     { path: '/calendar', label: 'My Followups', icon: Calendar, count: undefined },
-    { label: 'Pipelines', icon: BarChart3, children: visiblePipelineChildren },
     { label: 'Resources', icon: ToolkitIcon, children: [
       { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
     ] },
+    { label: 'Pipelines', icon: BarChart3, children: visiblePipelineChildren },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     ...(canViewPartners ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
     { path: '/updates', label: 'Updates', icon: Megaphone, count: undefined },
