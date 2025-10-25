@@ -70,55 +70,6 @@ export default function CoursesPage() {
   return (
     <Layout title="Courses" showSearch={false}>
       <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <InputWithIcon
-                icon={Search}
-                placeholder="Search by course, university, country"
-                value={queryText}
-                onChange={e => setQueryText(e.target.value)}
-              />
-
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat === 'all' ? 'All Categories' : cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedUniversity} onValueChange={setSelectedUniversity}>
-                <SelectTrigger>
-                  <SelectValue placeholder="University" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Universities</SelectItem>
-                  {universities?.map(u => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={topOnly} onValueChange={setTopOnly}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Top course" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="top">Top courses only</SelectItem>
-                  <SelectItem value="non-top">Non-top only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
 
         <Card>
           <CardHeader className="p-4 pb-3">
