@@ -11,6 +11,37 @@ export type Course = {
   country: string | null;
 };
 
-export async function getCourses() {
-  return http.get<{ data: Course[] }>(`/api/university-courses`);
+export type CourseListResponse = {
+  data: Course[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+};
+
+export interface CourseQueryParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  category?: string;
+  top?: 'top' | 'non-top' | 'all';
+}
+
+function toQueryString(params: CourseQueryParams) {
+  const parts: string[] = [];
+  if (params.page != null) parts.push(`page=${encodeURIComponent(String(params.page))}`);
+  if (params.limit != null) parts.push(`limit=${encodeURIComponent(String(params.limit))}`);
+  if (params.q != null && params.q !== '') parts.push(`q=${encodeURIComponent(String(params.q))}`);
+  if (params.category != null && params.category !== '') parts.push(`category=${encodeURIComponent(String(params.category))}`);
+  if (params.top != null && params.top !== '') parts.push(`top=${encodeURIComponent(String(params.top))}`);
+  return parts.length ? `?${parts.join('&')}` : '';
+}
+
+export async function getCourses(params: CourseQueryParams = {}) {
+  const qs = toQueryString(params);
+  return http.get<CourseListResponse>(`/api/university-courses${qs}`);
 }
