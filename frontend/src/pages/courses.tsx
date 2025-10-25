@@ -120,9 +120,81 @@ export default function CoursesPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Courses</CardTitle>
+          <CardHeader className="p-4 pb-3">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-semibold text-gray-800">Filters</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {(queryText || categoryFilter !== 'all' || selectedUniversity !== 'all' || topOnly !== 'all') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs px-3"
+                      onClick={() => {
+                        setQueryText('');
+                        setCategoryFilter('all');
+                        setSelectedUniversity('all');
+                        setTopOnly('all');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex-1 min-w-52">
+                  <InputWithIcon
+                    icon={Search}
+                    placeholder="Search by course, university, country"
+                    value={queryText}
+                    onChange={e => { setQueryText(e.target.value); setCurrentPage(1); }}
+                  />
+                </div>
+
+                <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-40 h-8 text-xs">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat === 'all' ? 'All Categories' : cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={selectedUniversity} onValueChange={(v) => { setSelectedUniversity(v); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-48 h-8 text-xs">
+                    <SelectValue placeholder="University" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Universities</SelectItem>
+                    {universities?.map(u => (
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={topOnly} onValueChange={(v) => { setTopOnly(v); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-36 h-8 text-xs">
+                    <SelectValue placeholder="Top course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="top">Top courses only</SelectItem>
+                    <SelectItem value="non-top">Non-top only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardHeader>
+
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
