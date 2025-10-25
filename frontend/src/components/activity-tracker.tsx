@@ -60,6 +60,9 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
+  // Compute activity options once per render so we can disable the select when only one option exists
+  const activityOptions = React.useMemo(() => getActivityTypes(entityType), [entityType]);
+
   const toInputDateTimeValue = React.useCallback((date: Date) => {
     return format(date, "yyyy-MM-dd'T'HH:mm");
   }, []);
