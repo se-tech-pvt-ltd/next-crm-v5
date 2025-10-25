@@ -148,6 +148,16 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
     }
   }, [entityType, activityType]);
 
+  // For certain entity types (student, application, admission), activity type must be comment-only
+  useEffect(() => {
+    const t = String((entityType || '').toLowerCase());
+    if (['student', 'application', 'admission'].includes(t)) {
+      if (activityType !== 'comment') {
+        setActivityType('comment');
+      }
+    }
+  }, [entityType, activityType]);
+
   const { data: activities = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/activities/${entityType}/${entityId}`],
     enabled: !!entityId,
