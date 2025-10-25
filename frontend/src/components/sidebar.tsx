@@ -28,7 +28,7 @@ export function Sidebar() {
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [navigationLock, setNavigationLock] = useState(false);
   const navigationLockRef = useRef(false);
-  const [pipelinesOpen, setPipelinesOpen] = useState(true);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ Pipelines: true, Resources: true });
 
   // Check if mobile screen
   useEffect(() => {
@@ -139,12 +139,14 @@ export function Sidebar() {
   // Apply visibility rules to pipeline children
   let visiblePipelineChildren = pipelineChildren.filter(item => isModuleVisible(item.label));
 
-  // Build top-level items (without pipelines yet)
+  // Build top-level items (with grouped sections)
   let navItems: any[] = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
     { path: '/calendar', label: 'My Followups', icon: Calendar, count: undefined },
-    { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
     { label: 'Pipelines', icon: BarChart3, children: visiblePipelineChildren },
+    { label: 'Resources', icon: ToolkitIcon, children: [
+      { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
+    ] },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     ...(canViewPartners ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
     { path: '/updates', label: 'Updates', icon: Megaphone, count: undefined },
@@ -272,9 +274,9 @@ export function Sidebar() {
                       }
                     }
                   }}
-                  onClick={() => setPipelinesOpen((o) => !o)}
+                  onClick={() => setOpenGroups(prev => ({ ...prev, [item.label]: !prev[item.label] }))}
                   role="button"
-                  aria-expanded={pipelinesOpen}
+                  aria-expanded={Boolean(openGroups[item.label])}
                   aria-label={item.label}
                 >
                   <div className="relative">
@@ -283,7 +285,7 @@ export function Sidebar() {
                   {isExpanded && (
                     <>
                       <span className="font-medium text-sm">{item.label}</span>
-                      <ChevronDown size={14} className={`ml-auto transition-transform ${pipelinesOpen ? '' : '-rotate-90'}`} />
+                      <ChevronDown size={14} className={`ml-auto transition-transform ${openGroups[item.label] ? '' : '-rotate-90'}`} />
                     </>
                   )}
 
@@ -293,7 +295,7 @@ export function Sidebar() {
                     </div>
                   )}
                 </div>
-                {pipelinesOpen && (
+                {openGroups[item.label] && (
                   <div className="space-y-1 pl-4">
                     {item.children.map((child: any) => {
                       const isActive = location === child.path;
