@@ -31,17 +31,20 @@ interface ActivityTrackerProps {
 }
 
 const getActivityTypes = (entityType?: string) => {
+  // Default activity types for most entities
   const base = [
     { value: 'comment', label: 'Comment', icon: MessageSquare },
-    { value: 'note', label: 'Note', icon: FileText },
     { value: 'call', label: 'Call', icon: UserIcon },
+    { value: 'meeting', label: 'Meeting', icon: CalendarClock },
   ];
   const t = (entityType || '').toLowerCase();
   if (t === 'lead') {
+    // For leads, include Follow Up and order: Comment, Follow Up, Call, Meeting
     return [
-      ...base.slice(0, 2),
+      { value: 'comment', label: 'Comment', icon: MessageSquare },
       { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
-      ...base.slice(2),
+      { value: 'call', label: 'Call', icon: UserIcon },
+      { value: 'meeting', label: 'Meeting', icon: CalendarClock },
     ];
   }
   return base;
