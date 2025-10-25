@@ -38,8 +38,9 @@ const getActivityTypes = (entityType?: string) => {
     { value: 'meeting', label: 'Meeting', icon: CalendarClock },
   ];
   const t = (entityType || '').toLowerCase();
-  if (t === 'lead') {
-    // For leads, include Follow Up and order: Comment, Follow Up, Call, Meeting
+
+  // Leads get a special set including follow_up
+  if (t.includes('lead')) {
     return [
       { value: 'comment', label: 'Comment', icon: MessageSquare },
       { value: 'follow_up', label: 'Follow Up', icon: CalendarIcon },
@@ -47,6 +48,14 @@ const getActivityTypes = (entityType?: string) => {
       { value: 'meeting', label: 'Meeting', icon: CalendarClock },
     ];
   }
+
+  // Students, applications, and admissions are comment-only
+  if (t.includes('student') || t.includes('application') || t.includes('admission')) {
+    return [
+      { value: 'comment', label: 'Comment', icon: MessageSquare },
+    ];
+  }
+
   return base;
 };
 
