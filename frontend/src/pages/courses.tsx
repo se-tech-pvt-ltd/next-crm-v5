@@ -38,12 +38,13 @@ export default function CoursesPage() {
   }, [allCoursesResp]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['/api/university-courses', queryText, categoryFilter, topOnly, currentPage, pageSize],
+    queryKey: ['/api/university-courses', queryText, categoryFilter, selectedUniversity, topOnly, currentPage, pageSize],
     queryFn: () => CoursesService.getCourses({
       page: currentPage,
       limit: pageSize,
       q: queryText || undefined,
       category: categoryFilter || undefined,
+      universityId: selectedUniversity && selectedUniversity !== 'all' ? selectedUniversity : undefined,
       top: topOnly || undefined,
     }),
     keepPreviousData: true,
@@ -54,14 +55,12 @@ export default function CoursesPage() {
 
   const courses = (data?.data || []) as CoursesService.Course[];
 
-  const categories = React.useMemo(() => {
-    const set = new Set<string>();
-    (data?.data || []).forEach(c => { if (c.category) set.add(c.category); });
-    return ['all', ...Array.from(set).sort()];
-  }, [data]);
-
   const totalPages = data?.pagination?.totalPages || 1;
   const pageItems = courses;
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [queryText, categoryFilter, topOnly, selectedUniversity]);
 
   React.useEffect(() => {
     setCurrentPage(1);
