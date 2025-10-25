@@ -103,29 +103,55 @@ export function CollapsibleCard({
     );
   }
 
+  const useControlled = Boolean(persistKey) || lockedOpen || lockedClosed;
+
   return (
     <Card className={cn("w-full", cardClassName)}>
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger asChild>
-          <CardHeader
-            role="button"
-            aria-expanded={open}
-            onClick={() => setOpen(prev => !prev)}
-            className={cn("pb-3 cursor-pointer select-none", headerClassName)}
-          >
-            <div className="flex items-center justify-between">
-              {header}
+      {useControlled ? (
+        <Collapsible open={open} onOpenChange={setOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader
+              role="button"
+              aria-expanded={open}
+              onClick={() => setOpen(prev => !prev)}
+              className={cn("pb-3 cursor-pointer select-none", headerClassName)}
+            >
+              <div className="flex items-center justify-between">
+                {header}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div style={{ display: open ? 'block' : 'none' }} aria-hidden={!open}>
+              <CardContent className={cn("space-y-4", contentClassName)}>
+                {children}
+              </CardContent>
             </div>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div style={{ display: open ? 'block' : 'none' }} aria-hidden={!open}>
-            <CardContent className={cn("space-y-4", contentClassName)}>
-              {children}
-            </CardContent>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+          </CollapsibleContent>
+        </Collapsible>
+      ) : (
+        <Collapsible defaultOpen={open} onOpenChange={(v) => setOpen(Boolean(v))}>
+          <CollapsibleTrigger asChild>
+            <CardHeader
+              role="button"
+              aria-expanded={open}
+              className={cn("pb-3 cursor-pointer select-none", headerClassName)}
+            >
+              <div className="flex items-center justify-between">
+                {header}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            {/* rely on Radix animation for content; still hide for screen readers */}
+            <div style={{ display: open ? 'block' : 'none' }} aria-hidden={!open}>
+              <CardContent className={cn("space-y-4", contentClassName)}>
+                {children}
+              </CardContent>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </Card>
   );
 }
