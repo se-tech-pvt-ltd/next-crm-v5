@@ -134,6 +134,7 @@ function Router() {
       <Route path="/events" component={EventsPage} />
       <Route path="/calendar" component={FollowUpsPage} />
       <Route path="/university" component={UniversityPage} />
+      <Route path="/courses" component={require('@/pages/courses').default} />
       <Route path="/reports" component={Reports} />
       <Route path="/updates" component={UpdatesPage} />
       <Route path="/partners" component={PartnersPage} />

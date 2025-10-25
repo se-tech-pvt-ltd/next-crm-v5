@@ -145,6 +145,7 @@ export function Sidebar() {
     { path: '/calendar', label: 'My Followups', icon: Calendar, count: undefined },
     { label: 'Resources', icon: ToolkitIcon, children: [
       { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
+      { path: '/courses', label: 'Courses', icon: GraduationCap, count: undefined },
     ] },
     { label: 'Pipelines', icon: BarChart3, children: visiblePipelineChildren },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
