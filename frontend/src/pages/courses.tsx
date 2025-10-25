@@ -15,7 +15,7 @@ export default function CoursesPage() {
   const [categoryFilter, setCategoryFilter] = React.useState<string>('all');
   const [topOnly, setTopOnly] = React.useState<string>('all');
   const [currentPage, setCurrentPage] = React.useState(1);
-  const pageSize = 10;
+  const pageSize = 6;
 
   const { data, isLoading } = useQuery({
     queryKey: ['/api/university-courses', queryText, categoryFilter, topOnly, currentPage, pageSize],
