@@ -13,9 +13,29 @@ import * as CoursesService from '@/services/courses';
 export default function CoursesPage() {
   const [queryText, setQueryText] = React.useState('');
   const [categoryFilter, setCategoryFilter] = React.useState<string>('all');
+  const [selectedUniversity, setSelectedUniversity] = React.useState<string>('all');
   const [topOnly, setTopOnly] = React.useState<string>('all');
   const [currentPage, setCurrentPage] = React.useState(1);
   const pageSize = 6;
+
+  const { data: universitiesResp } = useQuery({
+    queryKey: ['/api/universities'],
+    queryFn: () => import('@/services/universities').then(m => m.listUniversities()),
+    staleTime: 1000 * 60 * 5,
+  });
+  const universities = (universitiesResp || []) as any[];
+
+  // Fetch categories from server by requesting a larger list (first page)
+  const { data: allCoursesResp } = useQuery({
+    queryKey: ['/api/university-courses', 'all-categories'],
+    queryFn: () => CoursesService.getCourses({ limit: 1000, page: 1 }),
+    staleTime: 1000 * 60 * 5,
+  });
+  const categories = React.useMemo(() => {
+    const set = new Set<string>();
+    (allCoursesResp?.data || []).forEach((c: any) => { if (c.category) set.add(c.category); });
+    return ['all', ...Array.from(set).sort()];
+  }, [allCoursesResp]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['/api/university-courses', queryText, categoryFilter, topOnly, currentPage, pageSize],
