@@ -103,6 +103,7 @@ export function CollapsibleCard({
           <CardHeader
             role="button"
             aria-expanded={open}
+            onClick={() => setOpen(prev => !prev)}
             className={cn("pb-3 cursor-pointer select-none", headerClassName)}
           >
             <div className="flex items-center justify-between">
