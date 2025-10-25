@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { type Application, type Student, type Admission } from '@/lib/types';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import {
   ArrowLeft,
   School,
