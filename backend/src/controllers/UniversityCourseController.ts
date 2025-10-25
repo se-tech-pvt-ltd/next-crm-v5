@@ -11,6 +11,7 @@ export class UniversityCourseController {
       const universityId = typeof req.query.universityId === 'string' ? req.query.universityId : undefined;
       const top = typeof req.query.top === 'string' ? (['top', 'non-top', 'all'].includes(req.query.top) ? req.query.top as any : undefined) : undefined;
 
+      console.log('[UniversityCourseController] originalUrl:', req.originalUrl);
       console.log('[UniversityCourseController] list params:', { page, limit, q, category, universityId, top });
       const result = await UniversityCourseService.list({ page, limit, q, category, universityId, top });
       console.log('[UniversityCourseController] list result count:', Array.isArray(result.data) ? result.data.length : 0);
