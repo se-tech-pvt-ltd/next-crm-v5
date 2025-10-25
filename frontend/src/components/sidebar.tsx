@@ -13,7 +13,8 @@ import {
   GraduationCap as ToolkitIcon,
   LifeBuoy,
   Handshake,
-  Megaphone
+  Megaphone,
+  ChevronDown
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export function Sidebar() {
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [navigationLock, setNavigationLock] = useState(false);
   const navigationLockRef = useRef(false);
+  const [pipelinesOpen, setPipelinesOpen] = useState(true);
 
   // Check if mobile screen
   useEffect(() => {
@@ -126,28 +128,50 @@ export function Sidebar() {
     return entries.some((entry: any) => normalize(entry.viewLevel ?? entry.view_level) !== 'none');
   }, [accessByRole]);
 
-  let navItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
-    { path: '/calendar', label: 'My Followups', icon: Calendar, count: undefined },
-    { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
+  const pipelineChildren = [
     { path: '/events', label: 'Event', icon: Calendar, count: Array.isArray(eventsData) ? eventsData.length : 0, countColor: 'bg-primary' },
     { path: '/leads', label: 'Leads', icon: Users, count: newLeadsCount, countColor: 'bg-emerald-500' },
     { path: '/students', label: 'Students', icon: GraduationCap, count: studentsCount, countColor: 'bg-purple-600' },
     { path: '/applications', label: 'Application', icon: GraduationCap, count: applicationsCount, countColor: 'bg-amber-500' },
     { path: '/admissions', label: 'Admission', icon: Trophy, count: acceptedAdmissionsCount, countColor: 'bg-emerald-500' },
+  ];
+
+  // Apply visibility rules to pipeline children
+  let visiblePipelineChildren = pipelineChildren.filter(item => isModuleVisible(item.label));
+
+  // Build top-level items (without pipelines yet)
+  let navItems: any[] = [
+    { path: '/', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
+    { path: '/calendar', label: 'My Followups', icon: Calendar, count: undefined },
+    { path: '/university', label: 'University', icon: ToolkitIcon, count: undefined },
+    { label: 'Pipelines', icon: BarChart3, children: visiblePipelineChildren },
     { path: '/reports', label: 'Reports', icon: BarChart3, count: undefined },
     ...(canViewPartners ? [{ path: '/partners', label: 'Partners', icon: Handshake, count: undefined }] : []),
     { path: '/updates', label: 'Updates', icon: Megaphone, count: undefined },
     { path: '/settings', label: 'Settings', icon: Settings, count: undefined },
   ];
 
-  // If role-specific access rules hide modules, apply them
-  navItems = navItems.filter(item => isModuleVisible(item.label));
+  // If role-specific access rules hide modules, apply them to non-group items
+  navItems = navItems.map((item: any) => {
+    if (!item.children) return item;
+    const filteredChildren = (item.children || []).filter((child: any) => isModuleVisible(child.label));
+    return { ...item, children: filteredChildren };
+  }).filter((item: any) => {
+    if (item.children) return item.children.length > 0 || isModuleVisible(item.label);
+    return isModuleVisible(item.label);
+  });
 
   // Additional restriction: if user is a Partner, only show the partner-related modules
   if (userRoleNormalized === 'partner') {
     const allowed = new Set(['event','lead','leads','student','students','application','applications','admission','admissions','partner','partners']);
-    navItems = navItems.filter(i => allowed.has(normalize(i.label)) || allowed.has(singularize(normalize(i.label))));
+    navItems = navItems.map((item: any) => {
+      if (!item.children) return item;
+      const childAllowed = (item.children || []).filter((c: any) => allowed.has(normalize(c.label)) || allowed.has(singularize(normalize(c.label))));
+      return { ...item, children: childAllowed };
+    }).filter((i: any) => {
+      if (i.children) return i.children.length > 0; // keep group only if it has visible children
+      return allowed.has(normalize(i.label)) || allowed.has(singularize(normalize(i.label)));
+    });
   }
 
   const sidebarWidth = isExpanded ? 'w-56' : 'w-16';
@@ -219,9 +243,7 @@ export function Sidebar() {
 
       {/* Navigation Menu */}
       <nav id="primary-nav" aria-label="Primary" className="flex-1 p-2 space-y-1">
-        {((!roleId) || !isAccessLoading) && navItems.map((item) => {
-          const isActive = location === item.path;
-
+        {((!roleId) || !isAccessLoading) && navItems.map((item: any) => {
           const handleNavClick = () => {
             if (hoverTimeout) {
               clearTimeout(hoverTimeout);
@@ -232,6 +254,105 @@ export function Sidebar() {
             }
           };
 
+          if (item.children) {
+            const anyChildActive = item.children.some((c: any) => location === c.path);
+            return (
+              <div key={item.label} className="space-y-1">
+                <div
+                  className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
+                    anyChildActive ? 'bg-white text-[#223E7D] shadow' : 'text-white/90 hover:bg-white/10'
+                  } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
+                  onMouseDown={() => {
+                    if (!isMobile) {
+                      navigationLockRef.current = true;
+                      setNavigationLock(true);
+                      if (hoverTimeout) {
+                        clearTimeout(hoverTimeout);
+                        setHoverTimeout(null);
+                      }
+                    }
+                  }}
+                  onClick={() => setPipelinesOpen((o) => !o)}
+                  role="button"
+                  aria-expanded={pipelinesOpen}
+                  aria-label={item.label}
+                >
+                  <div className="relative">
+                    <item.icon size={16} />
+                  </div>
+                  {isExpanded && (
+                    <>
+                      <span className="font-medium text-sm">{item.label}</span>
+                      <ChevronDown size={14} className={`ml-auto transition-transform ${pipelinesOpen ? '' : '-rotate-90'}`} />
+                    </>
+                  )}
+
+                  {!isExpanded && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                      {item.label}
+                    </div>
+                  )}
+                </div>
+                {pipelinesOpen && (
+                  <div className="space-y-1 pl-4">
+                    {item.children.map((child: any) => {
+                      const isActive = location === child.path;
+                      return (
+                        <Link key={child.path} href={child.path}>
+                          <div
+                            className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 relative group ${
+                              isActive ? 'bg-white text-[#223E7D] shadow' : 'text-white/90 hover:bg-white/10'
+                            } ${!isExpanded ? 'justify-center' : 'space-x-3'}`}
+                            onMouseDown={() => {
+                              if (!isMobile) {
+                                navigationLockRef.current = true;
+                                setNavigationLock(true);
+                                if (hoverTimeout) {
+                                  clearTimeout(hoverTimeout);
+                                  setHoverTimeout(null);
+                                }
+                              }
+                            }}
+                            onClick={handleNavClick}
+                            role="link"
+                            aria-current={isActive ? 'page' : undefined}
+                            aria-label={child.label}
+                          >
+                            <div className="relative">
+                              <child.icon size={16} />
+                              {!isExpanded && child.count !== undefined && child.count > 0 && (
+                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full"></div>
+                              )}
+                            </div>
+
+                            {isExpanded && (
+                              <>
+                                <span className="font-medium text-sm">{child.label}</span>
+                                {child.count !== undefined && child.count > 0 && (
+                                  <Badge className={`ml-auto ${child.countColor || ''} text-white text-[10px] px-1.5 py-0.5 rounded-full`}>{child.count}</Badge>
+                                )}
+                              </>
+                            )}
+
+                            {!isExpanded && (
+                              <div className="absolute left-full ml-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                {child.label}
+                                {child.count !== undefined && child.count > 0 && (
+                                  <span className="ml-1 bg-red-500 text-white text-[10px] px-1 rounded">{child.count}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          const isActive = location === item.path;
           return (
             <Link key={item.path} href={item.path}>
               <div
