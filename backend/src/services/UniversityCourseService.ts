@@ -43,6 +43,9 @@ export class UniversityCourseService {
     if (params.category && params.category !== 'all') {
       conditions.push(eq(universityCourses.category, params.category));
     }
+    if (params.universityId) {
+      conditions.push(eq(universityCourses.universityId, params.universityId));
+    }
     if (params.top && params.top !== 'all') {
       const wantTop = params.top === 'top';
       conditions.push(eq(universityCourses.isTopCourse, wantTop ? 1 : 0));
