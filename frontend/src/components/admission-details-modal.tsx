@@ -304,11 +304,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                   </CardContent>
                 </Card>
 
-                <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center">Access</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
+              <CollapsibleCard defaultOpen={false} alwaysStartClosed header={<CardTitle className="flex items-center">Access</CardTitle>} cardClassName="w-full shadow-sm hover:shadow-md transition-shadow">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                       <div className="space-y-1.5">
                         <Label className="flex items-center space-x-2"><span>Region</span></Label>
@@ -387,8 +383,7 @@ export function AdmissionDetailsModal({ open, onOpenChange, admission, onOpenStu
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </CollapsibleCard>
 
               </div>
             </div>

@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { type Application, type Student, type Admission } from '@/lib/types';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import {
   ArrowLeft,
   School,
@@ -494,11 +495,7 @@ export default function ApplicationDetails() {
               </Card>
 
 
-              <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center"><Users className="w-5 h-5 mr-2" />Access</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
+              <CollapsibleCard defaultOpen={false} alwaysStartClosed header={<CardTitle className="text-sm flex items-center"><Users className="w-5 h-5 mr-2" />Access</CardTitle>} cardClassName="w-full shadow-sm hover:shadow-md transition-shadow">
                   {isPartnerRole ? (
                     (() => {
                       const pIdCandidates = [
@@ -623,8 +620,7 @@ export default function ApplicationDetails() {
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </CollapsibleCard>
 
 
             </div>

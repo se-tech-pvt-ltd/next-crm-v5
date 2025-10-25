@@ -12,6 +12,8 @@ interface CollapsibleCardProps {
   cardClassName?: string;
   persistKey?: string; // when provided, remember open/close in localStorage
   lockedOpen?: boolean; // when true, panel is always open and not collapsible
+  lockedClosed?: boolean; // when true, panel is always closed and not expandable
+  alwaysStartClosed?: boolean; // when true, ignore persisted state and start closed on first mount
 }
 
 export function CollapsibleCard({
@@ -23,9 +25,13 @@ export function CollapsibleCard({
   cardClassName,
   persistKey,
   lockedOpen = false,
+  lockedClosed = false,
+  alwaysStartClosed = false,
 }: CollapsibleCardProps) {
   const [open, setOpen] = useState<boolean>(() => {
     if (lockedOpen) return true;
+    if (lockedClosed) return false;
+    if (alwaysStartClosed) return false;
     if (!persistKey) return defaultOpen;
     if (typeof window === "undefined") return defaultOpen;
     try {
@@ -44,6 +50,14 @@ export function CollapsibleCard({
       setOpen(true);
       return;
     }
+    if (lockedClosed) {
+      setOpen(false);
+      return;
+    }
+    if (alwaysStartClosed) {
+      setOpen(false);
+      return;
+    }
     if (!persistKey) return;
     try {
       const stored = localStorage.getItem(persistKey);
@@ -52,15 +66,15 @@ export function CollapsibleCard({
       else setOpen(defaultOpen);
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persistKey, lockedOpen]);
+  }, [persistKey, lockedOpen, lockedClosed, alwaysStartClosed]);
 
   useEffect(() => {
-    if (lockedOpen) return;
+    if (lockedOpen || lockedClosed || alwaysStartClosed) return;
     if (!persistKey) return;
     try {
       localStorage.setItem(persistKey, open ? "1" : "0");
     } catch {}
-  }, [open, persistKey, lockedOpen]);
+  }, [open, persistKey, lockedOpen, lockedClosed, alwaysStartClosed]);
 
   if (lockedOpen) {
     return (
@@ -77,22 +91,67 @@ export function CollapsibleCard({
     );
   }
 
+  if (lockedClosed) {
+    return (
+      <Card className={cn("w-full", cardClassName)}>
+        <CardHeader className={cn("pb-3 select-none", headerClassName)}>
+          <div className="flex items-center justify-between">
+            {header}
+          </div>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const useControlled = Boolean(persistKey) || lockedOpen || lockedClosed;
+
   return (
     <Card className={cn("w-full", cardClassName)}>
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger asChild>
-          <CardHeader className={cn("pb-3 cursor-pointer select-none", headerClassName)}>
-            <div className="flex items-center justify-between">
-              {header}
+      {useControlled ? (
+        <Collapsible open={open} onOpenChange={setOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader
+              role="button"
+              aria-expanded={open}
+              onClick={() => setOpen(prev => !prev)}
+              className={cn("pb-3 cursor-pointer select-none", headerClassName)}
+            >
+              <div className="flex items-center justify-between">
+                {header}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div style={{ display: open ? 'block' : 'none' }} aria-hidden={!open}>
+              <CardContent className={cn("space-y-4", contentClassName)}>
+                {children}
+              </CardContent>
             </div>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <CardContent className={cn("space-y-4", contentClassName)}>
-            {children}
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
+          </CollapsibleContent>
+        </Collapsible>
+      ) : (
+        <Collapsible defaultOpen={open} onOpenChange={(v) => setOpen(Boolean(v))}>
+          <CollapsibleTrigger asChild>
+            <CardHeader
+              role="button"
+              aria-expanded={open}
+              className={cn("pb-3 cursor-pointer select-none", headerClassName)}
+            >
+              <div className="flex items-center justify-between">
+                {header}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            {/* rely on Radix animation for content; still hide for screen readers */}
+            <div style={{ display: open ? 'block' : 'none' }} aria-hidden={!open}>
+              <CardContent className={cn("space-y-4", contentClassName)}>
+                {children}
+              </CardContent>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </Card>
   );
 }
