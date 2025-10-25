@@ -13,6 +13,7 @@ interface CollapsibleCardProps {
   persistKey?: string; // when provided, remember open/close in localStorage
   lockedOpen?: boolean; // when true, panel is always open and not collapsible
   lockedClosed?: boolean; // when true, panel is always closed and not expandable
+  alwaysStartClosed?: boolean; // when true, ignore persisted state and start closed on first mount
 }
 
 export function CollapsibleCard({
@@ -25,10 +26,12 @@ export function CollapsibleCard({
   persistKey,
   lockedOpen = false,
   lockedClosed = false,
+  alwaysStartClosed = false,
 }: CollapsibleCardProps) {
   const [open, setOpen] = useState<boolean>(() => {
     if (lockedOpen) return true;
     if (lockedClosed) return false;
+    if (alwaysStartClosed) return false;
     if (!persistKey) return defaultOpen;
     if (typeof window === "undefined") return defaultOpen;
     try {
@@ -51,6 +54,10 @@ export function CollapsibleCard({
       setOpen(false);
       return;
     }
+    if (alwaysStartClosed) {
+      setOpen(false);
+      return;
+    }
     if (!persistKey) return;
     try {
       const stored = localStorage.getItem(persistKey);
@@ -59,15 +66,15 @@ export function CollapsibleCard({
       else setOpen(defaultOpen);
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persistKey, lockedOpen, lockedClosed]);
+  }, [persistKey, lockedOpen, lockedClosed, alwaysStartClosed]);
 
   useEffect(() => {
-    if (lockedOpen || lockedClosed) return;
+    if (lockedOpen || lockedClosed || alwaysStartClosed) return;
     if (!persistKey) return;
     try {
       localStorage.setItem(persistKey, open ? "1" : "0");
     } catch {}
-  }, [open, persistKey, lockedOpen, lockedClosed]);
+  }, [open, persistKey, lockedOpen, lockedClosed, alwaysStartClosed]);
 
   if (lockedOpen) {
     return (
