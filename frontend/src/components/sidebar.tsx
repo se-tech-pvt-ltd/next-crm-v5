@@ -28,7 +28,7 @@ export function Sidebar() {
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [navigationLock, setNavigationLock] = useState(false);
   const navigationLockRef = useRef(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ Pipelines: true, Resources: true });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   // Check if mobile screen
   useEffect(() => {
