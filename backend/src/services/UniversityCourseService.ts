@@ -18,6 +18,7 @@ export interface CourseQueryParams {
   limit?: number;
   q?: string;
   category?: string;
+  universityId?: string;
   top?: 'top' | 'non-top' | 'all';
 }
 
