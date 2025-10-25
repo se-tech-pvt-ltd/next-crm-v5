@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { AddAdmissionModal } from '@/components/add-admission-modal';
+import { CollapsibleCard } from '@/components/collapsible-card';
 import * as ApplicationsService from '@/services/applications';
 import * as StudentsService from '@/services/students';
 import * as AdmissionsService from '@/services/admissions';
