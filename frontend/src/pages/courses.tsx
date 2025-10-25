@@ -18,8 +18,15 @@ export default function CoursesPage() {
   const pageSize = 10;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['/api/university-courses'],
-    queryFn: () => CoursesService.getCourses(),
+    queryKey: ['/api/university-courses', queryText, categoryFilter, topOnly, currentPage, pageSize],
+    queryFn: () => CoursesService.getCourses({
+      page: currentPage,
+      limit: pageSize,
+      q: queryText || undefined,
+      category: categoryFilter || undefined,
+      top: topOnly || undefined,
+    }),
+    keepPreviousData: true,
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -29,23 +36,12 @@ export default function CoursesPage() {
 
   const categories = React.useMemo(() => {
     const set = new Set<string>();
-    courses.forEach(c => { if (c.category) set.add(c.category); });
+    (data?.data || []).forEach(c => { if (c.category) set.add(c.category); });
     return ['all', ...Array.from(set).sort()];
-  }, [courses]);
+  }, [data]);
 
-  const filtered = courses.filter(c => {
-    const q = queryText.trim().toLowerCase();
-    const matchesQuery = q === '' ? true : [c.name, c.universityName, c.country, c.category || '']
-      .some(v => (v || '').toString().toLowerCase().includes(q));
-
-    const matchesCategory = categoryFilter === 'all' ? true : String(c.category || '').toLowerCase() === String(categoryFilter).toLowerCase();
-    const matchesTop = topOnly === 'all' ? true : (topOnly === 'top' ? Boolean(c.isTopCourse) : !Boolean(c.isTopCourse));
-
-    return matchesQuery && matchesCategory && matchesTop;
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = data?.pagination?.totalPages || 1;
+  const pageItems = courses;
 
   React.useEffect(() => {
     setCurrentPage(1);
