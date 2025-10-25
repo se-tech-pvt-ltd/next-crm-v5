@@ -63,9 +63,6 @@ export default function CoursesPage() {
     setCurrentPage(1);
   }, [queryText, categoryFilter, topOnly, selectedUniversity]);
 
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [queryText, categoryFilter, topOnly]);
 
   return (
     <Layout title="Courses" showSearch={false}>
