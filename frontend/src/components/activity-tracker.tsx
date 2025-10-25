@@ -631,24 +631,31 @@ export function ActivityTracker({ entityType, entityId, entityName, initialInfo,
                 </Button>
               ) : (
                 <div className="space-y-3">
-                  <Select value={activityType} onValueChange={handleActivityTypeChange}>
-                    <SelectTrigger disabled={activityOptions.length === 1}>
-                      <SelectValue placeholder="Select activity type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {activityOptions.map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex items-center gap-2">
-                              <IconComponent className="h-4 w-4" />
-                              {type.label}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                  {activityOptions.length === 1 ? (
+                    <div className="h-10 flex items-center px-3 rounded-md border border-input bg-background text-sm text-gray-700">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      {activityOptions[0].label}
+                    </div>
+                  ) : (
+                    <Select value={activityType} onValueChange={handleActivityTypeChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select activity type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activityOptions.map((type) => {
+                          const IconComponent = type.icon;
+                          return (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div className="flex items-center gap-2">
+                                <IconComponent className="h-4 w-4" />
+                                {type.label}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
 
                   {activityType === 'follow_up' && (
                     <div className="space-y-2">
