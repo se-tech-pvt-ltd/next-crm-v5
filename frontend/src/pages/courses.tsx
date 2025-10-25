@@ -74,6 +74,18 @@ export default function CoursesPage() {
                 </SelectContent>
               </Select>
 
+              <Select value={selectedUniversity} onValueChange={setSelectedUniversity}>
+                <SelectTrigger>
+                  <SelectValue placeholder="University" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Universities</SelectItem>
+                  {universities?.map(u => (
+                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Select value={topOnly} onValueChange={setTopOnly}>
                 <SelectTrigger>
                   <SelectValue placeholder="Top course" />
