@@ -25,6 +25,7 @@ import ResetPassword from "@/pages/reset-password";
 import CalendarPage from "@/pages/calendar";
 import FollowUpsPage from '@/pages/follow-ups';
 import UpdatesPage from "@/pages/updates";
+import CoursesPage from "@/pages/courses";
 import UserProfileWizard from '@/components/settings/UserProfileWizard';
 
 function Router() {
@@ -134,7 +135,7 @@ function Router() {
       <Route path="/events" component={EventsPage} />
       <Route path="/calendar" component={FollowUpsPage} />
       <Route path="/university" component={UniversityPage} />
-      <Route path="/courses" component={require('@/pages/courses').default} />
+      <Route path="/courses" component={CoursesPage} />
       <Route path="/reports" component={Reports} />
       <Route path="/updates" component={UpdatesPage} />
       <Route path="/partners" component={PartnersPage} />
